@@ -163,14 +163,20 @@ client.on('message', async message => {
             saveGlobalConfig()
         }; break
 
-        case 'trusted':
+        case 'trusted': {
             if (!hasPermission(message, 'MANAGE_GUILD')) return
-            console.log(await requests.getCommunitiesFiltered(guildConfig.trusted))
-            break
+            const trusted = await requests.getCommunitiesFiltered(guildConfig.trusted)
+            const lines: string[] = ['```css\nAll communities that you trust:```']
+            trusted.forEach((community, index) => lines.push(`${index+1}) ${community.name} (${community.uid})`))
+            sendLines(message, lines)
+        }; break
 
         case 'communities':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
-            console.log(await requests.getCommunities())
+            const communities = await requests.getCommunities()
+            const lines: string[] = ['```css\nAll communities registered with FAGC:```']
+            communities.forEach((community, index) => lines.push(`${index+1}) ${community.name} (${community.uid})`))
+            sendLines(message, lines)
             break
         // 
         // Other Commands
