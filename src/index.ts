@@ -16,6 +16,15 @@ function hasPermission(message: Discord.Message, permission: Discord.PermissionS
     return true
 }
 
+// Check if the member has a role
+function hasRole(message: Discord.Message, role: string): boolean {
+    if (!message.member.roles.cache.has(role)) {
+        sendReply(message, `❌ You do not have the permissions to that command!`)
+        return false
+    }
+    return true
+}
+
 // Test if all the strings can be converted to numbers
 function validNumbers(message: Discord.Message, args: string[], valid: number[]): boolean {
     for (let i = 0; i < args.length; i++) {
@@ -38,8 +47,9 @@ client.once('ready', async () => {
 
 // Define the help message
 const helpMessage = [
-    'setPrefix     - Sets the prefix used to address this bot.',
-    'setApi        - Sets the uid and key to be used with the api, ask in our discord for info',
+    'setPrefix     - Set the prefix used to address this bot.',
+    'setApi        - Set the uid and key to be used with the api, ask in our discord for info',
+    'setModRole    - Set the the id of the role which can access ban and unban commands',
     'addRule       - Add a rule which your community follows',
     'removeRule    - Remove a rule which your community no longer follows',
     'rules         - List all rules which you follow',
@@ -94,6 +104,16 @@ client.on('message', async message => {
             saveGlobalConfig()
             break
 
+        case 'setmodrole':
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            if (!args[0]) return sendReply(message, `❌ You must give a new role id!`)
+            if (args[1]) return sendReply(message, `❌ This command only accepts one argument!`)
+            guildConfig.mod_role = args[0]
+            info(`Mod role set to ${args[0]} by ${message.member.displayName} in ${message.guild.name}`)
+            sendResult(message, `✅ Mod role has been set to ${args[0]} by ${memberName}`)
+            saveGlobalConfig()
+            break
+
         case 'setapi':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             if (process.env.self_host === 'true') return sendReply(message, `❌ Api can only be changed with .env with self host enabled`)
@@ -131,8 +151,9 @@ client.on('message', async message => {
         }; break
 
         case 'rules': {
+            if (!hasRole(message, guildConfig.mod_role)) return
             const rules = await requests.getRulesFiltered(guildConfig.rules)
-            const lines: string[] = []
+            const lines: string[] = ['```css\nRules for your community:```']
             rules.forEach((rule, index) => lines.push(`\`\`\`css\n${index+1}) ${rule.short}\`\`\`${rule.detailed} (Global ID: ${rule.id})\n`))
             sendLines(message, lines)
         }; break
@@ -182,6 +203,7 @@ client.on('message', async message => {
         // Other Commands
         //
         case 'banlist':
+            if (!hasRole(message, guildConfig.mod_role)) return
             if (guildConfig.rules.length === 0) return sendReply(message, `❌ Your community does not follow any global rules!`)
             const violations = await requests.getViolationsFiltered(guildConfig.rules, guildConfig.trusted)
             const players: Map<string, boolean> = new Map()
@@ -200,10 +222,12 @@ client.on('message', async message => {
             break
 
         case 'violations':
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
             console.log(await requests.getViolations())
             break
 
         case 'revocations':
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
             console.log(await requests.getRevocations())
             break
 
