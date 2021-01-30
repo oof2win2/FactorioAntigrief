@@ -69,6 +69,17 @@ client.on('message', async message => {
             saveGlobalConfig()
             break
 
+        case 'setkey':
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            if (process.env.self_host === 'true') return sendReply(message, `❌ Api key can only be changed with .env with self host enabled`)
+            if (!args[0]) return sendReply(message, `❌ You must give a new key!`)
+            if (args[1]) return sendReply(message, `❌ This command only accepts one argument!`)
+            guildConfig.api_key = args[0]
+            info(`Api key set to ${args[0]} by ${message.member.displayName} in ${message.guild.name}`)
+            sendResult(message, `✅ Api key has been set to ${args[0]} by ${memberName}`)
+            saveGlobalConfig()
+            break
+
         case 'help':
             if (args[0]) return sendReply(message, `❌ This command does not accept any arguments!`)
             message.reply('\n```css\n'+helpMessage+'```')

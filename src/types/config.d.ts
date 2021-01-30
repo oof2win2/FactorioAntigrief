@@ -6,5 +6,6 @@ export interface GlobalConfig {
 }
 
 export interface GuildConfig {
-    prefix: string
+    prefix: string,
+    api_key?: string
 }
