@@ -8,5 +8,6 @@ export interface GlobalConfig {
 export interface GuildConfig {
     prefix: string,
     api_key?: string,
-    rules: number[]
+    rules: number[],
+    trusted: string[]
 }

@@ -28,6 +28,15 @@ export function getCommunities(): Promise<Community[]> {
     })
 }
 
+export function getCommunitiesFiltered(uids: string[]): Promise<Community[]> {
+    const params = new URLSearchParams()
+    params.append('mode', 'include')
+    uids.forEach(uid => params.append('uid', uid))
+    return request('/communities?' + params.toString(), {
+        method: 'GET'
+    })
+}
+
 export function getViolations(): Promise<Community[]> {
     return request('/violations', {
         method: 'POST'

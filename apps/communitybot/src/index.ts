@@ -16,6 +16,18 @@ function hasPermission(message: Discord.Message, permission: Discord.PermissionS
     return true
 }
 
+// Test if all the strings can be converted to numbers
+function validNumbers(message: Discord.Message, args: string[], valid: number[]): boolean {
+    for (let i = 0; i < args.length; i++) {
+        try { valid.push(Number(args[i])) }
+        catch {
+            sendReply(message, `❌ You must give number ids, ${args[i]} is not a number`)
+            return false
+        }
+    }
+    return true
+}
+
 // Setup the bot
 const client = new Discord.Client()
 
@@ -27,12 +39,15 @@ client.once('ready', async () => {
 // Define the help message
 const helpMessage = [
     'setPrefix     - Sets the prefix used to address this bot.',
-    'setSafeMode   - When in safe mode, roles will not be deleted when using removeTopic.',
-    'setRoleEmotes - When in enabled, roles will start with the topic reaction emote.',
-    'postSelector  - Posts the topic selector message in this channel.',
-    'addTopic      - Add a topic that is linked to this channel.',
-    'removeTopic   - Remove the topic that is linked to this channel.',
-    'updateTopic   - Change the name of the topic linked to this channel.'
+    'setKey        - Sets the key to be used with the api, ask in our discord for info',
+    'addRule       - Add a rule which your community follows',
+    'removeRule    - Remove a rule which your community no longer follows',
+    'rules         - List all rules which you follow',
+    'allRules      - List all rules that are registered on the api',
+    'addTrusted    - Add a trusted community to follow their actions',
+    'removeTrusted - Remove a trusted community to stop following their actions',
+    'trusted       - List all trusted communities',
+    'communities   - List all communities using the api'
 ].join('\n')
 
 // Add the command handlers
@@ -56,8 +71,16 @@ client.on('message', async message => {
     
     debug(`Received command "${commandName}" from ${message.member.displayName}`)
     switch (commandName) {
+        // 
+        // Util Commands
+        //
         case 'ping':
             sendReply(message, 'Pong')
+            break
+
+        case 'help':
+            if (args[0]) return sendReply(message, `❌ This command does not accept any arguments!`)
+            message.reply('\n```css\n'+helpMessage+'```')
             break
 
         case 'setprefix':
@@ -80,31 +103,23 @@ client.on('message', async message => {
             sendResult(message, `✅ Api key has been set to ${args[0]} by ${memberName}`)
             saveGlobalConfig()
             break
-
+        // 
+        // Rule Commands
+        //
         case 'addrule': {
-            if (!hasPermission(message, 'MANAGE_GUILD')) return
             const valid: number[] = []
-            for (let i = 0; i < args.length; i++) {
-                try { valid.push(Number(args[i])) }
-                catch {
-                    return sendReply(message, `❌ You must give number ids, ${args[i]} is not a number`)
-                }
-            }
-            valid.forEach(rule => guildConfig.rules.push(rule))
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            if (!validNumbers(message, args, valid)) return
+            valid.forEach(rule => { if (!guildConfig.rules.includes(rule)) guildConfig.rules.push(rule) })
             info(`Rules set to ${guildConfig.rules} by ${message.member.displayName} in ${message.guild.name}`)
             sendResult(message, `✅ ${valid.length} Rules have been added by ${memberName}`)
             saveGlobalConfig()
         }; break
 
         case 'removerule': {
-            if (!hasPermission(message, 'MANAGE_GUILD')) return
             const valid: number[] = []
-            for (let i = 0; i < args.length; i++) {
-                try { valid.push(Number(args[i])) }
-                catch {
-                    return sendReply(message, `❌ You must give number ids, ${args[i]} is not a number`)
-                }
-            }
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            if (!validNumbers(message, args, valid)) return
             guildConfig.rules = guildConfig.rules.filter(v => !valid.includes(v))
             info(`Rules set to ${guildConfig.rules} by ${message.member.displayName} in ${message.guild.name}`)
             sendResult(message, `✅ ${valid.length} Rules have been removed by ${memberName}`)
@@ -116,24 +131,46 @@ client.on('message', async message => {
             break
 
         case 'allrules':
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
             console.log(await requests.getRules())
+            break
+        // 
+        // Trusted Commands
+        //
+        case 'addtrusted': {
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            args.forEach(uid => { if (!guildConfig.trusted.includes(uid)) guildConfig.trusted.push(uid) })
+            info(`Trusted set to ${guildConfig.trusted} by ${message.member.displayName} in ${message.guild.name}`)
+            sendResult(message, `✅ ${args.length} Trusted have been added by ${memberName}`)
+            saveGlobalConfig()
+        }; break
+
+        case 'removetrused': {
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            guildConfig.trusted = guildConfig.trusted.filter(uid => !args.includes(uid))
+            info(`Trusted set to ${guildConfig.trusted} by ${message.member.displayName} in ${message.guild.name}`)
+            sendResult(message, `✅ ${args.length} Trusted have been removed by ${memberName}`)
+            saveGlobalConfig()
+        }; break
+
+        case 'trusted':
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            console.log(await requests.getCommunitiesFiltered(guildConfig.trusted))
             break
 
         case 'communities':
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
             console.log(await requests.getCommunities())
             break
-
+        // 
+        // Other Commands
+        //
         case 'violations':
             console.log(await requests.getViolations())
             break
 
         case 'revocations':
             console.log(await requests.getRevocations())
-            break
-
-        case 'help':
-            if (args[0]) return sendReply(message, `❌ This command does not accept any arguments!`)
-            message.reply('\n```css\n'+helpMessage+'```')
             break
 
         default:

@@ -34,7 +34,8 @@ export function getGuildConfig(guild: Discord.Guild) {
     if (!(guild.id in globalConfig)) {
         globalConfig[guild.id] = {
             prefix: process.env.default_prefix,
-            rules: []
+            rules: [],
+            trusted: []
         }
 
         if (process.env.self_host === 'true' && process.env.guild_id === guild.id) {
