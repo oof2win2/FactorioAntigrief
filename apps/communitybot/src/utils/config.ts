@@ -34,6 +34,7 @@ export function getGuildConfig(guild: Discord.Guild) {
     if (!(guild.id in globalConfig)) {
         globalConfig[guild.id] = {
             prefix: process.env.default_prefix,
+            mod_role: guild.roles.highest.id,
             rules: [],
             trusted: []
         }
