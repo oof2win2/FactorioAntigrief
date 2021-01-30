@@ -4,6 +4,7 @@ import * as requests from './requests'
 import { status, debug, info } from './utils/log'
 import { getGuildConfig, loadGlobalConfig, saveGlobalConfig } from './utils/config'
 import { sendLines, sendReply, sendResult } from './utils/messages'
+import { Violation } from './types/requests'
 dotenv.config()
 loadGlobalConfig(process.env.config_path)
 
@@ -50,15 +51,19 @@ const helpMessage = [
     'setPrefix     - Set the prefix used to address this bot.',
     'setApi        - Set the uid and key to be used with the api, ask in our discord for info',
     'setModRole    - Set the the id of the role which can access ban and unban commands',
+
     'addRule       - Add a rule which your community follows',
     'removeRule    - Remove a rule which your community no longer follows',
     'rules         - List all rules which you follow',
     'allRules      - List all rules that are registered on the api',
+
     'addTrusted    - Add a trusted community to follow their actions',
     'removeTrusted - Remove a trusted community to stop following their actions',
     'trusted       - List all trusted communities',
     'communities   - List all communities using the api',
-    'banlist       - Generate a banlist file from your settings'
+
+    'banlist       - Generate a banlist file from your settings',
+    'check         - Generate a record of all the violations from a player'
 ].join('\n')
 
 // Add the command handlers
@@ -94,6 +99,7 @@ client.on('message', async message => {
             message.reply('\n```css\n'+helpMessage+'```')
             break
 
+        // Set the prefix that the bot will respond to
         case 'setprefix':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             if (!args[0]) return sendReply(message, `❌ You must give a new prefix!`)
@@ -104,6 +110,7 @@ client.on('message', async message => {
             saveGlobalConfig()
             break
 
+        // Set the role id of the moderator role (role which can ban, unban, and check violations)
         case 'setmodrole':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             if (!args[0]) return sendReply(message, `❌ You must give a new role id!`)
@@ -114,6 +121,7 @@ client.on('message', async message => {
             saveGlobalConfig()
             break
 
+        // Set the api uid and key for your community, this will allow access to the api
         case 'setapi':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             if (process.env.self_host === 'true') return sendReply(message, `❌ Api can only be changed with .env with self host enabled`)
@@ -130,6 +138,7 @@ client.on('message', async message => {
         // 
         // Rule Commands
         //
+        // Add a rule(s) to the rule list for ban list generation and webhooks
         case 'addrule': {
             const valid: number[] = []
             if (!hasPermission(message, 'MANAGE_GUILD')) return
@@ -140,6 +149,7 @@ client.on('message', async message => {
             saveGlobalConfig()
         }; break
 
+        // Remove a rule(s) from the rule list so it will no longer be included in banlist generation of webhooks
         case 'removerule': {
             const valid: number[] = []
             if (!hasPermission(message, 'MANAGE_GUILD')) return
@@ -150,6 +160,7 @@ client.on('message', async message => {
             saveGlobalConfig()
         }; break
 
+        // List all the rules currently in the rule list for a community
         case 'rules': {
             if (!hasRole(message, guildConfig.mod_role)) return
             const rules = await requests.getRulesFiltered(guildConfig.rules)
@@ -158,6 +169,7 @@ client.on('message', async message => {
             sendLines(message, lines)
         }; break
 
+        // List all the rules supported by the fagc api
         case 'allrules': {
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             const rules = await requests.getRules()
@@ -166,8 +178,9 @@ client.on('message', async message => {
             sendLines(message, lines)
         }; break
         // 
-        // Trusted Commands
+        // Community Commands
         //
+        // Adds a community as a trusted one so it will be included in your banlist
         case 'addtrusted': {
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             args.forEach(uid => { if (!guildConfig.trusted.includes(uid)) guildConfig.trusted.push(uid) })
@@ -176,6 +189,7 @@ client.on('message', async message => {
             saveGlobalConfig()
         }; break
 
+        // Removes a community as a trusted one so it will no longer be included in your banlist
         case 'removetrused': {
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             guildConfig.trusted = guildConfig.trusted.filter(uid => !args.includes(uid))
@@ -184,6 +198,7 @@ client.on('message', async message => {
             saveGlobalConfig()
         }; break
 
+        // List all trusted communities
         case 'trusted': {
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             const trusted = await requests.getCommunitiesFiltered(guildConfig.trusted)
@@ -192,6 +207,7 @@ client.on('message', async message => {
             sendLines(message, lines)
         }; break
 
+        // List all communities registered on the api
         case 'communities':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             const communities = await requests.getCommunities()
@@ -200,14 +216,16 @@ client.on('message', async message => {
             sendLines(message, lines)
             break
         // 
-        // Other Commands
+        // Moderator Commands
         //
-        case 'banlist':
+        // Generates a ban list json file using the set config
+        case 'banlist': {
             if (!hasRole(message, guildConfig.mod_role)) return
             if (guildConfig.rules.length === 0) return sendReply(message, `❌ Your community does not follow any global rules!`)
             const violations = await requests.getViolationsFiltered(guildConfig.rules, guildConfig.trusted)
             const players: Map<string, boolean> = new Map()
             const bans: Array<{ username: string, reason: string }> = []
+            // Take each violation and add it to the ban list (once per player)
             violations.forEach(violation => {
                 if (!players.has(violation.playername)) {
                     players.set(violation.playername, true)
@@ -219,13 +237,46 @@ client.on('message', async message => {
             })
 
             channel.send(`✅ Banlist requested by ${memberName}`, new Discord.MessageAttachment(Buffer.from(JSON.stringify(bans)), 'banlist.json'))
-            break
+        }; break
 
+        // Check all violations for a player
+        case 'check': {
+            if (!hasRole(message, guildConfig.mod_role)) return
+            if (!args[0]) return sendReply(message, `❌ You must give a player name!`)
+            if (args[1]) return sendReply(message, `❌ This command only accepts one argument!`)
+            const ruleData = await requests.getRules()
+            const violations = await requests.getViolationsPlayer(args[0])
+            const communities: Map<string, Violation[]> = new Map()
+            const lines: string[] = [`\`\`\`css\nViolation record for ${args[0]}:\`\`\``]
+            // Sort the violations by community
+            violations.forEach(violation => {
+                if (!communities.has(violation.community_uid)) {
+                    communities.set(violation.community_uid, [ violation ])
+                } else {
+                    communities.get(violation.community_uid).push(violation)
+                }
+            })
+            // List all the rules in a human readable way
+            const communityData = await requests.getCommunitiesFiltered(Array.from(communities.keys()))
+            communities.forEach((violations, uid) => {
+                const brokenRules: string[] = []
+                violations.forEach(violation => {
+                    brokenRules.push(ruleData.find(r => r.id == violation.rule_id).short)
+                })
+                const date = new Date(violations[0].time).toDateString()
+                lines.push(`${communityData.find(c => c.uid == uid).name}: (${date})\n  ` + brokenRules.join(', '))
+            })
+
+            sendLines(message, lines)
+        }; break
+
+        // Will be removed, debug only
         case 'violations':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             console.log(await requests.getViolations())
             break
 
+        // Will be removed, debug only
         case 'revocations':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
             console.log(await requests.getRevocations())
