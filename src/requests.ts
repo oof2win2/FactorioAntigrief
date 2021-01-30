@@ -44,6 +44,12 @@ export function getViolations(): Promise<Violation[]> {
     })
 }
 
+export function getViolationsPlayer(playername: string): Promise<Violation[]> {
+    return request('/violations/playername/'+playername, {
+        method: 'POST'
+    })
+}
+
 export function getViolationsFiltered(rules: number[], trusted: string[]): Promise<Violation[]> {
     return request('/violations', {
         method: 'POST',
