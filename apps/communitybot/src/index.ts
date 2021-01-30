@@ -1,5 +1,6 @@
 import * as Discord from 'discord.js'
 import * as dotenv from 'dotenv'
+import * as requests from './requests'
 import { status, debug, info } from './utils/log'
 import { getGuildConfig, loadGlobalConfig, saveGlobalConfig } from './utils/config'
 import { sendReply, sendResult } from './utils/messages'
@@ -78,6 +79,22 @@ client.on('message', async message => {
             info(`Api key set to ${args[0]} by ${message.member.displayName} in ${message.guild.name}`)
             sendResult(message, `✅ Api key has been set to ${args[0]} by ${memberName}`)
             saveGlobalConfig()
+            break
+
+        case 'allrules':
+            console.log(await requests.getRules())
+            break
+
+        case 'communities':
+            console.log(await requests.getCommunities())
+            break
+
+        case 'violations':
+            console.log(await requests.getViolations())
+            break
+
+        case 'revocations':
+            console.log(await requests.getRevocations())
             break
 
         case 'help':
