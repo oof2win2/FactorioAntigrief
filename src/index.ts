@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import * as requests from './requests'
 import { status, debug, info } from './utils/log'
 import { getGuildConfig, loadGlobalConfig, saveGlobalConfig } from './utils/config'
-import { sendReply, sendResult } from './utils/messages'
+import { sendLines, sendReply, sendResult } from './utils/messages'
 dotenv.config()
 loadGlobalConfig(process.env.config_path)
 
@@ -130,14 +130,20 @@ client.on('message', async message => {
             saveGlobalConfig()
         }; break
 
-        case 'rules': 
-            console.log(await requests.getRulesFiltered(guildConfig.rules))
-            break
+        case 'rules': {
+            const rules = await requests.getRulesFiltered(guildConfig.rules)
+            const lines: string[] = []
+            rules.forEach((rule, index) => lines.push(`\`\`\`css\n${index+1}) ${rule.short}\`\`\`${rule.detailed} (Global ID: ${rule.id})\n`))
+            sendLines(message, lines)
+        }; break
 
-        case 'allrules':
+        case 'allrules': {
             if (!hasPermission(message, 'MANAGE_GUILD')) return
-            console.log(await requests.getRules())
-            break
+            const rules = await requests.getRules()
+            const lines: string[] = ['```css\nAll rules supported by FAGC:```']
+            rules.forEach(rule => lines.push(`${rule.id}) \`${rule.short}\` - ${rule.detailed}`))
+            sendLines(message, lines)
+        }; break
         // 
         // Trusted Commands
         //
