@@ -1,8 +1,9 @@
 import fetch, { RequestInit } from 'node-fetch'
-import { Rule, Community } from './types/requests'
+import { Rule, Community, Violation, Revocation } from './types/requests'
 
 async function request(url: string, options: RequestInit) {
     console.log(process.env.fagc_api_url + url)
+    console.log(options)
     const res = await fetch(process.env.fagc_api_url + url, options)
     return await res.json()
 }
@@ -37,13 +38,25 @@ export function getCommunitiesFiltered(uids: string[]): Promise<Community[]> {
     })
 }
 
-export function getViolations(): Promise<Community[]> {
+export function getViolations(): Promise<Violation[]> {
     return request('/violations', {
         method: 'POST'
     })
 }
 
-export function getRevocations(): Promise<Community[]> {
+export function getViolationsFiltered(rules: number[], trusted: string[]): Promise<Violation[]> {
+    return request('/violations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: 'rule_id includes ? and community_uid includes ?',
+            parameters: [ rules, trusted ]
+        })
+    })
+}
+
+
+export function getRevocations(): Promise<Revocation[]> {
     return request('/revocations', {
         method: 'POST'
     })

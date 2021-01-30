@@ -39,7 +39,7 @@ client.once('ready', async () => {
 // Define the help message
 const helpMessage = [
     'setPrefix     - Sets the prefix used to address this bot.',
-    'setKey        - Sets the key to be used with the api, ask in our discord for info',
+    'setApi        - Sets the uid and key to be used with the api, ask in our discord for info',
     'addRule       - Add a rule which your community follows',
     'removeRule    - Remove a rule which your community no longer follows',
     'rules         - List all rules which you follow',
@@ -47,7 +47,8 @@ const helpMessage = [
     'addTrusted    - Add a trusted community to follow their actions',
     'removeTrusted - Remove a trusted community to stop following their actions',
     'trusted       - List all trusted communities',
-    'communities   - List all communities using the api'
+    'communities   - List all communities using the api',
+    'banlist       - Generate a banlist file from your settings'
 ].join('\n')
 
 // Add the command handlers
@@ -93,14 +94,17 @@ client.on('message', async message => {
             saveGlobalConfig()
             break
 
-        case 'setkey':
+        case 'setapi':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
-            if (process.env.self_host === 'true') return sendReply(message, `❌ Api key can only be changed with .env with self host enabled`)
-            if (!args[0]) return sendReply(message, `❌ You must give a new key!`)
-            if (args[1]) return sendReply(message, `❌ This command only accepts one argument!`)
-            guildConfig.api_key = args[0]
-            info(`Api key set to ${args[0]} by ${message.member.displayName} in ${message.guild.name}`)
-            sendResult(message, `✅ Api key has been set to ${args[0]} by ${memberName}`)
+            if (process.env.self_host === 'true') return sendReply(message, `❌ Api can only be changed with .env with self host enabled`)
+            if (!args[0]) return sendReply(message, `❌ You must give a uid!`)
+            if (!args[1]) return sendReply(message, `❌ You must give a key!`)
+            if (args[2]) return sendReply(message, `❌ This command only accepts two argument!`)
+            guildConfig.api_uid = args[0]
+            guildConfig.api_key = args[1]
+            guildConfig.trusted.push(args[0])
+            info(`Api set to ${args[0]} ${args[1]} by ${message.member.displayName} in ${message.guild.name}`)
+            sendResult(message, `✅ Api have been updated by ${memberName}`)
             saveGlobalConfig()
             break
         // 
@@ -165,6 +169,24 @@ client.on('message', async message => {
         // 
         // Other Commands
         //
+        case 'banlist':
+            if (guildConfig.rules.length === 0) return sendReply(message, `❌ Your community does not follow any global rules!`)
+            const violations = await requests.getViolationsFiltered(guildConfig.rules, guildConfig.trusted)
+            const players: Map<string, boolean> = new Map()
+            const bans: Array<{ username: string, reason: string }> = []
+            violations.forEach(violation => {
+                if (!players.has(violation.playername)) {
+                    players.set(violation.playername, true)
+                    bans.push({
+                        username: violation.playername,
+                        reason: `Banned by FAGC. Please see ${process.env.fagc_api_url}/violations/playername/${violation.playername}`
+                    })
+                }
+            })
+
+            channel.send(`✅ Banlist requested by ${memberName}`, new Discord.MessageAttachment(Buffer.from(JSON.stringify(bans)), 'banlist.json'))
+            break
+
         case 'violations':
             console.log(await requests.getViolations())
             break

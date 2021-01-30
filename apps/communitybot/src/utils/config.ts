@@ -39,7 +39,10 @@ export function getGuildConfig(guild: Discord.Guild) {
         }
 
         if (process.env.self_host === 'true' && process.env.guild_id === guild.id) {
-            globalConfig[guild.id].api_key = process.env.api_key
+            const config = globalConfig[guild.id]
+            config.api_key = process.env.fagc_key
+            config.api_uid = process.env.fagc_uid
+            config.trusted.push(process.env.fagc_uid)
         }
     }
 
