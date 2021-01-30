@@ -81,6 +81,40 @@ client.on('message', async message => {
             saveGlobalConfig()
             break
 
+        case 'addrule': {
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            const valid: number[] = []
+            for (let i = 0; i < args.length; i++) {
+                try { valid.push(Number(args[i])) }
+                catch {
+                    return sendReply(message, `❌ You must give number ids, ${args[i]} is not a number`)
+                }
+            }
+            valid.forEach(rule => guildConfig.rules.push(rule))
+            info(`Rules set to ${guildConfig.rules} by ${message.member.displayName} in ${message.guild.name}`)
+            sendResult(message, `✅ ${valid.length} Rules have been added by ${memberName}`)
+            saveGlobalConfig()
+        }; break
+
+        case 'removerule': {
+            if (!hasPermission(message, 'MANAGE_GUILD')) return
+            const valid: number[] = []
+            for (let i = 0; i < args.length; i++) {
+                try { valid.push(Number(args[i])) }
+                catch {
+                    return sendReply(message, `❌ You must give number ids, ${args[i]} is not a number`)
+                }
+            }
+            guildConfig.rules = guildConfig.rules.filter(v => !valid.includes(v))
+            info(`Rules set to ${guildConfig.rules} by ${message.member.displayName} in ${message.guild.name}`)
+            sendResult(message, `✅ ${valid.length} Rules have been removed by ${memberName}`)
+            saveGlobalConfig()
+        }; break
+
+        case 'rules': 
+            console.log(await requests.getRulesFiltered(guildConfig.rules))
+            break
+
         case 'allrules':
             console.log(await requests.getRules())
             break
