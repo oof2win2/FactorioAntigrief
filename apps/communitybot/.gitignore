@@ -1,0 +1,10 @@
+#config and env
+*.env
+config.json
+
+#dist
+dist
+
+#npm
+node_modules
+package-lock.json
