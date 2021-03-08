@@ -1,40 +1,58 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-const mongoose = require("mongoose");
+const express = require('express')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const morgan = require('morgan')
+const mongoose = require("mongoose")
 const config = require("../config.json")
+
+const authUser = require('./utils/authUser')
 
 const indexRouter = require('./routes/index')
 const communityRouter = require('./routes/communities')
-const ruleRouter = require('./routes/rules');
+const ruleRouter = require('./routes/rules')
+const offenseRouter = require('./routes/offenses')
+const violationsRouter = require('./routes/violations')
 
-const app = express();
+const app = express()
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'jade')
 
 // app.set('trust proxy', true)
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(morgan('dev'))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(cookieParser())
+app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', indexRouter)
+// middleware for authentication
+const authMiddleware = async (req, res, next) => {
+    const authenticated = await authUser(req)
+    console.log("auth code", authenticated)
+    if (authenticated === 404)
+        return res.status(404).send("AuthenticationError: API key is wrong")
+    if (authenticated === 401)
+        return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
+    next()
+}
+
+app.post('*', authMiddleware)
+app.put('*', authMiddleware)
+
+app.use('/index', indexRouter)
 app.use('/communities', communityRouter)
 app.use('/rules', ruleRouter)
+app.use('/offenses', offenseRouter)
+app.use('/violations', violationsRouter)
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    console.log(req)
+app.use(function (req, res) {
     res.status(404).send("Page Not Found")
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
