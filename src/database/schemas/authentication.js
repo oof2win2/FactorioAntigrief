@@ -1,8 +1,9 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
-const AuthModel = new mongoose.Schema({
-    authToken: String,
+const AuthSchema = new mongoose.Schema({
+    communityName: String,
+    apiKey: String,
     allowedIPs: [String]
 })
 
-module.exports = mongoose.model('Authentication', AuthModel)
+module.exports = mongoose.model('Authentication', AuthSchema)

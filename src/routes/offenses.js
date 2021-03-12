@@ -1,35 +1,48 @@
-const express = require('express')
-const router = express.Router()
-// const cryptoRandomString = require('crypto-random-string')
-// const community = require("../database/schemas/community")
-// const authentication = require("../database/schemas/authentication")
-const authUser = require("../utils/authUser")
-const offenses = require("../database/schemas/offenses")
+const express = require('express');
+const router = express.Router();
+const OffenseModel = require("../database/schemas/offense");
+const { getCommunity } = require('../utils/functions');
+const 
+
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Community API Homepage!')
+    res.send('Offenses API Homepage!')
 })
-router.get('/getID', async (req, res) => {
-    if (req.body.id == undefined || !Number.isInteger(parseInt(req.body.id)))
-        return res.status(400).send(`WrongRequest: ID is of wrong type, must be number. Recieved ${req.body.id} as param`)
-    const dbRes = await offenses.findOne({ offenseID: parseInt(req.body.id) })
-    res.status(200).json(dbRes)
+router.get('/offense', async (req, res) => {
+    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
+        return res.status(400).send(`Bad Request: playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`)
+    if (req.body.communityname === undefined || typeof (req.body.communityname) !== 'string')
+        return res.status(400).send(`Bad Request: communityname expected string, got ${typeof (req.body.communityname)} with value of ${req.body.communityname}`)
+    
+    const offense = await OffenseModel.findOne({
+        playername: req.body.playername,
+        communityname: req.body.communityname,
+    })
+    res.status(200).json(offense)
+})
+router.get('/offense', async (req, res) => {
+    if (req.body.id === undefined || isNaN(req.body.id))
+        return res.status(400).send(`Bad Request: id expected number, got ${typeof (req.body.id)} with value of ${req.body.id}`)
+    const offense = await OffenseModel.findById(req.body.id)
+    res.status(200).json(offense)
 })
 router.post('/revoke', async (req, res) => {
-    if (req.body.id == undefined || !Number.isInteger(parseInt(req.body.id)))
-        return res.status(400).send(`WrongRequest: ID is of wrong type, must be number. Recieved ${req.body.id} as param`)
-    if (req.body.admin == undefined || typeof(req.body.admin) !== "string")
-        return res.status(400).send(`WrongRequest: admin is of wrong type, must be string. Recieved ${req.body.admin} as param`)
-    
-    const authenticated = await authUser(req)
-    if (authenticated === 404)
-        return res.status(404).send("AuthenticationError: API key is wrong")
-    if (authenticated === 401)
-        return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
-    
-    const dbRes = offenses.deleteOne({ offenseID: req.body.id })
-    res.status(200).json(dbRes)
+    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
+        return res.status(400).send(`Bad Request: playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`)
+    if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string')
+        return res.status(400).send(`Bad Request: adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`)
+    if (req.body.communityname === undefined || typeof (req.body.communityname) !== 'string')
+        return res.status(400).send(`Bad Request: communityname expected string, got ${typeof (req.body.communityname)} with value of ${req.body.communityname}`)
+    const toRevoke = await OffenseModel.findOne({
+        playername: req.body.playername,
+        communityname: req.body.communityname
+    })
+    const community = await getCommunity(req.headers.apikey)
+    if (toRevoke.communityname !== community.communityName)
+        return res.status(403).send(`Access Denied: Belongs to community ${toRevoke.communityname} whilst you are ${community.communityName}`)
+    const revocation = await OffenseModel.findByIdAndDelete(toRevoke._id)
+    return revocation
 })
 
 module.exports = router

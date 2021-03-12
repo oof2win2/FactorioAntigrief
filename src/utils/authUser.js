@@ -6,8 +6,9 @@ const authentication = require("../database/schemas/authentication")
  * @returns {Number} - 200 if OK, 401 if wrong IP, 404 if key not found / doesn't belong to anyone
  */
 const authenticate = async (req) => {
+    if (req.method === 'GET') return 200
     if (req.headers.apikey === undefined) return 404 // no api key
-    const dbRes = await authentication.findOne({authToken: req.headers.apikey})
+    const dbRes = await authentication.findOne({apiKey: req.headers.apikey})
     if (dbRes === undefined || dbRes === null) return 404 // API key not found
 
     // api key is now confirmed to be correct

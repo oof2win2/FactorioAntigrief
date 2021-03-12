@@ -3,15 +3,18 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
 const mongoose = require("mongoose")
+
+// const logger = require('./utils/log')
+const authUser = require("./utils/authUser")
 const config = require("../config.json")
 
-const authUser = require('./utils/authUser')
-
-const indexRouter = require('./routes/index')
-const communityRouter = require('./routes/communities')
 const ruleRouter = require('./routes/rules')
-const offenseRouter = require('./routes/offenses')
-const violationsRouter = require('./routes/violations')
+const communityRouter = require('./routes/communities')
+const violationRouter = require('./routes/violations')
+const informaticsRouter = require('./routes/informatics')
+const revocationRouter = require('./routes/revocations')
+
+const testingRouter = require('./routes/testing')
 
 const app = express()
 
@@ -26,25 +29,26 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+// logger for any request other than POST
+// app.use(logger);
+
 // middleware for authentication
 const authMiddleware = async (req, res, next) => {
     const authenticated = await authUser(req)
-    console.log("auth code", authenticated)
     if (authenticated === 404)
         return res.status(404).send("AuthenticationError: API key is wrong")
     if (authenticated === 401)
         return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
     next()
 }
+// app.use('*', authMiddleware)
 
-app.post('*', authMiddleware)
-app.put('*', authMiddleware)
-
-app.use('/index', indexRouter)
-app.use('/communities', communityRouter)
 app.use('/rules', ruleRouter)
-app.use('/offenses', offenseRouter)
-app.use('/violations', violationsRouter)
+app.use('/communities', communityRouter)
+app.use('/violations', violationRouter)
+app.use('/revocations', revocationRouter)
+app.use('/informatics', informaticsRouter)
+app.use('/testing', testingRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res) {
@@ -62,6 +66,20 @@ app.use(function (err, req, res) {
     res.render('error');
 });
 
-mongoose.connect(config.mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+// app.use(expressModifyResponse(
+//     (req, res) => {
+//         return true
+//     },
+//     (req, res, body) => {
+//         console.log(body.toString())
+//         return body
+//     }
+// ))
+
+mongoose.connect(config.mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+})
 
 module.exports = app;
