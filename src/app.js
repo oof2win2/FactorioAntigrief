@@ -41,7 +41,7 @@ const authMiddleware = async (req, res, next) => {
         return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
     next()
 }
-// app.use('*', authMiddleware)
+app.use('*', authMiddleware)
 
 app.use('/rules', ruleRouter)
 app.use('/communities', communityRouter)

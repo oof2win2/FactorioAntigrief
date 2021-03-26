@@ -3,7 +3,8 @@ const router = express.Router();
 const ViolationModel = require("../database/schemas/violation")
 const OffenseModel = require("../database/schemas/offense")
 const RevocationModel = require("../database/schemas/revocation")
-const { getCommunity, violationCreatedMessage, violationRevokedMessage } = require("../utils/functions");
+const { getCommunity } = require("../utils/functions");
+const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -42,7 +43,7 @@ router.post('/create', async (req, res) => {
     })
     const violation = await ViolationModel.create({
         playername: req.body.playername,
-        communityname: community.communityName,
+        communityname: community.communityname,
         brokenRule: req.body.brokenRule,
         proof: req.body.proof || "None",
         description: req.body.description || "None",
@@ -67,10 +68,9 @@ router.post('/create', async (req, res) => {
             { $push: { violations: violation._id } }
         )
     }
-    violationCreatedMessage(violation)
-    return res.status(200).send(violation)
+    violationCreatedMessage(violation.toObject())
+    return res.status(200).send(violation.toObject())
 })
-
 router.delete('/revoke', async (req, res) => {
     if (req.body.id === undefined || typeof (req.body.id) !== 'string')
         return res.status(400).send(`Bad Request: id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`)
@@ -81,7 +81,7 @@ router.delete('/revoke', async (req, res) => {
     const toRevoke = await ViolationModel.findById(req.body.id)
     if (toRevoke === undefined || toRevoke === null)
         return res.status(404).send(`Not Found: Violation with ID ${req.body.id} not found`)
-    if (toRevoke.communityname !== community.communityName)
+    if (toRevoke.communityname !== community.communityname)
         return res.status(403).send(`Access Denied: You are trying to access a violation of community ${toRevoke.communityname} but your community name is ${community.communityname}`)
     
     const violation = await ViolationModel.findByIdAndDelete(toRevoke._id)
@@ -107,10 +107,9 @@ router.delete('/revoke', async (req, res) => {
         revokedBy: req.body.adminname
     })
 
-    violationRevokedMessage(revocation)
-    res.status(200).json(revocation)
+    violationRevokedMessage(revocation.toObject())
+    res.status(200).json(revocation.toObject())
 })
-
 router.delete('/revokeallname', async (req, res) => {
     if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string')
         return res.status(400).send(`Bad Request: adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`)
@@ -118,15 +117,32 @@ router.delete('/revokeallname', async (req, res) => {
         return res.status(400).send(`Bad Request: playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`)
 
     const community = await getCommunity(req.headers.apikey)
-    const toRevoke = await OffenseModel.findOne({playername: req.body.playername})
-    console.log(toRevoke, community)
+    const toRevoke = await OffenseModel.findOneAndDelete({playername: req.body.playername})
+    // console.log(toRevoke, community)
     if (toRevoke === undefined || toRevoke === null)
         return res.status(404).send(`Not Found: Violation with player name ${req.body.playername} not found`)
-    if (toRevoke.communityname !== community.communityName)
+    if (toRevoke.communityname !== community.communityname)
         return res.status(403).send(`Access Denied: You are trying to access a violation of community ${toRevoke.communityname} but your community name is ${community.communityname}`)
     toRevoke.violations.forEach(async (violationID) => {
         const violation = await ViolationModel.findByIdAndDelete(violationID)
-        console.log(violation)
+        RevocationModel.create({
+            playername: violation.playername,
+            communityname: violation.communityname,
+            adminname: violation.adminname,
+            brokenRule: violation.brokenRule,
+            proof: violation.proof,
+            description: violation.description,
+            automated: violation.automated,
+            ViolatedTime: violation.violatedTime,
+            RevokedTime: new Date(),
+            revokedBy: req.body.adminname
+        })
+            .then((revocation) =>{
+                violationRevokedMessage(revocation.toObject())
+            })
+            .catch((error) => {
+                console.error(error)
+            })
     })
     res.status(200).send("Done!")
 })

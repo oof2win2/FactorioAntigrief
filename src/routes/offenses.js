@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const OffenseModel = require("../database/schemas/offense");
 const { getCommunity } = require('../utils/functions');
-const 
 
 
 /* GET home page. */
@@ -39,8 +38,8 @@ router.post('/revoke', async (req, res) => {
         communityname: req.body.communityname
     })
     const community = await getCommunity(req.headers.apikey)
-    if (toRevoke.communityname !== community.communityName)
-        return res.status(403).send(`Access Denied: Belongs to community ${toRevoke.communityname} whilst you are ${community.communityName}`)
+    if (toRevoke.communityname !== community.communityname)
+        return res.status(403).send(`Access Denied: Belongs to community ${toRevoke.communityname} whilst you are ${community.communityname}`)
     const revocation = await OffenseModel.findByIdAndDelete(toRevoke._id)
     return revocation
 })

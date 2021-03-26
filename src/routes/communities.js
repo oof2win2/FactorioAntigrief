@@ -19,7 +19,7 @@ router.post('/create', async (req, res) => {
         return res.status(400).send(`Bad Request: contact expected string, got ${typeof (req.body.contact)} with value of ${req.body.contact}`)
 
     const apiKey = await AuthModel.create({
-        communityName: req.body.name,
+        communityname: req.body.name,
         apiKey: cryptoRandomString(128)
     })
     const community = await CommunityModel.create({
