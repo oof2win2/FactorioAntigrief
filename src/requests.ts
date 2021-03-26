@@ -5,7 +5,9 @@ async function request(url: string, options: RequestInit) {
     console.log(process.env.fagc_api_url + url)
     console.log(options)
     const res = await fetch(process.env.fagc_api_url + url, options)
-    return await res.json()
+    if (res.ok) return await res.json()
+    console.error(`Request Error: ${res.status} ${res.statusText}`)
+    throw res.status
 }
 
 export function getRules(): Promise<Rule[]> {
