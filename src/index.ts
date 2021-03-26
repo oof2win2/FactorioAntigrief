@@ -71,7 +71,6 @@ const TrueInput = ['true', 'on', 'enable', 'enabled', 'yes']
 const FalseInput = ['false', 'off', 'disable', 'disabled', 'no']
 client.on('message', async message => {
     if (process.env.NODE_ENV !== 'production' && message.guild.id !== process.env.dev_guild) return
-    if (process.env.self_host === 'true' && message.guild.id !== process.env.guild_id) return
 
     const guildConfig = getGuildConfig(message.guild)
     if (!message.content.startsWith(guildConfig.prefix)) return
@@ -124,7 +123,6 @@ client.on('message', async message => {
         // Set the api uid and key for your community, this will allow access to the api
         case 'setapi':
             if (!hasPermission(message, 'MANAGE_GUILD')) return
-            if (process.env.self_host === 'true') return sendReply(message, `❌ Api can only be changed with .env with self host enabled`)
             if (!args[0]) return sendReply(message, `❌ You must give a uid!`)
             if (!args[1]) return sendReply(message, `❌ You must give a key!`)
             if (args[2]) return sendReply(message, `❌ This command only accepts two argument!`)
