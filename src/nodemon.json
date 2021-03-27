@@ -1,0 +1,10 @@
+{
+    "restartable": "rs",
+    "watch": ["*"],
+    "ext": "js",
+    "exec": "node ./index.js",
+    "env": {
+        "NODE_ENV": "development"
+    },
+    "signal": "SIGINT"
+}
