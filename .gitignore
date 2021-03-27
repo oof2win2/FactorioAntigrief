@@ -1,6 +1,6 @@
 #config and env
 *.env
-config.json
+*/botconfig.json
 
 #dist
 dist
