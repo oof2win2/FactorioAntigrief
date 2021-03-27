@@ -1,0 +1,7 @@
+{
+    "apiurl": "http://localhost:3000",
+    "embedColors": {
+        "info": "#35e035",
+        "ban": "#9b11db"
+    }
+}

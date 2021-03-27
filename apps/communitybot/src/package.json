@@ -1,0 +1,25 @@
+{
+  "name": "fagc-discord-bot",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "dev": "nodemon index"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "common-tags": "^1.8.0",
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "fs-extra": "^9.1.0",
+    "moment": "^2.29.1",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.6",
+    "@types/node": "^14.14.22",
+    "@types/node-fetch": "^2.5.8"
+  },
+  "author": "Cooldude2606",
+  "license": "UNLICENSED"
+}
