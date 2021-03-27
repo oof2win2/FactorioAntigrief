@@ -5,66 +5,68 @@ const globalConfig = require("../../utils/globalconfig")
 
 module.exports = {
     config: {
-        name: "setrulefilters",
-        aliases: [],
+        name: "setcommunityfilters",
+        aliases: ["whitelistcommunities"],
         usage: "",
-        category: "rules",
-        description: "Gets all rules",
+        category: "communities",
+        description: "Sets community filters",
     },
     run: async (client, message, args) => {
-        const resRaw = await fetch(`${apiurl}/rules/getall`)
-        const rules = await resRaw.json()
+        const communitiesRaw = await fetch(`${apiurl}/communities/getall`)
+        const communities = await communitiesRaw.json()
 
         let embed = new MessageEmbed()
-            .setTitle("FAGC Rules")
+            .setTitle("FAGC Communities")
             .setColor(embedColors.info)
             .setTimestamp()
             .setAuthor("FAGC Community")
-            .setDescription("Set Filtered Rules")
+            .setDescription("Set Community Filters")
 
-        rules.forEach((rule, i) => {
+        communities.forEach((community, i) => {
             if (i == 25) {
                 message.channel.send(embed)
                 embed.fields = []
             }
-            embed.addField(`#${i + 1}/${rule._id}: ${rule.shortdesc}`, rule.longdesc)
+            embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
         })
         message.channel.send(embed)
-
         
+
         const messageFilter = response => {
             return response.author.id === message.author.id
         }
-        message.channel.send("Please type in ObjectIDs of rules you wish to use. Type `stop` to stop")
+        message.channel.send("Please type in ObjectIDs of communities you wish to trust. Type `stop` to stop")
 
-        let ruleFilters = []
+        let trustedCommunities = []
         const onEnd = () => {
-            globalConfig.config.filteredRules = ruleFilters
+            globalConfig.config.trustedCommunities = trustedCommunities
             console.log(globalConfig.config)
             globalConfig.saveGlobalConfig()
             let ruleEmbed = new MessageEmbed()
-                .setTitle("FAGC Rules")
+                .setTitle("FAGC Communities")
                 .setColor(embedColors.info)
                 .setTimestamp()
                 .setAuthor("FAGC Community")
-                .setDescription("Filtered Rules")
-            ruleFilters.forEach((filteredRuleID, i) => {
+                .setDescription("Trusted Communities")
+            trustedCommunities.forEach((trustedCommunityID, i) => {
                 if (i === 25) {
                     message.channel.send(ruleEmbed)
                     embed.fields = []
                 }
-                rules.forEach((rule) => {
-                    if (rule._id === filteredRuleID)
-                        ruleEmbed.addField(rule.shortdesc, rule.longdesc)
+                communities.forEach((community) => {
+                    if (community._id === trustedCommunityID)
+                        ruleEmbed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
                 })
             })
             message.channel.send(ruleEmbed)
         }
-        
-        let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(rules).length, time: 120000 })
+
+        console.log(Object.keys(communities).length)
+        let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(communities).length, time: 120000 })
         collector.on('collect', (message) => {
+            console.log(message.content)
             if (message.content === "stop") collector.stop()
-            else ruleFilters.push(message.content)
+            else trustedCommunities.push(message.content)
         })
         collector.on('end', () => {
             message.channel.send("End of collection")

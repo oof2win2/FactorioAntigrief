@@ -12,7 +12,6 @@ module.exports = {
         description: "Gets all rules",
     },
     run: async (client, message, args) => {
-        console.log(globalConfig.config)
         if (globalConfig.config.filteredRules === undefined)
             return message.reply("No rules filtered")
         const resRaw = await fetch(`${apiurl}/rules/getall`)
@@ -25,7 +24,6 @@ module.exports = {
             .setAuthor("FAGC Community")
             .setDescription("All FAGC Rules")
 
-        console.log(globalConfig.config)
         let sent = 0
         rules.forEach((rule, i) => {
             if (sent == 25) {
