@@ -19,7 +19,7 @@ exports.CommunitySchema = new mongoose_1.default.Schema({
     name: String,
     info: String,
 });
-// console.log(CommunitySchema)
+
 function connect() {
     return __awaiter(this, void 0, void 0, function* () {
         yield mongoose_1.default.connect('mongodb://localhost:27017/test', {

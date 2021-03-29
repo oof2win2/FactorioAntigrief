@@ -3,39 +3,64 @@ const router = express.Router();
 const ViolationModel = require("../database/schemas/violation")
 const OffenseModel = require("../database/schemas/offense")
 const RevocationModel = require("../database/schemas/revocation")
+const RuleModel = require("../database/schemas/rule")
 const { getCommunity } = require("../utils/functions");
 const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Violations API Homepage!')
+    res.json({info:'Violations API Homepage!'})
 })
 router.get('/getviolations', async (req, res) => {
-    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
-        return res.status(400).send(`Bad Request: playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`)
-    if (req.body.communityname === undefined || typeof (req.body.communityname) !== 'string')
-        return res.status(400).send(`Bad Request: communityname expected string, got ${typeof (req.body.communityname)} with value of ${req.body.communityname}`)
+    if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')
+        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}`})
+    if (req.query.communityname === undefined || typeof (req.query.communityname) !== 'string')
+        return res.status(400).send({ error: "Bad Request", description: `communityname expected string, got ${typeof (req.query.communityname)} with value of ${req.query.communityname}`})
     const dbRes = await ViolationModel.find({
-        playername: req.body.playername,
-        communityname: req.body.communityname
+        playername: req.query.playername,
+        communityname: req.query.communityname
+    }).populate('violations')
+    res.status(200).json(dbRes)
+})
+router.get('/getall', async (req, res) => {
+    if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')
+        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
+    const dbRes = await ViolationModel.find({
+        playername: req.query.playername
     }).populate('violations')
     res.status(200).json(dbRes)
 })
 router.get('/getbyid', async (req, res) => {
     if (req.body.id === undefined || typeof (req.body.id) !== 'string')
-        return res.status(400).send(`Bad Request: id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`)
+        return res.status(400).send({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`})
     const dbRes = await ViolationModel.findById(req.body.id)
     res.status(200).json(dbRes)
 })
+
+/**
+ * This function comment is parsed by doctrine
+ * @route POST /violations/create
+ * @group foo - Operations about user
+ * @param {string} email.query.required - username or email - eg: user@domain
+ * @param {string} password.query.required - user's password.
+ * @returns {object} 200 - An array of user info
+ * @returns {Error}  default - Unexpected error
+ */
 router.post('/create', async (req, res) => {
-    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string' || !req.body.adminname.length)
-        return res.status(400).send(`Bad Request: name expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`)
+    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string' || !req.body.playername.length)
+        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
     if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string' || !req.body.adminname.length)
-        return res.status(400).send(`Bad Request: adminname expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`)
-    if (req.body.brokenRule === undefined || isNaN(req.body.brokenRule))
-        return res.status(400).send(`Bad Request: brokenRules expected array, got ${typeof (req.body.brokenRules)} with value of ${req.body.brokenRules}`)
+        return res.status(400).send({ error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
+    if (req.body.brokenRule === undefined || typeof(req.body.brokenRule) !== 'string')
+        return res.status(400).send({ error: "Bad Request", description: `brokenRule expected string, got ${typeof (req.body.brokenRule)} with value of ${req.body.brokenRule}`})
     if (req.body.automated === undefined || typeof (req.body.automated) !== "string")
         req.body.automated = "false"
+    try {
+        const rule = await RuleModel.findById(req.body.brokenRule)
+        if (rule === null) throw "Wrong rule"
+    } catch (error) {
+        return res.status(400).send({error: "Bad Request", description: "Rule must be a RuleID"})
+    }
     const community = await getCommunity(req.headers.apikey)
     const dbOffense = await OffenseModel.findOne({
         playername: req.body.playername,
@@ -102,8 +127,8 @@ router.delete('/revoke', async (req, res) => {
         proof: violation.proof,
         description: violation.description,
         automated: violation.automated,
-        ViolatedTime: violation.violatedTime,
-        RevokedTime: new Date(),
+        violatedTime: violation.violatedTime,
+        revokedTime: new Date(),
         revokedBy: req.body.adminname
     })
 
@@ -118,7 +143,6 @@ router.delete('/revokeallname', async (req, res) => {
 
     const community = await getCommunity(req.headers.apikey)
     const toRevoke = await OffenseModel.findOneAndDelete({playername: req.body.playername})
-    // console.log(toRevoke, community)
     if (toRevoke === undefined || toRevoke === null)
         return res.status(404).send(`Not Found: Violation with player name ${req.body.playername} not found`)
     if (toRevoke.communityname !== community.communityname)
@@ -133,8 +157,8 @@ router.delete('/revokeallname', async (req, res) => {
             proof: violation.proof,
             description: violation.description,
             automated: violation.automated,
-            ViolatedTime: violation.violatedTime,
-            RevokedTime: new Date(),
+            violatedTime: violation.violatedTime,
+            revokedTime: new Date(),
             revokedBy: req.body.adminname
         })
             .then((revocation) =>{

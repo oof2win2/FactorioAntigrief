@@ -8,8 +8,8 @@ const RevocationSchema = new mongoose.Schema({
     proof: String,
     description: String,
     automated: Boolean,
-    ViolatedTime: Date,
-    RevokedTime: Date,
+    violatedTime: Date,
+    revokedTime: Date,
     revokedBy: String
 })
 

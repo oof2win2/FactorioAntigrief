@@ -8,6 +8,15 @@ const cryptoRandomString = require('crypto-random-string')
 router.get('/', function (req, res) {
     res.send('Community API Homepage!')
 })
+router.get('/getown', async (req, res) => {
+    if (req.headers.apikey === undefined)
+        return res.status(400).json({error: "Bad Request", description: "No way to find you community without an API key"})
+    const auth = await AuthModel.findOne({ apiKey: req.headers.apikey })
+    const dbRes = await CommunityModel.findOne({
+        name: auth.communityname
+    })
+    res.status(200).json(dbRes)
+})
 router.get('/getall', async (req, res) => {
     const dbRes = await CommunityModel.find({name: {$exists: true}})
     res.status(200).json(dbRes)

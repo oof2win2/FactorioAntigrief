@@ -8,6 +8,9 @@ module.exports = {
     WebsocketMessage,
     violationCreatedMessage,
     violationRevokedMessage,
+    ruleCreatedMessage,
+    ruleRemovedMessage,
+    offenseRevokedMessage,
 }
 
 async function WebhookMessage(message, level = 1) {
@@ -22,7 +25,6 @@ async function WebhookMessage(message, level = 1) {
     })
 }
 async function WebsocketMessage(message) {
-    // console.log(message)
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(message);
@@ -78,7 +80,7 @@ async function violationRevokedMessage(revocation) {
                 { name: "Automated", value: revocation.automated },
                 { name: "Proof", value: revocation.proof },
                 { name: "Description", value: revocation.description },
-                { name: "Violation ID", value: revocation._id },
+                { name: "Revocation ID", value: revocation._id },
                 { name: "Revocation Time", value: revocation.RevokedTime },
                 { name: "Revoked by", value: revocation.revokedBy },
             )
@@ -95,6 +97,89 @@ async function violationRevokedMessage(revocation) {
     }
 }
 
+async function ruleCreatedMessage(rule) {
+    if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
+    rule.messageType = "ruleCreated"
+    WebsocketMessage(JSON.stringify(rule))
+    try {
+        let ruleEmbed = new MessageEmbed()
+            .setTitle("FAGC Notifications")
+            .setDescription("Rule created")
+            .setColor("ORANGE")
+            .addFields(
+                { name: "Rule short description", value: rule.shortdesc },
+                { name: "Rule long description", value: rule.longdesc }
+            )
+        let message = {}
+        message.embeds = [ruleEmbed]
+        message.username = "FAGC Notifier"
+        WebhookMessage(message)
+    } catch (error) {
+        const time = new Date()
+        WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
+        console.log(time)
+        console.error(error)
+    }
+}
+
+async function ruleRemovedMessage(rule) {
+    if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
+    rule.messageType = "ruleRemoved"
+    WebsocketMessage(JSON.stringify(rule))
+    try {
+        let ruleEmbed = new MessageEmbed()
+            .setTitle("FAGC Notifications")
+            .setDescription("Rule removed")
+            .setColor("ORANGE")
+            .addFields(
+                {name: "Rule short description", value: rule.shortdesc},
+                {name: "Rule long description", value: rule.longdesc}
+            )
+        let message = {}
+        message.embeds = [ruleEmbed]
+        message.username = "FAGC Notifier"
+        WebhookMessage(message)
+    } catch (error) {
+        const time = new Date()
+        WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
+        console.log(time)
+        console.error(error)
+    }
+}
+
+async function offenseRevokedMessage(offense) {
+    offense.messageType = "offenseRevoked"
+    WebsocketMessage(JSON.stringify(offense))
+    try {
+        let embed = new MessageEmbed()
+            .setTitle("FAGC Notifications")
+            .setDescription("Offense revoked")
+            .setColor("ORANGE")
+        offense.forEach((revocation) => {
+            embed.addFields(
+                { name: "Playername", value: revocation.playername },
+                { name: "Admin", value: revocation.adminname },
+                { name: "Community Name", value: revocation.communityname },
+                { name: "Broken Rules", value: revocation.brokenRule },
+                { name: "Automated", value: revocation.automated },
+                { name: "Proof", value: revocation.proof },
+                { name: "Description", value: revocation.description },
+                { name: "Revocation ID", value: revocation._id },
+                { name: "Revocation Time", value: revocation.RevokedTime },
+                { name: "Revoked by", value: revocation.revokedBy },
+            )
+        })
+        let message = {}
+        message.embeds = [embed]
+        message.username = "FAGC Notifier"
+        WebhookMessage(message)
+    } catch (error) {
+        const time = new Date()
+        WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
+        console.log(time)
+        console.error(error)
+    }
+}
 
 wss.on('connection', () => {
     console.log("new WebSocket connection!");

@@ -14,10 +14,7 @@ function logResponse(req, res, next) {
     res.end = function (chunk) {
         if (chunk)
             chunks.push(chunk);
-        var body = Buffer.concat(chunks).toString('utf8');
-        // console.log(req.path, body);
-        // console.log(req.body)
-        // console.log(req.headers.apikey)
+        var body = Buffer.concat(chunks).toString('utf8')
         LogSchema.create({
             timestamp: new Date(),
             apiKey: req.headers.apikey,

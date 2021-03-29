@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
 const mongoose = require("mongoose")
 
-// const logger = require('./utils/log')
+const logger = require('./utils/log')
 const authUser = require("./utils/authUser")
 const config = require("../config.json")
 
@@ -13,6 +13,7 @@ const communityRouter = require('./routes/communities')
 const violationRouter = require('./routes/violations')
 const informaticsRouter = require('./routes/informatics')
 const revocationRouter = require('./routes/revocations')
+const offenseRouter = require('./routes/offenses')
 
 const testingRouter = require('./routes/testing')
 
@@ -30,7 +31,7 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 // logger for any request other than POST
-// app.use(logger);
+app.use(logger);
 
 // middleware for authentication
 const authMiddleware = async (req, res, next) => {
@@ -49,10 +50,11 @@ app.use('/violations', violationRouter)
 app.use('/revocations', revocationRouter)
 app.use('/informatics', informaticsRouter)
 app.use('/testing', testingRouter)
+app.use('/offenses', offenseRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res) {
-    res.status(404).send("Page Not Found")
+    res.status(404).json({error: "Page Not Found"})
 });
 
 // error handler
@@ -63,18 +65,8 @@ app.use(function (err, req, res) {
 
     // render the error page
     res.status(err.status || 500);
-    res.render('error');
+    res.json({error: 'error', message: err.message});
 });
-
-// app.use(expressModifyResponse(
-//     (req, res) => {
-//         return true
-//     },
-//     (req, res, body) => {
-//         console.log(body.toString())
-//         return body
-//     }
-// ))
 
 mongoose.connect(config.mongoURI, {
     useNewUrlParser: true,

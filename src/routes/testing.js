@@ -14,7 +14,7 @@ router.post('/reset', async (req, res) => {
     const res2 = await OffenseModel.deleteMany()
     const res3 = await RevocationModel.deleteMany()
     // console.log(res1, res2)
-    res.status(200).send("Done!")
+    res.status(200).json({done: true})
 })
 
 module.exports = router

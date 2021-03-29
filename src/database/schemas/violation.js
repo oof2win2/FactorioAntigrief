@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const ViolationSchema = new mongoose.Schema({
     playername: String,
     communityname: String,
-    brokenRule: Number,
+    brokenRule: mongoose.SchemaTypes.ObjectId,
     proof: String,
     description: String,
     automated: Boolean,
