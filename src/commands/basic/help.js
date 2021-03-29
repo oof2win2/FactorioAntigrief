@@ -1,7 +1,7 @@
 const { MessageEmbed } = require("discord.js");
-const { prefix } = require("../../botconfig.json");
 const { readdirSync } = require("fs");
 const { stripIndents } = require("common-tags");
+const globalConfig = require("../../utils/globalconfig")
 
 module.exports = {
   config: {
@@ -12,6 +12,7 @@ module.exports = {
     description: "Displays all available commands",
   },
   run: async (client, message, args) => {
+    const prefix = globalConfig.config.prefix
     const embed = new MessageEmbed()
       .setColor("GREEN")
       .setAuthor(`${message.guild.me.displayName} Help`, message.guild.iconURL)
