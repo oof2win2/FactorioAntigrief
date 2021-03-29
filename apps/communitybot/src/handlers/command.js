@@ -20,5 +20,5 @@ module.exports = (client) => {
   };
   // This is where different command folders are loaded
   // If you want to create a new category, add the category/folder name here
-  ["basic", "rules", "communities"].forEach((x) => load(x));
+  ["basic", "rules", "communities", "violations", "offenses"].forEach((x) => load(x));
 };

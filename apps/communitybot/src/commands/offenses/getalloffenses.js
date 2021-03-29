@@ -1,0 +1,41 @@
+const fetch = require("node-fetch")
+const { apiurl, embedColors } = require("../../config.json")
+const { MessageEmbed } = require("discord.js");
+
+
+module.exports = {
+    config: {
+        name: "getalloffenses",
+        aliases: [],
+        usage: "<playername>",
+        category: "offenses",
+        description: "Gets all offenses of a player",
+    },
+    run: async (client, message, args) => {
+        if (!args[0]) return message.reply("Provide a player name to get violations of")
+        const playername = args.shift()
+        const offensesRaw = await fetch(`${apiurl}/offenses/getall?playername=${playername}`)
+        const offenses = await offensesRaw.json()
+        if (offenses === null)
+            return message.channel.send(`User \`${playername}\` has no offenses!`)
+
+        let embed = new MessageEmbed()
+            .setTitle("FAGC Offenses")
+            .setColor(embedColors.info)
+            .setTimestamp()
+            .setAuthor("FAGC Community")
+            .setDescription(`FAGC Offense of player \`${playername}\``)
+        let i = 0
+        offenses.forEach((offense) => {
+            if (i == 25) {
+                message.channel.send(embed)
+                embed.fields = []
+            }
+
+            const violations = offense.violations.map((violation) => {return violation._id})
+            embed.addField(offense._id,`Community name: ${offense.communityname}, Violation ID(s): ${violations.join(", ")}`)
+            i++
+        })
+        message.channel.send(embed)
+    },
+};

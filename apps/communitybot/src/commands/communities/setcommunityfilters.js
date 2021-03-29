@@ -6,7 +6,7 @@ const globalConfig = require("../../utils/globalconfig")
 module.exports = {
     config: {
         name: "setcommunityfilters",
-        aliases: ["whitelistcommunities"],
+        aliases: ["whitelistcommunities", "settrustedcommunities"],
         usage: "",
         category: "communities",
         description: "Sets community filters",
@@ -40,7 +40,6 @@ module.exports = {
         let trustedCommunities = []
         const onEnd = () => {
             globalConfig.config.trustedCommunities = trustedCommunities
-            console.log(globalConfig.config)
             globalConfig.saveGlobalConfig()
             let ruleEmbed = new MessageEmbed()
                 .setTitle("FAGC Communities")
@@ -61,10 +60,8 @@ module.exports = {
             message.channel.send(ruleEmbed)
         }
 
-        console.log(Object.keys(communities).length)
         let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(communities).length, time: 120000 })
         collector.on('collect', (message) => {
-            console.log(message.content)
             if (message.content === "stop") collector.stop()
             else trustedCommunities.push(message.content)
         })
