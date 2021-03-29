@@ -1,5 +1,4 @@
 const fs = require('fs')
-// const a = require("./config/defaultGlobalConfig.json")
 
 class globalConfig {
     constructor() {

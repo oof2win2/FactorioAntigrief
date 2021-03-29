@@ -1,3 +1,6 @@
 {
-    "prefix": "fagc!"
+    "prefix": "fagc!",
+    "roles": {
+        "admin": "Administrator"
+    }
 }
