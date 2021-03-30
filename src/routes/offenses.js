@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
 const OffenseModel = require("../database/schemas/offense")
-const AuthModel = require("../database/schemas/authentication")
-const CommunityModel = require("../database/schemas/community")
-const RevocationModel = require("../database/schemas/revocation")
-const ViolationModel = require("../database/schemas/violation")
+// const AuthModel = require("../database/schemas/authentication")
+// const CommunityModel = require("../database/schemas/community")
+// const RevocationModel = require("../database/schemas/revocation")
+// const ViolationModel = require("../database/schemas/violation")
 const ObjectId = require('mongoose').Types.ObjectId
-const { offenseRevokedMessage } = require("../utils/info")
+// const { offenseRevokedMessage } = require("../utils/info")
 
 
 /* GET home page. */
@@ -42,42 +42,43 @@ router.get('/getbyid', async (req, res) => {
     const offense = await OffenseModel.findById(req.body.id).populate('violations')
     res.status(200).json(offense)
 })
-router.delete('/revoke', async (req, res) => {
-    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
-        return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
-    if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string')
-        return res.status(400).json({error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`})
-    const auth = await AuthModel.findOne({ apiKey: req.headers.apikey })
-    const community = await CommunityModel.findOne({
-        name: auth.communityname
-    })
-    const toRevoke = await OffenseModel.findOne({
-        playername: req.body.playername,
-        communityname: community.name
-    }).populate('violations')
-    if (toRevoke === null || toRevoke.communityname === undefined)
-        return res.status(404).json({error: "Resource Not Found", description: `Offense in community ${community.name} from player ${req.body.playername} not found`})
-    if (toRevoke.communityname !== community.name)
-        return res.status(403).send({error:"Access Denied", description: `Belongs to community ${toRevoke.communityname} whilst you are ${community.name}`})
-    OffenseModel.findByIdAndDelete(toRevoke._id)
-    let revocationArr = toRevoke.violations.map((violation) => {
-        return {
-            playername: violation.playername,
-            communityname: violation.communityname,
-            adminname: violation.adminname,
-            brokenRule: violation.brokenRule,
-            proof: violation.proof,
-            description: violation.description,
-            automated: violation.automated,
-            violatedTime: violation.violatedTime,
-            revokedTime: new Date(),
-            revokedBy: req.body.adminname
-        }
-    })
-    const revocations = await RevocationModel.insertMany(revocationArr)
-    console.log(revocations)
-    offenseRevokedMessage(revocations)
-    res.status(200).json(revocations)
-})
+// router.delete('/revoke', async (req, res) => {
+//     if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
+//         return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
+//     if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string')
+//         return res.status(400).json({error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`})
+//     const auth = await AuthModel.findOne({ apiKey: req.headers.apikey })
+//     const community = await CommunityModel.findOne({
+//         name: auth.communityname
+//     })
+//     const toRevoke = await OffenseModel.findOne({
+//         playername: req.body.playername,
+//         communityname: community.name
+//     }).populate('violations')
+//     if (toRevoke === null || toRevoke.communityname === undefined)
+//         return res.status(404).json({error: "Resource Not Found", description: `Offense in community ${community.name} from player ${req.body.playername} not found`})
+//     if (toRevoke.communityname !== community.name)
+//         return res.status(403).send({error:"Access Denied", description: `Belongs to community ${toRevoke.communityname} whilst you are ${community.name}`})
+//     let revocationArr = toRevoke.violations.map((violation) => {
+//         ViolationModel.findByIdAndDelete(violation._id)
+//         console.log(violation.brokenRule)
+//         return {
+//             playername: violation.playername,
+//             communityname: violation.communityname,
+//             adminname: violation.adminname,
+//             brokenRule: violation.brokenRule,
+//             proof: violation.proof,
+//             description: violation.description,
+//             automated: violation.automated,
+//             violatedTime: violation.violatedTime,
+//             revokedTime: new Date(),
+//             revokedBy: req.body.adminname
+//         }
+//     })
+//     OffenseModel.findByIdAndDelete(toRevoke._id)
+//     const revocations = await RevocationModel.insertMany(revocationArr)
+//     offenseRevokedMessage(revocations)
+//     res.status(200).json(revocations)
+// })
 
 module.exports = router
