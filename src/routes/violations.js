@@ -31,9 +31,9 @@ router.get('/getall', async (req, res) => {
     res.status(200).json(dbRes)
 })
 router.get('/getbyid', async (req, res) => {
-    if (req.body.id === undefined || typeof (req.body.id) !== 'string')
-        return res.status(400).send({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`})
-    const dbRes = await ViolationModel.findById(req.body.id)
+    if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
+        return res.status(400).send({ error: "Bad Request", description: `id expected ObjectID, got ${typeof (req.query.id)} with value of ${req.query.id}`})
+    const dbRes = await ViolationModel.findById(req.query.id)
     res.status(200).json(dbRes)
 })
 
@@ -51,8 +51,8 @@ router.post('/create', async (req, res) => {
         return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
     if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string' || !req.body.adminname.length)
         return res.status(400).send({ error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
-    if (req.body.brokenRule === undefined || typeof(req.body.brokenRule) !== 'string')
-        return res.status(400).send({ error: "Bad Request", description: `brokenRule expected string, got ${typeof (req.body.brokenRule)} with value of ${req.body.brokenRule}`})
+    if (req.body.brokenRule === undefined || !ObjectId.isValid(req.body.brokenRule))
+        return res.status(400).send({ error: "Bad Request", description: `brokenRule expected ObjectID, got ${typeof (req.body.brokenRule)} with value of ${req.body.brokenRule}`})
     if (req.body.automated === undefined || typeof (req.body.automated) !== "string")
         req.body.automated = "false"
     try {
@@ -97,8 +97,8 @@ router.post('/create', async (req, res) => {
     return res.status(200).send(violation.toObject())
 })
 router.delete('/revoke', async (req, res) => {
-    if (req.body.id === undefined || typeof (req.body.id) !== 'string')
-        return res.status(400).send(`Bad Request: id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`)
+    if (req.body.id === undefined || !ObjectId.isValid(req.body.id))
+        return res.status(400).send(`Bad Request: id expected ObjectID, got ${typeof (req.body.id)} with value of ${req.body.id}`)
     if (req.body.adminname === undefined || typeof(req.body.adminname) !== 'string')
         return res.status(400).send(`Bad Request: adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`)
 

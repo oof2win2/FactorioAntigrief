@@ -4,7 +4,7 @@ const RevocationSchema = new mongoose.Schema({
     playername: String,
     adminname: String,
     communityname: String,
-    brokenRules: Number,
+    brokenRule: mongoose.SchemaTypes.ObjectId,
     proof: String,
     description: String,
     automated: Boolean,
