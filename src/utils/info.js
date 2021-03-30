@@ -11,14 +11,12 @@ module.exports = {
     ruleCreatedMessage,
     ruleRemovedMessage,
     offenseRevokedMessage,
+    communityCreatedMessage,
+    communityRemovedMessage,
 }
 
-async function WebhookMessage(message, level = 1) {
-    // 3 levels
-    //  0: error
-    //  1: ban or other info (default)
-    //  2: debug
-    const webhooks = await WebhookSchema.find({ level: { $gte: level } })
+async function WebhookMessage(message) {
+    const webhooks = await WebhookSchema.find()
     webhooks.forEach(async (webhook) => {
         const client = new WebhookClient(webhook.id, webhook.token)
         client.send(message)
@@ -156,17 +154,12 @@ async function offenseRevokedMessage(offense) {
             .setDescription("Offense revoked")
             .setColor("ORANGE")
         offense.forEach((revocation) => {
-            embed.addFields(
-                { name: "Playername", value: revocation.playername },
-                { name: "Admin", value: revocation.adminname },
-                { name: "Community Name", value: revocation.communityname },
-                { name: "Broken Rules", value: revocation.brokenRule },
-                { name: "Automated", value: revocation.automated },
-                { name: "Proof", value: revocation.proof },
-                { name: "Description", value: revocation.description },
-                { name: "Revocation ID", value: revocation._id },
-                { name: "Revocation Time", value: revocation.RevokedTime },
-                { name: "Revoked by", value: revocation.revokedBy },
+            console.log(revocation)
+            embed.addField(
+                `ID: ${revocation._id}`,
+                `Playername: ${revocation.playername}, Admin: ${revocation.adminname}, Community name: ${revocation.communityname}\n` +
+                `Broken rule: ${revocation.brokenRule}, Automated: ${revocation.automated}, Proof: ${revocation.proof}\n` +
+                `Description: ${revocation.description}, Revocation time: ${revocation.revokedTime}, Revoked by: ${revocation.revokedBy}\n`
             )
         })
         let message = {}
@@ -176,6 +169,53 @@ async function offenseRevokedMessage(offense) {
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
+        console.log(time)
+        console.error(error)
+    }
+}
+
+async function communityCreatedMessage(community) {
+    community.messageType = "communityCreated"
+    WebsocketMessage(JSON.stringify(community))
+    try {
+        let embed = new MessageEmbed()
+            .setTitle("FAGC Notifications")
+            .setDescription("Community created")
+            .setColor("ORANGE")
+            .addFields(
+                { name: "Community name", value: community.name },
+                { name: "Contact", value: community.contact }
+            )
+        let message = {}
+        message.embeds = [embed]
+        message.username = "FAGC Notifier"
+        WebhookMessage(message)
+    } catch (error) {
+        const time = new Date()
+        WebhookMessage(`Error at ${time} when sending a community creation message.`, 2)
+        console.log(time)
+        console.error(error)
+    }
+}
+async function communityRemovedMessage(community) {
+    community.messageType = "communityRemoved"
+    WebsocketMessage(JSON.stringify(community))
+    try {
+        let embed = new MessageEmbed()
+            .setTitle("FAGC Notifications")
+            .setDescription("Community removed")
+            .setColor("ORANGE")
+            .addFields(
+                { name: "Community name", value: community.name },
+                { name: "Contact", value: community.contact }
+            )
+        let message = {}
+        message.embeds = [embed]
+        message.username = "FAGC Notifier"
+        WebhookMessage(message)
+    } catch (error) {
+        const time = new Date()
+        WebhookMessage(`Error at ${time} when sending a community removal message.`, 2)
         console.log(time)
         console.error(error)
     }
