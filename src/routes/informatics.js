@@ -8,16 +8,13 @@ router.get('/', function (req, res) {
 })
 router.post('/addWebhook', async (req, res) => {
     if (req.body.id === undefined || typeof(req.body.id) !== "string")
-        return res.status(400).send(`Bad Request: id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`)
+        return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`})
     if (req.body.token === undefined || typeof(req.body.token) !== "string")
-        return res.status(400).send(`Bad Request: token expected string, got ${typeof (req.body.token)} with value of ${req.body.token}`)
-    if (req.body.level === undefined || isNaN(req.body.level))
-        return res.status(400).send(`Bad Request: level expected number, got ${typeof (req.body.level)} with value of ${req.body.level}`)
+        return res.status(400).json({ error: "Bad Request", description: `token expected string, got ${typeof (req.body.token)} with value of ${req.body.token}`})
     const dbRes = await WebhookSchema.create({
         apiKey: req.headers.apikey,
         id: req.body.id,
         token: req.body.token,
-        level: parseInt(req.body.level),
         description: req.body.description
     })
     // console.log(dbRes, "result")
