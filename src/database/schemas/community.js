@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
-const CommunityModel = new mongoose.Schema({
+const CommunitySchema = new mongoose.Schema({
     name: String,
     contact: String
 })
 
-module.exports = mongoose.model('Communities', CommunityModel)
+module.exports = mongoose.model('Communities', CommunitySchema)

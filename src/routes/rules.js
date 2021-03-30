@@ -1,45 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const rule = require("../database/schemas/rule")
-const authUser = require("../utils/authUser")
+const RuleModel = require("../database/schemas/rule")
+const { ruleCreatedMessage, ruleRemovedMessage } = require("../utils/info")
+const ObjectId = require('mongoose').Types.ObjectId;
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Community API Homepage!')
+    res.send('Rules API Homepage!')
 })
-router.get('/getID', async (req, res) => {
-    console.log(req.body)
-    if (req.body.id == undefined || !Number.isInteger(parseInt(req.body.id)))
-        return res.status(404).send(`WrongRequest: RuleID is of wrong type, must be number. Recieved ${req.body.id} as param`)
-    const dbRes = await rule.findOne({ id: parseInt(req.body.id) })
-    res.status(200).json(dbRes)
+router.get('/getall', async (req, res) => {
+    const result = await RuleModel.find()
+    return res.status(200).json(result)
 })
-router.post('/setrule', async (req, res) => {
-    if (req.body.id === undefined || !Number.isInteger(parseInt(req.body.id)))
-        return res.status(404).send(`WrongRequest: RuleID is of wrong type, must be number. Recieved ${req.body.id} as param`)
+router.get('/getid', async (req, res) => {
+    if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
+        return res.status(400).json({ error: "Bad Request", description: `id must be ObjectID, got ${req.query.id}`})
+    const rule = await RuleModel.findById(req.query.id)
+    res.status(200).json(rule)
+})
+router.post('/create', async (req, res) => {
     if (req.body.shortdesc === undefined || typeof(req.body.shortdesc) !== "string")
-        return res.status(404).send(`WrongRequest: RuleShortdesc is of wrong type, must be string. Recieved ${req.body.id} as param`)
-    if (req.body.longdesc === undefined || typeof (req.body.longdesc) !== "string")
-        return res.status(404).send(`WrongRequest: RuleLongdesc is of wrong type, must be string. Recieved ${req.body.id} as param`)
-
-    const authenticated = await authUser(req)
-    if (authenticated === 404)
-        return res.status(404).send("AuthenticationError: API key is wrong")
-    if (authenticated === 401)
-        return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
-
-    if (req.body.shortdesc.length > 96)
-        return res.status(413).send("RuleError: Shortdesc too long, must be below 96 chars")
-    if (req.body.shortdesc.length > 512)
-        return res.status(413).send("RuleError: Longdesc too long, must be below 512 chars")
-    let found = await rule.findOne({id: req.body.id})
-    if (found !== null)
-        return res.status(403).send(`DuplicateError: Duplicate Rule ID: ${req.body.id} is already used by another rule!`)
-    const dbRes = await rule.create({
-        id: req.body.id,
+        return res.status(400).json({error: "Bad Request", description:`shortdesc must be string, got ${req.body.shortdesc}`})
+    if (req.body.longdesc === undefined || typeof(req.body.longdesc) !== "string")
+        return res.status(400).json({error: "Bad Request", description:`longdesc must be string, got ${req.body.longdesc}`})
+    const dbRes = await RuleModel.create({
         shortdesc: req.body.shortdesc,
         longdesc: req.body.longdesc
     })
+    ruleCreatedMessage(dbRes.toObject())
     res.status(200).json(dbRes)
 })
+router.delete('/remove', async (req, res) => {
+    if (req.body.id === undefined)
+        return res.status(400).send(`Bad Request: id must be object ID`)
+    const dbRes = await RuleModel.findByIdAndDelete(req.body.id)
+    ruleRemovedMessage(dbRes.toObject())
+    res.status(200).json(dbRes)
+})
+
 module.exports = router

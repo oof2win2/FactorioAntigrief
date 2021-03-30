@@ -1,38 +1,182 @@
-const express = require('express')
-const router = express.Router()
-// const cryptoRandomString = require('crypto-random-string')
-// const community = require("../database/schemas/community")
-// const authentication = require("../database/schemas/authentication")
-const authUser = require("../utils/authUser")
-const violations = require("../database/schemas/violations")
+const express = require('express');
+const router = express.Router();
+const ViolationModel = require("../database/schemas/violation")
+const OffenseModel = require("../database/schemas/offense")
+const RevocationModel = require("../database/schemas/revocation")
+const RuleModel = require("../database/schemas/rule")
+const ObjectId = require('mongoose').Types.ObjectId
+const { getCommunity } = require("../utils/functions");
+const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Community API Homepage!')
+    res.json({info:'Violations API Homepage!'})
 })
-router.get('/getID', async (req, res) => {
-    if (req.body.id == undefined || !Number.isInteger(parseInt(req.body.id)))
-        return res.status(400).send(`WrongRequest: ID is of wrong type, must be number. Recieved ${req.body.id} as param`)
-    const dbRes = await violations.findById(req.body.id)
+router.get('/getviolations', async (req, res) => {
+    if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')
+        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}`})
+    if (req.query.communityname === undefined || typeof (req.query.communityname) !== 'string')
+        return res.status(400).send({ error: "Bad Request", description: `communityname expected string, got ${typeof (req.query.communityname)} with value of ${req.query.communityname}`})
+    const dbRes = await ViolationModel.find({
+        playername: req.query.playername,
+        communityname: req.query.communityname
+    }).populate('violations')
     res.status(200).json(dbRes)
 })
-router.post('/create', async (req, res) => {
-    console.log(req.body.violations)
-    if (req.body.admin == undefined || typeof (req.body.admin) !== "string")
-        return res.status(400).send(`WrongRequest: admin is of wrong type, must be string. Recieved ${req.body.admin} as param`)
-    if (req.body.violations == undefined || req.body.violations[0] == undefined || typeof (req.body.violations[0]) !== "number")
-        return res.status(400).send(`WrongRequest: violations is of wrong type, must be array of ints. Recieved ${req.body.violations} as param`)
-    
-    const authenticated = await authUser(req)
-    if (authenticated === 404)
-        return res.status(404).send("AuthenticationError: API key is wrong")
-    if (authenticated === 401)
-        return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
-
-    const dbRes = violations.create({
-        
+router.get('/getall', async (req, res) => {
+    if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')
+        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
+    const dbRes = await ViolationModel.find({
+        playername: req.query.playername
+    }).populate('violations')
+    res.status(200).json(dbRes)
+})
+router.get('/getbyid', async (req, res) => {
+    if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
+        return res.status(400).send({ error: "Bad Request", description: `id expected ObjectID, got ${typeof (req.query.id)} with value of ${req.query.id}`})
+    const dbRes = await ViolationModel.findById(req.query.id)
+    res.status(200).json(dbRes)
+})
+router.get('/getbyrule', async (req, res) => {
+    if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
+        return res.status(400).json({ error: "Bad Request", description: `id must be ObjectID, got ${req.query.id}` })
+    const violations = await ViolationModel.find({
+        brokenRule: req.query.id
     })
-    res.status(200).json(dbRes)
+    res.status(200).json(violations)
+})
+
+router.post('/create', async (req, res) => {
+    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string' || !req.body.playername.length)
+        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
+    if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string' || !req.body.adminname.length)
+        return res.status(400).send({ error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
+    if (req.body.brokenRule === undefined || !ObjectId.isValid(req.body.brokenRule))
+        return res.status(400).send({ error: "Bad Request", description: `brokenRule expected ObjectID, got ${typeof (req.body.brokenRule)} with value of ${req.body.brokenRule}`})
+    if (req.body.automated === undefined || typeof (req.body.automated) !== "string")
+        req.body.automated = "false"
+    try {
+        const rule = await RuleModel.findById(req.body.brokenRule)
+        if (rule === null) throw "Wrong rule"
+    } catch (error) {
+        return res.status(400).send({error: "Bad Request", description: "Rule must be a RuleID"})
+    }
+    const community = await getCommunity(req.headers.apikey)
+    const dbOffense = await OffenseModel.findOne({
+        playername: req.body.playername,
+        communityname: community.communityname
+    })
+    const violation = await ViolationModel.create({
+        playername: req.body.playername,
+        communityname: community.communityname,
+        brokenRule: req.body.brokenRule,
+        proof: req.body.proof || "None",
+        description: req.body.description || "None",
+        automated: req.body.automated.toLowerCase() === "true" ? true : false,
+        violatedTime: new Date(),
+        adminname: req.body.adminname
+    })
+    if (dbOffense === null || dbOffense === undefined) {
+        const offense = new OffenseModel({
+            playername: req.body.playername,
+            communityname: community.communityname,
+            violations: []
+        })
+        offense.violations.push(violation._id)
+        offense.save()
+    } else {
+        await OffenseModel.updateOne(
+            {
+                playername: req.body.playername,
+                communityname: community.communityname
+            },
+            { $push: { violations: violation._id } }
+        )
+    }
+    violationCreatedMessage(violation.toObject())
+    return res.status(200).send(violation.toObject())
+})
+router.delete('/revoke', async (req, res) => {
+    if (req.body.id === undefined || !ObjectId.isValid(req.body.id))
+        return res.status(400).send(`Bad Request: id expected ObjectID, got ${typeof (req.body.id)} with value of ${req.body.id}`)
+    if (req.body.adminname === undefined || typeof(req.body.adminname) !== 'string')
+        return res.status(400).send(`Bad Request: adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`)
+
+    const community = await getCommunity(req.headers.apikey)
+    const toRevoke = await ViolationModel.findById(req.body.id)
+    if (toRevoke === undefined || toRevoke === null)
+        return res.status(404).send(`Not Found: Violation with ID ${req.body.id} not found`)
+    if (toRevoke.communityname !== community.communityname)
+        return res.status(403).send(`Access Denied: You are trying to access a violation of community ${toRevoke.communityname} but your community name is ${community.communityname}`)
+    
+    const violation = await ViolationModel.findByIdAndDelete(toRevoke._id)
+    await OffenseModel.updateOne(
+        {
+            violations: toRevoke._id
+        },
+        { $pull: { violations: toRevoke._id } }
+    )
+    await OffenseModel.deleteOne(
+        { violations: { $size: 0 } }
+    )
+    let revocation = await RevocationModel.create({
+        playername: violation.playername,
+        communityname: violation.communityname,
+        adminname: violation.adminname,
+        brokenRule: violation.brokenRule,
+        proof: violation.proof,
+        description: violation.description,
+        automated: violation.automated,
+        violatedTime: violation.violatedTime,
+        revokedTime: new Date(),
+        revokedBy: req.body.adminname
+    })
+
+    violationRevokedMessage(revocation.toObject())
+    res.status(200).json(revocation.toObject())
+})
+router.delete('/revokeallname', async (req, res) => {
+    if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string')
+        return res.status(400).json({ error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`})
+    if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
+        return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
+
+    const community = await getCommunity(req.headers.apikey)
+    // console.log(req.body.playername, community)
+    const toRevoke = await OffenseModel.findOne({
+        playername: req.body.playername,
+        communityname: community.communityname
+    })
+    if (toRevoke === undefined || toRevoke === null)
+        return res.status(404).json({ error: "Not Found", description: `Violation with player name ${req.body.playername} not found`})
+    if (toRevoke.communityname !== community.communityname)
+        return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityname} but your community name is ${community.communityname}`})
+    
+    // first get the offense and delete that first, so the caller can get the raw violations - not just IDs
+    const offense = await OffenseModel.findByIdAndDelete(toRevoke._id).populate('violations')
+    toRevoke.violations.forEach((violationID) => {
+        ViolationModel.findByIdAndDelete(violationID).then((violation) => {
+            RevocationModel.create({
+                playername: violation.playername,
+                communityname: violation.communityname,
+                adminname: violation.adminname,
+                brokenRule: violation.brokenRule,
+                proof: violation.proof,
+                description: violation.description,
+                automated: violation.automated,
+                violatedTime: violation.violatedTime,
+                revokedTime: new Date(),
+                revokedBy: req.body.adminname
+            })
+                .then((revocation) => {
+                    violationRevokedMessage(revocation.toObject())
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
+        })
+    })
+    res.status(200).json(offense)
 })
 
 module.exports = router

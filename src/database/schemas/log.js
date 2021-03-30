@@ -1,12 +1,12 @@
-const express = require("express")
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
-const LogModel = new mongoose.Schema({
+const LogSchema = new mongoose.Schema({
+    timestamp: Date,
     apiKey: String,
     ip: String,
-    timestamp: Date,
-    query: express.request.query,
-    response: express.response,
+    responseBody: Object,
+    requestBody: Object,
+    endpointAddress: String,
 })
 
-module.exports = mongoose.model('Logs', LogModel)
+module.exports = mongoose.model('logs', LogSchema)

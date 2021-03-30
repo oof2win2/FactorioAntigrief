@@ -3,15 +3,19 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
 const mongoose = require("mongoose")
+
+const logger = require('./utils/log')
+const authUser = require("./utils/authUser")
 const config = require("../config.json")
 
-const authUser = require('./utils/authUser')
-
-const indexRouter = require('./routes/index')
-const communityRouter = require('./routes/communities')
 const ruleRouter = require('./routes/rules')
+const communityRouter = require('./routes/communities')
+const violationRouter = require('./routes/violations')
+const informaticsRouter = require('./routes/informatics')
+const revocationRouter = require('./routes/revocations')
 const offenseRouter = require('./routes/offenses')
-const violationsRouter = require('./routes/violations')
+
+const testingRouter = require('./routes/testing')
 
 const app = express()
 
@@ -26,29 +30,31 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+// logger for any request other than POST
+app.use(logger);
+
 // middleware for authentication
 const authMiddleware = async (req, res, next) => {
     const authenticated = await authUser(req)
-    console.log("auth code", authenticated)
     if (authenticated === 404)
         return res.status(404).send("AuthenticationError: API key is wrong")
     if (authenticated === 401)
         return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
     next()
 }
+app.use('/v1/*', authMiddleware)
 
-app.post('*', authMiddleware)
-app.put('*', authMiddleware)
-
-app.use('/index', indexRouter)
-app.use('/communities', communityRouter)
-app.use('/rules', ruleRouter)
-app.use('/offenses', offenseRouter)
-app.use('/violations', violationsRouter)
+app.use('/v1/rules', ruleRouter)
+app.use('/v1/communities', communityRouter)
+app.use('/v1/violations', violationRouter)
+app.use('/v1/revocations', revocationRouter)
+app.use('/v1/informatics', informaticsRouter)
+app.use('/v1/testing', testingRouter)
+app.use('/v1/offenses', offenseRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res) {
-    res.status(404).send("Page Not Found")
+    res.status(404).json({error: "Page Not Found"})
 });
 
 // error handler
@@ -59,9 +65,13 @@ app.use(function (err, req, res) {
 
     // render the error page
     res.status(err.status || 500);
-    res.render('error');
+    res.json({error: 'error', message: err.message});
 });
 
-mongoose.connect(config.mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(config.mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+})
 
 module.exports = app;
