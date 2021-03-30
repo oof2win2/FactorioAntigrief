@@ -6,6 +6,7 @@ const LogSchema = new mongoose.Schema({
     ip: String,
     responseBody: Object,
     requestBody: Object,
+    endpointAddress: String,
 })
 
 module.exports = mongoose.model('logs', LogSchema)

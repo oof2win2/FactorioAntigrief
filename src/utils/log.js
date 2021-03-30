@@ -20,7 +20,8 @@ function logResponse(req, res, next) {
             apiKey: req.headers.apikey,
             ip: req.get('host').slice(0, req.get('host').indexOf(":")),
             responseBody: JSON.parse(body),
-            requestBody: req.body
+            requestBody: req.body,
+            endpointAddress: req.originalUrl
         })
         oldEnd.apply(res, arguments)
     };

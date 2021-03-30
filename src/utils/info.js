@@ -14,9 +14,12 @@ module.exports = {
     communityCreatedMessage,
     communityRemovedMessage,
 }
-
-async function WebhookMessage(message) {
-    const webhooks = await WebhookSchema.find()
+async function WebhookMessage(message, level = 1) {
+    // 3 levels
+    //  0: error
+    //  1: ban or other info (default)
+    //  2: debug
+    const webhooks = await WebhookSchema.find({ level: { $gte: level } })
     webhooks.forEach(async (webhook) => {
         const client = new WebhookClient(webhook.id, webhook.token)
         client.send(message)
