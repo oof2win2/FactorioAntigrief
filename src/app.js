@@ -36,10 +36,11 @@ app.use(logger);
 // middleware for authentication
 const authMiddleware = async (req, res, next) => {
     const authenticated = await authUser(req)
+    // console.log(req.headers['x-forwarded-for'] || req.socket.remoteAddress) // get origin IP
     if (authenticated === 404)
-        return res.status(404).send("AuthenticationError: API key is wrong")
+        return res.status(404).json({error: "AuthenticationError", description: "API key is wrong"})
     if (authenticated === 401)
-        return res.status(410).send("AuthenticationError: IP adress whitelist mismatch")
+        return res.status(410).json({error: "AuthenticationError", description: "IP adress whitelist mismatch"})
     next()
 }
 app.use('/v1/*', authMiddleware)
