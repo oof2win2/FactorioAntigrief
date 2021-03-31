@@ -1,3 +1,6 @@
+const fetch = require("node-fetch")
+const { apiurl } = require("../../config.json")
+
 module.exports = {
   config: {
     name: "ping",
@@ -9,10 +12,11 @@ module.exports = {
   run: async (client, message, args) => {
     let wsPing = client.ws.ping;
 
-    message.channel.send("Pinging...").then((m) => {
+    message.channel.send("Pinging...").then(async (m) => {
       let ping = m.createdTimestamp - message.createdTimestamp;
-
-      m.edit(`Bot Latency: \`${ping}ms\`\nAPI Latency: \`${wsPing}ms\``);
+      await fetch(apiurl)
+      const apilatency = Date.now() - m.createdTimestamp
+      m.edit(`Bot Latency: \`${ping}ms\`\nDiscord API Latency: \`${wsPing}ms\`\nFAGC API Latency: \`${apilatency}ms\``);
     });
   },
 };
