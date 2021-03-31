@@ -10,6 +10,7 @@ module.exports = {
         usage: "",
         category: "violations",
         description: "Creates a violation for a player",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         const messageFilter = response => {
@@ -40,8 +41,10 @@ module.exports = {
         message.channel.send("Please send a value representing the date of the violation. Type in `now` to set the current time")
         let timestamp = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()?.content
         if (timestamp.toLowerCase() === 'now') timestamp = (new Date).toISOString()
-        else timestamp = (new Date(timestamp)).toISOString()
-
+        else {
+            if (isNaN(Date.parse(timestamp))) timestamp = (new Date).toISOString()
+            else timestamp = Date.parse(timestamp).toISOString()
+        }
         let embed = new MessageEmbed()
             .setTitle("FAGC Violations")
             .setColor(embedColors.info)

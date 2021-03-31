@@ -5,6 +5,7 @@ module.exports = {
     category: "basic",
     usage: "",
     aliases: ["ut"],
+    accessibility: "Member",
   },
   run: async (client, message, args) => {
     function duration(ms) {

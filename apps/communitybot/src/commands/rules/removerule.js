@@ -10,6 +10,7 @@ module.exports = {
         usage: "<rule object ID>",
         category: "rules",
         description: "Removes a rule",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Please specify rule ID")

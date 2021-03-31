@@ -10,6 +10,7 @@ module.exports = {
         usage: "<playername> <offenseid>",
         category: "violations",
         description: "Revokes a player's violation with the violation ID",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide a player name to get violations of")

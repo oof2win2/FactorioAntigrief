@@ -9,6 +9,7 @@ module.exports = {
         usage: "",
         category: "rules",
         description: "Gets all rules",
+        accessibility: "Member",
     },
     run: async (client, message, args) => {
         const resRaw = await fetch(`${apiurl}/rules/getall`)

@@ -10,6 +10,7 @@ module.exports = {
         usage: "",
         category: "rules",
         description: "Creates a rule",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         const messageFilter = response => {
