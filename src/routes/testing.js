@@ -16,5 +16,8 @@ router.post('/reset', async (req, res) => {
     // console.log(res1, res2)
     res.status(200).json({done: true})
 })
+router.get('/test', async (req, res) => {
+    console.log(req.ip)
+})
 
 module.exports = router
