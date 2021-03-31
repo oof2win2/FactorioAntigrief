@@ -11,12 +11,12 @@
     "crypto-random-string": "^2.0.0",
     "debug": "~2.6.9",
     "discord.js": "^12.5.1",
-    "express": "~4.16.1",
+    "express": "~4.17.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "lodash": "^4.17.21",
-    "mongoose": "^5.11.19",
-    "morgan": "^1.9.1"
+    "mongoose": "^5.12.2",
+    "morgan": "^1.10.0"
   },
   "repository": {
     "type": "git",
