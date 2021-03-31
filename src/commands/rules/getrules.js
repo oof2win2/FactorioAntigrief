@@ -20,7 +20,6 @@ module.exports = {
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription("All FAGC Rules")
-
         rules.forEach((rule, i) => {
             if (i == 25) {
                 message.channel.send(embed)
