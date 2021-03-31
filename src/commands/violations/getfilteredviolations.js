@@ -9,7 +9,7 @@ module.exports = {
         aliases: ["check"],
         usage: "<playername>",
         category: "violations",
-        description: "Gets all violations of a player",
+        description: "Gets violations of a player from trusted communities",
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide a player name to get violations of")
@@ -34,7 +34,6 @@ module.exports = {
                 embed.fields = []
             }
             if (trustedCommunities.some((community) => {return community.name === violation.communityname})) {
-                console.log(violation)
                 embed.addField(violation._id,
                     `By: ${violation.adminname}\nCommunity name: ${violation.communityname}\n` +
                     `Broken rule: ${violation.brokenRule}\nProof: ${violation.proof}\n` +
