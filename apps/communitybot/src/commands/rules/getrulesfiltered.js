@@ -6,7 +6,7 @@ const globalConfig = require("../../utils/globalconfig")
 module.exports = {
     config: {
         name: "getrulesfiltered",
-        aliases: [],
+        aliases: ["getfilteredrules"],
         usage: "",
         category: "rules",
         description: "Gets all rules",
