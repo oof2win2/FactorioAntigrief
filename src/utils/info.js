@@ -14,12 +14,8 @@ module.exports = {
     communityCreatedMessage,
     communityRemovedMessage,
 }
-async function WebhookMessage(message, level = 1) {
-    // 3 levels
-    //  0: error
-    //  1: ban or other info (default)
-    //  2: debug
-    const webhooks = await WebhookSchema.find({ level: { $gte: level } })
+async function WebhookMessage(message) {
+    const webhooks = await WebhookSchema.find()
     webhooks.forEach(async (webhook) => {
         const client = new WebhookClient(webhook.id, webhook.token)
         client.send(message)
@@ -157,7 +153,6 @@ async function offenseRevokedMessage(offense) {
             .setDescription("Offense revoked")
             .setColor("ORANGE")
         offense.forEach((revocation) => {
-            console.log(revocation)
             embed.addField(
                 `ID: ${revocation._id}`,
                 `Playername: ${revocation.playername}, Admin: ${revocation.adminname}, Community name: ${revocation.communityname}\n` +

@@ -14,7 +14,7 @@ const authenticate = async (req) => {
     // api key is now confirmed to be correct
 
     // if whitelisted IPs are set. will have issues with IPv6 adresses since they have semicolons in them
-    const ip = req.get('host').slice(0, req.get('host').indexOf(":"))
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
     if (dbRes.allowedIPs[0] == undefined) return 200
     else if (dbRes.allowedIPs.includes(ip)) return 200 // API key is correct and IP adress is correct
     return 401  // API key is correct, but wrong IP adress
