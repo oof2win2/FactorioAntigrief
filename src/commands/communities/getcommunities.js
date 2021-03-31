@@ -10,6 +10,7 @@ module.exports = {
         usage: "",
         category: "communities",
         description: "Gets all communities",
+        accessibility: "Member",
     },
     run: async (client, message, args) => {
         const rawCommunities = await fetch(`${apiurl}/communities/getall`)

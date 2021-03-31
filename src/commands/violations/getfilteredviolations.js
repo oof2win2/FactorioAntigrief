@@ -10,6 +10,7 @@ module.exports = {
         usage: "<playername>",
         category: "violations",
         description: "Gets violations of a player from trusted communities",
+        accessibility: "Member",
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide a player name to get violations of")

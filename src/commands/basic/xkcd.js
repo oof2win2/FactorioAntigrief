@@ -6,7 +6,8 @@ module.exports = {
     name: "xkcd",
     description: "xkcd comics, get the latest or certain comic",
     usage: "<search|latest> (id)",
-    category: "miscellaneous",
+    category: "basic",
+    accessibility: "Member",
   },
   run: async (client, message, args) => {
     if ((args[1] && isNaN(args[1])) || !["search", "latest"].includes(args[0]))

@@ -9,6 +9,7 @@ module.exports = {
         usage: "",
         category: "informatics",
         description: "Gets channels that FAGC sends notifications to",
+        accessibility: "Member",
     },
     run: async (client, message, args) => {
         message.reply(`Channels <#${globalConfig.config.infoChannels.join(">, <#")}> are recieving FAGC notifications`)

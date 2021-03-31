@@ -9,6 +9,7 @@ module.exports = {
         usage: "<ruleid>",
         category: "rules",
         description: "Gets rule by ID",
+        accessibility: "Member",
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide rule ID to search by")

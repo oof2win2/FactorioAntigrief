@@ -10,6 +10,7 @@ module.exports = {
         usage: "<ip>",
         category: "communities",
         description: "Removes a IP whitelist",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         if (!args[0])

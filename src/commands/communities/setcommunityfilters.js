@@ -10,6 +10,7 @@ module.exports = {
         usage: "",
         category: "communities",
         description: "Sets community filters",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         const communitiesRaw = await fetch(`${apiurl}/communities/getall`)

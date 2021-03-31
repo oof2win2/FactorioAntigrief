@@ -10,6 +10,7 @@ module.exports = {
     usage: "(command)",
     category: "basic",
     description: "Displays all available commands",
+    accessibility: "Member",
   },
   run: async (client, message, args) => {
     const prefix = globalConfig.config.prefix

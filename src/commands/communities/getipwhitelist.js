@@ -10,6 +10,7 @@ module.exports = {
         usage: "",
         category: "communities",
         description: "Gets your community's IP whitelists",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         const whitelistRaw = await fetch(`${apiurl}/communities/getwhitelist`, {

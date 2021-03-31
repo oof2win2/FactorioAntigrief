@@ -7,7 +7,8 @@ module.exports = {
     aliases: ["alias"],
     usage: "",
     category: "basic",
-    description: "Pings the bot",
+    description: "Pings the bot and API",
+    accessibility: "Member",
   },
   run: async (client, message, args) => {
     let wsPing = client.ws.ping;

@@ -9,6 +9,7 @@ module.exports = {
         usage: "<channel ping/channel ID>",
         category: "informatics",
         description: "Adds a channel to send FAGC notifications to",
+        accessibility: "Moderator",
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide a channel ping or ID to send notifications to")
