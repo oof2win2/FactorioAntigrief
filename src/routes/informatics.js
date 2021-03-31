@@ -35,7 +35,7 @@ router.get('/getlogs', async (req, res) => {
     if (req.query.afterDate !== undefined && isNaN (req.query.afterDate))
         return res.status(400).json({ error: "Bad Request", description: `afterDate expected nothing or number, got ${typeof (req.query.afterDate)} with value ${req.query.afterDate}`})
     const logsRaw = await LogSchema.find({
-        timestamp: { $gte: parseInt(req.query.afterDate) }
+        timestamp: { $gte: parseInt(req.query.afterDate || 0) }
     }, {}, {limit: parseInt(req.query.limit)})
     const logsFiltered = logsRaw.map((log) => {
         log.apiKey = undefined
