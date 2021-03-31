@@ -15,8 +15,8 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "lodash": "^4.17.21",
-    "mongoose": "^5.12.3",
-    "morgan": "^1.9.1"
+    "mongoose": "^5.12.2",
+    "morgan": "^1.10.0"
   },
   "repository": {
     "type": "git",
