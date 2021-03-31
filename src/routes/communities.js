@@ -57,9 +57,10 @@ router.post('/create', async (req, res) => {
         allowedIPs: []
     })
 })
+
 // router.delete('/remove', async (req, res) => {
-//     // return res.status(500).json({error: "Disabled", description: "This module is disabled for now"})
-//     // works but disabled, not sure what should happen when community is removed
+//     return res.status(500).json({error: "Disabled", description: "This module is disabled for now"})
+//     works but disabled, not sure what should happen when community is removed
 //     if (req.body.id === undefined || !ObjectId.isValid(req.body.id))
 //         return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
 //     const community = await CommunityModel.findByIdAndDelete(req.body.id)
@@ -74,12 +75,17 @@ router.post('/create', async (req, res) => {
 
 router.post('/addwhitelist', async (req, res) => {
     if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
-        return res.status(400).json({error: "Bad Request", description: `p expected string, got ${typeof (req.body.ip)}`})
+        return res.status(400).json({error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}`})
     const dbRes = await AuthModel.findOneAndUpdate({ apiKey: req.headers.apikey }, { $push: { "allowedIPs": req.body.ip } }, {new:true})
     res.status(200).json(dbRes)
 })
+router.delete('/removewhitelist', async (req, res) => {
+    if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
+        return res.status(400).json({ error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}` })
+    const dbRes = await AuthModel.findOneAndUpdate({ apiKey: req.headers.apikey }, { $pull: { "allowedIPs": req.body.ip } }, {new:true})
+    res.status(200).json(dbRes)
+})
 router.get('/getwhitelist', async (req, res) => {
-    // console.log(req.headers['x-forwarded-for'] || req.socket.remoteAddress)
     const dbRes = await AuthModel.findOne({ apiKey: req.headers.apikey })
     res.status(200).json(dbRes)
 })
