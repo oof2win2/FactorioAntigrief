@@ -24,7 +24,7 @@ module.exports = {
             .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
-            .setDescription("All FAGC Rules")
+            .setDescription("Filtered FAGC Rules")
 
         let sent = 0
         rules.forEach((rule, i) => {
@@ -32,7 +32,7 @@ module.exports = {
                 message.channel.send(embed)
                 embed.fields = []
             }
-            if (globalConfig.config.filteredRules.some(id => id === rule._id)) {
+            if (config.filteredRules.some(id => id === rule._id)) {
                 embed.addField(`#${i + 1}/${rule._id}: ${rule.shortdesc}`, rule.longdesc)
                 sent++
             }
