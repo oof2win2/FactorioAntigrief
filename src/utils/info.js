@@ -17,8 +17,17 @@ module.exports = {
 async function WebhookMessage(message) {
     const webhooks = await WebhookSchema.find()
     webhooks.forEach(async (webhook) => {
-        const client = new WebhookClient(webhook.id, webhook.token)
-        client.send(message)
+        try {
+            const client = new WebhookClient(webhook.id, webhook.token)
+            client.send(message).catch((error) => {
+                if (error.stack.includes("Unknown Webhook")) {
+                    console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildid}. Removing webhook from database..`)
+                    WebhookSchema.findByIdAndDelete(webhook._id)
+                }
+            })
+        } catch (error) {
+            console.log(error)
+        }
     })
 }
 async function WebsocketMessage(message) {
@@ -78,7 +87,7 @@ async function violationRevokedMessage(revocation) {
                 { name: "Proof", value: revocation.proof },
                 { name: "Description", value: revocation.description },
                 { name: "Revocation ID", value: revocation._id },
-                { name: "Revocation Time", value: revocation.RevokedTime },
+                { name: "Revocation Time", value: revocation.revokedTime },
                 { name: "Revoked by", value: revocation.revokedBy },
             )
             .setTimestamp()
