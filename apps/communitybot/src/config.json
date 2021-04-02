@@ -1,7 +1,0 @@
-{
-    "token": "ODE3OTA4NDg2NDk0NjE3NjIx.YEQWow.my_QKKlrWUUj1vk7FuLL_hR5svI",
-    "_comment_mongoURI": "Your MongoDB URI with password",
-    "mongoURI": "mongodb+srv://spankMeDaddy:o8K0inVJrns7m4r3@cluster0.jsjdm.mongodb.net/bot?retryWrites=true&w=majority",
-    "prefix": "fagc!",
-    "apiurl": "http://localhost:3000/v1"
-}

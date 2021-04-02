@@ -1,5 +1,5 @@
-const { prefix } = require("../../config.json")
-const { moderatorrole } = require("../../config.json")
+const { prefix } = require("../../../config.json")
+const ConfigModel = require("../../database/schemas/config")
 
 module.exports = async (client, message) => {
     let args = message.content.slice(prefix.length).trim().split(/ +/g);
@@ -17,7 +17,8 @@ module.exports = async (client, message) => {
             if (commandfile.config.accessibility === "Member")
                 commandfile.run(client, message, args)
             if (commandfile.config.accessibility === "Moderator") {
-                if (authRoles.some((r) => r.id === moderatorrole))
+                const config = ConfigModel.findOne({guildid: message.guild.id})
+                if (authRoles.some((r) => r.id === config.moderatorroleId))
                     commandfile.run(client, message, args)
                 else if (message.guild.member(message.author).hasPermission('ADMINISTRATOR'))
                     commandfile.run(client, message, args)
