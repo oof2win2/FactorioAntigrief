@@ -4,7 +4,6 @@
         ".git",
         "node_modules/**/node_modules"
     ],
-    "verbose": true,
     "watch": ["*"],
     "env": {
         "NODE_ENV": "development"
