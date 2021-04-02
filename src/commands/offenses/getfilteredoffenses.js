@@ -1,7 +1,7 @@
 const fetch = require("node-fetch")
 const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
-// const globalConfig = require("../../utils/globalconfig")
+const ConfigModel = require("../../database/schemas/config")
 
 
 module.exports = {
@@ -14,16 +14,20 @@ module.exports = {
         accessibility: "Member",
     },
     run: async (client, message, args) => {
-        if (!args[0]) return message.reply("Provide a player name to get violations of")
+        if (!args[0]) return message.reply("Provide a player name to get offenses of")
         const playername = args.shift()
         const offensesRaw = await fetch(`${apiurl}/offenses/getall?playername=${playername}`)
         const offenses = await offensesRaw.json()
         if (offenses === null)
             return message.channel.send(`User \`${playername}\` has no offenses!`)
 
+        const config = await ConfigModel.findOne({ guildid: message.guild.id })
+        if (!config)
+            return message.reply("No server config!")
+        
         let embed = new MessageEmbed()
             .setTitle("FAGC Offenses")
-            .setColor(embedColors.info)
+            .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription(`FAGC Offense of player \`${playername}\``)
@@ -35,7 +39,7 @@ module.exports = {
                 embed.fields = []
             }
             communities.forEach((community) => {
-                if (globalConfig.config.trustedCommunities.some(id => {
+                if (config.trustedCommunities.some(id => {
                         return community.name === offense.communityname && community._id === id
                     })) {
                     const violations = offense.violations.map((violation) => { return violation._id })

@@ -6,8 +6,8 @@ const { MessageEmbed } = require("discord.js");
 
 module.exports = {
     config: {
-        name: "gettrustedcommunities",
-        aliases: ["getwhitelistedcommunities"],
+        name: "getfilteredcommunities",
+        aliases: ["getwhitelistedcommunities", "gettrustedcommunities"],
         usage: "",
         category: "communities",
         description: "Gets trusted communities",

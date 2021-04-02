@@ -13,13 +13,12 @@ module.exports = {
         accessibility: "Member",
     },
     run: async (client, message, args) => {
-        if (!args[0]) return message.reply("Provide a player name to get violations of")
+        if (!args[0]) return message.reply("Provide a player name to get offenses of")
         const playername = args.shift()
         const offensesRaw = await fetch(`${apiurl}/offenses/getall?playername=${playername}`)
         const offenses = await offensesRaw.json()
-        if (offenses === null)
+        if (offenses == null || offenses == [])
             return message.channel.send(`User \`${playername}\` has no offenses!`)
-
         let embed = new MessageEmbed()
             .setTitle("FAGC Offenses")
             .setColor("GREEN")

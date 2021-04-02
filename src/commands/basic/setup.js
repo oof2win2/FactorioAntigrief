@@ -28,7 +28,6 @@ module.exports = {
         apikey.delete()
         if (apikey.content === 'none') apikey = undefined
         else apikey = apikey.content
-        console.log(apikey)
         
         let embed = new MessageEmbed()
             .setTitle("FAGC Config")
