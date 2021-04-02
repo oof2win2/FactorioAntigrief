@@ -1,5 +1,4 @@
 {
-    "_comment_mongo": "Your MongoDB URI and password",
-    "mongoURI": "",
-    "mongoPassword": ""
+    "_comment_mongo": "Your MongoDB URI",
+    "mongoURI": ""
 }
