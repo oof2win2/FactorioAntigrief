@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "dev": "nodemon index"
+    "dev": "nodemon --inspect=0.0.0.0:9230 index"
   },
   "main": "index.js",
   "dependencies": {
@@ -13,6 +13,7 @@
     "dotenv": "^8.2.0",
     "fs-extra": "^9.1.0",
     "moment": "^2.29.1",
+    "mongoose": "^5.12.3",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 const fetch = require("node-fetch")
-const { apiurl, embedColors } = require("../../config.json")
-const { apitoken } = require("../../botconfig.json")
+const { apiurl} = require("../../config.json")
 const { MessageEmbed } = require("discord.js")
+const ConfigModel = require("../../database/schemas/config")
 
 module.exports = {
     config: {
@@ -15,8 +15,11 @@ module.exports = {
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide a player name to get violations of")
         const playername = args.shift()
+        const config = await ConfigModel.findOne({guildid: message.guild.id })
+        if (config === null) return message.reply("Community invalid")
+        if (!config.apikey) return message.reply("No API key set")
         const ownCommunity = await (await fetch(`${apiurl}/communities/getown`, {
-            headers: { 'apikey': apitoken, 'content-type': 'application/json' }
+            headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
         })).json()
         const offenseRaw = await fetch(`${apiurl}/offenses/getcommunity?playername=${playername}&communityname=${ownCommunity.name}`)
         const offense = await offenseRaw.json()
@@ -24,7 +27,7 @@ module.exports = {
             return message.reply(`Player \`${playername}\` has no offenses in community ${ownCommunity.name}`)
         let embed = new MessageEmbed()
             .setTitle("FAGC Offense Revocation")
-            .setColor(embedColors.info)
+            .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription(`FAGC Offense of player \`${playername}\` in community ${ownCommunity.name}`)
@@ -64,7 +67,7 @@ module.exports = {
                     playername: playername,
                     adminname: message.author.tag
                 }),
-                headers: { 'apikey': apitoken, 'content-type': 'application/json' }
+                headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })
             const response = await responseRaw.json()
             if (response._id && response.violations && response.playername && response.communityname) {

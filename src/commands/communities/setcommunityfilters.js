@@ -1,7 +1,8 @@
 const fetch = require("node-fetch")
 const { apiurl, embedColors } = require("../../config.json")
 const { MessageEmbed } = require("discord.js")
-const globalConfig = require("../../utils/globalconfig")
+const ConfigModel = require("../../database/schemas/config")
+const ObjectId = require('mongoose').Types.ObjectId
 
 module.exports = {
     config: {
@@ -18,7 +19,7 @@ module.exports = {
 
         let embed = new MessageEmbed()
             .setTitle("FAGC Communities")
-            .setColor(embedColors.info)
+            .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription("Set Community Filters")
@@ -39,32 +40,42 @@ module.exports = {
         message.channel.send("Please type in ObjectIDs of communities you wish to trust. Type `stop` to stop")
 
         let trustedCommunities = []
-        const onEnd = () => {
-            globalConfig.config.trustedCommunities = trustedCommunities
-            globalConfig.saveGlobalConfig()
-            let ruleEmbed = new MessageEmbed()
+        const onEnd = async () => {
+            let config = await ConfigModel.findOne({ guildid: message.guild.id })
+            console.log({config})
+            const replaced = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
+                $set: {"trustedCommunities": trustedCommunities}
+            }, {new:true})
+            console.log(replaced)
+            let embed = new MessageEmbed()
                 .setTitle("FAGC Communities")
-                .setColor(embedColors.info)
+                .setColor("GREEN")
                 .setTimestamp()
                 .setAuthor("FAGC Community")
                 .setDescription("Trusted Communities")
             trustedCommunities.forEach((trustedCommunityID, i) => {
                 if (i === 25) {
-                    message.channel.send(ruleEmbed)
+                    message.channel.send(embed)
                     embed.fields = []
                 }
                 communities.forEach((community) => {
                     if (community._id === trustedCommunityID)
-                        ruleEmbed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
+                        embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
                 })
             })
-            message.channel.send(ruleEmbed)
+            message.channel.send(embed)
         }
 
         let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(communities).length, time: 120000 })
         collector.on('collect', (message) => {
             if (message.content === "stop") collector.stop()
-            else trustedCommunities.push(message.content)
+            else {
+                if (ObjectId.isValid(message.content)) {
+                    trustedCommunities.push(message.content)
+                    console.log(message.content, typeof(message.content))
+                } else
+                    message.channel.send("Message is not ObjectID. Content disregarded")
+            }
         })
         collector.on('end', () => {
             message.channel.send("End of collection")

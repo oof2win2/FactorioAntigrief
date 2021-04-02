@@ -1,9 +1,11 @@
 #config and env
 *.env
-*/botconfig.json
+src/config.json
 
 #dist
 dist
 
 #npm
 node_modules
+
+src/config.json

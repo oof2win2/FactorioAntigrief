@@ -1,6 +1,6 @@
 const fetch = require("node-fetch")
-const { apiurl, embedColors } = require("../../config.json")
-const { apitoken } = require("../../botconfig.json")
+const { apiurl } = require("../../config.json")
+const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {
@@ -13,6 +13,9 @@ module.exports = {
         accessibility: "Moderator",
     },
     run: async (client, message, args) => {
+        const config = await ConfigModel.findOne({ guildid: message.guild.id })
+        if (config === null) return message.reply("Community invalid")
+        if (!config.apikey) return message.reply("No API key set")
         const messageFilter = response => {
             return response.author.id === message.author.id
         }
@@ -47,7 +50,7 @@ module.exports = {
         }
         let embed = new MessageEmbed()
             .setTitle("FAGC Violations")
-            .setColor(embedColors.info)
+            .setColor("RED")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription(`Create FAGC violation for \`${playername}\``)
@@ -83,7 +86,7 @@ module.exports = {
                     description: desc,
                     automated: false,
                 }),
-                headers: { 'apikey': apitoken, 'content-type': 'application/json' }
+                headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })
             const response = await responseRaw.json()
             if (response._id && response.brokenRule && response.violatedTime) {

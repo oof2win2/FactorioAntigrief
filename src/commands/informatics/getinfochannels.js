@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-const globalConfig = require("../../utils/globalconfig")
+// const globalConfig = require("../../utils/globalconfig")
 
 
 module.exports = {

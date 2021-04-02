@@ -1,7 +1,7 @@
 const fetch = require("node-fetch")
-const { apiurl, embedColors } = require("../../config.json")
+const { apiurl } = require("../../config.json")
 const { MessageEmbed } = require("discord.js")
-const globalConfig = require("../../utils/globalconfig")
+const ConfigModel = require("../../database/schemas/config")
 
 module.exports = {
     config: {
@@ -13,14 +13,15 @@ module.exports = {
         accessibility: "Member",
     },
     run: async (client, message, args) => {
-        if (globalConfig.config.filteredRules === undefined)
+        const config = await ConfigModel.findOne({guildid: message.guild.id})
+        if (config.filteredRules === undefined)
             return message.reply("No rules filtered")
         const resRaw = await fetch(`${apiurl}/rules/getall`)
         const rules = await resRaw.json()
 
         let embed = new MessageEmbed()
             .setTitle("FAGC Rules")
-            .setColor(embedColors.info)
+            .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription("All FAGC Rules")
