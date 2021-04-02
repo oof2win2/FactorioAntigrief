@@ -7,7 +7,7 @@ const RevocationModel = require('../database/schemas/revocation');
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Violations API Homepage!')
+    res.json({message: 'Testing API Homepage!'})
 })
 router.post('/reset', async (req, res) => {
     const res1 = await ViolationModel.deleteMany()

@@ -2,6 +2,7 @@
   "name": "fagc-backend",
   "version": "1.0.0",
   "private": true,
+  "main": "src/bin/www",
   "scripts": {
     "start": "node ./src/bin/www",
     "dev": "nodemon --inspect ./src/bin/www"
@@ -15,8 +16,9 @@
     "http-errors": "~1.8.0",
     "jade": "~1.11.0",
     "lodash": "^4.17.21",
-    "mongoose": "^5.12.2",
-    "morgan": "^1.10.0"
+    "mongoose": "^5.11.19",
+    "morgan": "^1.9.1",
+    "swagger-jsdoc": "^7.0.0-rc.6"
   },
   "repository": {
     "type": "git",

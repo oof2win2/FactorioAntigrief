@@ -1,6 +1,6 @@
 # private stuff
 config.json
-
+dist/
 # Logs
 logs
 *.log
