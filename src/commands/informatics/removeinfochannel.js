@@ -17,7 +17,6 @@ module.exports = {
         globalConfig.config.infoChannels = globalConfig.config.infoChannels.filter((channelID) => {
             return channelID !== channel.id
         })
-        console.log(globalConfig.config.infoChannels)
         globalConfig.saveGlobalConfig()
         message.reply(`Channel ${channel} will recieve FAGC notifications from now on!`)
     },
