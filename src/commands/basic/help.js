@@ -1,7 +1,7 @@
 const { MessageEmbed } = require("discord.js");
 const { readdirSync } = require("fs");
 const { stripIndents } = require("common-tags");
-const { prefix } = require("../../config.json")
+const { prefix } = require("../../../config.json")
 
 module.exports = {
   config: {

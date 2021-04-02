@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "dev": "nodemon --inspect=0.0.0.0:9230 index"
+    "dev": "nodemon --inspect=0.0.0.0:9230 src/index"
   },
-  "main": "index.js",
+  "main": "src/index.js",
   "dependencies": {
     "chalk": "^4.1.0",
     "common-tags": "^1.8.0",

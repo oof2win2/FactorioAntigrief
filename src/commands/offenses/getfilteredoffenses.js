@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-const { apiurl, embedColors } = require("../../config.json")
+const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 // const globalConfig = require("../../utils/globalconfig")
 
