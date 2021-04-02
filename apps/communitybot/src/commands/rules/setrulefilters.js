@@ -1,7 +1,7 @@
 const fetch = require("node-fetch")
-const { apiurl, embedColors } = require("../../config.json")
+const { apiurl } = require("../../config.json")
 const { MessageEmbed } = require("discord.js")
-const globalConfig = require("../../utils/globalconfig")
+const ConfigModel = require("../../database/schemas/config")
 
 module.exports = {
     config: {
@@ -18,7 +18,7 @@ module.exports = {
 
         let embed = new MessageEmbed()
             .setTitle("FAGC Rules")
-            .setColor(embedColors.info)
+            .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription("Set Filtered Rules")
@@ -39,17 +39,17 @@ module.exports = {
         message.channel.send("Please type in ObjectIDs of rules you wish to use. Type `stop` to stop")
 
         let ruleFilters = []
-        const onEnd = () => {
-            globalConfig.config.filteredRules = ruleFilters
-            console.log(globalConfig.config)
-            globalConfig.saveGlobalConfig()
+        const onEnd = async () => {
+            const config = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
+                $set: { "ruleFilters": ruleFilters}
+            }, {new: true})
             let ruleEmbed = new MessageEmbed()
                 .setTitle("FAGC Rules")
-                .setColor(embedColors.info)
+                .setColor("GREEN")
                 .setTimestamp()
                 .setAuthor("FAGC Community")
                 .setDescription("Filtered Rules")
-            ruleFilters.forEach((filteredRuleID, i) => {
+            config.ruleFilters.forEach((filteredRuleID, i) => {
                 if (i === 25) {
                     message.channel.send(ruleEmbed)
                     embed.fields = []

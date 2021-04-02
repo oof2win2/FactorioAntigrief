@@ -1,7 +1,7 @@
 const { MessageEmbed } = require("discord.js");
 const { readdirSync } = require("fs");
 const { stripIndents } = require("common-tags");
-const globalConfig = require("../../utils/globalconfig")
+const { prefix } = require("../../config.json")
 
 module.exports = {
   config: {
@@ -13,7 +13,6 @@ module.exports = {
     accessibility: "Member",
   },
   run: async (client, message, args) => {
-    const prefix = globalConfig.config.prefix
     const embed = new MessageEmbed()
       .setColor("GREEN")
       .setAuthor(`${message.guild.me.displayName} Help`, message.guild.iconURL)

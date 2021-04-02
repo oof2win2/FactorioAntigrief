@@ -1,24 +1,25 @@
 const fetch = require("node-fetch")
 const { apiurl, embedColors } = require("../../config.json")
-const { apitoken } = require("../../botconfig.json")
 const { MessageEmbed } = require("discord.js")
+const ConfigModel = require("../../database/schemas/config")
 
 module.exports = {
     config: {
         name: "revoke",
         aliases: ["revokeid"],
-        usage: "<playername> <offenseid>",
+        usage: "<offenseid>",
         category: "violations",
         description: "Revokes a player's violation with the violation ID",
         accessibility: "Moderator",
     },
     run: async (client, message, args) => {
-        if (!args[0]) return message.reply("Provide a player name to get violations of")
-        if (!args[1]) return message.reply("Provide a ObjectID for the violation to revoke")
-        const playername = args.shift()
+        if (!args[0]) return message.reply("Provide a ObjectID for the violation to revoke")
         const violationID = args.shift()
+        const config = await ConfigModel.findOne({guildid: message.guild.id})
+        if (config.apikey === undefined)
+            return message.reply("No API key set, operation not available!")
         const ownCommunity = await (await fetch(`${apiurl}/communities/getown`, {
-            headers: { 'apikey': apitoken, 'content-type': 'application/json' }
+            headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
         })).json()
         const violationRaw = await fetch(`${apiurl}/violations/getbyid?id=${violationID}`)
         const violation = await violationRaw.json()
@@ -28,10 +29,10 @@ module.exports = {
             return message.reply(`\`${violationID}\` is not a proper Mongo ObjectID`)
         let embed = new MessageEmbed()
             .setTitle("FAGC Violation Revocation")
-            .setColor(embedColors.info)
+            .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
-            .setDescription(`FAGC Violation \`${violation._id}\` of player \`${playername}\` in community ${ownCommunity.name}`)
+            .setDescription(`FAGC Violation \`${violation._id}\` of player \`${violation.playername}\` in community ${ownCommunity.name}`)
         embed.addFields(
             { name: "Admin name", value: violation.adminname },
             { name: "Broken rule ID", value: violation.brokenRule },
@@ -64,7 +65,7 @@ module.exports = {
                     id: violationID,
                     adminname: message.author.tag
                 }),
-                headers: { 'apikey': apitoken, 'content-type': 'application/json' }
+                headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })
             const response = await responseRaw.json()
             if (response._id && response.revokedBy && response.revokedTime) {

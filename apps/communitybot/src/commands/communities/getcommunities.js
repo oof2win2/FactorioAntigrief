@@ -1,6 +1,6 @@
 const fetch = require("node-fetch")
 const { apiurl, embedColors } = require("../../config.json")
-const { apitoken } = require("../../botconfig.json")
+const { apitoken } = require("../../config.json")
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {

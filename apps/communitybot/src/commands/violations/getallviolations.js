@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-const { apiurl, embedColors } = require("../../config.json")
+const { apiurl } = require("../../config.json")
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {
@@ -18,7 +18,7 @@ module.exports = {
 
         let embed = new MessageEmbed()
             .setTitle("FAGC Violations")
-            .setColor(embedColors.info)
+            .setColor("ORANGE")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription(`FAGC Violations of player \`${args[0]}\``)
