@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const CommunityModel = require("../database/schemas/community")
 const AuthModel = require("../database/schemas/authentication")
-const cryptoRandomString = require('crypto-random-string')
-const ObjectId = require('mongoose').Types.ObjectId
-const { communityCreatedMessage, communityRemovedMessage } = require("../utils/info")
+// const cryptoRandomString = require('crypto-random-string')
+// const ObjectId = require('mongoose').Types.ObjectId
+// const { communityCreatedMessage, communityRemovedMessage } = require("../utils/info")
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Community API Homepage!')
+    res.json({message: 'Community API Homepage!'})
 })
 // TODO: create documentation for all endpoints & maybe change to swagger-jsdoc instead of this
 /**
@@ -18,9 +18,12 @@ router.get('/', function (req, res) {
  * @returns {object} 200 - Object of the community that the API key in the request headers belongs to
  */
 router.get('/getown', async (req, res) => {
+    console.log(req.headers.apikey)
     if (req.headers.apikey === undefined)
         return res.status(400).json({ error: "Bad Request", description: "No way to find you community without an API key" })
     const auth = await AuthModel.findOne({ apiKey: req.headers.apikey })
+    if (!auth)
+        return res.status(404).json({error:"Not Found", description: "Community with your API key was not found"})
     const dbRes = await CommunityModel.findOne({
         name: auth.communityname
     })
@@ -31,32 +34,32 @@ router.get('/getall', async (req, res) => {
     res.status(200).json(dbRes)
 })
 
-router.post('/create', async (req, res) => {
-    if (req.body.name === undefined || typeof (req.body.name) !== "string")
-        return res.status(400).send({ error: "Bad Request", description: `name expected string, got ${typeof (req.body.name)} with value of ${req.body.name}` })
-    if (req.body.contact === undefined || typeof (req.body.contact) !== "string")
-        return res.status(400).send({ error: "Bad Request", description: `contact expected string, got ${typeof (req.body.contact)} with value of ${req.body.contact}` })
-    const dbRes = await CommunityModel.findOne({
-        name: req.body.name
-    })
-    if (dbRes !== null)
-        return res.status(403).json({ error: "Bad Request", description: `Community with name ${req.body.name} already exists` })
-    const apiKey = await AuthModel.create({
-        communityname: req.body.name,
-        apiKey: cryptoRandomString(128)
-    })
-    const community = await CommunityModel.create({
-        name: req.body.name,
-        contact: req.body.contact
-    })
+// router.post('/create', async (req, res) => {
+//     if (req.body.name === undefined || typeof (req.body.name) !== "string")
+//         return res.status(400).json({ error: "Bad Request", description: `name expected string, got ${typeof (req.body.name)} with value of ${req.body.name}` })
+//     if (req.body.contact === undefined || typeof (req.body.contact) !== "string")
+//         return res.status(400).json({ error: "Bad Request", description: `contact expected string, got ${typeof (req.body.contact)} with value of ${req.body.contact}` })
+//     const dbRes = await CommunityModel.findOne({
+//         name: req.body.name
+//     })
+//     if (dbRes !== null)
+//         return res.status(403).json({ error: "Bad Request", description: `Community with name ${req.body.name} already exists` })
+//     const apiKey = await AuthModel.create({
+//         communityname: req.body.name,
+//         apiKey: cryptoRandomString(128)
+//     })
+//     const community = await CommunityModel.create({
+//         name: req.body.name,
+//         contact: req.body.contact
+//     })
 
-    communityCreatedMessage(community.toObject())
-    res.status(200).json({
-        community: community,
-        key: apiKey.apiKey,
-        allowedIPs: []
-    })
-})
+//     communityCreatedMessage(community.toObject())
+//     res.status(200).json({
+//         community: community,
+//         key: apiKey.apiKey,
+//         allowedIPs: []
+//     })
+// })
 
 // router.delete('/remove', async (req, res) => {
 //     return res.status(500).json({error: "Disabled", description: "This module is disabled for now"})

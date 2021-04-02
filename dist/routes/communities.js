@@ -16,7 +16,7 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 /* GET home page. */
 router.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    res.send("Communities Router Homepage!");
+    res.json({message: "Communities Router Homepage!"});
 }));
 router.get('/getID', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     res.json({ hi: 400 });

@@ -34,7 +34,7 @@ const communitiesRouter = __importStar(require("./routes/communities"));
 // define a route handler for the default home page
 app.get("/", (req, res) => {
     // render the index template
-    res.send("Heyas! FAGC API here!");
+    res.json({message: "Heyas! FAGC API here!"});
 });
 app.use("/communities", communitiesRouter);
 // start the express server

@@ -6,7 +6,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Rules API Homepage!')
+    res.json({message:'Rules API Homepage!'})
 })
 router.get('/getall', async (req, res) => {
     const result = await RuleModel.find()
@@ -32,7 +32,7 @@ router.post('/create', async (req, res) => {
 })
 router.delete('/remove', async (req, res) => {
     if (req.body.id === undefined)
-        return res.status(400).send(`Bad Request: id must be object ID`)
+        return res.status(400).json({ error: "Bad Request", description:`id must be object ID`})
     const dbRes = await RuleModel.findByIdAndDelete(req.body.id)
     ruleRemovedMessage(dbRes.toObject())
     res.status(200).json(dbRes)

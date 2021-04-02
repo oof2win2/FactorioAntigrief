@@ -11,13 +11,13 @@ const ObjectId = require('mongoose').Types.ObjectId
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Offenses API Homepage!')
+    res.json({message:'Offenses API Homepage!'})
 })
 router.get('/getcommunity', async (req, res) => {
     if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')
-        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}`})
+        return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}`})
     if (req.query.communityname === undefined || typeof (req.query.communityname) !== 'string')
-        return res.status(400).send({ error: "Bad Request", description: `communityname expected string, got ${typeof (req.query.communityname)} with value of ${req.query.communityname}`})
+        return res.status(400).json({ error: "Bad Request", description: `communityname expected string, got ${typeof (req.query.communityname)} with value of ${req.query.communityname}`})
     
     const offense = await OffenseModel.findOne({
         playername: req.query.playername,
@@ -27,7 +27,7 @@ router.get('/getcommunity', async (req, res) => {
 })
 router.get('/getall', async (req, res) => {
     if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')
-        return res.status(400).send({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
+        return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
     const offense = await OffenseModel.find({
         playername: req.query.playername,
     }).populate('violations')
@@ -35,9 +35,9 @@ router.get('/getall', async (req, res) => {
 })
 router.get('/getbyid', async (req, res) => {
     if (req.query.id === undefined || typeof (req.query.id) !== "string")
-        return res.status(400).send({ error: "Bad Request", description: `id expected string, got ${typeof (req.query.id)} with value of ${req.query.id}`})
+        return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.query.id)} with value of ${req.query.id}`})
     if (!ObjectId.isValid(req.query.id))
-        return res.status(400).send({ error: "Bad Request", description: `id is not correct ObjectID, got value of ${req.query.id}`})
+        return res.status(400).json({ error: "Bad Request", description: `id is not correct ObjectID, got value of ${req.query.id}`})
 
     const offense = await OffenseModel.findById(req.body.id).populate('violations')
     res.status(200).json(offense)
@@ -58,7 +58,7 @@ router.get('/getbyid', async (req, res) => {
 //     if (toRevoke === null || toRevoke.communityname === undefined)
 //         return res.status(404).json({error: "Resource Not Found", description: `Offense in community ${community.name} from player ${req.body.playername} not found`})
 //     if (toRevoke.communityname !== community.name)
-//         return res.status(403).send({error:"Access Denied", description: `Belongs to community ${toRevoke.communityname} whilst you are ${community.name}`})
+//         return res.status(403).json({error:"Access Denied", description: `Belongs to community ${toRevoke.communityname} whilst you are ${community.name}`})
 //     let revocationArr = toRevoke.violations.map((violation) => {
 //         ViolationModel.findByIdAndDelete(violation._id)
 //         console.log(violation.brokenRule)

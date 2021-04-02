@@ -5,27 +5,33 @@ const LogSchema = require("../database/schemas/log")
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.send('Community API Homepage!')
+    res.json({message:'Informatics API Homepage!'})
 })
-router.post('/addWebhook', async (req, res) => {
+router.post('/addwebhook', async (req, res) => {
     if (req.body.id === undefined || typeof(req.body.id) !== "string")
         return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}`})
     if (req.body.token === undefined || typeof(req.body.token) !== "string")
         return res.status(400).json({ error: "Bad Request", description: `token expected string, got ${typeof (req.body.token)} with value of ${req.body.token}`})
+    if (req.body.guildid === undefined || typeof(req.body.guildid) !== "string")
+        return res.status(400).json({ error: "Bad Request", description: `guildid expected string, got ${typeof(req.body.guildid)} with value ${req.body.guildid}`})
     const dbRes = await WebhookSchema.create({
-        apiKey: req.headers.apikey,
         id: req.body.id,
         token: req.body.token,
-        description: req.body.description
+        guildID: req.body.guildid,
     })
-    res.status(200).send(dbRes)
+    res.status(200).json(dbRes)
 })
 router.delete('/removeWebhook', async (req, res) => {
     if (req.body.id === undefined || isNaN(req.body.id))    
         return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
+    if (req.body.token === undefined || typeof (req.body.token) !== "string")
+        return res.status(400).json({ error: "Bad Request", description: `token expected string, got ${typeof (req.body.token)} with value of ${req.body.token}` })
+    if (req.body.guildid === undefined || typeof (req.body.guildid) !== "string")
+        return res.status(400).json({ error: "Bad Request", description: `guildid expected string, got ${typeof (req.body.guildid)} with value ${req.body.guildid}` })
     const removed = await WebhookSchema.findOneAndDelete({
         id: req.body.id,
-        apiKey: req.headers.apikey
+        token: req.body.token,
+        guildID: req.body.guildid,
     })
     res.status(200).json(removed)
 })
