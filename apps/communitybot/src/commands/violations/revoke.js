@@ -52,7 +52,6 @@ module.exports = {
         try {
             reactions = (await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ['time'] }))
         } catch (error) {
-            console.log(error)
             return message.channel.send("Timed out.")
         }
         let reaction = reactions.first()

@@ -42,11 +42,9 @@ module.exports = {
         let trustedCommunities = []
         const onEnd = async () => {
             let config = await ConfigModel.findOne({ guildid: message.guild.id })
-            console.log({config})
             const replaced = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
                 $set: {"trustedCommunities": trustedCommunities}
             }, {new:true})
-            console.log(replaced)
             let embed = new MessageEmbed()
                 .setTitle("FAGC Communities")
                 .setColor("GREEN")
@@ -72,7 +70,6 @@ module.exports = {
             else {
                 if (ObjectId.isValid(message.content)) {
                     trustedCommunities.push(message.content)
-                    console.log(message.content, typeof(message.content))
                 } else
                     message.channel.send("Message is not ObjectID. Content disregarded")
             }
