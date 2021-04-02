@@ -27,6 +27,8 @@ module.exports = {
         let apikey = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()
         apikey.delete()
         if (apikey.content === 'none') apikey = undefined
+        else apikey = apikey.content
+        console.log(apikey)
         
         let embed = new MessageEmbed()
             .setTitle("FAGC Config")
