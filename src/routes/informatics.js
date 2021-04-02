@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const WebhookSchema = require("../database/schemas/webhook")
 const LogSchema = require("../database/schemas/log")
+const { WebhookClient } = require("discord.js")
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -17,11 +18,13 @@ router.post('/addwebhook', async (req, res) => {
     const dbRes = await WebhookSchema.create({
         id: req.body.id,
         token: req.body.token,
-        guildID: req.body.guildid,
+        guildid: req.body.guildid,
     })
+    const client = new WebhookClient(req.body.id, req.body.token)
+    client.send("Testing message from the FAGC API!").catch(console.error)
     res.status(200).json(dbRes)
 })
-router.delete('/removeWebhook', async (req, res) => {
+router.delete('/removewebhook', async (req, res) => {
     if (req.body.id === undefined || isNaN(req.body.id))    
         return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
     if (req.body.token === undefined || typeof (req.body.token) !== "string")
@@ -31,7 +34,7 @@ router.delete('/removeWebhook', async (req, res) => {
     const removed = await WebhookSchema.findOneAndDelete({
         id: req.body.id,
         token: req.body.token,
-        guildID: req.body.guildid,
+        guildid: req.body.guildid,
     })
     res.status(200).json(removed)
 })

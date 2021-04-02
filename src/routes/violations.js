@@ -35,7 +35,6 @@ router.get('/getbyid', async (req, res) => {
     if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
         return res.status(400).json({ error: "Bad Request", description: `id expected ObjectID, got ${typeof (req.query.id)} with value of ${req.query.id}`})
     const dbRes = await ViolationModel.findById(req.query.id)
-    console.log(dbRes)
     res.status(200).json(dbRes)
 })
 router.get('/getbyrule', async (req, res) => {
@@ -143,7 +142,6 @@ router.delete('/revokeallname', async (req, res) => {
         return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
 
     const community = await getCommunity(req.headers.apikey)
-    // console.log(req.body.playername, community)
     const toRevoke = await OffenseModel.findOne({
         playername: req.body.playername,
         communityname: community.communityname
