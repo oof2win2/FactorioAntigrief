@@ -1,2 +1,2 @@
-# fagc-master-backend
-The master backend for FAGC
+# fagc-master-bot
+The master bot for FAGC
