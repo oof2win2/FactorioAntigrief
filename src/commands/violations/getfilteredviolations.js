@@ -30,7 +30,7 @@ module.exports = {
         const trustedCommunities = communities.filter((community) => {
             if (config.trustedCommunities.some((trustedID) => {return trustedID === community._id})) return community
         })
-        violations.forEach((violation, i) => {
+        violations.forEach((violation) => {
             if (i == 25) {
                 message.channel.send(embed)
                 embed.fields = []
@@ -42,6 +42,7 @@ module.exports = {
                     `Description: ${violation.description}\nAutomated: ${violation.automated}\nViolated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
                     inline = true
                 )
+                i++
             }
         })
         message.channel.send(embed)

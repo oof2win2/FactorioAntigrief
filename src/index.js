@@ -4,8 +4,20 @@
 const { Client, Collection } = require("discord.js")
 const { token, prefix, mongoURI } = require("../config.json")
 const mongoose = require("mongoose")
+const fs = require("fs")
 
 process.chdir(__dirname)
+
+// remove all files from ./temp/ dir to prevent random bs
+try {
+    if (!fs.existsSync('./temp/')) fs.mkdirSync('./temp')
+    let tempFiles = fs.readdirSync('./temp/')
+    tempFiles.forEach(file => {
+        fs.rmSync(`./temp/${file}`);
+    });
+} catch (error) {
+    console.error(error);
+}
 
 const client = new Client();
 
