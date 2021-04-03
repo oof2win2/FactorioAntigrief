@@ -33,48 +33,12 @@ router.get('/getall', async (req, res) => {
     const dbRes = await CommunityModel.find({ name: { $exists: true } })
     res.status(200).json(dbRes)
 })
-
-// router.post('/create', async (req, res) => {
-//     if (req.body.name === undefined || typeof (req.body.name) !== "string")
-//         return res.status(400).json({ error: "Bad Request", description: `name expected string, got ${typeof (req.body.name)} with value of ${req.body.name}` })
-//     if (req.body.contact === undefined || typeof (req.body.contact) !== "string")
-//         return res.status(400).json({ error: "Bad Request", description: `contact expected string, got ${typeof (req.body.contact)} with value of ${req.body.contact}` })
-//     const dbRes = await CommunityModel.findOne({
-//         name: req.body.name
-//     })
-//     if (dbRes !== null)
-//         return res.status(403).json({ error: "Bad Request", description: `Community with name ${req.body.name} already exists` })
-//     const apiKey = await AuthModel.create({
-//         communityname: req.body.name,
-//         apiKey: cryptoRandomString(128)
-//     })
-//     const community = await CommunityModel.create({
-//         name: req.body.name,
-//         contact: req.body.contact
-//     })
-
-//     communityCreatedMessage(community.toObject())
-//     res.status(200).json({
-//         community: community,
-//         key: apiKey.apiKey,
-//         allowedIPs: []
-//     })
-// })
-
-// router.delete('/remove', async (req, res) => {
-//     return res.status(500).json({error: "Disabled", description: "This module is disabled for now"})
-//     works but disabled, not sure what should happen when community is removed
-//     if (req.body.id === undefined || !ObjectId.isValid(req.body.id))
-//         return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
-//     const community = await CommunityModel.findByIdAndDelete(req.body.id)
-//     if (community === null)
-//         return res.status(404).json({ error: "Not Found", description: `Community with ObjectID ${req.body.id} was not found` })
-//     AuthModel.findOneAndDelete({
-//         communityname: community.name
-//     })
-//     communityRemovedMessage(community.toObject())
-//     res.status(200).json(community)
-// })
+router.get('/getid', async (req, res) => {
+    if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
+        return res.status(400).json({ error: "Bad Request", description: `id must be ObjectID, got ${req.query.id}` })
+    const community = await CommunityModel.findById(req.query.id)
+    res.status(200).json(community)
+})
 
 router.post('/addwhitelist', async (req, res) => {
     if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
