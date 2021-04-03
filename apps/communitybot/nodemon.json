@@ -4,10 +4,10 @@
         ".git",
         "node_modules/**/node_modules"
     ],
-    "watch": ["*"],
+    "watch": ["*.*"],
     "env": {
         "NODE_ENV": "development"
     },
-    "ext": "*",
+    "ext": "js,mjs,json",
     "cwd": "./src/"
 }

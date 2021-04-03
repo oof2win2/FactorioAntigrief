@@ -17,7 +17,7 @@ module.exports = {
 
         let communitiesEmbed = new MessageEmbed()
             .setTitle("FAGC Communities")
-            .setColor(GREEN)
+            .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription("All FAGC Communities")
