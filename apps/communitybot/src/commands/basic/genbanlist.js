@@ -45,10 +45,11 @@ module.exports = {
         let banlist = violationArr.map((violation) => {
             return {
                 username: violation.playername,
-                reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${apiurl}/violations/getbyid?id=${violation._id}`
+                reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${apiurl}/offenses/getall?playername=${violation.playername}`
             }
         })
-        let file = new MessageAttachment(Buffer.from(JSON.stringify(banlist)), "banlist.json")
+        // using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab
+        let file = new MessageAttachment(Buffer.from(JSON.stringify(banlist, null, 4)), "banlist.json")
         await message.channel.send("Banlist attatched", {
             files: [file]
         })
