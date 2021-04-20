@@ -34,12 +34,12 @@ module.exports = {
             .setAuthor("FAGC Community")
             .setDescription(`FAGC Violation \`${violation._id}\` of player \`${violation.playername}\` in community ${config.communityname}`)
         embed.addFields(
-            { name: "Admin name", value: violation.adminname },
-            { name: "Broken rule ID", value: violation.brokenRule },
+            { name: "Admin name", value: violation.admin_name },
+            { name: "Broken rule ID", value: violation.broken_rule },
             { name: "Proof", value: violation.proof },
             { name: "Description", value: violation.description },
             { name: "Automated", value: violation.automated },
-            { name: "Violated time", value: Date(violation.violatedTime) }
+            { name: "Violated time", value: Date(violation.violated_time) }
         )
         message.channel.send(embed)
         
@@ -66,7 +66,7 @@ module.exports = {
                 method: "DELETE",
                 body: JSON.stringify({
                     id: violationID,
-                    adminname: message.author.tag
+                    admin_name: message.author.tag
                 }),
                 headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })

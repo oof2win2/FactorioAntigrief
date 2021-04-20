@@ -37,7 +37,7 @@ module.exports = {
         if (proof.toLowerCase() === 'none') proof = undefined
 
         const timestamp = (new Date).toISOString()
-        const adminname = message.author.tag
+        const admin_name = message.author.tag
 
         let embed = new MessageEmbed()
             .setTitle("FAGC Violations")
@@ -46,7 +46,7 @@ module.exports = {
             .setAuthor("FAGC Community")
             .setDescription(`Create FAGC violation for \`${playername}\``)
         embed.addFields(
-            { name: "Admin name", value: adminname, inline: true },
+            { name: "Admin name", value: admin_name, inline: true },
             { name: "Player name", value: playername, inline: true },
             { name: "Rule ID", value: ruleid, inline: true },
             { name: "Violation description", value: desc, inline: true },
@@ -74,17 +74,17 @@ module.exports = {
                 method: "POST",
                 body: JSON.stringify({
                     playername: playername,
-                    adminname: adminname,
-                    brokenRule: ruleid,
+                    admin_name: admin_name,
+                    broken_rule: ruleid,
                     proof: proof,
                     description: desc,
                     automated: false,
-                    violatedTime: timestamp
+                    violated_time: timestamp
                 }),
                 headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })
             const response = await responseRaw.json()
-            if (response._id && response.brokenRule && response.violatedTime) {
+            if (response._id && response.broken_rule && response.violated_time) {
                 return message.channel.send(`Violation created! _id: \`${response._id}\``)
             } else if (response.error && response.description === 'Rule must be a RuleID') {
                 return message.channel.send("RuleID is an invalid rule ObjectID. Please check rules")

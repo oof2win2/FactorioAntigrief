@@ -38,9 +38,9 @@ module.exports = {
                 embed.fields = []
             }
             embed.addField(violation._id,
-                `By: ${violation.adminname}\nBroken rule: ${violation.brokenRule}\n` +
+                `By: ${violation.admin_name}\nBroken rule: ${violation.broken_rule}\n` +
                 `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
-                `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+                `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violated_time)).toUTCString()}`,
                 inline = true
             )
         })
@@ -68,7 +68,7 @@ module.exports = {
                 method: "DELETE",
                 body: JSON.stringify({
                     playername: playername,
-                    adminname: message.author.tag
+                    admin_name: message.author.tag
                 }),
                 headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })

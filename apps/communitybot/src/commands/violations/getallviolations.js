@@ -29,10 +29,10 @@ module.exports = {
                 embed.fields = []
             }
             embed.addField(violation._id, 
-                `By: ${violation.adminname}\nCommunity name: ${violation.communityname}\n`+
-                `Broken rule: ${violation.brokenRule}\nProof: ${violation.proof}\n`+
+                `By: ${violation.admin_name}\nCommunity name: ${violation.communityname}\n`+
+                `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n`+
                 `Description: ${violation.description}\nAutomated: ${violation.automated}\n`+
-                `Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+                `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
                 inline=true
             )
         })
