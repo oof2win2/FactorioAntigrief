@@ -47,7 +47,7 @@ router.get('/getlogs', async (req, res) => {
         timestamp: { $gte: parseInt(req.query.afterDate || 0) }
     }, {}, {limit: parseInt(req.query.limit)})
     const logsFiltered = logsRaw.map((log) => {
-        log.apiKey = undefined
+        log.api_key = undefined
         log.ip = undefined
         if (log.responseBody && log.responseBody.key) log.responseBody.key = undefined
         return log

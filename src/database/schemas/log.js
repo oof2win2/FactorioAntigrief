@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 
 const LogSchema = new mongoose.Schema({
     timestamp: Date,
-    apiKey: String,
+    api_key: String,
     ip: String,
     responseBody: Object,
     requestBody: Object,

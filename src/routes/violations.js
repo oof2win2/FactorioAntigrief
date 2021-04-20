@@ -41,7 +41,7 @@ router.get('/getbyrule', async (req, res) => {
     if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
         return res.status(400).json({ error: "Bad Request", description: `id must be ObjectID, got ${req.query.id}` })
     const violations = await ViolationModel.find({
-        brokenRule: req.query.id
+        broken_rule: req.query.id
     })
     res.status(200).json(violations)
 })
@@ -49,14 +49,14 @@ router.get('/getbyrule', async (req, res) => {
 router.post('/create', async (req, res) => {
     if (req.body.playername === undefined || typeof (req.body.playername) !== 'string' || !req.body.playername.length)
         return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
-    if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string' || !req.body.adminname.length)
-        return res.status(400).json({ error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
-    if (req.body.brokenRule === undefined || !ObjectId.isValid(req.body.brokenRule))
-        return res.status(400).json({ error: "Bad Request", description: `brokenRule expected ObjectID, got ${typeof (req.body.brokenRule)} with value of ${req.body.brokenRule}`})
+    if (req.body.admin_name === undefined || typeof (req.body.admin_name) !== 'string' || !req.body.admin_name.length)
+        return res.status(400).json({ error: "Bad Request", description: `admin_name expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
+    if (req.body.broken_rule === undefined || !ObjectId.isValid(req.body.broken_rule))
+        return res.status(400).json({ error: "Bad Request", description: `broken_rule expected ObjectID, got ${typeof (req.body.broken_rule)} with value of ${req.body.broken_rule}`})
     if (req.body.automated === undefined || typeof (req.body.automated) !== "string")
         req.body.automated = "false"
     try {
-        const rule = await RuleModel.findById(req.body.brokenRule)
+        const rule = await RuleModel.findById(req.body.broken_rule)
         if (rule === null) throw "Wrong rule"
     } catch (error) {
         return res.status(400).json({error: "Bad Request", description: "Rule must be a RuleID"})
@@ -69,12 +69,12 @@ router.post('/create', async (req, res) => {
     const violation = await ViolationModel.create({
         playername: req.body.playername,
         communityname: community.communityname,
-        brokenRule: req.body.brokenRule,
+        broken_rule: req.body.broken_rule,
         proof: req.body.proof || "None",
         description: req.body.description || "None",
         automated: req.body.automated.toLowerCase() === "true" ? true : false,
-        violatedTime: Date.parse(req.body.violatedTime) || new Date(),
-        adminname: req.body.adminname
+        violated_time: Date.parse(req.body.violated_time) || new Date(),
+        admin_name: req.body.admin_name
     })
     if (dbOffense === null || dbOffense === undefined) {
         const offense = new OffenseModel({
@@ -99,8 +99,8 @@ router.post('/create', async (req, res) => {
 router.delete('/revoke', async (req, res) => {
     if (req.body.id === undefined || !ObjectId.isValid(req.body.id))
         return res.status(400).json({error:`Bad Request`, description:`id expected ObjectID, got ${typeof (req.body.id)} with value of ${req.body.id}`})
-    if (req.body.adminname === undefined || typeof(req.body.adminname) !== 'string')
-        return res.status(400).json({ error: `Bad Request`, description:`adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`})
+    if (req.body.admin_name === undefined || typeof(req.body.admin_name) !== 'string')
+        return res.status(400).json({ error: `Bad Request`, description:`admin_name expected string, got ${typeof (req.body.admin_name)} with value of ${req.body.admin_name}`})
 
     const community = await getCommunity(req.headers.apikey)
     const toRevoke = await ViolationModel.findById(req.body.id)
@@ -122,22 +122,22 @@ router.delete('/revoke', async (req, res) => {
     let revocation = await RevocationModel.create({
         playername: violation.playername,
         communityname: violation.communityname,
-        adminname: violation.adminname,
-        brokenRule: violation.brokenRule,
+        admin_name: violation.admin_name,
+        broken_rule: violation.broken_rule,
         proof: violation.proof,
         description: violation.description,
         automated: violation.automated,
-        violatedTime: violation.violatedTime,
+        violated_time: violation.violated_time,
         revokedTime: new Date(),
-        revokedBy: req.body.adminname
+        revokedBy: req.body.admin_name
     })
 
     violationRevokedMessage(revocation.toObject())
     res.status(200).json(revocation.toObject())
 })
 router.delete('/revokeallname', async (req, res) => {
-    if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string')
-        return res.status(400).json({ error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`})
+    if (req.body.admin_name === undefined || typeof (req.body.admin_name) !== 'string')
+        return res.status(400).json({ error: "Bad Request", description: `admin_name expected string, got ${typeof (req.body.admin_name)} with value of ${req.body.admin_name}`})
     if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
         return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
 
@@ -158,14 +158,14 @@ router.delete('/revokeallname', async (req, res) => {
             RevocationModel.create({
                 playername: violation.playername,
                 communityname: violation.communityname,
-                adminname: violation.adminname,
-                brokenRule: violation.brokenRule,
+                admin_name: violation.admin_name,
+                broken_rule: violation.broken_rule,
                 proof: violation.proof,
                 description: violation.description,
                 automated: violation.automated,
-                violatedTime: violation.violatedTime,
+                violated_time: violation.violated_time,
                 revokedTime: new Date(),
-                revokedBy: req.body.adminname
+                revokedBy: req.body.admin_name
             })
                 .then((revocation) => {
                     violationRevokedMessage(revocation.toObject())

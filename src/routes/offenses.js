@@ -45,9 +45,9 @@ router.get('/getbyid', async (req, res) => {
 // router.delete('/revoke', async (req, res) => {
 //     if (req.body.playername === undefined || typeof (req.body.playername) !== 'string')
 //         return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
-//     if (req.body.adminname === undefined || typeof (req.body.adminname) !== 'string')
-//         return res.status(400).json({error: "Bad Request", description: `adminname expected string, got ${typeof (req.body.adminname)} with value of ${req.body.adminname}`})
-//     const auth = await AuthModel.findOne({ apiKey: req.headers.apikey })
+//     if (req.body.admin_name === undefined || typeof (req.body.admin_name) !== 'string')
+//         return res.status(400).json({error: "Bad Request", description: `admin_name expected string, got ${typeof (req.body.admin_name)} with value of ${req.body.admin_name}`})
+//     const auth = await AuthModel.findOne({ api_key: req.headers.apikey })
 //     const community = await CommunityModel.findOne({
 //         name: auth.communityname
 //     })
@@ -61,18 +61,18 @@ router.get('/getbyid', async (req, res) => {
 //         return res.status(403).json({error:"Access Denied", description: `Belongs to community ${toRevoke.communityname} whilst you are ${community.name}`})
 //     let revocationArr = toRevoke.violations.map((violation) => {
 //         ViolationModel.findByIdAndDelete(violation._id)
-//         console.log(violation.brokenRule)
+//         console.log(violation.broken_rule)
 //         return {
 //             playername: violation.playername,
 //             communityname: violation.communityname,
-//             adminname: violation.adminname,
-//             brokenRule: violation.brokenRule,
+//             admin_name: violation.admin_name,
+//             broken_rule: violation.broken_rule,
 //             proof: violation.proof,
 //             description: violation.description,
 //             automated: violation.automated,
-//             violatedTime: violation.violatedTime,
+//             violated_time: violation.violated_time,
 //             revokedTime: new Date(),
-//             revokedBy: req.body.adminname
+//             revokedBy: req.body.admin_name
 //         }
 //     })
 //     OffenseModel.findByIdAndDelete(toRevoke._id)

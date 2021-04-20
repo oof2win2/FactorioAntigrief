@@ -21,7 +21,7 @@ router.get('/getown', async (req, res) => {
     console.log(req.headers.apikey)
     if (req.headers.apikey === undefined)
         return res.status(400).json({ error: "Bad Request", description: "No way to find you community without an API key" })
-    const auth = await AuthModel.findOne({ apiKey: req.headers.apikey })
+    const auth = await AuthModel.findOne({ api_key: req.headers.apikey })
     if (!auth)
         return res.status(404).json({error:"Not Found", description: "Community with your API key was not found"})
     const dbRes = await CommunityModel.findOne({
@@ -43,17 +43,17 @@ router.get('/getid', async (req, res) => {
 router.post('/addwhitelist', async (req, res) => {
     if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
         return res.status(400).json({error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}`})
-    const dbRes = await AuthModel.findOneAndUpdate({ apiKey: req.headers.apikey }, { $push: { "allowedIPs": req.body.ip } }, {new:true})
+    const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey }, { $push: { "allowed_ips": req.body.ip } }, {new:true})
     res.status(200).json(dbRes)
 })
 router.delete('/removewhitelist', async (req, res) => {
     if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
         return res.status(400).json({ error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}` })
-    const dbRes = await AuthModel.findOneAndUpdate({ apiKey: req.headers.apikey }, { $pull: { "allowedIPs": req.body.ip } }, {new:true})
+    const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey }, { $pull: { "allowed_ips": req.body.ip } }, {new:true})
     res.status(200).json(dbRes)
 })
 router.get('/getwhitelist', async (req, res) => {
-    const dbRes = await AuthModel.findOne({ apiKey: req.headers.apikey })
+    const dbRes = await AuthModel.findOne({ api_key: req.headers.apikey })
     res.status(200).json(dbRes)
 })
 

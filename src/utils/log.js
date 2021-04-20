@@ -17,7 +17,7 @@ function logResponse(req, res, next) {
         var body = Buffer.concat(chunks).toString('utf8')
         LogSchema.create({
             timestamp: new Date(),
-            apiKey: req.headers.apikey,
+            api_key: req.headers.apikey,
             ip: req.get('host').slice(0, req.get('host').indexOf(":")),
             responseBody: JSON.parse(body),
             requestBody: req.body,

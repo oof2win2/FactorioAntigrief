@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../fagc-discord-bot"
+		},
+		{
+			"path": "../fagc-master-backend"
+		},
+		{
+			"path": "../fagc-masterbot"
+		},
+		{
+			"path": "../fagc-website"
+		}
+	],
+	"settings": {}
+}

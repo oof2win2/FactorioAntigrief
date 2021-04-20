@@ -3,12 +3,12 @@ const mongoose = require("mongoose")
 const ViolationSchema = new mongoose.Schema({
     playername: String,
     communityname: String,
-    brokenRule: mongoose.SchemaTypes.ObjectId,
+    broken_rule: mongoose.SchemaTypes.ObjectId,
     proof: String,
     description: String,
     automated: Boolean,
-    violatedTime: Date,
-    adminname: String,
+    violated_time: Date,
+    admin_name: String,
 })
 
 module.exports = mongoose.model('Violations', ViolationSchema)
