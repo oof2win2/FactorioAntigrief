@@ -37,10 +37,10 @@ module.exports = {
             }
             if (trustedCommunities.some((community) => community.name === violation.communityname)) {
                 embed.addField(violation._id,
-                    `By: ${violation.adminname}\nCommunity name: ${violation.communityname}\n` +
-                    `Broken rule: ${violation.brokenRule}\nProof: ${violation.proof}\n` +
+                    `By: ${violation.admin_name}\nCommunity name: ${violation.communityname}\n` +
+                    `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
                     `Description: ${violation.description}\nAutomated: ${violation.automated}`+
-                    `Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+                    `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
                     inline = true
                 )
                 i++

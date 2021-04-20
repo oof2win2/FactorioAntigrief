@@ -27,8 +27,8 @@ module.exports = {
         const playername = (await getMessageResponse(message.channel.send("Please type in a playername for the violation"), messageFilter))?.content
         if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-        const adminname = (await getMessageResponse(message.channel.send("Please type in admin name for the violation"), messageFilter))?.content
-        if (adminname === undefined) return message.channel.send("Didn't send adminname in time")
+        const admin_name = (await getMessageResponse(message.channel.send("Please type in admin name for the violation"), messageFilter))?.content
+        if (admin_name === undefined) return message.channel.send("Didn't send admin_name in time")
 
         const ruleid = (await getMessageResponse(message.channel.send("Please type in ObjectID of rule that has been broken"), messageFilter))?.content
         if (ruleid === undefined) return message.channel.send("Didn't send rule ObjectID in time")
@@ -53,7 +53,7 @@ module.exports = {
             .setAuthor("FAGC Community")
             .setDescription(`Create FAGC violation for \`${playername}\``)
         embed.addFields(
-            { name: "Admin name", value: adminname, inline: true },
+            { name: "Admin name", value: admin_name, inline: true },
             { name: "Player name", value: playername, inline: true },
             { name: "Rule ID", value: ruleid, inline: true },
             { name: "Violation description", value: desc, inline: true },
@@ -78,17 +78,17 @@ module.exports = {
                 method: "POST",
                 body: JSON.stringify({
                     playername: playername,
-                    adminname: adminname,
-                    brokenRule: ruleid,
+                    admin_name: admin_name,
+                    broken_rule: ruleid,
                     proof: proof,
                     description: desc,
                     automated: false,
-                    violatedTime: timestamp
+                    violated_time: timestamp
                 }),
                 headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })
             const response = await responseRaw.json()
-            if (response._id && response.brokenRule && response.violatedTime) {
+            if (response._id && response.broken_rule && response.violated_time) {
                 return message.channel.send(`Violation created! _id: \`${response._id}\``)
             } else if (response.error && response.description === 'Rule must be a RuleID') {
                 return message.channel.send("RuleID is an invalid rule ObjectID. Please check rules")

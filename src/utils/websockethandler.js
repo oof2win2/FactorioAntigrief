@@ -17,14 +17,14 @@ async function SocketMessage (message, channels) {
                 .setAuthor("FAGC Community")
                 .addFields(
                     { name: "Playername", value: message.playername },
-                    { name: "Admin", value: message.adminname },
+                    { name: "Admin", value: message.admin_name },
                     { name: "Community Name", value: message.communityname },
-                    { name: "Broken Rule", value: message.brokenRule },
+                    { name: "Broken Rule", value: message.broken_rule },
                     { name: "Automated", value: message.automated },
                     { name: "Proof", value: message.proof },
                     { name: "Description", value: message.description },
                     { name: "Violation ID", value: message._id },
-                    { name: "Violation Time", value: message.violatedTime }
+                    { name: "Violation Time", value: message.violated_time }
                 )
             channels.forEach((channel) => {
                 channel.send(embed)
@@ -38,9 +38,9 @@ async function SocketMessage (message, channels) {
                 .setColor("ORANGE")
                 .addFields(
                     { name: "Playername", value: message.playername },
-                    { name: "Admin", value: message.adminname },
+                    { name: "Admin", value: message.admin_name },
                     { name: "Community Name", value: message.communityname },
-                    { name: "Broken Rules", value: message.brokenRule },
+                    { name: "Broken Rules", value: message.broken_rule },
                     { name: "Automated", value: message.automated },
                     { name: "Proof", value: message.proof },
                     { name: "Description", value: message.description },
