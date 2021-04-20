@@ -35,11 +35,12 @@ module.exports = {
                 message.channel.send(embed)
                 embed.fields = []
             }
-            if (trustedCommunities.some((community) => {return community.name === violation.communityname})) {
+            if (trustedCommunities.some((community) => community.name === violation.communityname)) {
                 embed.addField(violation._id,
                     `By: ${violation.adminname}\nCommunity name: ${violation.communityname}\n` +
                     `Broken rule: ${violation.brokenRule}\nProof: ${violation.proof}\n` +
-                    `Description: ${violation.description}\nAutomated: ${violation.automated}\nViolated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+                    `Description: ${violation.description}\nAutomated: ${violation.automated}`+
+                    `Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
                     inline = true
                 )
                 i++

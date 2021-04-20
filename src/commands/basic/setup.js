@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const ConfigModel = require("../../database/schemas/config")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 module.exports = {
     config: {
@@ -15,19 +16,21 @@ module.exports = {
             return response.author.id === message.author.id
         }
         message.channel.send("Hello! This is the bot setup process for this server")
-        message.channel.send("Please type in a contact for this server or the server's owner")
-        const contact = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()?.content
+
+        const contact = (await getMessageResponse(message.channel.send("Please type in a contact for this server or the server's owner"), messageFilter))?.content
         if (contact === undefined) return message.channel.send("Didn't send contact in time")
-        message.channel.send("Please ping (or type in the ID of) your role of people which can create violations")
-        let role = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()
-        if (role.mentions.roles.first()) role = role.mentions.roles.first().id
-        else role = role.content
+        
+        let roleMessage = (await getMessageResponse(message.channel.send("Please ping (or type in the ID of) your role of people which can create violations"), messageFilter))
+        let role
+        if (roleMessage.mentions.roles.first()) role = roleMessage.mentions.roles.first().id
+        else role = roleMessage.content
         if (message.guild.roles.cache.get(role) === undefined) return message.channel.send("Role is not correct")
-        message.channel.send("Please type in your API key that you recieved from the FAGC team, if you did recieve one. Type `none` if you didn't")
-        let apikey = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()
-        apikey.delete()
-        if (apikey.content === 'none') apikey = undefined
-        else apikey = apikey.content
+        
+        const apikeyMessage = await getMessageResponse(message.channel.send("Please type in your API key that you recieved from the FAGC team, if you did recieve one. Type `none` if you didn't"), messageFilter)
+        apikeyMessage.delete()
+        let apikey
+        if (apikeyMessage.content === 'none') apikey = undefined
+        else apikey = apikeyMessage.content
         
         let embed = new MessageEmbed()
             .setTitle("FAGC Config")
@@ -56,13 +59,14 @@ module.exports = {
         let reaction = reactions.first()
         if (reaction.emoji.name === "❌")
             return message.channel.send("Community configuration cancelled")
+        
         try {
             const originalData = await ConfigModel.findOne({
                 guildid: message.guild.id
             })
             let config = {}
             if (originalData) {
-                config = await ConfigModel.findOneAndReplace({guildid: originalData.guildid}, {
+                config = await ConfigModel.findOneAndReplace({guildid: message.guild.id}, {
                     communityname: message.guild.name,
                     guildid: message.guild.id,
                     contact: contact,
