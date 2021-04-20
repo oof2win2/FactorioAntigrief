@@ -8,7 +8,7 @@ module.exports = {
         usage: "",
         category: "basic",
         description: "Bot Server setup",
-        accessibility: "Moderator",
+        accessibility: "Administrator",
     },
     run: async (client, message, args) => {
         const messageFilter = response => {

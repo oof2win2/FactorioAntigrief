@@ -14,16 +14,27 @@ module.exports = async (client, message) => {
         let commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd))
         if (commandfile) { 
             const authRoles = message.member.roles.cache;
-            if (commandfile.config.accessibility === "Member")
-                commandfile.run(client, message, args)
-            if (commandfile.config.accessibility === "Moderator") {
-                const config = ConfigModel.findOne({guildid: message.guild.id})
-                if (authRoles.some((r) => r.id === config.moderatorroleId))
+            switch (commandfile.config.accessibility) {
+                case "Member":
                     commandfile.run(client, message, args)
-                else if (message.guild.member(message.author).hasPermission('ADMINISTRATOR'))
-                    commandfile.run(client, message, args)
-                else
-                    message.reply("Insufficient permissions :P")
+                    break
+                case "Moderator":
+                    const config = await ConfigModel.findOne({guildid: message.guild.id})
+                    if (authRoles.some((r) => r.id === config.moderatorroleId))
+                        commandfile.run(client, message, args)
+                    else if (message.guild.member(message.author).hasPermission('ADMINISTRATOR'))
+                        commandfile.run(client, message, args)
+                    else
+                        message.reply("Insufficient permissions :P")
+                    break
+                case "Administrator":
+                    if (message.guild.member(message.author).hasPermission('ADMINISTRATOR'))
+                        commandfile.run(client, message, args)
+                    else
+                        message.reply("Insufficient permissions :P")
+                    break
+                default:
+                    message.reply("Wrong accessibility. Command not run")
             }
         }
         return
