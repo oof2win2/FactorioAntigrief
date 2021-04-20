@@ -3,7 +3,7 @@ const router = express.Router();
 const CommunityModel = require("../database/schemas/community")
 const AuthModel = require("../database/schemas/authentication")
 // const cryptoRandomString = require('crypto-random-string')
-// const ObjectId = require('mongoose').Types.ObjectId
+const ObjectId = require('mongoose').Types.ObjectId
 // const { communityCreatedMessage, communityRemovedMessage } = require("../utils/info")
 
 /* GET home page. */

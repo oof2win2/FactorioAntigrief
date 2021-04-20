@@ -73,7 +73,7 @@ router.post('/create', async (req, res) => {
         proof: req.body.proof || "None",
         description: req.body.description || "None",
         automated: req.body.automated.toLowerCase() === "true" ? true : false,
-        violatedTime: new Date(),
+        violatedTime: Date.parse(req.body.violatedTime) || new Date(),
         adminname: req.body.adminname
     })
     if (dbOffense === null || dbOffense === undefined) {
