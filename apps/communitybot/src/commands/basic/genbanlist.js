@@ -1,14 +1,12 @@
 const fetch = require("node-fetch")
 const { apiurl } = require("../../../config.json")
 const ConfigModel = require("../../database/schemas/config")
-const { MessageEmbed } = require("discord.js");
-const Str = require("@supercharge/strings")
-const fs = require("fs")
+const { MessageAttachment } = require("discord.js")
 
 module.exports = {
     config: {
-        name: "genbanlist",
-        aliases: [],
+        name: "generatebanlist",
+        aliases: ["banlist"],
         usage: "",
         category: "basic",
         description: "Creates a .json banlist file to use for servers",
@@ -19,37 +17,40 @@ module.exports = {
         if (!config.trustedCommunities) return message.reply("Please set trusted communities first")
         if (!config.ruleFilters) return message.reply("Please set rule filters first")
         message.reply("Processing banlist. Please wait")
-
         let trustedCommunitiesProm = config.trustedCommunities.map(id => {
-            return fetch(`${apiurl}/communities/getid?id=${id}`).then(res => res.text())
+            return fetch(`${apiurl}/communities/getid?id=${id}`).then(res => res.json())
         })
+        
+        // get trusted communities
         const trustedCommunities = await Promise.all(trustedCommunitiesProm)
-        // console.log(apiurl)
+        const trustedCommunityNames = trustedCommunities.map((community) => community.name)
 
+        // get all violations based off of followed rules
         let rulePromises = config.ruleFilters.map((rule) => {
             return fetch(`${apiurl}/violations/getbyrule?id=${rule}`).then(res => res.json())
         })
         let ruleViolations = await Promise.all(rulePromises)
-        let nameArr = []
+        let violationArr = []
         ruleViolations.forEach((violations) => {
-            if (violations === []) return
-            violations.forEach((violation => {
-                nameArr.push(violation.playername)
-            }))
-        })
-        nameArr = nameArr.filter((name, i) => nameArr.indexOf(name) === i)
-        let banlist = nameArr.map((name) => {
-            return {
-                username: name,
-                reason: "Banned on FAGC. Please check one of the community Discord servers"
-            }
+            violations.forEach((violation) => {
+                violationArr.push(violation)
+            })
         })
 
-        const filepath = `./temp/${Str.random()}.txt`
-        fs.writeFileSync(filepath, JSON.stringify(banlist))
-        await message.channel.send("Banlist attatched", {
-            files: [filepath]
+        // filter violations so only trusted communities are on the banlist
+        violationArr = violationArr.filter((violation, i) => violationArr.indexOf(violation) === i)
+        violationArr = violationArr.filter((violation) => trustedCommunityNames.includes(violation.communityname))
+        
+        // create & send banlist
+        let banlist = violationArr.map((violation) => {
+            return {
+                username: violation.playername,
+                reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${apiurl}/violations/getbyid?id=${violation._id}`
+            }
         })
-        fs.rmSync(filepath)
+        let file = new MessageAttachment(Buffer.from(JSON.stringify(banlist)), "banlist.json")
+        await message.channel.send("Banlist attatched", {
+            files: [file]
+        })
     },
 };
