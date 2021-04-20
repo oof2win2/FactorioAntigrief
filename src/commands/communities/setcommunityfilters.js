@@ -7,11 +7,11 @@ const ObjectId = require('mongoose').Types.ObjectId
 module.exports = {
     config: {
         name: "setcommunityfilters",
-        aliases: ["whitelistcommunities", "settrustedcommunities"],
+        aliases: ["setwhitelistcommunities", "settrustedcommunities", "settrusted"],
         usage: "",
         category: "communities",
         description: "Sets community filters",
-        accessibility: "Moderator",
+        accessibility: "Administrator",
     },
     run: async (client, message, args) => {
         const communitiesRaw = await fetch(`${apiurl}/communities/getall`)

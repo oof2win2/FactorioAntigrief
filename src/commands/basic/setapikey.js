@@ -8,7 +8,7 @@ module.exports = {
         usage: "",
         category: "basic",
         description: "Set API key",
-        accessibility: "Moderator",
+        accessibility: "Administrator",
     },
     run: async (client, message, args) => {
         const config = ConfigModel.findOne({guildid: message.guild.id})

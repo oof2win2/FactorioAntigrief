@@ -12,6 +12,8 @@ module.exports = {
         accessibility: "Moderator",
     },
     run: async (client, message, args) => {
+        if (!message.member.hasPermission("MANAGE_WEBHOOKS")) return message.reply("Nice try! You need the `MANAGE_WEBHOOKS` permission!")
+
         if (!args[0]) return message.reply("Provide a Webhook ID")
         if (!args[1]) return message.reply("Provide a Webhook token")
         message.delete()
