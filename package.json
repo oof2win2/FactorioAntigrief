@@ -16,7 +16,7 @@
     "http-errors": "~1.8.0",
     "jade": "~1.11.0",
     "lodash": "^4.17.21",
-    "mongoose": "^5.12.4",
+    "mongoose": "^5.12.5",
     "morgan": "^1.9.1",
     "swagger-jsdoc": "^7.0.0-rc.6"
   },
