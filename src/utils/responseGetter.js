@@ -3,6 +3,6 @@ module.exports = {
 }
 
 async function getMessageResponse(message, messageFilter, timeout = 30000) {
-    await message
+    message = await message
     return (await message.channel.awaitMessages(messageFilter, { max: 1, time: timeout })).first()
 }
