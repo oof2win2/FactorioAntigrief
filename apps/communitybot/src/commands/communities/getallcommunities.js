@@ -4,8 +4,8 @@ const { MessageEmbed } = require("discord.js")
 
 module.exports = {
     config: {
-        name: "getcommunities",
-        aliases: [],
+        name: "getallcommunities",
+        aliases: ["getcommunities"],
         usage: "",
         category: "communities",
         description: "Gets all communities",
@@ -21,7 +21,11 @@ module.exports = {
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription("All FAGC Communities")
-        communities.forEach((community) => {
+        communities.forEach((community, i) => {
+            if (i == 25) {
+                message.channel.send(embed)
+                embed.fields = []
+            }
             communitiesEmbed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
         })
         message.channel.send(communitiesEmbed)

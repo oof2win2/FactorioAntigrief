@@ -7,7 +7,7 @@ const ConfigModel = require("../../database/schemas/config")
 module.exports = {
     config: {
         name: "getfilteredoffenses",
-        aliases: [],
+        aliases: ["getoffenses"],
         usage: "<playername>",
         category: "offenses",
         description: "Gets all offenses of a player from only trusted communities",
@@ -39,13 +39,10 @@ module.exports = {
                 embed.fields = []
             }
             communities.forEach((community) => {
-                if (config.trustedCommunities.some(id => {
-                        return community.name === offense.communityname && community._id === id
-                    })) {
-                    const violations = offense.violations.map((violation) => { return violation._id })
-                    embed.addField(offense._id, `Community name: ${offense.communityname}, Violation ID(s): ${violations.join(", ")}`)
-                    i++
-                }
+                if (config.trustedCommunities.find(communityID => community.name === offense.communityname && community._id === communityID)) return
+                const violations = offense.violations.map((violation) => { return violation._id })
+                embed.addField(offense._id, `Community name: ${offense.communityname}, Violation ID(s): ${violations.join(", ")}`)
+                i++
             })
         })
         message.channel.send(embed)

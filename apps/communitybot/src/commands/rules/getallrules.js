@@ -4,7 +4,7 @@ const { MessageEmbed } = require("discord.js")
 
 module.exports = {
     config: {
-        name: "getrules",
+        name: "getallrules",
         aliases: [],
         usage: "",
         category: "rules",

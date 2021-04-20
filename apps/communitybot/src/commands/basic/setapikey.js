@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const ConfigModel = require("../../database/schemas/config")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 module.exports = {
     config: {
@@ -17,8 +18,9 @@ module.exports = {
         const messageFilter = response => {
             return response.author.id === message.author.id
         }
-        message.channel.send("Please type in your API key")
-        let apimsg = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()
+        
+        let apimsg = (await getMessageResponse(message.channel.send("Please type in your API key"), messageFilter))
+        if (!apimsg) return message.reply("No API key given!")
         apimsg.delete()
         const apikey = apimsg.content
         

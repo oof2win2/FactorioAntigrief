@@ -6,7 +6,7 @@ const ConfigModel = require("../../database/schemas/config")
 module.exports = {
     config: {
         name: "getrulesfiltered",
-        aliases: ["getfilteredrules"],
+        aliases: ["getfilteredrules", "getrules"],
         usage: "",
         category: "rules",
         description: "Gets all rules",
