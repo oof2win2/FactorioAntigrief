@@ -54,10 +54,8 @@ module.exports = {
                     message.channel.send(ruleEmbed)
                     embed.fields = []
                 }
-                rules.forEach((rule) => {
-                    if (rule._id === filteredRuleID)
-                        ruleEmbed.addField(rule.shortdesc, rule.longdesc)
-                })
+                let rule = rules.find(rule => rule._id === filteredRuleID)
+                ruleEmbed.addField(rule.shortdesc, rule.longdesc)
             })
             message.channel.send(ruleEmbed)
         }
