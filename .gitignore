@@ -2,8 +2,6 @@
 config.json
 *.env
 
-src/temp
-
 # Logs
 logs
 *.log
