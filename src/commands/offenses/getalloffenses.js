@@ -26,7 +26,7 @@ module.exports = {
             .setAuthor("FAGC Community")
             .setDescription(`FAGC Offense of player \`${playername}\``)
         let i = 0
-        offenses.forEach((offense) => {
+        offenses.forEach((offense, i) => {
             if (i == 25) {
                 message.channel.send(embed)
                 embed.fields = []
@@ -34,7 +34,6 @@ module.exports = {
 
             const violations = offense.violations.map((violation) => {return violation._id})
             embed.addField(offense._id,`Community name: ${offense.communityname}, Violation ID(s): ${violations.join(", ")}`)
-            i++
         })
         message.channel.send(embed)
     },

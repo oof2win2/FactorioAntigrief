@@ -41,10 +41,10 @@ module.exports = {
 
         let trustedCommunities = []
         const onEnd = async () => {
-            let config = await ConfigModel.findOne({ guildid: message.guild.id })
-            const replaced = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
+            ConfigModel.findOne({ guildid: message.guild.id }).then(() => {})
+            await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
                 $set: {"trustedCommunities": trustedCommunities}
-            }, {new:true})
+            }, { new: true }).then(() => { })
             let embed = new MessageEmbed()
                 .setTitle("FAGC Communities")
                 .setColor("GREEN")
@@ -56,10 +56,8 @@ module.exports = {
                     message.channel.send(embed)
                     embed.fields = []
                 }
-                communities.forEach((community) => {
-                    if (community._id === trustedCommunityID)
-                        embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
-                })
+                let community = communities.find((community) => community === trustedCommunityID)
+                embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
             })
             message.channel.send(embed)
         }
