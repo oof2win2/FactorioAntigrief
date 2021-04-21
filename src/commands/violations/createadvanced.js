@@ -14,6 +14,8 @@ module.exports = {
         accessibility: "Moderator",
     },
     run: async (client, message, args) => {
+        if (!message.guild.member(message.author).hasPermission('BAN_MEMBERS')) return message.reply("Nice try! You need the `BAN_MEMBERS` permission!")
+
         const config = await ConfigModel.findOne({ guildid: message.guild.id })
         if (config === null) return message.reply("Community invalid")
         if (!config.apikey) return message.reply("No API key set")

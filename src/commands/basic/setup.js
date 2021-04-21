@@ -62,7 +62,7 @@ module.exports = {
         
         try {
             const originalData = await ConfigModel.findOne({
-                guildid: message.guild.id
+                guildid: { $exists: true, $in: [message.guild.id] },
             })
             let config = {}
             if (originalData) {
