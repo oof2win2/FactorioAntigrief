@@ -83,5 +83,12 @@ mongoose.connect(config.mongoURI, {
     useUnifiedTopology: true,
     useFindAndModify: false
 })
+// connect to BOT database
+mongoose.createConnection(config.mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+}).then((connection) => connection.useDb("bot")).then(() => {console.log("Connected to second database")})
+    .catch(err => console.error('Error connecting to second database. Error:' + err, 'error'));
 
 module.exports = app;

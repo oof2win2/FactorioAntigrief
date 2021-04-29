@@ -4,6 +4,7 @@ const CommunityModel = require("../database/schemas/community")
 const AuthModel = require("../database/schemas/authentication")
 // const cryptoRandomString = require('crypto-random-string')
 const ObjectId = require('mongoose').Types.ObjectId
+const mongoose = require("mongoose")
 // const { communityCreatedMessage, communityRemovedMessage } = require("../utils/info")
 
 /* GET home page. */
@@ -38,6 +39,20 @@ router.get('/getid', async (req, res) => {
         return res.status(400).json({ error: "Bad Request", description: `id must be ObjectID, got ${req.query.id}` })
     const community = await CommunityModel.findById(req.query.id)
     res.status(200).json(community)
+})
+
+// TODO
+// [X] get community config from guildid, censor api key
+// [ ] get community database schema synced with both backend & bot
+router.get('/getconfig', async (req, res) => {
+    if (req.query.id === undefined || typeof(req.query.id) !== "string")
+        return res.status(400).json({error: "Bad Request", description: `id must be Discord GuildID (snowflake), got ${req.query.id}`})
+    let CommunityConfig = await mongoose.connections[1].client.db("bot").collection("configs").findOne({
+        guildid: req.query.id
+    })
+    CommunityConfig.apikey = undefined
+    console.log(CommunityConfig)
+    res.status(200).json(CommunityConfig)
 })
 
 router.post('/addwhitelist', async (req, res) => {
