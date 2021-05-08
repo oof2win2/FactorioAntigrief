@@ -1,5 +1,6 @@
 const fetch = require("node-fetch")
 const { apiurl } = require("../../../config.json")
+const { SnowflakeUtil } = require("discord.js")
 
 
 module.exports = {
@@ -17,7 +18,12 @@ module.exports = {
         if (!message.member.hasPermission("MANAGE_WEBHOOKS")) return message.reply("Nice try! You need the `MANAGE_WEBHOOKS` permission!")
         if (!args[0]) return message.reply("Provide a Webhook ID")
         if (!args[1]) return message.reply("Provide a Webhook token")
-        
+
+        try {
+            await client.fetchWebhook(args[0], args[1])
+        } catch (e) {
+            return message.channel.send("Invalid webhook")
+        }
         const webRaw = await fetch(`${apiurl}/informatics/removewebhook`, {
             method: "DELETE",
             body: JSON.stringify({
@@ -28,9 +34,11 @@ module.exports = {
             headers: { 'content-type': 'application/json' }
         })
         const webhook = await webRaw.json();
-        if (webhook._id)
+        if (webhook && webhook._id) {
             return message.reply(`The webhook will no longer be recieving FAGC notifications!`)
-        else {
+        } else if (webhook === null) {
+            return message.reply("Webhook is not linked to FAGC!")
+        } else {
             console.error(webhook, Date.now())
             return message.reply("Error removing webhook")
         }

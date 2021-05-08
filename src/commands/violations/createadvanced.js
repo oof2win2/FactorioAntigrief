@@ -3,6 +3,7 @@ const { apiurl } = require("../../../config.json")
 const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
 const { getMessageResponse } = require("../../utils/responseGetter")
+const { handleErrors } = require("../../utils/functions")
 
 module.exports = {
     config: {
@@ -95,8 +96,7 @@ module.exports = {
             } else if (response.error && response.description === 'Rule must be a RuleID') {
                 return message.channel.send("RuleID is an invalid rule ObjectID. Please check rules")
             } else {
-                console.error(response)
-                return message.channel.send("Error creating violation. Please check logs.")
+                return handleErrors(message, response)
             }
         } catch (error) {
             console.error(error)
