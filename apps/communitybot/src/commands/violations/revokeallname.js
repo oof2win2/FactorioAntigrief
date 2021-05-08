@@ -2,6 +2,7 @@ const fetch = require("node-fetch")
 const { apiurl} = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
+const { handleErrors } = require("../../utils/functions")
 
 module.exports = {
     config: {
@@ -77,8 +78,7 @@ module.exports = {
             if (response._id && response.violations && response.playername && response.communityname) {
                 return message.channel.send(`Offense revoked!`)
             } else {
-                console.error({ response })
-                return message.channel.send("Error removing offense. Please check logs.")
+                return handleErrors(message, response)
             }
         } catch (error) {
             console.error({ error })

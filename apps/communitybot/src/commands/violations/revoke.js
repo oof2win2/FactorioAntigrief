@@ -2,6 +2,7 @@ const fetch = require("node-fetch")
 const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
+const { handleErrors } = require("../../utils/functions")
 
 module.exports = {
     config: {
@@ -76,8 +77,7 @@ module.exports = {
             if (response._id && response.revokedBy && response.revokedTime) {
                 return message.channel.send(`Violation revoked!`)
             } else {
-                console.error({ response })
-                return message.channel.send("Error revoking violation. Please check logs.")
+                return handleErrors(message, response)
             }
         } catch (error) {
             console.error({ error })
