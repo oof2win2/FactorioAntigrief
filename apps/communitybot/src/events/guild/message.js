@@ -11,6 +11,9 @@ module.exports = async (client, message) => {
             args = args.slice(0, i);
 
     if (message.content.startsWith(prefix)) {
+        const rate = client.checkTimeout(message.author.id, 5000)
+        if (rate) return message.channel.send("You're too fast!")
+        client.RateLimit.set(message.author.id, Date.now())
         let commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd))
         if (commandfile) { 
             const authRoles = message.member.roles.cache;
@@ -20,7 +23,8 @@ module.exports = async (client, message) => {
                     break
                 case "Moderator":
                     const config = await ConfigModel.findOne({guildid: message.guild.id})
-                    if (authRoles.some((r) => r.id === config.moderatorroleId))
+                    if (!config) message.reply("Bot not configured! Use `fagc!setup` to do so")
+                    else if (authRoles.some((r) => r.id === config.moderatorroleId))
                         commandfile.run(client, message, args)
                     else if (message.guild.member(message.author).hasPermission('ADMINISTRATOR'))
                         commandfile.run(client, message, args)
