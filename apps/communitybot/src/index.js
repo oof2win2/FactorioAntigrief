@@ -19,3 +19,5 @@ mongoose.connect(mongoURI, {
 })
 
 client.login(token);
+
+const PrometheusServer = require("./base/Prometheus")

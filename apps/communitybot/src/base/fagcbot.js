@@ -12,7 +12,6 @@ class FAGCBot extends Client {
         // load commands
         ["commands", "aliases"].forEach(x => this[x] = new Collection());
         ["command", "event"].forEach((x) => require(`../handlers/${x}`)(this));
-
         this.logger = require("../utils/logger")
     }
     /**
