@@ -12,7 +12,8 @@
     "fs-extra": "^9.1.0",
     "moment": "^2.29.1",
     "mongoose": "^5.12.3",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "prom-client": "^13.1.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.6",
