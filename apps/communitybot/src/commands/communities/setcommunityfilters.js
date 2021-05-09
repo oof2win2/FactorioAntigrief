@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 const ObjectId = require('mongoose').Types.ObjectId
@@ -14,7 +13,7 @@ module.exports = {
         accessibility: "Administrator",
     },
     run: async (client, message, args) => {
-        const communitiesRaw = await fetch(`${apiurl}/communities/getall`)
+        const communitiesRaw = await fetch(`${client.config.apiurl}/communities/getall`)
         const communities = await communitiesRaw.json()
 
         let embed = new MessageEmbed()

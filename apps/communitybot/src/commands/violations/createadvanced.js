@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
 const { getMessageResponse } = require("../../utils/responseGetter")
@@ -77,7 +76,7 @@ module.exports = {
         if (reaction.emoji.name === "❌")
             return message.channel.send("Violation creation cancelled")
         try {
-            const responseRaw = await fetch(`${apiurl}/violations/create`, {
+            const responseRaw = await fetch(`${client.config.apiurl}/violations/create`, {
                 method: "POST",
                 body: JSON.stringify({
                     playername: playername,

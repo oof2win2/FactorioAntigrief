@@ -1,6 +1,0 @@
-{
-    "token": "Your Discord bot token",
-    "mongoURI": "MongoDB connection string",
-    "prefix": "Bot prefix",
-    "apiurl": "URL of your API, such as https://localhost:3001/v1"
-}

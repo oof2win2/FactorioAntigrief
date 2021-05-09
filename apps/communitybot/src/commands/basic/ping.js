@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 
 module.exports = {
   config: {
@@ -15,7 +14,7 @@ module.exports = {
 
     message.channel.send("Pinging...").then(async (m) => {
       let ping = m.createdTimestamp - message.createdTimestamp;
-      await fetch(apiurl)
+      await fetch(client.config.apiurl)
       const apilatency = Date.now() - m.createdTimestamp
       m.edit(`Bot Latency: \`${ping}ms\`\nDiscord API Latency: \`${wsPing}ms\`\nFAGC API Latency: \`${apilatency}ms\``);
     });

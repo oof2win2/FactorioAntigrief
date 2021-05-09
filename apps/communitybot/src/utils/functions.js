@@ -1,7 +1,6 @@
 const Discord = require("discord.js")
 module.exports = {
     handleErrors,
-    checkSnowflake,
 }
 
 /**
@@ -22,8 +21,4 @@ async function handleErrors(msg, response) {
         default:
             msg.channel.send(`Error \`${response.error}\`: \`${response.description}\``)
     }
-}
-
-function checkSnowflake(snowflake) {
-    // if (snowflake.match)
 }

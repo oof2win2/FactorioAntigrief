@@ -1,6 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
-
 
 module.exports = {
     config: {
@@ -25,7 +23,7 @@ module.exports = {
             return message.channel.send("Invalid webhook")
         }
 
-        const webRaw = await fetch(`${apiurl}/informatics/addwebhook`, {
+        const webRaw = await fetch(`${client.config.apiurl}/informatics/addwebhook`, {
             method: "POST",
             body: JSON.stringify({
                 id: args[0],

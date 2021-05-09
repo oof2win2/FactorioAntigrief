@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 
@@ -16,7 +15,7 @@ module.exports = {
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide a player name to get offenses of")
         const playername = args.shift()
-        const offensesRaw = await fetch(`${apiurl}/offenses/getall?playername=${playername}`)
+        const offensesRaw = await fetch(`${client.config.apiurl}/offenses/getall?playername=${playername}`)
         const offenses = await offensesRaw.json()
         if (offenses === null)
             return message.channel.send(`User \`${playername}\` has no offenses!`)
@@ -31,7 +30,7 @@ module.exports = {
             .setTimestamp()
             .setAuthor("FAGC Community")
             .setDescription(`FAGC Offense of player \`${playername}\``)
-        const communities = await (await fetch(`${apiurl}/communities/getall`)).json()
+        const communities = await (await fetch(`${client.config.apiurl}/communities/getall`)).json()
         let i = 0
         offenses.forEach((offense) => {
             if (i == 25) {
