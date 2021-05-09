@@ -14,8 +14,9 @@ module.exports = {
 
     message.channel.send("Pinging...").then(async (m) => {
       let ping = m.createdTimestamp - message.createdTimestamp;
+      const beforeFetch = Date.now()
       await fetch(client.config.apiurl)
-      const apilatency = Date.now() - m.createdTimestamp
+      const apilatency = Date.now() - beforeFetch
       m.edit(`Bot Latency: \`${ping}ms\`\nDiscord API Latency: \`${wsPing}ms\`\nFAGC API Latency: \`${apilatency}ms\``);
     });
   },
