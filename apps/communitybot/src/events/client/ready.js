@@ -1,5 +1,5 @@
 module.exports = (client) => {
-    console.log(`${client.user.username} is online: ${new Date().toString().slice(4, 24)}`)
+    client.logger.log(`${client.user.username} is online: ${new Date().toString().slice(4, 24)}`)
     let activities = [
         `${client.guilds.cache.size} servers!`,
         `${client.channels.cache.size} channels!`,

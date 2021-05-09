@@ -12,7 +12,7 @@ module.exports = async (client, message) => {
 
     if (message.content.startsWith(prefix)) {
         const rate = client.checkTimeout(message.author.id, 5000)
-        if (rate) return message.channel.send("You're too fast!")
+        if (rate && !client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
         client.RateLimit.set(message.author.id, Date.now())
         let commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd))
         if (commandfile) { 
