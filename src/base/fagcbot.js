@@ -12,6 +12,8 @@ class FAGCBot extends Client {
         // load commands
         ["commands", "aliases"].forEach(x => this[x] = new Collection());
         ["command", "event"].forEach((x) => require(`../handlers/${x}`)(this));
+
+        this.logger = require("../utils/logger")
     }
     /**
      * Check if a user has sent a command in the past X milliseconds
