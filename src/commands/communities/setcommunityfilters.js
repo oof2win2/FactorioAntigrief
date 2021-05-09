@@ -55,7 +55,7 @@ module.exports = {
                     message.channel.send(embed)
                     embed.fields = []
                 }
-                let community = communities.find((community) => community === trustedCommunityID)
+                let community = communities.find((community) => community._id === trustedCommunityID)
                 embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
             })
             message.channel.send(embed)
