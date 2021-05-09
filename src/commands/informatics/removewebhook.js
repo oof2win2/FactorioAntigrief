@@ -1,6 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
-const { SnowflakeUtil } = require("discord.js")
 
 
 module.exports = {
@@ -24,7 +22,7 @@ module.exports = {
         } catch (e) {
             return message.channel.send("Invalid webhook")
         }
-        const webRaw = await fetch(`${apiurl}/informatics/removewebhook`, {
+        const webRaw = await fetch(`${client.config.apiurl}/informatics/removewebhook`, {
             method: "DELETE",
             body: JSON.stringify({
                 id: args[0],

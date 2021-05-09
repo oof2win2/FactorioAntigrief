@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {
@@ -13,7 +12,7 @@ module.exports = {
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide a player name to get violations of")
-        const violationsRaw = await fetch(`${apiurl}/violations/getall?playername=${args[0]}`)
+        const violationsRaw = await fetch(`${client.config.apiurl}/violations/getall?playername=${args[0]}`)
         const violations = await violationsRaw.json()
 
         let embed = new MessageEmbed()

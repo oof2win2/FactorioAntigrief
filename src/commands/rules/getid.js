@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {
@@ -13,7 +12,7 @@ module.exports = {
     },
     run: async (client, message, args) => {
         if (!args[0]) return message.reply("Provide rule ID to search by")
-        const resRaw = await fetch(`${apiurl}/rules/getid?id=${args[0]}`)
+        const resRaw = await fetch(`${client.config.apiurl}/rules/getid?id=${args[0]}`)
         const rule = await resRaw.json()
 
         if (rule === null)

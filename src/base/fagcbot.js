@@ -4,7 +4,7 @@ class FAGCBot extends Client {
     constructor(options) {
         super(options)
         
-        this.config = require("../../config.json")
+        this.config = require("../../config")
 
         // setup rate limit
         this.RateLimit = new Collection();

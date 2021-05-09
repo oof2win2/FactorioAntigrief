@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {
@@ -12,7 +11,7 @@ module.exports = {
         accessibility: "Member",
     },
     run: async (client, message, args) => {
-        const rawCommunities = await fetch(`${apiurl}/communities/getall`)
+        const rawCommunities = await fetch(`${client.config.apiurl}/communities/getall`)
         const communities = await rawCommunities.json()
 
         let communitiesEmbed = new MessageEmbed()

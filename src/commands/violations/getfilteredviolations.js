@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 
@@ -16,9 +15,9 @@ module.exports = {
         if (!args[0]) return message.reply("Provide a player name to get violations of")
         const config = await ConfigModel.findOne({guildid: message.guild.id})
         if (config.trustedCommunities === undefined) return message.reply("No filtered communities set")
-        const violationsRaw = await fetch(`${apiurl}/violations/getall?playername=${args[0]}`)
+        const violationsRaw = await fetch(`${client.config.apiurl}/violations/getall?playername=${args[0]}`)
         const violations = await violationsRaw.json()
-        const communities = await (await fetch(`${apiurl}/communities/getall`)).json()
+        const communities = await (await fetch(`${client.config.apiurl}/communities/getall`)).json()
 
         let embed = new MessageEmbed()
             .setTitle("FAGC Violations")

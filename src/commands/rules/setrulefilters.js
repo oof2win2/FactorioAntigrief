@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 
@@ -13,7 +12,7 @@ module.exports = {
         accessibility: "Administrator",
     },
     run: async (client, message, args) => {
-        const resRaw = await fetch(`${apiurl}/rules/getall`)
+        const resRaw = await fetch(`${client.config.apiurl}/rules/getall`)
         const rules = await resRaw.json()
 
         let embed = new MessageEmbed()

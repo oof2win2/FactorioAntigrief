@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 const { handleErrors } = require("../../utils/functions")
@@ -21,7 +20,7 @@ module.exports = {
         if (config.apikey === undefined)
             return message.reply("No API key set, operation not available!")
         
-        const violationRaw = await fetch(`${apiurl}/violations/getbyid?id=${violationID}`)
+        const violationRaw = await fetch(`${client.config.apiurl}/violations/getbyid?id=${violationID}`)
         const violation = await violationRaw.json()
         if (violation === null)
             return message.channel.send(`Violation with ID \`${violationID}\` doesn't exist`)
@@ -63,7 +62,7 @@ module.exports = {
             return message.channel.send("Violation revocation cancelled")
         
         try {
-            const responseRaw = await fetch(`${apiurl}/violations/revoke`, {
+            const responseRaw = await fetch(`${client.config.apiurl}/violations/revoke`, {
                 method: "DELETE",
                 body: JSON.stringify({
                     id: violationID,

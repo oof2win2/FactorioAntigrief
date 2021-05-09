@@ -1,7 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const { readdirSync } = require("fs");
 const { stripIndents } = require("common-tags");
-const { prefix } = require("../../../config.json")
 
 module.exports = {
   config: {
@@ -53,12 +52,12 @@ module.exports = {
           embed
             .setTitle("Invalid Command.")
             .setDescription(
-              `Do \`${prefix}help\` for the list of the commands.`
+              `Do \`${client.config.prefix}help\` for the list of the commands.`
             )
         );
       command = command.config;
 
-      embed.setDescription(stripIndents`The bot's prefix is: \`${prefix}\`\n
+      embed.setDescription(stripIndents`The bot's prefix is: \`${client.config.prefix}\`\n
             **Command:** ${
               command.name.slice(0, 1).toUpperCase() + command.name.slice(1)
             }
@@ -67,8 +66,8 @@ module.exports = {
             }
             **Usage:** ${
               command.usage
-                ? `\`${prefix}${command.name} ${command.usage}\``
-                : `\`${prefix}${command.name}\``
+                ? `\`${client.config.prefix}${command.name} ${command.usage}\``
+                : `\`${client.config.prefix}${command.name}\``
             }
             **Accessible by:** ${command.accessableby || "Members"}
             **Aliases:** ${

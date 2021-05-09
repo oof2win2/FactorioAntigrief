@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl } = require("../../../config.json")
 const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js");
 
@@ -14,7 +13,7 @@ module.exports = {
         accessibility: "Member",
     },
     run: async (client, message, args) => {
-        const rawCommunities = await fetch(`${apiurl}/communities/getall`)
+        const rawCommunities = await fetch(`${client.config.apiurl}/communities/getall`)
         const communities = await rawCommunities.json()
         const config = await ConfigModel.findOne({guildid: message.guild.id})
 

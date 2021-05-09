@@ -1,4 +1,4 @@
-const { prefix } = require("../../../config.json")
+const { prefix } = require("../../../config")
 const ConfigModel = require("../../database/schemas/config")
 
 module.exports = async (client, message) => {

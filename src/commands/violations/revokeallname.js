@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const { apiurl} = require("../../../config.json")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 const { handleErrors } = require("../../utils/functions")
@@ -21,7 +20,7 @@ module.exports = {
         if (config === null) return message.reply("Community invalid")
         if (!config.apikey) return message.reply("No API key set")
 
-        const offenseRaw = await fetch(`${apiurl}/offenses/getcommunity?playername=${playername}&communityname=${ownCommunity.name}`)
+        const offenseRaw = await fetch(`${client.config.apiurl}/offenses/getcommunity?playername=${playername}&communityname=${ownCommunity.name}`)
         const offense = await offenseRaw.json()
         if (offense === null)
             return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
@@ -65,7 +64,7 @@ module.exports = {
             return message.channel.send("Offense revocation cancelled")
         
         try {
-            const responseRaw = await fetch(`${apiurl}/violations/revokeallname`, {
+            const responseRaw = await fetch(`${client.config.apiurl}/violations/revokeallname`, {
                 method: "DELETE",
                 body: JSON.stringify({
                     playername: playername,
