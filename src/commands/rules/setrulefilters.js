@@ -12,6 +12,8 @@ module.exports = {
         accessibility: "Administrator",
     },
     run: async (client, message, args) => {
+        const config = await ConfigModel.findOne({ guildid: message.guild.id })
+        if (!config) return message.reply("Please setup using `fagc!setup` first")
         const resRaw = await fetch(`${client.config.apiurl}/rules/getall`)
         const rules = await resRaw.json()
 

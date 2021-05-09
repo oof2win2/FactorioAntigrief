@@ -21,7 +21,7 @@ module.exports = {
       const categories = readdirSync("./commands/");
 
       embed.setDescription(
-        `These are the avaliable commands for ${message.guild.me.displayName}\nThe bot prefix is: **${prefix}**`
+        `These are the avaliable commands for ${message.guild.me.displayName}\nThe bot prefix is: **${client.config.prefix}**`
       );
       embed.setFooter(
         `© ${message.guild.me.displayName} | Developed by DistroByte | Total Commands: ${client.commands.size}`,
