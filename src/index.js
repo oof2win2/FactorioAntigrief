@@ -9,6 +9,9 @@ const readdir = util.promisify(fs.readdir)
 
 process.chdir(__dirname)
 
+require("./utils/extenders");
+// This enables FAGCBot to access the extenders in any part of the codebase
+
 const FAGCBot = require("./base/fagcbot")
 const client = new FAGCBot();
 
