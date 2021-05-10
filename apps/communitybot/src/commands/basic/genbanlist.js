@@ -9,7 +9,6 @@ class Genbanlist extends Command {
             name: "generatebanlist",
             description: "Creates a .json banlist file to use for servers",
             aliases: ["banlist", "genbanlist"],
-            usage: ["{{p}}generatebanlist"],
             category: "basic",
             dirname: __dirname,
             enabled: true,

@@ -1,23 +1,36 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "getfilteredviolations",
-        aliases: ["check"],
-        usage: "<playername>",
-        category: "violations",
-        description: "Gets violations of a player from trusted communities",
-        accessibility: "Member",
-    },
-    run: async (client, message, args) => {
+class GetViolations extends Command {
+    constructor(client) {
+        super(client, {
+            name: "getfilteredviolations",
+            description: "Gets violations of a player from only trusted communities and rules",
+            aliases: ["check", "getviolations"],
+            category: "violations",
+            usage: "[playername]",
+            examples: ["{{p}}getfilteredviolations Windsinger"],
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: [],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: true
+        })
+    }
+    async run(message, args) {
         if (!args[0]) return message.reply("Provide a player name to get violations of")
-        const config = await ConfigModel.findOne({guildid: message.guild.id})
+        const config = await ConfigModel.findOne({ guildid: message.guild.id })
         if (config.trustedCommunities === undefined) return message.reply("No filtered communities set")
-        const violationsRaw = await fetch(`${client.config.apiurl}/violations/getall?playername=${args[0]}`)
+        const violationsRaw = await fetch(`${this.client.config.apiurl}/violations/getall?playername=${args[0]}`)
         const violations = await violationsRaw.json()
-        const communities = await (await fetch(`${client.config.apiurl}/communities/getall`)).json()
+        const communities = await (await fetch(`${this.client.config.apiurl}/communities/getall`)).json()
 
         let embed = new MessageEmbed()
             .setTitle("FAGC Violations")
@@ -27,8 +40,9 @@ module.exports = {
             .setDescription(`FAGC Violations of player \`${args[0]}\``)
 
         const trustedCommunities = communities.filter((community) => {
-            if (config.trustedCommunities.some((trustedID) => {return trustedID === community._id})) return community
+            if (config.trustedCommunities.some((trustedID) => { return trustedID === community._id })) return community
         })
+        let i = 0;
         violations.forEach((violation) => {
             if (i == 25) {
                 message.channel.send(embed)
@@ -38,13 +52,14 @@ module.exports = {
                 embed.addField(violation._id,
                     `By: ${violation.admin_name}\nCommunity name: ${violation.communityname}\n` +
                     `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
-                    `Description: ${violation.description}\nAutomated: ${violation.automated}`+
+                    `Description: ${violation.description}\nAutomated: ${violation.automated}` +
                     `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
-                    inline = true
+                    true
                 )
                 i++
             }
         })
         message.channel.send(embed)
-    },
-};
+    }
+}
+module.exports = GetViolations

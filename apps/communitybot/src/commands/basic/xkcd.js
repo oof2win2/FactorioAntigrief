@@ -8,7 +8,8 @@ class XKCD extends Command {
             name: "xkcd",
             description: "xkcd comics, get the latest or certain comic",
             aliases: [],
-            usage: ["{{p}}xkcd latest", "{{p}}xkcd search 2286"],
+            usage: "(Comic ID)",
+            examples: ["{{p}}xkcd", "{{p}}xkcd search 2286"],
             category: "basic",
             dirname: __dirname,
             enabled: true,
@@ -23,9 +24,7 @@ class XKCD extends Command {
         })
     }
     async run (message, args) {
-        if ((args[1] && isNaN(args[1])) || !["search", "latest"].includes(args[0]))
-            return message.channel.send("`<search|latest> (id)");
-        let search = args[1]
+        let search = args[0] && args[1]
             ? `http://xkcd.com/${args[1]}/info.0.json`
             : "http://xkcd.com/info.0.json";
         try {

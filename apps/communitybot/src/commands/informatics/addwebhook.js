@@ -7,7 +7,8 @@ class AddWebhook extends Command {
             name: "addwebhook",
             description: "Adds a webhook to send FAGC notifications to",
             aliases: [],
-            usage: ["{{p}}addwebhook [webhook ID] [webhook token]"],
+            usage: "[webhook ID] [webhook token]",
+            examples: ["{{p}}addwebhook 9945 ThisIsMyToken"],
             category: "informatics",
             dirname: __dirname,
             enabled: true,
@@ -21,19 +22,20 @@ class AddWebhook extends Command {
             requiredConfig: false,
         })
     }
-    async run(message) {
+    async run(message, args) {
         if (!args[0]) return message.reply("Provide a Webhook ID")
         if (!args[1]) return message.reply("Provide a Webhook token")
         message.delete()
         message.reply("Message removed to prevent unauthorized webhook access")
 
         try {
-            await client.fetchWebhook(args[0], args[1])
+            await this.client.fetchWebhook(args[0], args[1])
         } catch (e) {
+            console.log(e)
             return message.channel.send("Invalid webhook")
         }
 
-        const webRaw = await fetch(`${client.config.apiurl}/informatics/addwebhook`, {
+        const webRaw = await fetch(`${this.client.config.apiurl}/informatics/addwebhook`, {
             method: "POST",
             body: JSON.stringify({
                 id: args[0],

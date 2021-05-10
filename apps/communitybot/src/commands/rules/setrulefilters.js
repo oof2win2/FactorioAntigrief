@@ -1,20 +1,31 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "setrulefilters",
-        aliases: [],
-        usage: "",
-        category: "rules",
-        description: "Sets rule filters",
-        accessibility: "Administrator",
-    },
-    run: async (client, message, args) => {
+class SetRuleFilters extends Command {
+    constructor(client) {
+        super(client, {
+            name: "setrulefilters",
+            description: "Sets rule filters",
+            aliases: [],
+            category: "rules",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: ["ADMINISTRATOR"],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false
+        })
+    }
+    async run (message) {
         const config = await ConfigModel.findOne({ guildid: message.guild.id })
         if (!config) return message.reply("Please setup using `fagc!setup` first")
-        const resRaw = await fetch(`${client.config.apiurl}/rules/getall`)
+        const resRaw = await fetch(`${this.client.config.apiurl}/rules/getall`)
         const rules = await resRaw.json()
 
         let embed = new MessageEmbed()
@@ -33,7 +44,7 @@ module.exports = {
         })
         message.channel.send(embed)
 
-        
+
         const messageFilter = response => {
             return response.author.id === message.author.id
         }
@@ -41,9 +52,9 @@ module.exports = {
 
         let ruleFilters = []
         const onEnd = async () => {
-            const config = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
-                $set: { "ruleFilters": ruleFilters}
-            }, {new: true})
+            const config = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id }, {
+                $set: { "ruleFilters": ruleFilters }
+            }, { new: true })
             let ruleEmbed = new MessageEmbed()
                 .setTitle("FAGC Rules")
                 .setColor("GREEN")
@@ -60,7 +71,7 @@ module.exports = {
             })
             message.channel.send(ruleEmbed)
         }
-        
+
         let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(rules).length, time: 120000 })
         collector.on('collect', (message) => {
             if (message.content === "stop") collector.stop()
@@ -70,5 +81,6 @@ module.exports = {
             message.channel.send("End of collection")
             onEnd()
         })
-    },
+    }
 }
+module.exports = SetRuleFilters

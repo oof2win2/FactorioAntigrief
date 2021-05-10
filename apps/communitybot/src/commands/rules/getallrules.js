@@ -1,17 +1,28 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "getallrules",
-        aliases: [],
-        usage: "",
-        category: "rules",
-        description: "Gets all rules",
-        accessibility: "Member",
-    },
-    run: async (client, message, args) => {
-        const resRaw = await fetch(`${client.config.apiurl}/rules/getall`)
+class GetAllRules extends Command {
+    constructor(client) {
+        super(client, {
+            name: "getallrules",
+            description: "Gets all rules",
+            aliases: [],
+            category: "rules",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: [],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: true,
+        })
+    }
+    async run(message, args) {
+        const resRaw = await fetch(`${this.client.config.apiurl}/rules/getall`)
         const rules = await resRaw.json()
 
         let embed = new MessageEmbed()
@@ -25,8 +36,9 @@ module.exports = {
                 message.channel.send(embed)
                 embed.fields = []
             }
-            embed.addField(`#${i+1}/${rule._id}: ${rule.shortdesc}`, rule.longdesc)
+            embed.addField(`#${i + 1}/${rule._id}: ${rule.shortdesc}`, rule.longdesc)
         })
         message.channel.send(embed)
-    },
-};
+    }
+}
+module.exports = GetAllRules

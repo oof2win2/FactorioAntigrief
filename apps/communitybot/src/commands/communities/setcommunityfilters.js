@@ -10,7 +10,6 @@ class SetFilters extends Command {
             name: "setcommunityfilters",
             description: "Gets trusted communities",
             aliases: ["setwhitelistcommunities", "settrustedcommunities", "settrusted"],
-            usage: ["{{p}}setcommunityfilters"],
             category: "communities",
             dirname: __dirname,
             enabled: true,
@@ -21,7 +20,7 @@ class SetFilters extends Command {
             ownerOnly: false,
             args: false,
             cooldown: 3000,
-            requiredConfig: false,
+            requiredConfig: true,
         })
     }
     async run(message) {

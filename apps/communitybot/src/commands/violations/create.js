@@ -3,19 +3,28 @@ const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
 const { getMessageResponse } = require("../../utils/responseGetter")
 const { handleErrors } = require("../../utils/functions")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "create",
-        aliases: ["createviolation", "ban", "banhammer"],
-        usage: "",
-        category: "violations",
-        description: "Creates a violation for a player",
-        accessibility: "Moderator",
-    },
-    run: async (client, message, args) => {
-        const config = await ConfigModel.findOne({ guildid: message.guild.id })
-        if (config === null) return message.reply("Community invalid")
+class CreateViolation extends Command {
+    constructor(client) {
+        super(client, {
+            name: "create",
+            description: "Creates a violation",
+            aliases: ["createviolation", "ban", "banhammer"],
+            category: "violations",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: ["BAN_MEMBERS"],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false
+        })
+    }
+    async run(message, _, config) {
         if (!config.apikey) return message.reply("No API key set")
         const messageFilter = response => {
             return response.author.id === message.author.id
@@ -26,13 +35,13 @@ module.exports = {
 
         const playername = (await getMessageResponse(message.channel.send("Please type in a playername for the violation"), messageFilter))?.content
         if (playername === undefined) return message.channel.send("Didn't send playername in time")
-        
+
         const ruleid = (await getMessageResponse(message.channel.send("Please type in ObjectID of rule that has been broken"), messageFilter))?.content
         if (ruleid === undefined) return message.channel.send("Didn't send rule ObjectID in time")
 
         let desc = (await getMessageResponse(message.channel.send("Please type in description of the violation or `none` if you don't want to set one"), messageFilter))?.content
         if (desc.toLowerCase() === 'none') desc = undefined
-        
+
         let proof = (await getMessageResponse(message.channel.send("Please send a link to proof of the violation or `none` if there is no proof"), messageFilter))?.content
         if (proof.toLowerCase() === 'none') proof = undefined
 
@@ -50,14 +59,14 @@ module.exports = {
             { name: "Player name", value: playername, inline: true },
             { name: "Rule ID", value: ruleid, inline: true },
             { name: "Violation description", value: desc, inline: true },
-            { name: "Proof", value: proof},
-            { name: "Violated At (ISO)", value: timestamp}
+            { name: "Proof", value: proof },
+            { name: "Violated At (ISO)", value: timestamp }
         )
         message.channel.send(embed)
         const confirm = await message.channel.send("Do you wish to create this rule violation?")
         confirm.react("✅")
         confirm.react("❌")
-        
+
         let reactions
         try {
             reactions = (await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ['time'] }))
@@ -68,9 +77,9 @@ module.exports = {
         let reaction = reactions.first()
         if (reaction.emoji.name === "❌")
             return message.channel.send("Violation creation cancelled")
-        
+
         try {
-            const responseRaw = await fetch(`${client.config.apiurl}/violations/create`, {
+            const responseRaw = await fetch(`${this.client.config.apiurl}/violations/create`, {
                 method: "POST",
                 body: JSON.stringify({
                     playername: playername,
@@ -95,5 +104,6 @@ module.exports = {
             console.error(error)
             return message.channel.send("Error creating violation. Please check logs.")
         }
-    },
-};
+    }
+}
+module.exports = CreateViolation

@@ -13,7 +13,7 @@ module.exports = class {
         setInterval(
             () =>
                 this.client.user.setActivity(
-                    `${this.client.prefix}help | ${activities[i++ % activities.length]}`,
+                    `${this.client.config.prefix}help | ${activities[i++ % activities.length]}`,
                     { type: "WATCHING" }
                 ),
             15000

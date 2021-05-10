@@ -1,18 +1,31 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "getallviolations",
-        aliases: ["checkall"],
-        usage: "<playername>",
-        category: "violations",
-        description: "Gets all violations of a player",
-        accessibility: "Member",
-    },
-    run: async (client, message, args) => {
+class GetAllViolations extends Command {
+    constructor(client) {
+        super(client, {
+            name: "getallviolations",
+            description: "Gets all violations of a player",
+            aliases: ["checkall"],
+            category: "violations",
+            usage: "[playername]",
+            examples: ["{{p}}getallviolations Windsinger"],
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: [],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false
+        })
+    }
+    async run (message, args) {
         if (!args[0]) return message.reply("Provide a player name to get violations of")
-        const violationsRaw = await fetch(`${client.config.apiurl}/violations/getall?playername=${args[0]}`)
+        const violationsRaw = await fetch(`${this.client.config.apiurl}/violations/getall?playername=${args[0]}`)
         const violations = await violationsRaw.json()
 
         let embed = new MessageEmbed()
@@ -25,16 +38,17 @@ module.exports = {
         violations.forEach((violation, i) => {
             if (i == 25) {
                 message.channel.send(embed)
-                embed.fields = []
+                embed.fields = [];
             }
-            embed.addField(violation._id, 
-                `By: ${violation.admin_name}\nCommunity name: ${violation.communityname}\n`+
-                `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n`+
-                `Description: ${violation.description}\nAutomated: ${violation.automated}\n`+
+            embed.addField(violation._id,
+                `By: ${violation.admin_name}\nCommunity name: ${violation.communityname}\n` +
+                `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
+                `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
                 `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
-                inline=true
+                true
             )
         })
         message.channel.send(embed)
-    },
-};
+    }
+}
+module.exports = GetAllViolations

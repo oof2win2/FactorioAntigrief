@@ -7,7 +7,6 @@ class Stats extends Command {
       name: "stats",
       description: "Show bot stats",
       aliases: [],
-      usage: ["{{p}}stats"],
       category: "basic",
       dirname: __dirname,
       enabled: true,

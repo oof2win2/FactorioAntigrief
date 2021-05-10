@@ -7,7 +7,6 @@ class Ping extends Command {
       name: "ping",
       description: "Shows ping to related services",
       aliases: [],
-      usage: ["{{p}}ping"],
       category: "basic",
       dirname: __dirname,
       enabled: true,

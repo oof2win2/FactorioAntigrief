@@ -6,7 +6,6 @@ class Uptime extends Command {
       name: "uptime",
       description: "Show bot uptime",
       aliases: [],
-      usage: ["{{p}}uptime"],
       category: "basic",
       dirname: __dirname,
       enabled: true,
