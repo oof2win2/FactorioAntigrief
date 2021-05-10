@@ -5,6 +5,7 @@ module.exports = class {
     }
     async run (message) {
         if (message.author.bot) return;
+        if (!message.guild) return
         const prefix = this.client.config.prefix
         if (!message.content.startsWith(prefix)) return
 
@@ -14,6 +15,15 @@ module.exports = class {
         let command = args.shift().toLowerCase()
         let cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command))
         if (!cmd) return message.channel.send(`\`${prefix}${command}\` is not a valid command! Use \`fagc!help\` to view commands`)
+
+        if (!cmd.conf.enabled)
+            return message.channel.send("This command is currently disabled!")
+        if (cmd.conf.ownerOnly && message.author.id !== client.config.owner.id)
+            return message.channel.send(`Only the owner of ${this.client.user.username} can run this commands!`);
+
+        const rate = this.client.checkTimeout(message.author.id, cmd.conf.cooldown)
+        if (rate && !this.client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
+        this.client.RateLimit.set(message.author.id, Date.now())
 
         let guildConfig = await ConfigModel.findOne({ guildid: message.guild.id })
 
@@ -42,15 +52,6 @@ module.exports = class {
             if (!message.channel.nsfw && cmd.conf.nsfw)
                 return message.channel.send("You must execute this command in a channel that allows NSFW!");
         }
-
-        if (!cmd.conf.enabled)
-            return message.channel.send("This command is currently disabled!")
-        if (cmd.conf.ownerOnly && message.author.id !== client.config.owner.id)
-            return message.channel.send(`Only the owner of ${this.client.user.username} can run this commands!`);
-
-        const rate = this.client.checkTimeout(message.author.id, cmd.conf.cooldown)
-        if (rate && !this.client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
-        this.client.RateLimit.set(message.author.id, Date.now())
         
         try {
             cmd.run(message, args, guildConfig)
