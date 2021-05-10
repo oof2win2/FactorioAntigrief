@@ -1,17 +1,27 @@
 const fetch = require("node-fetch")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "addwebhook",
-        aliases: [],
-        usage: "<webhook ID> <webhook token>",
-        category: "informatics",
-        description: "Adds a webhook to recieve FAGC notifications",
-        accessibility: "Moderator",
-    },
-    run: async (client, message, args) => {
-        if (!message.member.hasPermission("MANAGE_WEBHOOKS")) return message.reply("Nice try! You need the `MANAGE_WEBHOOKS` permission!")
-
+class AddWebhook extends Command {
+    constructor(client) {
+        super(client, {
+            name: "addwebhook",
+            description: "Adds a webhook to send FAGC notifications to",
+            aliases: [],
+            usage: ["{{p}}addwebhook [webhook ID] [webhook token]"],
+            category: "informatics",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: ["MANAGE_WEBHOOKS"],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false,
+        })
+    }
+    async run(message) {
         if (!args[0]) return message.reply("Provide a Webhook ID")
         if (!args[1]) return message.reply("Provide a Webhook token")
         message.delete()
@@ -39,5 +49,6 @@ module.exports = {
             console.error(webook, Date.now())
             return message.reply("Error creating webhook")
         }
-    },
-};
+    }
+}
+module.exports = AddWebhook

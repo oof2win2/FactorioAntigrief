@@ -1,13 +1,26 @@
-module.exports = {
-  config: {
-    name: "uptime",
-    description: "Displays the bots current uptime!",
-    category: "basic",
-    usage: "",
-    aliases: ["ut"],
-    accessibility: "Member",
-  },
-  run: async (client, message, args) => {
+const Command = require("../../base/Command")
+
+class Uptime extends Command {
+  constructor(client) {
+    super(client, {
+      name: "uptime",
+      description: "Show bot uptime",
+      aliases: [],
+      usage: ["{{p}}uptime"],
+      category: "basic",
+      dirname: __dirname,
+      enabled: true,
+      guildOnly: true,
+      memberPermissions: [],
+      botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+      nsfw: false,
+      ownerOnly: false,
+      args: false,
+      cooldown: 3000,
+      requiredConfig: false,
+    })
+  }
+  async run(message) {
     function duration(ms) {
       const sec = Math.floor((ms / 1000) % 60).toString();
       const min = Math.floor((ms / (1000 * 60)) % 60).toString();
@@ -19,6 +32,7 @@ module.exports = {
       )}:${sec.padStart(2, "0")}\``;
     }
 
-    message.channel.send(`My uptime: ${duration(client.uptime)}`);
-  },
-};
+    message.channel.send(`My uptime: ${duration(this.client.uptime)}`);
+  }
+}
+module.exports = Uptime
