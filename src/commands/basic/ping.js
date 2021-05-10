@@ -1,23 +1,37 @@
 const fetch = require("node-fetch")
 
-module.exports = {
-  config: {
-    name: "ping",
-    aliases: ["alias"],
-    usage: "",
-    category: "basic",
-    description: "Pings the bot and API",
-    accessibility: "Member",
-  },
-  run: async (client, message, args) => {
-    let wsPing = client.ws.ping;
+const Command = require("../../base/Command")
+class Ping extends Command {
+  constructor(client) {
+    super(client, {
+      name: "ping",
+      description: "Shows ping to related services",
+      aliases: [],
+      usage: ["{{p}}ping"],
+      category: "basic",
+      dirname: __dirname,
+      enabled: true,
+      guildOnly: true,
+      memberPermissions: [],
+      accessLevel: "Member",
+      botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+      nsfw: false,
+      ownerOnly: false,
+      args: false,
+      cooldown: 3000,
+      requiredConfig: false,
+    })
+  }
+  async run (message) {
+    let wsPing = this.client.ws.ping;
 
     message.channel.send("Pinging...").then(async (m) => {
       let ping = m.createdTimestamp - message.createdTimestamp;
       const beforeFetch = Date.now()
-      await fetch(client.config.apiurl)
+      await fetch(this.client.config.apiurl)
       const apilatency = Date.now() - beforeFetch
       m.edit(`Bot Latency: \`${ping}ms\`\nDiscord API Latency: \`${wsPing}ms\`\nFAGC API Latency: \`${apilatency}ms\``);
     });
-  },
-};
+  }
+}
+module.exports = Ping

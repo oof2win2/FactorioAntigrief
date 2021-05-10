@@ -1,21 +1,32 @@
 const fetch = require("node-fetch")
 const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js");
+const Command = require("../../base/Command")
 
-
-module.exports = {
-    config: {
-        name: "getfilteredcommunities",
-        aliases: ["getwhitelistedcommunities", "gettrustedcommunities", "getcommunities", "gettrusted"],
-        usage: "",
-        category: "communities",
-        description: "Gets trusted communities",
-        accessibility: "Member",
-    },
-    run: async (client, message, args) => {
-        const rawCommunities = await fetch(`${client.config.apiurl}/communities/getall`)
+class GetWhitelisted extends Command {
+    constructor(client) {
+        super(client, {
+            name: "getfilteredcommunities",
+            description: "Gets trusted communities",
+            aliases: ["getwhitelistedcommunities", "gettrustedcommunities", "getcommunities", "gettrusted"],
+            usage: ["{{p}}getfilteredcommunities"],
+            category: "communities",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: [],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false,
+        })
+    }
+    async run(message) {
+        const rawCommunities = await fetch(`${this.client.config.apiurl}/communities/getall`)
         const communities = await rawCommunities.json()
-        const config = await ConfigModel.findOne({guildid: message.guild.id})
+        const config = await ConfigModel.findOne({ guildid: message.guild.id })
 
         let communitiesEmbed = new MessageEmbed()
             .setTitle("FAGC Communities")
@@ -36,5 +47,7 @@ module.exports = {
             }
         })
         message.channel.send(communitiesEmbed)
-    },
-};
+    }
+}
+
+module.exports = GetWhitelisted

@@ -1,6 +1,30 @@
 const fetch = require("node-fetch")
+const Command = require("../../base/Command")
 
-
+class AddWebhook extends Command {
+    constructor(client) {
+        super(client, {
+            name: "remov",
+            description: "Adds a webhook to send FAGC notifications to",
+            aliases: [],
+            usage: ["{{p}}addwebhook [webhook ID] [webhook token]"],
+            category: "informatics",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: ["MANAGE_WEBHOOKS"],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false,
+        })
+    }
+    async run (message, args) {
+        // TODO: migrate this and other commands (all are not committed, changes show yellow)
+    }
+}
 module.exports = {
     config: {
         name: "removewebhook",

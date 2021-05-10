@@ -2,18 +2,30 @@ const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 const ObjectId = require('mongoose').Types.ObjectId
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "setcommunityfilters",
-        aliases: ["setwhitelistcommunities", "settrustedcommunities", "settrusted"],
-        usage: "",
-        category: "communities",
-        description: "Sets community filters",
-        accessibility: "Administrator",
-    },
-    run: async (client, message, args) => {
-        const communitiesRaw = await fetch(`${client.config.apiurl}/communities/getall`)
+class SetFilters extends Command {
+    constructor(client) {
+        super(client, {
+            name: "setcommunityfilters",
+            description: "Gets trusted communities",
+            aliases: ["setwhitelistcommunities", "settrustedcommunities", "settrusted"],
+            usage: ["{{p}}setcommunityfilters"],
+            category: "communities",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: ["ADMINISTRATOR"],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false,
+        })
+    }
+    async run(message) {
+        const communitiesRaw = await fetch(`${this.client.config.apiurl}/communities/getall`)
         const communities = await communitiesRaw.json()
 
         let embed = new MessageEmbed()
@@ -31,7 +43,7 @@ module.exports = {
             embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
         })
         message.channel.send(embed)
-        
+
 
         const messageFilter = response => {
             return response.author.id === message.author.id
@@ -40,9 +52,9 @@ module.exports = {
 
         let trustedCommunities = []
         const onEnd = async () => {
-            ConfigModel.findOne({ guildid: message.guild.id }).then(() => {})
-            await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
-                $set: {"trustedCommunities": trustedCommunities}
+            ConfigModel.findOne({ guildid: message.guild.id }).then(() => { })
+            await ConfigModel.findOneAndUpdate({ guildid: message.guild.id }, {
+                $set: { "trustedCommunities": trustedCommunities }
             }, { new: true }).then(() => { })
             let embed = new MessageEmbed()
                 .setTitle("FAGC Communities")
@@ -75,5 +87,6 @@ module.exports = {
             message.channel.send("End of collection")
             onEnd()
         })
-    },
+    }
 }
+module.exports = SetFilters

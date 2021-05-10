@@ -1,15 +1,28 @@
 const { MessageEmbed } = require("discord.js");
 const fetch = require("node-fetch");
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "xkcd",
-        description: "xkcd comics, get the latest or certain comic",
-        usage: "<search|latest> (id)",
-        category: "basic",
-        accessibility: "Member",
-    },
-    run: async (client, message, args) => {
+class XKCD extends Command {
+    constructor(client) {
+        super(client, {
+            name: "xkcd",
+            description: "xkcd comics, get the latest or certain comic",
+            aliases: [],
+            usage: ["{{p}}xkcd latest", "{{p}}xkcd search 2286"],
+            category: "basic",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: [],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false,
+        })
+    }
+    async run (message, args) {
         if ((args[1] && isNaN(args[1])) || !["search", "latest"].includes(args[0]))
             return message.channel.send("`<search|latest> (id)");
         let search = args[1]
@@ -38,5 +51,6 @@ module.exports = {
             console.error(e);
             return message.channel.send("looks like ive broken! Try again.");
         }
-    },
-};
+    }
+}
+module.exports = XKCD
