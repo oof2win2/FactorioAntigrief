@@ -1,6 +1,6 @@
-const Discord = require("discord.js");
-const { readdirSync } = require("fs");
-const { stripIndents } = require("common-tags");
+const Discord = require("discord.js")
+const { readdirSync } = require("fs")
+const { stripIndents } = require("common-tags")
 const Command = require("../../base/Command")
 
 class Help extends Command {
@@ -72,11 +72,13 @@ class Help extends Command {
     const embed = new Discord.MessageEmbed()
       .setDescription(`● To get help on a specific command type\`${prefix}help <command>\`!`)
       .setColor(this.client.config.embeds.color)
-      .setFooter(this.client.config.embeds.footer);
+      .setFooter(this.client.config.embeds.footer)
+      .setAuthor(`${this.client.user.username} | Commands`, this.client.user.displayAvatarURL());
     categories.sort().forEach((cat) => {
-      const tCommands = commands.filter((cmd) => cmd.help.category === cat);
-      embed.addField(cat + " - (" + tCommands.size + ")", tCommands.map((cmd) => "`" + cmd.help.name + "`").join(", "));
-    });
+      const tCommands = commands.filter((cmd) => cmd.help.category === cat)
+      embed.addField(cat + " - (" + tCommands.size + ")", tCommands.map((cmd) => "`" + cmd.help.name + "`").join(", "))
+    })
+    return message.channel.send(embed)
   }
 }
 

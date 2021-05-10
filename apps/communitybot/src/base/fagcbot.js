@@ -6,6 +6,7 @@ class FAGCBot extends Client {
         super(options)
         
         this.config = require("../../config")
+        this.emotes = this.config.emotes
 
         // setup rate limit
         this.RateLimit = new Collection();
