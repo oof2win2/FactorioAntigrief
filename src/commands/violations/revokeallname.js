@@ -2,36 +2,46 @@ const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 const { handleErrors } = require("../../utils/functions")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "revokeallname",
-        aliases: ["revokeoffense"],
-        usage: "<playername>",
-        category: "violations",
-        description: "Revokes all violations of a player by ID",
-        accessibility: "Moderator",
-    },
-    run: async (client, message, args) => {
+class RevokeAllname extends Command {
+    constructor(client) {
+        super(client, {
+            name: "revokeallname",
+            description: "Revokes your offense of a player by offense ID",
+            aliases: ["revokeoffense"],
+            category: "violations",
+            usage: "[playername]",
+            examples: ["{{p}}revokeallname Windsinger"],
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: ["BAN_MEMBERS"],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: true
+        })
+    }
+    async run(message, args, config) {
         if (!args[0]) return message.reply("Provide a player name to get violations of")
         const playername = args.shift()
 
-        const config = await ConfigModel.findOne({guildid: message.guild.id })
-        if (config === null) return message.reply("Community invalid")
         if (!config.apikey) return message.reply("No API key set")
-
-        const offenseRaw = await fetch(`${client.config.apiurl}/offenses/getcommunity?playername=${playername}&communityname=${ownCommunity.name}`)
+        const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${playername}&communityname=${config.communityname}`)
         const offense = await offenseRaw.json()
         if (offense === null)
             return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
-        
+
         let embed = new MessageEmbed()
             .setTitle("FAGC Offense Revocation")
             .setColor("GREEN")
             .setTimestamp()
             .setAuthor("FAGC Community")
-            .setDescription(`FAGC Offense of player \`${playername}\` in community ${ownCommunity.name}`)
-        
+            .setDescription(`FAGC Offense of player \`${playername}\` in community ${config.communityname}`)
+
         offense.violations.forEach((violation, i) => {
             if (i == 25) {
                 message.channel.send(embed)
@@ -41,7 +51,7 @@ module.exports = {
                 `By: ${violation.admin_name}\nBroken rule: ${violation.broken_rule}\n` +
                 `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
                 `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violated_time)).toUTCString()}`,
-                inline = true
+                true
             )
         })
         message.channel.send(embed)
@@ -62,9 +72,9 @@ module.exports = {
         let reaction = reactions.first()
         if (reaction.emoji.name === "❌")
             return message.channel.send("Offense revocation cancelled")
-        
+
         try {
-            const responseRaw = await fetch(`${client.config.apiurl}/violations/revokeallname`, {
+            const responseRaw = await fetch(`${this.client.config.apiurl}/violations/revokeallname`, {
                 method: "DELETE",
                 body: JSON.stringify({
                     playername: playername,
@@ -73,7 +83,7 @@ module.exports = {
                 headers: { 'apikey': config.apikey, 'content-type': 'application/json' }
             })
             const response = await responseRaw.json()
-            
+
             if (response._id && response.violations && response.playername && response.communityname) {
                 return message.channel.send(`Offense revoked!`)
             } else {
@@ -83,5 +93,6 @@ module.exports = {
             console.error({ error })
             return message.channel.send("Error removing offense. Please check logs.")
         }
-    },
-};
+    }
+}
+module.exports = RevokeAllname

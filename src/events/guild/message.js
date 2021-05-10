@@ -1,4 +1,3 @@
-const { prefix } = require("../../../config")
 const ConfigModel = require("../../database/schemas/config")
 module.exports = class {
     constructor(client) {
@@ -6,6 +5,7 @@ module.exports = class {
     }
     async run (message) {
         if (message.author.bot) return;
+        const prefix = this.client.config.prefix
         if (!message.content.startsWith(prefix)) return
 
         const client = this.client
@@ -13,7 +13,7 @@ module.exports = class {
         let args = message.content.slice(prefix.length).trim().split(/ +/g)
         let command = args.shift().toLowerCase()
         let cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command))
-        if (!cmd) return
+        if (!cmd) return message.channel.send(`\`${prefix}${command}\` is not a valid command! Use \`fagc!help\` to view commands`)
 
         let guildConfig = await ConfigModel.findOne({ guildid: message.guild.id })
 

@@ -3,21 +3,28 @@ const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
 const { getMessageResponse } = require("../../utils/responseGetter")
 const { handleErrors } = require("../../utils/functions")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "createadvanced",
-        aliases: [],
-        usage: "",
-        category: "violations",
-        description: "Creates a violation for a player",
-        accessibility: "Moderator",
-    },
-    run: async (client, message, args) => {
-        if (!message.guild.member(message.author).hasPermission('BAN_MEMBERS')) return message.reply("Nice try! You need the `BAN_MEMBERS` permission!")
-
-        const config = await ConfigModel.findOne({ guildid: message.guild.id })
-        if (config === null) return message.reply("Community invalid")
+class CreateViolationAdvanced extends Command {
+    constructor(client) {
+        super(client, {
+            name: "createadvanced",
+            description: "Creates a violation - Advanced method",
+            aliases: [],
+            category: "violations",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: ["BAN_MEMBERS"],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: false
+        })
+    }
+    async run(message, _, config) {
         if (!config.apikey) return message.reply("No API key set")
         const messageFilter = response => {
             return response.author.id === message.author.id
@@ -76,7 +83,7 @@ module.exports = {
         if (reaction.emoji.name === "❌")
             return message.channel.send("Violation creation cancelled")
         try {
-            const responseRaw = await fetch(`${client.config.apiurl}/violations/create`, {
+            const responseRaw = await fetch(`${this.client.config.apiurl}/violations/create`, {
                 method: "POST",
                 body: JSON.stringify({
                     playername: playername,
@@ -101,5 +108,6 @@ module.exports = {
             console.error(error)
             return message.channel.send("Error creating violation. Please check logs.")
         }
-    },
-};
+    }
+}
+module.exports = CreateViolationAdvanced

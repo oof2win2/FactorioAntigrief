@@ -9,7 +9,6 @@ class GetWhitelisted extends Command {
             name: "getfilteredcommunities",
             description: "Gets trusted communities",
             aliases: ["getwhitelistedcommunities", "gettrustedcommunities", "getcommunities", "gettrusted"],
-            usage: ["{{p}}getfilteredcommunities"],
             category: "communities",
             dirname: __dirname,
             enabled: true,

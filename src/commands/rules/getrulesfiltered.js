@@ -1,21 +1,32 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
+const Command = require("../../base/Command")
 
-module.exports = {
-    config: {
-        name: "getrulesfiltered",
-        aliases: ["getfilteredrules", "getrules"],
-        usage: "",
-        category: "rules",
-        description: "Gets all rules",
-        accessibility: "Member",
-    },
-    run: async (client, message, args) => {
-        const config = await ConfigModel.findOne({guildid: message.guild.id})
-        if (config.filteredRules === undefined)
+class GetRulesFiltered extends Command {
+    constructor(client) {
+        super(client, {
+            name: "getrulesfiltered",
+            description: "Gets rules that this community follows",
+            aliases: ["getfilteredrules", "getrules"],
+            category: "rules",
+            dirname: __dirname,
+            enabled: true,
+            guildOnly: true,
+            memberPermissions: [],
+            botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+            nsfw: false,
+            ownerOnly: false,
+            args: false,
+            cooldown: 3000,
+            requiredConfig: true,
+        })
+    }
+    async run(message) {
+        const config = await ConfigModel.findOne({ guildid: message.guild.id })
+        if (config.ruleFilters === undefined)
             return message.reply("No rules filtered")
-        const resRaw = await fetch(`${client.config.apiurl}/rules/getall`)
+        const resRaw = await fetch(`${this.client.config.apiurl}/rules/getall`)
         const rules = await resRaw.json()
 
         let embed = new MessageEmbed()
@@ -31,11 +42,12 @@ module.exports = {
                 message.channel.send(embed)
                 embed.fields = []
             }
-            if (config.filteredRules.some(id => id === rule._id)) {
+            if (config.ruleFilters.some(id => id === rule._id)) {
                 embed.addField(`#${i + 1}/${rule._id}: ${rule.shortdesc}`, rule.longdesc)
                 sent++
             }
         })
         message.channel.send(embed)
-    },
+    }
 }
+module.exports = GetRulesFiltered

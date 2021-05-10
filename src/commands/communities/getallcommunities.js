@@ -8,7 +8,6 @@ class GetAll extends Command {
             name: "getallcommunities",
             description: "Gets all communities",
             aliases: [],
-            usage: ["{{p}}getallcommunities"],
             category: "communities",
             dirname: __dirname,
             enabled: true,

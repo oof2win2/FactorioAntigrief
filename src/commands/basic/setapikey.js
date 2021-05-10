@@ -8,7 +8,8 @@ class SetAPIKey extends Command {
             name: "setapikey",
             description: "Set API key",
             aliases: [],
-            usage: ["{{p}}setapikey [API KEY]"],
+            usage: "[API KEY]",
+            examples: ["{{p}}setapikey potatoKey"],
             category: "basic",
             dirname: __dirname,
             enabled: true,
@@ -22,7 +23,8 @@ class SetAPIKey extends Command {
             requiredConfig: false,
         })
     }
-    async run (message, args, config) {
+    async run (message, args) {
+        if (!args[0]) return message.channel.send("You must provide your API key as a parameter")
         message.delete()
         const apikey = args[0]
 
@@ -31,7 +33,7 @@ class SetAPIKey extends Command {
                 $set: { "apikey": apikey }
             }, { new: true })
             if (config.apikey && config.guildid === message.guild.id) {
-                return message.channel.send(`API key set successfully!`)
+                return message.channel.send(`${message.author} set the API key successfully!`)
             } else {
                 console.error({ config })
                 return message.channel.send("Error setting API key. Please check logs.")
