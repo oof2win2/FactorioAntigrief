@@ -15,9 +15,7 @@ class GetRulesFiltered extends Command {
             guildOnly: true,
             memberPermissions: [],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-            nsfw: false,
             ownerOnly: false,
-            args: false,
             cooldown: 3000,
             requiredConfig: true,
         })

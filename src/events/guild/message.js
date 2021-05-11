@@ -48,9 +48,6 @@ module.exports = class {
             })
             if (neededPermissions.length > 0)
                 return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`);
-
-            if (!message.channel.nsfw && cmd.config.nsfw)
-                return message.channel.send("You must execute this command in a channel that allows NSFW!");
         }
         
         try {

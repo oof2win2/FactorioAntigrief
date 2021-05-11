@@ -14,11 +14,8 @@ class Genbanlist extends Command {
             enabled: true,
             guildOnly: true,
             memberPermissions: [],
-            accessLevel: "Moderator",
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-            nsfw: false,
             ownerOnly: false,
-            args: false,
             cooldown: 5000,
             requiredConfig: true
         })
