@@ -41,9 +41,9 @@ const init = async () => {
         evts.forEach(evt => {
             const evtName = evt.split(".")[0];
             // splits the event and gets first part
-            const event = new (require(`./events/${dir}/${evt}`))(client);
+            const event = require(`./events/${dir}/${evt}`)
             // binds client to the event
-            client.on(evtName, (...args) => event.run(...args));
+            client.on(evtName, (...args) => event(client, ...args));
             delete require.cache[require.resolve(`./events/${dir}/${evt}`)];
             // on event, call it
         })
