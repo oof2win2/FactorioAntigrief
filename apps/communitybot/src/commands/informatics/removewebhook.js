@@ -15,9 +15,7 @@ class RemoveWebhook extends Command {
             guildOnly: true,
             memberPermissions: ["MANAGE_WEBHOOKS"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-            nsfw: false,
             ownerOnly: false,
-            args: false,
             cooldown: 3000,
             requiredConfig: false,
         })

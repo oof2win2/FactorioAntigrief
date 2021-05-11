@@ -16,9 +16,7 @@ class SetFilters extends Command {
             guildOnly: true,
             memberPermissions: ["ADMINISTRATOR"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-            nsfw: false,
             ownerOnly: false,
-            args: false,
             cooldown: 3000,
             requiredConfig: true,
         })

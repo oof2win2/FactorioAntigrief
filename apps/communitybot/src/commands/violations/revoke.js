@@ -18,9 +18,7 @@ class Revoke extends Command {
             guildOnly: true,
             memberPermissions: ["BAN_MEMBERS"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-            nsfw: false,
             ownerOnly: false,
-            args: false,
             cooldown: 3000,
             requiredConfig: true
         })

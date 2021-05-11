@@ -12,16 +12,13 @@ module.exports = class Command {
         aliases = new Array(), // an array of aliases
         botPermissions = new Array(), // an array of bot permissions, checked before command is run
         memberPermissions = new Array(), // an array of user permissions, checked before command is run
-        nsfw = false, // nsfw or not
         ownerOnly = false, // owner only, checked before command is run
-        args = false, // does your command require arguments
         cooldown = 5000, // gap between commands
         requiredConfig = false, // if guild config is required or not
-        accessLevel =  "Member", // command access level. Member, Moderator or Administrator. Overriden by permissions
     }) {
         const category = (dirname ? dirname.split(path.sep)[parseInt(dirname.split(path.sep).length - 1, 10)] : "Other"); // what command category the commands live in
         this.client = client; // bind client to this.client
-        this.config = { enabled, guildOnly, memberPermissions, botPermissions, nsfw, ownerOnly, cooldown, args, requiredConfig, accessLevel }; // some config options
+        this.config = { enabled, guildOnly, memberPermissions, botPermissions, ownerOnly, cooldown, requiredConfig }; // some config options
         this.help = { name, category, aliases, description, usage, examples }; // used for help command
     }
 };
