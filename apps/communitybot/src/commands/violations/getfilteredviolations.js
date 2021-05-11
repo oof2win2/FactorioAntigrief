@@ -14,7 +14,6 @@ class GetViolations extends Command {
             examples: ["{{p}}getfilteredviolations Windsinger"],
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: [],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,

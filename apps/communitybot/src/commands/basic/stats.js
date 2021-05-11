@@ -10,7 +10,6 @@ class Stats extends Command {
       category: "basic",
       dirname: __dirname,
       enabled: true,
-      guildOnly: true,
       memberPermissions: [],
       botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
       ownerOnly: false,

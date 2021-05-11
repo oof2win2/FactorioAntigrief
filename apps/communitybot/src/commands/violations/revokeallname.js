@@ -15,7 +15,6 @@ class RevokeAllname extends Command {
             examples: ["{{p}}revokeallname Windsinger"],
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: ["BAN_MEMBERS"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,

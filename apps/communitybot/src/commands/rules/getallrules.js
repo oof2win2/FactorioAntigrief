@@ -11,7 +11,6 @@ class GetAllRules extends Command {
             category: "rules",
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: [],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,

@@ -13,7 +13,6 @@ class SetFilters extends Command {
             category: "communities",
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: ["ADMINISTRATOR"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,
