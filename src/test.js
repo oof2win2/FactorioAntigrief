@@ -21,19 +21,19 @@
 // console.log(results)
 
 const configs = async () => {
-    return [
-        {
-            trustedCommunities: [],
-            ruleFilters: [],
-            _id: "60978843c7b6a373201b84a0",
-            communityname: "oof2win2's spam/dev",
-            guildid: '749943992719769613',
-            contact: 'oof2win2#3149 (test guild)',
-            moderatorroleId: '777986482962432060',
-            __v: 0,
-            apikey: 'potato'
-        }
-    ]
+	return [
+		{
+			trustedCommunities: [],
+			ruleFilters: [],
+			_id: "60978843c7b6a373201b84a0",
+			communityname: "oof2win2's spam/dev",
+			guildid: "749943992719769613",
+			contact: "oof2win2#3149 (test guild)",
+			moderatorroleId: "777986482962432060",
+			__v: 0,
+			apikey: "potato"
+		}
+	]
 }
 
 let a = configs().then((configs) => configs.map((CommunityConfig) => { delete CommunityConfig.apikey; return CommunityConfig}))
