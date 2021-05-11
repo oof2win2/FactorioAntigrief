@@ -15,7 +15,6 @@ class Revoke extends Command {
             examples: ["{{p}}revoke 60689a97674ac1edb15186f0"],
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: ["BAN_MEMBERS"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,

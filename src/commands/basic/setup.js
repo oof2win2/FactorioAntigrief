@@ -12,7 +12,6 @@ class Setup extends Command {
             category: "basic",
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: ["ADMINISTRATOR"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,

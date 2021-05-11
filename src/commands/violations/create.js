@@ -14,7 +14,6 @@ class CreateViolation extends Command {
             category: "violations",
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: ["BAN_MEMBERS"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,

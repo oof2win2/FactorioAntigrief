@@ -8,7 +8,6 @@ module.exports = class Command {
         examples = false, // examples, command and prefix **not** included
         dirname = false, // where the command is
         enabled = true, // if its enabled
-        guildOnly = false, // if you can only use it in DMs
         aliases = new Array(), // an array of aliases
         botPermissions = new Array(), // an array of bot permissions, checked before command is run
         memberPermissions = new Array(), // an array of user permissions, checked before command is run
@@ -18,7 +17,7 @@ module.exports = class Command {
     }) {
         const category = (dirname ? dirname.split(path.sep)[parseInt(dirname.split(path.sep).length - 1, 10)] : "Other"); // what command category the commands live in
         this.client = client; // bind client to this.client
-        this.config = { enabled, guildOnly, memberPermissions, botPermissions, ownerOnly, cooldown, requiredConfig }; // some config options
+        this.config = { enabled, memberPermissions, botPermissions, ownerOnly, cooldown, requiredConfig }; // some config options
         this.help = { name, category, aliases, description, usage, examples }; // used for help command
     }
 };

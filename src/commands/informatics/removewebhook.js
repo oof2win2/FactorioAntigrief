@@ -12,7 +12,6 @@ class RemoveWebhook extends Command {
             category: "informatics",
             dirname: __dirname,
             enabled: true,
-            guildOnly: true,
             memberPermissions: ["MANAGE_WEBHOOKS"],
             botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
             ownerOnly: false,
