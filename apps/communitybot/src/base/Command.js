@@ -21,7 +21,7 @@ module.exports = class Command {
     }) {
         const category = (dirname ? dirname.split(path.sep)[parseInt(dirname.split(path.sep).length - 1, 10)] : "Other"); // what command category the commands live in
         this.client = client; // bind client to this.client
-        this.conf = { enabled, guildOnly, memberPermissions, botPermissions, nsfw, ownerOnly, cooldown, args, requiredConfig, accessLevel }; // some config options
+        this.config = { enabled, guildOnly, memberPermissions, botPermissions, nsfw, ownerOnly, cooldown, args, requiredConfig, accessLevel }; // some config options
         this.help = { name, category, aliases, description, usage, examples }; // used for help command
     }
 };

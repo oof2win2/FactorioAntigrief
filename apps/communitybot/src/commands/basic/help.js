@@ -46,8 +46,8 @@ class Help extends Command {
           ? cmd.help.aliases.map(a => `\`${a}\``).join(",")
           : "No aliases"
         )
-        .addField("Member permissions requried", cmd.conf.memberPermissions.length > 0
-          ? cmd.conf.memberPermissions.map((p) => "`" + p + "`").join("\n")
+        .addField("Member permissions requried", cmd.config.memberPermissions.length > 0
+          ? cmd.config.memberPermissions.map((p) => "`" + p + "`").join("\n")
           : "No specific permission is required to execute this command"
         )
         .setColor(this.client.config.embeds.color)
