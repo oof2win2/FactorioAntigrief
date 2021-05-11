@@ -16,12 +16,12 @@ module.exports = class {
         let cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command))
         if (!cmd) return message.channel.send(`\`${prefix}${command}\` is not a valid command! Use \`fagc!help\` to view commands`)
 
-        if (!cmd.conf.enabled)
+        if (!cmd.config.enabled)
             return message.channel.send("This command is currently disabled!")
-        if (cmd.conf.ownerOnly && message.author.id !== client.config.owner.id)
+        if (cmd.config.ownerOnly && message.author.id !== client.config.owner.id)
             return message.channel.send(`Only the owner of ${this.client.user.username} can run this commands!`);
 
-        const rate = this.client.checkTimeout(message.author.id, cmd.conf.cooldown)
+        const rate = this.client.checkTimeout(message.author.id, cmd.config.cooldown)
         if (rate && !this.client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
         this.client.RateLimit.set(message.author.id, Date.now())
 
@@ -29,11 +29,11 @@ module.exports = class {
 
         if (message.guild) {
             let neededPermissions = [];
-            if (!cmd.conf.botPermissions.includes("EMBED_LINKS"))
-                cmd.conf.botPermissions.push("EMBED_LINKS")
+            if (!cmd.config.botPermissions.includes("EMBED_LINKS"))
+                cmd.config.botPermissions.push("EMBED_LINKS")
 
             // bot permissions
-            cmd.conf.botPermissions.forEach((perm) => {
+            cmd.config.botPermissions.forEach((perm) => {
                 if (!message.channel.permissionsFor(message.guild.me).has(perm))
                     neededPermissions.push(perm)
             })
@@ -42,14 +42,14 @@ module.exports = class {
 
             // user permissions
             neededPermissions = [];
-            cmd.conf.memberPermissions.forEach((perm) => {
+            cmd.config.memberPermissions.forEach((perm) => {
                 if (!message.channel.permissionsFor(message.member).has(perm))
                     neededPermissions.push(perm)
             })
             if (neededPermissions.length > 0)
                 return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`);
 
-            if (!message.channel.nsfw && cmd.conf.nsfw)
+            if (!message.channel.nsfw && cmd.config.nsfw)
                 return message.channel.send("You must execute this command in a channel that allows NSFW!");
         }
         

@@ -33,7 +33,7 @@ class FAGCBot extends Client {
     loadCommand(commandPath, commandName) { // load a command
         try {
             const props = new (require(`.${commandPath}${path.sep}${commandName}`))(this); // gets properties
-            props.conf.location = commandPath; // finds location
+            props.config.location = commandPath; // finds location
             if (props.init) {
                 props.init(this);
             }
