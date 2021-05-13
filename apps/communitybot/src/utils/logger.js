@@ -1,4 +1,5 @@
 const { bgBlue, black, green } = require("chalk")
+const dateformat = require("dateformat")
 
 // makes logs look pretty and uniform
 
@@ -10,19 +11,9 @@ function dateTimePad(value, digits) {
 	return number
 }
 
-function format(tDate) {
-	return (tDate.getFullYear() + "-" +
-        dateTimePad((tDate.getMonth() + 1), 2) + "-" +
-        dateTimePad(tDate.getDate(), 2) + " " +
-        dateTimePad(tDate.getHours(), 2) + ":" +
-        dateTimePad(tDate.getMinutes(), 2) + ":" +
-        dateTimePad(tDate.getSeconds(), 2) + "." +
-        dateTimePad(tDate.getMilliseconds(), 3))
-}
-
 module.exports = class Logger {
 	static log(content, type = "log") {
-		const date = `[${format(new Date(Date.now()))}]`
+		const date = `[${dateformat(Date.now(), "yyyy-mm-dd hh:MM:ss.l")}]`
 		switch (type) {
 		case "log":
 			return console.log(`${date} ${bgBlue(type.toUpperCase())} ${content}`)
