@@ -39,13 +39,12 @@ const init = async () => {
 		const evts = await readdir(`./events/${dir}/`)
 		// gets every dir inside events
 		evts.forEach(evt => {
+			// splits the event and gets first part. events are in the format "eventName.js"
 			const evtName = evt.split(".")[0]
-			// splits the event and gets first part
 			const event = require(`./events/${dir}/${evt}`)
 			// binds client to the event
 			client.on(evtName, (...args) => event(client, ...args))
 			delete require.cache[require.resolve(`./events/${dir}/${evt}`)]
-			// on event, call it
 		})
 	})
 	
