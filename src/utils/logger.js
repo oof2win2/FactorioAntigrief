@@ -3,14 +3,6 @@ const dateformat = require("dateformat")
 
 // makes logs look pretty and uniform
 
-function dateTimePad(value, digits) {
-	let number = value
-	while (number.toString().length < digits) {
-		number = "0" + number
-	}
-	return number
-}
-
 module.exports = class Logger {
 	static log(content, type = "log") {
 		const date = `[${dateformat(Date.now(), "yyyy-mm-dd hh:MM:ss.l")}]`
