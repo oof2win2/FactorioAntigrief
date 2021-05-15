@@ -3,7 +3,7 @@ const connection = database.connections.find((connection) => connection.n === "f
 
 const LogSchema = new connection.Schema({
     timestamp: Date,
-    api_key: String,
+    apikey: String,
     ip: String,
     responseBody: Object,
     requestBody: Object,

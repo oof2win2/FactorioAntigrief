@@ -2,7 +2,10 @@ const database = require("../database")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const AuthSchema = new connection.Schema({
-    communityname: String,
+	communityid: {
+		type: connection.Types.ObjectId,
+		ref: 'Communities'
+	},
     api_key: String,
     allowed_ips: [String]
 })

@@ -19,7 +19,7 @@ function logResponse(req, res, next) {
 		if (ip.includes(":")) ip = ip.slice(0, ip.indexOf(":"))
         LogSchema.create({
             timestamp: new Date(),
-            api_key: req.headers.apikey,
+            apikey: req.headers.apikey,
             ip: ip,
             responseBody: JSON.parse(body),
             requestBody: req.body,

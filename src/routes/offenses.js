@@ -16,12 +16,14 @@ router.get('/', function (req, res) {
 router.get('/getcommunity', async (req, res) => {
     if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')
         return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}`})
-    if (req.query.communityname === undefined || typeof (req.query.communityname) !== 'string')
-        return res.status(400).json({ error: "Bad Request", description: `communityname expected string, got ${typeof (req.query.communityname)} with value of ${req.query.communityname}`})
+    if (req.query.communityid === undefined || typeof (req.query.communityid) !== 'string')
+        return res.status(400).json({ error: "Bad Request", description: `communityid expected string, got ${typeof (req.query.communityid)} with value of ${req.query.communityid}`})
+	if (!ObjectId.isValid(req.query.communityid))
+		return res.status(400).json({ error: "Bad Request", description: `communityid is not correct ObjectID, got value of ${req.query.communityid}` })
     
     const offense = await OffenseModel.findOne({
         playername: req.query.playername,
-        communityname: req.query.communityname,
+        communityid: req.query.communityid,
     }).populate('violations')
     res.status(200).json(offense)
 })

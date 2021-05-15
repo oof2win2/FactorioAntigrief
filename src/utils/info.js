@@ -21,7 +21,7 @@ async function WebhookMessage(message) {
             const client = new WebhookClient(webhook.id, webhook.token)
             client.send(message).catch((error) => {
                 if (error.stack.includes("Unknown Webhook")) {
-                    console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildid}. Removing webhook from database..`)
+                    console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildid}. Removing webhook from database.`)
                     WebhookSchema.findByIdAndDelete(webhook._id)
                 }
             })
@@ -49,7 +49,7 @@ async function violationCreatedMessage(violation) {
             .addFields(
                 { name: "Playername", value: violation.playername },
                 { name: "Admin", value: violation.admin_name },
-                { name: "Community Name", value: violation.communityname },
+				{ name: "Community ID", value: violation.communityid },
                 { name: "Broken Rule", value: violation.broken_rule },
                 { name: "Automated", value: violation.automated },
                 { name: "Proof", value: violation.proof },
@@ -81,7 +81,7 @@ async function violationRevokedMessage(revocation) {
             .addFields(
                 { name: "Playername", value: revocation.playername },
                 { name: "Admin", value: revocation.admin_name },
-                { name: "Community Name", value: revocation.communityname },
+				{ name: "Community ID", value: revocation.communityid },
                 { name: "Broken Rules", value: revocation.broken_rule },
                 { name: "Automated", value: revocation.automated },
                 { name: "Proof", value: revocation.proof },
@@ -164,7 +164,7 @@ async function offenseRevokedMessage(offense) {
         offense.forEach((revocation) => {
             embed.addField(
                 `ID: ${revocation._id}`,
-                `Playername: ${revocation.playername}, Admin: ${revocation.admin_name}, Community name: ${revocation.communityname}\n` +
+				`Playername: ${revocation.playername}, Admin: ${revocation.admin_name}, Community ID: ${revocation.communityid}\n` +
                 `Broken rule: ${revocation.broken_rule}, Automated: ${revocation.automated}, Proof: ${revocation.proof}\n` +
                 `Description: ${revocation.description}, Revocation time: ${revocation.revokedTime}, Revoked by: ${revocation.revokedBy}\n`
             )

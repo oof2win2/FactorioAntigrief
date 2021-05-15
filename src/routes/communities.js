@@ -24,9 +24,7 @@ router.get('/getown', async (req, res) => {
     const auth = await AuthModel.findOne({ api_key: req.headers.apikey })
     if (!auth)
         return res.status(404).json({error:"Not Found", description: "Community with your API key was not found"})
-    const dbRes = await CommunityModel.findOne({
-        name: auth.communityname
-    })
+    const dbRes = await CommunityModel.findById(auth.communityid)
     res.status(200).json(dbRes)
 })
 router.get('/getall', async (req, res) => {
@@ -40,8 +38,7 @@ router.get('/getid', async (req, res) => {
     res.status(200).json(community)
 })
 
-// [X] get community config from guildid, censor api key
-// [X] get community database schema synced with both backend & bot
+// Interacts with the bot's database
 router.get('/getconfig', async (req, res) => {
     if (req.query.id === undefined || typeof(req.query.id) !== "string")
         return res.status(400).json({error: "Bad Request", description: `id must be Discord GuildID (snowflake), got ${req.query.id}`})
@@ -68,12 +65,13 @@ router.post('/setconfig', async (req, res) => {
 		trustedCommunities: req.body.trustedCommunities,
 		contact: req.body.contact,
 		moderatorroleId: req.body.moderatorroleId,
-		communityname: req.body.communityname,
+		communityid: req.body.communityid,
 	}, {new:true}).then((config) => config.toObject())
 	delete CommunityConfig.apikey
 	res.status(200).json(CommunityConfig)
 })
 
+// IP whitelists
 router.post('/addwhitelist', async (req, res) => {
     if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
         return res.status(400).json({error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}`})

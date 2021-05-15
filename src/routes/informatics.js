@@ -48,9 +48,9 @@ router.get('/getlogs', async (req, res) => {
     }, {}, {limit: parseInt(req.query.limit)})
     const logsFiltered = logsRaw.map((log) => {
 		log = log.toObject()
-        log.apiKey = undefined
-        log.ip = undefined
-        if (log.responseBody && log.responseBody.key) log.responseBody.key = undefined
+        delete log.apikey
+        delete log.ip
+        if (log.responseBody && log.responseBody.key) delete log.responseBody.key
         return log
     })
     res.status(200).json(logsFiltered)

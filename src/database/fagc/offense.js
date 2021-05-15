@@ -3,7 +3,10 @@ const connection = database.connections.find((connection) => connection.n === "f
 
 const OffenseModel = new connection.Schema({
     playername: String,
-    communityname: String,
+    communityid: {
+		type: connection.Types.ObjectId,
+		ref: "Communities"
+	},
 	violations: [{ type: connection.Types.ObjectId, ref: 'Violations' }]
 })
 

@@ -13,8 +13,6 @@ const informaticsRouter = require('./routes/informatics')
 const revocationRouter = require('./routes/revocations')
 const offenseRouter = require('./routes/offenses')
 
-// const testingRouter = require('./routes/testing')
-
 const app = express()
 
 // view engine setup
@@ -53,7 +51,6 @@ app.use('/v1/rules', ruleRouter)
 app.use('/v1/communities', communityRouter)
 app.use('/v1/violations', violationRouter)
 app.use('/v1/revocations', revocationRouter)
-// app.use('/v1/testing', testingRouter)
 app.use('/v1/offenses', offenseRouter)
 
 app.get('/', (req, res) => {
@@ -75,20 +72,5 @@ app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.json({error: 'error', message: err.message});
 });
-
-// mongoose.connect(config.mongoURI, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//     useFindAndModify: false
-// })
-
-// // connect to BOT database
-
-// mongoose.createConnection(config.mongoURI, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//     useFindAndModify: false
-// }).then((connection) => connection.useDb("bot")).then(() => {console.log("Connected to second database")})
-//     .catch(err => console.error('Error connecting to second database. Error:' + err, 'error'));
 
 module.exports = app;
