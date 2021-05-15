@@ -6,7 +6,7 @@
         ".vscode",
         ".git"
     ],
-    "watch": ["src", "config.js"],
+    "watch": ["src/", "config.js"],
     "env": {
         "NODE_ENV": "development"
     },

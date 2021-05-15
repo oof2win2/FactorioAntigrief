@@ -1,7 +1,8 @@
 const { MessageEmbed } = require("discord.js")
-const ConfigModel = require("../../database/schemas/config")
 const { getMessageResponse } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
+const ConfigModel = require("../../database/schemas/config")
+const fetch = require("node-fetch")
 class Setup extends Command {
 	constructor(client) {
 		super(client, {
@@ -25,6 +26,8 @@ class Setup extends Command {
 		}
 		message.channel.send("Hello! This is the bot setup process for this server")
 
+		const name = (await getMessageResponse(message.channel.send("Please type in this community's name"), messageFilter))?.content
+
 		const contact = (await getMessageResponse(message.channel.send("Please type in a contact for this server or the server's owner"), messageFilter))?.content
 		if (contact === undefined) return message.channel.send("Didn't send contact in time")
 
@@ -46,7 +49,7 @@ class Setup extends Command {
 			.setTimestamp()
 			.setDescription("Your FAGC Configuration")
 		embed.addFields(
-			{ name: "Community name", value: message.guild.name },
+			{ name: "Community name", value: name },
 			{ name: "Contact", value: contact },
 			{ name: "Moderator role", value: `<@&${role}>` },
 			{ name: "API key", value: apikey ? "Hidden" : "None" }
@@ -69,31 +72,26 @@ class Setup extends Command {
 			return message.channel.send("Community configuration cancelled")
 
 		try {
-			const originalData = await ConfigModel.findOne({
-				guildid: { $exists: true, $in: [message.guild.id] },
+			await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
+				$set: {apikey: apikey}
 			})
-			let config = {}
-			if (originalData) {
-				config = await ConfigModel.findOneAndReplace({ guildid: message.guild.id }, {
-					communityname: message.guild.name,
+			let config = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
+				method: "POST",
+				body: JSON.stringify({
+					communityname: name,
 					guildid: message.guild.id,
 					contact: contact,
 					moderatorroleId: role,
 					apikey: apikey,
-				}, { new: true })
-			} else {
-				config = await ConfigModel.create({
-					communityname: message.guild.name,
-					guildid: message.guild.id,
-					contact: contact,
-					moderatorroleId: role,
-				})
-			}
-			if (config.guildid && config.communityname) {
+				}),
+				headers: { "apikey": apikey, "content-type": "application/json" }
+			}).then((r) => r.json())
+			
+			if (config.moderatorroleId === role)
 				return message.channel.send("Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)")
-			} else {
-				console.error({ config })
-				return message.channel.send("Error setting configuration. Please check logs.")
+			else {
+				console.error({config}, Date.now())
+				return message.channel.send("Configuration unsuccessful. Please check logs")
 			}
 		} catch (error) {
 			console.error({ error })

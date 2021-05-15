@@ -64,6 +64,7 @@ class SetFilters extends Command {
 					embed.fields = []
 				}
 				let community = communities.find((community) => community._id === trustedCommunityID)
+				console.log(community)
 				embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
 			})
 			message.channel.send(embed)
