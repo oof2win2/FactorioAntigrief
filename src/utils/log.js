@@ -15,10 +15,12 @@ function logResponse(req, res, next) {
         if (chunk)
             chunks.push(chunk);
         var body = Buffer.concat(chunks).toString('utf8')
+		let ip = req.get('host')
+		if (ip.includes(":")) ip = ip.slice(0, ip.indexOf(":"))
         LogSchema.create({
             timestamp: new Date(),
             api_key: req.headers.apikey,
-            ip: req.get('host').slice(0, req.get('host').indexOf(":")),
+            ip: ip,
             responseBody: JSON.parse(body),
             requestBody: req.body,
             endpointAddress: req.originalUrl
