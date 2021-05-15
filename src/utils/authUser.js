@@ -1,4 +1,4 @@
-const authentication = require("../database/schemas/authentication")
+const authentication = require("../database/fagc/authentication")
 
 /**
  * @description Checks the authentication of a user by searching the database with the API key

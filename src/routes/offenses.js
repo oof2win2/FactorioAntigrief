@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const OffenseModel = require("../database/schemas/offense")
-// const AuthModel = require("../database/schemas/authentication")
-// const CommunityModel = require("../database/schemas/community")
-// const RevocationModel = require("../database/schemas/revocation")
-// const ViolationModel = require("../database/schemas/violation")
+const OffenseModel = require("../database/fagc/offense")
+// const AuthModel = require("../database/fagc/authentication")
+// const CommunityModel = require("../database/fagc/community")
+// const RevocationModel = require("../database/fagc/revocation")
+// const ViolationModel = require("../database/fagc/violation")
 const ObjectId = require('mongoose').Types.ObjectId
 // const { offenseRevokedMessage } = require("../utils/info")
 

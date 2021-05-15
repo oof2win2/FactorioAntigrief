@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const WebhookSchema = require("../database/schemas/webhook")
-const LogSchema = require("../database/schemas/log")
+const WebhookSchema = require("../database/fagc/webhook")
+const LogSchema = require("../database/fagc/log")
 const { WebhookClient } = require("discord.js")
 
 /* GET home page. */
@@ -47,7 +47,8 @@ router.get('/getlogs', async (req, res) => {
         timestamp: { $gte: parseInt(req.query.afterDate || 0) }
     }, {}, {limit: parseInt(req.query.limit)})
     const logsFiltered = logsRaw.map((log) => {
-        log.api_key = undefined
+		log = log.toObject()
+        log.apiKey = undefined
         log.ip = undefined
         if (log.responseBody && log.responseBody.key) log.responseBody.key = undefined
         return log

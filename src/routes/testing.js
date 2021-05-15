@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const ViolationModel = require("../database/schemas/violation")
-const OffenseModel = require("../database/schemas/offense");
-const RevocationModel = require('../database/schemas/revocation');
+const ViolationModel = require("../database/fagc/violation")
+const OffenseModel = require("../database/fagc/offense");
+const RevocationModel = require('../database/fagc/revocation');
 
 
 /* GET home page. */

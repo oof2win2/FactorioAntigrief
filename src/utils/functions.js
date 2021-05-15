@@ -1,4 +1,4 @@
-const AuthSchema = require("../database/schemas/authentication")
+const AuthSchema = require("../database/fagc/authentication")
 
 module.exports = {
     getCommunity

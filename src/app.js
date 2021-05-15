@@ -1,12 +1,32 @@
+const config = require("../config")
+const mongoose = require("mongoose")
+
+// create database connections first as like everything uses them
+// config.dbConnections.forEach((connectionConfig) => {
+// 	mongoose.createConnection(config.mongoURI, Object.assign(config.dbOptions, connectionConfig))
+// 		.then((db) => {
+// 			console.log(`Database "${db.name}" connected`)
+// 		}).catch(err => console.log(`Error connecting to database. Error: ${err}`))
+// })
+// mongoose.createConnection(config.mongoURI, Object.assign(config.dbOptions, {
+// 	dbName: "fagc"
+// })).then((db) => {
+// 	console.log(`Database ${db.name} connected`)
+// }).catch(err => console.log("Error connecting to database. Error:" + err, "error"))
+
+// mongoose.createConnection(config.mongoURI, Object.assign(config.dbOptions, {
+// 	dbName: "bot"
+// })).then((db) => {
+// 	console.log(`Database ${db.name} connected`)
+// }).catch(err => console.log("Error connecting to database. Error:" + err, "error"))
+
 const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
-const mongoose = require("mongoose")
 
 const logger = require('./utils/log')
 const authUser = require("./utils/authUser")
-const config = require("../config.json")
 
 const ruleRouter = require('./routes/rules')
 const communityRouter = require('./routes/communities')
@@ -78,17 +98,19 @@ app.use(function (err, req, res) {
     res.json({error: 'error', message: err.message});
 });
 
-mongoose.connect(config.mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-})
-// connect to BOT database
-mongoose.createConnection(config.mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-}).then((connection) => connection.useDb("bot")).then(() => {console.log("Connected to second database")})
-    .catch(err => console.error('Error connecting to second database. Error:' + err, 'error'));
+// mongoose.connect(config.mongoURI, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     useFindAndModify: false
+// })
+
+// // connect to BOT database
+
+// mongoose.createConnection(config.mongoURI, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     useFindAndModify: false
+// }).then((connection) => connection.useDb("bot")).then(() => {console.log("Connected to second database")})
+//     .catch(err => console.error('Error connecting to second database. Error:' + err, 'error'));
 
 module.exports = app;

@@ -1,4 +1,4 @@
-const LogSchema = require("../database/schemas/log")
+const LogSchema = require("../database/fagc/log")
 
 // https://stackoverflow.com/questions/19215042/express-logging-response-body
 

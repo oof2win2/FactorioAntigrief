@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const RevocationModel = require("../database/schemas/revocation")
+const RevocationModel = require("../database/fagc/revocation")
 
 router.get('/getrevocations', async (req, res) => {
     if (req.query.playername === undefined || typeof (req.query.playername) !== 'string')

@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const ViolationModel = require("../database/schemas/violation")
-const OffenseModel = require("../database/schemas/offense")
-const RevocationModel = require("../database/schemas/revocation")
-const RuleModel = require("../database/schemas/rule")
+const ViolationModel = require("../database/fagc/violation")
+const OffenseModel = require("../database/fagc/offense")
+const RevocationModel = require("../database/fagc/revocation")
+const RuleModel = require("../database/fagc/rule")
 const ObjectId = require('mongoose').Types.ObjectId
 const { getCommunity } = require("../utils/functions");
 const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")

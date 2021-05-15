@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const CommunityModel = require("../database/schemas/community")
-const AuthModel = require("../database/schemas/authentication")
+const CommunityModel = require("../database/fagc/community")
+const AuthModel = require("../database/fagc/authentication")
+const CommunityConfigModel = require("../database/bot/community")
 // const cryptoRandomString = require('crypto-random-string')
 const ObjectId = require('mongoose').Types.ObjectId
 const mongoose = require("mongoose")
@@ -41,17 +42,19 @@ router.get('/getid', async (req, res) => {
     res.status(200).json(community)
 })
 
-// TODO
 // [X] get community config from guildid, censor api key
-// [ ] get community database schema synced with both backend & bot
+// [X] get community database schema synced with both backend & bot
 router.get('/getconfig', async (req, res) => {
     if (req.query.id === undefined || typeof(req.query.id) !== "string")
         return res.status(400).json({error: "Bad Request", description: `id must be Discord GuildID (snowflake), got ${req.query.id}`})
-    let CommunityConfig = await mongoose.connections[1].client.db("bot").collection("configs").findOne({
-        guildid: req.query.id
-    })
-    CommunityConfig.apikey = undefined
-    console.log(CommunityConfig)
+	let CommunityConfig = await CommunityConfigModel.findOne({
+		guildid: req.query.id
+	})
+
+	if (CommunityConfig) {
+		CommunityConfig = CommunityConfig.toObject()
+		delete CommunityConfig.apikey
+	} 
     res.status(200).json(CommunityConfig)
 })
 

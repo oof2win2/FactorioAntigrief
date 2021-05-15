@@ -1,5 +1,5 @@
 const { WebhookClient, MessageEmbed } = require("discord.js")
-const WebhookSchema = require("../database/schemas/webhook")
+const WebhookSchema = require("../database/fagc/webhook")
 const WebSocket = require("ws")
 const wss = new WebSocket.Server({ port: 8001 });
 
