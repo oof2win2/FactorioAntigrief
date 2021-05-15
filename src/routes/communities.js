@@ -5,7 +5,6 @@ const AuthModel = require("../database/fagc/authentication")
 const CommunityConfigModel = require("../database/bot/community")
 // const cryptoRandomString = require('crypto-random-string')
 const ObjectId = require('mongoose').Types.ObjectId
-const mongoose = require("mongoose")
 // const { communityCreatedMessage, communityRemovedMessage } = require("../utils/info")
 
 /* GET home page. */
@@ -20,7 +19,6 @@ router.get('/', function (req, res) {
  * @returns {object} 200 - Object of the community that the API key in the request headers belongs to
  */
 router.get('/getown', async (req, res) => {
-    console.log(req.headers.apikey)
     if (req.headers.apikey === undefined)
         return res.status(400).json({ error: "Bad Request", description: "No way to find you community without an API key" })
     const auth = await AuthModel.findOne({ api_key: req.headers.apikey })
@@ -56,6 +54,24 @@ router.get('/getconfig', async (req, res) => {
 		delete CommunityConfig.apikey
 	} 
     res.status(200).json(CommunityConfig)
+})
+router.post('/setconfig', async (req, res) => {
+	let OldConfig = await CommunityConfigModel.findOne({
+		apikey: req.headers.apikey
+	})
+	if (!OldConfig)
+		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
+	let CommunityConfig = await CommunityConfigModel.findOneAndReplace(OldConfig.toObject(), {
+		guildid: OldConfig.guildid,
+		apikey: req.headers.apikey,
+		ruleFilters: req.body.ruleFilters,
+		trustedCommunities: req.body.trustedCommunities,
+		contact: req.body.contact,
+		moderatorroleId: req.body.moderatorroleId,
+		communityname: req.body.communityname,
+	}, {new:true}).then((config) => config.toObject())
+	delete CommunityConfig.apikey
+	res.status(200).json(CommunityConfig)
 })
 
 router.post('/addwhitelist', async (req, res) => {

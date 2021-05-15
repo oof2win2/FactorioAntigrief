@@ -1,25 +1,3 @@
-const config = require("../config")
-const mongoose = require("mongoose")
-
-// create database connections first as like everything uses them
-// config.dbConnections.forEach((connectionConfig) => {
-// 	mongoose.createConnection(config.mongoURI, Object.assign(config.dbOptions, connectionConfig))
-// 		.then((db) => {
-// 			console.log(`Database "${db.name}" connected`)
-// 		}).catch(err => console.log(`Error connecting to database. Error: ${err}`))
-// })
-// mongoose.createConnection(config.mongoURI, Object.assign(config.dbOptions, {
-// 	dbName: "fagc"
-// })).then((db) => {
-// 	console.log(`Database ${db.name} connected`)
-// }).catch(err => console.log("Error connecting to database. Error:" + err, "error"))
-
-// mongoose.createConnection(config.mongoURI, Object.assign(config.dbOptions, {
-// 	dbName: "bot"
-// })).then((db) => {
-// 	console.log(`Database ${db.name} connected`)
-// }).catch(err => console.log("Error connecting to database. Error:" + err, "error"))
-
 const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
@@ -61,7 +39,7 @@ const authMiddleware = async (req, res, next) => {
     if (authenticated === 404)
         return res.status(404).json({error: "AuthenticationError", description: "API key is wrong"})
     if (authenticated === 401)
-        return res.status(410).json({error: "AuthenticationError", description: "IP adress whitelist mismatch"})
+        return res.status(401).json({error: "AuthenticationError", description: "IP adress whitelist mismatch"})
     next()
 }
 
