@@ -24,13 +24,6 @@ class Genbanlist extends Command {
 		if (!config.trustedCommunities) return message.reply("Please set trusted communities first")
 		if (!config.ruleFilters) return message.reply("Please set rule filters first")
 		message.reply("Processing banlist. Please wait")
-		let trustedCommunitiesProm = config.trustedCommunities.map(id => {
-			return fetch(`${this.client.config.apiurl}/communities/getid?id=${id}`).then(res => res.json())
-		})
-
-		// get trusted communities
-		const trustedCommunities = await Promise.all(trustedCommunitiesProm)
-		const trustedCommunityNames = trustedCommunities.map((community) => community.name)
 
 		// get all violations based off of followed rules
 		let rulePromises = config.ruleFilters.map((rule) => {
@@ -45,8 +38,12 @@ class Genbanlist extends Command {
 		})
 
 		// filter violations so only trusted communities are on the banlist
+		console.log(violationArr)
+		console.log(config.trustedCommunities)
+		violationArr = violationArr.filter((violation) => config.trustedCommunities.includes(violation.communityid))
+		// remove duplicates
+		console.log(violationArr)
 		violationArr = violationArr.filter((violation, i) => violationArr.indexOf(violation) === i)
-		violationArr = violationArr.filter((violation) => trustedCommunityNames.includes(violation.communityname))
 
 		// create & send banlist
 		let banlist = violationArr.map((violation) => {

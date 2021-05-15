@@ -82,9 +82,8 @@ const trustedRules = async (communities) => {
 // collect statistics and put them to the server
 const collectStatistics = async () => {
 	let communitySettings = await ConfigModel.find({})
-		.then((configs) => configs.map((CommunityConfig) => CommunityConfig._doc))
+		.then((configs) => configs.map((CommunityConfig) => CommunityConfig.toObject()))
 		.then((configs) => configs.map((CommunityConfig) => { delete CommunityConfig.apikey; return CommunityConfig }))
-
 	let rules = await trustedRules(communitySettings)
 	let communities = await trustedCommunities(communitySettings)
 
@@ -92,6 +91,7 @@ const collectStatistics = async () => {
 		ruleGauge.set({ id: rule.rule._id, shortdesc: rule.rule.shortdesc }, rule.count)
 	})
 	communities.forEach((community) => {
+		if (!community.community || community.community._id) return
 		communityGauge.set({
 			id: community.community._id,
 			name: community.community.name,
