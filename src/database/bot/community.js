@@ -8,6 +8,9 @@ const ConfigSchema = new connection.Schema({
 		type: String,
 		required: true
 	},
+	communityid: {
+		type: connection.Types.ObjectId,
+	},
 	guildid: {
 		type: String,
 		required: true,

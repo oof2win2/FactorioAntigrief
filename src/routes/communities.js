@@ -65,8 +65,14 @@ router.post('/setconfig', async (req, res) => {
 		trustedCommunities: req.body.trustedCommunities,
 		contact: req.body.contact,
 		moderatorroleId: req.body.moderatorroleId,
-		communityid: req.body.communityid,
+		communityid: OldConfig.communityid,
+		communityname: req.body.communityname
 	}, {new:true}).then((config) => config.toObject())
+	await CommunityModel.findOneAndUpdate({ guildid: OldConfig.guildid}, {
+		guildid: OldConfig.guildid,
+		name: req.body.communityname,
+		contact: req.body.contact,
+	})
 	delete CommunityConfig.apikey
 	res.status(200).json(CommunityConfig)
 })

@@ -3,7 +3,8 @@ const connection = database.connections.find((connection) => connection.n === "f
 
 const CommunitySchema = new connection.Schema({
     name: String,
-    contact: String
+    contact: String,
+	guildid: String,
 })
 
 module.exports = connection.model('Communities', CommunitySchema)
