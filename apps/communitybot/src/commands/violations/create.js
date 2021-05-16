@@ -42,7 +42,6 @@ class CreateViolation extends Command {
 		if (proof.toLowerCase() === "none") proof = undefined
 
 		const timestamp = (new Date).toISOString()
-		const admin_name = message.author.tag
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Violations")
@@ -51,7 +50,7 @@ class CreateViolation extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`Create FAGC violation for \`${playername}\``)
 		embed.addFields(
-			{ name: "Admin name", value: admin_name, inline: true },
+			{ name: "Admin user", value: `<@${message.author.id}> | ${message.author.tag}`, inline: true },
 			{ name: "Player name", value: playername, inline: true },
 			{ name: "Rule ID", value: ruleid, inline: true },
 			{ name: "Violation description", value: desc, inline: true },
@@ -69,7 +68,6 @@ class CreateViolation extends Command {
 		} catch {
 			return message.channel.send("Timed out.")
 		}
-
 		let reaction = reactions.first()
 		if (reaction.emoji.name === "❌")
 			return message.channel.send("Violation creation cancelled")
@@ -79,7 +77,7 @@ class CreateViolation extends Command {
 				method: "POST",
 				body: JSON.stringify({
 					playername: playername,
-					admin_name: admin_name,
+					admin_id: message.author.id,
 					broken_rule: ruleid,
 					proof: proof,
 					description: desc,
