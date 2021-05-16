@@ -38,7 +38,7 @@ class GetAllViolations extends Command {
 				embed.fields = []
 			}
 			embed.addField(violation._id,
-				`By: ${violation.admin_name}\nCommunity name: ${violation.communityname}\n` +
+				`By: ${violation.admin_name}\nCommunity ID: ${violation.communityid}\n` +
                 `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
                 `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
                 `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,

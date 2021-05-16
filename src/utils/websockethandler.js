@@ -18,7 +18,7 @@ async function SocketMessage (message, channels) {
 			.addFields(
 				{ name: "Playername", value: message.playername },
 				{ name: "Admin", value: message.admin_name },
-				{ name: "Community Name", value: message.communityname },
+				{ name: "Community ID", value: message.communityid },
 				{ name: "Broken Rule", value: message.broken_rule },
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },
@@ -39,7 +39,7 @@ async function SocketMessage (message, channels) {
 			.addFields(
 				{ name: "Playername", value: message.playername },
 				{ name: "Admin", value: message.admin_name },
-				{ name: "Community Name", value: message.communityname },
+				{ name: "Community ID", value: message.communityid },
 				{ name: "Broken Rules", value: message.broken_rule },
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },

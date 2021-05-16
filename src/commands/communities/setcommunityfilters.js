@@ -48,7 +48,6 @@ class SetFilters extends Command {
 
 		let trustedCommunities = []
 		const onEnd = async () => {
-			ConfigModel.findOne({ guildid: message.guild.id }).then(() => { })
 			await ConfigModel.findOneAndUpdate({ guildid: message.guild.id }, {
 				$set: { "trustedCommunities": trustedCommunities }
 			}, { new: true }).then(() => { })
@@ -64,7 +63,6 @@ class SetFilters extends Command {
 					embed.fields = []
 				}
 				let community = communities.find((community) => community._id === trustedCommunityID)
-				console.log(community)
 				embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
 			})
 			message.channel.send(embed)
