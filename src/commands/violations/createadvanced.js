@@ -9,7 +9,7 @@ class CreateViolationAdvanced extends Command {
 		super(client, {
 			name: "createadvanced",
 			description: "Creates a violation - Advanced method",
-			aliases: [],
+			aliases: ["banadvanced"],
 			category: "violations",
 			dirname: __dirname,
 			enabled: true,
@@ -32,8 +32,10 @@ class CreateViolationAdvanced extends Command {
 		const playername = (await getMessageResponse(message.channel.send("Please type in a playername for the violation"), messageFilter))?.content
 		if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-		const admin_name = (await getMessageResponse(message.channel.send("Please type in admin name for the violation"), messageFilter))?.content
-		if (admin_name === undefined) return message.channel.send("Didn't send admin_name in time")
+		const admin_message = (await getMessageResponse(message.channel.send("Please type in admin user ID for the violation"), messageFilter))
+		if (admin_message === undefined) return message.channel.send("Didn't send admin user ID in time")
+		const admin_user = admin_message.mentions.users.first() || this.client.users.cache.get(admin_message.content) || await this.client.users.fetch(admin_message.content)
+		if (!admin_user) return message.channel.send("Sent user is not valid!")
 
 		const ruleid = (await getMessageResponse(message.channel.send("Please type in ObjectID of rule that has been broken"), messageFilter))?.content
 		if (ruleid === undefined) return message.channel.send("Didn't send rule ObjectID in time")
@@ -58,7 +60,7 @@ class CreateViolationAdvanced extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`Create FAGC violation for \`${playername}\``)
 		embed.addFields(
-			{ name: "Admin name", value: admin_name, inline: true },
+			{ name: "Admin user", value: `<@${admin_user.id}> | ${admin_user.tag}`, inline: true },
 			{ name: "Player name", value: playername, inline: true },
 			{ name: "Rule ID", value: ruleid, inline: true },
 			{ name: "Violation description", value: desc, inline: true },
@@ -83,7 +85,7 @@ class CreateViolationAdvanced extends Command {
 				method: "POST",
 				body: JSON.stringify({
 					playername: playername,
-					admin_name: admin_name,
+					admin_id: admin_user.id,
 					broken_rule: ruleid,
 					proof: proof,
 					description: desc,

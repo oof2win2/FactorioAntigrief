@@ -39,18 +39,18 @@ class GetViolations extends Command {
 		const trustedCommunities = communities.filter((community) => {
 			if (config.trustedCommunities.some((trustedID) => { return trustedID === community._id })) return community
 		})
-		console.log(config.trustedCommunities, trustedCommunities)
 		let i = 0
-		violations.forEach((violation) => {
+		violations.forEach(async (violation) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
 			if (trustedCommunities.some((community) => community._id === violation.communityid)) {
+				const admin = this.client.users.cache.get(violation.admin_name) || await this.client.users.fetch(violation.admin_name)
 				embed.addField(violation._id,
-					`By: ${violation.admin_name}\nCommunity ID: ${violation.communityid}\n` +
+					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${violation.communityid}\n` +
                     `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
-                    `Description: ${violation.description}\nAutomated: ${violation.automated}` +
+                    `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
                     `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
 					true
 				)

@@ -32,13 +32,14 @@ class GetAllViolations extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Violations of player \`${args[0]}\``)
 
-		violations.forEach((violation, i) => {
+		violations.forEach(async (violation, i) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
+			const admin = this.client.users.cache.get(violation.admin_name) || await this.client.users.fetch(violation.admin_name)
 			embed.addField(violation._id,
-				`By: ${violation.admin_name}\nCommunity ID: ${violation.communityid}\n` +
+				`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${violation.communityid}\n` +
                 `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
                 `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
                 `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
