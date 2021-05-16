@@ -12,7 +12,7 @@ const ViolationSchema = new connection.Schema({
     description: String,
     automated: Boolean,
     violated_time: Date,
-    admin_name: String,
+    admin_id: String,
 })
 
 module.exports = connection.model('Violations', ViolationSchema)

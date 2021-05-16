@@ -48,7 +48,7 @@ async function violationCreatedMessage(violation) {
             .setColor("ORANGE")
             .addFields(
                 { name: "Playername", value: violation.playername },
-                { name: "Admin", value: violation.admin_name },
+                { name: "Admin ID", value: violation.admin_id },
 				{ name: "Community ID", value: violation.communityid },
                 { name: "Broken Rule", value: violation.broken_rule },
                 { name: "Automated", value: violation.automated },
@@ -80,7 +80,7 @@ async function violationRevokedMessage(revocation) {
             .setColor("ORANGE")
             .addFields(
                 { name: "Playername", value: revocation.playername },
-                { name: "Admin", value: revocation.admin_name },
+                { name: "Admin ID", value: revocation.admin_id },
 				{ name: "Community ID", value: revocation.communityid },
                 { name: "Broken Rules", value: revocation.broken_rule },
                 { name: "Automated", value: revocation.automated },
@@ -164,7 +164,7 @@ async function offenseRevokedMessage(offense) {
         offense.forEach((revocation) => {
             embed.addField(
                 `ID: ${revocation._id}`,
-				`Playername: ${revocation.playername}, Admin: ${revocation.admin_name}, Community ID: ${revocation.communityid}\n` +
+				`Playername: ${revocation.playername}, Admin ID: ${revocation.admin_id}, Community ID: ${revocation.communityid}\n` +
                 `Broken rule: ${revocation.broken_rule}, Automated: ${revocation.automated}, Proof: ${revocation.proof}\n` +
                 `Description: ${revocation.description}, Revocation time: ${revocation.revokedTime}, Revoked by: ${revocation.revokedBy}\n`
             )
