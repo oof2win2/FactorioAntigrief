@@ -1,5 +1,6 @@
 const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
+const fetch = require("node-fetch")
 class SetAPIKey extends Command {
 	constructor(client) {
 		super(client, {
@@ -24,8 +25,12 @@ class SetAPIKey extends Command {
 		const apikey = args[0]
 
 		try {
+			const community = await fetch(`${this.client.config.apiurl}/communities/getown`, {
+				headers: {"apikey": apikey}
+			}).then((c) => c.json())
+			if (!community) return message.reply("That API key is not associated with a community")
 			const config = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id }, {
-				$set: { "apikey": apikey }
+				$set: { "apikey": apikey , "communityid": community._id }
 			}, { new: true })
 			if (config.apikey && config.guildid === message.guild.id) {
 				return message.channel.send(`${message.author} set the API key successfully!`)

@@ -41,8 +41,9 @@ class Revoke extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Violation \`${violation._id}\` of player \`${violation.playername}\` in community ${config.communityname}`)
+		const creator = this.client.users.cache.get(violation.admin_id) || await this.client.users.fetch(violation.admin_id)
 		embed.addFields(
-			{ name: "Admin name", value: violation.admin_name },
+			{ name: "Admin", value: `<@${creator.id}> | ${creator.tag}` },
 			{ name: "Broken rule ID", value: violation.broken_rule },
 			{ name: "Proof", value: violation.proof },
 			{ name: "Description", value: violation.description },
@@ -74,7 +75,7 @@ class Revoke extends Command {
 				method: "DELETE",
 				body: JSON.stringify({
 					id: violationID,
-					admin_name: message.author.tag
+					admin_id: message.author.id
 				}),
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})
