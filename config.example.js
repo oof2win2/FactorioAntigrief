@@ -1,9 +1,23 @@
 module.exports = {
-    token: "", // Your Discord bot token
-    mongoURI: "", // Your MongoDB connection string
-    prefix: "fagc!", // Your bot prefix
-    apiurl: "http://localhost:3000/v1", // Your API URL
-    adminIDs: [ // Discord UserIDs of admins
-        "429696038266208258"
-    ],
+	token: "", // Discord bot token
+	mongoURI: "", // MongoDB connection string
+	dbOptions: { // DB options
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+		useFindAndModify: false
+	},
+	prefix: "fagc!", // Bot prefix
+	apiurl: "http://localhost:3000/v1", // Base API url
+	adminIDs: [ // Admins that can restart the bot etc
+		"429696038266208258"
+	],
+	embeds: { // Embed configs
+		color: "GREEN",
+		footer: "FAGC Team | oof2win2"
+	},
+	emotes: { // Some emotes
+		error: ":x:",
+		success: "<:success:841385407790317588>"
+	},
+	fagcInvite: "FAGC INVITE STRING"
 }
