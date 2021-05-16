@@ -24,7 +24,7 @@ class GetUserById extends Command {
 		const user = this.client.users.cache.get(uid) || await this.client.users.fetch(uid)
 		if (!user && !user.id) return message.reply("This user could not be found. They may not exist")
 		let embed = new MessageEmbed()
-			.setTitle("FAGC Violation Revocation")
+			.setTitle("FAGC User Info")
 			.setColor(this.client.config.embeds.color)
 			.setFooter(this.client.config.embeds.footer)
 			.setTimestamp()
