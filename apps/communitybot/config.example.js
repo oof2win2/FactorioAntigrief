@@ -8,7 +8,7 @@ module.exports = {
 	},
 	prefix: "fagc!", // Bot prefix
 	apiurl: "http://localhost:3000/v1", // Base API url
-	adminIDs: [ // Admins that can restart the bot etc
+	adminIDs: [ // Admins user IDs that can restart the bot etc. Shouldn't be a large number of people
 		"429696038266208258"
 	],
 	embeds: { // Embed configs

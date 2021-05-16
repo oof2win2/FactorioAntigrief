@@ -9,7 +9,7 @@ class CreateViolationAdvanced extends Command {
 		super(client, {
 			name: "createadvanced",
 			description: "Creates a violation - Advanced method",
-			aliases: ["banadvanced"],
+			aliases: ["banadvanced", "createadv", "banadv"],
 			category: "violations",
 			dirname: __dirname,
 			enabled: true,
