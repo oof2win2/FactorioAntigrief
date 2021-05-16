@@ -54,6 +54,13 @@ class Setup extends Command {
 			{ name: "Moderator role", value: `<@&${role}>` },
 			{ name: "API key", value: apikey ? "Hidden" : "None" }
 		)
+		let community
+		if (apikey !== "none") {
+			community = await fetch(`${this.client.config.apiurl}/communities/getown`, {
+				headers: { "apikey": apikey }
+			}).then((c) => c.json())
+			if (!community) return message.reply("That API key is not associated with a community")
+		}
 		message.channel.send(embed)
 		const confirm = await message.channel.send("Are you sure you want these settings applied?")
 		confirm.react("✅")
@@ -75,15 +82,17 @@ class Setup extends Command {
 			await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
 				$set: {apikey: apikey}
 			})
+			let ConfigToSet = {
+				communityname: name,
+				guildid: message.guild.id,
+				contact: contact,
+				moderatorroleId: role,
+				apikey: apikey,
+			}
+			if (community) ConfigToSet.communityid = community._id
 			let config = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
 				method: "POST",
-				body: JSON.stringify({
-					communityname: name,
-					guildid: message.guild.id,
-					contact: contact,
-					moderatorroleId: role,
-					apikey: apikey,
-				}),
+				body: JSON.stringify(ConfigToSet),
 				headers: { "apikey": apikey, "content-type": "application/json" }
 			}).then((r) => r.json())
 			
