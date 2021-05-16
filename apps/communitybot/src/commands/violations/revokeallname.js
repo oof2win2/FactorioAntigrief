@@ -24,9 +24,8 @@ class RevokeAllname extends Command {
 	async run(message, args, config) {
 		if (!args[0]) return message.reply("Provide a player name to get violations of")
 		const playername = args.shift()
-
 		if (!config.apikey) return message.reply("No API key set")
-		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${playername}&communityname=${config.communityname}`)
+		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${playername}&communityid=${config.communityid}`)
 		const offense = await offenseRaw.json()
 		if (offense === null)
 			return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
@@ -38,13 +37,14 @@ class RevokeAllname extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\` in community ${config.communityname}`)
 
-		offense.violations.forEach((violation, i) => {
+		offense.violations.forEach(async (violation, i) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
+			const admin = this.client.users.cache.get(violation.admin_id) || await this.client.users.fetch(violation.admin_id)
 			embed.addField(violation._id,
-				`By: ${violation.admin_name}\nBroken rule: ${violation.broken_rule}\n` +
+				`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.broken_rule}\n` +
                 `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
                 `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violated_time)).toUTCString()}`,
 				true
@@ -74,13 +74,12 @@ class RevokeAllname extends Command {
 				method: "DELETE",
 				body: JSON.stringify({
 					playername: playername,
-					admin_name: message.author.tag
+					admin_id: message.author.id
 				}),
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})
 			const response = await responseRaw.json()
-
-			if (response._id && response.violations && response.playername && response.communityname) {
+			if (response._id && response.violations && response.playername && response.communityid) {
 				return message.channel.send("Offense revoked!")
 			} else {
 				return handleErrors(message, response)
