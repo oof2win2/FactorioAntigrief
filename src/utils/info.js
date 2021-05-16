@@ -3,6 +3,8 @@ const WebhookSchema = require("../database/fagc/webhook")
 const WebSocket = require("ws")
 const wss = new WebSocket.Server({ port: 8001 });
 
+let WebhookQueue = []
+
 module.exports = {
     WebhookMessage,
     WebsocketMessage,
@@ -14,21 +16,29 @@ module.exports = {
     communityCreatedMessage,
     communityRemovedMessage,
 }
-async function WebhookMessage(message) {
-    const webhooks = await WebhookSchema.find()
-    webhooks.forEach(async (webhook) => {
-        try {
-            const client = new WebhookClient(webhook.id, webhook.token)
-            client.send(message).catch((error) => {
-                if (error.stack.includes("Unknown Webhook")) {
-                    console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildid}. Removing webhook from database.`)
-                    WebhookSchema.findByIdAndDelete(webhook._id)
-                }
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    })
+async function SendWebhookMessages() {
+	let embeds = WebhookQueue.slice(0, 10)
+	if (!embeds[0]) return
+	WebhookQueue = WebhookQueue.slice(10)
+	const webhooks = await WebhookSchema.find()
+	webhooks.forEach(async (webhook) => {
+		try {
+			const client = new WebhookClient(webhook.id, webhook.token)
+			client.send({embeds: embeds, username: "FAGC Notifier"}).catch((error) => {
+				if (error.stack.includes("Unknown Webhook")) {
+					console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildid}. Removing webhook from database.`)
+					WebhookSchema.findByIdAndDelete(webhook._id)
+				}
+			})
+		} catch (error) {
+			console.log(error)
+		}
+	})
+}
+setInterval(SendWebhookMessages, 5000)
+
+function WebhookMessage(message) {
+    WebhookQueue.push(message)
 }
 async function WebsocketMessage(message) {
     wss.clients.forEach((client) => {
@@ -58,10 +68,7 @@ async function violationCreatedMessage(violation) {
                 { name: "Violation Time", value: violation.violated_time }
             )
             .setTimestamp()
-        let message = {}
-        message.embeds = [violationEmbed]
-        message.username = "FAGC Notifier"
-        WebhookMessage(message)
+		WebhookMessage(violationEmbed)
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a violation message.`, 2)
@@ -91,10 +98,7 @@ async function violationRevokedMessage(revocation) {
                 { name: "Revoked by", value: revocation.revokedBy },
             )
             .setTimestamp()
-        let message = {}
-        message.embeds = [revocationEmbed]
-        message.username = "FAGC Notifier"
-        WebhookMessage(message)
+		WebhookMessage(revocationEmbed)
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
@@ -116,10 +120,7 @@ async function ruleCreatedMessage(rule) {
                 { name: "Rule short description", value: rule.shortdesc },
                 { name: "Rule long description", value: rule.longdesc }
             )
-        let message = {}
-        message.embeds = [ruleEmbed]
-        message.username = "FAGC Notifier"
-        WebhookMessage(message)
+		WebhookMessage(ruleEmbed)
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
@@ -141,10 +142,7 @@ async function ruleRemovedMessage(rule) {
                 {name: "Rule short description", value: rule.shortdesc},
                 {name: "Rule long description", value: rule.longdesc}
             )
-        let message = {}
-        message.embeds = [ruleEmbed]
-        message.username = "FAGC Notifier"
-        WebhookMessage(message)
+		WebhookMessage(ruleEmbed)
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
@@ -169,10 +167,7 @@ async function offenseRevokedMessage(offense) {
                 `Description: ${revocation.description}, Revocation time: ${revocation.revokedTime}, Revoked by: ${revocation.revokedBy}\n`
             )
         })
-        let message = {}
-        message.embeds = [embed]
-        message.username = "FAGC Notifier"
-        WebhookMessage(message)
+		WebhookMessage(embed)
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a violation revocation message.`, 2)
@@ -193,10 +188,7 @@ async function communityCreatedMessage(community) {
                 { name: "Community name", value: community.name },
                 { name: "Contact", value: community.contact }
             )
-        let message = {}
-        message.embeds = [embed]
-        message.username = "FAGC Notifier"
-        WebhookMessage(message)
+		WebhookMessage(embed)
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a community creation message.`, 2)
@@ -216,10 +208,7 @@ async function communityRemovedMessage(community) {
                 { name: "Community name", value: community.name },
                 { name: "Contact", value: community.contact }
             )
-        let message = {}
-        message.embeds = [embed]
-        message.username = "FAGC Notifier"
-        WebhookMessage(message)
+		WebhookMessage(embed)
     } catch (error) {
         const time = new Date()
         WebhookMessage(`Error at ${time} when sending a community removal message.`, 2)
