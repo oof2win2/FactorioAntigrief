@@ -39,15 +39,16 @@ class GetViolations extends Command {
 		const trustedCommunities = communities.filter((community) => {
 			if (config.trustedCommunities.some((trustedID) => { return trustedID === community._id })) return community
 		})
+		console.log(config.trustedCommunities, trustedCommunities)
 		let i = 0
 		violations.forEach((violation) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			if (trustedCommunities.some((community) => community.name === violation.communityname)) {
+			if (trustedCommunities.some((community) => community._id === violation.communityid)) {
 				embed.addField(violation._id,
-					`By: ${violation.admin_name}\nCommunity name: ${violation.communityname}\n` +
+					`By: ${violation.admin_name}\nCommunity ID: ${violation.communityid}\n` +
                     `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
                     `Description: ${violation.description}\nAutomated: ${violation.automated}` +
                     `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
