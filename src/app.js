@@ -15,6 +15,20 @@ const offenseRouter = require('./routes/offenses')
 
 const app = express()
 
+// API rate limits
+const rateLimit = require("express-rate-limit");
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,	// 15 minutes
+	max: 100,	// 100 requests in timeframe
+	lookup: 'connection.remoteAddress',
+	skip: (req) => {
+		const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+		if (ip === "::1") return true
+		else return false
+	}
+})
+app.use(apiLimiter)
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'jade')
