@@ -1,47 +1,42 @@
+// TODO: remove this no-unreachable thingy
+/* eslint-disable no-unreachable */
 const express = require('express');
 const router = express.Router();
 const CommunityModel = require("../database/fagc/community")
+const RuleModel = require("../database/fagc/rule")
 const AuthModel = require("../database/fagc/authentication")
 const CommunityConfigModel = require("../database/bot/community")
-// const cryptoRandomString = require('crypto-random-string')
 const ObjectId = require('mongoose').Types.ObjectId
-// const { communityCreatedMessage, communityRemovedMessage } = require("../utils/info")
+const { checkUser } = require("../utils/functions")
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    res.json({message: 'Community API Homepage!'})
+	res.json({ message: 'Community API Homepage!' })
 })
-// TODO: create documentation for all endpoints & maybe change to swagger-jsdoc instead of this
-/**
- * Gets your own community based on your API key, which must be in your request headers.
- * @route GET /communities/getown
- * @group communities - Operations concerning communities
- * @returns {object} 200 - Object of the community that the API key in the request headers belongs to
- */
 router.get('/getown', async (req, res) => {
-    if (req.headers.apikey === undefined)
-        return res.status(400).json({ error: "Bad Request", description: "No way to find you community without an API key" })
-    const auth = await AuthModel.findOne({ api_key: req.headers.apikey })
-    if (!auth)
-        return res.status(404).json({error:"Not Found", description: "Community with your API key was not found"})
-    const dbRes = await CommunityModel.findById(auth.communityid)
-    res.status(200).json(dbRes)
+	if (req.headers.apikey === undefined)
+		return res.status(400).json({ error: "Bad Request", description: "No way to find you community without an API key" })
+	const auth = await AuthModel.findOne({ api_key: req.headers.apikey })
+	if (!auth)
+		return res.status(404).json({ error: "Not Found", description: "Community with your API key was not found" })
+	const dbRes = await CommunityModel.findById(auth.communityid)
+	res.status(200).json(dbRes)
 })
 router.get('/getall', async (req, res) => {
-    const dbRes = await CommunityModel.find({ name: { $exists: true } })
-    res.status(200).json(dbRes)
+	const dbRes = await CommunityModel.find({ name: { $exists: true } })
+	res.status(200).json(dbRes)
 })
 router.get('/getid', async (req, res) => {
-    if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
-        return res.status(400).json({ error: "Bad Request", description: `id must be ObjectID, got ${req.query.id}` })
-    const community = await CommunityModel.findById(req.query.id)
-    res.status(200).json(community)
+	if (req.query.id === undefined || !ObjectId.isValid(req.query.id))
+		return res.status(400).json({ error: "Bad Request", description: `id must be ObjectID, got ${req.query.id}` })
+	const community = await CommunityModel.findById(req.query.id)
+	res.status(200).json(community)
 })
 
 // Interacts with the bot's database
 router.get('/getconfig', async (req, res) => {
-    if (req.query.id === undefined || typeof(req.query.id) !== "string")
-        return res.status(400).json({error: "Bad Request", description: `id must be Discord GuildID (snowflake), got ${req.query.id}`})
+	if (req.query.id === undefined || typeof (req.query.id) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `id must be Discord GuildID (snowflake), got ${req.query.id}` })
 	let CommunityConfig = await CommunityConfigModel.findOne({
 		guildid: req.query.id
 	})
@@ -49,16 +44,43 @@ router.get('/getconfig', async (req, res) => {
 	if (CommunityConfig) {
 		CommunityConfig = CommunityConfig.toObject()
 		delete CommunityConfig.apikey
-	} 
-    res.status(200).json(CommunityConfig)
+	}
+	res.status(200).json(CommunityConfig)
 })
 router.post('/setconfig', async (req, res) => {
+	if (!req.body.ruleFilters || !Array.isArray(req.body.ruleFilters))
+		return res.status(400).json({ error: "Bad Request", description: `ruleFilters must be array of ObjectID, got ${req.body.ruleFilters}` })
+	if (req.body.ruleFilters.map((ruleFilter) => !ObjectId.isValid(ruleFilter)).filter(i => i)[0])
+		return res.status(400).json({ error: "Bad Request", description: `ruleFilters must be array of ObjectID, got ${req.body.ruleFilters}` })
+	if (!req.body.trustedCommunities || !Array.isArray(req.body.trustedCommunities))
+		return res.status(400).json({ error: "Bad Request", description: `trustedCommunities must be array of ObjectID, got ${req.body.trustedCommunities}` })
+	if (req.body.trustedCommunities.map((community) => !ObjectId.isValid(community)).filter(i => i)[0])
+		return res.status(400).json({ error: "Bad Request", description: `trustedCommunities must be array of ObjectID, got ${req.body.trustedCommunities}` })
+	if (!req.body.contact || typeof (req.body.contact) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `contact must be Discord User snowflake, got ${typeof (req.body.contact)} with value ${req.body.contact}` })
+	if (!req.body.moderatorroleId || typeof (req.body.moderatorroleId) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `moderatorroleId must be Discord role snowflake, got ${typeof (req.body.moderatorroleId)} with value ${req.body.moderatorroleId}` })
+	if (!req.body.communityname || typeof (req.body.communityname) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `communityname must be string, got ${typeof (req.body.communityname)} with value ${req.body.communityname}` })
+
+
+	// query database if rules and communities actually exist
+	const rulesExist = await RuleModel.find({ _id: { $in: req.body.ruleFilters } })
+	if (rulesExist.length !== req.body.ruleFilters.length)
+		return res.status(400).json({ error: "Bad Request", description: `ruleFilters must be array of ObjectID of rules, got ${req.body.ruleFilters.toString()}, some of which are not real rule IDs` })
+	const communitiesExist = await CommunityModel.find({ _id: { $in: req.body.trustedCommunities } })
+	if (communitiesExist.length !== req.body.ruleFilters.length)
+		return res.status(400).json({ error: "Bad Request", description: `ruleFilters must be array of ObjectID of communities, got ${req.body.ruleFilters.toString()}, some of which are not real community IDs` })
+	// check other stuff
+	if (!(await checkUser(req.body.contact)))
+		return res.status(400).json({ error: "Bad Request", description: `contact must be Discord User snowflake, got value ${req.body.contact}, which isn't a Discord user` })
 	let OldConfig = await CommunityConfigModel.findOne({
 		apikey: req.headers.apikey
 	})
 	if (!OldConfig)
 		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
-	let CommunityConfig = await CommunityConfigModel.findOneAndReplace(OldConfig.toObject(), {
+	CommunityConfigModel.findAndReplaceId
+	let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ _id: OldConfig._id }, {
 		guildid: OldConfig.guildid,
 		apikey: req.headers.apikey,
 		ruleFilters: req.body.ruleFilters,
@@ -67,8 +89,8 @@ router.post('/setconfig', async (req, res) => {
 		moderatorroleId: req.body.moderatorroleId,
 		communityid: OldConfig.communityid,
 		communityname: req.body.communityname
-	}, {new:true}).then((config) => config.toObject())
-	await CommunityModel.findOneAndUpdate({ guildid: OldConfig.guildid}, {
+	}, { new: true }).then((config) => config.toObject())
+	await CommunityModel.findOneAndUpdate({ guildid: OldConfig.guildid }, {
 		guildid: OldConfig.guildid,
 		name: req.body.communityname,
 		contact: req.body.contact,
@@ -79,20 +101,16 @@ router.post('/setconfig', async (req, res) => {
 
 // IP whitelists
 router.post('/addwhitelist', async (req, res) => {
-    if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
-        return res.status(400).json({error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}`})
-    const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey }, { $push: { "allowed_ips": req.body.ip } }, {new:true})
-    res.status(200).json(dbRes)
+	if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}` })
+	const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey }, { $push: { "allowed_ips": req.body.ip } }, { new: true })
+	res.status(200).json(dbRes)
 })
 router.delete('/removewhitelist', async (req, res) => {
-    if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
-        return res.status(400).json({ error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}` })
-    const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey }, { $pull: { "allowed_ips": req.body.ip } }, {new:true})
-    res.status(200).json(dbRes)
-})
-router.get('/getwhitelist', async (req, res) => {
-    const dbRes = await AuthModel.findOne({ api_key: req.headers.apikey })
-    res.status(200).json(dbRes)
+	if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}` })
+	const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey }, { $pull: { "allowed_ips": req.body.ip } }, { new: true })
+	res.status(200).json(dbRes)
 })
 
 module.exports = router
