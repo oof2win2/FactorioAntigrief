@@ -2,11 +2,9 @@ const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
-const mongoose = require("mongoose")
 
 const logger = require('./utils/log')
 const authUser = require("./utils/authUser")
-const config = require("../config.json")
 
 const ruleRouter = require('./routes/rules')
 const communityRouter = require('./routes/communities')
@@ -15,9 +13,21 @@ const informaticsRouter = require('./routes/informatics')
 const revocationRouter = require('./routes/revocations')
 const offenseRouter = require('./routes/offenses')
 
-// const testingRouter = require('./routes/testing')
-
 const app = express()
+
+// API rate limits
+const rateLimit = require("express-rate-limit");
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,	// 15 minutes
+	max: 100,	// 100 requests in timeframe
+	lookup: 'connection.remoteAddress',
+	skip: (req) => {
+		const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+		if (ip === "::1") return true
+		else return false
+	}
+})
+app.use(apiLimiter)
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
@@ -41,7 +51,7 @@ const authMiddleware = async (req, res, next) => {
     if (authenticated === 404)
         return res.status(404).json({error: "AuthenticationError", description: "API key is wrong"})
     if (authenticated === 401)
-        return res.status(410).json({error: "AuthenticationError", description: "IP adress whitelist mismatch"})
+        return res.status(401).json({error: "AuthenticationError", description: "IP adress whitelist mismatch"})
     next()
 }
 
@@ -55,7 +65,6 @@ app.use('/v1/rules', ruleRouter)
 app.use('/v1/communities', communityRouter)
 app.use('/v1/violations', violationRouter)
 app.use('/v1/revocations', revocationRouter)
-// app.use('/v1/testing', testingRouter)
 app.use('/v1/offenses', offenseRouter)
 
 app.get('/', (req, res) => {
@@ -77,11 +86,5 @@ app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.json({error: 'error', message: err.message});
 });
-
-mongoose.connect(config.mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-})
 
 module.exports = app;

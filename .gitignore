@@ -1,5 +1,5 @@
 # private stuff
-config.json
+config.js
 dist/
 # Logs
 logs

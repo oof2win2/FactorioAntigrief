@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const RuleModel = require("../database/schemas/rule")
+const RuleModel = require("../database/fagc/rule")
 const { ruleCreatedMessage, ruleRemovedMessage } = require("../utils/info")
 const ObjectId = require('mongoose').Types.ObjectId;
 

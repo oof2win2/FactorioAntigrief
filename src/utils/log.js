@@ -1,4 +1,4 @@
-const LogSchema = require("../database/schemas/log")
+const LogSchema = require("../database/fagc/log")
 
 // https://stackoverflow.com/questions/19215042/express-logging-response-body
 
@@ -15,10 +15,12 @@ function logResponse(req, res, next) {
         if (chunk)
             chunks.push(chunk);
         var body = Buffer.concat(chunks).toString('utf8')
+		let ip = req.get('host')
+		if (ip.includes(":")) ip = ip.slice(0, ip.indexOf(":"))
         LogSchema.create({
             timestamp: new Date(),
-            apiKey: req.headers.apikey,
-            ip: req.get('host').slice(0, req.get('host').indexOf(":")),
+            apikey: req.headers.apikey,
+            ip: ip,
             responseBody: JSON.parse(body),
             requestBody: req.body,
             endpointAddress: req.originalUrl
