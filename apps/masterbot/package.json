@@ -1,25 +1,29 @@
 {
-  "name": "fagc-masterbot",
-  "version": "1.0.0",
-  "description": "The master backend for the Factorio Anti-Grief community",
-  "main": "src/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/oof2win2/fagc-master-backend.git"
-  },
-  "author": "oof2win2",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/oof2win2/fagc-master-backend/issues"
-  },
-  "homepage": "https://github.com/oof2win2/fagc-master-backend#readme",
-  "dependencies": {
-    "common-tags": "^1.8.0",
-    "discord.js": "^12.5.3",
-    "mongoose": "^5.12.3",
-    "node-fetch": "^2.6.1"
-  }
+	"name": "fagc-masterbot",
+	"version": "1.0.0",
+	"description": "The master backend for the Factorio Anti-Grief community",
+	"main": "src/index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"lint": "eslint src/ --fix"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/oof2win2/fagc-master-backend.git"
+	},
+	"author": "oof2win2",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/oof2win2/fagc-master-backend/issues"
+	},
+	"homepage": "https://github.com/oof2win2/fagc-master-backend#readme",
+	"dependencies": {
+		"common-tags": "^1.8.0",
+		"discord.js": "^12.5.3",
+		"mongoose": "^5.12.3",
+		"node-fetch": "^2.6.1"
+	},
+	"devDependencies": {
+		"eslint": "^7.26.0"
+	}
 }
