@@ -27,9 +27,10 @@ class GetAllOffenses extends Command {
 		const offenses = await offensesRaw.json()
 		if (!offenses || !offenses[0])
 			return message.channel.send(`User \`${playername}\` has no offenses!`)
+		
 		const CachedCommunities = new Collection()
 		const getOrFetchCommunity = async (communityid) => {
-			if (CachedCommunities.get(getOrFetchCommunity)) return CachedCommunities.get(getOrFetchCommunity)
+			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
 			const community = await fetch(`${this.client.config.apiurl}/communities/getid?id=${communityid}`).then((c) => c.json())
 			CachedCommunities.set(communityid, community)
 			return community
@@ -42,7 +43,7 @@ class GetAllOffenses extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\``)
 		await Promise.all(offenses.map(async (offense, i) => {
-			if (i == 25) {
+			if (i && i % 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
