@@ -1,6 +1,5 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
-const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
 
 class GetRulesFiltered extends Command {
@@ -19,10 +18,9 @@ class GetRulesFiltered extends Command {
 			requiredConfig: true,
 		})
 	}
-	async run(message) {
-		const config = await ConfigModel.findOne({ guildid: message.guild.id })
-		if (config.ruleFilters === undefined)
-			return message.reply("No rules filtered")
+	async run(message, _, config) {
+		if (!config.ruleFilters || !config.ruleFilters[0])
+			return message.reply("No rule filters set")
 		const resRaw = await fetch(`${this.client.config.apiurl}/rules/getall`)
 		const rules = await resRaw.json()
 
@@ -34,13 +32,14 @@ class GetRulesFiltered extends Command {
 			.setDescription("Filtered FAGC Rules")
 
 		let sent = 0
-		rules.forEach((rule, i) => {
+		rules.forEach(rule => {
 			if (sent == 25) {
 				message.channel.send(embed)
 				embed.fields = []
+				sent = 0
 			}
-			if (config.ruleFilters.some(id => id === rule._id)) {
-				embed.addField(`#${i + 1}/${rule._id}: ${rule.shortdesc}`, rule.longdesc)
+			if (config.ruleFilters.some(id => id === rule.readableid)) {
+				embed.addField(`${rule.shortdesc} (${rule.readableid})`, rule.longdesc)
 				sent++
 			}
 		})

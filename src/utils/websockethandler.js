@@ -23,7 +23,7 @@ async function SocketMessage (message, channels) {
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },
 				{ name: "Description", value: message.description },
-				{ name: "Violation ID", value: message._id },
+				{ name: "Violation ID", value: message.readableid },
 				{ name: "Violation Time", value: message.violated_time }
 			)
 		channels.forEach((channel) => {
@@ -44,7 +44,7 @@ async function SocketMessage (message, channels) {
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },
 				{ name: "Description", value: message.description },
-				{ name: "Revocation ID", value: message._id },
+				{ name: "Revocation ID", value: message.readableid },
 				{ name: "Revocation Time", value: message.RevokedTime },
 				{ name: "Revoked by", value: message.revokedBy },
 			)

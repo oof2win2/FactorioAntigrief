@@ -42,7 +42,7 @@ class AddWebhook extends Command {
 			headers: { "content-type": "application/json" }
 		})
 		const webhook = await webRaw.json()
-		if (webhook._id)
+		if (webhook.guildid)
 			return message.reply("The webhook will recieve FAGC notifications from now on! Testing message has been sent")
 		else if (webhook.error && webhook.error == "Forbidden")
 			return message.reply("You already have a webhook running in your server. You cannot have more than 1 webhook per server")

@@ -37,17 +37,17 @@ class GetViolations extends Command {
 			.setDescription(`FAGC Violations of player \`${args[0]}\``)
 
 		const trustedCommunities = communities.filter((community) => {
-			if (config.trustedCommunities.some((trustedID) => { return trustedID === community._id })) return community
+			if (config.trustedCommunities.some((trustedID) => { return trustedID === community.readableid })) return community
 		})
 		let i = 0
-		violations.forEach(async (violation) => {
-			if (i == 25) {
+		await Promise.all(violations.map(async (violation) => {
+			if (i && i % 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			if (trustedCommunities.some((community) => community._id === violation.communityid)) {
+			if (trustedCommunities.some((community) => community.readableid === violation.communityid)) {
 				const admin = await this.client.users.fetch(violation.admin_id)
-				embed.addField(violation._id,
+				embed.addField(violation.readableid,
 					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${violation.communityid}\n` +
                     `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
                     `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
@@ -56,7 +56,7 @@ class GetViolations extends Command {
 				)
 				i++
 			}
-		})
+		}))
 		message.channel.send(embed)
 	}
 }

@@ -40,7 +40,7 @@ class Revoke extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Violation \`${violation._id}\` of player \`${violation.playername}\` in community ${config.communityname}`)
+			.setDescription(`FAGC Violation \`${violation.readableid}\` of player \`${violation.playername}\` in community ${config.communityname}`)
 		const creator = await this.client.users.fetch(violation.admin_id)
 		embed.addFields(
 			{ name: "Admin", value: `<@${creator.id}> | ${creator.tag}` },
@@ -82,7 +82,7 @@ class Revoke extends Command {
 
 			const response = await responseRaw.json()
 
-			if (response._id && response.revokedBy && response.revokedTime) {
+			if (response.readableid && response.revokedBy && response.revokedTime) {
 				return message.channel.send("Violation revoked!")
 			} else {
 				return handleErrors(message, response)
