@@ -7,9 +7,9 @@ const Command = require("../../base/Command")
 class SetFilters extends Command {
 	constructor(client) {
 		super(client, {
-			name: "setcommunityfilters",
+			name: "settrustedcommunities",
 			description: "Gets trusted communities",
-			aliases: ["setwhitelistcommunities", "settrustedcommunities", "settrusted"],
+			aliases: ["setwhitelistcommunities", "setcommunityfilters", "settrusted"],
 			category: "communities",
 			dirname: __dirname,
 			enabled: true,
@@ -29,22 +29,24 @@ class SetFilters extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription("Set Community Filters")
+			.setDescription("Set Trusted Communities")
 
-		communities.forEach((community, i) => {
+		await Promise.all(communities.map(async (community, i) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
-		})
+			
+			const user = await this.client.users.fetch(community.contact)
+			embed.addField(`${community.name} | ${community._id}`, `Contact: <@${user.id}> | ${user.tag}`)
+		}))
 		message.channel.send(embed)
 
 
 		const messageFilter = response => {
 			return response.author.id === message.author.id
 		}
-		message.channel.send("Please type in ObjectIDs of communities you wish to trust. Type `stop` to stop")
+		message.channel.send("Please type in ObjectIDs of communities you wish to trust. Type `stop` to stop. Will time out in 120s")
 
 		let trustedCommunities = []
 		const onEnd = async () => {
@@ -57,14 +59,15 @@ class SetFilters extends Command {
 				.setTimestamp()
 				.setAuthor("FAGC Community")
 				.setDescription("Trusted Communities")
-			trustedCommunities.forEach((trustedCommunityID, i) => {
+			await Promise.all(trustedCommunities.map(async (trustedCommunityID, i) => {
 				if (i === 25) {
 					message.channel.send(embed)
 					embed.fields = []
 				}
 				let community = communities.find((community) => community._id === trustedCommunityID)
-				embed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
-			})
+				const user = await this.client.users.fetch(community.contact)
+				embed.addField(`${community.name} | ${community._id}`, `Contact: <@${user.id}> | ${user.tag}`)
+			}))
 			message.channel.send(embed)
 		}
 

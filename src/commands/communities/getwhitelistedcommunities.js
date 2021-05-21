@@ -6,9 +6,9 @@ const Command = require("../../base/Command")
 class GetWhitelisted extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getfilteredcommunities",
+			name: "gettrustedcommunities",
 			description: "Gets trusted communities",
-			aliases: ["getwhitelistedcommunities", "gettrustedcommunities", "getcommunities", "gettrusted"],
+			aliases: ["getwhitelistedcommunities", "getfilteredcommunities", "getcommunities", "gettrusted"],
 			category: "communities",
 			dirname: __dirname,
 			enabled: true,
@@ -32,16 +32,17 @@ class GetWhitelisted extends Command {
 			.setDescription("Trusted FAGC Communities")
 
 		let sent = 0
-		communities.forEach((community) => {
+		await Promise.all(communities.map(async (community) => {
 			if (sent == 25) {
 				message.channel.send(communitiesEmbed)
 				communitiesEmbed.fields = []
 			}
 			if (config.trustedCommunities.some(id => id === community._id)) {
-				communitiesEmbed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
+				const user = await this.client.users.fetch(community.contact)
+				communitiesEmbed.addField(`${community.name} | ${community._id}`, `Contact: <@${user.id}> | ${user.tag}`)
 				sent++
 			}
-		})
+		}))
 		message.channel.send(communitiesEmbed)
 	}
 }
