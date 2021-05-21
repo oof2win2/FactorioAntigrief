@@ -28,12 +28,13 @@ class GetAll extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription("All FAGC Communities")
-		communities.forEach((community, i) => {
+		communities.forEach(async (community, i) => {
 			if (i == 25) {
 				message.channel.send(communitiesEmbed)
 				communitiesEmbed.fields = []
 			}
-			communitiesEmbed.addField(`${community.name} | ${community._id}`, `Contact: ${community.contact}`)
+			const user = this.client.users.cache.get(community.contact) || await this.client.users.fetch(community.contact)
+			communitiesEmbed.addField(`${community.name} | ${community._id}`, `Contact: <@${user.id}> | ${user.tag}`)
 		})
 		message.channel.send(communitiesEmbed)
 	}

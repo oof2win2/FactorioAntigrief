@@ -1,5 +1,4 @@
 const fetch = require("node-fetch")
-const ConfigModel = require("../../database/schemas/config")
 const { MessageAttachment } = require("discord.js")
 const Command = require("../../base/Command")
 
@@ -19,8 +18,7 @@ class Genbanlist extends Command {
 			requiredConfig: true
 		})
 	}
-	async run(message) {
-		const config = await ConfigModel.findOne({ guildid: message.guild.id })
+	async run(message, _, config) {
 		if (!config.trustedCommunities) return message.reply("Please set trusted communities first")
 		if (!config.ruleFilters) return message.reply("Please set rule filters first")
 		message.reply("Processing banlist. Please wait")
@@ -38,11 +36,9 @@ class Genbanlist extends Command {
 		})
 
 		// filter violations so only trusted communities are on the banlist
-		console.log(violationArr)
 		console.log(config.trustedCommunities)
 		violationArr = violationArr.filter((violation) => config.trustedCommunities.includes(violation.communityid))
 		// remove duplicates
-		console.log(violationArr)
 		violationArr = violationArr.filter((violation, i) => violationArr.indexOf(violation) === i)
 
 		// create & send banlist
