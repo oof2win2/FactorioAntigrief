@@ -43,7 +43,7 @@ class RevokeAllname extends Command {
 				embed.fields = []
 			}
 			const admin = await this.client.users.fetch(violation.admin_id)
-			embed.addField(violation._id,
+			embed.addField(violation.readableid,
 				`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.broken_rule}\n` +
                 `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
                 `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violated_time)).toUTCString()}`,
@@ -79,7 +79,7 @@ class RevokeAllname extends Command {
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})
 			const response = await responseRaw.json()
-			if (response._id && response.violations && response.playername && response.communityid) {
+			if (response.readableid && response.violations && response.playername && response.communityid) {
 				return message.channel.send("Offense revoked!")
 			} else {
 				return handleErrors(message, response)

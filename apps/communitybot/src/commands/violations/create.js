@@ -8,7 +8,7 @@ class CreateViolation extends Command {
 	constructor(client) {
 		super(client, {
 			name: "create",
-			description: "Creates a violation",
+			description: "Creates a violation. Use the advanced method to add in time of violation created and who created it. This command defaults to now and you",
 			aliases: ["createviolation", "ban", "banhammer"],
 			category: "violations",
 			dirname: __dirname,
@@ -32,8 +32,8 @@ class CreateViolation extends Command {
 		const playername = (await getMessageResponse(message.channel.send("Please type in a playername for the violation"), messageFilter))?.content
 		if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-		const ruleid = (await getMessageResponse(message.channel.send("Please type in ObjectID of rule that has been broken"), messageFilter))?.content
-		if (ruleid === undefined) return message.channel.send("Didn't send rule ObjectID in time")
+		const ruleid = (await getMessageResponse(message.channel.send("Please type in ID of rule that has been broken"), messageFilter))?.content
+		if (ruleid === undefined) return message.channel.send("Didn't send rule ID in time")
 
 		let desc = (await getMessageResponse(message.channel.send("Please type in description of the violation or `none` if you don't want to set one"), messageFilter))?.content
 		if (desc.toLowerCase() === "none") desc = undefined
@@ -87,10 +87,10 @@ class CreateViolation extends Command {
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})
 			const response = await responseRaw.json()
-			if (response._id && response.broken_rule && response.violated_time) {
-				return message.channel.send(`Violation created! _id: \`${response._id}\``)
+			if (response.readableid && response.broken_rule && response.violated_time) {
+				return message.channel.send(`Violation created! id: \`${response.readableid}\``)
 			} else if (response.error && response.description === "Rule must be a RuleID") {
-				return message.channel.send("RuleID is an invalid rule ObjectID. Please check rules")
+				return message.channel.send("RuleID is an invalid rule ID. Please check `fagc!getrules` or `fagc!getallrules`")
 			} else {
 				return handleErrors(message, response)
 			}

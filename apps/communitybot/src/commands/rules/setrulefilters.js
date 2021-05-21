@@ -16,14 +16,11 @@ class SetRuleFilters extends Command {
 			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			ownerOnly: false,
 			cooldown: 3000,
-			requiredConfig: false
+			requiredConfig: true
 		})
 	}
-	async run (message) {
-		const config = await ConfigModel.findOne({ guildid: message.guild.id })
-		if (!config) return message.reply("Please setup using `fagc!setup` first")
-		const resRaw = await fetch(`${this.client.config.apiurl}/rules/getall`)
-		const rules = await resRaw.json()
+	async run(message) {
+		const rules = await fetch(`${this.client.config.apiurl}/rules/getall`).then((r) => r.json())
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")
@@ -33,11 +30,11 @@ class SetRuleFilters extends Command {
 			.setDescription("Set Filtered Rules")
 
 		rules.forEach((rule, i) => {
-			if (i == 25) {
+			if (i && i % 25 == 0) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			embed.addField(`#${i + 1}/${rule._id}: ${rule.shortdesc}`, rule.longdesc)
+			embed.addField(`${rule.shortdesc} (${rule.readableid})`, rule.longdesc)
 		})
 		message.channel.send(embed)
 
@@ -59,12 +56,12 @@ class SetRuleFilters extends Command {
 				.setAuthor("FAGC Community")
 				.setDescription("Filtered Rules")
 			config.ruleFilters.forEach((filteredRuleID, i) => {
-				if (i === 25) {
+				if (i && i % 25 == 0) {
 					message.channel.send(ruleEmbed)
 					embed.fields = []
 				}
-				let rule = rules.find(rule => rule._id === filteredRuleID)
-				ruleEmbed.addField(rule.shortdesc, rule.longdesc)
+				let rule = rules.find(rule => rule.readableid === filteredRuleID)
+				ruleEmbed.addField(`${rule.shortdesc} (${rule.readableid})`, rule.longdesc)
 			})
 			message.channel.send(ruleEmbed)
 		}

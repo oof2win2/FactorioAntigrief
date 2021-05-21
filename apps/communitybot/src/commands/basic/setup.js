@@ -102,7 +102,7 @@ class Setup extends Command {
 				ruleFilters: [],
 				trustedCommunities: [],
 			}
-			if (community) ConfigToSet.communityid = community._id
+			if (community) ConfigToSet.communityid = community.readableid
 			let config = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
 				method: "POST",
 				body: JSON.stringify(ConfigToSet),

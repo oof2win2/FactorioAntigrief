@@ -31,21 +31,21 @@ class GetAllViolations extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Violations of player \`${args[0]}\``)
-
-		violations.forEach(async (violation, i) => {
-			if (i == 25) {
+			
+		await Promise.all(violations.map(async (violation, i) => {
+			if (i && i % 25 == 0) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
 			const admin = await this.client.users.fetch(violation.admin_id)
-			embed.addField(violation._id,
+			embed.addField(violation.readableid,
 				`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${violation.communityid}\n` +
                 `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
                 `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
                 `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
 				true
 			)
-		})
+		}))
 		message.channel.send(embed)
 	}
 }

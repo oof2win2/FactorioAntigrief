@@ -1,6 +1,5 @@
 const fetch = require("node-fetch")
-const { MessageEmbed } = require("discord.js")
-
+const { MessageEmbed, Collection } = require("discord.js")
 const Command = require("../../base/Command")
 
 class GetAllOffenses extends Command {
@@ -26,23 +25,32 @@ class GetAllOffenses extends Command {
 		const playername = args.shift()
 		const offensesRaw = await fetch(`${this.client.config.apiurl}/offenses/getall?playername=${playername}`)
 		const offenses = await offensesRaw.json()
-		if (offenses == null || offenses == [])
+		if (!offenses || !offenses[0])
 			return message.channel.send(`User \`${playername}\` has no offenses!`)
+		const CachedCommunities = new Collection()
+		const getOrFetchCommunity = async (communityid) => {
+			if (CachedCommunities.get(getOrFetchCommunity)) return CachedCommunities.get(getOrFetchCommunity)
+			const community = await fetch(`${this.client.config.apiurl}/communities/getid?id=${communityid}`).then((c) => c.json())
+			CachedCommunities.set(communityid, community)
+			return community
+		}
+
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Offenses")
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\``)
-		offenses.forEach((offense, i) => {
+		await Promise.all(offenses.map(async (offense, i) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
 			}
 
-			const violations = offense.violations.map((violation) => { return violation._id })
-			embed.addField(offense._id, `Community ID: ${offense.communityid}, Violation ID(s): ${violations.join(", ")}`)
-		})
+			const violations = offense.violations.map((violation) => { return violation.readableid })
+			const community = await getOrFetchCommunity(offense.communityid)
+			embed.addField(`Community ${community.name} (\`${offense.communityid}\`): ${offense.readableid}`, `Violation ID(s): ${violations.join(", ")}`)
+		}))
 		message.channel.send(embed)
 	}
 }
