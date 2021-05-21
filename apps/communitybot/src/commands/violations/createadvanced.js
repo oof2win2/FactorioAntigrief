@@ -34,7 +34,7 @@ class CreateViolationAdvanced extends Command {
 
 		const admin_message = (await getMessageResponse(message.channel.send("Please type in admin user ID for the violation"), messageFilter))
 		if (admin_message === undefined) return message.channel.send("Didn't send admin user ID in time")
-		const admin_user = admin_message.mentions.users.first() || this.client.users.cache.get(admin_message.content) || await this.client.users.fetch(admin_message.content)
+		const admin_user = admin_message.mentions.users.first() || await this.client.users.fetch(admin_message.content)
 		if (!admin_user) return message.channel.send("Sent user is not valid!")
 
 		const ruleid = (await getMessageResponse(message.channel.send("Please type in ObjectID of rule that has been broken"), messageFilter))?.content

@@ -42,7 +42,7 @@ class RevokeAllname extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			const admin = this.client.users.cache.get(violation.admin_id) || await this.client.users.fetch(violation.admin_id)
+			const admin = await this.client.users.fetch(violation.admin_id)
 			embed.addField(violation._id,
 				`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.broken_rule}\n` +
                 `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
