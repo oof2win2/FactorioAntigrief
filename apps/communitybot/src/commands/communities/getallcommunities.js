@@ -28,14 +28,15 @@ class GetAll extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription("All FAGC Communities")
-		communities.forEach(async (community, i) => {
+		await Promise.all(communities.map(async (community, i) => {
 			if (i == 25) {
 				message.channel.send(communitiesEmbed)
 				communitiesEmbed.fields = []
 			}
 			const user = await this.client.users.fetch(community.contact)
 			communitiesEmbed.addField(`${community.name} | ${community._id}`, `Contact: <@${user.id}> | ${user.tag}`)
-		})
+			return true
+		}))
 		message.channel.send(communitiesEmbed)
 	}
 }

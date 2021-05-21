@@ -5,12 +5,17 @@ const mongoose = require("mongoose")
 const util = require("util")
 const fs = require("fs")
 const readdir = util.promisify(fs.readdir)
+const config = require("../config")
 
 
 process.chdir(__dirname)
 
 require("./utils/extenders")
 // This enables FAGCBot to access the extenders in any part of the codebase
+
+mongoose.connect(config.mongoURI, config.dbOptions).then(() => {
+	client.logger.log("Database connected", "log")
+}).catch(err => client.logger.log("Error connecting to database. Error:" + err, "error"))
 
 const FAGCBot = require("./base/fagcbot")
 const client = new FAGCBot()
@@ -48,13 +53,9 @@ const init = async () => {
 		})
 	})
 	
-	// log in to discord + database
-	mongoose.connect(client.config.mongoURI, client.config.dbOptions).then(() => {
-		client.logger.log("Database connected", "log")
-		client.login(client.config.token) // log in the bot only AFTER the database connects
-	}).catch(err => client.logger.log("Error connecting to database. Error:" + err, "error"))
+	// log in to discord
+	client.login(client.config.token)
 }
-
 init()
 
 require("./base/Prometheus")
