@@ -30,7 +30,7 @@ class Setup extends Command {
 
 		const contactID = (await getMessageResponse(message.channel.send("Please ping the user to contact in this community"), messageFilter))?.mentions.users.first()?.id
 		if (contactID === undefined) return message.channel.send("Didn't send contact in time or invalid contact mention")
-		const contact = this.client.users.cache.get(contactID) || await this.client.users.fetch(contactID)
+		const contact = await this.client.users.fetch(contactID)
 		if (!contact) return message.reply("Contact user is invalid!")
 
 		let roleMessage = (await getMessageResponse(message.channel.send("Please ping (or type in the ID of) your role of people which can create violations"), messageFilter))

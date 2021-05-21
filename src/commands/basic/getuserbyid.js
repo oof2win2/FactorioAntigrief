@@ -21,7 +21,7 @@ class GetUserById extends Command {
 	}
 	async run(message, args) {
 		const uid = args.shift()
-		const user = this.client.users.cache.get(uid) || await this.client.users.fetch(uid)
+		const user = await this.client.users.fetch(uid)
 		if (!user && !user.id) return message.reply("This user could not be found. They may not exist")
 		let embed = new MessageEmbed()
 			.setTitle("FAGC User Info")

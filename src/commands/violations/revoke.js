@@ -41,7 +41,7 @@ class Revoke extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Violation \`${violation._id}\` of player \`${violation.playername}\` in community ${config.communityname}`)
-		const creator = this.client.users.cache.get(violation.admin_id) || await this.client.users.fetch(violation.admin_id)
+		const creator = await this.client.users.fetch(violation.admin_id)
 		embed.addFields(
 			{ name: "Admin", value: `<@${creator.id}> | ${creator.tag}` },
 			{ name: "Broken rule ID", value: violation.broken_rule },
