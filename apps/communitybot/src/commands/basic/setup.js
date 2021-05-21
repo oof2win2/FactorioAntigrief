@@ -28,8 +28,10 @@ class Setup extends Command {
 
 		const name = (await getMessageResponse(message.channel.send("Please type in this community's name"), messageFilter))?.content
 
-		const contact = (await getMessageResponse(message.channel.send("Please type in a contact for this server or the server's owner"), messageFilter))?.content
-		if (contact === undefined) return message.channel.send("Didn't send contact in time")
+		const contactID = (await getMessageResponse(message.channel.send("Please ping the user to contact in this community"), messageFilter))?.mentions.users.first()?.id
+		if (contactID === undefined) return message.channel.send("Didn't send contact in time or invalid contact mention")
+		const contact = this.client.users.cache.get(contactID) || await this.client.users.fetch(contactID)
+		if (!contact) return message.reply("Contact user is invalid!")
 
 		let roleMessage = (await getMessageResponse(message.channel.send("Please ping (or type in the ID of) your role of people which can create violations"), messageFilter))
 		let role
@@ -42,7 +44,7 @@ class Setup extends Command {
 		let apikey
 		if (apikeyMessage.content === "none") apikey = undefined
 		else apikey = apikeyMessage.content
-
+		
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Config")
 			.setAuthor(`${this.client.user.username} | oof2win2#3149`)
@@ -50,7 +52,7 @@ class Setup extends Command {
 			.setDescription("Your FAGC Configuration")
 		embed.addFields(
 			{ name: "Community name", value: name },
-			{ name: "Contact", value: contact },
+			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}` },
 			{ name: "Moderator role", value: `<@&${role}>` },
 			{ name: "API key", value: apikey ? "Hidden" : "None" }
 		)
@@ -79,15 +81,26 @@ class Setup extends Command {
 			return message.channel.send("Community configuration cancelled")
 
 		try {
-			await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
+			const res = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
 				$set: {apikey: apikey}
-			})
+			}, {new:true})
+			if (!res) {
+				await ConfigModel.create({
+					communityname: name,
+					guildid: message.guild.id,
+					contact: contact.id,
+					moderatorroleId: role,
+					apikey: apikey,
+				})
+			}
 			let ConfigToSet = {
 				communityname: name,
 				guildid: message.guild.id,
-				contact: contact,
+				contact: contact.id,
 				moderatorroleId: role,
 				apikey: apikey,
+				ruleFilters: [],
+				trustedCommunities: [],
 			}
 			if (community) ConfigToSet.communityid = community._id
 			let config = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {

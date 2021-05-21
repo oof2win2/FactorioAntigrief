@@ -1,3 +1,4 @@
+const { MessageEmbed } = require("discord.js")
 const json = require("../../../package.json")
 const Command = require("../../base/Command")
 
@@ -32,19 +33,21 @@ class Stats extends Command {
 		let channels = this.client.channels.cache.size
 		let nodeVersion = process.version
 		let djsVersion = json.dependencies["discord.js"].slice(1)
-
-		message.channel.send(
-			`\`\`\`apache\n
-      = STATISTICS =\n
-      • Memory_Usage   : : ${Math.round(memUsage * 100) / 100} MB\n
-      • Uptime         : : ${duration(this.client.uptime)}\n
-      • Total_Users    : : ${users}\n
-      • Total_Channels : : ${channels}\n
-      • Total_Servers  : : ${servers}\n
-      • NodeJS_Version : : ${nodeVersion}\n
-      • DJS_Version    : : v${djsVersion}
-      \`\`\``
+		let embed = new MessageEmbed()
+			.setTitle("FAGC Stats")
+			.setColor("GREEN")
+			.setTimestamp()
+			.setAuthor("FAGC Community")
+		embed.addFields(
+			{ name: "Memory Usage", value: `${Math.round(memUsage * 100) / 100} MB`, inline:true },
+			{ name: "Uptime", value: duration(this.client.uptime), inline:true },
+			{ name: "Total Users", value: users, inline:true },
+			{ name: "Total Channels", value: channels, inline:true },
+			{name: "Total Servers", value: servers, inline: true},
+			{ name: "NodeJS Version", value: nodeVersion, inline:true },
+			{ name: "DJS Version", value: `v${djsVersion}`, inline:true },
 		)
+		message.channel.send(embed)
 	}
 }
 module.exports = Stats

@@ -28,7 +28,7 @@ const init = async () => {
 			// loads each command
 			if (res) client.logger.log(res, "error")
 			// if there's an error, log it
-			else client.logger.log(`Command ${cmd} loaded`, "debug")
+			// else client.logger.log(`Command ${cmd} loaded`, "debug")
 		})
 	})
 
@@ -48,11 +48,10 @@ const init = async () => {
 		})
 	})
 	
-	// log in to discord
-	client.login(client.config.token)
-
+	// log in to discord + database
 	mongoose.connect(client.config.mongoURI, client.config.dbOptions).then(() => {
 		client.logger.log("Database connected", "log")
+		client.login(client.config.token) // log in the bot only AFTER the database connects
 	}).catch(err => client.logger.log("Error connecting to database. Error:" + err, "error"))
 }
 
