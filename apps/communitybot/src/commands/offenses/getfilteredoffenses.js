@@ -41,7 +41,7 @@ class GetOffenses extends Command {
 
 		const CachedCommunities = new Collection()
 		const getOrFetchCommunity = async (communityid) => {
-			if (CachedCommunities.get(getOrFetchCommunity)) return CachedCommunities.get(getOrFetchCommunity)
+			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
 			const community = await fetch(`${this.client.config.apiurl}/communities/getid?id=${communityid}`).then((c) => c.json())
 			CachedCommunities.set(communityid, community)
 			return community

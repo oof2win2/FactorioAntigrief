@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-const { MessageEmbed } = require("discord.js")
+const { MessageEmbed, Collection } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
 
@@ -39,6 +39,22 @@ class GetViolations extends Command {
 		const trustedCommunities = communities.filter((community) => {
 			if (config.trustedCommunities.some((trustedID) => { return trustedID === community.readableid })) return community
 		})
+
+		const CachedCommunities = new Collection()
+		const getOrFetchCommunity = async (communityid) => {
+			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
+			const community = await fetch(`${this.client.config.apiurl}/communities/getid?id=${communityid}`).then((c) => c.json())
+			CachedCommunities.set(communityid, community)
+			return community
+		}
+		const CachedRules = new Collection()
+		const getOrFetchRule = async (ruleid) => {
+			if (CachedRules.get(ruleid)) return CachedRules.get(getOrFetchCommunity)
+			const rule = await fetch(`${this.client.config.apiurl}/rules/getid?id=${ruleid}`).then((c) => c.json())
+			CachedRules.set(ruleid, rule)
+			return rule
+		}
+
 		let i = 0
 		await Promise.all(violations.map(async (violation) => {
 			if (i && i % 25) {
@@ -47,16 +63,20 @@ class GetViolations extends Command {
 			}
 			if (trustedCommunities.some((community) => community.readableid === violation.communityid)) {
 				const admin = await this.client.users.fetch(violation.admin_id)
+				const rule = await getOrFetchRule(violation.broken_rule)
+				const community = await getOrFetchCommunity(violation.communityid)
 				embed.addField(violation.readableid,
-					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${violation.communityid}\n` +
-                    `Broken rule: ${violation.broken_rule}\nProof: ${violation.proof}\n` +
-                    `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
-                    `Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
+					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.readableid})\n` +
+					`Broken rule: ${rule.shortdesc} (${rule.readableid})\nProof: ${violation.proof}\n` +
+					`Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
+					`Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
 					true
 				)
 				i++
 			}
 		}))
+		if (i == 0)
+			return message.channel.send(`Player \`${args[0]}\` doesn't have violations that correspond to your rule and community preferences`)
 		message.channel.send(embed)
 	}
 }
