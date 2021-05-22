@@ -88,10 +88,11 @@ const collectStatistics = async () => {
 	let communities = await trustedCommunities(communitySettings)
 
 	rules.forEach((rule) => {
-		ruleGauge.set({ id: rule.rule.readableid, shortdesc: rule.rule.shortdesc }, rule.count)
+		if (rule.rule)
+			ruleGauge.set({ id: rule.rule.readableid, shortdesc: rule.rule.shortdesc }, rule.count)
 	})
 	communities.forEach((community) => {
-		if (!community.community || community.community.readableid) return
+		if (!community.community || !community.community.readableid) return
 		communityGauge.set({
 			id: community.community.readableid,
 			name: community.community.name,

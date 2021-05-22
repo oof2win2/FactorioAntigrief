@@ -5,7 +5,7 @@ class RemoveWebhook extends Command {
 	constructor(client) {
 		super(client, {
 			name: "removewebhook",
-			description: "Adds a webhook to send FAGC notifications to",
+			description: "Removes a webhook from getting FAGC notifications",
 			aliases: [],
 			usage: "[webhook ID] [webhook token]",
 			examples: ["{{p}}removewebhook 9945 ThisIsMyToken"],

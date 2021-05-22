@@ -7,7 +7,7 @@ class SetFilters extends Command {
 	constructor(client) {
 		super(client, {
 			name: "settrustedcommunities",
-			description: "Gets trusted communities",
+			description: "Sets trusted communities",
 			aliases: ["setwhitelistcommunities", "setcommunityfilters", "settrusted"],
 			category: "communities",
 			dirname: __dirname,
