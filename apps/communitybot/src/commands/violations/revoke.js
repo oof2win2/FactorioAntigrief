@@ -25,15 +25,15 @@ class Revoke extends Command {
 		if (!config.apikey)
 			return message.reply("No API key set")
         
-		if (!args[0]) return message.reply("Provide a ObjectID for the violation to revoke")
+		if (!args[0]) return message.reply("Provide a ID for the violation to revoke")
 		const violationID = args.shift()
 
 		const violationRaw = await fetch(`${this.client.config.apiurl}/violations/getbyid?id=${violationID}`)
 		const violation = await violationRaw.json()
 		if (violation === null)
 			return message.channel.send(`Violation with ID \`${violationID}\` doesn't exist`)
-		if (violation.error && violation.description.startsWith("id expected ObjectID"))
-			return message.reply(`\`${violationID}\` is not a proper Mongo ObjectID`)
+		if (violation.error && violation.description.includes("id expected ID"))
+			return message.reply(`\`${violationID}\` is not a proper violation ID`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Violation Revocation")

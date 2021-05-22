@@ -34,7 +34,7 @@ class SetRuleFilters extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			embed.addField(`${rule.shortdesc} (${rule.readableid})`, rule.longdesc)
+			embed.addField(rule.shortdesc, rule.readableid, true)
 		})
 		message.channel.send(embed)
 
@@ -42,7 +42,7 @@ class SetRuleFilters extends Command {
 		const messageFilter = response => {
 			return response.author.id === message.author.id
 		}
-		message.channel.send("Please type in ObjectIDs of rules you wish to use. Type `stop` to stop")
+		message.channel.send("Please type in IDs of rules you wish to use. Type `stop` to stop")
 
 		let ruleFilters = []
 		const onEnd = async () => {
@@ -61,7 +61,7 @@ class SetRuleFilters extends Command {
 					embed.fields = []
 				}
 				let rule = rules.find(rule => rule.readableid === filteredRuleID)
-				ruleEmbed.addField(`${rule.shortdesc} (${rule.readableid})`, rule.longdesc)
+				ruleEmbed.addField(rule.shortdesc, rule.readableid, true)
 			})
 			message.channel.send(ruleEmbed)
 		}

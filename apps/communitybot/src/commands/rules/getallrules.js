@@ -33,8 +33,7 @@ class GetAllRules extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			embed.addField(`${rule.shortdesc} (${rule.readableid})`, rule.longdesc)
-			// embed.addField("\u200b", "\u200b")
+			embed.addField(rule.shortdesc, rule.readableid, true)
 		})
 		message.channel.send(embed)
 	}
