@@ -17,7 +17,8 @@ class CreateViolationAdvanced extends Command {
 			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			ownerOnly: false,
 			cooldown: 3000,
-			requiredConfig: false
+			requiredConfig: true,
+			customPermissions: ["violations"]
 		})
 	}
 	async run(message, _, config) {

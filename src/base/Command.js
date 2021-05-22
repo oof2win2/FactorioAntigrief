@@ -14,10 +14,11 @@ module.exports = class Command {
 		ownerOnly = false, // owner only, checked before command is run
 		cooldown = 5000, // gap between commands
 		requiredConfig = false, // if guild config is required or not
+		customPermissions = [] // custom role permissions
 	}) {
 		const category = (dirname ? dirname.split(path.sep)[parseInt(dirname.split(path.sep).length - 1, 10)] : "Other") // what command category the commands live in
 		this.client = client // bind client to this.client
-		this.config = { enabled, memberPermissions, botPermissions, ownerOnly, cooldown, requiredConfig } // some config options
+		this.config = { enabled, memberPermissions, botPermissions, ownerOnly, cooldown, requiredConfig, customPermissions } // some config options
 		this.help = { name, category, aliases, description, usage, examples } // used for help command
 	}
 }

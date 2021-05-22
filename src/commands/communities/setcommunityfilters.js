@@ -17,6 +17,7 @@ class SetFilters extends Command {
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
+			customPermissions: ["setCommunities"],
 		})
 	}
 	async run(message) {

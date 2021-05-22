@@ -22,28 +22,40 @@ module.exports = async (client, message) => {
 
 	let guildConfig = await ConfigModel.findOne({ guildid: message.guild.id })
 
-	if (message.guild) {
-		let neededPermissions = []
-		if (!cmd.config.botPermissions.includes("EMBED_LINKS"))
-			cmd.config.botPermissions.push("EMBED_LINKS")
+	/// permissions
+	let neededPermissions = []
+	if (!cmd.config.botPermissions.includes("EMBED_LINKS"))
+		cmd.config.botPermissions.push("EMBED_LINKS")
 
-		// bot permissions
-		cmd.config.botPermissions.forEach((perm) => {
-			if (!message.channel.permissionsFor(message.guild.me).has(perm))
-				neededPermissions.push(perm)
-		})
-		if (neededPermissions.length > 0)
-			return message.channel.send(`I need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)
+	// bot permissions
+	cmd.config.botPermissions.forEach((perm) => {
+		if (!message.channel.permissionsFor(message.guild.me).has(perm))
+			neededPermissions.push(perm)
+	})
+	if (neededPermissions.length > 0)
+		return message.channel.send(`I need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)
 
-		// user permissions
-		neededPermissions = []
-		cmd.config.memberPermissions.forEach((perm) => {
-			if (!message.channel.permissionsFor(message.member).has(perm))
-				neededPermissions.push(perm)
+	// user permissions
+	neededPermissions = []
+	let neededRoles = []
+	cmd.config.memberPermissions.forEach((perm) => {
+		if (!message.channel.permissionsFor(message.member).has(perm))
+			neededPermissions.push(perm)
+	})
+	if (guildConfig) {
+		cmd.config.customPermissions.forEach(perm => {
+			if (perm)
+				if (guildConfig.roles[perm] && message.member.roles.cache.has(guildConfig.roles[perm]))
+					neededPermissions = neededPermissions.filter(perm => perm !== perm)
+				else
+					neededRoles.push(guildConfig.roles[perm])
 		})
-		if (neededPermissions.length > 0)
-			return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)
 	}
+
+	if (neededRoles.length > 0)
+		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}. You can also use these roles instead: ${(await Promise.all(neededRoles.map(async (r) => await message.guild.roles.fetch(r).then(r => `\`${r.name}\``)))).join(", ")}`)
+	if (neededRoles.length == 0 && neededPermissions.length > 0)
+		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)
 
 	try {
 		cmd.run(message, args, guildConfig)

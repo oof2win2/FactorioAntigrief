@@ -17,6 +17,7 @@ class AddWebhook extends Command {
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
+			customPermissions: ["webhooks"],
 		})
 	}
 	async run(message, args) {

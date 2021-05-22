@@ -17,6 +17,7 @@ class SetAPIKey extends Command {
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
+			customPermissions: ["setConfig"],
 		})
 	}
 	async run (message, args) {
