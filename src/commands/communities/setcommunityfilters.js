@@ -7,7 +7,7 @@ class SetFilters extends Command {
 	constructor(client) {
 		super(client, {
 			name: "settrustedcommunities",
-			description: "Sets trusted communities",
+			description: "Sets trusted communities. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			aliases: ["setwhitelistcommunities", "setcommunityfilters", "settrusted"],
 			category: "communities",
 			dirname: __dirname,
@@ -29,7 +29,7 @@ class SetFilters extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription("Set Trusted Communities")
+			.setDescription("Set Trusted Communities [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
 		await Promise.all(communities.map(async (community, i) => {
 			if (i == 25) {

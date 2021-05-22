@@ -7,7 +7,7 @@ class GetWhitelisted extends Command {
 	constructor(client) {
 		super(client, {
 			name: "gettrustedcommunities",
-			description: "Gets trusted communities",
+			description: "Gets trusted communities. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			aliases: ["getwhitelistedcommunities", "getfilteredcommunities", "getcommunities", "gettrusted"],
 			category: "communities",
 			dirname: __dirname,
@@ -29,7 +29,7 @@ class GetWhitelisted extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription("Trusted FAGC Communities")
+			.setDescription("Trusted FAGC Communities [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
 		let sent = 0
 		await Promise.all(communities.map(async (community) => {
