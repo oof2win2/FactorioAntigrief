@@ -26,7 +26,7 @@ class GetIDRule extends Command {
 		const rule = await resRaw.json()
 
 		if (rule === null)
-			return message.reply(`No rule with ObjectID of \`${args[0]}\` exists`)
+			return message.reply(`No rule with ID of \`${args[0]}\` exists`)
 		if (rule.error && rule.description.includes("id must be ID"))
 			return message.reply(`\`${args[0]}\` is not a valid rule`)
 		if (rule.error)

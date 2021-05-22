@@ -1,7 +1,6 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
-const ObjectId = require("mongoose").Types.ObjectId
 const Command = require("../../base/Command")
 
 class SetFilters extends Command {
@@ -46,7 +45,7 @@ class SetFilters extends Command {
 		const messageFilter = response => {
 			return response.author.id === message.author.id
 		}
-		message.channel.send("Please type in ObjectIDs of communities you wish to trust. Type `stop` to stop. Will time out in 120s")
+		message.channel.send("Please type in IDs of communities you wish to trust. Type `stop` to stop. Will time out in 120s")
 
 		let trustedCommunities = []
 		const onEnd = async () => {
@@ -74,12 +73,7 @@ class SetFilters extends Command {
 		let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(communities).length, time: 120000 })
 		collector.on("collect", (message) => {
 			if (message.content === "stop") collector.stop()
-			else {
-				if (ObjectId.isValid(message.content)) {
-					trustedCommunities.push(message.content)
-				} else
-					message.channel.send("Message is not ObjectID. Content disregarded")
-			}
+			trustedCommunities.push(message.content)
 		})
 		collector.on("end", () => {
 			message.channel.send("End of collection")

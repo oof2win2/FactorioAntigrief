@@ -39,7 +39,7 @@ class GetRulesFiltered extends Command {
 				sent = 0
 			}
 			if (config.ruleFilters.some(id => id === rule.readableid)) {
-				embed.addField(`${rule.shortdesc} (${rule.readableid})`, rule.longdesc)
+				embed.addField(rule.shortdesc, rule.readableid, true)
 				sent++
 			}
 		})
