@@ -7,7 +7,7 @@ class GetViolations extends Command {
 	constructor(client) {
 		super(client, {
 			name: "getfilteredviolations",
-			description: "Gets violations of a player from only trusted communities and rules",
+			description: "Gets violations of a player from only trusted communities and filtered rules",
 			aliases: ["check", "getviolations"],
 			category: "violations",
 			usage: "[playername]",

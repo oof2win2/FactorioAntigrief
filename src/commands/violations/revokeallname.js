@@ -7,7 +7,7 @@ class RevokeAllname extends Command {
 	constructor(client) {
 		super(client, {
 			name: "revokeallname",
-			description: "Revokes your offense of a player by offense ID",
+			description: "Revokes your offense of a player by offense ID (revoke all violations of a player by playername)",
 			aliases: ["revokeoffense"],
 			category: "violations",
 			usage: "[playername]",
