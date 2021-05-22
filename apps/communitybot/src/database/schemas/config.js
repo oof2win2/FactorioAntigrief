@@ -17,7 +17,14 @@ const ConfigSchema = new mongoose.Schema({
 	apikey: String,
 	moderatorroleId: String,
 	trustedCommunities: [String],
-	ruleFilters: [String]
+	ruleFilters: [String],
+	roles: {
+		violations: String,
+		webhooks: String,
+		setConfig: String,
+		setRules: String,
+		setCommunities: String,
+	}
 })
 
 module.exports = mongoose.model("config", ConfigSchema)
