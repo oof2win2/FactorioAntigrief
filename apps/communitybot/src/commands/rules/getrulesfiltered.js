@@ -6,7 +6,7 @@ class GetRulesFiltered extends Command {
 	constructor(client) {
 		super(client, {
 			name: "getrulesfiltered",
-			description: "Gets rules that this community follows",
+			description: "Gets rules that this community follows. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			aliases: ["getfilteredrules", "getrules"],
 			category: "rules",
 			dirname: __dirname,
@@ -29,7 +29,7 @@ class GetRulesFiltered extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription("Filtered FAGC Rules")
+			.setDescription("Filtered FAGC Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
 		let sent = 0
 		rules.forEach(rule => {

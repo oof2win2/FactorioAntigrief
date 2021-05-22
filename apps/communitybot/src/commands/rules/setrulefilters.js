@@ -7,7 +7,7 @@ class SetRuleFilters extends Command {
 	constructor(client) {
 		super(client, {
 			name: "setrulefilters",
-			description: "Sets rule filters",
+			description: "Sets rule filters. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			aliases: [],
 			category: "rules",
 			dirname: __dirname,
@@ -28,7 +28,7 @@ class SetRuleFilters extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription("Set Filtered Rules")
+			.setDescription("Set Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
 		rules.forEach((rule, i) => {
 			if (i && i % 25 == 0) {
@@ -55,7 +55,7 @@ class SetRuleFilters extends Command {
 				.setColor("GREEN")
 				.setTimestamp()
 				.setAuthor("FAGC Community")
-				.setDescription("Filtered Rules")
+				.setDescription("Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 			config.ruleFilters.forEach((filteredRuleID, i) => {
 				if (i && i % 25 == 0) {
 					message.channel.send(ruleEmbed)
