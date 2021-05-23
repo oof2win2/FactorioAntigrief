@@ -1,5 +1,5 @@
 const { MessageEmbed } = require("discord.js")
-const { apiurl, apikey } = require("../../../config")
+const { masterapiurl, apiurl, masterapikey } = require("../../../config")
 const fetch = require("node-fetch")
 
 module.exports = {
@@ -40,12 +40,12 @@ module.exports = {
 		if (reaction.emoji.name === "❌")
 			return message.channel.send("Rule removal cancelled")
 		try {
-			const communityRaw = await fetch(`${apiurl}/rules/remove`, {
+			const communityRaw = await fetch(`${masterapiurl}/rules/remove`, {
 				method: "DELETE",
 				body: JSON.stringify({
 					id: args[0]
 				}),
-				headers: { "apikey": apikey, "content-type": "application/json" }
+				headers: { "apikey": masterapikey, "content-type": "application/json" }
 			})
 			const rule = await communityRaw.json()
 			if (rule._id) {

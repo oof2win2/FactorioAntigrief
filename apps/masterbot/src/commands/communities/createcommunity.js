@@ -1,5 +1,5 @@
 const { MessageEmbed } = require("discord.js")
-const { apiurl, apikey } = require("../../../config")
+const { masterapiurl, masterapikey } = require("../../../config")
 const fetch = require("node-fetch")
 
 module.exports = {
@@ -19,8 +19,9 @@ module.exports = {
 		if (!name) return message.reply("No valid community name entered")
 		
 		message.channel.send("Please ping the contact user for this community")
-		const contact = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()?.mentions.members.first()?.user
-		if (!contact) return message.channel.send("No valid contact supplied!")
+		const contactMsg = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()
+		if (!contactMsg) return message.channel.send("No valid contact supplied!")
+		const contact = contactMsg.mentions.members.first()?.user || await client.users.fetch(contactMsg.content)
 		if (!contact.id) return message.channel.send("User does not exist")
 		if (contact.bot) return message.channel.send("User is a bot!")
 		
@@ -53,20 +54,20 @@ module.exports = {
 		if (reaction.emoji.name === "❌")
 			return message.channel.send("Community creation cancelled")
 		try {
-			const communityRaw = await fetch(`${apiurl}/communities/create`, {
+			const communityRaw = await fetch(`${masterapiurl}/communities/create`, {
 				method: "POST",
 				body: JSON.stringify({
 					name: name,
 					contact: contact.id,
 					guildid: guildid
 				}),
-				headers: { "apikey": apikey, "content-type": "application/json" }
+				headers: { "apikey": masterapikey, "content-type": "application/json" }
 			})
 			const community = await communityRaw.json()
 			if (community.key && community.community._id) {
-				message.author.send(`API key for community ${name} (\`${community._id}\`), contacted at <@${contact.id}> | ${contact.tag}`)
+				message.author.send(`API key for community ${name} (\`${community.community.readableid}\`), contacted at <@${contact.id}> | ${contact.tag}`)
 				message.author.send(`||${community.key}||`)
-				return message.channel.send("Community created successfully! API key has been sent to your DMs")
+				return message.channel.send(`Community with ID \`${community.community.readableid}\` created successfully! API key has been sent to your DMs`)
 			} else if (community.error == "Bad Request" && community.error.includes("guildid must be Discord Guild snowflake")) {
 				message.channel.send("Provided GuildID of community is not valid or the bot is not in it")
 			} else {

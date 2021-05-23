@@ -1,5 +1,5 @@
 const { MessageEmbed } = require("discord.js")
-const { apiurl, apikey } = require("../../../config")
+const { masterapiurl, apiurl, masterapikey } = require("../../../config")
 const fetch = require("node-fetch")
 
 module.exports = {
@@ -15,13 +15,14 @@ module.exports = {
 		const communityRaw = await fetch(`${apiurl}/communities/getid?id=${args[0]}`)
 		const community = await communityRaw.json()
 		if (!community) return message.reply(`No community with ObjectID ${args[0]} does not exist`)
+		console.log(community)
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Community Setup")
 			.setAuthor("FAGC Community")
 			.setTimestamp()
 			.addFields(
 				{ name: "Community name", value: community.name },
-				{ name: "Contact", value: `<@${community.contact}> | ${client.users.cache.get(community.contact).tag || (await client.users.fetch(community.contact)).tag}` }
+				{ name: "Contact", value: `<@${community.contact}> | ${(await client.users.fetch(community.contact)).tag || community.contact}` }
 			)
 		message.channel.send(embed)
 		const confirm = await message.channel.send("Are you sure you want to remove this community?")
@@ -40,12 +41,12 @@ module.exports = {
 		if (reaction.emoji.name === "❌")
 			return message.channel.send("Community removal cancelled")
 		try {
-			const communityRaw = await fetch(`${apiurl}/communities/remove`, {
+			const communityRaw = await fetch(`${masterapiurl}/communities/remove`, {
 				method: "DELETE",
 				body: JSON.stringify({
 					id: args[0]
 				}),
-				headers: { "apikey": apikey, "content-type": "application/json" }
+				headers: { "apikey": masterapikey, "content-type": "application/json" }
 			})
 			const community = await communityRaw.json()
 			if (community._id) {

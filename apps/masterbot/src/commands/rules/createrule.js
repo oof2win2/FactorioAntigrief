@@ -1,5 +1,5 @@
 const { MessageEmbed } = require("discord.js")
-const { apiurl, apikey } = require("../../../config")
+const { masterapiurl, masterapikey } = require("../../../config")
 const fetch = require("node-fetch")
 
 module.exports = {
@@ -46,13 +46,13 @@ module.exports = {
 		if (reaction.emoji.name === "❌")
 			return message.channel.send("Community creation cancelled")
 		try {
-			const communityRaw = await fetch(`${apiurl}/rules/create`, {
+			const communityRaw = await fetch(`${masterapiurl}/rules/create`, {
 				method: "POST",
 				body: JSON.stringify({
 					shortdesc: shortdesc,
 					longdesc: longdesc
 				}),
-				headers: { "apikey": apikey, "content-type": "application/json" }
+				headers: { "apikey": masterapikey, "content-type": "application/json" }
 			})
 			const rule = await communityRaw.json()
 			if (rule._id) {

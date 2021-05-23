@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
         name: 'fagc-master-bot',
-        script: './index.js',
+        script: './src/index.js',
         env: {
             "NODE_ENV": "production"
         },
