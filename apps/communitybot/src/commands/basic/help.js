@@ -19,7 +19,7 @@ class Help extends Command {
 			requiredConfig: false,
 		})
 	}
-	async run(message, args) {
+	async run(message, args, config) {
 		const prefix = this.client.config.prefix
 		if (args[0]) {
 			const cmd = this.client.commands.get(args[0]) || this.client.commands.get(this.client.aliases.get(args[0]))
@@ -46,7 +46,15 @@ class Help extends Command {
 				)
 				.setColor(this.client.config.embeds.color)
 				.setFooter(this.client.config.embeds.footer)
-
+			if (config && config.roles) {
+				let neededRoles = []
+				cmd.config.customPermissions.forEach(perm => {
+					if (perm && config.roles[perm] !== "")
+						neededRoles.push(config.roles[perm])
+				})
+				if (neededRoles.length > 0)
+					groupEmbed.addField("Roles that can be used instead of the permissions", `<@&${neededRoles.join(">, <@&")}>`)
+			}
 			// and send the embed in the current channel
 			return message.channel.send(groupEmbed)
 		}
