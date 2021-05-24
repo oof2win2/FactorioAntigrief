@@ -1,3 +1,6 @@
+# Garbage
+.DS_Store
+
 # Config
 config.js
 *.env

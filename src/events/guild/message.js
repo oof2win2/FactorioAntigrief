@@ -21,6 +21,8 @@ module.exports = async (client, message) => {
 	client.RateLimit.set(message.author.id, Date.now())
 
 	let guildConfig = await ConfigModel.findOne({ guildid: message.guild.id })
+	if (cmd.config.requiredConfig && !guildConfig)
+		return message.reply("You need to create a guild config first with `fagc!setup`!")
 
 	/// permissions
 	let neededPermissions = []
@@ -42,16 +44,15 @@ module.exports = async (client, message) => {
 		if (!message.channel.permissionsFor(message.member).has(perm))
 			neededPermissions.push(perm)
 	})
-	if (guildConfig) {
+	if (guildConfig && guildConfig.roles !== undefined) {
 		cmd.config.customPermissions.forEach(perm => {
-			if (perm)
+			if (perm && guildConfig.roles[perm])
 				if (guildConfig.roles[perm] && message.member.roles.cache.has(guildConfig.roles[perm]))
 					neededPermissions = neededPermissions.filter(perm => perm !== perm)
 				else
 					neededRoles.push(guildConfig.roles[perm])
 		})
 	}
-
 	if (neededRoles.length > 0)
 		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}. You can also use these roles instead: ${(await Promise.all(neededRoles.map(async (r) => await message.guild.roles.fetch(r).then(r => `\`${r.name}\``)))).join(", ")}`)
 	if (neededRoles.length == 0 && neededPermissions.length > 0)
