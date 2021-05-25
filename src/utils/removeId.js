@@ -16,6 +16,5 @@ module.exports = mung.json(function (body) {
 		}
 		return response
 	}
-	console.log({body})
 	return editResponse(body)
 })
