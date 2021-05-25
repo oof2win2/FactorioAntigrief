@@ -96,8 +96,8 @@ class CreateViolationAdvanced extends Command {
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})
 			const response = await responseRaw.json()
-			if (response.readableid && response.broken_rule && response.violated_time) {
-				return message.channel.send(`Violation created! id: \`${response.readableid}\``)
+			if (response.id && response.broken_rule && response.violated_time) {
+				return message.channel.send(`Violation created! id: \`${response.id}\``)
 			} else if (response.error && response.description.includes("broken_rule expected ID")) {
 				return message.channel.send("RuleID is an invalid rule ID. Please check `fagc!getrules` or `fagc!getallrules`")
 			} else {

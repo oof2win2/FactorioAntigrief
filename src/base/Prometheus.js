@@ -89,12 +89,12 @@ const collectStatistics = async () => {
 
 	rules.forEach((rule) => {
 		if (rule.rule)
-			ruleGauge.set({ id: rule.rule.readableid, shortdesc: rule.rule.shortdesc }, rule.count)
+			ruleGauge.set({ id: rule.rule.id, shortdesc: rule.rule.shortdesc }, rule.count)
 	})
 	communities.forEach((community) => {
-		if (!community.community || !community.community.readableid) return
+		if (!community.community || !community.community.id) return
 		communityGauge.set({
-			id: community.community.readableid,
+			id: community.community.id,
 			name: community.community.name,
 			contact: community.community.contact
 		}, community.count)

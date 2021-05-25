@@ -37,7 +37,7 @@ class GetIDRule extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Rule with ID \`${rule.readableid}\``)
+			.setDescription(`FAGC Rule with ID \`${rule.id}\``)
 		embed.addField(rule.shortdesc, rule.longdesc)
 		message.channel.send(embed)
 	}

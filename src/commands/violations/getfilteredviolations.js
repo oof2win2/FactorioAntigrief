@@ -37,7 +37,7 @@ class GetViolations extends Command {
 			.setDescription(`FAGC Violations of player \`${args[0]}\``)
 
 		const trustedCommunities = communities.filter((community) => {
-			if (config.trustedCommunities.some((trustedID) => { return trustedID === community.readableid })) return community
+			if (config.trustedCommunities.some((trustedID) => { return trustedID === community.id })) return community
 		})
 
 		const CachedCommunities = new Collection()
@@ -61,13 +61,13 @@ class GetViolations extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			if (trustedCommunities.some((community) => community.readableid === violation.communityid)) {
+			if (trustedCommunities.some((community) => community.id === violation.communityid)) {
 				const admin = await this.client.users.fetch(violation.admin_id)
 				const rule = await getOrFetchRule(violation.broken_rule)
 				const community = await getOrFetchCommunity(violation.communityid)
-				embed.addField(violation.readableid,
-					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.readableid})\n` +
-					`Broken rule: ${rule.shortdesc} (${rule.readableid})\nProof: ${violation.proof}\n` +
+				embed.addField(violation.id,
+					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
+					`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
 					`Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
 					`Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
 					true

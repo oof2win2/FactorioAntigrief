@@ -33,7 +33,7 @@ class GetAllRules extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			embed.addField(rule.shortdesc, rule.readableid, true)
+			embed.addField(rule.shortdesc, rule.id, true)
 		})
 		message.channel.send(embed)
 	}
