@@ -1,5 +1,6 @@
 const fetch = require("node-fetch")
-const { MessageEmbed, Collection } = require("discord.js")
+const strictUriEncode = require("strict-uri-encode")
+const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
 class GetOffenses extends Command {
@@ -26,7 +27,7 @@ class GetOffenses extends Command {
 			return message.reply("Please set trusted communities first")
 
 		const playername = args.shift()
-		const offensesRaw = await fetch(`${this.client.config.apiurl}/offenses/getall?playername=${playername}`)
+		const offensesRaw = await fetch(`${this.client.config.apiurl}/offenses/getall?playername=${strictUriEncode(playername)}`)
 		const offenses = await offensesRaw.json()
 		if (!offenses || !offenses[0])
 			return message.channel.send(`User \`${playername}\` has no offenses that correspond to your filters!`)
@@ -37,13 +38,12 @@ class GetOffenses extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\``)
-		const communities = await (await fetch(`${this.client.config.apiurl}/communities/getall`)).json()
+		const communities = await fetch(`${this.client.config.apiurl}/communities/getall`).then(c => c.json())
 
-		const CachedCommunities = new Collection()
+		const CachedCommunities = new Map()
 		const getOrFetchCommunity = async (communityid) => {
 			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
-			const community = await fetch(`${this.client.config.apiurl}/communities/getid?id=${communityid}`).then((c) => c.json())
-			CachedCommunities.set(communityid, community)
+			const community = CachedCommunities.set(communityid, fetch(`${this.client.config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
 			return community
 		}
 

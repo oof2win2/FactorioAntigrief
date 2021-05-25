@@ -1,5 +1,6 @@
 const fetch = require("node-fetch")
-const { MessageEmbed, Collection } = require("discord.js")
+const strictUriEncode = require("strict-uri-encode")
+const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
 class GetAllOffenses extends Command {
@@ -23,16 +24,15 @@ class GetAllOffenses extends Command {
 	async run (message, args) {
 		if (!args[0]) return message.reply("Provide a player name to get offenses of")
 		const playername = args.shift()
-		const offensesRaw = await fetch(`${this.client.config.apiurl}/offenses/getall?playername=${playername}`)
+		const offensesRaw = await fetch(`${this.client.config.apiurl}/offenses/getall?playername=${strictUriEncode(playername)}`)
 		const offenses = await offensesRaw.json()
 		if (!offenses || !offenses[0])
 			return message.channel.send(`User \`${playername}\` has no offenses!`)
 		
-		const CachedCommunities = new Collection()
+		const CachedCommunities = new Map()
 		const getOrFetchCommunity = async (communityid) => {
 			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
-			const community = await fetch(`${this.client.config.apiurl}/communities/getid?id=${communityid}`).then((c) => c.json())
-			CachedCommunities.set(communityid, community)
+			const community = CachedCommunities.set(communityid, fetch(`${this.client.config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
 			return community
 		}
 
