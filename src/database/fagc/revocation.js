@@ -3,7 +3,7 @@ const { getUserStringFromID } = require("../../utils/functions-databaseless")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const RevocationSchema = new connection.Schema({
-	readableid: String,
+	id: String,
     playername: String,
     admin_id: String,
 	communityid: String,
@@ -16,7 +16,7 @@ const RevocationSchema = new connection.Schema({
     revokedBy: String
 })
 RevocationSchema.pre("save", function (next) {
-	this.readableid = getUserStringFromID(this._id.toString())
+	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 

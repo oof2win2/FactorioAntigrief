@@ -14,7 +14,7 @@ router.get('/getall', async (req, res) => {
 router.get('/getid', async (req, res) => {
 	if (req.query.id === undefined || !validateUserString(req.query.id))
 		return res.status(400).json({ error: "Bad Request", description: `id must be ID, got ${req.query.id}` })
-	const rule = await RuleModel.findOne({ readableid: req.query.id })
+	const rule = await RuleModel.findOne({ id: req.query.id })
 	res.status(200).json(rule)
 })
 

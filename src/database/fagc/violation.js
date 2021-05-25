@@ -3,7 +3,7 @@ const { getUserStringFromID } = require("../../utils/functions-databaseless")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const ViolationSchema = new connection.Schema({
-	readableid: String,
+	id: String,
     playername: String,
 	communityid: String,
 	broken_rule: String,
@@ -14,7 +14,7 @@ const ViolationSchema = new connection.Schema({
     admin_id: String,
 })
 ViolationSchema.pre("save", function (next) {
-	this.readableid = getUserStringFromID(this._id.toString())
+	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 

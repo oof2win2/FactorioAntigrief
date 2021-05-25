@@ -36,7 +36,7 @@ router.get('/getbyid', async (req, res) => {
 	if (!validateUserString(req.query.id))
         return res.status(400).json({ error: "Bad Request", description: `id is not correct ID, got value of ${req.query.id}`})
 	
-	const offense = await OffenseModel.findOne({ readableid: req.query.id }).populate('violations')
+	const offense = await OffenseModel.findOne({ id: req.query.id }).populate('violations')
     res.status(200).json(offense)
 })
 

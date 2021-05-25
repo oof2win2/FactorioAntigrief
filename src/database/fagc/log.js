@@ -3,7 +3,7 @@ const { getUserStringFromID } = require("../../utils/functions-databaseless")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const LogSchema = new connection.Schema({
-	readableid: String,
+	id: String,
     timestamp: Date,
     apikey: String,
     ip: String,
@@ -12,7 +12,7 @@ const LogSchema = new connection.Schema({
     endpointAddress: String,
 })
 LogSchema.pre("save", function (next) {
-	this.readableid = getUserStringFromID(this._id.toString())
+	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 

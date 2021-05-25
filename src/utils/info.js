@@ -27,7 +27,7 @@ async function SendWebhookMessages() {
 			client.send({embeds: embeds, username: "FAGC Notifier"}).catch((error) => {
 				if (error.stack.includes("Unknown Webhook")) {
 					console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildid}. Removing webhook from database.`)
-					WebhookSchema.findByIdAndDelete(webhook.readableid)
+					WebhookSchema.findByIdAndDelete(webhook.id)
 				}
 			})
 		} catch (error) {
@@ -64,7 +64,7 @@ async function violationCreatedMessage(violation) {
                 { name: "Automated", value: violation.automated },
                 { name: "Proof", value: violation.proof },
                 { name: "Description", value: violation.description },
-                { name: "Violation ID", value: violation.readableid },
+                { name: "Violation ID", value: violation.id },
                 { name: "Violation Time", value: violation.violated_time }
             )
             .setTimestamp()
@@ -93,7 +93,7 @@ async function violationRevokedMessage(revocation) {
                 { name: "Automated", value: revocation.automated },
                 { name: "Proof", value: revocation.proof },
                 { name: "Description", value: revocation.description },
-                { name: "Revocation ID", value: revocation.readableid },
+                { name: "Revocation ID", value: revocation.id },
                 { name: "Revocation Time", value: revocation.revokedTime },
                 { name: "Revoked by", value: revocation.revokedBy },
             )
@@ -161,7 +161,7 @@ async function offenseRevokedMessage(offense) {
             .setColor("ORANGE")
         offense.forEach((revocation) => {
             embed.addField(
-                `ID: ${revocation.readableid}`,
+                `ID: ${revocation.id}`,
 				`Playername: ${revocation.playername}, Admin ID: ${revocation.admin_id}, Community ID: ${revocation.communityid}\n` +
                 `Broken rule: ${revocation.broken_rule}, Automated: ${revocation.automated}, Proof: ${revocation.proof}\n` +
                 `Description: ${revocation.description}, Revocation time: ${revocation.revokedTime}, Revoked by: ${revocation.revokedBy}\n`

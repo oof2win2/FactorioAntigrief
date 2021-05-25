@@ -37,7 +37,7 @@ router.get('/getall', async (req, res) => {
 router.get('/getbyid', async (req, res) => {
 	if (req.query.id === undefined || !validateUserString(req.query.id))
 		return res.status(400).json({ error: "Bad Request", description: `id expected ID, got ${typeof (req.query.id)} with value of ${req.query.id}` })
-	const dbRes = await ViolationModel.findOne({ readableid: req.query.id })
+	const dbRes = await ViolationModel.findOne({ id: req.query.id })
 	res.status(200).json(dbRes)
 })
 router.get('/getbyrule', async (req, res) => {
@@ -63,7 +63,7 @@ router.post('/create', async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `admin_id expected Discord user ID, got ${typeof (req.body.admin_id)} which is not one` })
 	
 	try {
-		const rule = await RuleModel.findOne({ readableid: req.body.broken_rule })
+		const rule = await RuleModel.findOne({ id: req.body.broken_rule })
 		if (!rule) throw "Wrong rule"
 	} catch (error) {
 		return res.status(400).json({ error: "Bad Request", description: "Rule must be a RuleID" })
@@ -71,11 +71,11 @@ router.post('/create', async (req, res) => {
 	const community = await getCommunity(req.headers.apikey)
 	const dbOffense = await OffenseModel.findOne({
 		playername: req.body.playername,
-		communityid: community.readableid
+		communityid: community.id
 	})
 	const violation = await ViolationModel.create({
 		playername: req.body.playername,
-		communityid: community.readableid,
+		communityid: community.id,
 		broken_rule: req.body.broken_rule,
 		proof: req.body.proof || "None",
 		description: req.body.description || "None",
@@ -86,7 +86,7 @@ router.post('/create', async (req, res) => {
 	if (dbOffense === null || dbOffense === undefined) {
 		const offense = new OffenseModel({
 			playername: req.body.playername,
-			communityid: community.readableid,
+			communityid: community.id,
 			violations: [],
 		})
 		offense.violations.push(violation._id)
@@ -95,7 +95,7 @@ router.post('/create', async (req, res) => {
 		await OffenseModel.updateOne(
 			{
 				playername: req.body.playername,
-				communityid: community.readableid
+				communityid: community.id
 			},
 			{ $push: { violations: violation._id } }
 		)
@@ -115,11 +115,11 @@ router.delete('/revoke', async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `admin_id expected Discord user ID, got ${typeof (req.body.admin_id)} which is not one` })
 
 	const community = await getCommunity(req.headers.apikey)
-	const toRevoke = await ViolationModel.findOne({ readableid: req.body.id })
+	const toRevoke = await ViolationModel.findOne({ id: req.body.id })
 	if (toRevoke === undefined || toRevoke === null)
 		return res.status(404).json({ error: `Not Found`, description: `Violation with ID ${req.body.id} not found` })
-	if (!toRevoke.communityid == community.readableid)
-		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityid} but your community ID is ${community.readableid}` })
+	if (!toRevoke.communityid == community.id)
+		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityid} but your community ID is ${community.id}` })
 
 	const violation = await ViolationModel.findByIdAndDelete(toRevoke._id)
 	await OffenseModel.updateOne(
@@ -160,11 +160,11 @@ router.delete('/revokeallname', async (req, res) => {
 	const community = await getCommunity(req.headers.apikey)
 	const toRevoke = await OffenseModel.findOne({
 		playername: req.body.playername,
-		communityid: community.readableid
+		communityid: community.id
 	})
 	if (toRevoke === undefined || toRevoke === null)
 		return res.status(404).json({ error: "Not Found", description: `Violation with player name ${req.body.playername} not found` })
-	if (toRevoke.communityid != community.readableid)
+	if (toRevoke.communityid != community.id)
 		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityid} but your community ID is ${community.communityid}` })
 
 	// first get the offense and delete that first, so the caller can get the raw violations - not just IDs

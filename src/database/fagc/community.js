@@ -3,13 +3,13 @@ const { getUserStringFromID } = require("../../utils/functions-databaseless")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const CommunitySchema = new connection.Schema({
-	readableid: String,
+	id: String,
 	name: String,
     contact: String,
 	guildid: String,
 })
 CommunitySchema.pre("save", function (next) {
-	this.readableid = getUserStringFromID(this._id.toString())
+	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 

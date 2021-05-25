@@ -29,7 +29,7 @@ router.get('/getall', async (req, res) => {
 router.get('/getid', async (req, res) => {
 	if (req.query.id === undefined || !validateUserString(req.query.id))
 		return res.status(400).json({ error: "Bad Request", description: `id must be ID, got ${req.query.id}` })
-	const community = await CommunityModel.findOne({readableid: req.query.id })
+	const community = await CommunityModel.findOne({id: req.query.id })
 	res.status(200).json(community)
 })
 
@@ -65,10 +65,10 @@ router.post('/setconfig', async (req, res) => {
 
 
 	// query database if rules and communities actually exist
-	const rulesExist = await RuleModel.find({ readableid: { $in: req.body.ruleFilters } })
+	const rulesExist = await RuleModel.find({ id: { $in: req.body.ruleFilters } })
 	if (rulesExist.length !== req.body.ruleFilters.length)
 		return res.status(400).json({ error: "Bad Request", description: `ruleFilters must be array of IDs of rules, got ${req.body.ruleFilters.toString()}, some of which are not real rule IDs` })
-	const communitiesExist = await CommunityModel.find({ readableid: { $in: req.body.trustedCommunities } })
+	const communitiesExist = await CommunityModel.find({ id: { $in: req.body.trustedCommunities } })
 	if (communitiesExist.length !== req.body.ruleFilters.length)
 		return res.status(400).json({ error: "Bad Request", description: `ruleFilters must be array of IDs of communities, got ${req.body.ruleFilters.toString()}, some of which are not real community IDs` })
 	// check other stuff
