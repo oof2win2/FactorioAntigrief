@@ -65,9 +65,9 @@ module.exports = {
 			})
 			const community = await communityRaw.json()
 			if (community.key && community.community._id) {
-				message.author.send(`API key for community ${name} (\`${community.community.readableid}\`), contacted at <@${contact.id}> | ${contact.tag}`)
+				message.author.send(`API key for community ${name} (\`${community.community.id}\`), contacted at <@${contact.id}> | ${contact.tag}`)
 				message.author.send(`||${community.key}||`)
-				return message.channel.send(`Community with ID \`${community.community.readableid}\` created successfully! API key has been sent to your DMs`)
+				return message.channel.send(`Community with ID \`${community.community.id}\` created successfully! API key has been sent to your DMs`)
 			} else if (community.error == "Bad Request" && community.error.includes("guildid must be Discord Guild snowflake")) {
 				message.channel.send("Provided GuildID of community is not valid or the bot is not in it")
 			} else {
