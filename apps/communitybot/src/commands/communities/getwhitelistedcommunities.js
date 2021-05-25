@@ -37,9 +37,9 @@ class GetWhitelisted extends Command {
 				message.channel.send(communitiesEmbed)
 				communitiesEmbed.fields = []
 			}
-			if (config.trustedCommunities.some(id => id === community.readableid)) {
+			if (config.trustedCommunities.some(id => id === community.id)) {
 				const user = await this.client.users.fetch(community.contact)
-				communitiesEmbed.addField(`${community.name} | ${community.readableid}`, `Contact: <@${user.id}> | ${user.tag}`)
+				communitiesEmbed.addField(`${community.name} | ${community.id}`, `Contact: <@${user.id}> | ${user.tag}`)
 				sent++
 			}
 		}))

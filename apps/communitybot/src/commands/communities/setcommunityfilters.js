@@ -38,7 +38,7 @@ class SetFilters extends Command {
 			}
 			
 			const user = await this.client.users.fetch(community.contact)
-			embed.addField(`${community.name} | ${community.readableid}`, `Contact: <@${user.id}> | ${user.tag}`)
+			embed.addField(`${community.name} | ${community.id}`, `Contact: <@${user.id}> | ${user.tag}`)
 		}))
 		message.channel.send(embed)
 
@@ -64,9 +64,9 @@ class SetFilters extends Command {
 					message.channel.send(embed)
 					embed.fields = []
 				}
-				let community = communities.find((community) => community.readableid === trustedCommunityID)
+				let community = communities.find((community) => community.id === trustedCommunityID)
 				const user = await this.client.users.fetch(community.contact)
-				embed.addField(`${community.name} | ${community.readableid}`, `Contact: <@${user.id}> | ${user.tag}`)
+				embed.addField(`${community.name} | ${community.id}`, `Contact: <@${user.id}> | ${user.tag}`)
 			}))
 			message.channel.send(embed)
 		}

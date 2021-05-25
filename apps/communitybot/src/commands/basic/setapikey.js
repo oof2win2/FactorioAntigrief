@@ -31,7 +31,7 @@ class SetAPIKey extends Command {
 			}).then((c) => c.json())
 			if (!community) return message.reply("That API key is not associated with a community")
 			const config = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id }, {
-				$set: { "apikey": apikey, "communityid": community.readableid }
+				$set: { "apikey": apikey, "communityid": community.id }
 			}, { new: true })
 			if (config.apikey && config.guildid === message.guild.id) {
 				return message.channel.send(`${message.author} set the API key successfully!`)

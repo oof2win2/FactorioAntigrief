@@ -35,7 +35,7 @@ class SetRuleFilters extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			embed.addField(rule.shortdesc, rule.readableid, true)
+			embed.addField(rule.shortdesc, rule.id, true)
 		})
 		message.channel.send(embed)
 
@@ -61,8 +61,8 @@ class SetRuleFilters extends Command {
 					message.channel.send(ruleEmbed)
 					embed.fields = []
 				}
-				let rule = rules.find(rule => rule.readableid === filteredRuleID)
-				ruleEmbed.addField(rule.shortdesc, rule.readableid, true)
+				let rule = rules.find(rule => rule.id === filteredRuleID)
+				ruleEmbed.addField(rule.shortdesc, rule.id, true)
 			})
 			message.channel.send(ruleEmbed)
 		}
