@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
 
 const logger = require('./utils/log')
+const removeId = require("./utils/removeId")
 const authUser = require("./utils/authUser")
 
 const ruleRouter = require('./routes/rules')
@@ -17,13 +18,17 @@ const app = express()
 
 // API rate limits
 const rateLimit = require("express-rate-limit");
+const localIPs = [
+	"::ffff:127.0.0.1",
+	"::1"
+]
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,	// 15 minutes
 	max: 100,	// 100 requests in timeframe
-	lookup: 'connection.remoteAddress',
+	// lookup: 'connection.remoteAddress',
 	skip: (req) => {
 		const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-		if (ip === "::1") return true
+		if (localIPs.includes(ip)) return true
 		else return false
 	}
 })
@@ -41,7 +46,8 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 // logger for any request other than POST
-app.use(logger);
+app.use(logger)
+app.use(removeId)
 
 // middleware for authentication
 const authMiddleware = async (req, res, next) => {
