@@ -1,5 +1,6 @@
 const fetch = require("node-fetch")
-const { MessageEmbed, Collection } = require("discord.js")
+const strictUriEncode = require("strict-uri-encode")
+const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
 class GetAllViolations extends Command {
@@ -22,7 +23,7 @@ class GetAllViolations extends Command {
 	}
 	async run (message, args) {
 		if (!args[0]) return message.reply("Provide a player name to get violations of")
-		const violationsRaw = await fetch(`${this.client.config.apiurl}/violations/getall?playername=${args[0]}`)
+		const violationsRaw = await fetch(`${this.client.config.apiurl}/violations/getall?playername=${strictUriEncode(args[0])}`)
 		const violations = await violationsRaw.json()
 		if (!violations[0])
 			return message.reply(`Player \`${args[0]}\` doesn't have any violations`)
@@ -33,18 +34,16 @@ class GetAllViolations extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Violations of player \`${args[0]}\``)
 		
-		const CachedCommunities = new Collection()
+		const CachedCommunities = new Map()
 		const getOrFetchCommunity = async (communityid) => {
 			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
-			const community = await fetch(`${this.client.config.apiurl}/communities/getid?id=${communityid}`).then((c) => c.json())
-			CachedCommunities.set(communityid, community)
+			const community = CachedCommunities.set(communityid, fetch(`${this.client.config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
 			return community
 		}
-		const CachedRules = new Collection()
+		const CachedRules = new Map()
 		const getOrFetchRule = async (ruleid) => {
-			if (CachedRules.get(ruleid)) return CachedRules.get(getOrFetchCommunity)
-			const rule = await fetch(`${this.client.config.apiurl}/rules/getid?id=${ruleid}`).then((c) => c.json())
-			CachedRules.set(ruleid, rule)
+			if (CachedRules.get(ruleid)) return CachedRules.get(ruleid)
+			const rule = CachedRules.set(ruleid, fetch(`${this.client.config.apiurl}/rules/getid?id=${strictUriEncode(ruleid)}`).then((c) => c.json())).get(ruleid)
 			return rule
 		}
 		

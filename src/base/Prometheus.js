@@ -7,6 +7,7 @@ const promClient = require("prom-client")
 const http = require("http")
 const config = require("../../config")
 const fetch = require("node-fetch")
+const strictUriEncode = require("strict-uri-encode")
 const ConfigModel = require("../database/schemas/config")
 
 const collectDefaultMetrics = promClient.collectDefaultMetrics
@@ -31,6 +32,12 @@ register.registerMetric(ruleGauge)
 // Format community trust from config
 const trustedCommunities = async (communities) => {
 	let rawResults = []
+	const CachedCommunities = new Map()
+	const getOrFetchCommunity = async (communityid) => {
+		if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
+		const community = CachedCommunities.set(communityid, fetch(`${config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
+		return community
+	}
 	communities.forEach((community) => {
 		community.trustedCommunities.forEach((communityID) => {
 			let found = false
@@ -47,7 +54,7 @@ const trustedCommunities = async (communities) => {
 	})
 	let results = rawResults.map(async (community) => {
 		return {
-			community: await fetch(`${config.apiurl}/communities/getid?id=${community.id}`).then((r) => r.json()),
+			community: await getOrFetchCommunity(community.id),
 			count: community.count
 		}
 	})
@@ -56,6 +63,12 @@ const trustedCommunities = async (communities) => {
 // Format rule trust from config
 const trustedRules = async (communities) => {
 	let rawResults = []
+	const CachedRules = new Map()
+	const getOrFetchRule = async (ruleid) => {
+		if (CachedRules.get(ruleid)) return CachedRules.get(ruleid)
+		const rule = CachedRules.set(ruleid, fetch(`${config.apiurl}/rules/getid?id=${strictUriEncode(ruleid)}`).then((c) => c.json())).get(ruleid)
+		return rule
+	}
 	communities.forEach((community) => {
 		community.ruleFilters.forEach((ruleID) => {
 			let found = false
@@ -72,7 +85,7 @@ const trustedRules = async (communities) => {
 	})
 	let results = rawResults.map(async (rule) => {
 		return {
-			rule: await fetch(`${config.apiurl}/rules/getid?id=${rule.id}`).then((r) => r.json()),
+			rule: await getOrFetchRule(rule.id),
 			count: rule.count
 		}
 	})
