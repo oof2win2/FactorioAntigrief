@@ -8,6 +8,8 @@
     "dev": "nodemon --inspect ./src/bin/www"
   },
   "dependencies": {
+    "@sentry/node": "^6.4.1",
+    "@sentry/tracing": "^6.4.1",
     "cookie-parser": "~1.4.4",
     "crypto-random-string": "^4.0.0",
     "debug": "~4.3.1",

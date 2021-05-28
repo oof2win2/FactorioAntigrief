@@ -15,6 +15,29 @@ const revocationRouter = require('./routes/revocations')
 const offenseRouter = require('./routes/offenses')
 
 const app = express()
+const Sentry = require('@sentry/node');
+const Tracing = require("@sentry/tracing");
+
+Sentry.init({
+    dsn: "https://409d130978b04111b04d293810b4511b@o745688.ingest.sentry.io/5790604",
+    integrations: [
+        // enable HTTP calls tracing
+        new Sentry.Integrations.Http({ tracing: true }),
+        // enable Express.js middleware tracing
+        new Tracing.Integrations.Express({ app }),
+    ],
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+});
+
+// RequestHandler creates a separate execution context using domains, so that every
+// transaction/span/breadcrumb is attached to its own Hub instance
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
 
 // API rate limits
 const rateLimit = require("express-rate-limit");
@@ -64,7 +87,6 @@ const authMiddleware = async (req, res, next) => {
 // Informatics router should be publicly available to anyone who wants to use it (logs & webhooks)
 // this is why it is first, before the authentication middleware.
 app.use('/v1/informatics', informaticsRouter)
-
 app.use('/v1/*', authMiddleware)
 
 app.use('/v1/rules', ruleRouter)
@@ -77,20 +99,15 @@ app.get('/', (req, res) => {
     res.status(200).json({message: "FAGC api"})
 })
 
-// catch 404 and forward to error handler
-app.use(function (req, res) {
-    res.status(404).json({error: "Page Not Found"})
-});
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
 
-// error handler
-app.use(function (err, req, res) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-    // render the error page
-    res.status(err.status || 500);
-    res.json({error: 'error', message: err.message});
+// Optional fallthrough error handler
+app.use(function onError(err, req, res) {
+    // The error id is attached to `res.sentry` to be returned
+    // and optionally displayed to the user for support.
+    res.statusCode = 500;
+    res.end(res.sentry + "\n");
 });
 
 module.exports = app;
