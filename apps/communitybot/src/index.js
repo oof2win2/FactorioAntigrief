@@ -7,8 +7,20 @@ const fs = require("fs")
 const readdir = util.promisify(fs.readdir)
 const config = require("../config")
 
-
 process.chdir(__dirname)
+
+// Sentry.io logging
+const Sentry = require("@sentry/node")
+// eslint-disable-next-line no-unused-vars
+const Tracing = require("@sentry/tracing")
+Sentry.init({
+	dsn: "https://b9888956c9274e5086130d8d61fa3022@o745688.ingest.sentry.io/5790616",
+
+	// Set tracesSampleRate to 1.0 to capture 100%
+	// of transactions for performance monitoring.
+	// We recommend adjusting this value in production
+	tracesSampleRate: 1.0,
+})
 
 require("./utils/extenders")
 // This enables FAGCBot to access the extenders in any part of the codebase
@@ -52,7 +64,7 @@ const init = async () => {
 			delete require.cache[require.resolve(`./events/${dir}/${evt}`)]
 		})
 	})
-	
+
 	// log in to discord
 	client.login(client.config.token)
 }

@@ -8,6 +8,8 @@
     "dev": "nodemon"
   },
   "dependencies": {
+    "@sentry/node": "^6.4.1",
+    "@sentry/tracing": "^6.4.1",
     "@supercharge/strings": "^1.18.0",
     "chalk": "^4.1.1",
     "common-tags": "^1.8.0",
