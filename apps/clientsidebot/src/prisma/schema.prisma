@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// url doesn't seem to be doing anything with sqlite
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Config {
+	id Int @id @default(autoincrement())
+	onViolation String @default("info")
+	onRevocation String @default("info")
+	banRole String?
+	configRole String?
+	notificationsRole String?
+	guildid String
+	infochannels InfoChannels[]
+}
+model InfoChannels {
+	id Int @id @default(autoincrement())
+	channelid String
+	config Config @relation(fields: [configid], references: [id])
+	configid Int
+}
+
+model PrivateBans {
+	id Int @id @default(autoincrement())
+	bannedAt DateTime @default(now())
+	playername String
+	reason String? @default("No reason")
+	admin String
+}
+model Syncedbans {
+	id Int @id @default(autoincrement())
+	bannedAt DateTime @default(now())
+	apiId String
+	playername String
+	reason String
+	admin String
+}
+model Whitelist {
+	id Int @id @default(autoincrement())
+	playername String
+	whitelistedAt DateTime @default(now())
+}
