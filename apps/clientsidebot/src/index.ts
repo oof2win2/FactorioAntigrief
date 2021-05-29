@@ -10,8 +10,9 @@ process.chdir(__dirname)
 require("./utils/extenders")
 // This enables FAGCBot to access the extenders in any part of the codebase
 
-const FAGCBot = require("./base/fagcbot")
-const client = new FAGCBot()
+import FAGCBot from "./base/fagcbot"
+const client = new FAGCBot({})
+
 
 const init = async () => {
 	// Loads commands
@@ -23,9 +24,9 @@ const init = async () => {
 		cmds.filter(cmd => cmd.split(".").pop() === "js").forEach(cmd => {
 			const res = client.loadCommand(`./commands/${dir}`, cmd)
 			// loads each command
-			if (res) client.logger.log(res, "error")
+			if (res) client.logger(res)
 			// if there's an error, log it
-			// else client.logger.log(`Command ${cmd} loaded`, "debug")
+			// else client.logger(`Command ${cmd} loaded`, "debug")
 		})
 	})
 

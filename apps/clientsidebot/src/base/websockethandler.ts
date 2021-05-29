@@ -1,6 +1,8 @@
-const { MessageEmbed } = require("discord.js")
+import * as FAGCBot from "./fagcbot"
 
-module.exports = async function SocketMessage(message, client) {
+import { MessageEmbed } from "discord.js"
+
+async function WebSocketHandler(message, client) {
 	await client.infoChannel
 	await client.defaultAction
 	let channel = await client.channels.fetch(client.infoChannel)
@@ -74,3 +76,4 @@ module.exports = async function SocketMessage(message, client) {
 	}
 	}
 }
+export default WebSocketHandler

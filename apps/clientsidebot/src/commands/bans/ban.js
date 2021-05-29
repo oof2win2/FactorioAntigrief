@@ -16,7 +16,7 @@ class BanPlayer extends Command {
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
-			customPermissions: ["BAN"],
+			customPermissions: ["ban"],
 		})
 	}
 	async run(message, args) {

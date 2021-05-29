@@ -1,16 +1,36 @@
-const { Client, Collection } = require("discord.js")
-const path = require("path")
-const fetch = require("node-fetch")
-const WebSocket = require("ws")
-const WebSocketHandler = require("./websockethandler")
+// const { Client, Collection } = require("discord.js")
+import {Client, Collection, Snowflake} from "discord.js"
+import * as path from "path"
+import fetch from "node-fetch"
+import * as WebSocket from "ws"
+import { BotConfig, BotConfigEmotes } from "../types/FAGCBot"
 
-const { PrismaClient } = require("@prisma/client")
+import WebSocketHandler from "./websockethandler"
+
+import { PrismaClient } from "@prisma/client"
+
+import * as config from "../../config"
+import Logger, { LogType } from "../utils/logger"
+import { Config } from ".prisma/client"
+import { FAGCConfig } from "../types/FAGC"
+import Command from "./Command"
 
 class FAGCBot extends Client {
+	public config: BotConfig
+	public emotes: BotConfigEmotes
+	public RateLimit: Collection<Snowflake, number>
+	public commands: Collection<string, Command>
+	public aliases: Collection<string, string>
+	public logger: (message: String, type?: LogType) => void
+	public prisma: PrismaClient
+	public botconfig: Config
+	public fagcconfig: FAGCConfig
+	public wsHandler: (arg0: Object, arg1: FAGCBot) => void
+	private messageSocket: WebSocket
 	constructor(options) {
 		super(options)
 
-		this.config = require("../../config")
+		this.config = config
 		this.emotes = this.config.emotes
 
 		// setup rate limit
@@ -18,12 +38,12 @@ class FAGCBot extends Client {
 
 		this.commands = new Collection()
 		this.aliases = new Collection()
-		this.logger = require("../utils/logger")
+		this.logger = Logger
 
 		// this.db = require("../database/Database")
 		this.prisma = new PrismaClient()
-		this.botconfig = undefined
-		this.fagcconfig = undefined
+		this.botconfig = null
+		this.fagcconfig = null
 
 		this.wsHandler = WebSocketHandler
 		this.messageSocket = new WebSocket("ws://localhost:8001")
@@ -34,21 +54,24 @@ class FAGCBot extends Client {
 	}
 	async _asyncInit() {
 		await this.getConfig()
+		if (this.botconfig) this.messageSocket.send({
+			guildid: this.botconfig.guildid
+		})
 		await this.getGuildConfig()
 	}
 	/**
 	 * Check if a user has sent a command in the past X milliseconds
-	 * @param {String} uid - Discord user's ID snowflake
+	 * @param {string} uid - Discord user's ID snowflake
 	 * @param {Number} time - Time in ms to check
 	 * @returns {Boolean} True if the user has sent a command, false if they haven't
 	 */
-	checkTimeout(uid, time) {
+	checkTimeout(uid: Snowflake, time: number) {
 		const lastTime = this.RateLimit.get(uid)
 		if (!lastTime) return false
-		if (lastTime < Date.now() - time) return false
+		if (lastTime < (Date.now() - time)) return false
 		return true
 	}
-	loadCommand(commandPath, commandName) { // load a command
+	loadCommand(commandPath: string, commandName: string) { // load a command
 		try {
 			const props = new (require(`.${commandPath}${path.sep}${commandName}`))(this) // gets properties
 			props.config.location = commandPath // finds location
@@ -97,6 +120,11 @@ class FAGCBot extends Client {
 		} else {
 			const set = await await this.prisma.config.create({data: config})
 			if (set.id) {
+				// tell the websocket to the api that we have this guild ID
+				this.messageSocket.send({
+					guildid: this.botconfig.guildid
+				})
+
 				this.botconfig = set
 				return set
 			} else return set
@@ -109,4 +137,5 @@ class FAGCBot extends Client {
 		return this.fagcconfig
 	}
 }
-module.exports = FAGCBot
+
+export default FAGCBot

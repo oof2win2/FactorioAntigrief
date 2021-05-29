@@ -6,8 +6,8 @@ module.exports = {
  * 
  * @param {Object} msg - Discord message
  * @param {Object} response - API error message
- * @param {String} response.error - API error name
- * @param {String} response.description - API error description
+ * @param {string} response.error - API error name
+ * @param {string} response.description - API error description
  */
 async function handleErrors(msg, response) {
 	if (!msg.channel) return
