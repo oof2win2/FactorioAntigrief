@@ -21,7 +21,6 @@
     "mongoose": "^5.12.3",
     "node-fetch": "^2.6.1",
     "path": "^0.12.7",
-    "prom-client": "^13.1.0",
     "strict-uri-encode": "^2.0.0"
   },
   "devDependencies": {
