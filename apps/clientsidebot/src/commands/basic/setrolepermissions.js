@@ -22,18 +22,18 @@ class SetAPIKey extends Command {
 	}
 	async run(message, args) {
 		const options = ["banRole", "configRole", "notificationsRole"]
-		const messageFilter = response => response.author.id === message.author.id
+		
 		if (!args[0]) {
 			// Set all roles
-			const banRoleMsg = (await getMessageResponse(message.channel.send("What is the role that can create and manage bans (ping or ID)"), messageFilter))
+			const banRoleMsg = await getMessageResponse("What is the role that can create and manage bans (ping or ID)", message)
 			const banRole = banRoleMsg.mentions.roles.first() || await this.client.roles.fetch(banRoleMsg.content)
 			if (!banRole) return message.channel.send("Provided role does not exist")
 
-			const configRoleMsg = (await getMessageResponse(message.channel.send("What is the role that can manage the bot's configuration"), messageFilter))
+			const configRoleMsg = await getMessageResponse("What is the role that can manage the bot's configuration", message)
 			const configRole = configRoleMsg.mentions.roles.first() || await this.client.roles.fetch(configRoleMsg.content)
 			if (!configRole) return message.channel.send("Provided role does not exist")
 
-			const notificationRoleMsg = (await getMessageResponse(message.channel.send("What is the role that can manage FAGC notifications?"), messageFilter))
+			const notificationRoleMsg = await getMessageResponse("What is the role that can manage FAGC notifications?", message)
 			const notificationRole = notificationRoleMsg.mentions.roles.first() || await this.client.roles.fetch(notificationRoleMsg.content)
 			if (!notificationRole) return message.channel.send("Provided role does not exist")
 
@@ -82,7 +82,7 @@ class SetAPIKey extends Command {
 			const permission = args.shift()
 			if (options.includes(permission)) return message.reply(`\`${permission}\` is an invalid permission! Use one of \`${options.join("`, `")}\``)
 
-			const roleMsg = (await getMessageResponse(message.channel.send(`Mention or type the ID of the role that will have access to the \`${permission}\` permission?`), messageFilter))
+			const roleMsg = await getMessageResponse(`Mention or type the ID of the role that will have access to the \`${permission}\` permission?`, message)
 			const role = roleMsg.mentions.roles.first() || await this.client.roles.fetch(roleMsg.content)
 			if (!role) return message.channel.send("Provided role does not exist")
 

@@ -21,24 +21,22 @@ class Setup extends Command {
 		})
 	}
 	async run(message) {
-		const messageFilter = response => response.author.id === message.author.id
-
 		message.channel.send("Hello! This is the bot setup process for this server")
-		const violationAction = (await getMessageResponse(message.channel.send("What should be the default action of what should happen when a violation matching your config is created (one of `info`, `jail` and `ban`)"), messageFilter))?.cleanContent
+		const violationAction = (await getMessageResponse("What should be the default action of what should happen when a violation matching your config is created (one of `info`, `jail` and `ban`)", message))?.cleanContent
 		if (!(["info", "jail", "ban"]).includes(violationAction)) return message.channel.send("Default action on violation is invalid")
 
-		const revocationAction = (await getMessageResponse(message.channel.send("What should happen when such a violation is revoked (one of `info`, `keepBanned` and `removeBan`)"), messageFilter))?.cleanContent
+		const revocationAction = (await getMessageResponse("What should happen when such a violation is revoked (one of `info`, `keepBanned` and `removeBan`)", message))?.cleanContent
 		if (!(["info", "keepBanned", "removeBan"]).includes(revocationAction)) return message.channel.send("Revocation action is not valid.")
 
-		const banRoleMsg = (await getMessageResponse(message.channel.send("What is the role that can create and manage bans (ping or ID)"), messageFilter))
+		const banRoleMsg = await getMessageResponse("What is the role that can create and manage bans (ping or ID)", message)
 		const banRole = banRoleMsg.mentions.roles.first() || await this.client.roles.fetch(banRoleMsg.content)
 		if (!banRole) return message.channel.send("Provided role does not exist")
 
-		const configRoleMsg = (await getMessageResponse(message.channel.send("What is the role that can manage the bot's configuration"), messageFilter))
+		const configRoleMsg = await getMessageResponse("What is the role that can manage the bot's configuration", message)
 		const configRole = configRoleMsg.mentions.roles.first() || await this.client.roles.fetch(configRoleMsg.content)
 		if (!configRole) return message.channel.send("Provided role does not exist")
 
-		const notificationRoleMsg = (await getMessageResponse(message.channel.send("What is the role that can manage FAGC notifications?"), messageFilter))
+		const notificationRoleMsg = await getMessageResponse("What is the role that can manage FAGC notifications?", message)
 		const notificationRole = notificationRoleMsg.mentions.roles.first() || await this.client.roles.fetch(notificationRoleMsg.content)
 		if (!notificationRole) return message.channel.send("Provided role does not exist")
 

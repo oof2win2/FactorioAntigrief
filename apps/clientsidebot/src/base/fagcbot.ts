@@ -17,21 +17,21 @@ import Command from "./Command"
 
 class FAGCBot extends Client {
 	public config: BotConfig
-	public emotes: BotConfigEmotes
+	static emotes: BotConfigEmotes
 	public RateLimit: Collection<Snowflake, number>
 	public commands: Collection<string, Command>
 	public aliases: Collection<string, string>
 	public logger: (message: String, type?: LogType) => void
 	public prisma: PrismaClient
-	public botconfig: Config
-	public fagcconfig: FAGCConfig
+	static botconfig: Config
+	static fagcconfig: FAGCConfig
 	public wsHandler: (arg0: Object, arg1: FAGCBot) => void
 	private messageSocket: WebSocket
 	constructor(options) {
 		super(options)
 
 		this.config = config
-		this.emotes = this.config.emotes
+		FAGCBot.emotes = this.config.emotes
 
 		// setup rate limit
 		this.RateLimit = new Collection()
@@ -42,8 +42,8 @@ class FAGCBot extends Client {
 
 		// this.db = require("../database/Database")
 		this.prisma = new PrismaClient()
-		this.botconfig = null
-		this.fagcconfig = null
+		FAGCBot.botconfig = null
+		FAGCBot.fagcconfig = null
 
 		this.wsHandler = WebSocketHandler
 		this.messageSocket = new WebSocket("ws://localhost:8001")
@@ -54,9 +54,9 @@ class FAGCBot extends Client {
 	}
 	async _asyncInit() {
 		await this.getConfig()
-		if (this.botconfig) this.messageSocket.send({
-			guildid: this.botconfig.guildid
-		})
+		if (FAGCBot.botconfig) this.messageSocket.send(Buffer.from(JSON.stringify({
+			guildid: FAGCBot.botconfig.guildid
+		})))
 		await this.getGuildConfig()
 	}
 	/**
@@ -104,14 +104,14 @@ class FAGCBot extends Client {
 		return false
 	}
 	async getConfig() {
-		if (this.botconfig) return this.botconfig
+		if (FAGCBot.botconfig) return FAGCBot.botconfig
 		const config = await this.prisma.config.findFirst()
 		if (!config) return null
-		this.botconfig = config
+		FAGCBot.botconfig = config
 		return config
 	}
 	async setConfig(config) {
-		if (this.botconfig) {
+		if (FAGCBot.botconfig) {
 			const update = await this.prisma.config.update({
 				data: config,
 				where: {id: 1}
@@ -122,19 +122,19 @@ class FAGCBot extends Client {
 			if (set.id) {
 				// tell the websocket to the api that we have this guild ID
 				this.messageSocket.send({
-					guildid: this.botconfig.guildid
+					guildid: FAGCBot.botconfig.guildid
 				})
 
-				this.botconfig = set
+				FAGCBot.botconfig = set
 				return set
 			} else return set
 		}
 	}
 	async getGuildConfig() {
-		if (this.fagcconfig) return this.fagcconfig
-		this.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildid=${this.botconfig.guildid}`).then(c => c.json())
-		setTimeout(() => this.fagcconfig = undefined, 1000*60*15) // times itself out after 
-		return this.fagcconfig
+		if (FAGCBot.fagcconfig) return FAGCBot.fagcconfig
+		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildid=${FAGCBot.botconfig.guildid}`).then(c => c.json())
+		setTimeout(() => FAGCBot.fagcconfig = undefined, 1000*60*15) // times itself out after 
+		return FAGCBot.fagcconfig
 	}
 }
 

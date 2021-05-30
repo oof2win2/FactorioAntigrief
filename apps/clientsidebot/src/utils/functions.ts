@@ -1,6 +1,4 @@
-module.exports = {
-	handleErrors,
-}
+import { Message } from "discord.js"
 
 /**
  * 
@@ -9,7 +7,7 @@ module.exports = {
  * @param {string} response.error - API error name
  * @param {string} response.description - API error description
  */
-async function handleErrors(msg, response) {
+export async function handleErrors(msg: Message, response): Promise<Message> {
 	if (!msg.channel) return
 	switch (response.error) {
 	case "AuthenticationError": {
@@ -20,6 +18,6 @@ async function handleErrors(msg, response) {
 		break
 	}
 	default:
-		msg.channel.send(`Error \`${response.error}\`: \`${response.description}\``)
+		return msg.channel.send(`Error \`${response.error}\`: \`${response.description}\``)
 	}
 }

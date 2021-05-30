@@ -24,7 +24,7 @@ export default async (client: FAGCBot, message: Message) => {
 	const rate = client.checkTimeout(message.author.id, cmd.config.cooldown)
 	if (rate && !client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
 	client.RateLimit.set(message.author.id, Date.now())
-	let botconfig = client.botconfig
+	let botconfig = FAGCBot.botconfig
 	if (cmd.config.requiredConfig && !botconfig)
 		return message.reply("You need to create a guild config first with `fagc!setup`!")
 	/// permissions

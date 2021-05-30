@@ -18,5 +18,4 @@ export interface FAGCConfig {
 }
 export interface FAGCMessage {
 	messageType: string,
-
 }

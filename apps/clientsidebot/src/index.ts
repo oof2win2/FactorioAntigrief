@@ -7,12 +7,11 @@ const readdir = util.promisify(fs.readdir)
 
 process.chdir(__dirname)
 
-require("./utils/extenders")
+import "./utils/extenders"
 // This enables FAGCBot to access the extenders in any part of the codebase
 
 import FAGCBot from "./base/fagcbot"
 const client = new FAGCBot({})
-
 
 const init = async () => {
 	// Loads commands
@@ -39,7 +38,9 @@ const init = async () => {
 		evts.forEach(evt => {
 			// splits the event and gets first part. events are in the format "eventName.js"
 			const evtName = evt.split(".")[0]
-			const event = require(`./events/${dir}/${evt}`)
+			const event = (require(`./events/${dir}/${evt}`)).default
+			// import event from `./events/${dir}/${evt}`
+			// import * as event from `./events/${dir}/${evt}`
 			// binds client to the event
 			client.on(evtName, (...args) => event(client, ...args))
 			delete require.cache[require.resolve(`./events/${dir}/${evt}`)]
