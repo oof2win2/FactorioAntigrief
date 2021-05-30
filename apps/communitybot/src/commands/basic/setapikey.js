@@ -36,11 +36,11 @@ class SetAPIKey extends Command {
 			if (config.apikey && config.guildid === message.guild.id) {
 				return message.channel.send(`${message.author} set the API key successfully!`)
 			} else {
-				console.error({ config })
+				console.error("setapikey", config)
 				return message.channel.send("Error setting API key. Please check logs.")
 			}
 		} catch (error) {
-			console.error({ error })
+			console.error("setapikey", error)
 			return message.channel.send("Error setting API key. Please check logs.")
 		}
 	}

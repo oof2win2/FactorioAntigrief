@@ -80,7 +80,7 @@ class SetAPIKey extends Command {
 				else
 					return message.channel.send("An error occured. Please contact developers")
 			} catch (e) {
-				console.error({ e })
+				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
 			}
 		} else if (!args[1]) {
@@ -109,7 +109,7 @@ class SetAPIKey extends Command {
 				else
 					return message.channel.send("An error occured. Please contact developers")
 			} catch (e) {
-				console.error({ e })
+				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
 			}
 		} else if (!args[2]) {
@@ -133,11 +133,11 @@ class SetAPIKey extends Command {
 				if (res.guildid && (res.roles[args[0]] == role.id))
 					return message.channel.send("Role setting successfully applied!")
 				else {
-					console.error({ res })
+					console.error("setrolepermissions", res)
 					return message.channel.send("An error occured. Please contact developers")
 				}
 			} catch (e) {
-				console.error({ e })
+				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
 			}
 		}

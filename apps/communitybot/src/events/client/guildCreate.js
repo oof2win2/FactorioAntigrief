@@ -8,7 +8,7 @@ module.exports = async (client, guild) => {
 	// create initial config only if it doesn't exist yet
 	ConfigModel.findOne({ guildid: guild.id }).then((config) => {
 		if (config) return
-		console.log("Creating config")
+		console.log(`Creating config for guild with ID ${guild.id}`)
 		ConfigModel.create({
 			communityname: guild.name,
 			guildid: guild.id,

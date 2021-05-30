@@ -102,11 +102,11 @@ class Setup extends Command {
 			if (config.moderatorroleId === role)
 				return message.channel.send("Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)")
 			else {
-				console.error({config}, Date.now())
+				console.error("setup", config)
 				return message.channel.send("Configuration unsuccessful. Please check logs")
 			}
 		} catch (error) {
-			console.error({ error })
+			console.error("setup", error)
 			return message.channel.send("Error setting configuration. Please check logs.")
 		}
 	}
