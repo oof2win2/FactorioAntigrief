@@ -40,13 +40,6 @@ class GetOffenses extends Command {
 			.setDescription(`FAGC Offense of player \`${playername}\``)
 		const communities = await fetch(`${this.client.config.apiurl}/communities/getall`).then(c => c.json())
 
-		const CachedCommunities = new Map()
-		const getOrFetchCommunity = async (communityid) => {
-			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
-			const community = CachedCommunities.set(communityid, fetch(`${this.client.config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
-			return community
-		}
-
 		let i = 0
 		await Promise.all(offenses.map(async (offense) => {
 			if (i && i % 25 == 0) {
@@ -57,7 +50,7 @@ class GetOffenses extends Command {
 			let checkedCommunity = communities.find(community => community.name == offense.communityname)
 			if (checkedCommunity && config.trustedCommunities.includes(checkedCommunity.id)) {
 				const violations = offense.violations.map((violation) => violation.id)
-				const community = await getOrFetchCommunity(offense.communityid)
+				const community = await this.client.getOrFetchCommunity(offense.communityid)
 				embed.addField(`Community ${community.name} (\`${offense.communityid}\`): ${offense.id}`, `Violation ID(s): ${violations.join(", ")}`)
 				i++
 			}

@@ -29,12 +29,6 @@ class GetAllOffenses extends Command {
 		if (!offenses || !offenses[0])
 			return message.channel.send(`User \`${playername}\` has no offenses!`)
 		
-		const CachedCommunities = new Map()
-		const getOrFetchCommunity = async (communityid) => {
-			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
-			const community = CachedCommunities.set(communityid, fetch(`${this.client.config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
-			return community
-		}
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Offenses")
@@ -49,7 +43,7 @@ class GetAllOffenses extends Command {
 			}
 
 			const violations = offense.violations.map((violation) => { return violation.id })
-			const community = await getOrFetchCommunity(offense.communityid)
+			const community = await this.client.getOrFetchCommunity(offense.communityid)
 			embed.addField(`Community ${community.name} (\`${offense.communityid}\`): ${offense.id}`, `Violation ID(s): ${violations.join(", ")}`)
 		}))
 		message.channel.send(embed)

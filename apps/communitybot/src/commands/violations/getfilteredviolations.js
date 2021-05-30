@@ -40,19 +40,6 @@ class GetViolations extends Command {
 			if (config.trustedCommunities.some((trustedID) => { return trustedID === community.id })) return community
 		})
 
-		const CachedCommunities = new Map()
-		const getOrFetchCommunity = async (communityid) => {
-			if (CachedCommunities.get(communityid)) return CachedCommunities.get(communityid)
-			const community = CachedCommunities.set(communityid, fetch(`${this.client.config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
-			return community
-		}
-		const CachedRules = new Map()
-		const getOrFetchRule = async (ruleid) => {
-			if (CachedRules.get(ruleid)) return CachedRules.get(ruleid)
-			const rule = CachedRules.set(ruleid, fetch(`${this.client.config.apiurl}/rules/getid?id=${strictUriEncode(ruleid)}`).then((c) => c.json())).get(ruleid)
-			return rule
-		}
-
 		let i = 0
 		await Promise.all(violations.map(async (violation) => {
 			if (i && i % 25) {
@@ -61,8 +48,8 @@ class GetViolations extends Command {
 			}
 			if (trustedCommunities.some((community) => community.id === violation.communityid)) {
 				const admin = await this.client.users.fetch(violation.admin_id)
-				const rule = await getOrFetchRule(violation.broken_rule)
-				const community = await getOrFetchCommunity(violation.communityid)
+				const rule = await this.client.getOrFetchRule(violation.broken_rule)
+				const community = await this.client.getOrFetchCommunity(violation.communityid)
 				embed.addField(violation.id,
 					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
 					`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
