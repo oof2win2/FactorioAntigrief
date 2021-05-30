@@ -1,14 +1,14 @@
 const Command = require("../../base/Command")
 const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
-const { getMessageResponse } = require("../../utils/responseGetter")
+const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
 
 class SetAPIKey extends Command {
 	constructor(client) {
 		super(client, {
 			name: "setrolepermissions",
 			description: "Set role permissions for command access",
-			aliases: ["setroleperms", "setperms"],
+			aliases: ["setroleperms", "setperms", "setpermissions"],
 			category: "basic",
 			usage: "([option] [role])",
 			examples: ["{{p}}setrolepermissions violations 841761018380288100"],
@@ -60,20 +60,8 @@ class SetAPIKey extends Command {
 				{ name: "Communities Management", value: communities.id },
 			)
 			message.channel.send(embed)
-			const confirm = await message.channel.send("Are you sure you want these settings applied?")
-			confirm.react("✅")
-			confirm.react("❌")
-			const reactionFilter = (reaction, user) => {
-				return user.id == message.author.id
-			}
-			let reactions
-			try {
-				reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] })
-			} catch (error) {
-				return message.channel.send("Timed out.")
-			}
-			let reaction = reactions.first()
-			if (reaction.emoji.name === "❌")
+			const confirmation = await getConfirmationMessage(message, "Are you sure you want these settings applied?")
+			if (!confirmation)
 				return message.channel.send("Permission configuration cancelled")
 
 			try {
@@ -105,19 +93,8 @@ class SetAPIKey extends Command {
 			const roleMsg = (await getMessageResponse(message.channel.send(`Please type in the ID or ping the role for the \`${args[0]}\` permission`), messageFilter))
 			const role = roleMsg.mentions.roles.first() || await message.guild.roles.fetch(roleMsg.content)
 			if (!role) return message.channel.send(`\`${roleMsg.content}\` is not a valid role`)
-			const confirm = await message.channel.send(`The role ${role.name} will be used for the permission \`${args[0]}\``)
-			confirm.react("✅")
-			confirm.react("❌")
-			const reactionFilter = (reaction, user) => user.id == message.author.id
-
-			let reactions
-			try {
-				reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] })
-			} catch (error) {
-				return message.channel.send("Timed out.")
-			}
-			let reaction = reactions.first()
-			if (reaction.emoji.name === "❌")
+			const confirm = await getConfirmationMessage(message, `The role ${role.name} will be used for the permission \`${args[0]}\``)
+			if (!confirm)
 				return message.channel.send("Permission configuration cancelled")
 
 			try {
@@ -142,21 +119,10 @@ class SetAPIKey extends Command {
 
 			const role = message.mentions.roles.first() || await message.guild.roles.fetch(args[1])
 			if (!role) return message.channel.send(`\`${args[1]}\` is not a valid role`)
-			const confirm = await message.channel.send(`The role ${role.name} will be used for the permission \`${args[0]}\``)
-			confirm.react("✅")
-			confirm.react("❌")
-			const reactionFilter = (reaction, user) => user.id == message.author.id
-
-			let reactions
-			try {
-				reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] })
-			} catch (error) {
-				return message.channel.send("Timed out.")
-			}
-			let reaction = reactions.first()
-			if (reaction.emoji.name === "❌")
+			const confirm = await getConfirmationMessage(message, `The role ${role.name} will be used for the permission \`${args[0]}\``)
+			if (!confirm)
 				return message.channel.send("Permission configuration cancelled")
-
+			
 			try {
 				const res = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id },
 					{

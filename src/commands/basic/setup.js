@@ -1,5 +1,5 @@
 const { MessageEmbed } = require("discord.js")
-const { getMessageResponse } = require("../../utils/responseGetter")
+const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
 const ConfigModel = require("../../database/schemas/config")
 const fetch = require("node-fetch")
@@ -65,22 +65,11 @@ class Setup extends Command {
 			if (!community) return message.reply("That API key is not associated with a community")
 		}
 		message.channel.send(embed)
-		const confirm = await message.channel.send("Are you sure you want these settings applied?")
-		confirm.react("✅")
-		confirm.react("❌")
-		const reactionFilter = (reaction, user) => {
-			return user.id == message.author.id
-		}
-		let reactions
-		try {
-			reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] })
-		} catch (error) {
-			return message.channel.send("Timed out.")
-		}
-		let reaction = reactions.first()
-		if (reaction.emoji.name === "❌")
-			return message.channel.send("Community configuration cancelled")
 
+		const confirm = await getConfirmationMessage(message, "Are you sure you want these settings applied?")
+		if (!confirm)
+			return message.channel.send("Community configuration cancelled")
+		
 		try {
 			const res = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
 				$set: {apikey: apikey}

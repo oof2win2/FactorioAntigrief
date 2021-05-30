@@ -36,7 +36,6 @@ class Genbanlist extends Command {
 		})
 
 		// filter violations so only trusted communities are on the banlist
-		console.log(config.trustedCommunities)
 		violationArr = violationArr.filter((violation) => config.trustedCommunities.includes(violation.communityid))
 		// remove duplicates
 		violationArr = violationArr.filter((violation, i) => violationArr.indexOf(violation) === i)

@@ -2,6 +2,7 @@ const fetch = require("node-fetch")
 const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const { handleErrors } = require("../../utils/functions")
+const { getConfirmationMessage } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
 
 class RevokeAllname extends Command {
@@ -57,18 +58,8 @@ class RevokeAllname extends Command {
 		const reactionFilter = (reaction, user) => {
 			return user.id == message.author.id
 		}
-		const confirm = await message.channel.send("Are you sure you want to revoke this player's offense?")
-		confirm.react("✅")
-		confirm.react("❌")
-		let reactions
-		try {
-			reactions = (await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] }))
-		} catch (error) {
-			return message.channel.send("Timed out.")
-		}
-
-		let reaction = reactions.first()
-		if (reaction.emoji.name === "❌")
+		const confirm = await getConfirmationMessage("Are you sure you want to revoke this player's offense?")
+		if (!confirm)
 			return message.channel.send("Offense revocation cancelled")
 
 		try {
