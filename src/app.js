@@ -18,8 +18,10 @@ const app = express()
 const Sentry = require('@sentry/node');
 const Tracing = require("@sentry/tracing");
 
+const config = require("../config")
+
 Sentry.init({
-    dsn: "https://409d130978b04111b04d293810b4511b@o745688.ingest.sentry.io/5790604",
+    dsn: config.sentryLink,
     integrations: [
         // enable HTTP calls tracing
         new Sentry.Integrations.Http({ tracing: true }),
@@ -109,5 +111,8 @@ app.use(function onError(err, req, res) {
     res.statusCode = 500;
     res.end(res.sentry + "\n");
 });
+
+// statistics
+require("./utils/Prometheus")
 
 module.exports = app;
