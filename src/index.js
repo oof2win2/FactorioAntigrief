@@ -14,7 +14,7 @@ const Sentry = require("@sentry/node")
 // eslint-disable-next-line no-unused-vars
 const Tracing = require("@sentry/tracing")
 Sentry.init({
-	dsn: "https://b9888956c9274e5086130d8d61fa3022@o745688.ingest.sentry.io/5790616",
+	dsn: config.sentryLink,
 
 	// Set tracesSampleRate to 1.0 to capture 100%
 	// of transactions for performance monitoring.
