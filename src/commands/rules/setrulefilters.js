@@ -1,7 +1,7 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
-const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
+const { getConfirmationMessage } = require("../../utils/responseGetter")
 
 class SetRuleFilters extends Command {
 	constructor(client) {
@@ -20,7 +20,7 @@ class SetRuleFilters extends Command {
 			customPermissions: ["setRules"],
 		})
 	}
-	async run(message) {
+	async run(message, _, config) {
 		const rules = await fetch(`${this.client.config.apiurl}/rules/getall`).then((r) => r.json())
 
 		let embed = new MessageEmbed()
@@ -47,24 +47,37 @@ class SetRuleFilters extends Command {
 
 		let ruleFilters = []
 		const onEnd = async () => {
-			const config = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id }, {
-				$set: { "ruleFilters": ruleFilters }
-			}, { new: true })
 			let ruleEmbed = new MessageEmbed()
 				.setTitle("FAGC Rules")
 				.setColor("GREEN")
 				.setTimestamp()
 				.setAuthor("FAGC Community")
 				.setDescription("Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
-			config.ruleFilters.forEach((filteredRuleID, i) => {
+			ruleFilters.forEach((filteredRuleID, i) => {
 				if (i && i % 25 == 0) {
 					message.channel.send(ruleEmbed)
 					embed.fields = []
 				}
 				let rule = rules.find(rule => rule.id === filteredRuleID)
+				if (!rule.id) return
 				ruleEmbed.addField(rule.shortdesc, rule.id, true)
 			})
 			message.channel.send(ruleEmbed)
+
+			const confirm = await getConfirmationMessage(message, "Are you sure you want your rule filters set to this?")
+			if (!confirm) return message.channel.send("Rule setting cancelled")
+
+			const request = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
+				method: "POST",
+				body: JSON.stringify({
+					ruleFilters: ruleFilters
+				}),
+				headers: { "apikey": config.apikey, "content-type": "application/json" }
+			}).then(r => r.json())
+			if (request.guildid) return message.channel.send("Rules have successfully been set")
+
+			message.channel.send("An error has occured. Please try again in some time")
+			throw request
 		}
 
 		let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(rules).length, time: 120000 })
