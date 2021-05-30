@@ -1,6 +1,6 @@
 const Command = require("../../base/Command")
 const { MessageEmbed } = require("discord.js")
-const { getMessageResponse } = require("../../utils/responseGetter")
+const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
 
 class SetAPIKey extends Command {
 	constructor(client) {
@@ -48,20 +48,8 @@ class SetAPIKey extends Command {
 				{ name: "Role that can manage FAGC notifications", value: notificationRole },
 			)
 			message.channel.send(embed)
-			const confirm = await message.channel.send("Are you sure you want these settings applied?")
-			confirm.react("✅")
-			confirm.react("❌")
-			const reactionFilter = (reaction, user) => {
-				return user.id == message.author.id
-			}
-			let reactions
-			try {
-				reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] })
-			} catch (error) {
-				return message.channel.send("Timed out.")
-			}
-			let reaction = reactions.first()
-			if (reaction.emoji.name === "❌")
+			const confirm = await getConfirmationMessage(message, "Are you sure you want these settings applied?")
+			if (!confirm)
 				return message.channel.send("Configuration cancelled")
 
 			try {

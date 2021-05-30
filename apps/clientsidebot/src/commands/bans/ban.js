@@ -1,4 +1,5 @@
 const Command = require("../../base/Command")
+const { getConfirmationMessage } = require("../../utils/responseGetter")
 
 class BanPlayer extends Command {
 	constructor(client) {
@@ -24,18 +25,8 @@ class BanPlayer extends Command {
 		const user = args.shift()
 		const reason = args.join(" ") || "No reason provided"
 		
-		const confirm = await message.channel.send(`\`${user}\` will be banned for \`${reason}\``)
-		confirm.react("✅")
-		confirm.react("❌")
-		const reactionFilter = (reaction, user) => user.id == message.author.id
-		let reactions
-		try {
-			reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] })
-		} catch (error) {
-			return message.channel.send("Timed out.")
-		}
-		let reaction = reactions.first()
-		if (reaction.emoji.name === "❌")
+		const confirm = await getConfirmationMessage(message, `\`${user}\` will be banned for \`${reason}\``)
+		if (!confirm)
 			return message.channel.send("Banning cancelled")
 
 		try {
