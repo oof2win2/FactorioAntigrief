@@ -11,5 +11,6 @@
         "NODE_ENV": "development"
     },
     "ext": "js,mjs,json,ts,mts",
-    "cwd": "./src/"
+    "cwd": "./src/",
+	"exec": "ts-node-dev --respawn --transpile-only src/index.ts"
 }

@@ -38,9 +38,9 @@ class BanPlayer extends Command {
 			}})
 			if (ban.id) return message.channel.send(`\`${user}\` has been banned for \`${reason}\``)
 			message.channel.send("An error has occured whilst banning. Please check logs")
-			console.error({ban})
+			console.error("ban", ban)
 		} catch (error) {
-			console.error({ error })
+			console.error("ban", error)
 			return message.channel.send("Error banning. Please check logs.")
 		}
 

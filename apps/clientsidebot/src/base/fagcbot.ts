@@ -7,7 +7,7 @@ import { BotConfig, BotConfigEmotes } from "../types/FAGCBot"
 
 import WebSocketHandler from "./websockethandler"
 
-import { PrismaClient } from "@prisma/client"
+import { InfoChannels, PrismaClient } from "@prisma/client"
 
 import * as config from "../../config"
 import Logger, { LogType } from "../utils/logger"
@@ -24,6 +24,7 @@ class FAGCBot extends Client {
 	public logger: (message: String, type?: LogType) => void
 	public prisma: PrismaClient
 	static botconfig: Config
+	static infochannels: InfoChannels[]
 	static fagcconfig: FAGCConfig
 	public wsHandler: (arg0: Object, arg1: FAGCBot) => void
 	private messageSocket: WebSocket
@@ -48,16 +49,21 @@ class FAGCBot extends Client {
 		this.wsHandler = WebSocketHandler
 		this.messageSocket = new WebSocket("ws://localhost:8001")
 		this.messageSocket.on("message", (message) => {
-			this.wsHandler(message, this)
+			this.wsHandler(JSON.parse(message.toString('utf-8')), this)
 		})
 		this._asyncInit()
 	}
 	async _asyncInit() {
 		await this.getConfig()
-		if (FAGCBot.botconfig) this.messageSocket.send(Buffer.from(JSON.stringify({
-			guildid: FAGCBot.botconfig.guildid
-		})))
-		await this.getGuildConfig()
+		// await this.getGuildConfig()
+		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
+
+		// get bot config from the FAGC api
+		if (FAGCBot.botconfig) {
+			this.messageSocket.send(Buffer.from(JSON.stringify({
+				guildid: FAGCBot.botconfig.guildid
+			})))
+		}
 	}
 	/**
 	 * Check if a user has sent a command in the past X milliseconds
@@ -132,6 +138,7 @@ class FAGCBot extends Client {
 	}
 	async getGuildConfig() {
 		if (FAGCBot.fagcconfig) return FAGCBot.fagcconfig
+		// this case should like literally never happen as the config will get sent when it is updated. here just in case.
 		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildid=${FAGCBot.botconfig.guildid}`).then(c => c.json())
 		setTimeout(() => FAGCBot.fagcconfig = undefined, 1000*60*15) // times itself out after 
 		return FAGCBot.fagcconfig

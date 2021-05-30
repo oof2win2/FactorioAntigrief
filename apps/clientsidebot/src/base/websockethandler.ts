@@ -1,13 +1,18 @@
-import * as FAGCBot from "./fagcbot"
+import FAGCBot from "./fagcbot"
 
-import { MessageEmbed } from "discord.js"
+import { MessageEmbed, TextChannel } from "discord.js"
 
-async function WebSocketHandler(message, client) {
-	await client.infoChannel
-	await client.defaultAction
-	let channel = await client.channels.fetch(client.infoChannel)
-	if (!channel) return
+async function WebSocketHandler(message, client: FAGCBot) {
+	let channels = await Promise.all(FAGCBot.infochannels.map(infochannel => {
+		return client.channels.fetch(infochannel.channelid)
+	})).then((channels)=>channels.filter(c=>c && c.isText())) as TextChannel[]
 	switch (message.messageType) {
+	case "guildConfig": {
+		// guild config has been updated
+		delete message.messageType
+		FAGCBot.fagcconfig = message
+		break
+	}
 	case "violation": {
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Notifications")
@@ -25,8 +30,8 @@ async function WebSocketHandler(message, client) {
 				{ name: "Description", value: message.description },
 				{ name: "Violation ID", value: message.id },
 				{ name: "Violation Time", value: message.violated_time }
-			)
-		channel.send(embed)
+			);
+		channels.forEach(channel => channel.send(embed))
 		break
 	}
 	case "revocation": {
@@ -47,7 +52,7 @@ async function WebSocketHandler(message, client) {
 				{ name: "Revoked by", value: message.revokedBy },
 			)
 			.setTimestamp()
-		channel.send(embed)
+		channels.forEach(channel => channel.send(embed))
 		break
 	}
 	case "ruleCreated": {
@@ -59,7 +64,7 @@ async function WebSocketHandler(message, client) {
 				{ name: "Rule short description", value: message.shortdesc },
 				{ name: "Rule long description", value: message.longdesc }
 			)
-		channel.send(embed)
+		channels.forEach(channel => channel.send(embed))
 		break
 	}
 	case "ruleRemoved": {
@@ -71,7 +76,7 @@ async function WebSocketHandler(message, client) {
 				{ name: "Rule short description", value: message.shortdesc },
 				{ name: "Rule long description", value: message.longdesc }
 			)
-		channel.send(embed)
+		channels.forEach(channel => channel.send(embed))
 		break
 	}
 	}
