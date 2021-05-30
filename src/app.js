@@ -20,6 +20,10 @@ const Tracing = require("@sentry/tracing");
 
 const config = require("../config")
 
+// extenders so they can be used anywhere
+require("./utils/extenders")
+
+
 Sentry.init({
     dsn: config.sentryLink,
     integrations: [

@@ -6,9 +6,7 @@ const LogSchema = require("../database/fagc/log")
 module.exports = mung.json(function(body, req) {
 	if (req.method === 'GET') return
 	let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-	console.log(ip)
 	if (ip.includes(":") && ip !== "::1") ip = ip.slice(0, ip.indexOf(":"))
-	console.log(ip)
 	LogSchema.create({
 		timestamp: new Date(),
 		apikey: req.headers.apikey,
