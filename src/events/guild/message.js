@@ -59,9 +59,9 @@ module.exports = async (client, message) => {
 		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)
 
 	try {
-		cmd.run(message, args, guildConfig)
+		await cmd.run(message, args, guildConfig)
 	} catch (e) {
-		console.error(e)
-		return message.channel.send("Something went wrong... Please try again later!")
+		message.channel.send("Something went wrong... Please try again later!")
+		throw e
 	}
 }
