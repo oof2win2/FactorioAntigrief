@@ -29,7 +29,7 @@ class AddWebhook extends Command {
 		try {
 			await this.client.fetchWebhook(args[0], args[1])
 		} catch (e) {
-			console.log(e)
+			console.error(e)
 			return message.channel.send("Invalid webhook")
 		}
 

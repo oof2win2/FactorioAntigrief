@@ -13,8 +13,14 @@ process.chdir(__dirname)
 const Sentry = require("@sentry/node")
 // eslint-disable-next-line no-unused-vars
 const Tracing = require("@sentry/tracing")
+const { CaptureConsole } = require("@sentry/integrations")
 Sentry.init({
 	dsn: config.sentryLink,
+	integrations: [
+		new CaptureConsole({ // capture stuff on console.error
+			levels: ["error"]
+		})
+	],
 
 	// Set tracesSampleRate to 1.0 to capture 100%
 	// of transactions for performance monitoring.
@@ -69,5 +75,3 @@ const init = async () => {
 	client.login(client.config.token)
 }
 init()
-
-require("./base/Prometheus")
