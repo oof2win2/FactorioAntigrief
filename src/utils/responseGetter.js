@@ -3,8 +3,10 @@ module.exports = {
 	getConfirmationMessage,
 }
 
-async function getMessageResponse(message, messageFilter, timeout = 30000) {
-	message = await message
+async function getMessageResponse(content, msg, timeout = 30000) {
+	const messageFilter = response => response.author.id == msg.author.id
+	
+	const message = await msg.channel.send(content)
 	return (await message.channel.awaitMessages(messageFilter, { max: 1, time: timeout })).first()
 }
 async function getConfirmationMessage(message, content) {

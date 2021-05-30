@@ -23,28 +23,25 @@ class CreateViolationAdvanced extends Command {
 	}
 	async run(message, _, config) {
 		if (!config.apikey) return message.reply("No API key set")
-		const messageFilter = response => {
-			return response.author.id === message.author.id
-		}
 
-		const playername = (await getMessageResponse(message.channel.send("Please type in a playername for the violation"), messageFilter))?.content
+		const playername = (await getMessageResponse("Please type in a playername for the violation", message))?.content
 		if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-		const admin_message = (await getMessageResponse(message.channel.send("Please type in admin user ID for the violation"), messageFilter))
+		const admin_message = (await getMessageResponse("Please type in admin user ID for the violation", message))
 		if (admin_message === undefined) return message.channel.send("Didn't send admin user ID in time")
 		const admin_user = admin_message.mentions.users.first() || await this.client.users.fetch(admin_message.content)
 		if (!admin_user) return message.channel.send("Sent user is not valid!")
 
-		const ruleid = (await getMessageResponse(message.channel.send("Please type in ID of rule that has been broken"), messageFilter))?.content
+		const ruleid = (await getMessageResponse("Please type in ID of rule that has been broken", message))?.content
 		if (ruleid === undefined) return message.channel.send("Didn't send rule ID in time")
 
-		let desc = (await getMessageResponse(message.channel.send("Please type in description of the violation or `none` if you don't want to set one"), messageFilter))?.content
+		let desc = (await getMessageResponse("Please type in description of the violation or `none` if you don't want to set one", message))?.content
 		if (desc.toLowerCase() === "none") desc = undefined
 
-		let proof = (await getMessageResponse(message.channel.send("Please send a link to proof of the violation or `none` if there is no proof"), messageFilter))?.content
+		let proof = (await getMessageResponse("Please send a link to proof of the violation or `none` if there is no proof", message))?.content
 		if (proof.toLowerCase() === "none") proof = undefined
 
-		let timestamp = (await getMessageResponse(message.channel.send("Please send a value representing the date of the violation. Type in `now` to set the current time"), messageFilter))?.content
+		let timestamp = (await getMessageResponse("Please send a value representing the date of the violation. Type in `now` to set the current time", message))?.content
 		if (timestamp.toLowerCase() === "now") timestamp = (new Date).toISOString()
 		else {
 			if (isNaN(Date.parse(timestamp))) timestamp = (new Date).toISOString()

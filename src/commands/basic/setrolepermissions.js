@@ -25,25 +25,24 @@ class SetAPIKey extends Command {
 	async run(message, args) {
 		if (!args[0]) {
 			// all perms
-			const messageFilter = response => response.author.id === message.author.id
 			message.channel.send("Process of setting roles has started. ")
-			const violationsMsg = (await getMessageResponse(message.channel.send("Please type in the ID or ping the role for violation management"), messageFilter))
+			const violationsMsg = await getMessageResponse("Please type in the ID or ping the role for violation management", message)
 			const violations = violationsMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(violationsMsg.content)
 			if (!violations) return message.channel.send(`\`${violationsMsg.content}\` is not a valid role`)
 
-			const webhooksMsg = (await getMessageResponse(message.channel.send("Please type in the ID or ping the role for webhook management"), messageFilter))
+			const webhooksMsg = await getMessageResponse("Please type in the ID or ping the role for webhook management", message)
 			const webhooks = webhooksMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(webhooksMsg.content)
 			if (!webhooks) return message.channel.send(`\`${webhooksMsg.content}\` is not a valid role`)
 
-			const configMsg = (await getMessageResponse(message.channel.send("Please type in the ID or ping the role for config management"), messageFilter))
+			const configMsg = await getMessageResponse("Please type in the ID or ping the role for config management", message)
 			const config = configMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(configMsg.content)
 			if (!config) return message.channel.send(`\`${configMsg.content}\` is not a valid role`)
 
-			const ruleMsg = (await getMessageResponse(message.channel.send("Please type in the ID or ping the role for management of filtered rules"), messageFilter))
+			const ruleMsg = await getMessageResponse("Please type in the ID or ping the role for management of filtered rules", message)
 			const rules = ruleMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(ruleMsg.content)
 			if (!rules) return message.channel.send(`\`${ruleMsg.content}\` is not a valid role`)
 
-			const communitiesMsg = (await getMessageResponse(message.channel.send("Please type in the ID or ping the role for management of trusted communities"), messageFilter))
+			const communitiesMsg = await getMessageResponse("Please type in the ID or ping the role for management of trusted communities", message)
 			const communities = communitiesMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(communitiesMsg.content)
 			if (!communities) return message.channel.send(`\`${communitiesMsg.content}\` is not a valid role`)
 
@@ -89,8 +88,7 @@ class SetAPIKey extends Command {
 			if (!options.includes(args[0]))
 				return message.reply(`That is not a valid setting! Use one of \`${options.join("`, `")}\``)
 
-			const messageFilter = response => response.author.id === message.author.id
-			const roleMsg = (await getMessageResponse(message.channel.send(`Please type in the ID or ping the role for the \`${args[0]}\` permission`), messageFilter))
+			const roleMsg = await getMessageResponse(`Please type in the ID or ping the role for the \`${args[0]}\` permission`, message)
 			const role = roleMsg.mentions.roles.first() || await message.guild.roles.fetch(roleMsg.content)
 			if (!role) return message.channel.send(`\`${roleMsg.content}\` is not a valid role`)
 			const confirm = await getConfirmationMessage(message, `The role ${role.name} will be used for the permission \`${args[0]}\``)
