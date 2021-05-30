@@ -55,9 +55,6 @@ class RevokeAllname extends Command {
 		})
 		message.channel.send(embed)
 
-		const reactionFilter = (reaction, user) => {
-			return user.id == message.author.id
-		}
 		const confirm = await getConfirmationMessage("Are you sure you want to revoke this player's offense?")
 		if (!confirm)
 			return message.channel.send("Offense revocation cancelled")
