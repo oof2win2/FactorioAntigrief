@@ -23,18 +23,17 @@ class CreateViolation extends Command {
 	}
 	async run(message, _, config) {
 		if (!config.apikey) return message.reply("No API key set")
-		const messageFilter = response => response.author.id === message.author.id
 
-		const playername = (await getMessageResponse(message.channel.send("Please type in a playername for the violation"), messageFilter))?.content
+		const playername = (await getMessageResponse("Please type in a playername for the violation", message))?.content
 		if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-		const ruleid = (await getMessageResponse(message.channel.send("Please type in ID of rule that has been broken"), messageFilter))?.content
+		const ruleid = (await getMessageResponse("Please type in ID of rule that has been broken", message))?.content
 		if (ruleid === undefined) return message.channel.send("Didn't send rule ID in time")
 
-		let desc = (await getMessageResponse(message.channel.send("Please type in description of the violation or `none` if you don't want to set one"), messageFilter))?.content
+		let desc = (await getMessageResponse("Please type in description of the violation or `none` if you don't want to set one", message))?.content
 		if (desc.toLowerCase() === "none") desc = undefined
 
-		let proof = (await getMessageResponse(message.channel.send("Please send a link to proof of the violation or `none` if there is no proof"), messageFilter))?.content
+		let proof = (await getMessageResponse("Please send a link to proof of the violation or `none` if there is no proof", message))?.content
 		if (proof.toLowerCase() === "none") proof = undefined
 
 		const timestamp = (new Date).toISOString()
