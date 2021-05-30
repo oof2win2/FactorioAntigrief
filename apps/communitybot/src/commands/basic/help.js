@@ -53,7 +53,7 @@ class Help extends Command {
 						neededRoles.push(config.roles[perm])
 				})
 				if (neededRoles.length > 0)
-					groupEmbed.addField("Roles that can be used instead of the permissions", `<@&${neededRoles.join(">, <@&")}>`)
+					groupEmbed.addField("The following roles can always use this command", `<@&${neededRoles.join(">, <@&")}>`)
 			}
 			// and send the embed in the current channel
 			return message.channel.send(groupEmbed)

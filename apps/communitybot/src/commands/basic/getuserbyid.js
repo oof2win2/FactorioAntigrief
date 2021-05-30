@@ -16,7 +16,6 @@ class GetUserById extends Command {
 			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			ownerOnly: false,
 			cooldown: 5000,
-			requiredConfig: true
 		})
 	}
 	async run(message, args) {
