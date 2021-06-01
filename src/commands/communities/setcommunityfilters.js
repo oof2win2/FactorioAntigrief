@@ -1,7 +1,7 @@
 const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
-const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
+const { getConfirmationMessage } = require("../../utils/responseGetter")
 
 class SetFilters extends Command {
 	constructor(client) {
@@ -20,7 +20,7 @@ class SetFilters extends Command {
 			customPermissions: ["setCommunities"],
 		})
 	}
-	async run(message) {
+	async run(message, _, config) {
 		const communitiesRaw = await fetch(`${this.client.config.apiurl}/communities/getall`)
 		const communities = await communitiesRaw.json()
 
@@ -50,9 +50,6 @@ class SetFilters extends Command {
 
 		let trustedCommunities = []
 		const onEnd = async () => {
-			await ConfigModel.findOneAndUpdate({ guildid: message.guild.id }, {
-				$set: { "trustedCommunities": trustedCommunities }
-			}, { new: true }).then(() => { })
 			let embed = new MessageEmbed()
 				.setTitle("FAGC Communities")
 				.setColor("GREEN")
@@ -69,6 +66,20 @@ class SetFilters extends Command {
 				embed.addField(`${community.name} | ${community.id}`, `Contact: <@${user.id}> | ${user.tag}`)
 			}))
 			message.channel.send(embed)
+			const confirm = await getConfirmationMessage(message, "Are you sure you want to set your community filters to this?")
+			if (!confirm) return message.channel.send("Setting of trusted communities has been cancelled")
+
+			const request = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
+				method: "POST",
+				body: JSON.stringify({
+					trustedCommunities: trustedCommunities
+				}),
+				headers: { "apikey": config.apikey, "content-type": "application/json" }
+			}).then(r => r.json())
+			if (request.guildid) return message.channel.send("Trusted communities have successfully been set")
+
+			message.channel.send("An error has occured. Please try again in some time")
+			throw request
 		}
 
 		let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(communities).length, time: 120000 })
