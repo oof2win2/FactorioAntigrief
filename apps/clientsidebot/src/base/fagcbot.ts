@@ -51,6 +51,21 @@ class FAGCBot extends Client {
 		this.messageSocket.on("message", (message) => {
 			this.wsHandler(JSON.parse(message.toString('utf-8')), this)
 		})
+		this.messageSocket.on("close", (code, reason) => {
+			console.log("closed")
+			const recconect = setInterval(() => {
+				console.log(this.messageSocket.readyState === this.messageSocket.OPEN)
+				if (this.messageSocket.readyState === this.messageSocket.OPEN) {
+					console.log("connected")
+					return clearInterval(recconect)
+				}
+				// if not connected, try connecting again
+				try {
+					this.messageSocket = new WebSocket("ws://localhost:8001")
+				} catch (e) {}
+				console.log("reconnection attempt")
+			}, 5000)
+		})
 		this._asyncInit()
 	}
 	async _asyncInit() {
