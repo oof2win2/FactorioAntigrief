@@ -10,6 +10,7 @@ async function WebSocketHandler(message, client: FAGCBot) {
 	case "guildConfig": {
 		// guild config has been updated
 		delete message.messageType
+		console.log("config set to", message)
 		FAGCBot.fagcconfig = message
 		break
 	}

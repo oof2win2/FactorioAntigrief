@@ -1,8 +1,9 @@
 /**
  * @file Index file, opening file for the bot. The bot logs in here, loads the commands, events and handlers.
  */
-const util = require("util")
-const fs = require("fs")
+
+import * as util from "util"
+import * as fs from "fs"
 const readdir = util.promisify(fs.readdir)
 
 process.chdir(__dirname)
@@ -20,8 +21,8 @@ const init = async () => {
 	dirs.forEach(async (dir) => {
 		const cmds = await readdir(`./commands/${dir}/`)
 		// gets every dir inside commands
-		cmds.filter(cmd => cmd.split(".").pop() === "js").forEach(cmd => {
-			const res = client.loadCommand(`./commands/${dir}`, cmd)
+		cmds.filter(cmd => cmd.split(".").pop() === "ts").forEach(async (cmd) => {
+			const res = await client.loadCommand(`./commands/${dir}`, cmd)
 			// loads each command
 			if (res) client.logger(res)
 			// if there's an error, log it

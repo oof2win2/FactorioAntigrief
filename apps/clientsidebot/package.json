@@ -2,7 +2,7 @@
   "name": "fagc-discord-bot",
   "version": "0.0.1",
   "description": "",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "lint": "eslint src/ --fix",
     "dev": "nodemon"
@@ -10,6 +10,7 @@
   "prisma": {
 	"schema": "src/prisma/schema.prisma"
   },
+  "module": "es2020",
   "dependencies": {
     "@prisma/client": "^2.23.0",
     "@supercharge/strings": "^1.18.0",

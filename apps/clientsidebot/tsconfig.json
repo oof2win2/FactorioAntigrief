@@ -3,7 +3,10 @@
     "outDir": "./dist",
     "allowJs": true,
     "target": "es6",
-	"moduleResolution": "node"
+	"moduleResolution": "node",
+	"module": "commonjs",
+	"allowSyntheticDefaultImports": true,
+	"esModuleInterop": true
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules"],

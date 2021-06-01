@@ -11,7 +11,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Config {
+model GuildConfig {
 	id Int @id @default(autoincrement())
 	onViolation String @default("info")
 	onRevocation String @default("info")
@@ -24,7 +24,7 @@ model Config {
 model InfoChannels {
 	id Int @id @default(autoincrement())
 	channelid String
-	config Config @relation(fields: [configid], references: [id])
+	config GuildConfig @relation(fields: [configid], references: [id])
 	configid Int
 }
 

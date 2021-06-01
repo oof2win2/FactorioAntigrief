@@ -1,8 +1,7 @@
-// const { Client, Collection } = require("discord.js")
 import {Client, Collection, Snowflake} from "discord.js"
 import * as path from "path"
 import fetch from "node-fetch"
-import * as WebSocket from "ws"
+import WebSocket from "ws"
 import { BotConfig, BotConfigEmotes } from "../types/FAGCBot"
 
 import WebSocketHandler from "./websockethandler"
@@ -11,7 +10,7 @@ import { InfoChannels, PrismaClient } from "@prisma/client"
 
 import * as config from "../../config"
 import Logger, { LogType } from "../utils/logger"
-import { Config } from ".prisma/client"
+import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC"
 import Command from "./Command"
 
@@ -23,7 +22,7 @@ class FAGCBot extends Client {
 	public aliases: Collection<string, string>
 	public logger: (message: String, type?: LogType) => void
 	public prisma: PrismaClient
-	static botconfig: Config
+	static GuildConfig: GuildConfig
 	static infochannels: InfoChannels[]
 	static fagcconfig: FAGCConfig
 	public wsHandler: (arg0: Object, arg1: FAGCBot) => void
@@ -41,9 +40,8 @@ class FAGCBot extends Client {
 		this.aliases = new Collection()
 		this.logger = Logger
 
-		// this.db = require("../database/Database")
 		this.prisma = new PrismaClient()
-		FAGCBot.botconfig = null
+		FAGCBot.GuildConfig = null
 		FAGCBot.fagcconfig = null
 
 		this.wsHandler = WebSocketHandler
@@ -52,9 +50,7 @@ class FAGCBot extends Client {
 			this.wsHandler(JSON.parse(message.toString('utf-8')), this)
 		})
 		this.messageSocket.on("close", (code, reason) => {
-			console.log("closed")
 			const recconect = setInterval(() => {
-				console.log(this.messageSocket.readyState === this.messageSocket.OPEN)
 				if (this.messageSocket.readyState === this.messageSocket.OPEN) {
 					console.log("connected")
 					return clearInterval(recconect)
@@ -74,9 +70,9 @@ class FAGCBot extends Client {
 		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
 
 		// get bot config from the FAGC api
-		if (FAGCBot.botconfig) {
+		if (FAGCBot.GuildConfig) {
 			this.messageSocket.send(Buffer.from(JSON.stringify({
-				guildid: FAGCBot.botconfig.guildid
+				guildid: FAGCBot.GuildConfig.guildid
 			})))
 		}
 	}
@@ -92,16 +88,12 @@ class FAGCBot extends Client {
 		if (lastTime < (Date.now() - time)) return false
 		return true
 	}
-	loadCommand(commandPath: string, commandName: string) { // load a command
+	async loadCommand(commandPath: string, commandName: string) { // load a command
 		try {
-			const props = new (require(`.${commandPath}${path.sep}${commandName}`))(this) // gets properties
-			props.config.location = commandPath // finds location
-			if (props.init) {
-				props.init(this)
-			}
-			this.commands.set(props.help.name, props) // adds command to commands collection
-			props.help.aliases.forEach((alias) => {
-				this.aliases.set(alias, props.help.name) // adds command to alias collection
+			const command = (await import(`.${commandPath}${path.sep}${commandName}`))?.command
+			this.commands.set(command.name, command) // adds command to commands collection
+			command.aliases?.forEach((alias: string) => {
+				this.aliases.set(alias, command.name) // adds command to alias collection
 			})
 			return false
 		} catch (e) {
@@ -125,28 +117,28 @@ class FAGCBot extends Client {
 		return false
 	}
 	async getConfig() {
-		if (FAGCBot.botconfig) return FAGCBot.botconfig
-		const config = await this.prisma.config.findFirst()
+		if (FAGCBot.GuildConfig) return FAGCBot.GuildConfig
+		const config = await this.prisma.guildConfig.findFirst()
 		if (!config) return null
-		FAGCBot.botconfig = config
+		FAGCBot.GuildConfig = config
 		return config
 	}
-	async setConfig(config) {
-		if (FAGCBot.botconfig) {
-			const update = await this.prisma.config.update({
+	async setConfig(config: GuildConfig) {
+		if (FAGCBot.GuildConfig) {
+			const update = await this.prisma.guildConfig.update({
 				data: config,
 				where: {id: 1}
 			})
 			return update
 		} else {
-			const set = await await this.prisma.config.create({data: config})
+			const set = await await this.prisma.guildConfig.create({data: config})
 			if (set.id) {
 				// tell the websocket to the api that we have this guild ID
 				this.messageSocket.send({
-					guildid: FAGCBot.botconfig.guildid
+					guildid: FAGCBot.GuildConfig.guildid
 				})
 
-				FAGCBot.botconfig = set
+				FAGCBot.GuildConfig = set
 				return set
 			} else return set
 		}
@@ -154,7 +146,7 @@ class FAGCBot extends Client {
 	async getGuildConfig() {
 		if (FAGCBot.fagcconfig) return FAGCBot.fagcconfig
 		// this case should like literally never happen as the config will get sent when it is updated. here just in case.
-		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildid=${FAGCBot.botconfig.guildid}`).then(c => c.json())
+		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildid=${FAGCBot.GuildConfig.guildid}`).then(c => c.json())
 		setTimeout(() => FAGCBot.fagcconfig = undefined, 1000*60*15) // times itself out after 
 		return FAGCBot.fagcconfig
 	}
