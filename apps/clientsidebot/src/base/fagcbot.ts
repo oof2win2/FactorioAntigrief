@@ -131,14 +131,14 @@ class FAGCBot extends Client {
 			})
 			return update
 		} else {
-			const set = await await this.prisma.guildConfig.create({data: config})
+			const set = await this.prisma.guildConfig.create({data: config})
 			if (set.id) {
+				FAGCBot.GuildConfig = set
 				// tell the websocket to the api that we have this guild ID
 				this.messageSocket.send({
 					guildid: FAGCBot.GuildConfig.guildid
 				})
 
-				FAGCBot.GuildConfig = set
 				return set
 			} else return set
 		}

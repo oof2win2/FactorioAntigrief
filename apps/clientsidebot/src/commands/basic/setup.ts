@@ -1,26 +1,22 @@
-const { MessageEmbed } = require("discord.js")
-const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
-const Command = require("../../base/Command")
+import Command from "../../base/Command"
+import { Message, MessageEmbed } from "discord.js"
+import { getMessageResponse, getConfirmationMessage } from "../../utils/responseGetter"
 
-class Setup extends Command {
-	constructor(client) {
-		super(client, {
-			name: "setup",
-			description: "Setup your guild",
-			aliases: [],
-			usage: ["{{p}}setup"],
-			category: "basic",
-			dirname: __dirname,
-			enabled: true,
-			memberPermissions: ["ADMINISTRATOR"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			ownerOnly: false,
-			cooldown: 3000,
-			requiredConfig: false,
-			customPermissions: ["config"],
-		})
-	}
-	async run(message) {
+export const command: Command<Message> = {
+	name: "setup",
+	description: "Setup your guild",
+	aliases: [],
+	usage: "{{p}}setup",
+	dirname: __dirname,
+	enabled: true,
+	memberPermissions: ["ADMINISTRATOR"],
+	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+	ownerOnly: false,
+	cooldown: 3000,
+	requiredConfig: false,
+	customPermissions: ["config"],
+	run: async (client, message) => {
+		const guild = message.guild
 		message.channel.send("Hello! This is the bot setup process for this server")
 		const violationAction = (await getMessageResponse("What should be the default action of what should happen when a violation matching your config is created (one of `info`, `jail` and `ban`)", message))?.cleanContent
 		if (!(["info", "jail", "ban"]).includes(violationAction)) return message.channel.send("Default action on violation is invalid")
@@ -29,20 +25,20 @@ class Setup extends Command {
 		if (!(["info", "keepBanned", "removeBan"]).includes(revocationAction)) return message.channel.send("Revocation action is not valid.")
 
 		const banRoleMsg = await getMessageResponse("What is the role that can create and manage bans (ping or ID)", message)
-		const banRole = banRoleMsg.mentions.roles.first() || await this.client.roles.fetch(banRoleMsg.content)
+		const banRole = banRoleMsg.mentions.roles.first() || await guild.roles.fetch(banRoleMsg.content)
 		if (!banRole) return message.channel.send("Provided role does not exist")
 
 		const configRoleMsg = await getMessageResponse("What is the role that can manage the bot's configuration", message)
-		const configRole = configRoleMsg.mentions.roles.first() || await this.client.roles.fetch(configRoleMsg.content)
+		const configRole = configRoleMsg.mentions.roles.first() || await guild.roles.fetch(configRoleMsg.content)
 		if (!configRole) return message.channel.send("Provided role does not exist")
 
 		const notificationRoleMsg = await getMessageResponse("What is the role that can manage FAGC notifications?", message)
-		const notificationRole = notificationRoleMsg.mentions.roles.first() || await this.client.roles.fetch(notificationRoleMsg.content)
+		const notificationRole = notificationRoleMsg.mentions.roles.first() || await guild.roles.fetch(notificationRoleMsg.content)
 		if (!notificationRole) return message.channel.send("Provided role does not exist")
 
 		let embed = new MessageEmbed()
 			.setTitle("Config")
-			.setAuthor(`${this.client.user.username} | oof2win2#3149`)
+			.setAuthor(`${client.user.username} | oof2win2#3149`)
 			.setTimestamp()
 			.setDescription("Your configuration")
 		embed.addFields(
@@ -60,7 +56,8 @@ class Setup extends Command {
 
 		try {
 			// set to database
-			const res = await this.client.setConfig({
+			const res = await client.setConfig({
+				id: 1,
 				onViolation: violationAction,
 				onRevocation: revocationAction,
 				banRole: banRole.id,
@@ -70,9 +67,8 @@ class Setup extends Command {
 			})
 			if (res.id) return message.channel.send("Config set successfully!")
 		} catch (error) {
-			console.error({ error })
-			return message.channel.send("Error setting configuration. Please check logs.")
+			message.channel.send("Error setting configuration. Please check logs.")
+			throw error
 		}
 	}
 }
-module.exports = Setup

@@ -53,7 +53,7 @@ export default async (client: FAGCBot, message: Message) => {
 					neededRoles.push(botconfig[`${perm}Role`])
 		})
 	}
-	if ((cmd.customPermissions?.length > 0 && neededRoles.length == 0) || neededPermissions.length > 0)
+	if ((cmd.customPermissions?.length > 0 && neededRoles.length > 0) || neededPermissions.length > 0)
 		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}. You can also use these roles instead: ${(await Promise.all(neededRoles.map(async (r) => await message.guild.roles.fetch(r).then(r => `\`${r.name}\``)))).join(", ")}`)
 	if (cmd.customPermissions?.length == 0 && neededPermissions.length > 0)
 		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)

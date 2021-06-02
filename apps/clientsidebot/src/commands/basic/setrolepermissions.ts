@@ -1,45 +1,42 @@
-const Command = require("../../base/Command")
-const { MessageEmbed } = require("discord.js")
-const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
+import Command from "../../base/Command"
+import { MessageEmbed, Message } from "discord.js"
+import { getMessageResponse, getConfirmationMessage } from "../../utils/responseGetter"
+import FAGCBot from "../../base/fagcbot"
 
-class SetAPIKey extends Command {
-	constructor(client) {
-		super(client, {
-			name: "setrolepermissions",
-			description: "Set role permissions for command access",
-			aliases: ["setroleperms", "setperms"],
-			category: "basic",
-			usage: "([option] [role])",
-			examples: ["{{p}}setrolepermissions banRole 841761018380288100"],
-			dirname: __dirname,
-			enabled: true,
-			memberPermissions: ["ADMINISTRATOR"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
-			ownerOnly: false,
-			cooldown: 3000,
-			requiredConfig: true,
-		})
-	}
-	async run(message, args) {
+export const command: Command<Message> = {
+	name: "setrolepermissions",
+	description: "Set role permissions for command access",
+	aliases: ["setroleperms", "setperms"],
+	usage: "([option] [role])",
+	examples: ["{{p}}setrolepermissions banRole 841761018380288100"],
+	dirname: __dirname,
+	enabled: true,
+	memberPermissions: ["ADMINISTRATOR"],
+	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+	ownerOnly: false,
+	cooldown: 3000,
+	requiredConfig: true,
+	run: async (client, message, args) => {
 		const options = ["banRole", "configRole", "notificationsRole"]
+		const guild = message.guild
 		
 		if (!args[0]) {
 			// Set all roles
 			const banRoleMsg = await getMessageResponse("What is the role that can create and manage bans (ping or ID)", message)
-			const banRole = banRoleMsg.mentions.roles.first() || await this.client.roles.fetch(banRoleMsg.content)
+			const banRole = banRoleMsg.mentions.roles.first() || await guild.roles.fetch(banRoleMsg.content)
 			if (!banRole) return message.channel.send("Provided role does not exist")
 
 			const configRoleMsg = await getMessageResponse("What is the role that can manage the bot's configuration", message)
-			const configRole = configRoleMsg.mentions.roles.first() || await this.client.roles.fetch(configRoleMsg.content)
+			const configRole = configRoleMsg.mentions.roles.first() || await guild.roles.fetch(configRoleMsg.content)
 			if (!configRole) return message.channel.send("Provided role does not exist")
 
 			const notificationRoleMsg = await getMessageResponse("What is the role that can manage FAGC notifications?", message)
-			const notificationRole = notificationRoleMsg.mentions.roles.first() || await this.client.roles.fetch(notificationRoleMsg.content)
+			const notificationRole = notificationRoleMsg.mentions.roles.first() || await guild.roles.fetch(notificationRoleMsg.content)
 			if (!notificationRole) return message.channel.send("Provided role does not exist")
 
 			let embed = new MessageEmbed()
 				.setTitle("Role permissions")
-				.setAuthor(`${this.client.user.username} | oof2win2#3149`)
+				.setAuthor(`${client.user.username} | oof2win2#3149`)
 				.setTimestamp()
 				.setDescription("Your role permissions")
 			embed.addFields(
@@ -54,8 +51,8 @@ class SetAPIKey extends Command {
 
 			try {
 				// set to database
-				const res = await this.client.setConfig({
-					...this.client.guildConfig,
+				const res = await client.setConfig({
+					...FAGCBot.GuildConfig,
 					banRole: banRole.id,
 					configRole: configRole.id,
 					notificationsRole: notificationRole.id,
@@ -71,26 +68,25 @@ class SetAPIKey extends Command {
 			if (options.includes(permission)) return message.reply(`\`${permission}\` is an invalid permission! Use one of \`${options.join("`, `")}\``)
 
 			const roleMsg = await getMessageResponse(`Mention or type the ID of the role that will have access to the \`${permission}\` permission?`, message)
-			const role = roleMsg.mentions.roles.first() || await this.client.roles.fetch(roleMsg.content)
+			const role = roleMsg.mentions.roles.first() || await guild.roles.fetch(roleMsg.content)
 			if (!role) return message.channel.send("Provided role does not exist")
 
-			const conf = this.client.guildConfig
+			const conf = FAGCBot.GuildConfig
 			conf[permission] = role.id
-			const newConfig = await this.client.setConfig(conf)
+			const newConfig = await client.setConfig(conf)
 			if (newConfig.id) return message.channel.send(`Permission \`${permission}\` set successfully!`)
 		} else {
 			// Set role and ID from message
 			const permission = args.shift()
 			const id = args.shift()
 			if (options.includes(permission)) return message.reply(`\`${permission}\` is an invalid permission! Use one of \`${options.join("`, `")}\``)
-			const role = message.mentions.roles.first() || await this.client.roles.fetch(role)
+			const role = message.mentions.roles.first() || await guild.roles.fetch(permission)
 			if (!role) return message.reply(`\`${id}\` is not a valid role!`)
 			
-			const conf = this.client.guildConfig
+			const conf = FAGCBot.GuildConfig
 			conf[permission] = id
-			const newConfig = await this.client.setConfig(conf)
+			const newConfig = await client.setConfig(conf)
 			if (newConfig.id) return message.channel.send(`Permission \`${permission}\` set successfully!`)
 		}
 	}
 }
-module.exports = SetAPIKey

@@ -12,5 +12,5 @@
     },
     "ext": "js,mjs,json,ts,mts",
     "cwd": "./src/",
-	"exec": "ts-node-dev --respawn --transpile-only src/index.ts"
+	"exec": "ts-node --transpile-only src/index.ts"
 }
