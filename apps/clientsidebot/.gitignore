@@ -5,6 +5,7 @@
 /config.js
 /servers.js
 /database.js
+/database.sqlite
 *.env
 
 /dist
