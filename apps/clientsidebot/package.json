@@ -8,7 +8,7 @@
     "dev": "nodemon"
   },
   "prisma": {
-	"schema": "src/prisma/schema.prisma"
+    "schema": "src/prisma/schema.prisma"
   },
   "module": "es2020",
   "dependencies": {
@@ -22,6 +22,7 @@
     "path": "^0.12.7",
     "rcon-client": "^4.2.3",
     "sqlite3": "^5.0.2",
+    "tail": "^2.2.2",
     "ws": "^7.4.6"
   },
   "devDependencies": {

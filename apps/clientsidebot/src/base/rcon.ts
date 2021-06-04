@@ -5,10 +5,11 @@ import { Snowflake, TextChannel } from "discord.js"
 import { Rcon } from "rcon-client"
 import { FactorioServer } from "../types/types"
 import FAGCBot from "./fagcbot"
-// import { rconport, rconpw, errorchannel } from "../../config"
-const { rconport, rconpw, errorchannel } = require("../../config")
-// import servers from "../../servers"
-const servers = require("../../servers")
+import config from "../../config"
+const { rconport, rconpw, errorchannel } = config
+// const { rconport, rconpw, errorchannel } = require("../../config")
+import servers from "../../servers"
+// const servers = require("../../servers")
 
 
 interface rconConfig {
@@ -125,7 +126,7 @@ class rconInterface {
 	 * @param {string} command - Command to send to the servers. Automatically prefixed with /
 	 * @returns {Promise<RCONOutput[]>} RCON output of all servers
 	 */
-	async rconCommandAll(command) {
+	async rconCommandAll(command: string) {
 		let promiseArray = this.rconConnections.map(async (server) => {
 			return new Promise((resolve, reject) => {
 				const resultIdentifier = {
@@ -192,4 +193,4 @@ const rconPorts = servers.map((server) => {
 	}
 })
 const rcon = new rconInterface(rconPorts)
-module.exports = rcon
+export default rcon

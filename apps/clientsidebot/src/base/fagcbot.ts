@@ -8,11 +8,12 @@ import WebSocketHandler from "./websockethandler"
 
 import { InfoChannels, PrismaClient } from "@prisma/client"
 
-import * as config from "../../config"
+import config from "../../config"
 import Logger, { LogType } from "../utils/logger"
 import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC"
 import Command from "./Command"
+import { PlayerJoin } from "./FAGCHandler"
 
 class FAGCBot extends Client {
 	public config: BotConfig
@@ -25,12 +26,14 @@ class FAGCBot extends Client {
 	static GuildConfig: GuildConfig
 	static infochannels: InfoChannels[]
 	static fagcconfig: FAGCConfig
+	static config: BotConfig
 	public wsHandler: (arg0: Object, arg1: FAGCBot) => void
 	private messageSocket: WebSocket
 	constructor(options) {
 		super(options)
-
+		
 		this.config = config
+		FAGCBot.config = config
 		FAGCBot.emotes = this.config.emotes
 
 		// setup rate limit

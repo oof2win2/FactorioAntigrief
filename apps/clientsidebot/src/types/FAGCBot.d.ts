@@ -19,5 +19,13 @@ export interface BotConfig {
 	owner: {
 		id: Snowflake, // guild owner's ID, such as 429696038266208258
 		name: String // guild owner's tag, such as oof2win2#3149
-	}
+	},
+	rconport: number,
+	rconpw: string,
+	errorchannel: string,
+
+	jailCommand: string,
+	banCommand: string,
+	unjailCommand: string,
+	unbanCommand: string,
 }

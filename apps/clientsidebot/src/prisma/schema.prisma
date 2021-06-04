@@ -38,7 +38,7 @@ model PrivateBans {
 model Syncedbans {
 	id Int @id @default(autoincrement())
 	bannedAt DateTime @default(now())
-	apiId String
+	apiId String @unique
 	playername String
 	reason String
 	admin String

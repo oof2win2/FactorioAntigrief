@@ -2,9 +2,8 @@
 .DS_Store
 
 # Config
-/config.js
-/servers.js
-/database.js
+/config.*
+/servers.ts
 /database.sqlite
 *.env
 

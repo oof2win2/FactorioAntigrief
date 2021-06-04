@@ -1,6 +1,7 @@
 import FAGCBot from "./fagcbot"
 
 import { MessageEmbed, TextChannel } from "discord.js"
+import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler"
 
 async function WebSocketHandler(message, client: FAGCBot) {
 	let channels = await Promise.all(FAGCBot.infochannels.map(infochannel => {
@@ -32,6 +33,10 @@ async function WebSocketHandler(message, client: FAGCBot) {
 				{ name: "Violation ID", value: message.id },
 				{ name: "Violation Time", value: message.violated_time }
 			);
+		
+		const handled = await HandleUnfilteredViolation(message)
+		embed.addField("Handled with an action", handled)
+
 		channels.forEach(channel => channel.send(embed))
 		break
 	}
@@ -52,9 +57,12 @@ async function WebSocketHandler(message, client: FAGCBot) {
 				{ name: "Revocation Time", value: message.RevokedTime },
 				{ name: "Revoked by", value: message.revokedBy },
 			)
-			.setTimestamp()
+			.setTimestamp();
+		
+		const handled = await HandleUnfilteredRevocation(message)
+		embed.addField("Handled with an action", handled)
+
 		channels.forEach(channel => channel.send(embed))
-		break
 	}
 	case "ruleCreated": {
 		let embed = new MessageEmbed()
@@ -69,6 +77,7 @@ async function WebSocketHandler(message, client: FAGCBot) {
 		break
 	}
 	case "ruleRemoved": {
+		// when a rule is removed, all related violations are also removed in the rule removal process. no need to do that manually.
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Notifications")
 			.setDescription("Rule removed")

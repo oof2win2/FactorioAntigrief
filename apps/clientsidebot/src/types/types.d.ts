@@ -5,5 +5,6 @@ export interface FactorioServer {
 	discordname: string,
 	discordid: Snowflake,
 	path: string,
-	rconoffset: number
+	rconoffset: number,
+	watch: boolean,
 }
