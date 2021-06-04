@@ -9,12 +9,17 @@ const wait = (time: number): Promise<void> => {
 }
 
 export async function PlayerJoin (playername: string): Promise<boolean> {
+	console.log(`${playername} joined the game`)
 	const violations = await fetch(`${FAGCBot.config.apiurl}/violations/getall?playername=${playername}`, {
 		headers: {"Content-Type": "application/json"}
 	}).then(v=>v.json())
-	if (!violations[0]) return // no violations at all
+	const revocations = await fetch(`${FAGCBot.config.apiurl}/revocations/getallrevocations?playername=${playername}`, {
+		headers: { "Content-Type": "application/json" }
+	}).then(v => v.json())
+	if (!violations[0] && !revocations[0]) return false // no violations or revocations at all
+	let rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation)))
 	let res = <boolean[]> await Promise.all(violations.map(violation => HandleUnfilteredViolation(violation)))
-	return res.filter(v=>v)[0] || false
+	return rev.concat(res).filter(v=>v)[0] || false
 }
 
 export async function HandleUnfilteredViolation (violation): Promise<boolean> {
@@ -61,7 +66,7 @@ export async function HandleUnfilteredRevocation (revocation): Promise<boolean> 
 async function HandleFilteredRevocation (revocation): Promise<boolean> {
 	const unjailCommand = FAGCBot.config.unjailCommand.replace("${PLAYERNAME}", revocation.playername)
 	const unbanCommand = FAGCBot.config.unbanCommand.replace("${PLAYERNAME}", revocation.playername)
-	switch (FAGCBot.GuildConfig.onViolation) {
+	switch (FAGCBot.GuildConfig.onRevocation) {
 		case "info": return false
 		case "keepBanned": return false
 		case "removeBan":

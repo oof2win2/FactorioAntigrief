@@ -33,7 +33,9 @@
     "@types/ws": "^7.4.4",
     "eslint": "^7.26.0",
     "nodemon": "^2.0.7",
-    "prisma": "^2.23.0"
+    "prisma": "^2.23.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2"
   },
   "author": "Cooldude2606",
   "license": "UNLICENSED"

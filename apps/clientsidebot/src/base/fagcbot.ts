@@ -15,6 +15,8 @@ import { FAGCConfig } from "../types/FAGC"
 import Command from "./Command"
 import { PlayerJoin } from "./FAGCHandler"
 
+import "./serverhandler"
+
 class FAGCBot extends Client {
 	public config: BotConfig
 	static emotes: BotConfigEmotes
@@ -48,7 +50,7 @@ class FAGCBot extends Client {
 		FAGCBot.fagcconfig = null
 
 		this.wsHandler = WebSocketHandler
-		this.messageSocket = new WebSocket("ws://localhost:8001")
+		this.messageSocket = new WebSocket(FAGCBot.config.websocketurl)
 		this.messageSocket.on("message", (message) => {
 			this.wsHandler(JSON.parse(message.toString('utf-8')), this)
 		})
@@ -60,10 +62,15 @@ class FAGCBot extends Client {
 				}
 				// if not connected, try connecting again
 				try {
-					this.messageSocket = new WebSocket("ws://localhost:8001")
+					this.messageSocket = new WebSocket(FAGCBot.config.websocketurl)
 				} catch (e) {}
 				console.log("reconnection attempt")
 			}, 5000)
+		})
+		this.messageSocket.on("open", () => {
+			this.messageSocket.send(Buffer.from(JSON.stringify({
+				guildid: FAGCBot.GuildConfig.guildid
+			})))
 		})
 		this._asyncInit()
 	}
@@ -71,13 +78,6 @@ class FAGCBot extends Client {
 		await this.getConfig()
 		// await this.getGuildConfig()
 		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
-
-		// get bot config from the FAGC api
-		if (FAGCBot.GuildConfig) {
-			this.messageSocket.send(Buffer.from(JSON.stringify({
-				guildid: FAGCBot.GuildConfig.guildid
-			})))
-		}
 	}
 	/**
 	 * Check if a user has sent a command in the past X milliseconds
@@ -138,9 +138,9 @@ class FAGCBot extends Client {
 			if (set.id) {
 				FAGCBot.GuildConfig = set
 				// tell the websocket to the api that we have this guild ID
-				this.messageSocket.send({
+				this.messageSocket.send(Buffer.from(JSON.stringify({
 					guildid: FAGCBot.GuildConfig.guildid
-				})
+				})))
 
 				return set
 			} else return set

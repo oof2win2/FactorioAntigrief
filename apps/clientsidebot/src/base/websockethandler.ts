@@ -7,6 +7,7 @@ async function WebSocketHandler(message, client: FAGCBot) {
 	let channels = await Promise.all(FAGCBot.infochannels.map(infochannel => {
 		return client.channels.fetch(infochannel.channelid)
 	})).then((channels)=>channels.filter(c=>c && c.isText())) as TextChannel[]
+	console.log(message)
 	switch (message.messageType) {
 	case "guildConfig": {
 		// guild config has been updated
