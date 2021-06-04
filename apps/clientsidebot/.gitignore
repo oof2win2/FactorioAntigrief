@@ -2,7 +2,7 @@
 .DS_Store
 
 # Config
-/config.*
+/config.ts
 /servers.ts
 /database.sqlite
 *.env
