@@ -25,12 +25,13 @@ describe("CommunityManager", () => {
 			expect(fetched.id).to.equal(testingID)
 		})
 		it("Should take a shorter amount of time to fetch when result is cached", async () => {
-			const timeBeforeFetch = performance.now()
+			const beforeFetch = performance.now()
 			await Communities.fetchCommunity(testingID)
-			const timeAfterFetch = performance.now()
+			const afterFetch = performance.now()
 			await Communities.fetchCommunity(testingID)
-			const timeAfterCachedFetch = performance.now()
-			expect((timeAfterFetch - timeBeforeFetch < timeAfterCachedFetch - timeAfterFetch), `Time to fetch after cached (${timeAfterCachedFetch - timeAfterFetch}ms) took longer than before cached (${timeAfterFetch - timeBeforeFetch}ms)`).to.equal(false)
+			const afterCached = performance.now()
+			expect((afterFetch - beforeFetch < afterCached - afterFetch), `Time to fetch after cached (${afterCached - afterFetch}ms) took longer than before cached (${afterFetch - beforeFetch}ms)`).to.equal(false)
+			expect(afterCached - afterFetch, "Took more than 1ms to get supposedly cached result").to.be.lessThanOrEqual(1)
 		})
 		it("Should not fetch non-existent community", async () => {
 			const wrongID = "potatoe"
@@ -44,24 +45,20 @@ describe("CommunityManager", () => {
 		})
 		it("Should fetch all communities", async () => {
 			const fetched = await Communities.fetchAll()
-			expect(fetched.length, "Did not fetch an array of communities").to.greaterThanOrEqual(1)
+			if (fetched[0])
+				expect(fetched[0].id).to.not.equal(null)
 		})
-		it("Should cache all fetched communities", async () => {
+		it("Should fetch all communities and cache them properly", async () => {
 			const fetched = await Communities.fetchAll()
 			expect(fetched.length, "Amount of cached communities was not equal to amount of fetched communities").to.equal(Communities.cache.size)
 		})
 	})
 	describe("#resolveID()", () => {
-		it("Should fetch if not cached", async () => {
-			const community = await Communities.fetchCommunity(testingID)
-			expect(community.id).to.equal(testingID)
-		})
 		it("Should resolve quickly if cached", async () => {
-			const before = performance.now()
-			const community = await Communities.fetchCommunity(testingID)
-			const after = performance.now()
-			expect(community.id).to.equal(testingID)
-			expect(after - before, "Took more than 1ms to get supposedly cached result").to.be.lessThanOrEqual(1)
+			const fetched = await Communities.fetchCommunity(testingID)
+			const resolved = Communities.resolveID(testingID)
+			expect(resolved, "Resolved and fetched should be the same").deep.equal(fetched)
+			expect(resolved.id).to.equal(testingID)
 		})
 	})
 	describe("#fetchConfig()", () => {
