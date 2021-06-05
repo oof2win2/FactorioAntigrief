@@ -8,6 +8,13 @@ export interface Community {
 	contact: Snowflake
 	guildid: Snowflake
 }
+export interface Rule {
+	id: ApiID
+	shortdesc: string
+	longdesc: string
+}
+
+
 export interface CommunityConfig {
 	trustedCommunities?: ApiID[]
 	ruleFilters?: ApiID[]

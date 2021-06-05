@@ -1,8 +1,8 @@
 import fetch from "node-fetch"
-import Collection from "@discordjs/collection"
 import { Community, ApiID, CommunityConfig, SetCommunityConfig, RequestConfig } from "./types"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError } from "./errors"
+import strictUriEncode from "strict-uri-encode"
 
 export default class CommunityManager extends BaseManager<ApiID, Community> {
 	public apikey?: string
@@ -17,7 +17,7 @@ export default class CommunityManager extends BaseManager<ApiID, Community> {
 			const cached = this.cache.get(communityid)
 			if (cached) return cached
 		}
-		const fetched = await fetch(`${this.apiurl}/communities/getid?id=${communityid}`).then(c=>c.json())
+		const fetched = await fetch(`${this.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c=>c.json())
 		
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
 
@@ -37,13 +37,13 @@ export default class CommunityManager extends BaseManager<ApiID, Community> {
 		}
 		return allCommunities
 	}
-	async resolveID (communityid: string): Promise<Community|null> {
+	resolveID (communityid: string): Community|null {
 		const cached = this.cache.get(communityid)
 		if (cached) return cached
-		return this.fetchCommunity(communityid)
+		return null
 	}
 	async fetchConfig(guildid: string): Promise<CommunityConfig|null> {
-		const config = await fetch(`${this.apiurl}/communities/getconfig?guildid=${guildid}`).then(c=>c.json())
+		const config = await fetch(`${this.apiurl}/communities/getconfig?guildid=${strictUriEncode(guildid)}`).then(c=>c.json())
 		
 		if (config.error) throw new GenericAPIError(`${config.error}: ${config.description}`)
 		if (!config || !config.guildid) return null
