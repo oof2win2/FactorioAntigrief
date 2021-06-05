@@ -20,7 +20,7 @@ export const command: Command<Message> = {
 		const ban = await client.prisma.privateBans.findFirst({
 			where: {playername: player}
 		})
-		if (ban) return message.channel.send(`Player \`${player}\` has been banned by ${await client.users.fetch(ban.admin).then(a => `\`${a.tag}\``)} for reason ${ban.reason} at ${ban.bannedAt}`)
+		if (ban) return message.channel.send(`Player \`${player}\` has been banned by ${await client.users.fetch(ban.admin).then(a => `\`${a.tag}\` | ${a.id}`)} for reason ${ban.reason} at ${new Date(ban.bannedAt)}`)
 		return message.channel.send(`Player \`${player}\` is not banned`)
 	}
 }

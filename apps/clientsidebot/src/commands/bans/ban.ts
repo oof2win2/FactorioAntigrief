@@ -20,6 +20,13 @@ export const command: Command<Message> = {
 		if (!args[0]) return message.channel.send("Please provide a user to ban")
 		const user = args.shift()
 		const reason = args.join(" ") || "No reason provided"
+
+		const fetch = await client.prisma.privateBans.findFirst({
+			where: {
+				playername: user
+			}
+		})
+		if (fetch?.id) return message.channel.send(`\`${user}\` is already banned for ${fetch.reason} by ${await client.users.fetch(fetch.admin).then(u=>`\`${u?.tag}\``)} | ${fetch.admin} at ${new Date(fetch.bannedAt)}`)
 		
 		const confirm = await getConfirmationMessage(message, `\`${user}\` will be banned for \`${reason}\``)
 		if (!confirm)

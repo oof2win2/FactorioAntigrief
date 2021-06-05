@@ -5,6 +5,7 @@
 /config.ts
 /servers.ts
 /database.sqlite
+/database.sqlite-journal
 *.env
 
 /dist

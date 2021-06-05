@@ -67,15 +67,27 @@ class FAGCBot extends Client {
 				console.log("reconnection attempt")
 			}, 5000)
 		})
-		this.messageSocket.on("open", () => {
-			this.messageSocket.send(Buffer.from(JSON.stringify({
-				guildid: FAGCBot.GuildConfig.guildid
-			})))
-		})
 		this._asyncInit()
 	}
 	async _asyncInit() {
 		await this.getConfig()
+
+		if (this.messageSocket.readyState == this.messageSocket.OPEN) {
+			if (FAGCBot.GuildConfig?.guildid) {
+				this.messageSocket.send(Buffer.from(JSON.stringify({
+					guildid: FAGCBot.GuildConfig.guildid
+				})))
+			}
+		} else {
+			this.messageSocket.on("open", () => {
+				if (FAGCBot.GuildConfig?.guildid) {
+					this.messageSocket.send(Buffer.from(JSON.stringify({
+						guildid: FAGCBot.GuildConfig.guildid
+					})))
+			}
+			})
+		}
+
 		// await this.getGuildConfig()
 		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
 	}

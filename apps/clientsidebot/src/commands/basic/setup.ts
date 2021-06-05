@@ -65,7 +65,10 @@ export const command: Command<Message> = {
 				notificationsRole: notificationRole.id,
 				guildid: message.guild.id
 			})
-			if (res.id) return message.channel.send("Config set successfully!")
+			if (res.id) {
+				client.getGuildConfig() // get config from FAGC
+				return message.channel.send("Config set successfully!")
+			}
 		} catch (error) {
 			message.channel.send("Error setting configuration. Please check logs.")
 			throw error

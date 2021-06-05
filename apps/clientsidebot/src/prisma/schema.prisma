@@ -42,9 +42,11 @@ model Syncedbans {
 	playername String
 	reason String
 	admin String
+	potato Boolean
 }
 model Whitelist {
 	id Int @id @default(autoincrement())
 	playername String
 	whitelistedAt DateTime @default(now())
+	whitelistedBy String
 }
