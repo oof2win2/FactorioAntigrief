@@ -1,6 +1,6 @@
 import fetch from "node-fetch"
-import { CommunityConfig, SetCommunityConfig, RequestConfig } from "./types/types"
-import { Rule, ApiID } from "./types/apitypes"
+import { RequestConfig } from "./types/types"
+import { CommunityConfig, SetCommunityConfig, Rule, ApiID } from "./types/apitypes"
 import BaseManager from "./BaseManager"
 import { GenericAPIError } from "./errors"
 import strictUriEncode from "strict-uri-encode"

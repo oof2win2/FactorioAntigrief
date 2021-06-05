@@ -24,3 +24,20 @@ export interface Violation {
 	violated_time: Date
 	admin_id: string
 }
+
+export interface CommunityConfig {
+	trustedCommunities?: ApiID[]
+	ruleFilters?: ApiID[]
+	guildid: string
+	contact: string,
+	moderatorroleId: string,
+	communityname: string
+}
+export interface SetCommunityConfig {
+	trustedCommunities?: ApiID[]
+	ruleFilters?: ApiID[]
+	guildid?: string
+	contact?: string,
+	moderatorroleId?: string,
+	communityname?: string
+}
