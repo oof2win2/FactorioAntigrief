@@ -67,7 +67,16 @@ describe("CommunityManager", () => {
 	describe("#fetchConfig()", () => {
 		it("Should fetch a config correctly", async () => {
 			const fetched = await Communities.fetchConfig(config.guildid)
-			expect(fetched.guildid).to.equal(config.guildid)
+			expect(fetched.guildid).to.deep.equal(config.guildid)
+		})
+	})
+	describe("#setConfig()", () => {
+		it("Should properly set a config", async () => {
+			const trustedCommunities = ["qj8n58c", "p1UgG0G"]
+			const previousConfig = await Communities.fetchConfig(config.guildid)
+			const newConfig = await Communities.setConfig({trustedCommunities}, {apikey: config.apikey})
+			expect(newConfig.trustedCommunities).to.deep.equal(trustedCommunities)
+			expect(newConfig.guildid).to.deep.equal(previousConfig.guildid)
 		})
 	})
 })
