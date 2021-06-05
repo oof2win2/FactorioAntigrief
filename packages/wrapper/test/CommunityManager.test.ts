@@ -1,12 +1,15 @@
 import CommunityManager from "../src/CommunityManager"
 import { Community, ApiID } from "../src/types"
 import config from "./testconfig"
+import ApiWrapper from "../src/index"
 
 import { expect } from 'chai';
 
+const FAGC = new ApiWrapper(config.apikey)
+
 
 describe("CommunityManager", () => {
-	const Communities = new CommunityManager(config.apiurl, config.apikey)
+	const Communities = FAGC.communities
 	let testingID
 	before(async () => {
 		testingID = await Communities.fetchAll().then(c=>c[0].id)
