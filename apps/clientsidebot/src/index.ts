@@ -12,7 +12,7 @@ import "./utils/extenders"
 // This enables FAGCBot to access the extenders in any part of the codebase
 
 import FAGCBot from "./base/fagcbot"
-const client = new FAGCBot({})
+export const client = new FAGCBot({})
 
 const init = async () => {
 	// Loads commands

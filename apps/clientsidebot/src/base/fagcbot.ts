@@ -88,7 +88,6 @@ class FAGCBot extends Client {
 			})
 		}
 
-		// await this.getGuildConfig()
 		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
 	}
 	/**
