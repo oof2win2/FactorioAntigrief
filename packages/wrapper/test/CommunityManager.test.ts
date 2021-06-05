@@ -1,5 +1,5 @@
 import CommunityManager from "../src/CommunityManager"
-import { Community, ApiID } from "../src/types"
+import { Community, ApiID } from "../src/types/apitypes"
 import config from "./testconfig"
 import ApiWrapper from "../src/index"
 

@@ -1,5 +1,5 @@
 import fetch from "node-fetch"
-import { RequestConfig } from "./types/types"
+import { ManagerOptions, RequestConfig } from "./types/types"
 import { CommunityConfig, SetCommunityConfig, Rule, ApiID } from "./types/apitypes"
 import BaseManager from "./BaseManager"
 import { GenericAPIError } from "./errors"
@@ -8,7 +8,7 @@ import strictUriEncode from "strict-uri-encode"
 export class RuleManager extends BaseManager<ApiID, Rule> {
 	public apikey?: string
 	private apiurl: string
-	constructor(apiurl: string, apikey?: string) {
+	constructor(apiurl: string, apikey?: string, options: ManagerOptions = {}) {
 		super()
 		if (apikey) this.apikey = apikey
 		this.apiurl = apiurl

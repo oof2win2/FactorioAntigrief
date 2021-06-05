@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "module": "es2020",
   "scripts": {
-    "test": "mocha --require ts-node/register ./test/*.test.ts --recursive --reporter nyan"
+    "test": "mocha --require ts-node/register ./test/*.test.ts --recursive --reporter nyan --exit"
   },
   "repository": {
     "type": "git",
