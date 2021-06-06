@@ -28,8 +28,8 @@ export async function PlayerJoin (playername: string): Promise<boolean> {
 		headers: { "Content-Type": "application/json" }
 	}).then(v => v.json())
 	if (!violations[0] && !revocations[0]) return false // no violations or revocations at all
-	let rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation)))
-	let res = <boolean[]> await Promise.all(violations.map(violation => HandleUnfilteredViolation(violation)))
+	const rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation)))
+	const res = <boolean[]> await Promise.all(violations.map(violation => HandleUnfilteredViolation(violation)))
 	return rev.concat(res).filter(v=>v)[0] || false
 }
 
@@ -39,7 +39,7 @@ export async function HandleUnfilteredViolation (violation): Promise<boolean> {
 		await wait(2500)
 		return HandleUnfilteredViolation(violation)
 	}
-	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === violation.broken_rule)
+	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === violation.brokenRule)
 	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityid => communityid === violation.communityid)
 	console.log(rule, community)
 	if (rule && community) {
@@ -70,7 +70,7 @@ export async function HandleUnfilteredRevocation (revocation): Promise<boolean> 
 		await wait(5000)
 		return HandleUnfilteredRevocation(revocation)
 	}
-	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === revocation.broken_rule)
+	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === revocation.brokenRule)
 	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityid => communityid === revocation.communityid)
 	if (rule && community) {
 		return HandleFilteredRevocation(revocation)

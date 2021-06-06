@@ -4,7 +4,7 @@ const dateformat = require("dateformat")
 // makes logs look pretty and uniform
 
 class Logger {
-	static log(content: any, type: string = "log") {
+	static log(content: any, type = "log") {
 		const date = `[${dateformat(Date.now(), "yyyy-mm-dd hh:MM:ss.l")}]`
 		switch (type) {
 		case "log":

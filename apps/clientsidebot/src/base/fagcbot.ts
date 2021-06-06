@@ -23,7 +23,7 @@ class FAGCBot extends Client {
 	public RateLimit: Collection<Snowflake, number>
 	public commands: Collection<string, Command>
 	public aliases: Collection<string, string>
-	public logger: (message: String, type?: LogType) => void
+	public logger: (message: string, type?: LogType) => void
 	public prisma: PrismaClient
 	static GuildConfig: GuildConfig
 	static infochannels: InfoChannels[]

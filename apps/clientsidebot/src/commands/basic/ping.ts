@@ -14,10 +14,10 @@ export const command: Command<void> = {
 	cooldown: 3000,
 	requiredConfig: false,
 	run: async (client, message: Message) => {
-		let wsPing = client.ws.ping
+		const wsPing = client.ws.ping
 
 		message.channel.send("Pinging...").then(async (m) => {
-			let ping = m.createdTimestamp - message.createdTimestamp
+			const ping = m.createdTimestamp - message.createdTimestamp
 			const beforeFetch = Date.now()
 			await fetch(client.config.apiurl)
 			const apilatency = Date.now() - beforeFetch

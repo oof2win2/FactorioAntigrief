@@ -34,7 +34,7 @@ export const command: Command<Message> = {
 			const notificationRole = notificationRoleMsg.mentions.roles.first() || await guild.roles.fetch(notificationRoleMsg.content)
 			if (!notificationRole) return message.channel.send("Provided role does not exist")
 
-			let embed = new MessageEmbed()
+			const embed = new MessageEmbed()
 				.setTitle("Role permissions")
 				.setAuthor(`${client.user.username} | oof2win2#3149`)
 				.setTimestamp()

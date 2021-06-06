@@ -16,7 +16,7 @@ export const command: Command<Message | MessageEmbed> = {
 	cooldown: 3000,
 	requiredConfig: false,
 	run: async (client, message, args) => {
-		let search = args[0] && args[1]
+		const search = args[0] && args[1]
 			? `http://xkcd.com/${args[1]}/info.0.json`
 			: "http://xkcd.com/info.0.json"
 		const res = await fetch(search).then(r => r.json())
@@ -24,9 +24,9 @@ export const command: Command<Message | MessageEmbed> = {
 		if (!res)
 			return message.channel.send("No results found for this comic, sorry!")
 
-		let { safe_title, img, day, month, year, num, alt } = res
+		const { safe_title, img, day, month, year, num, alt } = res
 
-		let embed = new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setColor("GREEN")
 			.setDescription(alt ? alt : "*crickets* - No Description")
 			.setAuthor(`XKCD | ${safe_title} [${num}]`)

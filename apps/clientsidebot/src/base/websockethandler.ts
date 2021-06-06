@@ -4,7 +4,7 @@ import { MessageEmbed, TextChannel } from "discord.js"
 import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler"
 
 async function WebSocketHandler(message, client: FAGCBot) {
-	let channels = await Promise.all(FAGCBot.infochannels.map(infochannel => {
+	const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => {
 		return client.channels.fetch(infochannel.channelid)
 	})).then((channels)=>channels.filter(c=>c && c.isText())) as TextChannel[]
 	switch (message.messageType) {
@@ -16,7 +16,7 @@ async function WebSocketHandler(message, client: FAGCBot) {
 		break
 	}
 	case "violation": {
-		let embed = new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setTitle("FAGC Notifications")
 			.setColor("ORANGE")
 			.setDescription("FAGC violation has been created")
@@ -24,14 +24,14 @@ async function WebSocketHandler(message, client: FAGCBot) {
 			.setAuthor("FAGC Community")
 			.addFields(
 				{ name: "Playername", value: message.playername },
-				{ name: "Admin ID", value: message.admin_id },
+				{ name: "Admin ID", value: message.adminid },
 				{ name: "Community ID", value: message.communityid },
-				{ name: "Broken Rule", value: message.broken_rule },
+				{ name: "Broken Rule", value: message.brokenRule },
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },
 				{ name: "Description", value: message.description },
 				{ name: "Violation ID", value: message.id },
-				{ name: "Violation Time", value: message.violated_time }
+				{ name: "Violation Time", value: message.violatedTime }
 			);
 		
 		const handled = await HandleUnfilteredViolation(message)
@@ -41,15 +41,15 @@ async function WebSocketHandler(message, client: FAGCBot) {
 		break
 	}
 	case "revocation": {
-		let embed = new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setTitle("FAGC Notifications")
 			.setDescription("Violation Revoked")
 			.setColor("ORANGE")
 			.addFields(
 				{ name: "Playername", value: message.playername },
-				{ name: "Admin ID", value: message.admin_id },
+				{ name: "Admin ID", value: message.adminid },
 				{ name: "Community ID", value: message.communityid },
-				{ name: "Broken Rules", value: message.broken_rule },
+				{ name: "Broken Rules", value: message.brokenRule },
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },
 				{ name: "Description", value: message.description },
@@ -65,7 +65,7 @@ async function WebSocketHandler(message, client: FAGCBot) {
 		channels.forEach(channel => channel.send(embed))
 	}
 	case "ruleCreated": {
-		let embed = new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setTitle("FAGC Notifications")
 			.setDescription("Rule created")
 			.setColor("ORANGE")
@@ -78,7 +78,7 @@ async function WebSocketHandler(message, client: FAGCBot) {
 	}
 	case "ruleRemoved": {
 		// when a rule is removed, all related violations are also removed in the rule removal process. no need to do that manually.
-		let embed = new MessageEmbed()
+		const embed = new MessageEmbed()
 			.setTitle("FAGC Notifications")
 			.setDescription("Rule removed")
 			.setColor("ORANGE")

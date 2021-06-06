@@ -47,13 +47,13 @@ export const command: Command<Message> = {
 				.setColor(client.config.embeds.color)
 				.setFooter(client.config.embeds.footer)
 			if (botconfig) {
-				let neededPermissions: PermissionResolvable[] = []
+				const neededPermissions: PermissionResolvable[] = []
 				cmd.memberPermissions.forEach((perm) => {
 					message.channel = message.channel as TextChannel
 					if (!channel.permissionsFor(message.member).has(perm))
 						neededPermissions.push(perm)
 				})
-				let neededRoles: string[] = []
+				const neededRoles: string[] = []
 				if (botconfig) {
 					cmd.customPermissions.forEach(perm => {
 						if (perm && botconfig[`${perm}Role`])

@@ -11,7 +11,7 @@ export class ServerHandler {
 		this.servers.forEach(server => {
 			const joinPath = new Tail(server.joinPath)
 			joinPath.on("line", (line: string) => {
-				let content = JSON.parse(line)
+				const content = JSON.parse(line)
 				if (content.type == "join")
 					PlayerJoin(content.playerName)
 			})

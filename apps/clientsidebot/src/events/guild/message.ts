@@ -11,9 +11,9 @@ export default async (client: FAGCBot, message: Message) => {
 	const prefix = client.config.prefix
 	if (!message.content.startsWith(prefix)) return
 
-	let args = message.content.slice(prefix.length).trim().split(/ +/g)
-	let command = args.shift().toLowerCase()
-	let cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command))
+	const args = message.content.slice(prefix.length).trim().split(/ +/g)
+	const command = args.shift().toLowerCase()
+	const cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command))
 	if (!cmd) return message.channel.send(`\`${prefix}${command}\` is not a valid command! Use \`fagc!help\` to view commands`)
 	if (!cmd.enabled)
 		return message.channel.send("This command is currently disabled!")
@@ -23,7 +23,7 @@ export default async (client: FAGCBot, message: Message) => {
 	const rate = client.checkTimeout(message.author.id, cmd.cooldown)
 	if (rate && !client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
 	client.RateLimit.set(message.author.id, Date.now())
-	let botconfig = FAGCBot.GuildConfig
+	const botconfig = FAGCBot.GuildConfig
 	if (cmd.requiredConfig && !botconfig)
 		return message.reply("You need to create a guild config first with `fagc!setup`!")
 	/// permissions
@@ -40,7 +40,7 @@ export default async (client: FAGCBot, message: Message) => {
 		return message.channel.send(`I need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)
 	// user permissions
 	neededPermissions = []
-	let neededRoles = []
+	const neededRoles = []
 	cmd.memberPermissions.forEach((perm) => {
 		message.channel = message.channel as TextChannel
 		if (!channel.permissionsFor(message.member).has(perm as PermissionResolvable))

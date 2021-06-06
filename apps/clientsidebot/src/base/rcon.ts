@@ -44,7 +44,7 @@ class rconInterface {
 	_init() {
 		if (!this.rconConfig) return console.log("no config")
 		this.rconConfig.forEach(async (server) => {
-			let rcon = new Rcon({
+			const rcon = new Rcon({
 				host: "localhost",
 				port: server.rconport,
 				password: rconpw
@@ -115,7 +115,7 @@ class rconInterface {
 			throw new Error("Server couldn't be found")
 		}
 		try {
-			let resp = await server.rcon.send(command)
+			const resp = await server.rcon.send(command)
 			if (typeof resp == "string" && resp.length) return { resp: resp, server: server }
 		} catch (error) {
 			return { resp: error, server: server }
@@ -127,7 +127,7 @@ class rconInterface {
 	 * @returns {Promise<RCONOutput[]>} RCON output of all servers
 	 */
 	async rconCommandAll(command: string) {
-		let promiseArray = this.rconConnections.map(async (server) => {
+		const promiseArray = this.rconConnections.map(async (server) => {
 			return new Promise((resolve, reject) => {
 				const resultIdentifier = {
 					name: server.server.name,
@@ -154,15 +154,15 @@ class rconInterface {
 			return array1.filter(x => array2.indexOf(x) !== -1)
 		}
 
-		let overlap = []
-		let nameArr = this.rconConnections.map((connection) => { return connection.server.name })
-		let channelIDArr = this.rconConnections.map((connection) => { return connection.server.discordid })
-		let channelNameArr = this.rconConnections.map((connection) => { return connection.server.discordname })
+		const overlap = []
+		const nameArr = this.rconConnections.map((connection) => { return connection.server.name })
+		const channelIDArr = this.rconConnections.map((connection) => { return connection.server.discordid })
+		const channelNameArr = this.rconConnections.map((connection) => { return connection.server.discordname })
 		overlap.push(...getArrayOverlap(exclusionServerIdentifiers, nameArr))
 		overlap.push(...getArrayOverlap(exclusionServerIdentifiers, channelIDArr))
 		overlap.push(...getArrayOverlap(exclusionServerIdentifiers, channelNameArr))
 
-		let toRun = []
+		const toRun = []
 		this.rconConnections.forEach(connection => {
 			if (overlap.includes(connection.server.name) ||
 				overlap.includes(connection.server.discordid) ||
@@ -171,7 +171,7 @@ class rconInterface {
 				toRun.push(connection)
 		})
 
-		let promiseArray = toRun.map((connection) => {
+		const promiseArray = toRun.map((connection) => {
 			return new Promise((resolve, reject) => {
 				const resultIdentifier = {
 					name: connection.server.name,

@@ -22,13 +22,13 @@ export const command: Command<Message> = {
 			return `${days} days, ${hrs} hrs, ${min} mins, ${sec} secs`
 		}
 
-		let memUsage = process.memoryUsage().heapUsed / 1024 / 1024
-		let users = client.users.cache.size
-		let servers = client.guilds.cache.size
-		let channels = client.channels.cache.size
-		let nodeVersion = process.version
-		let djsVersion = json.dependencies["discord.js"].slice(1)
-		let embed = new MessageEmbed()
+		const memUsage = process.memoryUsage().heapUsed / 1024 / 1024
+		const users = client.users.cache.size
+		const servers = client.guilds.cache.size
+		const channels = client.channels.cache.size
+		const nodeVersion = process.version
+		const djsVersion = json.dependencies["discord.js"].slice(1)
+		const embed = new MessageEmbed()
 			.setTitle("FAGC Stats")
 			.setColor("GREEN")
 			.setTimestamp()

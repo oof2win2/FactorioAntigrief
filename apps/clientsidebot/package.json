@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/ --fix",
+    "lint": "eslint src/ --fix --ext .js,.ts",
     "dev": "nodemon"
   },
   "prisma": {
@@ -31,7 +31,9 @@
     "@types/node-fetch": "^2.5.8",
     "@types/sequelize": "^4.28.9",
     "@types/ws": "^7.4.4",
-    "eslint": "^7.26.0",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "eslint": "^7.28.0",
     "nodemon": "^2.0.7",
     "prisma": "^2.23.0",
     "ts-node": "^10.0.0",
