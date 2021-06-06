@@ -1,8 +1,7 @@
 import fetch from "node-fetch"
-import { ManagerOptions, RequestConfig } from "./types/types"
-import { ApiID, CreateViolation, Revocation, Violation } from "./types/apitypes"
+import { ManagerOptions } from "./types/types"
+import { ApiID, Revocation } from "./types/apitypes"
 import BaseManager from "./BaseManager"
-import { AuthenticationError, GenericAPIError, NoApikeyError } from "./errors"
 import strictUriEncode from "strict-uri-encode"
 import Collection from "@discordjs/collection"
 
