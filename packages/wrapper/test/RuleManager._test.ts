@@ -3,7 +3,7 @@ import { Community, ApiID } from "../src/types/apitypes"
 import config from "./testconfig"
 import ApiWrapper from "../src/index"
 
-import { expect } from 'chai';
+import { expect } from "chai";
 
 const FAGC = new ApiWrapper(config.apikey)
 
