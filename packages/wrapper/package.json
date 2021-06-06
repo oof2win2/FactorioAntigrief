@@ -11,7 +11,7 @@
   "files": [
 	  "dist/"
   ],
-  "types": "dist/types/alltypes.d.ts",
+  "types": "dist/types/index.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oof2win2/fagc-api-wrapper.git"
