@@ -168,29 +168,25 @@ router.delete("/revokeallname", async (req, res) => {
 		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityid} but your community ID is ${community.communityid}` })
 
 	// first get the offense and delete that first, so the caller can get the raw violations - not just IDs
-	const offense = await OffenseModel.findByIdAndDelete(toRevoke._id).populate("violations")
-	toRevoke.violations.forEach((violationID) => {
-		ViolationModel.findByIdAndDelete(violationID).then((violation) => {
-			RevocationModel.create({
-				playername: violation.playername,
-				communityid: violation.communityid,
-				adminid: violation.adminid,
-				brokenRule: violation.brokenRule,
-				proof: violation.proof,
-				description: violation.description,
-				automated: violation.automated,
-				violatedTime: violation.violatedTime,
-				revokedTime: new Date(),
-				revokedBy: req.body.adminid
-			})
-				.then((revocation) => {
-					violationRevokedMessage(revocation.toObject())
-				})
-				.catch((error) => {
-					console.error(error)
-				})
+	const offense = await OffenseModel.findByIdAndDelete(toRevoke._id).populate("violations").then(r=>r?.toObject())
+	const revocations = await Promise.all(toRevoke.violations.map(async (violationID) => {
+		const violation = await ViolationModel.findByIdAndDelete(violationID)
+		const revocation = await RevocationModel.create({
+			playername: violation.playername,
+			communityid: violation.communityid,
+			adminid: violation.adminid,
+			brokenRule: violation.brokenRule,
+			proof: violation.proof,
+			description: violation.description,
+			automated: violation.automated,
+			violatedTime: violation.violatedTime,
+			revokedTime: new Date(),
+			revokedBy: req.body.adminid
 		})
-	})
+		violationRevokedMessage(revocation.toObject())
+		return revocation
+	}))
+	offense.violations = revocations
 	res.status(200).json(offense)
 })
 

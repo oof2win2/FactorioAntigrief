@@ -9,9 +9,11 @@ module.exports = mung.json(function (body) {
 			if (prop == "_id") {
 				delete response[prop]
 			} else {
-				if (response[prop].toObject) response[prop] = response[prop].toObject()
-				if (Array.isArray(response[prop])) response[prop] = editResponse(response[prop])
-				if (typeof(response[prop]) == "object") response[prop] = editResponse(response[prop])
+				if (response[prop]) {
+					if (response[prop].toObject) response[prop] = response[prop].toObject()
+					if (Array.isArray(response[prop])) response[prop] = editResponse(response[prop])
+					if (typeof(response[prop]) == "object") response[prop] = editResponse(response[prop])
+				}
 			}
 		}
 		return response

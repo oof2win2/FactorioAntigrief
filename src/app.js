@@ -78,7 +78,7 @@ app.use(express.static(path.join(__dirname, "public")))
 // logger for any request other than POST
 app.use(logger)
 app.use(removeId)
-app.use(mung.json(function (body, req, res) { // make mung not send
+app.use(mung.json(function (body, req, res) { // make mung not send 204
 	if (body == null || body == undefined) {
 		body = {}
 		res.status(200)
