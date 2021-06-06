@@ -44,11 +44,11 @@ class RevokeAllname extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			const admin = await this.client.users.fetch(violation.admin_id)
+			const admin = await this.client.users.fetch(violation.adminid)
 			embed.addField(violation.id,
-				`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.broken_rule}\n` +
+				`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.brokenRule}\n` +
                 `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
-                `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violated_time)).toUTCString()}`,
+                `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
 				true
 			)
 		}))
@@ -63,7 +63,7 @@ class RevokeAllname extends Command {
 				method: "DELETE",
 				body: JSON.stringify({
 					playername: playername,
-					admin_id: message.author.id
+					adminid: message.author.id
 				}),
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})

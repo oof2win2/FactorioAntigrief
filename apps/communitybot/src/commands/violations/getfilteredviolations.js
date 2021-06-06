@@ -47,14 +47,14 @@ class GetViolations extends Command {
 				embed.fields = []
 			}
 			if (trustedCommunities.some((community) => community.id === violation.communityid)) {
-				const admin = await this.client.users.fetch(violation.admin_id)
-				const rule = await this.client.getOrFetchRule(violation.broken_rule)
+				const admin = await this.client.users.fetch(violation.adminid)
+				const rule = await this.client.getOrFetchRule(violation.brokenRule)
 				const community = await this.client.getOrFetchCommunity(violation.communityid)
 				embed.addField(violation.id,
 					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
 					`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
 					`Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
-					`Violated time: ${(new Date(violation.violated_time)).toUTCString()}`,
+					`Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
 					true
 				)
 				i++

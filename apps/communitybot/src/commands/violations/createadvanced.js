@@ -72,19 +72,19 @@ class CreateViolationAdvanced extends Command {
 				method: "POST",
 				body: JSON.stringify({
 					playername: playername,
-					admin_id: admin_user.id,
-					broken_rule: ruleid,
+					adminid: admin_user.id,
+					brokenRule: ruleid,
 					proof: proof,
 					description: desc,
 					automated: false,
-					violated_time: timestamp
+					violatedTime: timestamp
 				}),
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})
 			const response = await responseRaw.json()
-			if (response.id && response.broken_rule && response.violated_time) {
+			if (response.id && response.brokenRule && response.violatedTime) {
 				return message.channel.send(`Violation created! id: \`${response.id}\``)
-			} else if (response.error && response.description.includes("broken_rule expected ID")) {
+			} else if (response.error && response.description.includes("brokenRule expected ID")) {
 				return message.channel.send("RuleID is an invalid rule ID. Please check `fagc!getrules` or `fagc!getallrules`")
 			} else {
 				return handleErrors(message, response)
