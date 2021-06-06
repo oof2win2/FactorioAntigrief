@@ -12,7 +12,7 @@ module.exports = {
 
 async function getCommunity(api_key) {
 	const auth = await AuthSchema.findOne({ api_key: api_key })
-	return CommunitySchema.findById(auth.communityid)
+	return CommunitySchema.findById(auth.communityId)
 }
 async function checkUser(userid) {
 	const user = await fetch(`https://discord.com/api/users/${userid}`, {

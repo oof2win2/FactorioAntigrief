@@ -30,23 +30,23 @@ register.registerMetric(ruleGauge)
 const trustedCommunities = async (communities) => {
 	let rawResults = []
 	const CachedCommunities = new Map()
-	const getOrFetchCommunity = async (communityid) => {
-		const cachedCommunity = CachedCommunities.get(communityid)
+	const getOrFetchCommunity = async (communityId) => {
+		const cachedCommunity = CachedCommunities.get(communityId)
 		if (cachedCommunity) return cachedCommunity
-		const community = CachedCommunities.set(communityid, CommunityModel.findOne({id: communityid})).get(communityid)
+		const community = CachedCommunities.set(communityId, CommunityModel.findOne({id: communityId})).get(communityId)
 		return community
 	}
 	communities.forEach((community) => {
-		community.trustedCommunities.forEach((communityID) => {
+		community.trustedCommunities.forEach((communityId) => {
 			let found = false
 			rawResults.forEach((trusted) => {
-				if (trusted.id === communityID) {
+				if (trusted.id === communityId) {
 					trusted.count++
 					found = true
 				}
 			})
 			if (!found) {
-				rawResults.push({ id: communityID, count: 1 })
+				rawResults.push({ id: communityId, count: 1 })
 			}
 		})
 	})

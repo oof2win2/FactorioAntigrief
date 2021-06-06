@@ -27,7 +27,7 @@ async function SendWebhookMessages() {
 		const client = new WebhookClient(webhook.id, webhook.token)
 		client.send({embeds: embeds, username: "FAGC Notifier"}).catch((error) => {
 			if (error.stack.includes("Unknown Webhook")) {
-				console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildid}. Removing webhook from database.`)
+				console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildId}. Removing webhook from database.`)
 				WebhookSchema.findByIdAndDelete(webhook.id)
 			}
 			else throw error
@@ -43,10 +43,10 @@ function WebhookMessage(message) {
 wss.on("connection", (ws) => {
 	ws.on("message", async (msg) => {
 		const message = JSON.parse(msg.toString("utf-8"))
-		if (message.guildid) {
-			ws.guildid = message.guildid
+		if (message.guildId) {
+			ws.guildId = message.guildId
 			if (!message) return
-			const guildConfig = await GuildConfigModel.findOne({guildid: message.guildid}).then((c) => c?.toObject())
+			const guildConfig = await GuildConfigModel.findOne({guildId: message.guildId}).then((c) => c?.toObject())
 			if (guildConfig) ws.send(Buffer.from(JSON.stringify({
 				...guildConfig,
 				messageType: "guildConfig"
@@ -72,8 +72,8 @@ async function violationCreatedMessage(violation) {
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: violation.playername },
-			{ name: "Admin ID", value: violation.adminid },
-			{ name: "Community ID", value: violation.communityid },
+			{ name: "Admin ID", value: violation.adminId },
+			{ name: "Community ID", value: violation.communityId },
 			{ name: "Broken Rule", value: violation.brokenRule },
 			{ name: "Automated", value: violation.automated },
 			{ name: "Proof", value: violation.proof },
@@ -94,8 +94,8 @@ async function violationRevokedMessage(revocation) {
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: revocation.playername },
-			{ name: "Admin ID", value: revocation.adminid },
-			{ name: "Community ID", value: revocation.communityid },
+			{ name: "Admin ID", value: revocation.adminId },
+			{ name: "Community ID", value: revocation.communityId },
 			{ name: "Broken Rules", value: revocation.brokenRule },
 			{ name: "Automated", value: revocation.automated },
 			{ name: "Proof", value: revocation.proof },
@@ -148,7 +148,7 @@ async function offenseRevokedMessage(offense) {
 	offense.forEach((revocation) => {
 		embed.addField(
 			`ID: ${revocation.id}`,
-			`Playername: ${revocation.playername}, Admin ID: ${revocation.adminid}, Community ID: ${revocation.communityid}\n` +
+			`Playername: ${revocation.playername}, Admin ID: ${revocation.adminId}, Community ID: ${revocation.communityId}\n` +
 			`Broken rule: ${revocation.brokenRule}, Automated: ${revocation.automated}, Proof: ${revocation.proof}\n` +
 			`Description: ${revocation.description}, Revocation time: ${revocation.revokedTime}, Revoked by: ${revocation.revokedBy}\n`
 		)
@@ -184,7 +184,7 @@ async function communityRemovedMessage(community) {
 }
 async function communityConfigChanged(config) {
 	wss.clients.forEach(client => {
-		if (client.guildid == config.guildid) {
+		if (client.guildId == config.guildId) {
 			client.send(Buffer.from(JSON.stringify({
 				...config,
 				messageType: "guildConfig"

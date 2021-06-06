@@ -13,15 +13,15 @@ router.post("/addwebhook", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
 	if (req.body.token === undefined || typeof (req.body.token) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `token expected string, got ${typeof (req.body.token)} with value of ${req.body.token}` })
-	if (req.body.guildid === undefined || typeof (req.body.guildid) !== "string")
-		return res.status(400).json({ error: "Bad Request", description: `guildid expected string, got ${typeof (req.body.guildid)} with value ${req.body.guildid}` })
-	const found = await WebhookSchema.findOne({ guildid: req.body.guildid })
+	if (req.body.guildId === undefined || typeof (req.body.guildId) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `guildId expected string, got ${typeof (req.body.guildId)} with value ${req.body.guildId}` })
+	const found = await WebhookSchema.findOne({ guildId: req.body.guildId })
 	if (found)
-		return res.status(403).json({ error: "Forbidden", description: `webhook in the guild ${req.body.guildid} already exists` })
+		return res.status(403).json({ error: "Forbidden", description: `webhook in the guild ${req.body.guildId} already exists` })
 	const dbRes = await WebhookSchema.create({
 		id: req.body.id,
 		token: req.body.token,
-		guildid: req.body.guildid,
+		guildId: req.body.guildId,
 	})
 	const client = new WebhookClient(req.body.id, req.body.token)
 	client.send("Testing message from the FAGC API!").catch(console.error)
@@ -32,12 +32,12 @@ router.delete("/removewebhook", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
 	if (req.body.token === undefined || typeof (req.body.token) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `token expected string, got ${typeof (req.body.token)} with value of ${req.body.token}` })
-	if (req.body.guildid === undefined || typeof (req.body.guildid) !== "string")
-		return res.status(400).json({ error: "Bad Request", description: `guildid expected string, got ${typeof (req.body.guildid)} with value ${req.body.guildid}` })
+	if (req.body.guildId === undefined || typeof (req.body.guildId) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `guildId expected string, got ${typeof (req.body.guildId)} with value ${req.body.guildId}` })
 	const removed = await WebhookSchema.findOneAndDelete({
 		id: req.body.id,
 		token: req.body.token,
-		guildid: req.body.guildid,
+		guildId: req.body.guildId,
 	})
 	res.status(200).json(removed)
 })

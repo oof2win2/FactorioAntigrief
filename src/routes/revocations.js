@@ -6,13 +6,13 @@ const { validateUserString } = require("../utils/functions-databaseless")
 router.get("/getrevocations", async (req, res) => {
 	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
-	if (req.query.communityid === undefined || typeof (req.query.communityid) !== "string")
-		return res.status(400).json({ error: "Bad Request", description: `communityid expected string, got ${typeof (req.body.communityid)} with value of ${req.body.communityid}`})
-	if (!validateUserString(req.query.communityid))
-		return res.status(400).json({ error: "Bad Request", description: `communityid is not correct ID, got value of ${req.query.communityid}` })
+	if (req.query.communityId === undefined || typeof (req.query.communityId) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `communityId expected string, got ${typeof (req.body.communityId)} with value of ${req.body.communityId}`})
+	if (!validateUserString(req.query.communityId))
+		return res.status(400).json({ error: "Bad Request", description: `communityId is not correct ID, got value of ${req.query.communityId}` })
 	let revocations = await RevocationModel.find({
 		playername: req.query.playername,
-		communityid: req.query.communityid
+		communityId: req.query.communityId
 	})
 	return res.status(200).json(revocations)
 })

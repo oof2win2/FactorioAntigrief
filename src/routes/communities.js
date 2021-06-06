@@ -20,7 +20,7 @@ router.get("/getown", async (req, res) => {
 	const auth = await AuthModel.findOne({ api_key: req.headers.apikey })
 	if (!auth)
 		return res.status(404).json({ error: "Not Found", description: "Community with your API key was not found" })
-	const dbRes = await CommunityModel.findById(auth.communityid) // Internal search
+	const dbRes = await CommunityModel.findById(auth.communityId) // Internal search
 	res.status(200).json(dbRes)
 })
 router.get("/getall", async (req, res) => {
@@ -36,10 +36,10 @@ router.get("/getid", async (req, res) => {
 
 // Interacts with the bot's database
 router.get("/getconfig", async (req, res) => {
-	if (req.query.guildid === undefined || typeof (req.query.guildid) !== "string")
-		return res.status(400).json({ error: "Bad Request", description: `guildid must be Discord GuildID (snowflake), got ${req.query.guildid}` })
+	if (req.query.guildId === undefined || typeof (req.query.guildId) !== "string")
+		return res.status(400).json({ error: "Bad Request", description: `guildId must be Discord guildId (snowflake), got ${req.query.guildId}` })
 	let CommunityConfig = await CommunityConfigModel.findOne({
-		guildid: req.query.guildid
+		guildId: req.query.guildId
 	})
 
 	if (CommunityConfig) {
@@ -91,15 +91,15 @@ router.post("/setconfig", async (req, res) => {
 	if (!OldConfig)
 		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
 	delete OldConfig._id
-	let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildid: OldConfig.guildid }, {
+	let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, {
 		...OldConfig,
 		...req.body,
-		guildid: OldConfig.guildid,
+		guildId: OldConfig.guildId,
 		apikey: req.headers.apikey,
 	}, { new: true })
 	CommunityConfig = CommunityConfig.toObject()
-	await CommunityModel.findOneAndUpdate({ guildid: OldConfig.guildid }, {
-		guildid: OldConfig.guildid,
+	await CommunityModel.findOneAndUpdate({ guildId: OldConfig.guildId }, {
+		guildId: OldConfig.guildId,
 		name: CommunityConfig.communityname,
 		contact: CommunityConfig.contact,
 	})

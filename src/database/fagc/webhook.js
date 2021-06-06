@@ -4,7 +4,7 @@ const connection = database.connections.find((connection) => connection.n === "f
 const WebhookSchema = new connection.Schema({
 	id: String,
 	token: String,
-	guildid: String,
+	guildId: String,
 })
 
 module.exports = connection.model("webhooks", WebhookSchema)

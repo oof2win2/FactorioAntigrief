@@ -1,3 +1,3 @@
 const WebSocket = require("ws")
 
-WebSocket.prototype.guildid = String
+WebSocket.prototype.guildId = String

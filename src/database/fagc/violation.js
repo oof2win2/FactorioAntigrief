@@ -5,13 +5,13 @@ const connection = database.connections.find((connection) => connection.n === "f
 const ViolationSchema = new connection.Schema({
 	id: String,
 	playername: String,
-	communityid: String,
+	communityId: String,
 	brokenRule: String,
 	proof: String,
 	description: String,
 	automated: Boolean,
 	violatedTime: Date,
-	adminid: String,
+	adminId: String,
 })
 ViolationSchema.pre("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
