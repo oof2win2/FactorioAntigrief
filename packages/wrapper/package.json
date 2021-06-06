@@ -13,7 +13,8 @@
     "url": "git+https://github.com/oof2win2/fagc-api-wrapper.git"
   },
   "author": "oof2win2",
-  "license": "ISC",
+  "keywords": ["api", "wrapper", "fagc"],
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/oof2win2/fagc-api-wrapper/issues"
   },
