@@ -5,7 +5,8 @@
   "main": "src/bin/www",
   "scripts": {
     "start": "node ./src/bin/www",
-    "dev": "nodemon --inspect ./src/bin/www"
+    "dev": "nodemon --inspect ./src/bin/www",
+	"lint": "eslint src/ --fix"
   },
   "dependencies": {
     "@sentry/node": "^6.4.1",
@@ -35,7 +36,7 @@
   },
   "homepage": "https://github.com/oof2win2/fagc-backend#readme",
   "devDependencies": {
-    "eslint": "^7.25.0",
+    "eslint": "^7.28.0",
     "express-swagger-generator": "^1.1.17",
     "nodemon": "^2.0.7"
   }

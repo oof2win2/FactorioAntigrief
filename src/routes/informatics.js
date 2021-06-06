@@ -1,14 +1,14 @@
-const express = require('express')
+const express = require("express")
 const router = express.Router()
 const WebhookSchema = require("../database/fagc/webhook")
 const LogSchema = require("../database/fagc/log")
 const { WebhookClient } = require("discord.js")
 
 /* GET home page. */
-router.get('/', function (req, res) {
-	res.json({ message: 'Informatics API Homepage!' })
+router.get("/", function (req, res) {
+	res.json({ message: "Informatics API Homepage!" })
 })
-router.post('/addwebhook', async (req, res) => {
+router.post("/addwebhook", async (req, res) => {
 	if (req.body.id === undefined || typeof (req.body.id) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
 	if (req.body.token === undefined || typeof (req.body.token) !== "string")
@@ -27,7 +27,7 @@ router.post('/addwebhook', async (req, res) => {
 	client.send("Testing message from the FAGC API!").catch(console.error)
 	res.status(200).json(dbRes)
 })
-router.delete('/removewebhook', async (req, res) => {
+router.delete("/removewebhook", async (req, res) => {
 	if (req.body.id === undefined || isNaN(req.body.id))
 		return res.status(400).json({ error: "Bad Request", description: `id expected string, got ${typeof (req.body.id)} with value of ${req.body.id}` })
 	if (req.body.token === undefined || typeof (req.body.token) !== "string")
@@ -41,7 +41,7 @@ router.delete('/removewebhook', async (req, res) => {
 	})
 	res.status(200).json(removed)
 })
-router.get('/getlogs', async (req, res) => {
+router.get("/getlogs", async (req, res) => {
 	if (req.query.limit === undefined || isNaN(req.query.limit))
 		return res.status(400).json({ error: "Bad Request", description: `limit expected number, got ${typeof (req.query.limit)} with value ${req.query.limit}` })
 	if (req.query.afterDate !== undefined && isNaN(req.query.afterDate))

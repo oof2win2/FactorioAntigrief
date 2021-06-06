@@ -5,7 +5,7 @@ const connection = database.connections.find((connection) => connection.n === "f
 const CommunitySchema = new connection.Schema({
 	id: String,
 	name: String,
-    contact: String,
+	contact: String,
 	guildid: String,
 })
 CommunitySchema.pre("save", function (next) {
@@ -13,4 +13,4 @@ CommunitySchema.pre("save", function (next) {
 	next()
 })
 
-module.exports = connection.model('Communities', CommunitySchema)
+module.exports = connection.model("Communities", CommunitySchema)

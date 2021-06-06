@@ -4,20 +4,20 @@ const connection = database.connections.find((connection) => connection.n === "f
 
 const RevocationSchema = new connection.Schema({
 	id: String,
-    playername: String,
-    admin_id: String,
+	playername: String,
+	adminid: String,
 	communityid: String,
-	broken_rule: String,
-    proof: String,
-    description: String,
-    automated: Boolean,
-    violated_time: Date,
-    revokedTime: Date,
-    revokedBy: String
+	brokenRule: String,
+	proof: String,
+	description: String,
+	automated: Boolean,
+	violatedTime: Date,
+	revokedTime: Date,
+	revokedBy: String
 })
 RevocationSchema.pre("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 
-module.exports = connection.model('Revocations', RevocationSchema)
+module.exports = connection.model("Revocations", RevocationSchema)

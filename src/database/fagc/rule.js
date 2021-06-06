@@ -4,8 +4,8 @@ const connection = database.connections.find((connection) => connection.n === "f
 
 const RuleSchema = new connection.Schema({
 	id: String,
-    shortdesc: String,
-    longdesc: String,
+	shortdesc: String,
+	longdesc: String,
 })
 RuleSchema.pre("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
@@ -13,4 +13,4 @@ RuleSchema.pre("save", function (next) {
 })
 
 
-module.exports = connection.model('Rules', RuleSchema)
+module.exports = connection.model("Rules", RuleSchema)

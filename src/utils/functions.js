@@ -4,15 +4,15 @@ const fetch = require("node-fetch")
 const config = require("../../config")
 
 module.exports = {
-    getCommunity,
+	getCommunity,
 	checkUser,
 	sendEmbed,
 	sendEmbedWait,
 }
 
 async function getCommunity(api_key) {
-    const auth = await AuthSchema.findOne({ api_key: api_key })
-    return CommunitySchema.findById(auth.communityid)
+	const auth = await AuthSchema.findOne({ api_key: api_key })
+	return CommunitySchema.findById(auth.communityid)
 }
 async function checkUser(userid) {
 	const user = await fetch(`https://discord.com/api/users/${userid}`, {

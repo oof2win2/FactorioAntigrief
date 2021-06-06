@@ -20,7 +20,7 @@ const ConfigSchema = new connection.Schema({
 		required: true,
 	},
 	apikey: String,
-	moderatorroleId: String,
+	moderatorRoleId: String,
 	trustedCommunities: [String],
 	ruleFilters: [String]
 })
