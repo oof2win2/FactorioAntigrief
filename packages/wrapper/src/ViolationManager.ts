@@ -79,6 +79,12 @@ export default class ViolationManager extends BaseManager<Violation> {
 			}),
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
 		}).then(u=>u.json())
+
+		if (revoked.error) {
+			if (revoked.description === "API key is wrong") throw new AuthenticationError()
+			throw new GenericAPIError(`${revoked.error}: ${revoked.description}`)
+		}
+
 		if (!revoked?.revokedTime) throw new UnsuccessfulRevocationError()
 		if (cache) this.createRevocation(revoked)
 		this.cache.sweep((violation) => violation.id === violationid) // remove the revoked violation from cache as it isnt working anymore
@@ -93,6 +99,12 @@ export default class ViolationManager extends BaseManager<Violation> {
 			}),
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
 		}).then(u=>u.json())
+
+		if (revoked.error) {
+			if (revoked.description === "API key is wrong") throw new AuthenticationError()
+			throw new GenericAPIError(`${revoked.error}: ${revoked.description}`)
+		}
+
 		revoked.violations.forEach(revocation => {
 			if (!revocation?.violatedTime) throw new UnsuccessfulRevocationError()
 			if (cache) this.createRevocation(revocation)
