@@ -22,7 +22,7 @@ describe("RevocationManager", () => {
 				return FAGC.violations.create({
 					playername: playername,
 					brokenRule: testRuleID,
-					adminid: "429696038266208258"
+					adminId: "429696038266208258"
 				})
 			}))
 			await FAGC.violations.revokeAllName(playername, "429696038266208258")

@@ -70,12 +70,12 @@ export default class ViolationManager extends BaseManager<Violation> {
 		if (cache) this.add(create)
 		return create
 	}
-	async revoke(violationid: ApiID, adminid: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
+	async revoke(violationid: ApiID, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
 		const revoked = await fetch(`${this.apiurl}/violations/revoke`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				id: violationid,
-				adminid: adminid,
+				adminId: adminId,
 			}),
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
 		}).then(u=>u.json())
@@ -84,12 +84,12 @@ export default class ViolationManager extends BaseManager<Violation> {
 		this.cache.sweep((violation) => violation.id === violationid) // remove the revoked violation from cache as it isnt working anymore
 		return revoked
 	}
-	async revokeAllName(playername: string, adminid: string, cache = true, reqConfig: RequestConfig = {}): Promise<Offense> {
+	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Offense> {
 		const revoked = await fetch(`${this.apiurl}/violations/revokeallname`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				playername: playername,
-				adminid: adminid,
+				adminId: adminId,
 			}),
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
 		}).then(u=>u.json())

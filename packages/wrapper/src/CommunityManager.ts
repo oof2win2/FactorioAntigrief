@@ -13,12 +13,12 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (apikey) this.apikey = apikey
 		this.apiurl = apiurl
 	}
-	async fetchCommunity (communityid: ApiID, cache=true, force=false): Promise<Community|null> {
+	async fetchCommunity (communityId: ApiID, cache=true, force=false): Promise<Community|null> {
 		if (!force) {
-			const cached = this.cache.get(communityid)
+			const cached = this.cache.get(communityId)
 			if (cached) return cached
 		}
-		const fetched = await fetch(`${this.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c=>c.json())
+		const fetched = await fetch(`${this.apiurl}/communities/getid?id=${strictUriEncode(communityId)}`).then(c=>c.json())
 		
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
 
@@ -38,16 +38,16 @@ export default class CommunityManager extends BaseManager<Community> {
 		}
 		return allCommunities
 	}
-	resolveID (communityid: string): Community|null {
-		const cached = this.cache.get(communityid)
+	resolveID (communityId: string): Community|null {
+		const cached = this.cache.get(communityId)
 		if (cached) return cached
 		return null
 	}
-	async fetchConfig(guildid: string): Promise<CommunityConfig|null> {
-		const config = await fetch(`${this.apiurl}/communities/getconfig?guildid=${strictUriEncode(guildid)}`).then(c=>c.json())
+	async fetchConfig(guildId: string): Promise<CommunityConfig|null> {
+		const config = await fetch(`${this.apiurl}/communities/getconfig?guildId=${strictUriEncode(guildId)}`).then(c=>c.json())
 		
 		if (config.error) throw new GenericAPIError(`${config.error}: ${config.description}`)
-		if (!config || !config.guildid) return null
+		if (!config || !config.guildId) return null
 		return config
 	}
 	async setConfig(config: SetCommunityConfig, reqConfig: RequestConfig = {}): Promise<CommunityConfig> {

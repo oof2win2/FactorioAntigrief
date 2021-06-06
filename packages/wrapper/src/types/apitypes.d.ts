@@ -13,7 +13,7 @@ export interface Common {
 // 	id: ApiID
 // 	name: string
 // 	contact: Snowflake
-// 	guildid: Snowflake
+// 	guildId: Snowflake
 // }
 // export interface CreateViolation {
 // 	playername: string
@@ -22,7 +22,7 @@ export interface Common {
 // 	description?: string
 // 	automated?: boolean
 // 	violatedTime?: Date
-// 	adminid: string
+// 	adminId: string
 // }
 
 
@@ -34,7 +34,7 @@ export interface CreateViolation {
 	description?: string
 	automated?: boolean
 	violatedTime?: Date
-	adminid: string
+	adminId: string
 }
 interface _Violation extends Common, CreateViolation {}
 export type Violation = Required<_Violation>
@@ -46,7 +46,7 @@ export interface Revocation extends Violation {
 
 export interface Offense extends Common {
 	playername: string
-	communityid: ApiID
+	communityId: ApiID
 	id: ApiID
 	violations: Violation[]
 }
@@ -54,7 +54,7 @@ export interface Offense extends Common {
 export interface Community extends Common {
 	name: string
 	contact: Snowflake
-	guildid: Snowflake
+	guildId: Snowflake
 }
 export interface Rule extends Common {
 	shortdesc: string
@@ -64,16 +64,16 @@ export interface Rule extends Common {
 export interface CommunityConfig {
 	trustedCommunities?: ApiID[]
 	ruleFilters?: ApiID[]
-	guildid: string
+	guildId: string
 	contact: string,
-	moderatorroleId: string,
+	moderatorRoleId: string,
 	communityname: string
 }
 export interface SetCommunityConfig {
 	trustedCommunities?: ApiID[]
 	ruleFilters?: ApiID[]
-	guildid?: string
+	guildId?: string
 	contact?: string,
-	moderatorroleId?: string,
+	moderatorRoleId?: string,
 	communityname?: string
 }

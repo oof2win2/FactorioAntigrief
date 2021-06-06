@@ -18,7 +18,7 @@ describe("ViolationManager", () => {
 		await Violations.create({
 			playername: playername,
 			brokenRule: testRuleID,
-			adminid: "429696038266208258"
+			adminId: "429696038266208258"
 		})
 		testViolationID = await Violations.fetchAllName(playername).then(v=>v[0]?.id)
 		FAGC.violations.cache.clear()
@@ -55,7 +55,7 @@ describe("ViolationManager", () => {
 			const created = await Violations.create({
 				playername: "Windsinger",
 				brokenRule: testRuleID,
-				adminid: "429696038266208258"
+				adminId: "429696038266208258"
 			})
 			expect(created.brokenRule).to.equal(testRuleID, "Created rule ID didn't match supplied rule ID")
 		})
@@ -63,7 +63,7 @@ describe("ViolationManager", () => {
 			const created = await Violations.create({
 				playername: "Windsinger",
 				brokenRule: testRuleID,
-				adminid: "429696038266208258"
+				adminId: "429696038266208258"
 			})
 			const resolved = Violations.resolveID(created.id)
 			expect(resolved?.id).to.equal(created.id, "Created violation wasn't cached properly")
@@ -88,7 +88,7 @@ describe("ViolationManager", () => {
 			const created = await Violations.create({
 				playername: "Windsinger",
 				brokenRule: testRuleID,
-				adminid: "429696038266208258"
+				adminId: "429696038266208258"
 			})
 			const revoked = await Violations.revoke(created.id, "429696038266208258")
 			expect(revoked.violatedTime).to.equal(created.violatedTime, "Creation times do not equal therefore the violation is not the same")
@@ -103,7 +103,7 @@ describe("ViolationManager", () => {
 				return Violations.create({
 					playername: "Windsinger",
 					brokenRule: testRuleID,
-					adminid: "429696038266208258"
+					adminId: "429696038266208258"
 				})
 			}))
 			const violations = await Violations.fetchAllName("Windsinger")
