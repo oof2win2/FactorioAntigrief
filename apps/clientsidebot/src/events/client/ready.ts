@@ -1,11 +1,13 @@
-export default async (client) => {
+import FAGCBot from "../../base/fagcbot"
+
+export default async (client: FAGCBot): Promise<void> => {
 	client.logger(`${client.user.username} is online: ${new Date().toString().slice(4, 24)}`)
-	let activities = [
+	const activities = [
 		`${client.guilds.cache.size} servers!`,
 		`${client.channels.cache.size} channels!`,
 		`${client.users.cache.size} users!`,
-	],
-		i = 0
+	]
+	let i = 0
 	setInterval(
 		() =>
 			client.user.setActivity(

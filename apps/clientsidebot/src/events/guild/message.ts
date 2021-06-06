@@ -3,7 +3,7 @@ import { Message, TextChannel } from "discord.js"
 import FAGCBot from "../../base/fagcbot"
 
 
-export default async (client: FAGCBot, message: Message) => {
+export default async (client: FAGCBot, message: Message): Promise<Message|void> => {
 	if (message.author.bot) return
 	if (message.channel.type === "dm") return
 

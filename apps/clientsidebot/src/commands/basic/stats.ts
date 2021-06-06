@@ -1,4 +1,4 @@
-const json = require("../../../package.json")
+import json from "../../../package.json"
 import Command from "../../base/Command"
 import { MessageEmbed, Message } from "discord.js"
 

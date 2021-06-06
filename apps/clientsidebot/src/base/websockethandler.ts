@@ -3,7 +3,7 @@ import FAGCBot from "./fagcbot"
 import { MessageEmbed, TextChannel } from "discord.js"
 import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler"
 
-async function WebSocketHandler(message, client: FAGCBot) {
+async function WebSocketHandler(message, client: FAGCBot): Promise<void> {
 	const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => {
 		return client.channels.fetch(infochannel.channelid)
 	})).then((channels)=>channels.filter(c=>c && c.isText())) as TextChannel[]
@@ -32,7 +32,7 @@ async function WebSocketHandler(message, client: FAGCBot) {
 				{ name: "Description", value: message.description },
 				{ name: "Violation ID", value: message.id },
 				{ name: "Violation Time", value: message.violatedTime }
-			);
+			)
 		
 		const handled = await HandleUnfilteredViolation(message)
 		embed.addField("Handled with an action", handled)
@@ -57,12 +57,13 @@ async function WebSocketHandler(message, client: FAGCBot) {
 				{ name: "Revocation Time", value: message.RevokedTime },
 				{ name: "Revoked by", value: message.revokedBy },
 			)
-			.setTimestamp();
+			.setTimestamp()
 		
 		const handled = await HandleUnfilteredRevocation(message)
 		embed.addField("Handled with an action", handled)
 
 		channels.forEach(channel => channel.send(embed))
+		break
 	}
 	case "ruleCreated": {
 		const embed = new MessageEmbed()

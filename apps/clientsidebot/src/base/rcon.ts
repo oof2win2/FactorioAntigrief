@@ -1,7 +1,7 @@
 /**
  * @file RCON client manager for servers
  */
-import { Snowflake, TextChannel } from "discord.js"
+import { TextChannel } from "discord.js"
 import { Rcon } from "rcon-client"
 import { FactorioServer } from "../types/types"
 import FAGCBot from "./fagcbot"
@@ -64,7 +64,7 @@ class rconInterface {
 							rcon.connect().then(() => {
 								clearInterval(interval)
 								this.client?.channels.fetch(errorchannel).then((channel?: TextChannel) => channel.send(`Server <#${server.server.discordid}> has connected to RCON`))
-							}).catch(() => { })
+							}).catch()
 							i++
 							if (i === 60) { // 5 minutes
 								// clearInterval(interval) // just keep trying to reconnect
@@ -78,7 +78,7 @@ class rconInterface {
 				console.error(error)
 				const errorSend = setInterval(() => {
 					this.client?.channels?.fetch(errorchannel).then((channel?: TextChannel) => channel?.send(`Server <#${server.server.discordid}> is having RCON issues`))
-						.then(() => clearInterval(errorSend)).catch(() => { })
+						.then(() => clearInterval(errorSend)).catch()
 				}, 1000)
 				let i = 0
 				const interval = setInterval(async () => {
@@ -86,7 +86,7 @@ class rconInterface {
 						rcon.connect().then(() => {
 							clearInterval(interval)
 							this.client?.channels.fetch(errorchannel).then((channel?: TextChannel) => channel.send(`Server <#${server.server.discordid}> has connected to RCON`))
-						}).catch(() => { })
+						}).catch()
 						i++
 						if (i === 60) { // 5 minutes
 							// clearInterval(interval) // just keep trying to reconnect

@@ -1,5 +1,4 @@
 import { Message, MessageEmbed } from "discord.js"
-import { GuildConfig } from ".prisma/client"
 import Command from "../../base/Command"
 import { TextChannel } from "discord.js"
 import { PermissionResolvable } from "discord.js"

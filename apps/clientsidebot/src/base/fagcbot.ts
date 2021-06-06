@@ -13,7 +13,6 @@ import Logger, { LogType } from "../utils/logger"
 import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC"
 import Command from "./Command"
-import { PlayerJoin } from "./FAGCHandler"
 
 import "./serverhandler"
 
@@ -23,13 +22,13 @@ class FAGCBot extends Client {
 	public RateLimit: Collection<Snowflake, number>
 	public commands: Collection<string, Command>
 	public aliases: Collection<string, string>
-	public logger: (message: string, type?: LogType) => void
+	public logger: (message: unknown, type?: LogType) => void
 	public prisma: PrismaClient
 	static GuildConfig: GuildConfig
 	static infochannels: InfoChannels[]
 	static fagcconfig: FAGCConfig
 	static config: BotConfig
-	public wsHandler: (arg0: Object, arg1: FAGCBot) => void
+	public wsHandler: (arg0: unknown, arg1: FAGCBot) => void // TODO: create type for API messages and use it here
 	private messageSocket: WebSocket
 	constructor(options) {
 		super(options)
@@ -52,9 +51,9 @@ class FAGCBot extends Client {
 		this.wsHandler = WebSocketHandler
 		this.messageSocket = new WebSocket(FAGCBot.config.websocketurl)
 		this.messageSocket.on("message", (message) => {
-			this.wsHandler(JSON.parse(message.toString('utf-8')), this)
+			this.wsHandler(JSON.parse(message.toString("utf-8")), this)
 		})
-		this.messageSocket.on("close", (code, reason) => {
+		this.messageSocket.on("close", () => {
 			const recconect = setInterval(() => {
 				if (this.messageSocket.readyState === this.messageSocket.OPEN) {
 					console.log("connected")
@@ -63,13 +62,14 @@ class FAGCBot extends Client {
 				// if not connected, try connecting again
 				try {
 					this.messageSocket = new WebSocket(FAGCBot.config.websocketurl)
+				// eslint-disable-next-line no-empty
 				} catch (e) {}
 				console.log("reconnection attempt")
 			}, 5000)
 		})
 		this._asyncInit()
 	}
-	async _asyncInit() {
+	async _asyncInit(): Promise<void> {
 		await this.getConfig()
 
 		if (this.messageSocket.readyState == this.messageSocket.OPEN) {
@@ -84,7 +84,7 @@ class FAGCBot extends Client {
 					this.messageSocket.send(Buffer.from(JSON.stringify({
 						guildid: FAGCBot.GuildConfig.guildid
 					})))
-			}
+				}
 			})
 		}
 
@@ -96,13 +96,13 @@ class FAGCBot extends Client {
 	 * @param {Number} time - Time in ms to check
 	 * @returns {Boolean} True if the user has sent a command, false if they haven't
 	 */
-	checkTimeout(uid: Snowflake, time: number) {
+	checkTimeout(uid: Snowflake, time: number): boolean {
 		const lastTime = this.RateLimit.get(uid)
 		if (!lastTime) return false
 		if (lastTime < (Date.now() - time)) return false
 		return true
 	}
-	async loadCommand(commandPath: string, commandName: string) { // load a command
+	async loadCommand(commandPath: string, commandName: string): Promise<boolean|string> { // load a command
 		try {
 			const command = (await import(`.${commandPath}${path.sep}${commandName}`))?.command
 			this.commands.set(command.name, command) // adds command to commands collection
@@ -114,7 +114,7 @@ class FAGCBot extends Client {
 			return `Unable to load command ${commandName}: ${e}`
 		}
 	}
-	async unloadCommand(commandPath, commandName) { // unload a command
+	async unloadCommand(commandPath: string, commandName: string): Promise<boolean|string> { // unload a command
 		let command
 		if (this.commands.has(commandName)) {
 			command = this.commands.get(commandName)
@@ -130,14 +130,14 @@ class FAGCBot extends Client {
 		delete require.cache[require.resolve(`.${commandPath}${path.sep}${commandName}.js`)]
 		return false
 	}
-	async getConfig() {
+	async getConfig(): Promise<GuildConfig> {
 		if (FAGCBot.GuildConfig) return FAGCBot.GuildConfig
 		const config = await this.prisma.guildConfig.findFirst()
 		if (!config) return null
 		FAGCBot.GuildConfig = config
 		return config
 	}
-	async setConfig(config: GuildConfig) {
+	async setConfig(config: GuildConfig): Promise<GuildConfig> {
 		if (FAGCBot.GuildConfig) {
 			const update = await this.prisma.guildConfig.update({
 				data: config,
@@ -157,7 +157,7 @@ class FAGCBot extends Client {
 			} else return set
 		}
 	}
-	async getGuildConfig() {
+	async getGuildConfig(): Promise<FAGCConfig> {
 		if (FAGCBot.fagcconfig) return FAGCBot.fagcconfig
 		// this case should like literally never happen as the config will get sent when it is updated. here just in case.
 		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildid=${FAGCBot.GuildConfig.guildid}`).then(c => c.json())

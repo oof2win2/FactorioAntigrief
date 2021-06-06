@@ -1,5 +1,5 @@
 import { Message, Structures } from "discord.js"
-import FAGCBot from "../base/fagcbot";
+import FAGCBot from "../base/fagcbot"
 import * as responses from "./responses"
 
 interface BotMessageOptions {

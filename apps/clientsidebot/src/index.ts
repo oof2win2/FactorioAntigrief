@@ -14,6 +14,8 @@ import "./utils/extenders"
 import FAGCBot from "./base/fagcbot"
 export const client = new FAGCBot({})
 
+import rcon from "./base/rcon"
+
 const init = async () => {
 	// Loads commands
 	const dirs = await readdir("./commands/")
@@ -36,10 +38,11 @@ const init = async () => {
 	evtDirs.forEach(async dir => {
 		const evts = await readdir(`./events/${dir}/`)
 		// gets every dir inside events
-		evts.forEach(evt => {
+		evts.forEach(async (evt) => {
 			// splits the event and gets first part. events are in the format "eventName.js"
 			const evtName = evt.split(".")[0]
-			const event = (require(`./events/${dir}/${evt}`)).default
+			// const event = (require(`./events/${dir}/${evt}`)).default
+			const event = await import(`./events/${dir}/${evt}`)
 			// import event from `./events/${dir}/${evt}`
 			// import * as event from `./events/${dir}/${evt}`
 			// binds client to the event
@@ -51,7 +54,6 @@ const init = async () => {
 	// log in to discord
 	client.login(client.config.token)
 
-	const rcon = require("./base/rcon")
 	rcon.client = client
 }
 init()

@@ -34,7 +34,6 @@ export async function PlayerJoin (playername: string): Promise<boolean> {
 }
 
 export async function HandleUnfilteredViolation (violation): Promise<boolean> {
-	console.log(violation)
 	if (!FAGCBot.fagcconfig) {
 		await wait(2500)
 		return HandleUnfilteredViolation(violation)
@@ -54,14 +53,14 @@ async function HandleFilteredViolation (violation): Promise<boolean> {
 	const jailCommand = FAGCBot.config.jailCommand.replace("${PLAYERNAME}", violation.playername).replace("${REASON}", `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/violations/getall?playername=${violation.palyername} for why this could be`)
 	const banCommand = FAGCBot.config.banCommand.replace("${PLAYERNAME}", violation.playername).replace("${REASON}", `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/violations/getall?playername=${violation.palyername} for why this could be`)
 	switch (FAGCBot.GuildConfig.onViolation) {
-		case "info": return false
-		case "jail": 
-			rcon.rconCommandAll(jailCommand)
-			return true
-		case "ban":
-			rcon.rconCommandAll(banCommand)
-			return true
-		default: return false
+	case "info": return false
+	case "jail": 
+		rcon.rconCommandAll(jailCommand)
+		return true
+	case "ban":
+		rcon.rconCommandAll(banCommand)
+		return true
+	default: return false
 	}
 }
 
@@ -82,12 +81,12 @@ async function HandleFilteredRevocation (revocation): Promise<boolean> {
 	const unjailCommand = FAGCBot.config.unjailCommand.replace("${PLAYERNAME}", revocation.playername)
 	const unbanCommand = FAGCBot.config.unbanCommand.replace("${PLAYERNAME}", revocation.playername)
 	switch (FAGCBot.GuildConfig.onRevocation) {
-		case "info": return false
-		case "keepBanned": return false
-		case "removeBan":
-			rcon.rconCommandAll(unbanCommand)
-			rcon.rconCommandAll(unjailCommand)
-			return true
-		default: return false
+	case "info": return false
+	case "keepBanned": return false
+	case "removeBan":
+		rcon.rconCommandAll(unbanCommand)
+		rcon.rconCommandAll(unjailCommand)
+		return true
+	default: return false
 	}
 }
