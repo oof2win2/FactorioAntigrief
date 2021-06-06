@@ -57,9 +57,9 @@ router.post('/setconfig', async (req, res) => {
 	}
 	if (req.body.trustedCommunities) {
 		if (!Array.isArray(req.body.trustedCommunities))
-		return res.status(400).json({ error: "Bad Request", description: `trustedCommunities must be array of IDs, got ${req.body.trustedCommunities}` })
-	if (req.body.trustedCommunities.map((community) => !validateUserString(community)).filter(i => i)[0])
-		return res.status(400).json({ error: "Bad Request", description: `trustedCommunities must be array of IDs, got ${req.body.trustedCommunities}` })
+			return res.status(400).json({ error: "Bad Request", description: `trustedCommunities must be array of IDs, got ${req.body.trustedCommunities}` })
+		if (req.body.trustedCommunities.map((community) => !validateUserString(community)).filter(i => i)[0])
+			return res.status(400).json({ error: "Bad Request", description: `trustedCommunities must be array of IDs, got ${req.body.trustedCommunities}` })
 	}
 
 	if (req.body.contact &&  typeof (req.body.contact) !== "string")

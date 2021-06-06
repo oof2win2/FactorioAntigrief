@@ -17,6 +17,7 @@ const offenseRouter = require('./routes/offenses')
 const app = express()
 const Sentry = require('@sentry/node');
 const Tracing = require("@sentry/tracing");
+const mung = require("express-mung")
 
 const config = require("../config")
 
@@ -77,6 +78,13 @@ app.use(express.static(path.join(__dirname, 'public')))
 // logger for any request other than POST
 app.use(logger)
 app.use(removeId)
+app.use(mung.json(function (body, req, res) { // make mung not send
+	if (body == null || body == undefined) {
+		body = {}
+		res.status(200)
+	}
+	return body
+}))
 
 // middleware for authentication
 const authMiddleware = async (req, res, next) => {
@@ -101,20 +109,19 @@ app.use('/v1/violations', violationRouter)
 app.use('/v1/revocations', revocationRouter)
 app.use('/v1/offenses', offenseRouter)
 
+app.get('/v1', (req, res) => {
+    res.status(200).json({message: "FAGC api v1"})
+})
 app.get('/', (req, res) => {
-    res.status(200).json({message: "FAGC api"})
+	res.status(200).json({ message: "FAGC api" })
 })
 
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());
 
-// Optional fallthrough error handler
-app.use(function onError(err, req, res) {
-    // The error id is attached to `res.sentry` to be returned
-    // and optionally displayed to the user for support.
-    res.statusCode = 500;
-    res.end(res.sentry + "\n");
-});
+app.use((req, res) => {
+	res.status(404).json({ error: "404 Not Found", message: `Path ${req.path} does not exist on this API` })
+})
 
 // statistics
 require("./utils/Prometheus")
