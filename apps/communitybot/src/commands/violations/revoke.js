@@ -33,7 +33,7 @@ class Revoke extends Command {
 
 		const violationRaw = await fetch(`${this.client.config.apiurl}/violations/getbyid?id=${strictUriEncode(violationID)}`)
 		const violation = await violationRaw.json()
-		if (violation === null)
+		if (!violation?.id)
 			return message.channel.send(`Violation with ID \`${violationID}\` doesn't exist`)
 		if (violation.error && violation.description.includes("id expected ID"))
 			return message.reply(`\`${violationID}\` is not a proper violation ID`)
