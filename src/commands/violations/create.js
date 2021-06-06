@@ -53,7 +53,7 @@ class CreateViolation extends Command {
 			{ name: "Violated At (ISO)", value: timestamp }
 		)
 		message.channel.send(embed)
-		const confirm = await getConfirmationMessage("Do you wish to create this rule violation?")
+		const confirm = await getConfirmationMessage(message, "Do you wish to create this rule violation?")
 		if (!confirm)
 			return message.channel.send("Violation creation cancelled")
 

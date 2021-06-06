@@ -30,7 +30,7 @@ class RevokeAllname extends Command {
 		if (!config.apikey) return message.reply("No API key set")
 		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${strictUriEncode(playername)}&communityid=${strictUriEncode(config.communityid)}`)
 		const offense = await offenseRaw.json()
-		if (offense === null)
+		if (!offense || offense === {})
 			return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
 
 		let embed = new MessageEmbed()
@@ -39,8 +39,7 @@ class RevokeAllname extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\` in community ${config.communityname}`)
-
-		offense.violations.forEach(async (violation, i) => {
+		await Promise.all(offense.violations.map(async (violation, i) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
@@ -52,10 +51,10 @@ class RevokeAllname extends Command {
                 `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violated_time)).toUTCString()}`,
 				true
 			)
-		})
+		}))
 		message.channel.send(embed)
 
-		const confirm = await getConfirmationMessage("Are you sure you want to revoke this player's offense?")
+		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this player's offense?")
 		if (!confirm)
 			return message.channel.send("Offense revocation cancelled")
 
