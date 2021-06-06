@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "module": "es2020",
   "scripts": {
-    "test": "mocha --require ts-node/register ./test/*.test.ts --recursive --reporter nyan --exit"
+	  "lint": "eslint src/ --fix --ext .js,.ts",
+    "test": "mocha --require ts-node/register ./test/*.test.ts --reporter nyan --exit"
   },
   "repository": {
     "type": "git",
@@ -26,7 +27,10 @@
   "devDependencies": {
     "@types/chai": "^4.2.18",
     "@types/mocha": "^8.2.2",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
     "chai": "^4.3.4",
+    "eslint": "^7.28.0",
     "mocha": "^8.4.0",
     "ts-node": "^10.0.0",
     "typescript": "^4.3.2"

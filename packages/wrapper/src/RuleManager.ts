@@ -1,15 +1,14 @@
 import fetch from "node-fetch"
-import { ManagerOptions, RequestConfig } from "./types/types"
-import { CommunityConfig, SetCommunityConfig, Rule, ApiID } from "./types/apitypes"
+import { ManagerOptions } from "./types/types"
+import { Rule, ApiID } from "./types/apitypes"
 import BaseManager from "./BaseManager"
-import { GenericAPIError } from "./errors"
 import strictUriEncode from "strict-uri-encode"
 
-export class RuleManager extends BaseManager<ApiID, Rule> {
+export class RuleManager extends BaseManager<Rule> {
 	public apikey?: string
 	private apiurl: string
 	constructor(apiurl: string, apikey?: string, options: ManagerOptions = {}) {
-		super()
+		super(options)
 		if (apikey) this.apikey = apikey
 		this.apiurl = apiurl
 	}
@@ -23,11 +22,11 @@ export class RuleManager extends BaseManager<ApiID, Rule> {
 
 		if (!fetched || !fetched.id) return null // return null if the fetch is empty
 		
-		if (cache) this.cache.set(ruleid, fetched)
+		if (cache) this.add(fetched)
 		if (fetched?.id === ruleid) return fetched
 		return null
 	}
-	async fetchAll(cache=true, force=false): Promise<Rule[]> {
+	async fetchAll(cache=true): Promise<Rule[]> {
 		const allRules = await fetch(`${this.apiurl}/rules/getall`).then(r=>r.json())
 		
 		if (cache && allRules[0])

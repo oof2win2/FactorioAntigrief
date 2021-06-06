@@ -5,11 +5,11 @@ import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError } from "./errors"
 import strictUriEncode from "strict-uri-encode"
 
-export default class CommunityManager extends BaseManager<ApiID, Community> {
+export default class CommunityManager extends BaseManager<Community> {
 	public apikey?: string
 	private apiurl: string
 	constructor(apiurl: string, apikey?: string, opts: ManagerOptions = {}) {
-		super()
+		super(opts)
 		if (apikey) this.apikey = apikey
 		this.apiurl = apiurl
 	}
@@ -23,7 +23,7 @@ export default class CommunityManager extends BaseManager<ApiID, Community> {
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
 
 		if (!fetched || !fetched.id) return null // return null if the fetch is empty
-		if (cache) this.cache.set(communityid, fetched)
+		if (cache) this.add(fetched)
 		return fetched
 	}
 	async fetchAll(cache=true): Promise<Community[]> {
@@ -58,7 +58,7 @@ export default class CommunityManager extends BaseManager<ApiID, Community> {
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
 		}).then(u=>u.json())
 		if (update.error) {
-			if (update.description === 'API key is wrong') throw new AuthenticationError()
+			if (update.description === "API key is wrong") throw new AuthenticationError()
 			throw new GenericAPIError(`${update.error}: ${update.description}`)
 		}
 		return update
