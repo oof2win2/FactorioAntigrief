@@ -64,7 +64,7 @@ class SetAPIKey extends Command {
 				return message.channel.send("Permission configuration cancelled")
 
 			try {
-				const res = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id },
+				const res = await ConfigModel.findOneAndUpdate({ guildId: message.guild.id },
 					{
 						$set: {
 							"roles.violations": violations,
@@ -74,7 +74,7 @@ class SetAPIKey extends Command {
 							"roles.setCommunities": communities
 						}
 					}, { new: true })
-				if (res.guildid)
+				if (res.guildId)
 					return message.channel.send("Role configs successfully applied!")
 				else
 					return message.channel.send("An error occured. Please contact developers")
@@ -96,13 +96,13 @@ class SetAPIKey extends Command {
 				return message.channel.send("Permission configuration cancelled")
 
 			try {
-				const res = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id },
+				const res = await ConfigModel.findOneAndUpdate({ guildId: message.guild.id },
 					{
 						$set: {
 							[`roles.${args[0]}`]: role.id
 						}
 					}, { new: true })
-				if (res.guildid && res.roles[args[0]] == role.id)
+				if (res.guildId && res.roles[args[0]] == role.id)
 					return message.channel.send("Role configs successfully applied!")
 				else
 					return message.channel.send("An error occured. Please contact developers")
@@ -122,13 +122,13 @@ class SetAPIKey extends Command {
 				return message.channel.send("Permission configuration cancelled")
 			
 			try {
-				const res = await ConfigModel.findOneAndUpdate({ guildid: message.guild.id },
+				const res = await ConfigModel.findOneAndUpdate({ guildId: message.guild.id },
 					{
 						$set: {
 							[`roles.${args[0]}`]: role.id
 						}
 					}, {new: true})
-				if (res.guildid && (res.roles[args[0]] == role.id))
+				if (res.guildId && (res.roles[args[0]] == role.id))
 					return message.channel.send("Role setting successfully applied!")
 				else {
 					console.error("setrolepermissions", res)

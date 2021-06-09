@@ -62,7 +62,7 @@ class CreateViolation extends Command {
 				method: "POST",
 				body: JSON.stringify({
 					playername: playername,
-					adminid: message.author.id,
+					adminId: message.author.id,
 					brokenRule: ruleid,
 					proof: proof,
 					description: desc,

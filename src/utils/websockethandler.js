@@ -17,8 +17,8 @@ async function SocketMessage (message, channels) {
 			.setAuthor("FAGC Community")
 			.addFields(
 				{ name: "Playername", value: message.playername },
-				{ name: "Admin ID", value: message.adminid },
-				{ name: "Community ID", value: message.communityid },
+				{ name: "Admin ID", value: message.adminId },
+				{ name: "Community ID", value: message.communityId },
 				{ name: "Broken Rule", value: message.brokenRule },
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },
@@ -38,8 +38,8 @@ async function SocketMessage (message, channels) {
 			.setColor("ORANGE")
 			.addFields(
 				{ name: "Playername", value: message.playername },
-				{ name: "Admin ID", value: message.adminid },
-				{ name: "Community ID", value: message.communityid },
+				{ name: "Admin ID", value: message.adminId },
+				{ name: "Community ID", value: message.communityId },
 				{ name: "Broken Rules", value: message.brokenRule },
 				{ name: "Automated", value: message.automated },
 				{ name: "Proof", value: message.proof },

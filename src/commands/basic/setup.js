@@ -69,35 +69,35 @@ class Setup extends Command {
 			return message.channel.send("Community configuration cancelled")
 		
 		try {
-			const res = await ConfigModel.findOneAndUpdate({guildid: message.guild.id}, {
+			const res = await ConfigModel.findOneAndUpdate({guildId: message.guild.id}, {
 				$set: {apikey: apikey}
 			}, {new:true})
 			if (!res) {
 				await ConfigModel.create({
 					communityname: name,
-					guildid: message.guild.id,
+					guildId: message.guild.id,
 					contact: contact.id,
-					moderatorroleId: role,
+					moderatorRoleId: role,
 					apikey: apikey,
 				})
 			}
 			let ConfigToSet = {
 				communityname: name,
-				guildid: message.guild.id,
+				guildId: message.guild.id,
 				contact: contact.id,
-				moderatorroleId: role,
+				moderatorRoleId: role,
 				apikey: apikey,
 				ruleFilters: [],
 				trustedCommunities: [],
 			}
-			if (community) ConfigToSet.communityid = community.id
+			if (community) ConfigToSet.communityId = community.id
 			let config = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
 				method: "POST",
 				body: JSON.stringify(ConfigToSet),
 				headers: { "apikey": apikey, "content-type": "application/json" }
 			}).then((r) => r.json())
 			
-			if (config.moderatorroleId === role)
+			if (config.moderatorRoleId === role)
 				return message.channel.send("Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)")
 			else {
 				console.error("setup", config)

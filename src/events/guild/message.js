@@ -20,7 +20,7 @@ module.exports = async (client, message) => {
 	if (rate && !client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
 	client.RateLimit.set(message.author.id, Date.now())
 
-	let guildConfig = await ConfigModel.findOne({ guildid: message.guild.id })
+	let guildConfig = await ConfigModel.findOne({ guildId: message.guild.id })
 	if (cmd.config.requiredConfig && !guildConfig)
 		return message.reply("You need to create a guild config first with `fagc!setup`!")
 

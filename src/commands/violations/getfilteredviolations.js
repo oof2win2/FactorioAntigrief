@@ -24,7 +24,7 @@ class GetViolations extends Command {
 	}
 	async run(message, args) {
 		if (!args[0]) return message.reply("Provide a player name to get violations of")
-		const config = await ConfigModel.findOne({ guildid: message.guild.id })
+		const config = await ConfigModel.findOne({ guildId: message.guild.id })
 		if (config.trustedCommunities === undefined) return message.reply("No filtered communities set")
 		const violations = await fetch(`${this.client.config.apiurl}/violations/getall?playername=${strictUriEncode(args[0])}`).then(v => v.json())
 		const communities = await fetch(`${this.client.config.apiurl}/communities/getall`).then(c => c.json())
@@ -46,10 +46,10 @@ class GetViolations extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			if (trustedCommunities.some((community) => community.id === violation.communityid)) {
-				const admin = await this.client.users.fetch(violation.adminid)
+			if (trustedCommunities.some((community) => community.id === violation.communityId)) {
+				const admin = await this.client.users.fetch(violation.adminId)
 				const rule = await this.client.getOrFetchRule(violation.brokenRule)
-				const community = await this.client.getOrFetchCommunity(violation.communityid)
+				const community = await this.client.getOrFetchCommunity(violation.communityId)
 				embed.addField(violation.id,
 					`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
 					`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +

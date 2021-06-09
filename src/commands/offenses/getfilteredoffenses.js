@@ -50,8 +50,8 @@ class GetOffenses extends Command {
 			let checkedCommunity = communities.find(community => community.name == offense.communityname)
 			if (checkedCommunity && config.trustedCommunities.includes(checkedCommunity.id)) {
 				const violations = offense.violations.map((violation) => violation.id)
-				const community = await this.client.getOrFetchCommunity(offense.communityid)
-				embed.addField(`Community ${community.name} (\`${offense.communityid}\`): ${offense.id}`, `Violation ID(s): ${violations.join(", ")}`)
+				const community = await this.client.getOrFetchCommunity(offense.communityId)
+				embed.addField(`Community ${community.name} (\`${offense.communityId}\`): ${offense.id}`, `Violation ID(s): ${violations.join(", ")}`)
 				i++
 			}
 		}))
