@@ -1,51 +1,50 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
 
-// url doesn't seem to be doing anything with sqlite
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model GuildConfig {
+  id                Int            @id @default(autoincrement())
+  onViolation       String         @default("info")
+  onRevocation      String         @default("info")
+  banRole           String?
+  configRole        String?
+  notificationsRole String?
+  guildId           String
+  infochannels      InfoChannels[]
 }
 
-model GuildConfig {
-	id Int @id @default(autoincrement())
-	onViolation String @default("info")
-	onRevocation String @default("info")
-	banRole String?
-	configRole String?
-	notificationsRole String?
-	guildid String
-	infochannels InfoChannels[]
-}
 model InfoChannels {
-	id Int @id @default(autoincrement())
-	channelid String
-	config GuildConfig @relation(fields: [configid], references: [id])
-	configid Int
+  id        Int         @id @default(autoincrement())
+  channelid String
+  configid  Int
+  config    GuildConfig @relation(fields: [configid], references: [id])
 }
 
 model PrivateBans {
-	id Int @id @default(autoincrement())
-	bannedAt DateTime @default(now())
-	playername String
-	reason String? @default("No reason")
-	admin String
+  id         Int      @id @default(autoincrement())
+  bannedAt   DateTime @default(now())
+  playername String
+  reason     String?  @default("No reason")
+  admin      String
 }
+
 model Syncedbans {
-	id Int @id @default(autoincrement())
-	bannedAt DateTime @default(now())
-	apiId String @unique
-	playername String
-	reason String
-	admin String
+  id         Int      @id @default(autoincrement())
+  bannedAt   DateTime @default(now())
+  apiId      String   @unique
+  playername String
+  reason     String
+  admin      String
 }
+
 model Whitelist {
-	id Int @id @default(autoincrement())
-	playername String
-	whitelistedAt DateTime @default(now())
-	whitelistedBy String
+  id            Int      @id @default(autoincrement())
+  playername    String
+  whitelistedAt DateTime @default(now())
+  whitelistedBy String
 }

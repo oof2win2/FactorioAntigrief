@@ -63,7 +63,7 @@ export const command: Command<Message> = {
 				banRole: banRole.id,
 				configRole: configRole.id,
 				notificationsRole: notificationRole.id,
-				guildid: message.guild.id
+				guildId: message.guild.id
 			})
 			if (res.id) {
 				client.getGuildConfig() // get config from FAGC

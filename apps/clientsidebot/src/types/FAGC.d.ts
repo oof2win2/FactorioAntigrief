@@ -1,10 +1,10 @@
 import { Snowflake } from "discord.js"
 
 export interface FAGCConfig {
-	guildid: Snowflake,
+	guildId: Snowflake,
 	apikey: string,
 	contact: Snowflake,
-	moderatorroleId: Snowflake,
+	moderatorRoleId: Snowflake,
 	communityname: string,
 	roles: {
 		setCommunities?: Snowflake,

@@ -39,7 +39,7 @@ export async function HandleUnfilteredViolation (violation): Promise<boolean> {
 		return HandleUnfilteredViolation(violation)
 	}
 	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === violation.brokenRule)
-	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityid => communityid === violation.communityid)
+	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityId => communityId === violation.communityId)
 	console.log(rule, community)
 	if (rule && community) {
 		return HandleFilteredViolation(violation)
@@ -70,7 +70,7 @@ export async function HandleUnfilteredRevocation (revocation): Promise<boolean> 
 		return HandleUnfilteredRevocation(revocation)
 	}
 	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === revocation.brokenRule)
-	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityid => communityid === revocation.communityid)
+	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityId => communityId === revocation.communityId)
 	if (rule && community) {
 		return HandleFilteredRevocation(revocation)
 	}

@@ -73,16 +73,16 @@ class FAGCBot extends Client {
 		await this.getConfig()
 
 		if (this.messageSocket.readyState == this.messageSocket.OPEN) {
-			if (FAGCBot.GuildConfig?.guildid) {
+			if (FAGCBot.GuildConfig?.guildId) {
 				this.messageSocket.send(Buffer.from(JSON.stringify({
-					guildid: FAGCBot.GuildConfig.guildid
+					guildId: FAGCBot.GuildConfig.guildId
 				})))
 			}
 		} else {
 			this.messageSocket.on("open", () => {
-				if (FAGCBot.GuildConfig?.guildid) {
+				if (FAGCBot.GuildConfig?.guildId) {
 					this.messageSocket.send(Buffer.from(JSON.stringify({
-						guildid: FAGCBot.GuildConfig.guildid
+						guildId: FAGCBot.GuildConfig.guildId
 					})))
 				}
 			})
@@ -150,7 +150,7 @@ class FAGCBot extends Client {
 				FAGCBot.GuildConfig = set
 				// tell the websocket to the api that we have this guild ID
 				this.messageSocket.send(Buffer.from(JSON.stringify({
-					guildid: FAGCBot.GuildConfig.guildid
+					guildId: FAGCBot.GuildConfig.guildId
 				})))
 
 				return set
@@ -160,7 +160,7 @@ class FAGCBot extends Client {
 	async getGuildConfig(): Promise<FAGCConfig> {
 		if (FAGCBot.fagcconfig) return FAGCBot.fagcconfig
 		// this case should like literally never happen as the config will get sent when it is updated. here just in case.
-		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildid=${FAGCBot.GuildConfig.guildid}`).then(c => c.json())
+		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildId=${FAGCBot.GuildConfig.guildId}`).then(c => c.json())
 		setTimeout(() => FAGCBot.fagcconfig = undefined, 1000*60*15) // times itself out after 
 		return FAGCBot.fagcconfig
 	}

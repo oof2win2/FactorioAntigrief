@@ -6,7 +6,7 @@ CREATE TABLE "GuildConfig" (
     "banRole" TEXT,
     "configRole" TEXT,
     "notificationsRole" TEXT,
-    "guildid" TEXT NOT NULL
+    "guildId" TEXT NOT NULL
 );
 
 -- CreateTable
