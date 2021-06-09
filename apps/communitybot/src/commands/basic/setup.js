@@ -24,21 +24,21 @@ class Setup extends Command {
 	async run (message) {
 		message.channel.send("Hello! This is the bot setup process for this server")
 
-		const name = (await getMessageResponse("Please type in this community's name", message))?.content
+		const name = (await getMessageResponse(message, "Please type in this community's name"))?.content
 		if (!name) return message.reply("No community name!")
 
-		const contactID = (await getMessageResponse("Please ping the user to contact in this community", message))?.mentions.users.first()?.id
+		const contactID = (await getMessageResponse(message, "Please ping the user to contact in this community"))?.mentions.users.first()?.id
 		if (contactID === undefined) return message.channel.send("Didn't send contact in time or invalid contact mention")
 		const contact = await this.client.users.fetch(contactID)
 		if (!contact) return message.reply("Contact user is invalid!")
 
-		let roleMessage = (await getMessageResponse("Please ping (or type in the ID of) your role of people which can create violations", message))
+		let roleMessage = (await getMessageResponse(message, "Please ping (or type in the ID of) your role of people which can create violations"))
 		let role
 		if (roleMessage.mentions.roles.first()) role = roleMessage.mentions.roles.first().id
 		else role = roleMessage.content
 		if (message.guild.roles.cache.get(role) === undefined) return message.channel.send("Role is not correct")
 
-		const apikeyMessage = await getMessageResponse("Please type in your API key that you recieved from the FAGC team, if you did recieve one. Type `none` if you didn't", message)
+		const apikeyMessage = await getMessageResponse(message, "Please type in your API key that you recieved from the FAGC team, if you did recieve one. Type `none` if you didn't")
 		apikeyMessage.delete()
 		let apikey
 		if (apikeyMessage.content === "none") apikey = undefined

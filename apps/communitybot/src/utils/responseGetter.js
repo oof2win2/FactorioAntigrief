@@ -3,20 +3,20 @@ module.exports = {
 	getConfirmationMessage,
 }
 
-async function getMessageResponse(content, msg, timeout = 30000) {
-	const messageFilter = response => response.author.id == msg.author.id
+async function getMessageResponse(message, content, timeout = 30000) {
+	const messageFilter = response => response.author.id == message.author.id
 	
-	const message = await msg.channel.send(content)
-	return (await message.channel.awaitMessages(messageFilter, { max: 1, time: timeout })).first()
+	const msg = await message.channel.send(content)
+	return (await msg.channel.awaitMessages(messageFilter, { max: 1, time: timeout })).first()
 }
-async function getConfirmationMessage(message, content) {
+async function getConfirmationMessage(message, content, timeout = 120000) {
 	const confirm = await message.channel.send(content)
 	confirm.react("✅")
 	confirm.react("❌")
 	const reactionFilter = (reaction, user) => user.id === message.author.id
 	let reactions
 	try {
-		reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: 120000, errors: ["time"] })
+		reactions = await confirm.awaitReactions(reactionFilter, { max: 1, time: timeout, errors: ["time"] })
 	} catch (error) {
 		return false
 	}
