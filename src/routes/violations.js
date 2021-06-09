@@ -60,7 +60,7 @@ router.post("/create", async (req, res) => {
 		req.body.automated = "false"
 	const isUser = await checkUser(req.body.adminId) // this is later as it takes a bit
 	if (!isUser)
-		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${typeof (req.body.adminId)} which is not one` })
+		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 	
 	try {
 		const rule = await RuleModel.findOne({ id: req.body.brokenRule })
@@ -112,7 +112,7 @@ router.delete("/revoke", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected string, got ${typeof (req.body.adminId)} with value of ${req.body.adminId}` })
 	const isUser = await checkUser(req.body.adminId)
 	if (!isUser)
-		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${typeof (req.body.adminId)} which is not one` })
+		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 
 	const community = await getCommunity(req.headers.apikey)
 	const toRevoke = await ViolationModel.findOne({ id: req.body.id })
@@ -155,7 +155,7 @@ router.delete("/revokeallname", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}` })
 	const isUser = await checkUser(req.body.adminId)
 	if (!isUser)
-		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${typeof (req.body.adminId)} which is not one` })
+		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 
 	const community = await getCommunity(req.headers.apikey)
 	const toRevoke = await OffenseModel.findOne({

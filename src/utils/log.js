@@ -1,4 +1,4 @@
-const mung = require("express-mung")
+const mung = require("./mung")
 const LogSchema = require("../database/fagc/log")
 
 // https://stackoverflow.com/questions/19215042/express-logging-response-body

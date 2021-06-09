@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./src/bin/www",
     "dev": "nodemon --inspect ./src/bin/www",
-	"lint": "eslint src/ --fix"
+    "lint": "eslint src/ --fix"
   },
   "dependencies": {
     "@sentry/node": "^6.4.1",
@@ -16,9 +16,9 @@
     "debug": "~4.3.1",
     "discord.js": "^12.5.3",
     "express": "~4.17.1",
-    "express-mung": "^0.5.1",
     "express-rate-limit": "^5.2.6",
     "lodash": "^4.17.21",
+    "mongo-mock": "^4.0.0",
     "mongoose": "^5.12.5",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.1",

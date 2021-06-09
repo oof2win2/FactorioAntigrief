@@ -17,7 +17,7 @@ const offenseRouter = require("./routes/offenses")
 const app = express()
 const Sentry = require("@sentry/node")
 const Tracing = require("@sentry/tracing")
-const mung = require("express-mung")
+const mung = require("./utils/mung")
 
 const config = require("../config")
 
