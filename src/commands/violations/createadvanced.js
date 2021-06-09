@@ -24,24 +24,24 @@ class CreateViolationAdvanced extends Command {
 	async run(message, _, config) {
 		if (!config.apikey) return message.reply("No API key set")
 
-		const playername = (await getMessageResponse("Please type in a playername for the violation", message))?.content
+		const playername = (await getMessageResponse(message, "Please type in a playername for the violation"))?.content
 		if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-		const admin_message = (await getMessageResponse("Please type in admin user ID for the violation", message))
+		const admin_message = (await getMessageResponse(message, "Please type in admin user ID for the violation"))
 		if (admin_message === undefined) return message.channel.send("Didn't send admin user ID in time")
 		const admin_user = admin_message.mentions.users.first() || await this.client.users.fetch(admin_message.content)
 		if (!admin_user) return message.channel.send("Sent user is not valid!")
 
-		const ruleid = (await getMessageResponse("Please type in ID of rule that has been broken", message))?.content
+		const ruleid = (await getMessageResponse(message, "Please type in ID of rule that has been broken"))?.content
 		if (ruleid === undefined) return message.channel.send("Didn't send rule ID in time")
 
-		let desc = (await getMessageResponse("Please type in description of the violation or `none` if you don't want to set one", message))?.content
+		let desc = (await getMessageResponse(message, "Please type in description of the violation or `none` if you don't want to set one"))?.content
 		if (desc.toLowerCase() === "none") desc = undefined
 
-		let proof = (await getMessageResponse("Please send a link to proof of the violation or `none` if there is no proof", message))?.content
+		let proof = (await getMessageResponse(message, "Please send a link to proof of the violation or `none` if there is no proof"))?.content
 		if (proof.toLowerCase() === "none") proof = undefined
 
-		let timestamp = (await getMessageResponse("Please send a value representing the date of the violation. Type in `now` to set the current time", message))?.content
+		let timestamp = (await getMessageResponse(message, "Please send a value representing the date of the violation. Type in `now` to set the current time"))?.content
 		if (timestamp.toLowerCase() === "now") timestamp = (new Date).toISOString()
 		else {
 			if (isNaN(Date.parse(timestamp))) timestamp = (new Date).toISOString()
