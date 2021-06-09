@@ -30,7 +30,7 @@ class RevokeAllname extends Command {
 		if (!config.apikey) return message.reply("No API key set")
 		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(config.communityId)}`)
 		const offense = await offenseRaw.json()
-		if (!offense || offense === {})
+		if (!offense)
 			return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
 
 		let embed = new MessageEmbed()
