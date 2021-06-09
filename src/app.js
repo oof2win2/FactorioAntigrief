@@ -17,7 +17,6 @@ const offenseRouter = require("./routes/offenses")
 const app = express()
 const Sentry = require("@sentry/node")
 const Tracing = require("@sentry/tracing")
-const mung = require("./utils/mung")
 
 const config = require("../config")
 
@@ -78,13 +77,6 @@ app.use(express.static(path.join(__dirname, "public")))
 // logger for any request other than POST
 app.use(logger)
 app.use(removeId)
-app.use(mung.json(function (body, req, res) { // make mung not send 204
-	if (body == null || body == undefined) {
-		body = {}
-		res.status(200)
-	}
-	return body
-}))
 
 // middleware for authentication
 const authMiddleware = async (req, res, next) => {

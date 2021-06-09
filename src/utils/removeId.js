@@ -1,7 +1,6 @@
 const mung = require("./mung")
 // remove the _id property from everything using recursion magic
 
-//
 module.exports = mung.json(function (body) {
 	const editResponse = (response) => {
 		const removeable = ["_id", "__v", "apikey"]

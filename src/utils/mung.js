@@ -46,9 +46,8 @@ mung.json = function json(fn, options) {
 			if (json === undefined)
 				json = originalJson
 
-			// If null, then 204 No Content
 			if (json === null || json === undefined)
-				return res.status(204).json(null)
+				return res.status(404).json(null)
 
 			// If munged scalar value, then text/plain
 			if (originalJson !== json && isScalar(json)) {
@@ -83,9 +82,8 @@ mung.jsonAsync = function json(fn, options) {
 						if (res.headersSent)
 							return
 
-						// If null, then 204 No Content (but still send null)
 						if (json === null || json === undefined)
-							return res.status(204).json(null)
+							return res.status(404).json(null)
 
 						// If munged scalar value, then text/plain
 						if (json !== originalJson && isScalar(json)) {
