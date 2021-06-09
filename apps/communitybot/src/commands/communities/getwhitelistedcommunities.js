@@ -22,7 +22,7 @@ class GetWhitelisted extends Command {
 	async run(message) {
 		const rawCommunities = await fetch(`${this.client.config.apiurl}/communities/getall`)
 		const communities = await rawCommunities.json()
-		const config = await ConfigModel.findOne({ guildid: message.guild.id })
+		const config = await ConfigModel.findOne({ guildId: message.guild.id })
 
 		let communitiesEmbed = new MessageEmbed()
 			.setTitle("FAGC Communities")

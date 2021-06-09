@@ -43,8 +43,8 @@ class GetAllOffenses extends Command {
 			}
 
 			const violations = offense.violations.map((violation) => { return violation.id })
-			const community = await this.client.getOrFetchCommunity(offense.communityid)
-			embed.addField(`Community ${community.name} (\`${offense.communityid}\`): ${offense.id}`, `Violation ID(s): ${violations.join(", ")}`)
+			const community = await this.client.getOrFetchCommunity(offense.communityId)
+			embed.addField(`Community ${community.name} (\`${offense.communityId}\`): ${offense.id}`, `Violation ID(s): ${violations.join(", ")}`)
 		}))
 		message.channel.send(embed)
 	}

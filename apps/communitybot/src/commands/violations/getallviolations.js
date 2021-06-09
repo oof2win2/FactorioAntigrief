@@ -40,9 +40,9 @@ class GetAllViolations extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			const admin = await this.client.users.fetch(violation.adminid)
+			const admin = await this.client.users.fetch(violation.adminId)
 			const rule = await this.client.getOrFetchRule(violation.brokenRule)
-			const community = await this.client.getOrFetchCommunity(violation.communityid)
+			const community = await this.client.getOrFetchCommunity(violation.communityId)
 			embed.addField(violation.id,
 				`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
                 `Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +

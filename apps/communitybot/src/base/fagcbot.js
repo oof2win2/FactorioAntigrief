@@ -69,10 +69,10 @@ class FAGCBot extends Client {
 		delete require.cache[require.resolve(`.${commandPath}${path.sep}${commandName}.js`)]
 		return false
 	}
-	async getOrFetchCommunity (communityid) {
-		const cachedCommunity = this.CachedCommunities.get(communityid)
+	async getOrFetchCommunity (communityId) {
+		const cachedCommunity = this.CachedCommunities.get(communityId)
 		if (cachedCommunity) return cachedCommunity
-		const community = this.CachedCommunities.set(communityid, fetch(`${this.config.apiurl}/communities/getid?id=${strictUriEncode(communityid)}`).then(c => c.json())).get(communityid)
+		const community = this.CachedCommunities.set(communityId, fetch(`${this.config.apiurl}/communities/getid?id=${strictUriEncode(communityId)}`).then(c => c.json())).get(communityId)
 		return community
 	}
 	async getOrFetchRule (ruleid) {

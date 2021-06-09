@@ -37,12 +37,12 @@ class RemoveWebhook extends Command {
 			body: JSON.stringify({
 				id: args[0],
 				token: args[1],
-				guildid: message.guild.id
+				guildId: message.guild.id
 			}),
 			headers: { "content-type": "application/json" }
 		})
 		const webhook = await webRaw.json()
-		if (webhook && webhook.guildid) {
+		if (webhook && webhook.guildId) {
 			return message.reply("The webhook will no longer be recieving FAGC notifications!")
 		} else if (webhook === null) {
 			return message.reply("Webhook is not linked to FAGC!")

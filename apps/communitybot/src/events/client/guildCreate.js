@@ -6,12 +6,12 @@ module.exports = async (client, guild) => {
 	client.logger.log(`${client.user.username} joined guild ${guild.name}. Setting up config`)
 	const owner = guild.owner || await client.users.fetch(guild.ownerID)
 	// create initial config only if it doesn't exist yet
-	ConfigModel.findOne({ guildid: guild.id }).then((config) => {
+	ConfigModel.findOne({ guildId: guild.id }).then((config) => {
 		if (config) return
 		console.log(`Creating config for guild with ID ${guild.id}`)
 		ConfigModel.create({
 			communityname: guild.name,
-			guildid: guild.id,
+			guildId: guild.id,
 			contact: owner.id,
 			apikey: "",
 		})

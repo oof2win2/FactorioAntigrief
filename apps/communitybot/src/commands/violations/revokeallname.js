@@ -28,7 +28,7 @@ class RevokeAllname extends Command {
 		if (!args[0]) return message.reply("Provide a player name to get violations of")
 		const playername = args.shift()
 		if (!config.apikey) return message.reply("No API key set")
-		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${strictUriEncode(playername)}&communityid=${strictUriEncode(config.communityid)}`)
+		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(config.communityId)}`)
 		const offense = await offenseRaw.json()
 		if (!offense || offense === {})
 			return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
@@ -44,7 +44,7 @@ class RevokeAllname extends Command {
 				message.channel.send(embed)
 				embed.fields = []
 			}
-			const admin = await this.client.users.fetch(violation.adminid)
+			const admin = await this.client.users.fetch(violation.adminId)
 			embed.addField(violation.id,
 				`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.brokenRule}\n` +
                 `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
@@ -63,12 +63,12 @@ class RevokeAllname extends Command {
 				method: "DELETE",
 				body: JSON.stringify({
 					playername: playername,
-					adminid: message.author.id
+					adminId: message.author.id
 				}),
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			})
 			const response = await responseRaw.json()
-			if (response.id && response.violations && response.playername && response.communityid) {
+			if (response.id && response.violations && response.playername && response.communityId) {
 				return message.channel.send("Offense revoked!")
 			} else {
 				return handleErrors(message, response)

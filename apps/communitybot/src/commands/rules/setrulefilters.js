@@ -74,7 +74,7 @@ class SetRuleFilters extends Command {
 				}),
 				headers: { "apikey": config.apikey, "content-type": "application/json" }
 			}).then(r => r.json())
-			if (request.guildid) return message.channel.send("Rules have successfully been set")
+			if (request.guildId) return message.channel.send("Rules have successfully been set")
 
 			message.channel.send("An error has occured. Please try again in some time")
 			throw request
