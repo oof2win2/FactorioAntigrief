@@ -26,8 +26,8 @@ module.exports = {
 		if (contact.bot) return message.channel.send("User is a bot!")
 		
 		message.channel.send("Please type in the Guild ID of the community's server")
-		const guildid = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()?.cleanContent
-		if (!guildid) return message.channel.send("No guild ID supplied!")
+		const guildId = (await message.channel.awaitMessages(messageFilter, { max: 1, time: 30000 })).first()?.cleanContent
+		if (!guildId) return message.channel.send("No guild ID supplied!")
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Community Setup")
 			.setAuthor("FAGC Community")
@@ -35,7 +35,7 @@ module.exports = {
 			.addFields(
 				{name: "Community name", value: name},
 				{name: "Contact", value: `<@${contact.id}> | ${contact.tag}`},
-				{name: "Guild ID", value: guildid}
+				{name: "Guild ID", value: guildId}
 			)
 		message.channel.send(embed)
 		const confirm = await message.channel.send("Are you sure you want these settings applied?")
@@ -59,7 +59,7 @@ module.exports = {
 				body: JSON.stringify({
 					name: name,
 					contact: contact.id,
-					guildid: guildid
+					guildId: guildId
 				}),
 				headers: { "apikey": masterapikey, "content-type": "application/json" }
 			})
@@ -68,8 +68,8 @@ module.exports = {
 				message.author.send(`API key for community ${name} (\`${community.community.id}\`), contacted at <@${contact.id}> | ${contact.tag}`)
 				message.author.send(`||${community.key}||`)
 				return message.channel.send(`Community with ID \`${community.community.id}\` created successfully! API key has been sent to your DMs`)
-			} else if (community.error == "Bad Request" && community.error.includes("guildid must be Discord Guild snowflake")) {
-				message.channel.send("Provided GuildID of community is not valid or the bot is not in it")
+			} else if (community.error == "Bad Request" && community.error.includes("guildId must be Discord Guild snowflake")) {
+				message.channel.send("Provided guildId of community is not valid or the bot is not in it")
 			} else {
 				console.error({ community })
 				return message.channel.send("Error creating community. Please check logs.")

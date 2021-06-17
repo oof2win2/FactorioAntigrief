@@ -11,7 +11,7 @@ module.exports = {
 		description: "Removes a FAGC community",
 	},
 	run: async (client, message, args) => {
-		if (!args[0]) return message.reply("No CommunityID given")
+		if (!args[0]) return message.reply("No communityId given")
 		const communityRaw = await fetch(`${apiurl}/communities/getid?id=${args[0]}`)
 		const community = await communityRaw.json()
 		if (!community) return message.reply(`No community with ObjectID ${args[0]} does not exist`)
