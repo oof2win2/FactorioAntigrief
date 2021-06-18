@@ -31,7 +31,8 @@
     "@discordjs/collection": "^0.1.6",
     "discord-api-types": "^0.18.1",
     "node-fetch": "^2.6.1",
-    "strict-uri-encode": "^2.0.0"
+    "strict-uri-encode": "^2.0.0",
+    "why-is-node-running": "^2.2.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.18",

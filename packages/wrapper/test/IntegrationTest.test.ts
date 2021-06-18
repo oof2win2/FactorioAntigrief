@@ -94,7 +94,6 @@ describe("ApiWrapper", () => {
 				...testStuff.violation, // description, automated, proof, playername
 			})
 		}))
-		expect(false).to.equal(true)
 		createdViolations.forEach(violation => {
 			// check that all violations were created correctly
 			expect(violation.adminId).to.equal(testUserId, "Violation admin ID mismatch")
@@ -110,10 +109,9 @@ describe("ApiWrapper", () => {
 		})
 
 		const violations = await FAGC.violations.fetchAllName(testStuff.violation.playername)
-		expect(false).to.equal(true)
 		const revocations = await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId)
-		expect(revocations.violations.length).to.equal(violations.length, "Amount of player violations and revocations mismatch")
-		revocations.violations.forEach((revocation, i) => {
+		expect(revocations.length).to.equal(violations.length, "Amount of player violations and revocations mismatch")
+		revocations.forEach((revocation, i) => {
 			const violation = violations[i]
 			// equal violation
 			expect(revocation.adminId).to.equal(violation.adminId, "Revocation adminId mismatch")

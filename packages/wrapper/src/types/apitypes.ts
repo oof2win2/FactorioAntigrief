@@ -44,13 +44,6 @@ export interface Revocation extends Violation {
 	revokedBy: string
 }
 
-export interface Offense extends Common {
-	playername: string
-	communityId: ApiID
-	id: ApiID
-	violations: Violation[]
-}
-
 export interface Community extends Common {
 	name: string
 	contact: Snowflake

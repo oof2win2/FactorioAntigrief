@@ -11,11 +11,11 @@ export default class FAGCWrapper {
 	public rules: RuleManager
 	public violations: ViolationManager
 	public revocations: RevocationManager
-	constructor(apikey: string, options: ManagerOptions = {
+	constructor(apikey: string, apiurl?: string, options: ManagerOptions = {
 		uncacheage: 1000*60*15,
 		uncachems: 1000*60*15
 	}) {
-		this.apiurl = "http://localhost:3000/v1"
+		this.apiurl = apiurl || "http://localhost:3000/v1"
 		this.apikey = apikey
 
 		this.revocations = new RevocationManager(this.apiurl, this.apikey, options)

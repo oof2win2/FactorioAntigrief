@@ -1,6 +1,6 @@
 import fetch from "node-fetch"
 import { ManagerOptions, RequestConfig } from "./types/types"
-import { ApiID, CreateViolation, Offense, Revocation, Violation } from "./types/apitypes"
+import { ApiID, CreateViolation, Revocation, Violation } from "./types/apitypes"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError, UnsuccessfulRevocationError } from "./errors"
 import strictUriEncode from "strict-uri-encode"
@@ -28,8 +28,7 @@ export default class ViolationManager extends BaseManager<Violation> {
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
 
 		if (!fetched || !fetched.id) return null // return null if the fetch is empty
-		if (cache)
-			this.add(fetched)
+		if (cache) this.add(fetched)
 		return fetched
 	}
 	async fetchAllName(playername: string, cache=true): Promise<Violation[]> {
@@ -90,7 +89,7 @@ export default class ViolationManager extends BaseManager<Violation> {
 		this.cache.sweep((violation) => violation.id === violationid) // remove the revoked violation from cache as it isnt working anymore
 		return revoked
 	}
-	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Offense> {
+	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Violation[]|null> {
 		const revoked = await fetch(`${this.apiurl}/violations/revokeallname`, {
 			method: "DELETE",
 			body: JSON.stringify({
@@ -105,7 +104,7 @@ export default class ViolationManager extends BaseManager<Violation> {
 			throw new GenericAPIError(`${revoked.error}: ${revoked.description}`)
 		}
 
-		revoked.violations.forEach(revocation => {
+		revoked.forEach(revocation => {
 			if (!revocation?.violatedTime) throw new UnsuccessfulRevocationError()
 			if (cache) this.createRevocation(revocation)
 		})
