@@ -138,7 +138,7 @@ router.delete("/revokeallname", async (req, res) => {
 	const toRevoke = await ViolationModel.find({
 		playername: req.body.playername,
 		communityId: community.id
-	}).then(o=>o.map(v=>v.toObject()))
+	}).then(o=>o.map(v=>v?.toObject()))
 	if (!toRevoke || !toRevoke[0])
 		return res.status(404).json({ error: "Not Found", description: `Offense with player name ${req.body.playername} not found` })
 	if (toRevoke[0].communityId != community.id)
