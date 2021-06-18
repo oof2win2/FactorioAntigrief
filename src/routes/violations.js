@@ -1,17 +1,24 @@
 const express = require("express")
 const router = express.Router()
 const ViolationModel = require("../database/fagc/violation")
-const OffenseModel = require("../database/fagc/offense")
 const RevocationModel = require("../database/fagc/revocation")
 const RuleModel = require("../database/fagc/rule")
 const { validateUserString } = require("../utils/functions-databaseless")
 const { getCommunity, checkUser } = require("../utils/functions")
 const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")
 
-/* GET home page. */
-router.get("/", function (req, res) {
-	res.json({ info: "Violations API Homepage!" })
-})
+const RaceConditionManager = {
+	RaceConditions: new Map(),
+	checkRaceConditionName: async (playername, setWait=false) => {
+		const waitFor = RaceConditions.get(playername)
+		if (waitFor) return await waitFor
+		if (setWait) {
+			this.RaceConditions.set(playername, new Promise())
+		}
+		return
+	}
+}
+
 router.get("/getviolations", async (req, res) => {
 	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
@@ -19,6 +26,8 @@ router.get("/getviolations", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `communityId expected string, got ${typeof (req.query.communityId)} with value of ${req.query.communityId}` })
 	if (!validateUserString(req.query.communityId))
 		return res.status(400).json({ error: "Bad Request", description: `communityId is not correct ID, got value of ${req.query.communityId}` })
+	
+	await RaceConditionManager.checkRaceConditionName(req.body.playername)
 
 	const dbRes = await ViolationModel.find({
 		playername: req.query.playername,
@@ -69,10 +78,6 @@ router.post("/create", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: "Rule must be a RuleID" })
 	}
 	const community = await getCommunity(req.headers.apikey)
-	const dbOffense = await OffenseModel.findOne({
-		playername: req.body.playername,
-		communityId: community.id
-	})
 	const violation = await ViolationModel.create({
 		playername: req.body.playername,
 		communityId: community.id,
@@ -83,25 +88,7 @@ router.post("/create", async (req, res) => {
 		violatedTime: Date.parse(req.body.violatedTime) || new Date(),
 		adminId: req.body.adminId
 	})
-	if (dbOffense === null || dbOffense === undefined) {
-		const offense = new OffenseModel({
-			playername: req.body.playername,
-			communityId: community.id,
-			violations: [],
-		})
-		offense.violations.push(violation._id)
-		offense.save()
-	} else {
-		await OffenseModel.updateOne(
-			{
-				playername: req.body.playername,
-				communityId: community.id
-			},
-			{ $push: { violations: violation._id } }
-		)
-	}
 	let msg = violation.toObject()
-	delete msg._id
 	violationCreatedMessage(violation.toObject())
 	return res.status(200).json(msg)
 })
@@ -122,15 +109,6 @@ router.delete("/revoke", async (req, res) => {
 		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityId} but your community ID is ${community.id}` })
 
 	const violation = await ViolationModel.findByIdAndDelete(toRevoke._id)
-	await OffenseModel.updateOne(
-		{
-			violations: toRevoke._id
-		},
-		{ $pull: { violations: toRevoke._id } }
-	)
-	await OffenseModel.deleteOne(
-		{ violations: { $size: 0 } }
-	)
 	let revocation = await RevocationModel.create({
 		playername: violation.playername,
 		communityId: violation.communityId,
@@ -144,7 +122,6 @@ router.delete("/revoke", async (req, res) => {
 		revokedBy: req.body.adminId
 	})
 	let msg = revocation.toObject()
-	delete msg._id
 	violationRevokedMessage(msg)
 	res.status(200).json(msg)
 })
@@ -158,19 +135,19 @@ router.delete("/revokeallname", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 
 	const community = await getCommunity(req.headers.apikey)
-	const toRevoke = await OffenseModel.findOne({
+	const toRevoke = await ViolationModel.find({
 		playername: req.body.playername,
 		communityId: community.id
-	})
-	if (toRevoke === undefined || toRevoke === null)
-		return res.status(404).json({ error: "Not Found", description: `Violation with player name ${req.body.playername} not found` })
-	if (toRevoke.communityId != community.id)
-		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityId} but your community ID is ${community.communityId}` })
+	}).then(o=>o.map(v=>v.toObject()))
+	if (!toRevoke || !toRevoke[0])
+		return res.status(404).json({ error: "Not Found", description: `Offense with player name ${req.body.playername} not found` })
+	if (toRevoke[0].communityId != community.id)
+		return res.status(403).json({ error: "Access Denied", description: `You are trying to access an offense of community ${toRevoke.communityId} but your community ID is ${community.communityId}` })
 
 	// first get the offense and delete that first, so the caller can get the raw violations - not just IDs
-	const offense = await OffenseModel.findByIdAndDelete(toRevoke._id).populate("violations").then(r=>r?.toObject())
-	const revocations = await Promise.all(toRevoke.violations.map(async (violationID) => {
-		const violation = await ViolationModel.findByIdAndDelete(violationID)
+	// delete all violations and then 
+	const revocations = await Promise.all(toRevoke.map(async (violation) => {
+		await ViolationModel.findByIdAndDelete(violation._id)
 		const revocation = await RevocationModel.create({
 			playername: violation.playername,
 			communityId: violation.communityId,
@@ -186,8 +163,7 @@ router.delete("/revokeallname", async (req, res) => {
 		violationRevokedMessage(revocation.toObject())
 		return revocation
 	}))
-	offense.violations = revocations
-	res.status(200).json(offense)
+	res.status(200).json(revocations)
 })
 
 module.exports = router

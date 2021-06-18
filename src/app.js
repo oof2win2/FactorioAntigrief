@@ -12,7 +12,6 @@ const communityRouter = require("./routes/communities")
 const violationRouter = require("./routes/violations")
 const informaticsRouter = require("./routes/informatics")
 const revocationRouter = require("./routes/revocations")
-const offenseRouter = require("./routes/offenses")
 
 const app = express()
 const Sentry = require("@sentry/node")
@@ -99,7 +98,6 @@ app.use("/v1/rules", ruleRouter)
 app.use("/v1/communities", communityRouter)
 app.use("/v1/violations", violationRouter)
 app.use("/v1/revocations", revocationRouter)
-app.use("/v1/offenses", offenseRouter)
 
 app.get("/v1", (req, res) => {
 	res.status(200).json({message: "FAGC api v1"})
