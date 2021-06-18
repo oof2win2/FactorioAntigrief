@@ -4,7 +4,10 @@ import { RuleManager } from "./RuleManager"
 import { ManagerOptions } from "./types/types"
 import ViolationManager from "./ViolationManager"
 
-export default class FAGCWrapper {
+// export types
+export * from "./types/index"
+
+export class FAGCWrapper {
 	public readonly apiurl: string
 	public apikey: string
 	public communities: CommunityManager
