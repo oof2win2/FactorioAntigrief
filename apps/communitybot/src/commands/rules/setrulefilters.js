@@ -21,7 +21,7 @@ class SetRuleFilters extends Command {
 		})
 	}
 	async run(message, _, config) {
-		const rules = await fetch(`${this.client.config.apiurl}/rules/getall`).then((r) => r.json())
+		const rules = await this.client.fagc.rules.fetchAll()
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")
@@ -67,14 +67,8 @@ class SetRuleFilters extends Command {
 			const confirm = await getConfirmationMessage(message, "Are you sure you want your rule filters set to this?")
 			if (!confirm) return message.channel.send("Rule setting cancelled")
 
-			const request = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
-				method: "POST",
-				body: JSON.stringify({
-					ruleFilters: ruleFilters
-				}),
-				headers: { "apikey": config.apikey, "content-type": "application/json" }
-			}).then(r => r.json())
-			if (request.guildId) return message.channel.send("Rules have successfully been set")
+			const request = await this.client.fagc.communities.setConfig({ruleFilters}, {apikey: config.apikey})
+			if (request.guildId === message.guildid) return message.channel.send("Rules have successfully been set")
 
 			message.channel.send("An error has occured. Please try again in some time")
 			throw request

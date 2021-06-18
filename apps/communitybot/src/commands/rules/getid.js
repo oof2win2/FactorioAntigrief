@@ -1,5 +1,3 @@
-const fetch = require("node-fetch")
-const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
@@ -23,8 +21,7 @@ class GetIDRule extends Command {
 	}
 	async run(message, args) {
 		if (!args[0]) return message.reply("Provide rule ID to search by")
-		const resRaw = await fetch(`${this.client.config.apiurl}/rules/getid?id=${strictUriEncode(args[0])}`)
-		const rule = await resRaw.json()
+		const rule = await this.client.fagc.rules.fetchRule(args[0])
 
 		if (rule === null)
 			return message.reply(`No rule with ID of \`${args[0]}\` exists`)

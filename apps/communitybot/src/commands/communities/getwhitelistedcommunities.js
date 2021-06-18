@@ -1,5 +1,3 @@
-const fetch = require("node-fetch")
-const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
@@ -20,9 +18,8 @@ class GetWhitelisted extends Command {
 		})
 	}
 	async run(message) {
-		const rawCommunities = await fetch(`${this.client.config.apiurl}/communities/getall`)
-		const communities = await rawCommunities.json()
-		const config = await ConfigModel.findOne({ guildId: message.guild.id })
+		const communities = await this.client.fagc.communities.fetchAll()
+		const config = await this.client.fagc.communities.fetchConfig(message.guild.id)
 
 		let communitiesEmbed = new MessageEmbed()
 			.setTitle("FAGC Communities")

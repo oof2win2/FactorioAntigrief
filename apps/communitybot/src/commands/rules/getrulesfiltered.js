@@ -1,4 +1,3 @@
-const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
@@ -21,8 +20,7 @@ class GetRulesFiltered extends Command {
 	async run(message, _, config) {
 		if (!config.ruleFilters || !config.ruleFilters[0])
 			return message.reply("No rule filters set")
-		const resRaw = await fetch(`${this.client.config.apiurl}/rules/getall`)
-		const rules = await resRaw.json()
+		const rules = await this.client.fagc.rules.fetchAll()
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")
