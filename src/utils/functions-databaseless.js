@@ -10,7 +10,10 @@ function getUserStringFromID(string) {
 	let end = endBuf.toString("base64")
 	return start + end
 }
+
+// validate IDs that are visible to users
 function validateUserString(string) {
+	if (!typeof string === "string") return false // it's not a string so it's obviously wrong
 	if (string.length !== 7) return false
 	return true
 }
