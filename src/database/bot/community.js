@@ -8,10 +8,10 @@ const ConfigSchema = new connection.Schema({
 		type: String,
 		required: true
 	},
-	communityid: {
+	communityId: {
 		type: connection.Types.ObjectId,
 	},
-	guildid: {
+	guildId: {
 		type: String,
 		required: true,
 	},
@@ -20,7 +20,7 @@ const ConfigSchema = new connection.Schema({
 		required: true,
 	},
 	apikey: String,
-	moderatorroleId: String,
+	moderatorRoleId: String,
 	trustedCommunities: [String],
 	ruleFilters: [String]
 })

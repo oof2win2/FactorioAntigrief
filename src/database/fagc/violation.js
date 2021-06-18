@@ -1,18 +1,21 @@
 const database = require("../database")
+const { getUserStringFromID } = require("../../utils/functions-databaseless")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const ViolationSchema = new connection.Schema({
-    playername: String,
-	communityid: {
-		type: connection.Types.ObjectId,
-		ref: "Communities"
-	},
-	broken_rule: connection.SchemaTypes.ObjectId,
-    proof: String,
-    description: String,
-    automated: Boolean,
-    violated_time: Date,
-    admin_id: String,
+	id: String,
+	playername: String,
+	communityId: String,
+	brokenRule: String,
+	proof: String,
+	description: String,
+	automated: Boolean,
+	violatedTime: Date,
+	adminId: String,
+})
+ViolationSchema.pre("save", function (next) {
+	this.id = getUserStringFromID(this._id.toString())
+	next()
 })
 
-module.exports = connection.model('Violations', ViolationSchema)
+module.exports = connection.model("Violations", ViolationSchema)

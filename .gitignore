@@ -1,6 +1,8 @@
 # private stuff
 config.js
 dist/
+*.code-workspace
+
 # Logs
 logs
 *.log

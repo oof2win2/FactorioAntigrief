@@ -1,20 +1,23 @@
 const database = require("../database")
+const { getUserStringFromID } = require("../../utils/functions-databaseless")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const RevocationSchema = new connection.Schema({
-    playername: String,
-    admin_id: String,
-	communityid: {
-		type: connection.Types.ObjectId,
-		ref: "Communities"
-	},
-	broken_rule: connection.SchemaTypes.ObjectId,
-    proof: String,
-    description: String,
-    automated: Boolean,
-    violated_time: Date,
-    revokedTime: Date,
-    revokedBy: String
+	id: String,
+	playername: String,
+	adminId: String,
+	communityId: String,
+	brokenRule: String,
+	proof: String,
+	description: String,
+	automated: Boolean,
+	violatedTime: Date,
+	revokedTime: Date,
+	revokedBy: String
+})
+RevocationSchema.pre("save", function (next) {
+	this.id = getUserStringFromID(this._id.toString())
+	next()
 })
 
-module.exports = connection.model('Revocations', RevocationSchema)
+module.exports = connection.model("Revocations", RevocationSchema)

@@ -5,22 +5,23 @@
   "main": "src/bin/www",
   "scripts": {
     "start": "node ./src/bin/www",
-    "dev": "nodemon --inspect ./src/bin/www"
+    "dev": "nodemon --inspect ./src/bin/www",
+    "lint": "eslint src/ --fix"
   },
   "dependencies": {
+    "@sentry/node": "^6.4.1",
+    "@sentry/tracing": "^6.4.1",
     "cookie-parser": "~1.4.4",
     "crypto-random-string": "^4.0.0",
     "debug": "~4.3.1",
     "discord.js": "^12.5.3",
     "express": "~4.17.1",
     "express-rate-limit": "^5.2.6",
-    "http-errors": "~1.8.0",
-    "jade": "~1.11.0",
     "lodash": "^4.17.21",
     "mongoose": "^5.12.8",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.1",
-    "swagger-jsdoc": "^7.0.0-rc.6"
+    "prom-client": "^13.1.0"
   },
   "repository": {
     "type": "git",

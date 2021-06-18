@@ -1,10 +1,16 @@
 const database = require("../database")
+const { getUserStringFromID } = require("../../utils/functions-databaseless")
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 const CommunitySchema = new connection.Schema({
-    name: String,
-    contact: String,
-	guildid: String,
+	id: String,
+	name: String,
+	contact: String,
+	guildId: String,
+})
+CommunitySchema.pre("save", function (next) {
+	this.id = getUserStringFromID(this._id.toString())
+	next()
 })
 
-module.exports = connection.model('Communities', CommunitySchema)
+module.exports = connection.model("Communities", CommunitySchema)
