@@ -1,4 +1,3 @@
-const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
@@ -19,8 +18,7 @@ class GetAll extends Command {
 		})
 	}
 	async run(message) {
-		const rawCommunities = await fetch(`${this.client.config.apiurl}/communities/getall`)
-		const communities = await rawCommunities.json()
+		const communities = await this.client.fagc.communities.fetchAll()
 
 		let communitiesEmbed = new MessageEmbed()
 			.setTitle("FAGC Communities")

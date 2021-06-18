@@ -1,6 +1,12 @@
 const path = require("path")
+const FAGCBot = require("./fagcbot")
 
 module.exports = class Command {
+	/**
+	 * 
+	 * @param {FAGCBot} client 
+	 * @param {*} param1 
+	 */
 	constructor(client, {
 		name = null, // name of command
 		description = false, // description
