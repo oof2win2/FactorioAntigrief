@@ -5,7 +5,7 @@ const ConfigSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
-	communityid: String, // the community ID in the fagc database
+	communityId: String, // the community ID in the fagc database
 	guildid: {
 		type: String,
 		required: true,
