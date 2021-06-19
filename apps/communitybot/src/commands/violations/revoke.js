@@ -8,10 +8,10 @@ class Revoke extends Command {
 	constructor(client) {
 		super(client, {
 			name: "revoke",
-			description: "Revokes a player's violation with the violation ID",
+			description: "Revokes a player's report with the report ID",
 			aliases: ["revokeid"],
-			category: "violations",
-			usage: "[violationid]",
+			category: "reports",
+			usage: "[reportid]",
 			examples: ["{{p}}revoke 60689a97674ac1edb15186f0"],
 			dirname: __dirname,
 			enabled: true,
@@ -20,54 +20,54 @@ class Revoke extends Command {
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["violations"],
+			customPermissions: ["reports"],
 		})
 	}
 	async run(message, args, config) {
 		if (!config.apikey)
 			return message.reply("No API key set")
         
-		if (!args[0]) return message.reply("Provide a ID for the violation to revoke")
-		const violationID = args.shift()
+		if (!args[0]) return message.reply("Provide a ID for the report to revoke")
+		const reportID = args.shift()
 
-		const violation = await this.client.fagc.violations.fetchViolation(violationID)
-		if (!violation?.id)
-			return message.channel.send(`Violation with ID \`${violationID}\` doesn't exist`)
-		if (violation.error && violation.description.includes("id expected ID"))
-			return message.reply(`\`${violationID}\` is not a proper violation ID`)
+		const report = await this.client.fagc.violations.fetchReport(reportID)
+		if (!report?.id)
+			return message.channel.send(`Report with ID \`${reportID}\` doesn't exist`)
+		if (report.error && report.description.includes("id expected ID"))
+			return message.reply(`\`${reportID}\` is not a proper report ID`)
 
 		let embed = new MessageEmbed()
-			.setTitle("FAGC Violation Revocation")
+			.setTitle("FAGC Report Revocation")
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Violation \`${violation.id}\` of player \`${violation.playername}\` in community ${config.communityname}`)
-		const creator = await this.client.users.fetch(violation.adminId)
+			.setDescription(`FAGC Report \`${report.id}\` of player \`${report.playername}\` in community ${config.communityname}`)
+		const creator = await this.client.users.fetch(report.adminId)
 		embed.addFields(
 			{ name: "Admin", value: `<@${creator.id}> | ${creator.tag}` },
-			{ name: "Broken rule ID", value: violation.brokenRule },
-			{ name: "Proof", value: violation.proof },
-			{ name: "Description", value: violation.description },
-			{ name: "Automated", value: violation.automated },
-			{ name: "Violated time", value: Date(violation.violatedTime) }
+			{ name: "Broken rule ID", value: report.brokenRule },
+			{ name: "Proof", value: report.proof },
+			{ name: "Description", value: report.description },
+			{ name: "Automated", value: report.automated },
+			{ name: "Violated time", value: Date(report.reportedTime) }
 		)
 		message.channel.send(embed)
 
-		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this violation?")
+		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this report?")
 		if (!confirm)
-			return message.channel.send("Violation revocation cancelled")
+			return message.channel.send("Report revocation cancelled")
 
 		try {
-			const response = await this.client.fagc.violations.revoke(violationID, message.author.id, true, {apikey: config.apikey})
+			const response = await this.client.fagc.violations.revoke(reportID, message.author.id, true, {apikey: config.apikey})
 
 			if (response.id && response.revokedBy && response.revokedTime) {
-				return message.channel.send("Violation revoked!")
+				return message.channel.send("Report revoked!")
 			} else {
 				return handleErrors(message, response)
 			}
 		} catch (error) {
 			if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
-			message.channel.send("Error revoking violation. Please check logs.")
+			message.channel.send("Error revoking report. Please check logs.")
 			throw error
 		}
 	}

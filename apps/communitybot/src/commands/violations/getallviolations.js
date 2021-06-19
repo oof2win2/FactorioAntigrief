@@ -2,15 +2,15 @@ const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
 
-class GetAllViolations extends Command {
+class GetAllReports extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getallviolations",
-			description: "Gets all violations of a player",
+			name: "getallreports",
+			description: "Gets all reports of a player",
 			aliases: ["checkall"],
-			category: "violations",
+			category: "reportss",
 			usage: "[playername]",
-			examples: ["{{p}}getallviolations Windsinger"],
+			examples: ["{{p}}getallreports Windsinger"],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
@@ -21,31 +21,31 @@ class GetAllViolations extends Command {
 		})
 	}
 	async run (message, args) {
-		if (!args[0]) return message.reply("Provide a player name to get violations of")
-		const violations = await this.client.fagc.violations.fetchAllName(args[0])
-		if (!violations[0])
-			return message.reply(`Player \`${args[0]}\` doesn't have any violations`)
+		if (!args[0]) return message.reply("Provide a player name to get reports of")
+		const reports = await this.client.fagc.violations.fetchAllName(args[0])
+		if (!reports[0])
+			return message.reply(`Player \`${args[0]}\` doesn't have any reports`)
 		let embed = new MessageEmbed()
-			.setTitle("FAGC Violations")
+			.setTitle("FAGC Reports")
 			.setColor("ORANGE")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Violations of player \`${args[0]}\``)
+			.setDescription(`FAGC Reports of player \`${args[0]}\``)
 		
-		const fields = await Promise.all(violations.map(async (violation) => {
-			const admin = await this.client.users.fetch(violation.adminId)
-			const rule = await this.client.getOrFetchRule(violation.brokenRule)
-			const community = await this.client.getOrFetchCommunity(violation.communityId)
+		const fields = await Promise.all(reports.map(async (report) => {
+			const admin = await this.client.users.fetch(report.adminId)
+			const rule = await this.client.getOrFetchRule(report.brokenRule)
+			const community = await this.client.getOrFetchCommunity(report.communityId)
 			return {
-				name: violation.id,
+				name: report.id,
 				value: 	`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
-						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
-						`Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
-						`Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${report.proof}\n` +
+						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
+						`Violated time: ${(new Date(report.reportedTime)).toUTCString()}`,
 				inline: true
 			}
 		}))
 		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
-module.exports = GetAllViolations
+module.exports = GetAllReports

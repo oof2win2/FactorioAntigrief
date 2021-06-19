@@ -32,7 +32,7 @@ class Setup extends Command {
 		const contact = await this.client.users.fetch(contactID)
 		if (!contact) return message.reply("Contact user is invalid!")
 
-		let roleMessage = (await getMessageResponse(message, "Please ping (or type in the ID of) your role of people which can create violations"))
+		let roleMessage = (await getMessageResponse(message, "Please ping (or type in the ID of) your role of people which can create reports"))
 		let role
 		if (roleMessage.mentions.roles.first()) role = roleMessage.mentions.roles.first().id
 		else role = roleMessage.content
