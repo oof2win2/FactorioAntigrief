@@ -2,7 +2,7 @@ import fetch from "node-fetch"
 import { ManagerOptions, RequestConfig } from "./types/types"
 import { CommunityConfig, SetCommunityConfig, Community, ApiID } from "./types/apitypes"
 import BaseManager from "./BaseManager"
-import { AuthenticationError, GenericAPIError, NoApikeyError } from "./errors"
+import { AuthenticationError, GenericAPIError, NoApikeyError } from "./types/errors"
 import strictUriEncode from "strict-uri-encode"
 
 export default class CommunityManager extends BaseManager<Community> {

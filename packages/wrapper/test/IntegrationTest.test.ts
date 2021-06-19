@@ -1,16 +1,16 @@
 import CommunityManager from "../src/CommunityManager"
 import { Community, ApiID } from "../src/types/apitypes"
 import config from "./testconfig"
-import ApiWrapper from "../src/index"
+import { FAGCWrapper } from "../src/index"
 
 import { expect } from "chai"
 
-import {step} from "mocha-steps"
+import { step } from "mocha-steps"
 
-const FAGC = new ApiWrapper(config.apikey)
+const FAGC = new FAGCWrapper(config.apikey)
 
 const testGuildId = "749943992719769613"
-const testUserId  = "429696038266208258"
+const testUserId = "429696038266208258"
 const testStuff = {
 	violation: {
 		automated: false,
