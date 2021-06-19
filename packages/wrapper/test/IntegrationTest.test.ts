@@ -72,8 +72,6 @@ describe("ApiWrapper", () => {
 		const resolvedViolation = FAGC.violations.resolveID(violation.id)
 		expect(resolvedViolation).to.deep.equal(violation, "Cached violation mismatch to violation")
 
-		const fetchedByCommunity = await FAGC.violations.fetchByCommunity(testStuff.violation.playername, resolvedViolation.communityId)
-
 		const revocation = await FAGC.violations.revoke(violation.id, testUserId)
 		// equal violation
 		expect(revocation.adminId).to.equal(violation.adminId, "Revocation adminId mismatch")
@@ -134,6 +132,25 @@ describe("ApiWrapper", () => {
 			const resolved = FAGC.violations.resolveID(violation.id)
 			expect(resolved, "Violation not removed from cache properly").to.be.null
 		})
+	})
+	step("Should be able to create violations and get an offense from them", async () => {
+		before(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId))
+		after(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId))
+
+		const rules = await FAGC.rules.fetchAll()
+		await Promise.all(new Array(testStuff.violationCount).fill(0).map(() => {
+			return FAGC.violations.create({
+				brokenRule: rules[0].id,
+				adminId: testUserId,
+				...testStuff.violation, // description, automated, proof, playername
+			})
+		}))
+		const fetchedViolations = await FAGC.violations.fetchAllName(testStuff.violation.playername)
+		const offense = await FAGC.offenses.fetchCommunity(testStuff.violation.playername, fetchedViolations[0].communityId)
+		expect(offense.violations.length).to.equal(fetchedViolations.length, "Amount of fetched violations and violations in offense did not match")
+		expect(fetchedViolations).to.deep.equal(offense.violations, "Fetched violations did not match violations in offense")
+		expect(offense.playername).to.equal(testStuff.violation.playername, "Given playername and offense playername mismatch")
+		expect(offense.communityId).to.equal(fetchedViolations[0].communityId, "Community IDs mismatch")
 	})
 	step("Add and remove a webhook", async () => {
 		before(async () => {

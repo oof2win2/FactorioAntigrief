@@ -3,17 +3,14 @@ import { ManagerOptions } from "./types/types"
 import { ApiID, Revocation } from "./types/apitypes"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import Collection from "@discordjs/collection"
 
 export default class RevocationManager extends BaseManager<Revocation> {
 	public apikey?: string
 	private apiurl: string
-	private created: Collection<string, number> // Date.now() gives back a number
 	constructor(apiurl: string, apikey?: string, options: ManagerOptions = {}) {
 		super(options)
 		if (apikey) this.apikey = apikey
 		this.apiurl = apiurl
-		this.created = new Collection()
 	}
 	resolveID(revocationid: ApiID): Revocation|null {
 		const cached = this.cache.get(revocationid)

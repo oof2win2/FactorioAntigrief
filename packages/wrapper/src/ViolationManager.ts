@@ -52,12 +52,6 @@ export default class ViolationManager extends BaseManager<Violation> {
 		if (cache) ruleViolations.forEach(violation => this.add(violation))
 		return ruleViolations
 	}
-	async fetchByCommunity(playername: string, communityId: ApiID, cache = true): Promise<Violation[]> {
-		const fetched = await fetch(`${this.apiurl}/violations/getcommunity?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(communityId)}`)
-			.then(r=>r.json())
-		if (cache) fetched.forEach((violation: Violation) => this.add(violation))
-		return fetched
-	}
 	async create(violation: CreateViolation, cache = true, reqConfig: RequestConfig = {}): Promise<Violation> {
 		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
 

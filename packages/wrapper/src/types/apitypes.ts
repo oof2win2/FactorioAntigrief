@@ -36,14 +36,19 @@ export interface CreateViolation {
 	violatedTime?: Date
 	adminId: string
 }
-interface _Violation extends Common, CreateViolation {
+export interface Violation extends Common, Required<CreateViolation> {
 	communityId: ApiID
 }
-export type Violation = Required<_Violation>
 
 export interface Revocation extends Violation {
 	revokedTime: Date
 	revokedBy: string
+}
+
+export interface Offense extends Common {
+	communityId: ApiID
+	playername: string
+	violations: Violation[]
 }
 
 export interface Community extends Common {
