@@ -4,8 +4,9 @@ import OffenseManager from "./managers/OffenseManager"
 import RevocationManager from "./managers/RevocationManager"
 import { RuleManager } from "./managers/RuleManager"
 import { Revocation } from "./types/apitypes"
-import { ManagerOptions } from "./types/types"
+import { ManagerOptions, WrapperOptions } from "./types/types"
 import ViolationManager from "./managers/ViolationManager"
+import WebSocketHandler from "./WebsocketListener"
 
 // export types
 export * from "./types/index"
@@ -19,21 +20,27 @@ export class FAGCWrapper {
 	public revocations: RevocationManager
 	public info: InfoManager
 	public offenses: OffenseManager
-	constructor(apikey?: string, apiurl?: string, options: ManagerOptions = {
+	public websocket: WebSocketHandler
+
+	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {
 		uncacheage: 1000*60*15,
 		uncachems: 1000*60*15
 	}) {
-		this.apiurl = apiurl || "http://localhost:3000/v1"
-		this.apikey = apikey || null
+		this.apiurl = options.apiurl || "http://localhost:3000/v1"
+		this.apikey = options.apikey || null
 
-		this.revocations = new RevocationManager(this.apiurl, this.apikey, options)
-		this.communities = new CommunityManager(this.apiurl, this.apikey, options)
-		this.rules = new RuleManager(this.apiurl, this.apikey, options)
-		this.info = new InfoManager(this.apiurl, this.apikey, options)
-		this.offenses = new OffenseManager(this.apiurl, this.apikey, options)
+		this.revocations = new RevocationManager(this.apiurl, this.apikey, managerOptions)
+		this.communities = new CommunityManager(this.apiurl, this.apikey, managerOptions)
+		this.rules = new RuleManager(this.apiurl, this.apikey, managerOptions)
+		this.info = new InfoManager(this.apiurl, this.apikey, managerOptions)
+		this.offenses = new OffenseManager(this.apiurl, this.apikey, managerOptions)
 
 		const createCacheRevocation = (revocation: Revocation) => this.revocations.add(revocation)
+		this.violations = new ViolationManager(this.apiurl, createCacheRevocation, this.apikey, managerOptions)
 
-		this.violations = new ViolationManager(this.apiurl, createCacheRevocation, this.apikey, options)
+		
+		this.websocket = new WebSocketHandler({
+			uri: options.socketurl
+		})
 	}
 }

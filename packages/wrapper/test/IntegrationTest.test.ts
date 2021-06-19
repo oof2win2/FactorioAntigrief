@@ -1,11 +1,15 @@
 import config from "./testconfig"
-import { FAGCWrapper } from "../src/index"
+import { FAGCWrapper, Revocation, Violation } from "../src/index"
 
 import { expect } from "chai"
 
 import { step } from "mocha-steps"
 
-const FAGC = new FAGCWrapper(config.apikey)
+const FAGC = new FAGCWrapper({
+	apikey: config.apikey,
+	socketurl: config.websocketurl,
+	apiurl: config.apiurl
+})
 
 const testGuildId = "749943992719769613"
 const testUserId = "429696038266208258"
@@ -150,7 +154,7 @@ describe("ApiWrapper", () => {
 		expect(offense.playername).to.equal(testStuff.violation.playername, "Given playername and offense playername mismatch")
 		expect(offense.communityId).to.equal(fetchedViolations[0].communityId, "Community IDs mismatch")
 	})
-	step("Add and remove a webhook", async () => {
+	step("Addition and removal of webhooks should work", async () => {
 		before(async () => {
 			return await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
 		})
@@ -159,10 +163,47 @@ describe("ApiWrapper", () => {
 		expect(added.id).to.equal(testStuff.webhookId, "Webhook Creation IDs mismatch")
 		expect(added.token).to.equal(testStuff.webhookToken, "Webhook Creation token mismatch")
 		expect(added.guildId).to.equal(testGuildId, "Webhook Creation guild IDs mismatch")
-		
+
 		const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
 		expect(removed.id).to.equal(testStuff.webhookId, "Webhook Removal IDs mismatch")
 		expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
 		expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
+	})
+	step("Violation WebSocket event should work", async () => {
+		// before(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId).catch())
+		// after(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId).catch())
+
+		const rules = await FAGC.rules.fetchAll()
+		const ViolationHandler = (evt: Violation) => {
+			expect(evt.id).to.equal(violation.id, "Event Violation ID mismatch")
+			expect(evt.adminId).to.equal(violation.adminId, "Event Violation admin ID mismatch")
+			expect(evt.playername).to.equal(violation.playername, "Event Violation playername mismatch")
+			expect(evt.brokenRule).to.equal(violation.brokenRule, "Event Violation rule mismatch")
+			expect(evt.description).to.equal(violation.description, "Event Violation description mismatch")
+			expect(evt.automated).to.equal(violation.automated, "Event Violation automated mismatch")
+			expect(evt.proof).to.equal(violation.proof, "Event Violation proof mismatch")
+		}
+		const RevocationHandler = (evt: Revocation) => {
+			// violation stuff
+			expect(evt.id).to.equal(revocation.id, "Event Revocation ID mismatch")
+			expect(evt.adminId).to.equal(revocation.adminId, "Event Revocation admin ID mismatch")
+			expect(evt.playername).to.equal(revocation.playername, "Event Revocation playername mismatch")
+			expect(evt.brokenRule).to.equal(revocation.brokenRule, "Event Revocation rule mismatch")
+			expect(evt.description).to.equal(revocation.description, "Event Revocation description mismatch")
+			expect(evt.automated).to.equal(revocation.automated, "Event Revocation automated mismatch")
+			expect(evt.proof).to.equal(revocation.proof, "Event Revocation proof mismatch")
+
+			// revocation stuff
+			expect(evt.revokedBy).to.equal(revocation.revokedBy, "Event Revocation revokedBy mismatch")
+			expect(evt.revokedTime).to.equal(revocation.revokedTime, "Event Revocation revokedTime mismatch")
+		}
+		FAGC.websocket.once("violation", ViolationHandler)
+		FAGC.websocket.on("revocation", RevocationHandler)
+		const violation = await FAGC.violations.create({
+			brokenRule: rules[0].id,
+			adminId: testUserId,
+			...testStuff.violation, // description, automated, proof, playername
+		})
+		const revocation = await FAGC.violations.revoke(violation.id, testUserId)
 	})
 })
