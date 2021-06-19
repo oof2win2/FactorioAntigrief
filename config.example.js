@@ -14,7 +14,7 @@ module.exports = {
 			useFindAndModify: false
 		}
 	],
-	botToken: "", // Discord bot token
+	botToken: "", // Discord bot token. Keep it the same as for the Discord bot
     sentryLink: "", // Sentry.io ingest link
     ports: { // some ports
         prometheus: 9110,
