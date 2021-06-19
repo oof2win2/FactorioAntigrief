@@ -1,33 +1,33 @@
 const express = require("express")
 const router = express.Router()
-const ViolationModel = require("../database/fagc/violation")
+const ReportModel = require("../database/fagc/report")
 const RevocationModel = require("../database/fagc/revocation")
 const RuleModel = require("../database/fagc/rule")
 const { validateUserString } = require("../utils/functions-databaseless")
 const { getCommunity, checkUser } = require("../utils/functions")
-const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")
+const { reportCreatedMessage, reportRevokedMessage } = require("../utils/info")
 
 router.get("/getall", async (req, res) => {
 	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
-	const dbRes = await ViolationModel.find({
+	const dbRes = await ReportModel.find({
 		playername: req.query.playername
-	}).populate("violations")
+	}).populate("reports")
 	res.status(200).json(dbRes)
 })
 router.get("/getbyid", async (req, res) => {
 	if (req.query.id === undefined || !validateUserString(req.query.id))
 		return res.status(400).json({ error: "Bad Request", description: `id expected ID, got ${typeof (req.query.id)} with value of ${req.query.id}` })
-	const dbRes = await ViolationModel.findOne({ id: req.query.id })
+	const dbRes = await ReportModel.findOne({ id: req.query.id })
 	res.status(200).json(dbRes)
 })
 router.get("/getbyrule", async (req, res) => {
 	if (req.query.id === undefined || !validateUserString(req.query.id))
 		return res.status(400).json({ error: "Bad Request", description: `id must be ID, got ${req.query.id}` })
-	const violations = await ViolationModel.find({
+	const reports = await ReportModel.find({
 		brokenRule: req.query.id
 	})
-	res.status(200).json(violations)
+	res.status(200).json(reports)
 })
 
 router.post("/create", async (req, res) => {
@@ -50,18 +50,18 @@ router.post("/create", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: "Rule must be a RuleID" })
 	}
 	const community = await getCommunity(req.headers.apikey)
-	const violation = await ViolationModel.create({
+	const report = await ReportModel.create({
 		playername: req.body.playername,
 		communityId: community.id,
 		brokenRule: req.body.brokenRule,
 		proof: req.body.proof || "None",
 		description: req.body.description || "None",
 		automated: req.body.automated.toLowerCase() === "true" ? true : false,
-		violatedTime: Date.parse(req.body.violatedTime) || new Date(),
+		reportedTime: Date.parse(req.body.reportedTime) || new Date(),
 		adminId: req.body.adminId
 	})
-	let msg = violation.toObject()
-	violationCreatedMessage(violation.toObject())
+	let msg = report.toObject()
+	reportCreatedMessage(msg)
 	return res.status(200).json(msg)
 })
 router.delete("/revoke", async (req, res) => {
@@ -74,27 +74,27 @@ router.delete("/revoke", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 
 	const community = await getCommunity(req.headers.apikey)
-	const toRevoke = await ViolationModel.findOne({ id: req.body.id })
+	const toRevoke = await ReportModel.findOne({ id: req.body.id })
 	if (toRevoke === undefined || toRevoke === null)
-		return res.status(404).json({ error: "Not Found", description: `Violation with ID ${req.body.id} not found` })
+		return res.status(404).json({ error: "Not Found", description: `Report with ID ${req.body.id} not found` })
 	if (!toRevoke.communityId == community.id)
-		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a violation of community ${toRevoke.communityId} but your community ID is ${community.id}` })
+		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a report of community ${toRevoke.communityId} but your community ID is ${community.id}` })
 
-	const violation = await ViolationModel.findByIdAndDelete(toRevoke._id)
+	const report = await ReportModel.findByIdAndDelete(toRevoke._id)
 	let revocation = await RevocationModel.create({
-		playername: violation.playername,
-		communityId: violation.communityId,
-		adminId: violation.adminId,
-		brokenRule: violation.brokenRule,
-		proof: violation.proof,
-		description: violation.description,
-		automated: violation.automated,
-		violatedTime: violation.violatedTime,
+		playername: report.playername,
+		communityId: report.communityId,
+		adminId: report.adminId,
+		brokenRule: report.brokenRule,
+		proof: report.proof,
+		description: report.description,
+		automated: report.automated,
+		reportedTime: report.reportedTime,
 		revokedTime: new Date(),
 		revokedBy: req.body.adminId
 	})
 	let msg = revocation.toObject()
-	violationRevokedMessage(msg)
+	reportRevokedMessage(msg)
 	res.status(200).json(msg)
 })
 router.delete("/revokeallname", async (req, res) => {
@@ -107,7 +107,7 @@ router.delete("/revokeallname", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 
 	const community = await getCommunity(req.headers.apikey)
-	const toRevoke = await ViolationModel.find({
+	const toRevoke = await ReportModel.find({
 		playername: req.body.playername,
 		communityId: community.id
 	}).then(o=>o.map(v=>v?.toObject()))
@@ -116,23 +116,21 @@ router.delete("/revokeallname", async (req, res) => {
 	if (toRevoke[0].communityId != community.id)
 		return res.status(403).json({ error: "Access Denied", description: `You are trying to access an offense of community ${toRevoke.communityId} but your community ID is ${community.communityId}` })
 
-	// first get the offense and delete that first, so the caller can get the raw violations - not just IDs
-	// delete all violations and then 
-	const revocations = await Promise.all(toRevoke.map(async (violation) => {
-		await ViolationModel.findByIdAndDelete(violation._id)
+	const revocations = await Promise.all(toRevoke.map(async (report) => {
+		await RevocationModel.findByIdAndDelete(report._id)
 		const revocation = await RevocationModel.create({
-			playername: violation.playername,
-			communityId: violation.communityId,
-			adminId: violation.adminId,
-			brokenRule: violation.brokenRule,
-			proof: violation.proof,
-			description: violation.description,
-			automated: violation.automated,
-			violatedTime: violation.violatedTime,
+			playername: report.playername,
+			communityId: report.communityId,
+			adminId: report.adminId,
+			brokenRule: report.brokenRule,
+			proof: report.proof,
+			description: report.description,
+			automated: report.automated,
+			reportedTime: report.reportedTime,
 			revokedTime: new Date(),
 			revokedBy: req.body.adminId
 		})
-		violationRevokedMessage(revocation.toObject())
+		reportRevokedMessage(revocation.toObject())
 		return revocation
 	}))
 	res.status(200).json(revocations)

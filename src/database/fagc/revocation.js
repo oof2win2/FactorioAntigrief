@@ -11,7 +11,7 @@ const RevocationSchema = new connection.Schema({
 	proof: String,
 	description: String,
 	automated: Boolean,
-	violatedTime: Date,
+	reportedTime: Date,
 	revokedTime: Date,
 	revokedBy: String
 })
