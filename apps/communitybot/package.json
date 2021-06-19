@@ -17,7 +17,7 @@
     "dateformat": "^4.5.1",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "fagc-api-wrapper": "^1.1.5",
+    "fagc-api-wrapper": "^1.4.0",
     "fs-extra": "^9.1.0",
     "moment": "^2.29.1",
     "mongoose": "^5.12.3",

@@ -1,9 +1,8 @@
-const fetch = require("node-fetch")
-const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const { handleErrors } = require("../../utils/functions")
 const Command = require("../../base/Command")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
+const { AuthenticationError } = require("fagc-api-wrapper")
 
 class Revoke extends Command {
 	constructor(client) {
@@ -31,8 +30,7 @@ class Revoke extends Command {
 		if (!args[0]) return message.reply("Provide a ID for the violation to revoke")
 		const violationID = args.shift()
 
-		const violationRaw = await fetch(`${this.client.config.apiurl}/violations/getbyid?id=${strictUriEncode(violationID)}`)
-		const violation = await violationRaw.json()
+		const violation = await this.client.fagc.violations.fetchViolation(violationID)
 		if (!violation?.id)
 			return message.channel.send(`Violation with ID \`${violationID}\` doesn't exist`)
 		if (violation.error && violation.description.includes("id expected ID"))
@@ -60,16 +58,7 @@ class Revoke extends Command {
 			return message.channel.send("Violation revocation cancelled")
 
 		try {
-			const responseRaw = await fetch(`${this.client.config.apiurl}/violations/revoke`, {
-				method: "DELETE",
-				body: JSON.stringify({
-					id: violationID,
-					adminId: message.author.id
-				}),
-				headers: { "apikey": config.apikey, "content-type": "application/json" }
-			})
-
-			const response = await responseRaw.json()
+			const response = await this.client.fagc.violations.revoke(violationID, message.author.id, true, {apikey: config.apikey})
 
 			if (response.id && response.revokedBy && response.revokedTime) {
 				return message.channel.send("Violation revoked!")
@@ -77,8 +66,9 @@ class Revoke extends Command {
 				return handleErrors(message, response)
 			}
 		} catch (error) {
-			console.error({ error })
-			return message.channel.send("Error revoking violation. Please check logs.")
+			if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
+			message.channel.send("Error revoking violation. Please check logs.")
+			throw error
 		}
 	}
 }

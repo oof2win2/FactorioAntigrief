@@ -4,6 +4,7 @@ const { MessageEmbed } = require("discord.js")
 const { handleErrors } = require("../../utils/functions")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
+const { AuthenticationError } = require("fagc-api-wrapper")
 
 class RevokeAllname extends Command {
 	constructor(client) {
@@ -25,12 +26,12 @@ class RevokeAllname extends Command {
 		})
 	}
 	async run(message, args, config) {
-		if (!args[0]) return message.reply("Provide a player name to get violations of")
+		if (!args[0]) return message.reply("Provide a player name to revoke violations of")
 		const playername = args.shift()
 		if (!config.apikey) return message.reply("No API key set")
 		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(config.communityId)}`)
-		const offense = await offenseRaw.json()
-		if (!offense)
+		const offense = await this.client.fagc.violations.fetchAllName(playername).then(o=>o.filter((v) => v.communityId === config.communityId))
+		if (!offense || !offense[0])
 			return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
 
 		let embed = new MessageEmbed()
@@ -39,7 +40,8 @@ class RevokeAllname extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\` in community ${config.communityname}`)
-		await Promise.all(offense.violations.map(async (violation, i) => {
+		console.log(offense)
+		await Promise.all(offense.map(async (violation, i) => {
 			if (i == 25) {
 				message.channel.send(embed)
 				embed.fields = []
@@ -74,6 +76,7 @@ class RevokeAllname extends Command {
 				return handleErrors(message, response)
 			}
 		} catch (error) {
+			if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
 			console.error({ error })
 			return message.channel.send("Error removing offense. Please check logs.")
 		}
