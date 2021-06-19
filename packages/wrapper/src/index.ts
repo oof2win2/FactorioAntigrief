@@ -1,11 +1,11 @@
-import CommunityManager from "./CommunityManager"
-import InfoManager from "./InfoManager"
-import OffenseManager from "./OffenseManager"
-import RevocationManager from "./RevocationManager"
-import { RuleManager } from "./RuleManager"
+import CommunityManager from "./managers/CommunityManager"
+import InfoManager from "./managers/InfoManager"
+import OffenseManager from "./managers/OffenseManager"
+import RevocationManager from "./managers/RevocationManager"
+import { RuleManager } from "./managers/RuleManager"
 import { Revocation } from "./types/apitypes"
 import { ManagerOptions } from "./types/types"
-import ViolationManager from "./ViolationManager"
+import ViolationManager from "./managers/ViolationManager"
 
 // export types
 export * from "./types/index"

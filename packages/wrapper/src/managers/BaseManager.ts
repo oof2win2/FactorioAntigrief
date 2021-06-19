@@ -1,6 +1,6 @@
 import Collection from "@discordjs/collection"
-import { Common } from "./types/apitypes"
-import { AddOptions, ManagerOptions } from "./types/types"
+import { Common } from "../types/apitypes"
+import { AddOptions, ManagerOptions } from "../types/types"
 
 export default class BaseManager<HoldsWithId extends Common> {
 	public cache: Collection<Common["id"], HoldsWithId>

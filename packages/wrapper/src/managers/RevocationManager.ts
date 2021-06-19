@@ -1,6 +1,6 @@
 import fetch from "node-fetch"
-import { ManagerOptions } from "./types/types"
-import { ApiID, Revocation } from "./types/apitypes"
+import { ManagerOptions } from "../types/types"
+import { ApiID, Revocation } from "../types/apitypes"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 

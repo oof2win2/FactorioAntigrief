@@ -1,6 +1,6 @@
 import fetch from "node-fetch"
-import { ManagerOptions } from "./types/types"
-import { Webhook } from "./types/apitypes"
+import { ManagerOptions } from "../types/types"
+import { Webhook } from "../types/apitypes"
 import BaseManager from "./BaseManager"
 
 export default class InfoManager extends BaseManager<Webhook> {

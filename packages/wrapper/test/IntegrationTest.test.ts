@@ -1,5 +1,3 @@
-import CommunityManager from "../src/CommunityManager"
-import { Community, ApiID } from "../src/types/apitypes"
 import config from "./testconfig"
 import { FAGCWrapper } from "../src/index"
 
