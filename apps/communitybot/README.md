@@ -10,10 +10,13 @@ FAGC Discord Bot
 - [Installation](#installation)
 
 ## Explanation
+
 [⬆️ Head back up](#contents)
+
 FAGC (Factorio Anti-Grief Community) is a community of people who try to work against griefers in Factorio.
 
-### Key terms 
+### Key terms
+
 [⬆️ Head back up](#contents)
 
 - Community: A community is a group of people that play Factorio together and use this API in a way to prevent griefers on their servers
@@ -23,6 +26,7 @@ FAGC (Factorio Anti-Grief Community) is a community of people who try to work ag
 - Revocation: When a community removes any profiles from a user. Revocations can never be turned back to reports
 
 ### Data Types
+
 [⬆️ Head back up](#contents)
 
 This is a short description of the different data that you may encounter with this bot or it's ecosystem, it is however not a complete developer guide.
@@ -64,6 +68,8 @@ All `id` properties are generated automatically by the API and cannot be set by 
   - `longdesc` - A long, verbose definition of the rule
 
 ## Installation
+
+[⬆️ Head back up](#contents)
 
 Installation instructions are useful only in the case when you want to **self-host the whole ecosystem**, as the bot integrates with the database, to which you will not get access :P
 1. Make sure that you have the API already set up. [See installation instructions here](https://github.com/oof2win2/fagc-backend#readme)
