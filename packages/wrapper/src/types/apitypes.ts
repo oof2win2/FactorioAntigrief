@@ -30,7 +30,7 @@ export interface Revocation extends Report {
 	revokedBy: string
 }
 
-export interface Offense extends Common {
+export interface Profile extends Common {
 	communityId: ApiID
 	playername: string
 	reports: Report[]

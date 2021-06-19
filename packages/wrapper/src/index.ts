@@ -1,6 +1,6 @@
 import CommunityManager from "./managers/CommunityManager"
 import InfoManager from "./managers/InfoManager"
-import OffenseManager from "./managers/OffenseManager"
+import ProfileManager from "./managers/ProfileManager"
 import RevocationManager from "./managers/RevocationManager"
 import { RuleManager } from "./managers/RuleManager"
 import { Revocation } from "./types/apitypes"
@@ -19,7 +19,7 @@ export class FAGCWrapper {
 	public reports: ReportManager
 	public revocations: RevocationManager
 	public info: InfoManager
-	public offenses: OffenseManager
+	public profiles: ProfileManager
 	public websocket: WebSocketHandler
 
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {
@@ -33,7 +33,7 @@ export class FAGCWrapper {
 		this.communities = new CommunityManager(this.apiurl, this.apikey, managerOptions)
 		this.rules = new RuleManager(this.apiurl, this.apikey, managerOptions)
 		this.info = new InfoManager(this.apiurl, this.apikey, managerOptions)
-		this.offenses = new OffenseManager(this.apiurl, this.apikey, managerOptions)
+		this.profiles = new ProfileManager(this.apiurl, this.apikey, managerOptions)
 
 		const createCacheRevocation = (revocation: Revocation) => this.revocations.add(revocation)
 		this.reports = new ReportManager(this.apiurl, createCacheRevocation, this.apikey, managerOptions)

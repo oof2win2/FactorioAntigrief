@@ -135,7 +135,7 @@ describe("ApiWrapper", () => {
 			expect(resolved, "Report not removed from cache properly").to.be.null
 		})
 	})
-	step("Should be able to create reports and get an offense from them", async () => {
+	step("Should be able to create reports and get a profile from them", async () => {
 		before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
 		after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
 
@@ -148,11 +148,11 @@ describe("ApiWrapper", () => {
 			})
 		}))
 		const fetchedReports = await FAGC.reports.fetchAllName(testStuff.report.playername)
-		const offense = await FAGC.offenses.fetchCommunity(testStuff.report.playername, fetchedReports[0].communityId)
-		expect(offense.reports.length).to.equal(fetchedReports.length, "Amount of fetched reports and reports in offense did not match")
-		expect(fetchedReports).to.deep.equal(offense.reports, "Fetched reports did not match reports in offense")
-		expect(offense.playername).to.equal(testStuff.report.playername, "Given playername and offense playername mismatch")
-		expect(offense.communityId).to.equal(fetchedReports[0].communityId, "Community IDs mismatch")
+		const profile = await FAGC.profiles.fetchCommunity(testStuff.report.playername, fetchedReports[0].communityId)
+		expect(profile.reports.length).to.equal(fetchedReports.length, "Amount of fetched reports and reports in profile did not match")
+		expect(fetchedReports).to.deep.equal(profile.reports, "Fetched reports did not match reports in profile")
+		expect(profile.playername).to.equal(testStuff.report.playername, "Given playername and profile playername mismatch")
+		expect(profile.communityId).to.equal(fetchedReports[0].communityId, "Community IDs mismatch")
 	})
 	step("Addition and removal of webhooks should work", async () => {
 		before(async () => {
