@@ -2,7 +2,7 @@ const CommunityModel = require("./database/fagc/community")
 const OffenseModel = require("./database/fagc/offense")
 const RevocationModel = require("./database/fagc/revocation")
 const RuleModel = require("./database/fagc/rule")
-const ViolationModel = require("./database/fagc/violation")
+const ViolationModel = require("./database/fagc/report")
 
 CommunityModel.find({}).then((communities) => {
 	communities.forEach((community) => {

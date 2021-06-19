@@ -9,7 +9,7 @@ const authUser = require("./utils/authUser")
 
 const ruleRouter = require("./routes/rules")
 const communityRouter = require("./routes/communities")
-const violationRouter = require("./routes/violations")
+const reportRouter = require("./routes/reports")
 const informaticsRouter = require("./routes/informatics")
 const revocationRouter = require("./routes/revocations")
 const offensesRouter = require("./routes/offenses")
@@ -97,7 +97,7 @@ app.use("/v1/*", authMiddleware)
 
 app.use("/v1/rules", ruleRouter)
 app.use("/v1/communities", communityRouter)
-app.use("/v1/violations", violationRouter)
+app.use("/v1/reports", reportRouter)
 app.use("/v1/revocations", revocationRouter)
 app.use("/v1/offenses", offensesRouter)
 

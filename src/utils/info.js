@@ -10,8 +10,8 @@ let WebhookQueue = []
 module.exports = {
 	WebhookMessage,
 	WebsocketMessage,
-	violationCreatedMessage,
-	violationRevokedMessage,
+	reportCreatedMessage,
+	reportRevokedMessage,
 	ruleCreatedMessage,
 	ruleRemovedMessage,
 	offenseRevokedMessage,
@@ -63,35 +63,35 @@ async function WebsocketMessage(message) {
 		}
 	})
 }
-async function violationCreatedMessage(violation) {
-	if (violation === null || violation.playername === undefined) return
-	violation.messageType = "violation"
-	WebsocketMessage(JSON.stringify(violation))
-	let violationEmbed = new MessageEmbed()
+async function reportCreatedMessage(report) {
+	if (report === null || report.playername === undefined) return
+	report.messageType = "report"
+	WebsocketMessage(JSON.stringify(report))
+	let reportEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Violation Created")
+		.setDescription("Report Created")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Playername", value: violation.playername },
-			{ name: "Admin ID", value: violation.adminId },
-			{ name: "Community ID", value: violation.communityId },
-			{ name: "Broken Rule", value: violation.brokenRule },
-			{ name: "Automated", value: violation.automated },
-			{ name: "Proof", value: violation.proof },
-			{ name: "Description", value: violation.description },
-			{ name: "Violation ID", value: violation.id },
-			{ name: "Violation Time", value: violation.violatedTime }
+			{ name: "Playername", value: report.playername },
+			{ name: "Admin ID", value: report.adminId },
+			{ name: "Community ID", value: report.communityId },
+			{ name: "Broken Rule", value: report.brokenRule },
+			{ name: "Automated", value: report.automated },
+			{ name: "Proof", value: report.proof },
+			{ name: "Description", value: report.description },
+			{ name: "Report ID", value: report.id },
+			{ name: "Report Time", value: report.reportedTime }
 		)
 		.setTimestamp()
-	WebhookMessage(violationEmbed)
+	WebhookMessage(reportEmbed)
 }
-async function violationRevokedMessage(revocation) {
+async function reportRevokedMessage(revocation) {
 	if (revocation === null || revocation.playername === undefined) return
 	revocation.messageType = "revocation"
 	WebsocketMessage(JSON.stringify(revocation))
 	let revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Violation Revoked")
+		.setDescription("Report Revoked")
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: revocation.playername },
