@@ -24,10 +24,9 @@ export default class ViolationManager extends BaseManager<Violation> {
 			if (cached) return cached
 		}
 		const fetched = await fetch(`${this.apiurl}/violations/getbyid?id=${strictUriEncode(violationid)}`).then(c=>c.json())
-		
-		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
 
-		if (!fetched || !fetched.id) return null // return null if the fetch is empty
+		if (!fetched) return null // return null if the fetch is empty
+		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
 		if (cache) this.add(fetched)
 		return fetched
 	}

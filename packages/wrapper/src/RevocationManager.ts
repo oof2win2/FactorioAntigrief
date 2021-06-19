@@ -23,15 +23,15 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	async fetchRevocations(playername: string, communityId: string, cache = true): Promise<Revocation[]> {
 		const revocations = await fetch(`${this.apiurl}/revocations/getrevocations?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(communityId)}`)
 			.then(r=>r.json())
-		if (cache)
-			revocations.forEach(revocation => this.add(revocation))
+		if (!revocations || !revocations[0]) return null
+		if (cache) revocations.forEach((revocation: Revocation) => this.add(revocation))
 		return revocations
 	}
 	async fetchAllRevocations(playername: string, cache = true): Promise<Revocation[]> {
 		const revocations = await fetch(`${this.apiurl}/revocations/getallrevocations?playername=${strictUriEncode(playername)}`)
 			.then(r=>r.json())
-		if (cache)
-			revocations.forEach(revocation => this.add(revocation))
+		if (!revocations || !revocations[0]) return null
+		if (cache) revocations.forEach((revocation: Revocation) => this.add(revocation))
 		return revocations
 	}
 }
