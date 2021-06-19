@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
 
 class SetFilters extends Command {
@@ -29,16 +30,14 @@ class SetFilters extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription("Set Trusted Communities [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
-		await Promise.all(communities.map(async (community, i) => {
-			if (i == 25) {
-				message.channel.send(embed)
-				embed.fields = []
-			}
-			
+		const fields = await Promise.all(communities.map(async (community) => {
 			const user = await this.client.users.fetch(community.contact)
-			embed.addField(`${community.name} | ${community.id}`, `Contact: <@${user.id}> | ${user.tag}`)
+			return {
+				name: `${community.name} | \`${community.id}\``,
+				value: `Contact: <@${user.id}> | ${user.tag}`
+			}
 		}))
-		message.channel.send(embed)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 
 
 		const messageFilter = response => {
@@ -54,16 +53,15 @@ class SetFilters extends Command {
 				.setTimestamp()
 				.setAuthor("FAGC Community")
 				.setDescription("Trusted Communities")
-			await Promise.all(trustedCommunities.map(async (trustedCommunityID, i) => {
-				if (i === 25) {
-					message.channel.send(embed)
-					embed.fields = []
-				}
+			const fields = await Promise.all(trustedCommunities.map(async (trustedCommunityID, i) => {
 				let community = communities.find((community) => community.id === trustedCommunityID)
 				const user = await this.client.users.fetch(community.contact)
-				embed.addField(`${community.name} | ${community.id}`, `Contact: <@${user.id}> | ${user.tag}`)
+				return {
+					name: `${community.name} | \`${community.id}\``,
+					value: `Contact: <@${user.id}> | ${user.tag}`
+				}
 			}))
-			message.channel.send(embed)
+			createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 			const confirm = await getConfirmationMessage(message, "Are you sure you want to set your community filters to this?")
 			if (!confirm) return message.channel.send("Setting of trusted communities has been cancelled")
 

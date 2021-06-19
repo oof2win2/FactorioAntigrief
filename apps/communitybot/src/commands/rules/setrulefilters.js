@@ -2,6 +2,7 @@ const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
 const { AuthenticationError } = require("fagc-api-wrapper")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class SetRuleFilters extends Command {
 	constructor(client) {
@@ -30,14 +31,13 @@ class SetRuleFilters extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription("Set Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
-		rules.forEach((rule, i) => {
-			if (i && i % 25 == 0) {
-				message.channel.send(embed)
-				embed.fields = []
+		const allRuleFields = rules.map(rule => {
+			return {
+				name: `${rule.shortdesc} (\`${rule.id}\`)`,
+				value: rule.longdesc,
 			}
-			embed.addField(rule.shortdesc, rule.id, true)
 		})
-		message.channel.send(embed)
+		createPagedEmbed(allRuleFields, embed, message, {maxPageCount: 5})
 
 
 		const messageFilter = response => {
@@ -53,26 +53,28 @@ class SetRuleFilters extends Command {
 				.setTimestamp()
 				.setAuthor("FAGC Community")
 				.setDescription("Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
-			ruleFilters.forEach((filteredRuleID, i) => {
-				if (i && i % 25 == 0) {
-					message.channel.send(ruleEmbed)
-					embed.fields = []
-				}
+			const fields = ruleFilters.map(filteredRuleID => {
 				let rule = rules.find(rule => rule.id === filteredRuleID)
-				if (!rule.id) return
-				ruleEmbed.addField(rule.shortdesc, rule.id, true)
-			})
-			message.channel.send(ruleEmbed)
+				if (rule?.id) {
+					return {
+						name: `${rule.shortdesc} (\`${rule.id}\`)`,
+						value: rule.longdesc,
+					}
+				}
+				return null
+			}).filter(r=>r)
+			createPagedEmbed(fields, embed, message, {maxPageCount: 5})
+			
 			try {
 				const confirm = await getConfirmationMessage(message, "Are you sure you want your rule filters set to this?")
 				if (!confirm) return message.channel.send("Rule setting cancelled")
 
 				const request = await this.client.fagc.communities.setConfig({ruleFilters}, {apikey: config.apikey})
-				if (request.guildId === message.guildid) return message.channel.send("Rules have successfully been set")
 
+				if (request.guildId === message.guild.id) return message.channel.send("Rules have successfully been set")
 				throw request
 			} catch (error) {
-				if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
+				if (error instanceof AuthenticationError) return messagse.channel.send("Your API key is set incorrectly")
 				message.channel.send("An error has occured. Please try again in some time")
 				throw error // pass on to Sentry
 			}

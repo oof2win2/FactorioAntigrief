@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class GetAllOffenses extends Command {
 	constructor(client) {
@@ -31,17 +32,15 @@ class GetAllOffenses extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\``)
-		await Promise.all(offenses.map(async (offense, i) => {
-			if (i && i % 25 == 0) {
-				message.channel.send(embed)
-				embed.fields = []
-			}
-
+		const fields = await Promise.all(offenses.map(async (offense) => {
 			const violations = offense.violations.map((violation) => { return violation.id })
 			const community = await this.client.getOrFetchCommunity(offense.communityId)
-			embed.addField(`Community ${community.name} (\`${offense.communityId}\`)`, `Violation ID(s): \`${violations.join("`, `")}\``)
+			return {
+				name: `Community ${community.name} (\`${offense.communityId}\`)`,
+				value:  `Violation ID(s): \`${violations.join("`, `")}\``
+			}
 		}))
-		if (embed.fields.length) message.channel.send(embed)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
 module.exports = GetAllOffenses

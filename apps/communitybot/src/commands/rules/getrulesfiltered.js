@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class GetRulesFiltered extends Command {
 	constructor(client) {
@@ -29,19 +30,15 @@ class GetRulesFiltered extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription("Filtered FAGC Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
-		let sent = 0
-		rules.forEach(rule => {
-			if (sent == 25) {
-				message.channel.send(embed)
-				embed.fields = []
-				sent = 0
-			}
-			if (config.ruleFilters.some(id => id === rule.id)) {
-				embed.addField(rule.shortdesc, rule.id, true)
-				sent++
-			}
-		})
-		message.channel.send(embed)
+		const fields = rules.map(rule => {
+			if (config.ruleFilters.some(id => id === rule.id))
+				return {
+					name: `${rule.shortdesc} (\`${rule.id}\`)`,
+					value: rule.longdesc,
+				}
+			else return null
+		}).filter(r=>r)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
 module.exports = GetRulesFiltered

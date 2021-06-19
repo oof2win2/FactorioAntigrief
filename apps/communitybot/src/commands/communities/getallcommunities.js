@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class GetAll extends Command {
 	constructor(client) {
@@ -20,22 +21,20 @@ class GetAll extends Command {
 	async run(message) {
 		const communities = await this.client.fagc.communities.fetchAll()
 
-		let communitiesEmbed = new MessageEmbed()
+		let embed = new MessageEmbed()
 			.setTitle("FAGC Communities")
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription("All FAGC Communities")
-		await Promise.all(communities.map(async (community, i) => {
-			if (i == 25) {
-				message.channel.send(communitiesEmbed)
-				communitiesEmbed.fields = []
-			}
+		const fields = await Promise.all(communities.map(async (community) => {
 			const user = await this.client.users.fetch(community.contact)
-			communitiesEmbed.addField(`${community.name} | ${community.id}`, `Contact: <@${user.id}> | ${user.tag}`)
-			return true
+			return {
+				name: `${community.name} | \`${community.id}\``,
+				value: `Contact: <@${user.id}> | ${user.tag}`
+			}
 		}))
-		message.channel.send(communitiesEmbed)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
 module.exports = GetAll
