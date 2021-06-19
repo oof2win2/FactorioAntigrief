@@ -1,7 +1,7 @@
 const fetch = require("node-fetch")
 const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
-const { handleErrors } = require("../../utils/functions")
+const { handleErrors, createPagedEmbed } = require("../../utils/functions")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
 const { AuthenticationError } = require("fagc-api-wrapper")
@@ -29,9 +29,10 @@ class RevokeAllname extends Command {
 		if (!args[0]) return message.reply("Provide a player name to revoke violations of")
 		const playername = args.shift()
 		if (!config.apikey) return message.reply("No API key set")
-		const offenseRaw = await fetch(`${this.client.config.apiurl}/offenses/getcommunity?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(config.communityId)}`)
-		const offense = await this.client.fagc.violations.fetchAllName(playername).then(o=>o.filter((v) => v.communityId === config.communityId))
-		if (!offense || !offense[0])
+		console.log(config)
+		const offense = await this.client.fagc.offenses.fetchCommunity(playername, config.communityId)
+		console.log(offense)
+		if (!offense || !offense.violations[0])
 			return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
 
 		let embed = new MessageEmbed()
@@ -40,21 +41,17 @@ class RevokeAllname extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\` in community ${config.communityname}`)
-		console.log(offense)
-		await Promise.all(offense.map(async (violation, i) => {
-			if (i == 25) {
-				message.channel.send(embed)
-				embed.fields = []
-			}
+		const fields = await Promise.all(offense.map(async (violation, i) => {
 			const admin = await this.client.users.fetch(violation.adminId)
-			embed.addField(violation.id,
-				`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.brokenRule}\n` +
-                `Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
-                `Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
-				true
-			)
+			return {
+				name: violation.id,
+				value: 	`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.brokenRule}\n` +
+						`Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
+						`Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+				inline: true
+			}
 		}))
-		message.channel.send(embed)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 
 		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this player's offense?")
 		if (!confirm)

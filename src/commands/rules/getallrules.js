@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class GetAllRules extends Command {
 	constructor(client) {
@@ -25,14 +26,13 @@ class GetAllRules extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription("All FAGC Rules")
-		rules.forEach((rule, i) => {
-			if (i == 25) {
-				message.channel.send(embed)
-				embed.fields = []
+		const fields = rules.map(rule => {
+			return {
+				name: `${rule.shortdesc} (\`${rule.id}\`)`,
+				value: rule.longdesc,
 			}
-			embed.addField(rule.shortdesc, rule.id, true)
 		})
-		message.channel.send(embed)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
 module.exports = GetAllRules

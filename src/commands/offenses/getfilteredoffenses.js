@@ -2,6 +2,7 @@ const fetch = require("node-fetch")
 const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class GetOffenses extends Command {
 	constructor(client) {
@@ -40,22 +41,15 @@ class GetOffenses extends Command {
 
 		const filteredOffenses = offenses.filter(offense => config.trustedCommunities.includes(offense.communityId))
 		if (!filteredOffenses[0]) return message.channel.send(`User \`${playername}\` has no offenses that correspond to your filters`)
-		let i = 0
-		await Promise.all(offenses.map(async (offense) => {
-			if (i && i % 25 == 0) {
-				message.channel.send(embed)
-				embed.fields = []
-			}
-
+		const fields = await Promise.all(offenses.map(async (offense) => {
 			const violations = offense.violations.map((violation) => violation.id)
 			const community = await this.client.getOrFetchCommunity(offense.communityId)
-			embed.addField(`Community ${community.name} (\`${offense.communityId}\`)`, `Violation ID(s): ${violations.join(", ")}`)
-			i++
+			return {
+				name: `Community ${community.name} (\`${offense.communityId}\`)`,
+				value: `Violation ID(s): \`${violations.join("`, `")}\``,
+			}
 		}))
-		if (embed.fields[0])
-			message.channel.send(embed)
-		if (!i)
-			message.channel.send("No offenses correspond to your filters")
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
 

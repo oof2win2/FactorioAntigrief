@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class GetAllOffenses extends Command {
 	constructor(client) {
@@ -36,23 +37,19 @@ class GetAllOffenses extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Offense of player \`${playername}\` in community ${community.name} (\`${community.id}\`)`)
-        await Promise.all(offense.violations.map(async (violation, i) => {
-            if (i && i % 25 === 0) {
-				message.channel.send(embed)
-				embed.fields = []
-			}
+        const fields = await Promise.all(offense.violations.map(async (violation) => {
             const rule = await this.client.fagc.rules.fetchRule(violation.brokenRule)
             const admin = await this.client.users.fetch(violation.adminId)
-            embed.addField(violation.id,
-				`By: <@${violation.adminId}> | ${admin?.tag}\n` +
-                `Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
-                `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
-                `Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
-				true
-			)
-            return
+			return {
+				name: violation.id,
+				value: 	`By: <@${violation.adminId}> | ${admin?.tag}\n` +
+						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
+						`Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
+						`Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+				inline: true
+			}
         }))
-        if (embed.fields.length) message.channel.send(embed)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
 module.exports = GetAllOffenses

@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { createPagedEmbed } = require("../../utils/functions")
 
 class GetAllViolations extends Command {
 	constructor(client) {
@@ -31,23 +32,20 @@ class GetAllViolations extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Violations of player \`${args[0]}\``)
 		
-		await Promise.all(violations.map(async (violation, i) => {
-			if (i && i % 25 == 0) {
-				message.channel.send(embed)
-				embed.fields = []
-			}
+		const fields = await Promise.all(violations.map(async (violation) => {
 			const admin = await this.client.users.fetch(violation.adminId)
 			const rule = await this.client.getOrFetchRule(violation.brokenRule)
 			const community = await this.client.getOrFetchCommunity(violation.communityId)
-			embed.addField(violation.id,
-				`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
-                `Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
-                `Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
-                `Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
-				true
-			)
+			return {
+				name: violation.id,
+				value: 	`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
+						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
+						`Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
+						`Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+				inline: true
+			}
 		}))
-		message.channel.send(embed)
+		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
 module.exports = GetAllViolations
