@@ -14,7 +14,7 @@ module.exports = {
 	reportRevokedMessage,
 	ruleCreatedMessage,
 	ruleRemovedMessage,
-	offenseRevokedMessage,
+	profileRevokedMessage,
 	communityCreatedMessage,
 	communityRemovedMessage,
 	communityConfigChanged,
@@ -139,14 +139,14 @@ async function ruleRemovedMessage(rule) {
 	WebhookMessage(ruleEmbed)
 }
 
-async function offenseRevokedMessage(offense) {
-	offense.messageType = "offenseRevoked"
-	WebsocketMessage(JSON.stringify(offense))
+async function profileRevokedMessage(profile) {
+	profile.messageType = "profileRevoked"
+	WebsocketMessage(JSON.stringify(profile))
 	let embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Offense revoked")
+		.setDescription("Profile revoked")
 		.setColor("ORANGE")
-	offense.forEach((revocation) => {
+	profile.forEach((revocation) => {
 		embed.addField(
 			`ID: ${revocation.id}`,
 			`Playername: ${revocation.playername}, Admin ID: ${revocation.adminId}, Community ID: ${revocation.communityId}\n` +

@@ -5,7 +5,7 @@ const { validateUserString } = require("../utils/functions-databaseless")
 
 /* GET home page. */
 router.get("/", function (req, res) {
-	res.json({ message: "Offenses API Homepage!" })
+	res.json({ message: "Profiles API Homepage!" })
 })
 
 router.get("/getcommunity", async (req, res) => {
@@ -17,34 +17,34 @@ router.get("/getcommunity", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `communityId is not correct ID, got value of ${req.query.communityId}` })
     const allReports = await ReportModel.find({playername: req.query.playername}).then(reports=>reports.map(r=>r.toObject()))
     if (!allReports || !allReports[0]?.id) return res.status(200).json(allReports)
-    const offense = {
+    const profile = {
         communityId: req.query.communityId,
         playername: req.query.playername,
         reports: allReports
     }
-    res.status(200).json(offense)
+    res.status(200).json(profile)
 })
 router.get("/getall", async (req, res) => {
     if (!req.query.playername || typeof(req.query.playername) !== "string")
         return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}` })
     const allReports = await ReportModel.find({playername: req.query.playername}).then(reports=>reports.map(r=>r.toObject()))
-    const offensesMap = new Map()
+    const profilesMap = new Map()
     allReports.forEach(report => {
-        let offense = offensesMap.get(report.communityId)
-        if (offense) {
-            offense.reports.push(report)
-            offensesMap.set(report.communityId, offense)
+        let profile = profilesMap.get(report.communityId)
+        if (profile) {
+            profile.reports.push(report)
+            profilesMap.set(report.communityId, profile)
         } else {
-            offensesMap.set(report.communityId, {
+            profilesMap.set(report.communityId, {
                 playername: report.playername,
                 communityId: report.communityId,
                 reports: [report]
             })
         }
     })
-    const offenses = []
-    offensesMap.forEach(offense => offenses.push(offense))
-    res.status(200).json(offenses)
+    const profiles = []
+    profilesMap.forEach(profile => profiles.push(profile))
+    res.status(200).json(profiles)
 })
 
 module.exports = router
