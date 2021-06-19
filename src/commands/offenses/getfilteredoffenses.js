@@ -27,19 +27,19 @@ class GetOffenses extends Command {
 			return message.reply("Please set trusted communities first")
 
 		const playername = args.shift()
-		const offensesRaw = await fetch(`${this.client.config.apiurl}/offenses/getall?playername=${strictUriEncode(playername)}`)
-		const offenses = await offensesRaw.json()
+		const offenses = await this.client.fagc.offenses.fetchAll(playername)
 		if (!offenses || !offenses[0])
-			return message.channel.send(`User \`${playername}\` has no offenses that correspond to your filters!`)
+			return message.channel.send(`User \`${playername}\` has no offenses`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Offenses")
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Offense of player \`${playername}\``)
-		const communities = await fetch(`${this.client.config.apiurl}/communities/getall`).then(c => c.json())
+			.setDescription(`FAGC Offenses of player \`${playername}\``)
 
+		const filteredOffenses = offenses.filter(offense => config.trustedCommunities.includes(offense.communityId))
+		if (!filteredOffenses[0]) return message.channel.send(`User \`${playername}\` has no offenses that correspond to your filters`)
 		let i = 0
 		await Promise.all(offenses.map(async (offense) => {
 			if (i && i % 25 == 0) {
@@ -47,13 +47,10 @@ class GetOffenses extends Command {
 				embed.fields = []
 			}
 
-			let checkedCommunity = communities.find(community => community.name == offense.communityname)
-			if (checkedCommunity && config.trustedCommunities.includes(checkedCommunity.id)) {
-				const violations = offense.violations.map((violation) => violation.id)
-				const community = await this.client.getOrFetchCommunity(offense.communityId)
-				embed.addField(`Community ${community.name} (\`${offense.communityId}\`): ${offense.id}`, `Violation ID(s): ${violations.join(", ")}`)
-				i++
-			}
+			const violations = offense.violations.map((violation) => violation.id)
+			const community = await this.client.getOrFetchCommunity(offense.communityId)
+			embed.addField(`Community ${community.name} (\`${offense.communityId}\`)`, `Violation ID(s): ${violations.join(", ")}`)
+			i++
 		}))
 		if (embed.fields[0])
 			message.channel.send(embed)

@@ -1,7 +1,7 @@
-const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
+const { AuthenticationError } = require("fagc-api-wrapper")
 
 class SetRuleFilters extends Command {
 	constructor(client) {
@@ -63,15 +63,19 @@ class SetRuleFilters extends Command {
 				ruleEmbed.addField(rule.shortdesc, rule.id, true)
 			})
 			message.channel.send(ruleEmbed)
+			try {
+				const confirm = await getConfirmationMessage(message, "Are you sure you want your rule filters set to this?")
+				if (!confirm) return message.channel.send("Rule setting cancelled")
 
-			const confirm = await getConfirmationMessage(message, "Are you sure you want your rule filters set to this?")
-			if (!confirm) return message.channel.send("Rule setting cancelled")
+				const request = await this.client.fagc.communities.setConfig({ruleFilters}, {apikey: config.apikey})
+				if (request.guildId === message.guildid) return message.channel.send("Rules have successfully been set")
 
-			const request = await this.client.fagc.communities.setConfig({ruleFilters}, {apikey: config.apikey})
-			if (request.guildId === message.guildid) return message.channel.send("Rules have successfully been set")
-
-			message.channel.send("An error has occured. Please try again in some time")
-			throw request
+				throw request
+			} catch (error) {
+				if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
+				message.channel.send("An error has occured. Please try again in some time")
+				throw error // pass on to Sentry
+			}
 		}
 
 		let collector = await message.channel.createMessageCollector(messageFilter, { max: Object.keys(rules).length, time: 120000 })

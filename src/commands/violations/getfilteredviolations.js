@@ -1,5 +1,3 @@
-const fetch = require("node-fetch")
-const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
@@ -26,8 +24,8 @@ class GetViolations extends Command {
 		if (!args[0]) return message.reply("Provide a player name to get violations of")
 		const config = await ConfigModel.findOne({ guildId: message.guild.id })
 		if (config.trustedCommunities === undefined) return message.reply("No filtered communities set")
-		const violations = await fetch(`${this.client.config.apiurl}/violations/getall?playername=${strictUriEncode(args[0])}`).then(v => v.json())
-		const communities = await fetch(`${this.client.config.apiurl}/communities/getall`).then(c => c.json())
+		const violations = await this.client.fagc.violations.fetchAllName(args[0])
+		const communities = await this.client.fagc.communities.fetchAll()
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Violations")

@@ -1,5 +1,3 @@
-const fetch = require("node-fetch")
-const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
@@ -23,8 +21,7 @@ class GetAllViolations extends Command {
 	}
 	async run (message, args) {
 		if (!args[0]) return message.reply("Provide a player name to get violations of")
-		const violationsRaw = await fetch(`${this.client.config.apiurl}/violations/getall?playername=${strictUriEncode(args[0])}`)
-		const violations = await violationsRaw.json()
+		const violations = await this.client.fagc.violations.fetchAllName(args[0])
 		if (!violations[0])
 			return message.reply(`Player \`${args[0]}\` doesn't have any violations`)
 		let embed = new MessageEmbed()
@@ -33,7 +30,6 @@ class GetAllViolations extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Violations of player \`${args[0]}\``)
-		
 		
 		await Promise.all(violations.map(async (violation, i) => {
 			if (i && i % 25 == 0) {

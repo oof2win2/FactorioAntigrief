@@ -1,8 +1,8 @@
-const fetch = require("node-fetch")
 const { MessageEmbed } = require("discord.js")
 const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
 const { handleErrors } = require("../../utils/functions")
 const Command = require("../../base/Command")
+const { AuthenticationError } = require("fagc-api-wrapper")
 
 class CreateViolationAdvanced extends Command {
 	constructor(client) {
@@ -64,24 +64,18 @@ class CreateViolationAdvanced extends Command {
 		)
 		message.channel.send(embed)
 		const confirm = await getConfirmationMessage(message, "Do you wish to create this rule violation?")
-		if (!confirm)
-			return message.channel.send("Violation creation cancelled")
+		if (!confirm) return message.channel.send("Violation creation cancelled")
 		
 		try {
-			const responseRaw = await fetch(`${this.client.config.apiurl}/violations/create`, {
-				method: "POST",
-				body: JSON.stringify({
-					playername: playername,
-					adminId: admin_user.id,
-					brokenRule: ruleid,
-					proof: proof,
-					description: desc,
-					automated: false,
-					violatedTime: timestamp
-				}),
-				headers: { "apikey": config.apikey, "content-type": "application/json" }
-			})
-			const response = await responseRaw.json()
+			const response = await this.client.fagc.violations.create({
+				playername: playername,
+				adminId: admin_user.id,
+				brokenRule: ruleid,
+				proof: proof,
+				description: desc,
+				automated: false,
+				violatedTime: timestamp
+			}, true, {apikey: config.apikey})
 			if (response.id && response.brokenRule && response.violatedTime) {
 				return message.channel.send(`Violation created! id: \`${response.id}\``)
 			} else if (response.error && response.description.includes("brokenRule expected ID")) {
@@ -90,8 +84,9 @@ class CreateViolationAdvanced extends Command {
 				return handleErrors(message, response)
 			}
 		} catch (error) {
-			console.error(error)
-			return message.channel.send("Error creating violation. Please check logs.")
+			if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
+			message.channel.send("Error creating violation. Please check logs.")
+			throw error
 		}
 	}
 }
