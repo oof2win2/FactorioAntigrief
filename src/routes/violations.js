@@ -7,20 +7,6 @@ const { validateUserString } = require("../utils/functions-databaseless")
 const { getCommunity, checkUser } = require("../utils/functions")
 const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")
 
-router.get("/getcommunity", async (req, res) => {
-	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
-		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
-	if (req.query.communityId === undefined || typeof (req.query.communityId) !== "string")
-		return res.status(400).json({ error: "Bad Request", description: `communityId expected string, got ${typeof (req.query.communityId)} with value of ${req.query.communityId}` })
-	if (!validateUserString(req.query.communityId))
-		return res.status(400).json({ error: "Bad Request", description: `communityId is not correct ID, got value of ${req.query.communityId}` })
-
-	const dbRes = await ViolationModel.find({
-		playername: req.query.playername,
-		communityId: req.query.communityId
-	})
-	res.status(200).json(dbRes)
-})
 router.get("/getall", async (req, res) => {
 	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
