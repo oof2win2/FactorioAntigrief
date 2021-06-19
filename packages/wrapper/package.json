@@ -1,6 +1,6 @@
 {
   "name": "fagc-api-wrapper",
-  "version": "1.1.0",
+  "version": "1.5.0",
   "description": "Wrapper for the FAGC API",
   "main": "dist/index.js",
   "module": "es2020",
@@ -11,7 +11,7 @@
   "files": [
     "dist/"
   ],
-  "types": "dist/types/index.ts",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oof2win2/fagc-api-wrapper.git"
@@ -32,11 +32,13 @@
     "discord-api-types": "^0.18.1",
     "node-fetch": "^2.6.1",
     "strict-uri-encode": "^2.0.0",
-    "why-is-node-running": "^2.2.0"
+    "ws": "^7.5.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.18",
     "@types/mocha": "^8.2.2",
+    "@types/strict-uri-encode": "^2.0.0",
+    "@types/ws": "^7.4.5",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "chai": "^4.3.4",

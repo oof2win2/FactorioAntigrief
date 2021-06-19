@@ -1,29 +1,46 @@
-import CommunityManager from "./CommunityManager"
-import RevocationManager from "./RevocationManager"
-import { RuleManager } from "./RuleManager"
-import { ManagerOptions } from "./types/types"
-import ViolationManager from "./ViolationManager"
+import CommunityManager from "./managers/CommunityManager"
+import InfoManager from "./managers/InfoManager"
+import OffenseManager from "./managers/OffenseManager"
+import RevocationManager from "./managers/RevocationManager"
+import { RuleManager } from "./managers/RuleManager"
+import { Revocation } from "./types/apitypes"
+import { ManagerOptions, WrapperOptions } from "./types/types"
+import ViolationManager from "./managers/ViolationManager"
+import WebSocketHandler from "./WebsocketListener"
 
-export default class FAGCWrapper {
+// export types
+export * from "./types/index"
+
+export class FAGCWrapper {
 	public readonly apiurl: string
 	public apikey: string
 	public communities: CommunityManager
 	public rules: RuleManager
 	public violations: ViolationManager
 	public revocations: RevocationManager
-	constructor(apikey: string, apiurl?: string, options: ManagerOptions = {
+	public info: InfoManager
+	public offenses: OffenseManager
+	public websocket: WebSocketHandler
+
+	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {
 		uncacheage: 1000*60*15,
 		uncachems: 1000*60*15
 	}) {
-		this.apiurl = apiurl || "http://localhost:3000/v1"
-		this.apikey = apikey
+		this.apiurl = options.apiurl || "http://localhost:3000/v1"
+		this.apikey = options.apikey || null
 
-		this.revocations = new RevocationManager(this.apiurl, this.apikey, options)
-		this.communities = new CommunityManager(this.apiurl, this.apikey, options)
-		this.rules = new RuleManager(this.apiurl, this.apikey, options)
+		this.revocations = new RevocationManager(this.apiurl, this.apikey, managerOptions)
+		this.communities = new CommunityManager(this.apiurl, this.apikey, managerOptions)
+		this.rules = new RuleManager(this.apiurl, this.apikey, managerOptions)
+		this.info = new InfoManager(this.apiurl, this.apikey, managerOptions)
+		this.offenses = new OffenseManager(this.apiurl, this.apikey, managerOptions)
 
-		const createCacheRevocation = (revocation) => this.revocations.add(revocation)
+		const createCacheRevocation = (revocation: Revocation) => this.revocations.add(revocation)
+		this.violations = new ViolationManager(this.apiurl, createCacheRevocation, this.apikey, managerOptions)
 
-		this.violations = new ViolationManager(this.apiurl, createCacheRevocation, this.apikey, options)
+		
+		this.websocket = new WebSocketHandler({
+			uri: options.socketurl
+		})
 	}
 }

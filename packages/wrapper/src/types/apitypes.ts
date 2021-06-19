@@ -36,12 +36,19 @@ export interface CreateViolation {
 	violatedTime?: Date
 	adminId: string
 }
-interface _Violation extends Common, CreateViolation {}
-export type Violation = Required<_Violation>
+export interface Violation extends Common, Required<CreateViolation> {
+	communityId: ApiID
+}
 
 export interface Revocation extends Violation {
 	revokedTime: Date
 	revokedBy: string
+}
+
+export interface Offense extends Common {
+	communityId: ApiID
+	playername: string
+	violations: Violation[]
 }
 
 export interface Community extends Common {
@@ -49,6 +56,7 @@ export interface Community extends Common {
 	contact: Snowflake
 	guildId: Snowflake
 }
+
 export interface Rule extends Common {
 	shortdesc: string
 	longdesc: string
@@ -69,4 +77,11 @@ export interface SetCommunityConfig {
 	contact?: string,
 	moderatorRoleId?: string,
 	communityname?: string
+}
+
+// this also extends common but the ID is a Discord snowflake
+export interface Webhook extends Common {
+	id: Snowflake
+	token: string
+	guildId: string
 }

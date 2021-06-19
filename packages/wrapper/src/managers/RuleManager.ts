@@ -1,6 +1,6 @@
 import fetch from "node-fetch"
-import { ManagerOptions } from "./types/types"
-import { Rule, ApiID } from "./types/apitypes"
+import { ManagerOptions } from "../types/types"
+import { Rule, ApiID } from "../types/apitypes"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 
@@ -23,14 +23,14 @@ export class RuleManager extends BaseManager<Rule> {
 		if (!fetched || !fetched.id) return null // return null if the fetch is empty
 		
 		if (cache) this.add(fetched)
-		if (fetched?.id === ruleid) return fetched
+		if (fetched.id === ruleid) return fetched
 		return null
 	}
 	async fetchAll(cache=true): Promise<Rule[]> {
 		const allRules = await fetch(`${this.apiurl}/rules/getall`).then(r=>r.json())
 		
 		if (cache && allRules[0])
-			return allRules.map(rule => this.add(rule))
+			return allRules.map((rule: Rule) => this.add(rule))
 		
 		return allRules
 	}
