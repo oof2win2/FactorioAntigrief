@@ -125,7 +125,7 @@ http.createServer(async (req, res) => {
 	if (req.url.endsWith("/metrics")) {
 		return res.end(await register.metrics())
 	}
-}).listen(config.promPort)
+}).listen(config.ports.prometheus)
 
 module.exports = {
 	promClient,

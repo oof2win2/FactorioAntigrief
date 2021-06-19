@@ -1,7 +1,8 @@
 const { WebhookClient, MessageEmbed } = require("discord.js")
 const WebhookSchema = require("../database/fagc/webhook")
+const config = require("../../config")
 const WebSocket = require("ws")
-const wss = new WebSocket.Server({ port: 8001 })
+const wss = new WebSocket.Server({ port: config.ports.websocket })
 const GuildConfigModel = require("../database/bot/community")
 
 let WebhookQueue = []

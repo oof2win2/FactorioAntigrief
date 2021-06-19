@@ -16,12 +16,12 @@ const revocationRouter = require("./routes/revocations")
 const app = express()
 const Sentry = require("@sentry/node")
 const Tracing = require("@sentry/tracing")
+const debug = require('debug')('src:server')
 
 const config = require("../config")
 
 // extenders so they can be used anywhere
 require("./utils/extenders")
-
 
 Sentry.init({
 	dsn: config.sentryLink,
@@ -116,4 +116,6 @@ app.use((req, res) => {
 // statistics
 require("./utils/Prometheus")
 
-module.exports = app
+app.listen(config.ports.api, () => {
+	console.log(`API listening on port ${config.ports.api}`)
+})

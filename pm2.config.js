@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
         name: 'fagc-backend',
-        script: './src/bin/www',
+        script: './app.js',
         env: {
             "NODE_ENV": "production"
         },
