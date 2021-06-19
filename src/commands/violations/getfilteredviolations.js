@@ -25,7 +25,7 @@ class GetReports extends Command {
 		if (!args[0]) return message.reply("Provide a player name to get reports of")
 		if (!config.trustedCommunities) return message.reply("No filtered communities set")
 		if (!config.ruleFilters) return message.reply("No filtered rules set")
-		const reports = await this.client.fagc.violations.fetchAllName(args[0])
+		const reports = await this.client.fagc.reports.fetchAllName(args[0])
 		const communities = await this.client.fagc.communities.fetchAll()
 
 		let embed = new MessageEmbed()

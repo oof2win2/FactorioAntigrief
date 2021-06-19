@@ -26,13 +26,20 @@ class GetAllRules extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription("All FAGC Rules")
-		const fields = rules.map(rule => {
+		let tmpFields = rules.map(rule => {
 			return {
 				name: `${rule.shortdesc} (\`${rule.id}\`)`,
-				value: rule.longdesc,
+				value: "\u200b",
 			}
 		})
-		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
+		let fields = []
+		for (let i = 0; i < rules.length; i+=5) {
+			fields.push({
+				name:rules.slice(i, i+5).map(rule=>`${rule.shortdesc} (\`${rule.id}\`)\n`).join(""),
+				value: "\u200b"
+			})
+		}
+		createPagedEmbed(fields, embed, message, {maxPageCount: 1})
 	}
 }
 module.exports = GetAllRules
