@@ -49,6 +49,7 @@ export interface Community extends Common {
 	contact: Snowflake
 	guildId: Snowflake
 }
+
 export interface Rule extends Common {
 	shortdesc: string
 	longdesc: string
@@ -69,4 +70,11 @@ export interface SetCommunityConfig {
 	contact?: string,
 	moderatorRoleId?: string,
 	communityname?: string
+}
+
+// this also extends common but the ID is a Discord snowflake
+export interface Webhook extends Common {
+	id: Snowflake
+	token: string
+	guildId: string
 }

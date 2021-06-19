@@ -19,6 +19,8 @@ const testStuff = {
 		playername: "Windsinger",
 	},
 	violationCount: 5,
+	webhookId: "855703411228147743",
+	webhookToken: "pbMuJ4CN-R-YZTsUL2JCLGHJ-bD7zIjLbMT_AV45ROjiRyJughxvgJ5Mc1VZ1cIAhLQ2"
 }
 
 describe("ApiWrapper", () => {
@@ -130,5 +132,20 @@ describe("ApiWrapper", () => {
 			const resolved = FAGC.violations.resolveID(violation.id)
 			expect(resolved, "Violation not removed from cache properly").to.be.null
 		})
+	})
+	step("Add and remove a webhook", async () => {
+		before(async () => {
+			return await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
+		})
+
+		const added = await FAGC.info.addWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
+		expect(added.id).to.equal(testStuff.webhookId, "Webhook Creation IDs mismatch")
+		expect(added.token).to.equal(testStuff.webhookToken, "Webhook Creation token mismatch")
+		expect(added.guildId).to.equal(testGuildId, "Webhook Creation guild IDs mismatch")
+		
+		const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
+		expect(removed.id).to.equal(testStuff.webhookId, "Webhook Removal IDs mismatch")
+		expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
+		expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
 	})
 })
