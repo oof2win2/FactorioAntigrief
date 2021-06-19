@@ -4,7 +4,6 @@ const LogSchema = require("../database/fagc/log")
 // https://stackoverflow.com/questions/19215042/express-logging-response-body
 
 module.exports = mung.json(function(body, req) {
-	console.log(body, "a")
 	if (req.method === "GET") return
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
 	if (ip.includes(":") && ip !== "::1") ip = ip.slice(0, ip.indexOf(":"))

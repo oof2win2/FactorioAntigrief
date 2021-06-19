@@ -2,7 +2,7 @@
   "name": "fagc-backend",
   "version": "1.0.0",
   "private": true,
-  "main": "src/bin/www",
+  "main": "src/app.js",
   "scripts": {
     "start": "node ./src/bin/www",
     "dev": "nodemon --inspect ./src/bin/www",
