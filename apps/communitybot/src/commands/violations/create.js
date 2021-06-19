@@ -58,7 +58,7 @@ class CreateReport extends Command {
 			return message.channel.send("Report creation cancelled")
 
 		try {
-			const response = await this.client.fagc.violations.create({
+			const response = await this.client.fagc.reports.create({
 				playername: playername,
 				adminId: message.author.id,
 				brokenRule: ruleid,
@@ -81,4 +81,4 @@ class CreateReport extends Command {
 		}
 	}
 }
-module.exports = CreateViolation
+module.exports = CreateReport

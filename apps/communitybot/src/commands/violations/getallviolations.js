@@ -22,7 +22,7 @@ class GetAllReports extends Command {
 	}
 	async run (message, args) {
 		if (!args[0]) return message.reply("Provide a player name to get reports of")
-		const reports = await this.client.fagc.violations.fetchAllName(args[0])
+		const reports = await this.client.fagc.reports.fetchAllName(args[0])
 		if (!reports[0])
 			return message.reply(`Player \`${args[0]}\` doesn't have any reports`)
 		let embed = new MessageEmbed()

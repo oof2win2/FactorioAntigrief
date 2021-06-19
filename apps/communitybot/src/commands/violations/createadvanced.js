@@ -67,7 +67,7 @@ class CreateReportAdvanced extends Command {
 		if (!confirm) return message.channel.send("Report creation cancelled")
 		
 		try {
-			const response = await this.client.fagc.violations.create({
+			const response = await this.client.fagc.reports.create({
 				playername: playername,
 				adminId: admin_user.id,
 				brokenRule: ruleid,

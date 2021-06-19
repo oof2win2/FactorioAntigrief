@@ -25,7 +25,7 @@ class Genbanlist extends Command {
 
 		// get all reports based off of followed rules
 		let rulePromises = config.ruleFilters.map((rule) => {
-			return this.client.fagc.violations.fetchByRule(rule)
+			return this.client.fagc.reports.fetchByRule(rule)
 		})
 		let ruleReports = await Promise.all(rulePromises)
 		let reportArr = []
