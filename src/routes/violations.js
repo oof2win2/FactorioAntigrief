@@ -7,27 +7,13 @@ const { validateUserString } = require("../utils/functions-databaseless")
 const { getCommunity, checkUser } = require("../utils/functions")
 const { violationCreatedMessage, violationRevokedMessage } = require("../utils/info")
 
-const RaceConditionManager = {
-	RaceConditions: new Map(),
-	checkRaceConditionName: async (playername, setWait=false) => {
-		const waitFor = RaceConditions.get(playername)
-		if (waitFor) return await waitFor
-		if (setWait) {
-			this.RaceConditions.set(playername, new Promise())
-		}
-		return
-	}
-}
-
-router.get("/getviolations", async (req, res) => {
+router.get("/getcommunity", async (req, res) => {
 	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.query.playername)} with value of ${req.query.playername}` })
 	if (req.query.communityId === undefined || typeof (req.query.communityId) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `communityId expected string, got ${typeof (req.query.communityId)} with value of ${req.query.communityId}` })
 	if (!validateUserString(req.query.communityId))
 		return res.status(400).json({ error: "Bad Request", description: `communityId is not correct ID, got value of ${req.query.communityId}` })
-	
-	await RaceConditionManager.checkRaceConditionName(req.body.playername)
 
 	const dbRes = await ViolationModel.find({
 		playername: req.query.playername,
