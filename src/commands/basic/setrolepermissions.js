@@ -11,7 +11,7 @@ class SetAPIKey extends Command {
 			aliases: ["setroleperms", "setperms", "setpermissions"],
 			category: "basic",
 			usage: "([option] [role])",
-			examples: ["{{p}}setrolepermissions violations 841761018380288100"],
+			examples: ["{{p}}setrolepermissions reports 841761018380288100"],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: ["ADMINISTRATOR"],
@@ -26,9 +26,9 @@ class SetAPIKey extends Command {
 		if (!args[0]) {
 			// all perms
 			message.channel.send("Process of setting roles has started. ")
-			const violationsMsg = await getMessageResponse(message, "Please type in the ID or ping the role for violation management")
-			const violations = violationsMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(violationsMsg.content)
-			if (!violations) return message.channel.send(`\`${violationsMsg.content}\` is not a valid role`)
+			const reportsMsg = await getMessageResponse(message, "Please type in the ID or ping the role for report management")
+			const reports = reportsMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(reportsMsg.content)
+			if (!reports) return message.channel.send(`\`${reportsMsg.content}\` is not a valid role`)
 
 			const webhooksMsg = await getMessageResponse(message, "Please type in the ID or ping the role for webhook management")
 			const webhooks = webhooksMsg.mentions.roles.first()?.id || await message.guild.roles.fetch(webhooksMsg.content)
@@ -52,7 +52,7 @@ class SetAPIKey extends Command {
 				.setTimestamp()
 				.setDescription("Your FAGC Role Configuration")
 			embed.addFields(
-				{ name: "Violations Management", value: violations.id },
+				{ name: "Reports Management", value: reports.id },
 				{ name: "Webhook Management", value: webhooks.id },
 				{ name: "Config Management", value: config.id },
 				{ name: "Rule Management", value: rules.id },
@@ -67,7 +67,7 @@ class SetAPIKey extends Command {
 				const res = await ConfigModel.findOneAndUpdate({ guildId: message.guild.id },
 					{
 						$set: {
-							"roles.violations": violations,
+							"roles.reports": reports,
 							"roles.webhooks": webhooks,
 							"roles.setConfig": config,
 							"roles.setRules": rules,
@@ -84,7 +84,7 @@ class SetAPIKey extends Command {
 			}
 		} else if (!args[1]) {
 			// set with extra message
-			const options = ["violations", "webhooks", "setConfig", "setRules", "setCommunities"]
+			const options = ["reports", "webhooks", "setConfig", "setRules", "setCommunities"]
 			if (!options.includes(args[0]))
 				return message.reply(`That is not a valid setting! Use one of \`${options.join("`, `")}\``)
 
@@ -111,7 +111,7 @@ class SetAPIKey extends Command {
 				message.channel.send("An error occured. Please try again later")
 			}
 		} else if (!args[2]) {
-			const options = ["violations", "webhooks", "setConfig", "setRules", "setCommunities"]
+			const options = ["reports", "webhooks", "setConfig", "setRules", "setCommunities"]
 			if (!options.includes(args[0]))
 				return message.reply(`That is not a valid setting! Use one of \`${options.join("`, `")}\``)
 

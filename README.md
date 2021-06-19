@@ -49,7 +49,7 @@ All `id` properties are generated automatically by the API and cannot be set by 
 - **Profile**
   - `communityId` - The ID of the community that has created these reports. Is set automatically by the API
   - `playername` - The name of the player that these reports belong to
-  - `violations[]` - The collection of reports that have been created
+  - `reports[]` - The collection of reports that have been created
 - **Revocation**
     - `id` - ID of the revocation. Can be used to fetch it only
     - `playername` - Name of the player who's report has been revoked

@@ -3,6 +3,7 @@ const { MessageEmbed } = require("discord.js")
 // This is only an example file, it is not used anywhere in the bot currently
 // Can be used instead of Webhooks, but those have the advantage of being managed by the backend entirely
 // so they don't need to be updated from the bot-side
+// You can also use the fagc-api-wrapper, which can handle events and you just get the content and send messages
 
 module.exports = SocketMessage
 
@@ -24,7 +25,7 @@ async function SocketMessage (message, channels) {
 				{ name: "Proof", value: message.proof },
 				{ name: "Description", value: message.description },
 				{ name: "Violation ID", value: message.id },
-				{ name: "Violation Time", value: message.violatedTime }
+				{ name: "Violation Time", value: message.reportedTime }
 			)
 		channels.forEach((channel) => {
 			channel.send(embed)

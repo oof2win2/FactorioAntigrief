@@ -10,9 +10,9 @@ class RevokeAllname extends Command {
 	constructor(client) {
 		super(client, {
 			name: "revokeallname",
-			description: "Revokes your offense of a player by offense ID (revoke all violations of a player by playername)",
-			aliases: ["revokeoffense"],
-			category: "violations",
+			description: "Revokes your profile of a player by profile ID (revoke all reports of a player by playername)",
+			aliases: ["revokeprofile"],
+			category: "reports",
 			usage: "[playername]",
 			examples: ["{{p}}revokeallname Windsinger"],
 			dirname: __dirname,
@@ -22,60 +22,51 @@ class RevokeAllname extends Command {
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["violations"],
+			customPermissions: ["reports"],
 		})
 	}
 	async run(message, args, config) {
-		if (!args[0]) return message.reply("Provide a player name to revoke violations of")
+		if (!args[0]) return message.reply("Provide a player name to revoke reports of")
 		const playername = args.shift()
 		if (!config.apikey) return message.reply("No API key set")
 		console.log(config)
-		const offense = await this.client.fagc.offenses.fetchCommunity(playername, config.communityId)
-		console.log(offense)
-		if (!offense || !offense.violations[0])
-			return message.reply(`Player \`${playername}\` has no offenses in community ${config.communityname}`)
+		const profile = await this.client.fagc.profiles.fetchCommunity(playername, config.communityId)
+		if (!profile || !profile.reports[0])
+			return message.reply(`Player \`${playername}\` has no profile in community ${config.communityname}`)
 
 		let embed = new MessageEmbed()
-			.setTitle("FAGC Offense Revocation")
+			.setTitle("FAGC Profile Revocation")
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Offense of player \`${playername}\` in community ${config.communityname}`)
-		const fields = await Promise.all(offense.map(async (violation, i) => {
-			const admin = await this.client.users.fetch(violation.adminId)
+			.setDescription(`FAGC Profile of player \`${playername}\` in community ${config.communityname}`)
+		const fields = await Promise.all(profile.map(async (report, i) => {
+			const admin = await this.client.users.fetch(report.adminId)
 			return {
-				name: violation.id,
-				value: 	`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${violation.brokenRule}\n` +
-						`Proof: ${violation.proof}\nDescription: ${violation.description}\n` +
-						`Automated: ${violation.automated}\nViolated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+				name: report.id,
+				value: 	`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${report.brokenRule}\n` +
+						`Proof: ${report.proof}\nDescription: ${report.description}\n` +
+						`Automated: ${report.automated}\nViolated time: ${(new Date(report.reportedTime)).toUTCString()}`,
 				inline: true
 			}
 		}))
 		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 
-		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this player's offense?")
+		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this player's profile?")
 		if (!confirm)
-			return message.channel.send("Offense revocation cancelled")
+			return message.channel.send("Profile revocation cancelled")
 
 		try {
-			const responseRaw = await fetch(`${this.client.config.apiurl}/violations/revokeallname`, {
-				method: "DELETE",
-				body: JSON.stringify({
-					playername: playername,
-					adminId: message.author.id
-				}),
-				headers: { "apikey": config.apikey, "content-type": "application/json" }
-			})
-			const response = await responseRaw.json()
-			if (response.id && response.violations && response.playername && response.communityId) {
-				return message.channel.send("Offense revoked!")
+			const response = await this.client.fagc.violations.revokeAllName(playername, message.author.id)
+			if (response.reports && response.playername && response.communityId) {
+				return message.channel.send("Profile revoked!")
 			} else {
 				return handleErrors(message, response)
 			}
 		} catch (error) {
 			if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
 			console.error({ error })
-			return message.channel.send("Error removing offense. Please check logs.")
+			return message.channel.send("Error removing profile. Please check logs.")
 		}
 	}
 }

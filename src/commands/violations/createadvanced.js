@@ -4,13 +4,13 @@ const { handleErrors } = require("../../utils/functions")
 const Command = require("../../base/Command")
 const { AuthenticationError } = require("fagc-api-wrapper")
 
-class CreateViolationAdvanced extends Command {
+class CreateReportAdvanced extends Command {
 	constructor(client) {
 		super(client, {
 			name: "createadvanced",
-			description: "Creates a violation - Advanced method. Allows specification of who created the violation and when it was created",
+			description: "Creates a report - Advanced method. Allows specification of who created the report and when it was created",
 			aliases: ["banadvanced", "createadv", "banadv"],
-			category: "violations",
+			category: "reports",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: ["BAN_MEMBERS"],
@@ -18,16 +18,16 @@ class CreateViolationAdvanced extends Command {
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["violations"]
+			customPermissions: ["reports"]
 		})
 	}
 	async run(message, _, config) {
 		if (!config.apikey) return message.reply("No API key set")
 
-		const playername = (await getMessageResponse(message, "Please type in a playername for the violation"))?.content
+		const playername = (await getMessageResponse(message, "Please type in a playername for the report"))?.content
 		if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-		const admin_message = (await getMessageResponse(message, "Please type in admin user ID for the violation"))
+		const admin_message = (await getMessageResponse(message, "Please type in admin user ID for the report"))
 		if (admin_message === undefined) return message.channel.send("Didn't send admin user ID in time")
 		const admin_user = admin_message.mentions.users.first() || await this.client.users.fetch(admin_message.content)
 		if (!admin_user) return message.channel.send("Sent user is not valid!")
@@ -35,13 +35,13 @@ class CreateViolationAdvanced extends Command {
 		const ruleid = (await getMessageResponse(message, "Please type in ID of rule that has been broken"))?.content
 		if (ruleid === undefined) return message.channel.send("Didn't send rule ID in time")
 
-		let desc = (await getMessageResponse(message, "Please type in description of the violation or `none` if you don't want to set one"))?.content
+		let desc = (await getMessageResponse(message, "Please type in description of the report or `none` if you don't want to set one"))?.content
 		if (desc.toLowerCase() === "none") desc = undefined
 
-		let proof = (await getMessageResponse(message, "Please send a link to proof of the violation or `none` if there is no proof"))?.content
+		let proof = (await getMessageResponse(message, "Please send a link to proof of the report or `none` if there is no proof"))?.content
 		if (proof.toLowerCase() === "none") proof = undefined
 
-		let timestamp = (await getMessageResponse(message, "Please send a value representing the date of the violation. Type in `now` to set the current time"))?.content
+		let timestamp = (await getMessageResponse(message, "Please send a value representing the date of the report. Type in `now` to set the current time"))?.content
 		if (timestamp.toLowerCase() === "now") timestamp = (new Date).toISOString()
 		else {
 			if (isNaN(Date.parse(timestamp))) timestamp = (new Date).toISOString()
@@ -49,22 +49,22 @@ class CreateViolationAdvanced extends Command {
 		}
 
 		let embed = new MessageEmbed()
-			.setTitle("FAGC Violations")
+			.setTitle("FAGC Reports")
 			.setColor("RED")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`Create FAGC violation for \`${playername}\``)
+			.setDescription(`Create FAGC report for \`${playername}\``)
 		embed.addFields(
 			{ name: "Admin user", value: `<@${admin_user.id}> | ${admin_user.tag}`, inline: true },
 			{ name: "Player name", value: playername, inline: true },
 			{ name: "Rule ID", value: ruleid, inline: true },
-			{ name: "Violation description", value: desc, inline: true },
+			{ name: "Report description", value: desc, inline: true },
 			{ name: "Proof", value: proof },
 			{ name: "Violated At (ISO)", value: timestamp }
 		)
 		message.channel.send(embed)
-		const confirm = await getConfirmationMessage(message, "Do you wish to create this rule violation?")
-		if (!confirm) return message.channel.send("Violation creation cancelled")
+		const confirm = await getConfirmationMessage(message, "Do you wish to create this report?")
+		if (!confirm) return message.channel.send("Report creation cancelled")
 		
 		try {
 			const response = await this.client.fagc.violations.create({
@@ -74,10 +74,10 @@ class CreateViolationAdvanced extends Command {
 				proof: proof,
 				description: desc,
 				automated: false,
-				violatedTime: timestamp
+				reportedTime: timestamp
 			}, true, {apikey: config.apikey})
-			if (response.id && response.brokenRule && response.violatedTime) {
-				return message.channel.send(`Violation created! id: \`${response.id}\``)
+			if (response.id && response.brokenRule && response.reportedTime) {
+				return message.channel.send(`Report created! id: \`${response.id}\``)
 			} else if (response.error && response.description.includes("brokenRule expected ID")) {
 				return message.channel.send("RuleID is an invalid rule ID. Please check `fagc!getrules` or `fagc!getallrules`")
 			} else {
@@ -85,9 +85,9 @@ class CreateViolationAdvanced extends Command {
 			}
 		} catch (error) {
 			if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
-			message.channel.send("Error creating violation. Please check logs.")
+			message.channel.send("Error creating report. Please check logs.")
 			throw error
 		}
 	}
 }
-module.exports = CreateViolationAdvanced
+module.exports = CreateReportAdvanced

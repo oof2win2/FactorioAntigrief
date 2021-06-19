@@ -23,28 +23,28 @@ class Genbanlist extends Command {
 		if (!config.ruleFilters) return message.reply("Please set rule filters first")
 		message.reply("Processing banlist. Please wait")
 
-		// get all violations based off of followed rules
+		// get all reports based off of followed rules
 		let rulePromises = config.ruleFilters.map((rule) => {
-			return fetch(`${this.client.config.apiurl}/violations/getbyrule?id=${rule}`).then(res => res.json())
+			return this.client.fagc.violations.fetchByRule(rule)
 		})
-		let ruleViolations = await Promise.all(rulePromises)
-		let violationArr = []
-		ruleViolations.forEach((violations) => {
-			violations.forEach((violation) => {
-				violationArr.push(violation)
+		let ruleReports = await Promise.all(rulePromises)
+		let reportArr = []
+		ruleReports.forEach((reports) => {
+			reports.forEach((report) => {
+				reportArr.push(report)
 			})
 		})
 
-		// filter violations so only trusted communities are on the banlist
-		violationArr = violationArr.filter((violation) => config.trustedCommunities.includes(violation.communityId))
+		// filter reports so only trusted communities are on the banlist
+		reportArr = reportArr.filter((report) => config.trustedCommunities.includes(report.communityId))
 		// remove duplicates
-		violationArr = violationArr.filter((violation, i) => violationArr.indexOf(violation) === i)
+		reportArr = reportArr.filter((report, i) => reportArr.indexOf(report) === i)
 
 		// create & send banlist
-		let banlist = violationArr.map((violation) => {
+		let banlist = reportArr.map((report) => {
 			return {
-				username: violation.playername,
-				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${this.client.config.apiurl}/offenses/getall?playername=${violation.playername}`
+				username: report.playername,
+				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${this.client.config.apiurl}/profiles/getall?playername=${report.playername}`
 			}
 		})
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab

@@ -14,7 +14,10 @@ class FAGCBot extends Client {
 		// setup rate limit
 		this.RateLimit = new Collection()
 
-		this.fagc = new FAGCWrapper()
+		this.fagc = new FAGCWrapper({
+			apiurl: this.config.apiurl,
+			socketurl: this.config.socketurl
+		})
 
 		this.commands = new Collection()
 		this.aliases = new Collection()

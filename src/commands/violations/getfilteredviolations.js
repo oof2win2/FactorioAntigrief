@@ -3,15 +3,15 @@ const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
 
-class GetViolations extends Command {
+class GetReports extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getfilteredviolations",
-			description: "Gets violations of a player from only trusted communities and filtered rules",
-			aliases: ["check", "getviolations"],
-			category: "violations",
+			name: "getfilteredreports",
+			description: "Gets reports of a player from only trusted communities and filtered rules",
+			aliases: ["check", "getreports"],
+			category: "reports",
 			usage: "[playername]",
-			examples: ["{{p}}getfilteredviolations Windsinger"],
+			examples: ["{{p}}getfilteredreports Windsinger"],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
@@ -22,46 +22,46 @@ class GetViolations extends Command {
 		})
 	}
 	async run(message, args, config) {
-		if (!args[0]) return message.reply("Provide a player name to get violations of")
+		if (!args[0]) return message.reply("Provide a player name to get reports of")
 		if (!config.trustedCommunities) return message.reply("No filtered communities set")
 		if (!config.ruleFilters) return message.reply("No filtered rules set")
-		const violations = await this.client.fagc.violations.fetchAllName(args[0])
+		const reports = await this.client.fagc.violations.fetchAllName(args[0])
 		const communities = await this.client.fagc.communities.fetchAll()
 
 		let embed = new MessageEmbed()
-			.setTitle("FAGC Violations")
+			.setTitle("FAGC Reports")
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Violations of player \`${args[0]}\``)
+			.setDescription(`FAGC Reports of player \`${args[0]}\``)
 
 		const trustedCommunities = communities.filter((community) => {
 			if (config.trustedCommunities.some((trustedID) => { return trustedID === community.id })) return community
 		})
-		const filteredViolations = violations.map(violation => {
+		const filteredReports = reports.map(report => {
 			if (
-				trustedCommunities.some((community) => community.id === violation.communityId) &&
-				config.ruleFilters.includes(violation.brokenRule)
-			) return violation
+				trustedCommunities.some((community) => community.id === report.communityId) &&
+				config.ruleFilters.includes(report.brokenRule)
+			) return report
 			return null
 		}).filter(v=>v)
 
-		if (!filteredViolations.length)
-			return message.channel.send(`Player \`${args[0]}\` doesn't have violations that correspond to your rule and community preferences`)
-		const fields = await Promise.all(filteredViolations.map(async (violation) => {
-			const admin = await this.client.users.fetch(violation.adminId)
-			const rule = await this.client.getOrFetchRule(violation.brokenRule)
-			const community = await this.client.getOrFetchCommunity(violation.communityId)
+		if (!filteredReports.length)
+			return message.channel.send(`Player \`${args[0]}\` doesn't have report that correspond to your rule and community preferences`)
+		const fields = await Promise.all(filteredReports.map(async (report) => {
+			const admin = await this.client.users.fetch(report.adminId)
+			const rule = await this.client.getOrFetchRule(report.brokenRule)
+			const community = await this.client.getOrFetchCommunity(report.communityId)
 			return {
-				name: violation.id,
+				name: report.id,
 				value: `By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
-					`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${violation.proof}\n` +
-					`Description: ${violation.description}\nAutomated: ${violation.automated}\n` +
-					`Violated time: ${(new Date(violation.violatedTime)).toUTCString()}`,
+					`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${report.proof}\n` +
+					`Description: ${report.description}\nAutomated: ${report.automated}\n` +
+					`Violated time: ${(new Date(report.reportedTime)).toUTCString()}`,
 				inline: true
 			}
 		}))
 		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }
-module.exports = GetViolations
+module.exports = GetReports
