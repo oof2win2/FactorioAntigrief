@@ -1,15 +1,13 @@
 import fetch from "node-fetch"
 import { ManagerOptions } from "../types/types"
-import { ApiID, Offense, Revocation, Violation } from "../types/apitypes"
+import { ApiID, Offense, Revocation, Report } from "../types/apitypes"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import Collection from "@discordjs/collection"
 
-export default class OffenseManager extends BaseManager<Violation> {
+export default class OffenseManager extends BaseManager<Report> {
 	public apikey?: string
 	private apiurl: string
-	private created: Collection<string, number> // Date.now() gives back a number
-	private createRevocation: (revocationObject: Revocation) => void
 	constructor(apiurl: string, apikey?: string, options: ManagerOptions = {}) {
 		super(options)
 		if (apikey) this.apikey = apikey

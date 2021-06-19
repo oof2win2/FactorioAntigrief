@@ -1,6 +1,6 @@
 import { EventEmitter } from "events"
 import WebSocket from "ws"
-import { CommunityConfig, Revocation, Rule, Violation } from "./types"
+import { CommunityConfig, Revocation, Rule, Report } from "./types"
 
 // some typescript stuff so it is strictly typed
 export interface WebSockethandlerOpts {
@@ -8,7 +8,7 @@ export interface WebSockethandlerOpts {
 }
 export type WebSocketMessageType = 
 	| "guildConfig"
-	| "violation"
+	| "report"
 	| "revocation"
 	| "ruleCreated"
 	| "ruleRemoved"
@@ -18,7 +18,7 @@ export interface WebSocketMessage {
 }
 export declare interface WebSocketEvents {
     "guildConfig": (message: CommunityConfig) => void
-    "violation": (message: Violation) => void
+    "report": (message: Report) => void
     "revocation": (message: Revocation) => void
     "ruleCreated": (message: Rule) => void
     "ruleRemoved": (message: Rule) => void
@@ -67,7 +67,7 @@ class WebSocketHandler extends EventEmitter {
         delete toEmit.messageType
         switch (message.messageType) {
             case "guildConfig": this.emit("guildConfig", toEmit as unknown as CommunityConfig); break;
-            case "violation": this.emit("violation", toEmit as unknown as Violation); break;
+            case "report": this.emit("report", toEmit as unknown as Report); break;
             case "revocation": this.emit("revocation", toEmit as unknown as Revocation); break;
             case "ruleCreated": this.emit("ruleCreated", toEmit as unknown as Rule); break;
             case "ruleRemoved": this.emit("ruleRemoved", toEmit as unknown as Rule); break

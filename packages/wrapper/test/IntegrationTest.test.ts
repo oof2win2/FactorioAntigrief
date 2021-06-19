@@ -1,5 +1,5 @@
 import config from "./testconfig"
-import { FAGCWrapper, Revocation, Violation } from "../src/index"
+import { FAGCWrapper, Revocation, Report } from "../src/index"
 
 import { expect } from "chai"
 
@@ -14,13 +14,13 @@ const FAGC = new FAGCWrapper({
 const testGuildId = "749943992719769613"
 const testUserId = "429696038266208258"
 const testStuff = {
-	violation: {
+	report: {
 		automated: false,
 		description: "i like potatoes",
 		proof: "not gonna give it to ya",
 		playername: "Windsinger",
 	},
-	violationCount: 5,
+	reportCount: 5,
 	webhookId: "855703411228147743",
 	webhookToken: "pbMuJ4CN-R-YZTsUL2JCLGHJ-bD7zIjLbMT_AV45ROjiRyJughxvgJ5Mc1VZ1cIAhLQ2"
 }
@@ -29,7 +29,7 @@ describe("ApiWrapper", () => {
 	beforeEach(() => {
 		// clear all caches
 		FAGC.communities.cache.clear()
-		FAGC.violations.cache.clear()
+		FAGC.reports.cache.clear()
 		FAGC.revocations.cache.clear()
 		FAGC.rules.cache.clear()
 	})
@@ -57,102 +57,102 @@ describe("ApiWrapper", () => {
 			communityname: oldConfig.communityname
 		})
 	})
-	step("Should be able to create a violation, cache it, fetch it by community, and revoke it", async () => {
+	step("Should be able to create a report, cache it, fetch it by community, and revoke it", async () => {
 		const rules = await FAGC.rules.fetchAll()
-		const violation = await FAGC.violations.create({
+		const report = await FAGC.reports.create({
 			brokenRule: rules[0].id,
 			adminId: testUserId,
-			...testStuff.violation, // description, automated, proof, playername
+			...testStuff.report, // description, automated, proof, playername
 		})
-		expect(violation.adminId).to.equal(testUserId, "Violation admin ID mismatch")
-		expect(violation.playername).to.equal(testStuff.violation.playername, "Violation playername mismatch")
-		expect(violation.brokenRule).to.equal(rules[0].id, "Violation rule mismatch")
-		expect(violation.description).to.equal(testStuff.violation.description, "Violation description mismatch")
-		expect(violation.automated).to.equal(testStuff.violation.automated, "Violation automated mismatch")
-		expect(violation.proof).to.equal(testStuff.violation.proof, "Violation proof mismatch")
+		expect(report.adminId).to.equal(testUserId, "Report admin ID mismatch")
+		expect(report.playername).to.equal(testStuff.report.playername, "Report playername mismatch")
+		expect(report.brokenRule).to.equal(rules[0].id, "Report rule mismatch")
+		expect(report.description).to.equal(testStuff.report.description, "Report description mismatch")
+		expect(report.automated).to.equal(testStuff.report.automated, "Report automated mismatch")
+		expect(report.proof).to.equal(testStuff.report.proof, "Report proof mismatch")
 
-		const resolvedViolation = FAGC.violations.resolveID(violation.id)
-		expect(resolvedViolation).to.deep.equal(violation, "Cached violation mismatch to violation")
+		const resolvedReport = FAGC.reports.resolveID(report.id)
+		expect(resolvedReport).to.deep.equal(report, "Cached report mismatch to report")
 
-		const revocation = await FAGC.violations.revoke(violation.id, testUserId)
-		// equal violation
-		expect(revocation.adminId).to.equal(violation.adminId, "Revocation adminId mismatch")
-		expect(revocation.playername).to.equal(violation.playername, "Revocation playername mismatch")
-		expect(revocation.brokenRule).to.equal(violation.brokenRule, "Revocation brokenRule mismatch")
-		expect(revocation.description).to.equal(violation.description, "Revocation description mismatch")
-		expect(revocation.automated).to.equal(violation.automated, "Revocation automated mismatch")
-		expect(revocation.proof).to.equal(violation.proof, "Revocation proof mismatch")
-		expect(revocation.violatedTime).to.equal(violation.violatedTime, "Revocation time mismatch")
+		const revocation = await FAGC.reports.revoke(report.id, testUserId)
+		// equal report
+		expect(revocation.adminId).to.equal(report.adminId, "Revocation adminId mismatch")
+		expect(revocation.playername).to.equal(report.playername, "Revocation playername mismatch")
+		expect(revocation.brokenRule).to.equal(report.brokenRule, "Revocation brokenRule mismatch")
+		expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
+		expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
+		expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
+		expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
 		// revocation specific
 		expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
 
-		const resolvedViolationAfterRevoked = FAGC.violations.resolveID(violation.id)
-		expect(resolvedViolationAfterRevoked, "Violation not removed from cache properly").to.be.null
+		const resolvedReportsAfterRevoked = FAGC.reports.resolveID(report.id)
+		expect(resolvedReportsAfterRevoked, "Report not removed from cache properly").to.be.null
 	})
-	step("Should be able to create multiple violations, cache them and revoke them", async () => {
+	step("Should be able to create multiple reports, cache them and revoke them", async () => {
 		const rules = await FAGC.rules.fetchAll()
-		const createdViolations = await Promise.all(new Array(testStuff.violationCount).fill(0).map(() => {
-			return FAGC.violations.create({
+		const createdReports = await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
+			return FAGC.reports.create({
 				brokenRule: rules[0].id,
 				adminId: testUserId,
-				...testStuff.violation, // description, automated, proof, playername
+				...testStuff.report, // description, automated, proof, playername
 			})
 		}))
-		createdViolations.forEach(violation => {
-			// check that all violations were created correctly
-			expect(violation.adminId).to.equal(testUserId, "Violation admin ID mismatch")
-			expect(violation.playername).to.equal(testStuff.violation.playername, "Violation playername mismatch")
-			expect(violation.brokenRule).to.equal(rules[0].id, "Violation rule mismatch")
-			expect(violation.description).to.equal(testStuff.violation.description, "Violation description mismatch")
-			expect(violation.automated).to.equal(testStuff.violation.automated, "Violation automated mismatch")
-			expect(violation.proof).to.equal(testStuff.violation.proof, "Violation proof mismatch")
+		createdReports.forEach(report => {
+			// check that all reports were created correctly
+			expect(report.adminId).to.equal(testUserId, "Report admin ID mismatch")
+			expect(report.playername).to.equal(testStuff.report.playername, "Report playername mismatch")
+			expect(report.brokenRule).to.equal(rules[0].id, "Report rule mismatch")
+			expect(report.description).to.equal(testStuff.report.description, "Report description mismatch")
+			expect(report.automated).to.equal(testStuff.report.automated, "Report automated mismatch")
+			expect(report.proof).to.equal(testStuff.report.proof, "Report proof mismatch")
 
-			// check resolved violation
-			const resolved = FAGC.violations.resolveID(violation.id)
-			expect(resolved).to.deep.equal(violation, "Cached violation mismatch to violation")
+			// check resolved report
+			const resolved = FAGC.reports.resolveID(report.id)
+			expect(resolved).to.deep.equal(report, "Cached report mismatch to report")
 		})
 
-		const violations = await FAGC.violations.fetchAllName(testStuff.violation.playername)
-		const revocations = await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId)
-		expect(revocations.length).to.equal(violations.length, "Amount of player violations and revocations mismatch")
+		const reports = await FAGC.reports.fetchAllName(testStuff.report.playername)
+		const revocations = await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId)
+		expect(revocations.length).to.equal(reports.length, "Amount of player reports and revocations mismatch")
 		revocations.forEach((revocation, i) => {
-			const violation = violations[i]
-			// equal violation
-			expect(revocation.adminId).to.equal(violation.adminId, "Revocation adminId mismatch")
-			expect(revocation.playername).to.equal(violation.playername, "Revocation playername mismatch")
-			expect(revocation.brokenRule).to.equal(violation.brokenRule, "Revocation brokenRule mismatch")
-			expect(revocation.description).to.equal(violation.description, "Revocation description mismatch")
-			expect(revocation.automated).to.equal(violation.automated, "Revocation automated mismatch")
-			expect(revocation.proof).to.equal(violation.proof, "Revocation proof mismatch")
-			expect(revocation.violatedTime).to.equal(violation.violatedTime, "Revocation time mismatch")
+			const report = reports[i]
+			// equal report
+			expect(revocation.adminId).to.equal(report.adminId, "Revocation adminId mismatch")
+			expect(revocation.playername).to.equal(report.playername, "Revocation playername mismatch")
+			expect(revocation.brokenRule).to.equal(report.brokenRule, "Revocation brokenRule mismatch")
+			expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
+			expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
+			expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
+			expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
 			// revocation specific
 			expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
 		})
 
-		violations.forEach(violation => {
-			// make sure that violations are removed from cache
-			const resolved = FAGC.violations.resolveID(violation.id)
-			expect(resolved, "Violation not removed from cache properly").to.be.null
+		reports.forEach(report => {
+			// make sure that reports are removed from cache
+			const resolved = FAGC.reports.resolveID(report.id)
+			expect(resolved, "Report not removed from cache properly").to.be.null
 		})
 	})
-	step("Should be able to create violations and get an offense from them", async () => {
-		before(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId))
-		after(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId))
+	step("Should be able to create reports and get an offense from them", async () => {
+		before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
+		after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
 
 		const rules = await FAGC.rules.fetchAll()
-		await Promise.all(new Array(testStuff.violationCount).fill(0).map(() => {
-			return FAGC.violations.create({
+		await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
+			return FAGC.reports.create({
 				brokenRule: rules[0].id,
 				adminId: testUserId,
-				...testStuff.violation, // description, automated, proof, playername
+				...testStuff.report, // description, automated, proof, playername
 			})
 		}))
-		const fetchedViolations = await FAGC.violations.fetchAllName(testStuff.violation.playername)
-		const offense = await FAGC.offenses.fetchCommunity(testStuff.violation.playername, fetchedViolations[0].communityId)
-		expect(offense.violations.length).to.equal(fetchedViolations.length, "Amount of fetched violations and violations in offense did not match")
-		expect(fetchedViolations).to.deep.equal(offense.violations, "Fetched violations did not match violations in offense")
-		expect(offense.playername).to.equal(testStuff.violation.playername, "Given playername and offense playername mismatch")
-		expect(offense.communityId).to.equal(fetchedViolations[0].communityId, "Community IDs mismatch")
+		const fetchedReports = await FAGC.reports.fetchAllName(testStuff.report.playername)
+		const offense = await FAGC.offenses.fetchCommunity(testStuff.report.playername, fetchedReports[0].communityId)
+		expect(offense.reports.length).to.equal(fetchedReports.length, "Amount of fetched reports and reports in offense did not match")
+		expect(fetchedReports).to.deep.equal(offense.reports, "Fetched reports did not match reports in offense")
+		expect(offense.playername).to.equal(testStuff.report.playername, "Given playername and offense playername mismatch")
+		expect(offense.communityId).to.equal(fetchedReports[0].communityId, "Community IDs mismatch")
 	})
 	step("Addition and removal of webhooks should work", async () => {
 		before(async () => {
@@ -169,22 +169,22 @@ describe("ApiWrapper", () => {
 		expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
 		expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
 	})
-	step("Violation WebSocket event should work", async () => {
-		// before(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId).catch())
-		// after(async () => await FAGC.violations.revokeAllName(testStuff.violation.playername, testUserId).catch())
+	step("Report WebSocket event should work", async () => {
+		// before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
+		// after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
 
 		const rules = await FAGC.rules.fetchAll()
-		const ViolationHandler = (evt: Violation) => {
-			expect(evt.id).to.equal(violation.id, "Event Violation ID mismatch")
-			expect(evt.adminId).to.equal(violation.adminId, "Event Violation admin ID mismatch")
-			expect(evt.playername).to.equal(violation.playername, "Event Violation playername mismatch")
-			expect(evt.brokenRule).to.equal(violation.brokenRule, "Event Violation rule mismatch")
-			expect(evt.description).to.equal(violation.description, "Event Violation description mismatch")
-			expect(evt.automated).to.equal(violation.automated, "Event Violation automated mismatch")
-			expect(evt.proof).to.equal(violation.proof, "Event Violation proof mismatch")
+		const ReportHandler = (evt: Report) => {
+			expect(evt.id).to.equal(report.id, "Event Report ID mismatch")
+			expect(evt.adminId).to.equal(report.adminId, "Event Report admin ID mismatch")
+			expect(evt.playername).to.equal(report.playername, "Event Report playername mismatch")
+			expect(evt.brokenRule).to.equal(report.brokenRule, "Event Report rule mismatch")
+			expect(evt.description).to.equal(report.description, "Event Report description mismatch")
+			expect(evt.automated).to.equal(report.automated, "Event Report automated mismatch")
+			expect(evt.proof).to.equal(report.proof, "Event Report proof mismatch")
 		}
 		const RevocationHandler = (evt: Revocation) => {
-			// violation stuff
+			// report stuff
 			expect(evt.id).to.equal(revocation.id, "Event Revocation ID mismatch")
 			expect(evt.adminId).to.equal(revocation.adminId, "Event Revocation admin ID mismatch")
 			expect(evt.playername).to.equal(revocation.playername, "Event Revocation playername mismatch")
@@ -197,13 +197,13 @@ describe("ApiWrapper", () => {
 			expect(evt.revokedBy).to.equal(revocation.revokedBy, "Event Revocation revokedBy mismatch")
 			expect(evt.revokedTime).to.equal(revocation.revokedTime, "Event Revocation revokedTime mismatch")
 		}
-		FAGC.websocket.once("violation", ViolationHandler)
+		FAGC.websocket.once("report", ReportHandler)
 		FAGC.websocket.once("revocation", RevocationHandler)
-		const violation = await FAGC.violations.create({
+		const report = await FAGC.reports.create({
 			brokenRule: rules[0].id,
 			adminId: testUserId,
-			...testStuff.violation, // description, automated, proof, playername
+			...testStuff.report, // description, automated, proof, playername
 		})
-		const revocation = await FAGC.violations.revoke(violation.id, testUserId)
+		const revocation = await FAGC.reports.revoke(report.id, testUserId)
 	})
 })

@@ -5,7 +5,7 @@ import RevocationManager from "./managers/RevocationManager"
 import { RuleManager } from "./managers/RuleManager"
 import { Revocation } from "./types/apitypes"
 import { ManagerOptions, WrapperOptions } from "./types/types"
-import ViolationManager from "./managers/ViolationManager"
+import ReportManager from "./managers/ReportManager"
 import WebSocketHandler from "./WebsocketListener"
 
 // export types
@@ -16,7 +16,7 @@ export class FAGCWrapper {
 	public apikey: string
 	public communities: CommunityManager
 	public rules: RuleManager
-	public violations: ViolationManager
+	public reports: ReportManager
 	public revocations: RevocationManager
 	public info: InfoManager
 	public offenses: OffenseManager
@@ -36,7 +36,7 @@ export class FAGCWrapper {
 		this.offenses = new OffenseManager(this.apiurl, this.apikey, managerOptions)
 
 		const createCacheRevocation = (revocation: Revocation) => this.revocations.add(revocation)
-		this.violations = new ViolationManager(this.apiurl, createCacheRevocation, this.apikey, managerOptions)
+		this.reports = new ReportManager(this.apiurl, createCacheRevocation, this.apikey, managerOptions)
 
 		
 		this.websocket = new WebSocketHandler({

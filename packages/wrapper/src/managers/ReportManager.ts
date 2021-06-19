@@ -1,63 +1,59 @@
 import fetch from "node-fetch"
 import { ManagerOptions, RequestConfig } from "../types/types"
-import { ApiID, CreateViolation, Revocation, Violation } from "../types/apitypes"
+import { ApiID, CreateReport, Revocation, Report } from "../types/apitypes"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError, UnsuccessfulRevocationError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import Collection from "@discordjs/collection"
 
-export default class ViolationManager extends BaseManager<Violation> {
+export default class ReportManager extends BaseManager<Report> {
 	public apikey?: string
 	private apiurl: string
-	private created: Collection<string, number> // Date.now() gives back a number
 	private createRevocation: (revocationObject: Revocation) => void
 	constructor(apiurl: string, createRevocation: (revocationObject: Revocation) => void, apikey?: string, options: ManagerOptions = {}) {
 		super(options)
 		if (apikey) this.apikey = apikey
 		this.apiurl = apiurl
-		this.created = new Collection()
 		this.createRevocation = createRevocation
 	}
-	async fetchViolation (violationid: ApiID, cache=true, force=false): Promise<Violation|null> {
+	async fetchReport (reportid: ApiID, cache=true, force=false): Promise<Report|null> {
 		if (!force) {
-			const cached = this.cache.get(violationid)
+			const cached = this.cache.get(reportid)
 			if (cached) return cached
 		}
-		const fetched = await fetch(`${this.apiurl}/violations/getbyid?id=${strictUriEncode(violationid)}`).then(c=>c.json())
+		const fetched = await fetch(`${this.apiurl}/reports/getbyid?id=${strictUriEncode(reportid)}`).then(c=>c.json())
 
 		if (!fetched) return null // return null if the fetch is empty
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
 		if (cache) this.add(fetched)
 		return fetched
 	}
-	async fetchAllName(playername: string, cache=true): Promise<Violation[]> {
-		const allViolations = await fetch(`${this.apiurl}/violations/getall?playername=${strictUriEncode(playername)}`).then(c=>c.json())
+	async fetchAllName(playername: string, cache=true): Promise<Report[]> {
+		const allReports = await fetch(`${this.apiurl}/reports/getall?playername=${strictUriEncode(playername)}`).then(c=>c.json())
 
-		if (allViolations.error) throw new GenericAPIError(`${allViolations.error}: ${allViolations.description}`)
+		if (allReports.error) throw new GenericAPIError(`${allReports.error}: ${allReports.description}`)
 
-		if (cache && allViolations[0]) {
-			allViolations.forEach(violation => {
-				this.add(violation)
-			})
+		if (cache && allReports[0]) {
+			allReports.forEach(report => this.add(report))
 		}
-		return allViolations
+		return allReports
 	}
-	resolveID (violationid: ApiID): Violation|null {
-		const cached = this.cache.get(violationid)
+	resolveID (reportid: ApiID): Report|null {
+		const cached = this.cache.get(reportid)
 		if (cached) return cached
 		return null
 	}
-	async fetchByRule(ruleid: ApiID, cache = true): Promise<Violation[]> {
-		const ruleViolations = await fetch(`${this.apiurl}/violations/getbyrule?id=${strictUriEncode(ruleid)}`).then(c=>c.json())
-		if (cache) ruleViolations.forEach(violation => this.add(violation))
-		return ruleViolations
+	async fetchByRule(ruleid: ApiID, cache = true): Promise<Report[]> {
+		const ruleReports = await fetch(`${this.apiurl}/reports/getbyrule?id=${strictUriEncode(ruleid)}`).then(c=>c.json())
+		if (cache) ruleReports.forEach(report => this.add(report))
+		return ruleReports
 	}
-	async create(violation: CreateViolation, cache = true, reqConfig: RequestConfig = {}): Promise<Violation> {
+	async create(report: CreateReport, cache = true, reqConfig: RequestConfig = {}): Promise<Report> {
 		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
 
-		const create = await fetch(`${this.apiurl}/violations/create`, {
+		const create = await fetch(`${this.apiurl}/reports/create`, {
 			method: "POST",
-			body: JSON.stringify(violation),
+			body: JSON.stringify(report),
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
 		}).then(u=>u.json())
 
@@ -68,11 +64,11 @@ export default class ViolationManager extends BaseManager<Violation> {
 		if (cache) this.add(create)
 		return create
 	}
-	async revoke(violationid: ApiID, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
-		const revoked = await fetch(`${this.apiurl}/violations/revoke`, {
+	async revoke(reportid: ApiID, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
+		const revoked = await fetch(`${this.apiurl}/reports/revoke`, {
 			method: "DELETE",
 			body: JSON.stringify({
-				id: violationid,
+				id: reportid,
 				adminId: adminId,
 			}),
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
@@ -85,11 +81,11 @@ export default class ViolationManager extends BaseManager<Violation> {
 
 		if (!revoked?.revokedTime) throw new UnsuccessfulRevocationError()
 		if (cache) this.createRevocation(revoked)
-		this.cache.sweep((violation) => violation.id === violationid) // remove the revoked violation from cache as it isnt working anymore
+		this.cache.sweep((report) => report.id === reportid) // remove the revoked report from cache as it isnt working anymore
 		return revoked
 	}
-	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Violation[]|null> {
-		const revoked = await fetch(`${this.apiurl}/violations/revokeallname`, {
+	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Report[]|null> {
+		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				playername: playername,
@@ -104,10 +100,10 @@ export default class ViolationManager extends BaseManager<Violation> {
 		}
 
 		revoked.forEach(revocation => {
-			if (!revocation?.violatedTime) throw new UnsuccessfulRevocationError()
+			if (!revocation?.reportedTime) throw new UnsuccessfulRevocationError()
 			if (cache) this.createRevocation(revocation)
 		})
-		this.cache.sweep((violation) => violation.playername === playername) // remove the revoked violation from cache as it isnt working anymore
+		this.cache.sweep((report) => report.playername === playername) // remove the revoked report from cache as it isnt working anymore
 		return revoked
 	}
 }
