@@ -4,7 +4,7 @@ use('fagc');
 // The drop() command destroys all data from a collection.
 // Make sure you run it against the correct database and collection.
 db.rules.drop();
-// db.offenses.drop();
+// db.profiles.drop();
 // db.reports.drop();
 // db.revocations.drop();
 // db.logs.drop();
