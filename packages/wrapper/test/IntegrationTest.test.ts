@@ -55,7 +55,7 @@ describe("ApiWrapper", () => {
 			communityname: oldConfig.communityname
 		})
 	})
-	step("Should be able to create a violation, cache it and revoke it", async () => {
+	step("Should be able to create a violation, cache it, fetch it by community, and revoke it", async () => {
 		const rules = await FAGC.rules.fetchAll()
 		const violation = await FAGC.violations.create({
 			brokenRule: rules[0].id,
@@ -71,6 +71,8 @@ describe("ApiWrapper", () => {
 
 		const resolvedViolation = FAGC.violations.resolveID(violation.id)
 		expect(resolvedViolation).to.deep.equal(violation, "Cached violation mismatch to violation")
+
+		const fetchedByCommunity = await FAGC.violations.fetchByCommunity(testStuff.violation.playername, resolvedViolation.communityId)
 
 		const revocation = await FAGC.violations.revoke(violation.id, testUserId)
 		// equal violation
