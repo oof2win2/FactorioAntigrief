@@ -198,7 +198,7 @@ describe("ApiWrapper", () => {
 			expect(evt.revokedTime).to.equal(revocation.revokedTime, "Event Revocation revokedTime mismatch")
 		}
 		FAGC.websocket.once("violation", ViolationHandler)
-		FAGC.websocket.on("revocation", RevocationHandler)
+		FAGC.websocket.once("revocation", RevocationHandler)
 		const violation = await FAGC.violations.create({
 			brokenRule: rules[0].id,
 			adminId: testUserId,
