@@ -15,15 +15,15 @@ module.exports = {
 async function handleErrors(msg, response) {
 	if (!msg.channel) return
 	switch (response.error) {
-		case "AuthenticationError": {
-			switch (response.description) {
-				case "API key is wrong":
-					return msg.channel.send("Error: API key has been set incorrectly.")
-			}
-			break
+	case "AuthenticationError": {
+		switch (response.description) {
+		case "API key is wrong":
+			return msg.channel.send("Error: API key has been set incorrectly.")
 		}
-		default:
-			msg.channel.send(`Error \`${response.error}\`: \`${response.description}\``)
+		break
+	}
+	default:
+		msg.channel.send(`Error \`${response.error}\`: \`${response.description}\``)
 	}
 }
 
@@ -56,34 +56,35 @@ async function createPagedEmbed(fields, embedMsgOptions, message, options = {}) 
 	}
 	// if there is only 1 page then no sense to make arrows, just slows other reactions down
 	if (maxPages) {
-		embedMsg.react("⬅️")
-		embedMsg.react("➡️")
+		await embedMsg.react("⬅️")
+		await embedMsg.react("➡️")
 	}
-	embedMsg.react("🗑️")
+	await embedMsg.react("🗑️")
+	
+	const reactionFilter = (reaction, user) => user.id === message.author.id
 
+	const reactionCollector = embedMsg.createReactionCollector(reactionFilter, { timer: 120000 })
 
-	const backwardsFilter = (reaction, user) => reaction.emoji.name === "⬅️" && user.id === message.author.id
-	const forwardsFilter = (reaction, user) => reaction.emoji.name === "➡️" && user.id === message.author.id
-	const removeFilter = (reaction, user) => reaction.emoji.name === "🗑️" && user.id === message.author.id
-
-	const backwards = embedMsg.createReactionCollector(backwardsFilter, { timer: 120000 })
-	const forwards = embedMsg.createReactionCollector(forwardsFilter, { timer: 120000 })
-	const remove = embedMsg.createReactionCollector(removeFilter, { timer: 120000 })
-
-	backwards.on("collect", (reaction) => {
-		page--
-		removeReaction("⬅️") // remove the user's reaction no matter what
-		if (page == -1) page = 0
-		else setData()
-	})
-	forwards.on("collect", (reaction) => {
-		page++
-		removeReaction("➡️") // remove the user's reaction no matter what
-		if (page > maxPages) page = maxPages
-		else setData()
-	})
-
-	remove.on("collect", () => {
-		embedMsg.delete()
+	reactionCollector.on("collect", (reaction) => {
+		switch (reaction.emoji.name) {
+		case "⬅️": {
+			page--
+			removeReaction("⬅️") // remove the user's reaction no matter what
+			if (page == -1) page = 0
+			else setData()
+			break
+		}
+		case "➡️": {
+			page++
+			removeReaction("➡️") // remove the user's reaction no matter what
+			if (page > maxPages) page = maxPages
+			else setData()
+			break
+		}
+		case "🗑️": {
+			reactionCollector.stop()
+			embedMsg.delete()
+		}
+		}
 	})
 }

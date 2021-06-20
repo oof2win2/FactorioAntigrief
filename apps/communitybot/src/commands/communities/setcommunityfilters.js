@@ -53,7 +53,7 @@ class SetFilters extends Command {
 				.setTimestamp()
 				.setAuthor("FAGC Community")
 				.setDescription("Trusted Communities")
-			const fields = await Promise.all(trustedCommunities.map(async (trustedCommunityID, i) => {
+			const fields = await Promise.all(trustedCommunities.map(async (trustedCommunityID) => {
 				let community = communities.find((community) => community.id === trustedCommunityID)
 				const user = await this.client.users.fetch(community.contact)
 				return {

@@ -1,4 +1,5 @@
 const path = require("path")
+// eslint-disable-next-line no-unused-vars
 const FAGCBot = require("./fagcbot")
 
 module.exports = class Command {

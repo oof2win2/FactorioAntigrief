@@ -1,5 +1,4 @@
 const { MessageEmbed } = require("discord.js")
-const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
 

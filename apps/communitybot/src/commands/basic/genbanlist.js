@@ -1,4 +1,3 @@
-const fetch = require("node-fetch")
 const { MessageAttachment } = require("discord.js")
 const Command = require("../../base/Command")
 

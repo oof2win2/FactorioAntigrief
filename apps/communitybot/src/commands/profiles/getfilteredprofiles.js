@@ -1,5 +1,3 @@
-const fetch = require("node-fetch")
-const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")

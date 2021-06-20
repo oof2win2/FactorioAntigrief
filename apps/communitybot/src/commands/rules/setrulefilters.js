@@ -47,7 +47,7 @@ class SetRuleFilters extends Command {
 
 		let ruleFilters = []
 		const onEnd = async () => {
-			let ruleEmbed = new MessageEmbed()
+			let embed = new MessageEmbed()
 				.setTitle("FAGC Rules")
 				.setColor("GREEN")
 				.setTimestamp()
@@ -74,7 +74,7 @@ class SetRuleFilters extends Command {
 				if (request.guildId === message.guild.id) return message.channel.send("Rules have successfully been set")
 				throw request
 			} catch (error) {
-				if (error instanceof AuthenticationError) return messagse.channel.send("Your API key is set incorrectly")
+				if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
 				message.channel.send("An error has occured. Please try again in some time")
 				throw error // pass on to Sentry
 			}
