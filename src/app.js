@@ -17,7 +17,6 @@ const profileRouter = require("./routes/profiles")
 const app = express()
 const Sentry = require("@sentry/node")
 const Tracing = require("@sentry/tracing")
-const debug = require('debug')('src:server')
 
 const config = require("../config")
 
@@ -53,13 +52,18 @@ const localIPs = [
 ]
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,	// 15 minutes
-	max: 100,	// 100 requests in timeframe
+	max: 10000,	// 10000 requests in timeframe
 	// lookup: 'connection.remoteAddress',
 	skip: (req) => {
 		const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
 		if (localIPs.includes(ip)) return true
 		else return false
-	}
+	},
+	message: JSON.stringify({
+		error: "Too Many Requests",
+		description: "You have sent too many requests. Please try again laterp"
+	}),
+	statusCode: 429,
 })
 app.use(apiLimiter)
 
