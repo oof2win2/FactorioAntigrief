@@ -1,9 +1,8 @@
 import fetch from "node-fetch"
 import { ManagerOptions } from "../types/types"
-import { ApiID, Profile, Revocation, Report } from "../types/apitypes"
+import { ApiID, Profile, Report } from "../types/apitypes"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import Collection from "@discordjs/collection"
 
 export default class ProfileManager extends BaseManager<Report> {
 	public apikey?: string

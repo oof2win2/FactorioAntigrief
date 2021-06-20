@@ -1,5 +1,5 @@
 import config from "./testconfig"
-import { FAGCWrapper, Revocation, Report } from "../src/index"
+import { FAGCWrapper, Revocation, Report, CommunityConfig } from "../src/index"
 
 import { expect } from "chai"
 
@@ -8,7 +8,8 @@ import { step } from "mocha-steps"
 const FAGC = new FAGCWrapper({
 	apikey: config.apikey,
 	socketurl: config.websocketurl,
-	apiurl: config.apiurl
+	apiurl: config.apiurl,
+	
 })
 
 const testGuildId = "749943992719769613"
@@ -205,5 +206,12 @@ describe("ApiWrapper", () => {
 			...testStuff.report, // description, automated, proof, playername
 		})
 		const revocation = await FAGC.reports.revoke(report.id, testUserId)
+	})
+	step("Getting Guild Config from websocket should work", async () => {
+		const CommunityConfigChangeHandler = (config: CommunityConfig) => {
+			expect(config.guildId).to.equal(testGuildId, "API sent the wrong guild ID")
+		}
+		FAGC.websocket.once("guildConfig", CommunityConfigChangeHandler)
+		FAGC.websocket.setGuildID(testGuildId)
 	})
 })

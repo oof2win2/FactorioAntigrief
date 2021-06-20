@@ -4,7 +4,6 @@ import { ApiID, CreateReport, Revocation, Report } from "../types/apitypes"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError, UnsuccessfulRevocationError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
-import Collection from "@discordjs/collection"
 
 export default class ReportManager extends BaseManager<Report> {
 	public apikey?: string

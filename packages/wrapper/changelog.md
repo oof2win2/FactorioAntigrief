@@ -1,3 +1,8 @@
+## [1.6.0] - [2021-06-10]
+### Added
+- WebSocket can now send the Guild ID to recieve the correct config
+- WebSocket can be disabled with a configuration option
+
 ## [1.5.1] - [2021-06-19]
 ### Changed
 - Offenses are now called profiles

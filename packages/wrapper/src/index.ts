@@ -26,8 +26,8 @@ export class FAGCWrapper {
 		uncacheage: 1000*60*15,
 		uncachems: 1000*60*15
 	}) {
-		this.apiurl = options.apiurl || "http://localhost:3000/v1"
-		this.apikey = options.apikey || null
+		this.apiurl = options.apiurl
+		this.apikey = options.apikey
 
 		this.revocations = new RevocationManager(this.apiurl, this.apikey, managerOptions)
 		this.communities = new CommunityManager(this.apiurl, this.apikey, managerOptions)
@@ -40,7 +40,8 @@ export class FAGCWrapper {
 
 		
 		this.websocket = new WebSocketHandler({
-			uri: options.socketurl
+			uri: options.socketurl,
+			disabled: options.enableWebSocket
 		})
 	}
 }
