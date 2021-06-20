@@ -21,7 +21,7 @@ model GuildConfig {
 
 model InfoChannels {
   id        Int         @id @default(autoincrement())
-  channelid String
+  channelid String      @unique
   configid  Int
   config    GuildConfig @relation(fields: [configid], references: [id])
 }

@@ -24,6 +24,9 @@ export default async (client: FAGCBot, message: Message): Promise<Message|void> 
 	if (rate && !client.config.adminIDs.includes(message.author.id)) return message.channel.send("You're too fast!")
 	client.RateLimit.set(message.author.id, Date.now())
 	const botconfig = FAGCBot.GuildConfig
+
+	if (botconfig.guildId !== message.guild.id) return message.channel.send("You are trying to send commands in a different guild than the bot is configured for. The bot doesn't support this.")
+
 	if (cmd.requiredConfig && !botconfig)
 		return message.reply("You need to create a guild config first with `fagc!setup`!")
 	/// permissions
@@ -54,7 +57,7 @@ export default async (client: FAGCBot, message: Message): Promise<Message|void> 
 		})
 	}
 	if ((cmd.customPermissions?.length > 0 && neededRoles.length > 0) || neededPermissions.length > 0)
-		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}. You can also use these roles instead: ${(await Promise.all(neededRoles.map(async (r) => await message.guild.roles.fetch(r).then(r => `\`${r.name}\``)))).join(", ")}`)
+		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}. You can also use these roles instead: ${(await Promise.all(neededRoles.map(async (r) => await message.guild.roles.fetch(r).then(r => `\`${r?.name}\``)))).join(", ")}`)
 	if (cmd.customPermissions?.length == 0 && neededPermissions.length > 0)
 		return message.channel.send(`You need the following permissions to execute this command: ${neededPermissions.map((p) => `\`${p}\``).join(", ")}`)
 	try {
