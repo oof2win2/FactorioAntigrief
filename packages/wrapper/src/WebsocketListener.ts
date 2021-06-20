@@ -13,6 +13,8 @@ export type WebSocketMessageType =
 	| "revocation"
 	| "ruleCreated"
 	| "ruleRemoved"
+	| "reconnecting"
+	| "connected"
 export interface WebSocketMessage {
 	messageType: WebSocketMessageType
 	[key: string]: string | boolean | number
@@ -23,6 +25,9 @@ export declare interface WebSocketEvents {
 	"revocation": (message: Revocation) => void
 	"ruleCreated": (message: Rule) => void
 	"ruleRemoved": (message: Rule) => void
+	
+	"reconnecting": (message: void) => void
+	"connected": (message: void) => void
 }
 
 declare interface WebSocketHandler {
@@ -55,7 +60,7 @@ class WebSocketHandler extends EventEmitter {
 		this.socket.on("close", () => {
 			const recconect = setInterval(() => {
 				if (this.socket.readyState === this.socket.OPEN) {
-					console.log("connected")
+					this.emit("connected")
 					return clearInterval(recconect)
 				}
 				// if not connected, try connecting again
@@ -63,19 +68,19 @@ class WebSocketHandler extends EventEmitter {
 					this.socket = new WebSocket(opts.uri)
 					// eslint-disable-next-line no-empty
 				} catch (e) { }
-				console.log("reconnection attempt")
+				this.emit("reconnecting")
 			}, 5000)
 		})
 	}
 	handleMessage(message: WebSocketMessage): void {
-		const toEmit = message
-		delete toEmit.messageType
-		switch (message.messageType) {
-		case "guildConfig": this.emit("guildConfig", toEmit as unknown as CommunityConfig); break
-		case "report": this.emit("report", toEmit as unknown as Report); break
-		case "revocation": this.emit("revocation", toEmit as unknown as Revocation); break
-		case "ruleCreated": this.emit("ruleCreated", toEmit as unknown as Rule); break
-		case "ruleRemoved": this.emit("ruleRemoved", toEmit as unknown as Rule); break
+		const messageType = message.messageType
+		delete message.messageType
+		switch (messageType) {
+		case "guildConfig": this.emit("guildConfig", message as unknown as CommunityConfig); break
+		case "report": this.emit("report", message as unknown as Report); break
+		case "revocation": this.emit("revocation", message as unknown as Revocation); break
+		case "ruleCreated": this.emit("ruleCreated", message as unknown as Rule); break
+		case "ruleRemoved": this.emit("ruleRemoved", message as unknown as Rule); break
 		}
 	}
 	setGuildID(guildId: string): void {
