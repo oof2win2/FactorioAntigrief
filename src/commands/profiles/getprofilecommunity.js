@@ -22,12 +22,12 @@ class GetAllProfiles extends Command {
 	}
 	async run (message, args) {
 		if (!args[0]) return message.reply("Provide a player name to get profiles of")
-        if (!args[1]) return message.reply("Provide a community ID to get the profiles from")
+		if (!args[1]) return message.reply("Provide a community ID to get the profiles from")
 		const playername = args.shift()
-        const communityId = args.shift()
+		const communityId = args.shift()
 
-        const community = await this.client.fagc.communities.fetchCommunity(communityId)
-        if (!community) return message.channel.send(`Community with ID \`${communityId}\` does not exist`)
+		const community = await this.client.fagc.communities.fetchCommunity(communityId)
+		if (!community) return message.channel.send(`Community with ID \`${communityId}\` does not exist`)
 		const profile = await this.client.fagc.profiles.fetchCommunity(playername, communityId)
 		if (!profile) return message.channel.send(`User \`${playername}\` has no profile in community ${community.name} (\`${community.id}\`)`)
 
@@ -37,9 +37,9 @@ class GetAllProfiles extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Profile of player \`${playername}\` in community ${community.name} (\`${community.id}\`)`)
-        const fields = await Promise.all(profile.reports.map(async (report) => {
-            const rule = await this.client.fagc.rules.fetchRule(report.brokenRule)
-            const admin = await this.client.users.fetch(report.adminId)
+		const fields = await Promise.all(profile.reports.map(async (report) => {
+			const rule = await this.client.fagc.rules.fetchRule(report.brokenRule)
+			const admin = await this.client.users.fetch(report.adminId)
 			return {
 				name: report.id,
 				value: 	`By: <@${report.adminId}> | ${admin?.tag}\n` +
@@ -48,7 +48,7 @@ class GetAllProfiles extends Command {
 						`Violated time: ${(new Date(report.reportedTime)).toUTCString()}`,
 				inline: true
 			}
-        }))
+		}))
 		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }

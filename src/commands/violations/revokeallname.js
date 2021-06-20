@@ -1,5 +1,3 @@
-const fetch = require("node-fetch")
-const strictUriEncode = require("strict-uri-encode")
 const { MessageEmbed } = require("discord.js")
 const { handleErrors, createPagedEmbed } = require("../../utils/functions")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
@@ -29,7 +27,6 @@ class RevokeAllname extends Command {
 		if (!args[0]) return message.reply("Provide a player name to revoke reports of")
 		const playername = args.shift()
 		if (!config.apikey) return message.reply("No API key set")
-		console.log(config)
 		const profile = await this.client.fagc.profiles.fetchCommunity(playername, config.communityId)
 		if (!profile || !profile.reports[0])
 			return message.reply(`Player \`${playername}\` has no profile in community ${config.communityname}`)
@@ -40,7 +37,7 @@ class RevokeAllname extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Profile of player \`${playername}\` in community ${config.communityname}`)
-		const fields = await Promise.all(profile.map(async (report, i) => {
+		const fields = await Promise.all(profile.map(async (report) => {
 			const admin = await this.client.users.fetch(report.adminId)
 			return {
 				name: report.id,

@@ -26,12 +26,6 @@ class GetAllRules extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription("All FAGC Rules")
-		let tmpFields = rules.map(rule => {
-			return {
-				name: `${rule.shortdesc} (\`${rule.id}\`)`,
-				value: "\u200b",
-			}
-		})
 		let fields = []
 		for (let i = 0; i < rules.length; i+=5) {
 			fields.push({

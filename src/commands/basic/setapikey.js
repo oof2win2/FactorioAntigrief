@@ -1,7 +1,7 @@
 const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
 const fetch = require("node-fetch")
-const { AuthenticationError } = require("fagc-api-wrapper")
+
 class SetAPIKey extends Command {
 	constructor(client) {
 		super(client, {
