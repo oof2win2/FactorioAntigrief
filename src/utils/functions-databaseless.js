@@ -13,7 +13,7 @@ function getUserStringFromID(string) {
 
 // validate IDs that are visible to users
 function validateUserString(string) {
-	if (!typeof string === "string") return false // it's not a string so it's obviously wrong
+	if (typeof string !== "string") return false // it's not a string so it's obviously wrong
 	if (string.length !== 7) return false
 	return true
 }

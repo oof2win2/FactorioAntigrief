@@ -117,7 +117,7 @@ router.delete("/revokeallname", async (req, res) => {
 		return res.status(403).json({ error: "Access Denied", description: `You are trying to access a profile of community ${toRevoke.communityId} but your community ID is ${community.communityId}` })
 
 	const revocations = await Promise.all(toRevoke.map(async (report) => {
-		await RevocationModel.findByIdAndDelete(report._id)
+		await ReportModel.findByIdAndDelete(report._id)
 		const revocation = await RevocationModel.create({
 			playername: report.playername,
 			communityId: report.communityId,
