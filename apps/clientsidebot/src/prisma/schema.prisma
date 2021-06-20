@@ -15,6 +15,7 @@ model GuildConfig {
   configRole        String?
   notificationsRole String?
   guildId           String
+  apikey            String?
   infochannels      InfoChannels[]
 }
 

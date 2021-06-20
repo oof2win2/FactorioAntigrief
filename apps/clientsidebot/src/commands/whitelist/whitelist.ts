@@ -23,8 +23,8 @@ export const command: Command<Message> = {
 		})
 		if (check?.id) return message.channel.send(`\`${playername}\` is already whitelisted!`)
 		const confirm = await getConfirmationMessage(message, `Are you sure you want to whitelist \`${playername}\` from FAGC violations?`)
-		if (!confirm)
-			return message.channel.send("Whitelisting cancelled")
+		if (!confirm) return message.channel.send("Whitelisting cancelled")
+		
 		const whitelist = await client.prisma.whitelist.create({data: {
 			playername: playername,
 			whitelistedBy: message.author.id

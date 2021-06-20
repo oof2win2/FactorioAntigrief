@@ -3,6 +3,11 @@ import { Message } from "discord.js"
 import { GuildConfig } from ".prisma/client"
 import { PermissionResolvable } from "discord.js"
 
+type customPermission = 
+	| "ban"
+	| "config"
+	| "notifications"
+
 // the user must EITHER have the roles OR they must have the Discord permissions. can't mix.
 export type Command <T=void> = {
 	name: string,
@@ -17,7 +22,7 @@ export type Command <T=void> = {
 	aliases: string[],
 	botPermissions?: PermissionResolvable[],
 	memberPermissions?: PermissionResolvable[],
-	customPermissions?: string[],
+	customPermissions?: customPermission[],
 	run: (
 		client: FAGCBot,
 		message: Message,

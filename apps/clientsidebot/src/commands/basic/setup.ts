@@ -36,6 +36,10 @@ export const command: Command<Message> = {
 		const notificationRole = notificationRoleMsg.mentions.roles.first() || await guild.roles.fetch(notificationRoleMsg.content)
 		if (!notificationRole) return message.channel.send("Provided role does not exist")
 
+		const apikeyMsg = await getMessageResponse("If you have been given an API key by the FAGC team, please type it in. Type in `none` if you have not", message)
+		apikeyMsg.delete()
+		const apikey = apikeyMsg.content === "none" ? null : apikeyMsg.content
+
 		const embed = new MessageEmbed()
 			.setTitle("Config")
 			.setAuthor(`${client.user.username} | oof2win2#3149`)
@@ -47,6 +51,7 @@ export const command: Command<Message> = {
 			{ name: "Role that can create and manage bans", value: banRole },
 			{ name: "Role that can manage the bot's configuration", value: configRole },
 			{ name: "Role that can manage FAGC notifications", value: notificationRole },
+			{ name: "API key", value: apikey ? "Set" : "None" }
 		)
 
 		message.channel.send(embed)
@@ -63,7 +68,8 @@ export const command: Command<Message> = {
 				banRole: banRole.id,
 				configRole: configRole.id,
 				notificationsRole: notificationRole.id,
-				guildId: message.guild.id
+				guildId: message.guild.id,
+				apikey: apikey
 			})
 			if (res.id) {
 				client.getGuildConfig() // get config from FAGC

@@ -42,7 +42,7 @@ const init = async () => {
 			// splits the event and gets first part. events are in the format "eventName.js"
 			const evtName = evt.split(".")[0]
 			// const event = (require(`./events/${dir}/${evt}`)).default
-			const event = await import(`./events/${dir}/${evt}`)
+			const event = await import(`./events/${dir}/${evt}`).then(e=>e.default)
 			// import event from `./events/${dir}/${evt}`
 			// import * as event from `./events/${dir}/${evt}`
 			// binds client to the event

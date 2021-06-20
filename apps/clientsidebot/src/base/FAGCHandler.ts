@@ -9,6 +9,7 @@ const wait = (time: number): Promise<void> => {
 }
 
 import { client } from "../index"
+import { Revocation } from "fagc-api-wrapper"
 async function IsWhitelisted(playername: string): Promise<boolean> {
 	const res = await client.prisma.whitelist.findFirst({where: {
 		playername: playername
@@ -19,7 +20,7 @@ async function IsWhitelisted(playername: string): Promise<boolean> {
 }
 
 
-export async function PlayerJoin (playername: string): Promise<boolean> {
+export async function PlayerJoin (playername: string, client: FAGCBot): Promise<boolean> {
 	console.log(`${playername} joined the game`)
 	const violations = await fetch(`${FAGCBot.config.apiurl}/violations/getall?playername=${playername}`, {
 		headers: {"Content-Type": "application/json"}
@@ -28,7 +29,7 @@ export async function PlayerJoin (playername: string): Promise<boolean> {
 		headers: { "Content-Type": "application/json" }
 	}).then(v => v.json())
 	if (!violations[0] && !revocations[0]) return false // no violations or revocations at all
-	const rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation)))
+	const rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation, client)))
 	const res = <boolean[]> await Promise.all(violations.map(violation => HandleUnfilteredViolation(violation)))
 	return rev.concat(res).filter(v=>v)[0] || false
 }
@@ -64,20 +65,22 @@ async function HandleFilteredViolation (violation): Promise<boolean> {
 	}
 }
 
-export async function HandleUnfilteredRevocation (revocation): Promise<boolean> {
+export async function HandleUnfilteredRevocation (revocation: Revocation, client: FAGCBot): Promise<boolean> {
 	if (!FAGCBot.fagcconfig) {
-		await wait(5000)
-		return HandleUnfilteredRevocation(revocation)
+		setTimeout(() => HandleUnfilteredRevocation(revocation, client), 5000)
+		return false
 	}
 	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === revocation.brokenRule)
 	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityId => communityId === revocation.communityId)
+	const allReports = await client.getFilteredReports(revocation.playername)
+	if (allReports.length) return false // there is more than one report
 	if (rule && community) {
 		return HandleFilteredRevocation(revocation)
 	}
 	return false
 }
 
-async function HandleFilteredRevocation (revocation): Promise<boolean> {
+async function HandleFilteredRevocation (revocation: Revocation): Promise<boolean> {
 	const unjailCommand = FAGCBot.config.unjailCommand.replace("${PLAYERNAME}", revocation.playername)
 	const unbanCommand = FAGCBot.config.unbanCommand.replace("${PLAYERNAME}", revocation.playername)
 	switch (FAGCBot.GuildConfig.onRevocation) {

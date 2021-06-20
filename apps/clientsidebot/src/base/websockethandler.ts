@@ -2,94 +2,82 @@ import FAGCBot from "./fagcbot"
 
 import { MessageEmbed, TextChannel } from "discord.js"
 import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler"
+import { CommunityConfig, Report, Revocation, Rule } from "fagc-api-wrapper"
 
-async function WebSocketHandler(message, client: FAGCBot): Promise<void> {
-	const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => {
-		return client.channels.fetch(infochannel.channelid)
-	})).then((channels)=>channels.filter(c=>c && c.isText())) as TextChannel[]
-	switch (message.messageType) {
-	case "guildConfig": {
-		// guild config has been updated
-		delete message.messageType
-		console.log("config set to", message)
-		FAGCBot.fagcconfig = message
-		break
+export function GuildConfigHandler(config: CommunityConfig, client: FAGCBot): void {
+	FAGCBot.fagcconfig = {
+		...FAGCBot.fagcconfig,
+		...config,
 	}
-	case "violation": {
-		const embed = new MessageEmbed()
-			.setTitle("FAGC Notifications")
-			.setColor("ORANGE")
-			.setDescription("FAGC violation has been created")
-			.setTimestamp()
-			.setAuthor("FAGC Community")
-			.addFields(
-				{ name: "Playername", value: message.playername },
-				{ name: "Admin ID", value: message.adminId },
-				{ name: "Community ID", value: message.communityId },
-				{ name: "Broken Rule", value: message.brokenRule },
-				{ name: "Automated", value: message.automated },
-				{ name: "Proof", value: message.proof },
-				{ name: "Description", value: message.description },
-				{ name: "Violation ID", value: message.id },
-				{ name: "Violation Time", value: message.violatedTime }
-			)
-		
-		const handled = await HandleUnfilteredViolation(message)
-		embed.addField("Handled with an action", handled)
-
-		channels.forEach(channel => channel.send(embed))
-		break
-	}
-	case "revocation": {
-		const embed = new MessageEmbed()
-			.setTitle("FAGC Notifications")
-			.setDescription("Violation Revoked")
-			.setColor("ORANGE")
-			.addFields(
-				{ name: "Playername", value: message.playername },
-				{ name: "Admin ID", value: message.adminId },
-				{ name: "Community ID", value: message.communityId },
-				{ name: "Broken Rules", value: message.brokenRule },
-				{ name: "Automated", value: message.automated },
-				{ name: "Proof", value: message.proof },
-				{ name: "Description", value: message.description },
-				{ name: "Revocation ID", value: message.id },
-				{ name: "Revocation Time", value: message.RevokedTime },
-				{ name: "Revoked by", value: message.revokedBy },
-			)
-			.setTimestamp()
-		
-		const handled = await HandleUnfilteredRevocation(message)
-		embed.addField("Handled with an action", handled)
-
-		channels.forEach(channel => channel.send(embed))
-		break
-	}
-	case "ruleCreated": {
-		const embed = new MessageEmbed()
-			.setTitle("FAGC Notifications")
-			.setDescription("Rule created")
-			.setColor("ORANGE")
-			.addFields(
-				{ name: "Rule short description", value: message.shortdesc },
-				{ name: "Rule long description", value: message.longdesc }
-			)
-		channels.forEach(channel => channel.send(embed))
-		break
-	}
-	case "ruleRemoved": {
-		// when a rule is removed, all related violations are also removed in the rule removal process. no need to do that manually.
-		const embed = new MessageEmbed()
-			.setTitle("FAGC Notifications")
-			.setDescription("Rule removed")
-			.setColor("ORANGE")
-			.addFields(
-				{ name: "Rule short description", value: message.shortdesc },
-				{ name: "Rule long description", value: message.longdesc }
-			)
-		channels.forEach(channel => channel.send(embed))
-		break
-	}
-	}
+	return
 }
-export default WebSocketHandler
+
+export async function ReportHandler(report: Report, client: FAGCBot, channels: TextChannel[]): Promise<void> {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC Notifications")
+		.setColor("ORANGE")
+		.setDescription("FAGC Report has been created")
+		.setTimestamp()
+		.setAuthor("oof2win2")
+		.addFields(
+			{ name: "Playername", value: report.playername },
+			{ name: "Admin ID", value: report.adminId },
+			{ name: "Community ID", value: report.communityId },
+			{ name: "Broken Rule", value: report.brokenRule },
+			{ name: "Automated", value: report.automated },
+			{ name: "Proof", value: report.proof },
+			{ name: "Description", value: report.description },
+			{ name: "Report ID", value: report.id },
+			{ name: "Reported Time", value: report.reportedTime }
+		)
+	const handled = await HandleUnfilteredViolation(report)
+	embed.addField("Handled with an action", handled ? "Yes" : "No")
+	channels.forEach(channel => channel.send(embed))
+}
+export async function RevocationHandler(revocation: Revocation, client: FAGCBot, channels: TextChannel[]): Promise<void> {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC Notifications")
+		.setColor("ORANGE")
+		.setDescription("FAGC Report has been revoked")
+		.setTimestamp()
+		.setAuthor("oof2win2")
+		.addFields(
+			{ name: "Playername", value: revocation.playername },
+			{ name: "Admin ID", value: revocation.adminId },
+			{ name: "Community ID", value: revocation.communityId },
+			{ name: "Broken Rules", value: revocation.brokenRule },
+			{ name: "Automated", value: revocation.automated },
+			{ name: "Proof", value: revocation.proof },
+			{ name: "Description", value: revocation.description },
+			{ name: "Revocation ID", value: revocation.id },
+			{ name: "Revocation Time", value: revocation.RevokedTime },
+			{ name: "Revoked by", value: revocation.revokedBy },
+		)
+	const handled = await HandleUnfilteredRevocation(revocation, client)
+	embed.addField("Handled with an action", handled ? "Yes" : "No")
+	channels.forEach(channel => channel.send(embed))
+}
+
+export function RuleCreatedHandler(rule: Rule, client: FAGCBot, channels: TextChannel[]) {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC Notifications")
+		.setDescription("Rule created")
+		.setColor("ORANGE")
+		.addFields(
+			{ name: "Rule short description", value: rule.shortdesc },
+			{ name: "Rule long description", value: rule.longdesc }
+		)
+	channels.forEach(channel => channel.send(embed))
+}
+
+export function RuleRemovedHandler(message: Rule, client: FAGCBot, channels: TextChannel[]) {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC Notifications")
+		.setDescription("Rule removed")
+		.setColor("ORANGE")
+		.addFields(
+			{ name: "Rule short description", value: message.shortdesc },
+			{ name: "Rule long description", value: message.longdesc }
+		)
+	channels.forEach(channel => channel.send(embed))
+}

@@ -1,10 +1,16 @@
-import {Client, Collection, Snowflake} from "discord.js"
+import { Client, ClientOptions, Collection, Snowflake, TextChannel } from "discord.js"
 import * as path from "path"
 import fetch from "node-fetch"
 import WebSocket from "ws"
 import { BotConfig, BotConfigEmotes } from "../types/FAGCBot"
 
-import WebSocketHandler from "./websockethandler"
+import {
+	GuildConfigHandler,
+	ReportHandler,
+	RevocationHandler,
+	RuleCreatedHandler,
+	RuleRemovedHandler
+} from "./websockethandler"
 
 import { InfoChannels, PrismaClient } from "@prisma/client"
 
@@ -14,7 +20,12 @@ import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC"
 import Command from "./Command"
 
-import "./serverhandler"
+import ServerHandler from "./serverhandler"
+import servers from "../../servers"
+import { FAGCWrapper, Report, Revocation, Rule } from "fagc-api-wrapper"
+
+interface FAGCBotOptions extends ClientOptions {
+}
 
 class FAGCBot extends Client {
 	public config: BotConfig
@@ -30,9 +41,11 @@ class FAGCBot extends Client {
 	static config: BotConfig
 	public wsHandler: (arg0: unknown, arg1: FAGCBot) => void // TODO: create type for API messages and use it here
 	private messageSocket: WebSocket
-	constructor(options) {
+	public fagc: FAGCWrapper
+	private ServerHandler: ServerHandler
+	constructor(options: FAGCBotOptions) {
 		super(options)
-		
+
 		this.config = config
 		FAGCBot.config = config
 		FAGCBot.emotes = this.config.emotes
@@ -48,46 +61,38 @@ class FAGCBot extends Client {
 		FAGCBot.GuildConfig = null
 		FAGCBot.fagcconfig = null
 
-		this.wsHandler = WebSocketHandler
-		this.messageSocket = new WebSocket(FAGCBot.config.websocketurl)
-		this.messageSocket.on("message", (message) => {
-			this.wsHandler(JSON.parse(message.toString("utf-8")), this)
+		this.ServerHandler = new ServerHandler(servers, this)
+
+		this.fagc = new FAGCWrapper({
+			apiurl: this.config.apiurl,
+			socketurl: this.config.websocketurl,
 		})
-		this.messageSocket.on("close", () => {
-			const recconect = setInterval(() => {
-				if (this.messageSocket.readyState === this.messageSocket.OPEN) {
-					console.log("connected")
-					return clearInterval(recconect)
-				}
-				// if not connected, try connecting again
-				try {
-					this.messageSocket = new WebSocket(FAGCBot.config.websocketurl)
-				// eslint-disable-next-line no-empty
-				} catch (e) {}
-				console.log("reconnection attempt")
-			}, 5000)
+
+		this.fagc.websocket.on("guildConfig", async (GuildConfig) => {
+			GuildConfigHandler(GuildConfig, this)
 		})
+		this.fagc.websocket.on("report", async (report: Report) => {
+			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
+			ReportHandler(report, this, channels)
+		})
+		this.fagc.websocket.on("revocation", async (revocation: Revocation) => {
+			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
+			RevocationHandler(revocation, this, channels)
+		})
+		this.fagc.websocket.on("ruleCreated", async (rule: Rule) => {
+			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
+			RuleCreatedHandler(rule, this, channels)
+		})
+		this.fagc.websocket.on("ruleRemoved", async (rule: Rule) => {
+			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
+			RuleRemovedHandler(rule, this, channels)
+		})
+
+		
 		this._asyncInit()
 	}
 	async _asyncInit(): Promise<void> {
 		await this.getConfig()
-
-		if (this.messageSocket.readyState == this.messageSocket.OPEN) {
-			if (FAGCBot.GuildConfig?.guildId) {
-				this.messageSocket.send(Buffer.from(JSON.stringify({
-					guildId: FAGCBot.GuildConfig.guildId
-				})))
-			}
-		} else {
-			this.messageSocket.on("open", () => {
-				if (FAGCBot.GuildConfig?.guildId) {
-					this.messageSocket.send(Buffer.from(JSON.stringify({
-						guildId: FAGCBot.GuildConfig.guildId
-					})))
-				}
-			})
-		}
-
 		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
 	}
 	/**
@@ -102,7 +107,7 @@ class FAGCBot extends Client {
 		if (lastTime < (Date.now() - time)) return false
 		return true
 	}
-	async loadCommand(commandPath: string, commandName: string): Promise<boolean|string> { // load a command
+	async loadCommand(commandPath: string, commandName: string): Promise<boolean | string> { // load a command
 		try {
 			const command = (await import(`.${commandPath}${path.sep}${commandName}`))?.command
 			this.commands.set(command.name, command) // adds command to commands collection
@@ -114,7 +119,7 @@ class FAGCBot extends Client {
 			return `Unable to load command ${commandName}: ${e}`
 		}
 	}
-	async unloadCommand(commandPath: string, commandName: string): Promise<boolean|string> { // unload a command
+	async unloadCommand(commandPath: string, commandName: string): Promise<boolean | string> { // unload a command
 		let command
 		if (this.commands.has(commandName)) {
 			command = this.commands.get(commandName)
@@ -135,23 +140,24 @@ class FAGCBot extends Client {
 		const config = await this.prisma.guildConfig.findFirst()
 		if (!config) return null
 		FAGCBot.GuildConfig = config
+		if (config.apikey) this.fagc.apikey = config.apikey
 		return config
 	}
 	async setConfig(config: GuildConfig): Promise<GuildConfig> {
 		if (FAGCBot.GuildConfig) {
 			const update = await this.prisma.guildConfig.update({
 				data: config,
-				where: {id: 1}
+				where: { id: 1 }
 			})
 			return update
 		} else {
-			const set = await this.prisma.guildConfig.create({data: config})
+			const set = await this.prisma.guildConfig.create({ data: config })
 			if (set.id) {
 				FAGCBot.GuildConfig = set
 				// tell the websocket to the api that we have this guild ID
-				this.messageSocket.send(Buffer.from(JSON.stringify({
-					guildId: FAGCBot.GuildConfig.guildId
-				})))
+				// this.messageSocket.send(Buffer.from(JSON.stringify({
+				// 	guildId: FAGCBot.GuildConfig.guildId
+				// })))
 
 				return set
 			} else return set
@@ -161,8 +167,22 @@ class FAGCBot extends Client {
 		if (FAGCBot.fagcconfig) return FAGCBot.fagcconfig
 		// this case should like literally never happen as the config will get sent when it is updated. here just in case.
 		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildId=${FAGCBot.GuildConfig.guildId}`).then(c => c.json())
-		setTimeout(() => FAGCBot.fagcconfig = undefined, 1000*60*15) // times itself out after 
+		setTimeout(() => FAGCBot.fagcconfig = undefined, 1000 * 60 * 15) // times itself out after 
 		return FAGCBot.fagcconfig
+	}
+	async getFilteredReports(playername: string): Promise<Report[]> {
+		if (!FAGCBot.fagcconfig?.ruleFilters || !FAGCBot.fagcconfig?.trustedCommunities) return []
+		const allReports = await this.fagc.reports.fetchAllName(playername)
+		const configFilteredReports = allReports.filter(report => {
+			return (FAGCBot.fagcconfig.trustedCommunities.includes(report.communityId)
+			&& FAGCBot.fagcconfig.ruleFilters.includes(report.brokenRule))
+		})
+		const filteredReports = await Promise.all(configFilteredReports.filter(async (report) => {
+			const ignored = await this.prisma.ignoredViolations.findFirst({where: {violationId: report.id}})
+			if (ignored.id) return null // the report is ignored so don't give it back
+			return report
+		}))
+		return filteredReports.filter(report=>report) // remove nulls
 	}
 }
 
