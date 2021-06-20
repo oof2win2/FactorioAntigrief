@@ -24,6 +24,7 @@ import ServerHandler from "./serverhandler"
 import servers from "../../servers"
 import { FAGCWrapper, Report, Revocation, Rule } from "fagc-api-wrapper"
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FAGCBotOptions extends ClientOptions {
 }
 
@@ -68,8 +69,8 @@ class FAGCBot extends Client {
 			socketurl: this.config.websocketurl,
 		})
 
-		this.fagc.websocket.on("guildConfig", async (GuildConfig) => {
-			GuildConfigHandler(GuildConfig, this)
+		this.fagc.websocket.on("guildConfig", (GuildConfig) => {
+			GuildConfigHandler(GuildConfig)
 		})
 		this.fagc.websocket.on("report", async (report: Report) => {
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
@@ -155,9 +156,7 @@ class FAGCBot extends Client {
 			if (set.id) {
 				FAGCBot.GuildConfig = set
 				// tell the websocket to the api that we have this guild ID
-				// this.messageSocket.send(Buffer.from(JSON.stringify({
-				// 	guildId: FAGCBot.GuildConfig.guildId
-				// })))
+				this.fagc.websocket.setGuildID(FAGCBot.GuildConfig.guildId)
 
 				return set
 			} else return set

@@ -17,10 +17,10 @@ export const command: Command<Message|void> = {
 	requiredConfig: false,
 	customPermissions: ["ban"],
 	run: async (client, message, args) => {
-        if (!args[0]) return message.channel.send("Please provide a violation ID to ignore")
+		if (!args[0]) return message.channel.send("Please provide a violation ID to ignore")
 
-        const report = await client.fagc.reports.fetchReport(args[0]).catch()
-        if (!report?.id) return message.channel.send(`\`${args[0]}\` is an invalid violation ID`)
+		const report = await client.fagc.reports.fetchReport(args[0]).catch()
+		if (!report?.id) return message.channel.send(`\`${args[0]}\` is an invalid violation ID`)
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Violation Ignoration")
 			.setColor("ORANGE")

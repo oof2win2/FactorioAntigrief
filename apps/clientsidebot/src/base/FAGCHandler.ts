@@ -9,7 +9,7 @@ const wait = (time: number): Promise<void> => {
 }
 
 import { client } from "../index"
-import { Revocation } from "fagc-api-wrapper"
+import { Report, Revocation } from "fagc-api-wrapper"
 async function IsWhitelisted(playername: string): Promise<boolean> {
 	const res = await client.prisma.whitelist.findFirst({where: {
 		playername: playername
@@ -34,7 +34,7 @@ export async function PlayerJoin (playername: string, client: FAGCBot): Promise<
 	return rev.concat(res).filter(v=>v)[0] || false
 }
 
-export async function HandleUnfilteredViolation (violation): Promise<boolean> {
+export async function HandleUnfilteredViolation (violation: Report): Promise<boolean> {
 	if (!FAGCBot.fagcconfig) {
 		await wait(2500)
 		return HandleUnfilteredViolation(violation)

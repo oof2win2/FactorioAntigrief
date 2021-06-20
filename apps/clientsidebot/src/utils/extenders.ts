@@ -1,4 +1,4 @@
-import { Message, Structures } from "discord.js"
+import { Message } from "discord.js"
 import FAGCBot from "../base/fagcbot"
 import * as responses from "./responses"
 

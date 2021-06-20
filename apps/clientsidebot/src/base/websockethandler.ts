@@ -4,7 +4,7 @@ import { MessageEmbed, TextChannel } from "discord.js"
 import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler"
 import { CommunityConfig, Report, Revocation, Rule } from "fagc-api-wrapper"
 
-export function GuildConfigHandler(config: CommunityConfig, client: FAGCBot): void {
+export function GuildConfigHandler(config: CommunityConfig): void {
 	FAGCBot.fagcconfig = {
 		...FAGCBot.fagcconfig,
 		...config,
@@ -58,7 +58,7 @@ export async function RevocationHandler(revocation: Revocation, client: FAGCBot,
 	channels.forEach(channel => channel.send(embed))
 }
 
-export function RuleCreatedHandler(rule: Rule, client: FAGCBot, channels: TextChannel[]) {
+export function RuleCreatedHandler(rule: Rule, client: FAGCBot, channels: TextChannel[]): void {
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule created")
@@ -70,7 +70,7 @@ export function RuleCreatedHandler(rule: Rule, client: FAGCBot, channels: TextCh
 	channels.forEach(channel => channel.send(embed))
 }
 
-export function RuleRemovedHandler(message: Rule, client: FAGCBot, channels: TextChannel[]) {
+export function RuleRemovedHandler(message: Rule, client: FAGCBot, channels: TextChannel[]): void {
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule removed")
