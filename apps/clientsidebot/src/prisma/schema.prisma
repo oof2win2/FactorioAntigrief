@@ -48,3 +48,11 @@ model Whitelist {
   whitelistedAt DateTime @default(now())
   whitelistedBy String
 }
+
+model IgnoredViolations {
+  id            Int       @id @default(autoincrement())
+  playername    String    
+  violationId   String    @unique
+  whitelistedAt DateTime  @default(now())
+  whitelistedBy String
+}
