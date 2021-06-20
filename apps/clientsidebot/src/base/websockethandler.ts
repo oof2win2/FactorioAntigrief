@@ -50,7 +50,7 @@ export async function RevocationHandler(revocation: Revocation, client: FAGCBot,
 			{ name: "Proof", value: revocation.proof },
 			{ name: "Description", value: revocation.description },
 			{ name: "Revocation ID", value: revocation.id },
-			{ name: "Revocation Time", value: revocation.RevokedTime },
+			{ name: "Revocation Time", value: revocation.revokedTime },
 			{ name: "Revoked by", value: revocation.revokedBy },
 		)
 	const handled = await HandleUnfilteredRevocation(revocation, client)

@@ -9,7 +9,7 @@ export async function getMessageResponse(content: string, message: Message, time
 	const resp = await message.channel.send(content)
 	return (await resp.channel.awaitMessages(messageFilter, { max: 1, time: timeout })).first()
 }
-export async function getConfirmationMessage(message: Message, content: string): Promise<boolean> {
+export async function getConfirmationMessage(content: string, message: Message): Promise<boolean> {
 	const confirm = await message.channel.send(content)
 	confirm.react("✅")
 	confirm.react("❌")

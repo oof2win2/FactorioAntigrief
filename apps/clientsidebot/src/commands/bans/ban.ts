@@ -28,7 +28,7 @@ export const command: Command<Message> = {
 		})
 		if (fetch?.id) return message.channel.send(`\`${user}\` is already banned for ${fetch.reason} by ${await client.users.fetch(fetch.admin).then(u=>`\`${u?.tag}\``)} | ${fetch.admin} at ${new Date(fetch.bannedAt)}`)
 		
-		const confirm = await getConfirmationMessage(message, `\`${user}\` will be banned for \`${reason}\``)
+		const confirm = await getConfirmationMessage(`\`${user}\` will be banned for \`${reason}\``, message)
 		if (!confirm)
 			return message.channel.send("Banning cancelled")
 

@@ -45,7 +45,7 @@ export const command: Command<Message> = {
 				{ name: "Role that can manage FAGC notifications", value: notificationRole },
 			)
 			message.channel.send(embed)
-			const confirm = await getConfirmationMessage(message, "Are you sure you want these settings applied?")
+			const confirm = await getConfirmationMessage("Are you sure you want these settings applied?", message)
 			if (!confirm)
 				return message.channel.send("Configuration cancelled")
 

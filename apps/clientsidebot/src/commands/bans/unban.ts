@@ -27,7 +27,7 @@ export const command: Command<Message> = {
 		})
 		if (!ban) return message.channel.send(`\`${playername}\` is not banned locally`)
 
-		const confirm = await getConfirmationMessage(message, `\`${playername}\` will be unbanned. They have been banned by ${ban.admin} at ${new Date(ban.bannedAt)} due to ${ban.reason}`)
+		const confirm = await getConfirmationMessage(`\`${playername}\` will be unbanned. They have been banned by ${ban.admin} at ${new Date(ban.bannedAt)} due to ${ban.reason}`, message)
 		if (!confirm)
 			return message.channel.send("Banning cancelled")
 

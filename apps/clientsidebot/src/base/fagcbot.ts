@@ -1,6 +1,5 @@
 import { Client, ClientOptions, Collection, Snowflake, TextChannel } from "discord.js"
 import * as path from "path"
-import fetch from "node-fetch"
 import WebSocket from "ws"
 import { BotConfig, BotConfigEmotes } from "../types/FAGCBot"
 
@@ -73,10 +72,12 @@ class FAGCBot extends Client {
 			GuildConfigHandler(GuildConfig)
 		})
 		this.fagc.websocket.on("report", async (report: Report) => {
+			console.log("report created")
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			ReportHandler(report, this, channels)
 		})
 		this.fagc.websocket.on("revocation", async (revocation: Revocation) => {
+			console.log("revocation created")
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RevocationHandler(revocation, this, channels)
 		})
@@ -141,6 +142,7 @@ class FAGCBot extends Client {
 		const config = await this.prisma.guildConfig.findFirst()
 		if (!config) return null
 		FAGCBot.GuildConfig = config
+		this.getGuildConfig()
 		if (config.apikey) this.fagc.apikey = config.apikey
 		return config
 	}
@@ -165,8 +167,11 @@ class FAGCBot extends Client {
 	async getGuildConfig(): Promise<FAGCConfig> {
 		if (FAGCBot.fagcconfig) return FAGCBot.fagcconfig
 		// this case should like literally never happen as the config will get sent when it is updated. here just in case.
-		FAGCBot.fagcconfig = await fetch(`${this.config.apiurl}/communities/getconfig?guildId=${FAGCBot.GuildConfig.guildId}`).then(c => c.json())
-		setTimeout(() => FAGCBot.fagcconfig = undefined, 1000 * 60 * 15) // times itself out after 
+		FAGCBot.fagcconfig = {
+			...await this.fagc.communities.fetchConfig(FAGCBot.GuildConfig.guildId),
+			apikey: FAGCBot.GuildConfig.apikey
+		}
+		// setTimeout(() => FAGCBot.fagcconfig = undefined, 1000 * 60 * 15) // times itself out after 
 		return FAGCBot.fagcconfig
 	}
 	async getFilteredReports(playername: string): Promise<Report[]> {
@@ -178,7 +183,7 @@ class FAGCBot extends Client {
 		})
 		const filteredReports = await Promise.all(configFilteredReports.filter(async (report) => {
 			const ignored = await this.prisma.ignoredViolations.findFirst({where: {violationId: report.id}})
-			if (ignored.id) return null // the report is ignored so don't give it back
+			if (ignored?.id) return null // the report is ignored so don't give it back
 			return report
 		}))
 		return filteredReports.filter(report=>report) // remove nulls

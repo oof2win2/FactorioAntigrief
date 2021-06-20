@@ -39,7 +39,7 @@ export const command: Command<Message|void> = {
 				{ name: "Reported Time", value: report.reportedTime, inline:true }
 			)
 		message.channel.send(embed)
-		const confirm = await getConfirmationMessage(message, "Are you sure you want to ignore this report?")
+		const confirm = await getConfirmationMessage("Are you sure you want to ignore this report?", message)
 		if (!confirm) return message.channel.send("Report ignoration cancelled")
 
 		const ignoration = await client.prisma.ignoredViolations.create({data: {

@@ -40,7 +40,7 @@ export const command: Command<Message|void> = {
 				{name: "Ignored By", value: `<@${ignoration.whitelistedBy}> | ${await client.users.fetch(ignoration.whitelistedBy).then(u=>u?.tag)}`}
 			)
 		message.channel.send(embed)
-		const confirm = await getConfirmationMessage(message, "Are you sure you want to stop ignoring this report?")
+		const confirm = await getConfirmationMessage("Are you sure you want to stop ignoring this report?", message)
 		if (!confirm) return message.channel.send("Report ignoration removal cancelled")
         
 		const removed = await client.prisma.ignoredViolations.delete({where: {violationId: report.id}})

@@ -1,15 +1,13 @@
 /**
  * @file RCON client manager for servers
  */
-import { TextChannel } from "discord.js"
+import { Snowflake, TextChannel } from "discord.js"
 import { Rcon } from "rcon-client"
 import { FactorioServer } from "../types/types"
 import FAGCBot from "./fagcbot"
 import config from "../../config"
 const { rconport, rconpw, errorchannel } = config
-// const { rconport, rconpw, errorchannel } = require("../../config")
 import servers from "../../servers"
-// const servers = require("../../servers")
 
 
 interface rconConfig {
@@ -19,6 +17,15 @@ interface rconConfig {
 interface rconConnection {
 	rcon: Rcon,
 	server: FactorioServer,
+}
+
+interface RCONOutput {
+	resp: string
+	server: {
+		name: string,
+		discordid: string,
+		discordname: string
+	}
 }
 
 /**
@@ -104,7 +111,7 @@ class rconInterface {
 	 * @param {(discord.Snowflake|string)} serverIdentifier - Identifier for server. Either server's Discord channel ID, Discord name or debug name
 	 * @returns {Promise<RCONOutput>} RCON output or error. Can be "Server couldn't be found" if no server was found
 	 */
-	async rconCommand(command, serverIdentifier) {
+	async rconCommand(command: string, serverIdentifier: Snowflake|string): Promise<RCONOutput> {
 		if (!command.startsWith("/")) command = `/${command}`
 		let server = undefined
 		this.rconConnections.forEach(serverConnections => {
@@ -126,20 +133,15 @@ class rconInterface {
 	 * @param {string} command - Command to send to the servers. Automatically prefixed with /
 	 * @returns {Promise<RCONOutput[]>} RCON output of all servers
 	 */
-	async rconCommandAll(command: string) {
+	async rconCommandAll(command: string): Promise<RCONOutput[]> {
 		const promiseArray = this.rconConnections.map(async (server) => {
 			return new Promise((resolve, reject) => {
-				const resultIdentifier = {
-					name: server.server.name,
-					discordid: server.server.discordid,
-					discordname: server.server.discordname,
-				}
 				this.rconCommand(command, server.server.discordid)
-					.then(res => resolve({ resp: res, server: resultIdentifier }))
-					.catch(e => reject({ resp: e, server: resultIdentifier }))
+					.then(res => resolve(res))
+					.catch(e => reject(e))
 			})
 		})
-		return await Promise.all(promiseArray)
+		return (await Promise.all(promiseArray)) as RCONOutput[]
 	}
 	/**
 	 * Send a RCON command to all Factorio servers except the one you specify

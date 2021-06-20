@@ -1,4 +1,3 @@
-import fetch from "node-fetch"
 import FAGCBot from "./fagcbot"
 import rcon from "./rcon"
 
@@ -21,16 +20,15 @@ async function IsWhitelisted(playername: string): Promise<boolean> {
 
 
 export async function PlayerJoin (playername: string, client: FAGCBot): Promise<boolean> {
-	console.log(`${playername} joined the game`)
-	const violations = await fetch(`${FAGCBot.config.apiurl}/violations/getall?playername=${playername}`, {
-		headers: {"Content-Type": "application/json"}
-	}).then(v=>v.json())
-	const revocations = await fetch(`${FAGCBot.config.apiurl}/revocations/getallrevocations?playername=${playername}`, {
-		headers: { "Content-Type": "application/json" }
-	}).then(v => v.json())
-	if (!violations[0] && !revocations[0]) return false // no violations or revocations at all
-	const rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation, client)))
-	const res = <boolean[]> await Promise.all(violations.map(violation => HandleUnfilteredViolation(violation)))
+	const reports = await client.fagc.reports.fetchAllName(playername)
+	const revocations = await client.fagc.revocations.fetchAllRevocations(playername)
+	if (!reports[0] && !revocations[0]) return false // no violations or revocations at all
+	const getPlayerBans = await rcon.rconCommandAll(`/banlist get ${playername}`).then(responses=>responses.map(resp=>resp.resp))
+	const isPlayerBanned = getPlayerBans.map(ban=>ban === `${playername} is banned.\n`).some(r=>r)
+	let rev: boolean[]
+	if (isPlayerBanned) rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation, client)))
+	else rev = []
+	const res = <boolean[]> await Promise.all(reports.map(violation => HandleUnfilteredViolation(violation)))
 	return rev.concat(res).filter(v=>v)[0] || false
 }
 
@@ -41,18 +39,17 @@ export async function HandleUnfilteredViolation (violation: Report): Promise<boo
 	}
 	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === violation.brokenRule)
 	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityId => communityId === violation.communityId)
-	console.log(rule, community)
 	if (rule && community) {
 		return HandleFilteredViolation(violation)
 	}
 	return false
 }
 
-async function HandleFilteredViolation (violation): Promise<boolean> {
-	if (await IsWhitelisted(violation.playername)) return false
+async function HandleFilteredViolation (report: Report): Promise<boolean> {
+	if (await IsWhitelisted(report.playername)) return false
 	// player is not whitelisted
-	const jailCommand = FAGCBot.config.jailCommand.replace("${PLAYERNAME}", violation.playername).replace("${REASON}", `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/violations/getall?playername=${violation.palyername} for why this could be`)
-	const banCommand = FAGCBot.config.banCommand.replace("${PLAYERNAME}", violation.playername).replace("${REASON}", `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/violations/getall?playername=${violation.palyername} for why this could be`)
+	const jailCommand = FAGCBot.config.jailCommand.replace("${PLAYERNAME}", report.playername).replace("${REASON}", `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/violations/getall?playername=${report.playername} for why this could be`)
+	const banCommand = FAGCBot.config.banCommand.replace("${PLAYERNAME}", report.playername).replace("${REASON}", `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/violations/getall?playername=${report.playername} for why this could be`)
 	switch (FAGCBot.GuildConfig.onViolation) {
 	case "info": return false
 	case "jail": 
