@@ -1,3 +1,7 @@
+## [1.6.3] - [2021-06-22]
+### Fixed
+- WebSocket now uses `heineiuo/isomorphic-ws` so it can work in the browser and in node
+
 ## [1.6.1] - [2021-06-22]
 ### Fixed
 - WebSocket will now emit events correctly and not delete their names before checking them

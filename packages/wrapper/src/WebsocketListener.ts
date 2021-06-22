@@ -1,5 +1,5 @@
 import { EventEmitter } from "events"
-import WebSocket from "ws"
+import WebSocket from "isomorphic-ws"
 import { CommunityConfig, Revocation, Rule, Report } from "./types"
 
 // some typescript stuff so it is strictly typed
