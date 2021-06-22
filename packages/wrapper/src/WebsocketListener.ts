@@ -52,12 +52,12 @@ class WebSocketHandler extends EventEmitter {
 		this.socket = new WebSocket(this.opts.uri)
 
 		// handle socket messages
-		this.socket.on("message", (msg) => {
-			this.handleMessage(JSON.parse(msg.toString("utf-8")))
-		})
+		this.socket.onmessage = (msg) => {
+			this.handleMessage(JSON.parse(msg.data as string))
+		}
 
 		// auto-reconnect for socket
-		this.socket.on("close", () => {
+		this.socket.onclose = () => {
 			const recconect = setInterval(() => {
 				if (this.socket.readyState === this.socket.OPEN) {
 					this.emit("connected")
@@ -70,7 +70,7 @@ class WebSocketHandler extends EventEmitter {
 				} catch (e) { }
 				this.emit("reconnecting")
 			}, 5000)
-		})
+		}
 	}
 	handleMessage(message: WebSocketMessage): void {
 		const messageType = message.messageType

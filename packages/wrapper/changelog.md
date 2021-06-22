@@ -1,3 +1,7 @@
+## [1.6.4] - [2021-06-22]
+### Fixed
+- Fixed the implementation of the new ws client
+
 ## [1.6.3] - [2021-06-22]
 ### Fixed
 - WebSocket now uses `heineiuo/isomorphic-ws` so it can work in the browser and in node
