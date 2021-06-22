@@ -20,16 +20,16 @@ FAGC (Factorio Anti-Grief Community) is a community of people who try to work ag
 [⬆️ Head back up](#contents)
 
 - Community: A community is a group of people that play Factorio together and use this API in a way to prevent griefers on their servers
-- Rule: A single item that describes something that must be followed, rules are categorized by which aspect of gameplay/user interaction it governances.
+- Rule: A single item that describes something that must be followed; rules are categorized by which aspect of gameplay/user interaction it governs.
 - Report: A single instance of a single rule which has been broken (or held up). Can be revoked and then turn into a revocation
-- Profile: A collection of reports. Profiles are only one per player per community (a community can have multiple profiles for different players and a player can have multiple Profiles in different communities)
+- Profile: A collection of reports. Profiles are specific to a single player at a single community
 - Revocation: When a community removes any profiles from a user. Revocations can never be turned back to reports
 
 ### Data Types
 
 [⬆️ Head back up](#contents)
 
-This is a short description of the different data that you may encounter with this bot or it's ecosystem, it is however not a complete developer guide.
+This is a short description of the different data that you may encounter with this bot or its ecosystem, it is however not a complete developer guide.
 All `id` properties are generated automatically by the API and cannot be set by users.
 - **Community**
   - `id` - ID of the community. Used to fetch it only
@@ -37,7 +37,7 @@ All `id` properties are generated automatically by the API and cannot be set by 
   - `contact` - Discord UserID of the contact user for the community
   - `guildid` - Discord GuildID of the Discord guild for the community
 - **Report**
-  - `id` - ID of the report. Can be used to fetch it and revoke it (only if the report has been created by your community)
+  - `id` - ID of the report. Used to fetch and revoke reports created by your community
   - `playername` - Name of the player that is being reported
   - `adminId` - Discord UserID of the administrator that created this report
   - `proof` - Proof of the report
@@ -71,10 +71,10 @@ All `id` properties are generated automatically by the API and cannot be set by 
 
 [⬆️ Head back up](#contents)
 
-Installation instructions are useful only in the case when you want to **self-host the whole ecosystem**, as the bot integrates with the database, to which you will not get access :P
-1. Make sure that you have the API already set up. [See installation instructions here](https://github.com/oof2win2/fagc-backend#readme)
+Installation instructions are useful only in the case when you want to **self-host the whole ecosystem**
+1. Set up the API [See installation instructions here](https://github.com/oof2win2/fagc-backend#readme)
 2. Install dependencies with `npm i`
-3. Set up your `config.js` file according to [`config.example.js`](config.example.js). Make sure that the database connection string is the same as the connection string as for the API but has it's collection set to `bot` instead of `fagc` (So the API can access the data)
+3. Set up your `config.js` file according to [`config.example.js`](config.example.js). Make sure that the database connection string is the same as for the API but with its collection set to `bot` instead of `fagc`
 4. Run the program with one of:
    1. `nodemon`
    2. `pm2 start pm2.config.js`
