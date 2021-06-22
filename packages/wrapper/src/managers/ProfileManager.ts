@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import axios from "axios"
 import { ManagerOptions } from "../types/types"
 import { ApiID, Profile, Report } from "../types/apitypes"
 import BaseManager from "./BaseManager"
@@ -13,13 +13,11 @@ export default class ProfileManager extends BaseManager<Report> {
 		this.apiurl = apiurl
 	}
 	async fetchCommunity(playername: string, communityId: ApiID): Promise<Profile> {
-		const fetched = await fetch(`${this.apiurl}/profiles/getcommunity?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(communityId)}`)
-			.then(o=>o.json())
+		const fetched = (await axios.get(`${this.apiurl}/profiles/getcommunity?playername=${strictUriEncode(playername)}&communityId=${strictUriEncode(communityId)}`)).data
 		return fetched
 	}
 	async fetchAll(playername: string): Promise<Profile[]> {
-		const fetched = await fetch(`${this.apiurl}/profiles/getall?playername=${strictUriEncode(playername)}`)
-			.then(o=>o.json())
+		const fetched = (await axios.get(`${this.apiurl}/profiles/getall?playername=${strictUriEncode(playername)}`)).data
 		return fetched
 	}
 }

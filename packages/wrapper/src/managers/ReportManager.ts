@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import axios from "axios"
 import { ManagerOptions, RequestConfig } from "../types/types"
 import { ApiID, CreateReport, Revocation, Report } from "../types/apitypes"
 import BaseManager from "./BaseManager"
@@ -20,7 +20,7 @@ export default class ReportManager extends BaseManager<Report> {
 			const cached = this.cache.get(reportid)
 			if (cached) return cached
 		}
-		const fetched = await fetch(`${this.apiurl}/reports/getbyid?id=${strictUriEncode(reportid)}`).then(c=>c.json())
+		const fetched = (await axios.get(`${this.apiurl}/reports/getbyid?id=${strictUriEncode(reportid)}`)).data
 
 		if (!fetched) return null // return null if the fetch is empty
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
@@ -28,7 +28,7 @@ export default class ReportManager extends BaseManager<Report> {
 		return fetched
 	}
 	async fetchAllName(playername: string, cache=true): Promise<Report[]> {
-		const allReports = await fetch(`${this.apiurl}/reports/getall?playername=${strictUriEncode(playername)}`).then(c=>c.json())
+		const allReports = (await axios.get(`${this.apiurl}/reports/getall?playername=${strictUriEncode(playername)}`)).data
 
 		if (allReports.error) throw new GenericAPIError(`${allReports.error}: ${allReports.description}`)
 
@@ -43,18 +43,16 @@ export default class ReportManager extends BaseManager<Report> {
 		return null
 	}
 	async fetchByRule(ruleid: ApiID, cache = true): Promise<Report[]> {
-		const ruleReports = await fetch(`${this.apiurl}/reports/getbyrule?id=${strictUriEncode(ruleid)}`).then(c=>c.json())
+		const ruleReports = (await axios.get(`${this.apiurl}/reports/getbyrule?id=${strictUriEncode(ruleid)}`)).data
 		if (cache) ruleReports.forEach(report => this.add(report))
 		return ruleReports
 	}
 	async create(report: CreateReport, cache = true, reqConfig: RequestConfig = {}): Promise<Report> {
 		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
 
-		const create = await fetch(`${this.apiurl}/reports/create`, {
-			method: "POST",
-			body: JSON.stringify(report),
+		const create = (await axios.post(`${this.apiurl}/reports/create`, report, {
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
-		}).then(u=>u.json())
+		})).data
 
 		if (create.error) {
 			if (create.description === "API key is wrong") throw new AuthenticationError()
@@ -64,14 +62,13 @@ export default class ReportManager extends BaseManager<Report> {
 		return create
 	}
 	async revoke(reportid: ApiID, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
-		const revoked = await fetch(`${this.apiurl}/reports/revoke`, {
-			method: "DELETE",
-			body: JSON.stringify({
+		const revoked = (await axios.delete(`${this.apiurl}/reports/revoke`, {
+			data: {
 				id: reportid,
 				adminId: adminId,
-			}),
+			},
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
-		}).then(u=>u.json())
+		})).data
 
 		if (revoked.error) {
 			if (revoked.description === "API key is wrong") throw new AuthenticationError()
@@ -84,14 +81,13 @@ export default class ReportManager extends BaseManager<Report> {
 		return revoked
 	}
 	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Report[]|null> {
-		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {
-			method: "DELETE",
-			body: JSON.stringify({
+		const revoked = (await axios.delete(`${this.apiurl}/reports/revokeallname`, {
+			data: {
 				playername: playername,
 				adminId: adminId,
-			}),
+			},
 			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
-		}).then(u=>u.json())
+		})).data
 
 		if (revoked.error) {
 			if (revoked.description === "API key is wrong") throw new AuthenticationError()

@@ -1,6 +1,6 @@
 {
   "name": "fagc-api-wrapper",
-  "version": "1.6.5",
+  "version": "1.7.0",
   "description": "Wrapper for the FAGC API",
   "main": "dist/index.js",
   "module": "es2020",
@@ -29,9 +29,9 @@
   "homepage": "https://github.com/oof2win2/fagc-api-wrapper#readme",
   "dependencies": {
     "@discordjs/collection": "^0.1.6",
+    "axios": "^0.21.1",
     "discord-api-types": "^0.18.1",
     "isomorphic-ws": "^4.0.1",
-    "node-fetch": "^2.6.1",
     "strict-uri-encode": "^2.0.0",
     "ws": "^7.5.0"
   },

@@ -1,3 +1,7 @@
+## [1.7.0] - [2021-06-22]
+## Changed
+- Removed `node-fetch` and instead installed `axios` as node-fetch was behaving funky with the browser
+
 ## [1.6.4] - [2021-06-22]
 ### Fixed
 - Fixed the implementation of the new ws client

@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import axios from "axios"
 import { ManagerOptions } from "../types/types"
 import { Rule, ApiID } from "../types/apitypes"
 import BaseManager from "./BaseManager"
@@ -18,7 +18,7 @@ export class RuleManager extends BaseManager<Rule> {
 			if (cached) return cached
 		}
 		
-		const fetched = await fetch(`${this.apiurl}/rules/getid?id=${strictUriEncode(ruleid)}`).then(r=>r.json())
+		const fetched = (await axios.get(`${this.apiurl}/rules/getid?id=${strictUriEncode(ruleid)}`)).data
 
 		if (!fetched || !fetched.id) return null // return null if the fetch is empty
 		
@@ -27,7 +27,7 @@ export class RuleManager extends BaseManager<Rule> {
 		return null
 	}
 	async fetchAll(cache=true): Promise<Rule[]> {
-		const allRules = await fetch(`${this.apiurl}/rules/getall`).then(r=>r.json())
+		const allRules = (await axios.get(`${this.apiurl}/rules/getall`)).data
 		
 		if (cache && allRules[0])
 			return allRules.map((rule: Rule) => this.add(rule))
