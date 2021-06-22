@@ -28,6 +28,7 @@ export interface Report extends Common, Required<CreateReport> {
 export interface Revocation extends Report {
 	revokedTime: Date
 	revokedBy: string
+	reportId: ApiID
 }
 
 export interface Profile extends Common {

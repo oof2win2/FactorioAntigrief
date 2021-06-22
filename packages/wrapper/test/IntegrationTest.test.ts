@@ -9,7 +9,7 @@ const FAGC = new FAGCWrapper({
 	apikey: config.apikey,
 	socketurl: config.websocketurl,
 	apiurl: config.apiurl,
-	
+
 })
 
 const testGuildId = "749943992719769613"
@@ -174,6 +174,8 @@ describe("ApiWrapper", () => {
 		// before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
 		// after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
 
+
+		// TODO: fix this bug in tests and let it compare even though the event may be recieved later
 		const rules = await FAGC.rules.fetchAll()
 		const ReportHandler = (evt: Report) => {
 			expect(evt.id).to.equal(report.id, "Event Report ID mismatch")
