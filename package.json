@@ -9,7 +9,7 @@
     "lint": "eslint src/ --fix"
   },
   "dependencies": {
-    "@sentry/node": "^6.4.1",
+    "@sentry/node": "^6.7.2",
     "@sentry/tracing": "^6.7.2",
     "cookie-parser": "~1.4.4",
     "crypto-random-string": "^4.0.0",
