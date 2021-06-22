@@ -1,4 +1,8 @@
-## [1.6.0] - [2021-06-10]
+## [1.6.1] - [2021-06-22]
+### Fixed
+- WebSocket will now emit events correctly and not delete their names before checking them
+
+## [1.6.0] - [2021-06-20]
 ### Added
 - WebSocket can now send the Guild ID to recieve the correct config
 - WebSocket can be disabled with a configuration option
