@@ -31,12 +31,14 @@
     "@discordjs/collection": "^0.1.6",
     "axios": "^0.21.1",
     "discord-api-types": "^0.18.1",
+    "isomorphic-fetch": "^3.0.0",
     "isomorphic-ws": "^4.0.1",
     "strict-uri-encode": "^2.0.0",
     "ws": "^7.5.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.18",
+    "@types/isomorphic-fetch": "0.0.35",
     "@types/mocha": "^8.2.2",
     "@types/strict-uri-encode": "^2.0.0",
     "@types/ws": "^7.4.5",

@@ -44,7 +44,8 @@ describe("ApiWrapper", () => {
 		const community = FAGC.communities.resolveID(communities[0]?.id)
 		expect(communities[0]?.id).to.equal(community?.id, "Cached communities improperly")
 	})
-	step("Should be able to set and get configs properly", async () => {
+	step("Should be able to set and get configs properly", async function() {
+		this.timeout(5000)
 		const oldConfig = await FAGC.communities.fetchConfig(testGuildId)
 		expect(oldConfig?.guildId).to.equal(testGuildId, "Guild configs fetched improperly")
 		const newName = "OOF2 BANBOT"

@@ -1,3 +1,7 @@
+## UNRELEASED
+## Changed
+- Remove `axios` and add in `isomorphic-fetch` as `axios` caused issues when it threw errors on 404s, which are used sometimes on some endpoints
+
 ## [1.7.0] - [2021-06-22]
 ## Changed
 - Removed `node-fetch` and instead installed `axios` as node-fetch was behaving funky with the browser
