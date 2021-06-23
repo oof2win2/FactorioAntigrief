@@ -1,6 +1,6 @@
 {
   "name": "fagc-api-wrapper",
-  "version": "1.7.0",
+  "version": "1.7.3",
   "description": "Wrapper for the FAGC API",
   "main": "dist/index.js",
   "module": "es2020",

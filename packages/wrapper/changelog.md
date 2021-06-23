@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.7.3] - [2021-06-23]
 ## Changed
 - Remove `axios` and add in `isomorphic-fetch` as `axios` caused issues when it threw errors on 404s, which are used sometimes on some endpoints
 
