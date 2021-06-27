@@ -1,59 +1,66 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
 }
 
 model GuildConfig {
-  id                Int            @id @default(autoincrement())
-  onViolation       String         @default("info")
-  onRevocation      String         @default("info")
-  banRole           String?
-  configRole        String?
-  notificationsRole String?
-  guildId           String
-  apikey            String?
-  infochannels      InfoChannels[]
+    id                Int            @id @default(autoincrement())
+    onViolation       String         @default("info")
+    onRevocation      String         @default("info")
+    banRole           String?
+    configRole        String?
+    notificationsRole String?
+    guildId           String
+    apikey            String?
+    infochannels      InfoChannels[]
 }
 
 model InfoChannels {
-  id        Int         @id @default(autoincrement())
-  channelid String      @unique
-  configid  Int
-  config    GuildConfig @relation(fields: [configid], references: [id])
+    id        Int         @id @default(autoincrement())
+    channelid String      @unique
+    configid  Int
+    config    GuildConfig @relation(fields: [configid], references: [id])
 }
 
 model PrivateBans {
-  id         Int      @id @default(autoincrement())
-  bannedAt   DateTime @default(now())
-  playername String
-  reason     String?  @default("No reason")
-  admin      String
+    id         Int      @id @default(autoincrement())
+    bannedAt   DateTime @default(now())
+    playername String
+    reason     String?  @default("No reason")
+    admin      String
 }
 
 model Syncedbans {
-  id         Int      @id @default(autoincrement())
-  bannedAt   DateTime @default(now())
-  apiId      String   @unique
-  playername String
-  reason     String
-  admin      String
+    id         Int      @id @default(autoincrement())
+    bannedAt   DateTime @default(now())
+    apiId      String   @unique
+    playername String
+    reason     String
+    admin      String
 }
 
 model Whitelist {
-  id            Int      @id @default(autoincrement())
-  playername    String
-  whitelistedAt DateTime @default(now())
-  whitelistedBy String
+    id            Int      @id @default(autoincrement())
+    playername    String
+    whitelistedAt DateTime @default(now())
+    whitelistedBy String
 }
 
 model IgnoredViolations {
-  id            Int       @id @default(autoincrement())
-  playername    String    
-  violationId   String    @unique
-  whitelistedAt DateTime  @default(now())
-  whitelistedBy String
+    id            Int      @id @default(autoincrement())
+    playername    String
+    violationId   String   @unique
+    whitelistedAt DateTime @default(now())
+    whitelistedBy String
+}
+
+model HandledReports {
+    id         Int    @id @default(autoincrement())
+    reportId   String @unique
+    playername String
+    action     String
 }

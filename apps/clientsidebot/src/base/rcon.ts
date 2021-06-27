@@ -134,6 +134,7 @@ class rconInterface {
 	 * @returns {Promise<RCONOutput[]>} RCON output of all servers
 	 */
 	async rconCommandAll(command: string): Promise<RCONOutput[]> {
+		console.log(`rconCommandAll: "${command}"`)
 		const promiseArray = this.rconConnections.map(async (server) => {
 			return new Promise((resolve, reject) => {
 				this.rconCommand(command, server.server.discordid)

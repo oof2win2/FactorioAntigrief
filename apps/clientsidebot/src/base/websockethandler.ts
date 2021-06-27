@@ -30,7 +30,7 @@ export async function ReportHandler(report: Report, client: FAGCBot, channels: T
 			{ name: "Report ID", value: report.id },
 			{ name: "Reported Time", value: report.reportedTime }
 		)
-	const handled = await HandleUnfilteredViolation(report)
+	const handled = await HandleUnfilteredViolation(report, client)
 	embed.addField("Handled with an action", handled ? "Yes" : "No")
 	channels.forEach(channel => channel.send(embed))
 }
@@ -50,6 +50,7 @@ export async function RevocationHandler(revocation: Revocation, client: FAGCBot,
 			{ name: "Proof", value: revocation.proof },
 			{ name: "Description", value: revocation.description },
 			{ name: "Revocation ID", value: revocation.id },
+			{ name: "Report ID", value: revocation.reportId },
 			{ name: "Revocation Time", value: revocation.revokedTime },
 			{ name: "Revoked by", value: revocation.revokedBy },
 		)
