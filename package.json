@@ -18,7 +18,7 @@
     "express": "~4.17.1",
     "express-rate-limit": "^5.2.6",
     "lodash": "^4.17.21",
-    "mongoose": "^5.12.8",
+    "mongoose": "^5.13.0",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.1",
     "prom-client": "^13.1.0"
