@@ -82,6 +82,7 @@ router.delete("/revoke", async (req, res) => {
 
 	const report = await ReportModel.findByIdAndDelete(toRevoke._id)
 	let revocation = await RevocationModel.create({
+		reportId: report.id,
 		playername: report.playername,
 		communityId: report.communityId,
 		adminId: report.adminId,
@@ -119,6 +120,7 @@ router.delete("/revokeallname", async (req, res) => {
 	const revocations = await Promise.all(toRevoke.map(async (report) => {
 		await ReportModel.findByIdAndDelete(report._id)
 		const revocation = await RevocationModel.create({
+			reportId: report.id,
 			playername: report.playername,
 			communityId: report.communityId,
 			adminId: report.adminId,

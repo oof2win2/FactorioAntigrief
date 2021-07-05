@@ -4,6 +4,7 @@ const connection = database.connections.find((connection) => connection.n === "f
 
 const RevocationSchema = new connection.Schema({
 	id: String,
+	reportId: String,
 	playername: String,
 	adminId: String,
 	communityId: String,

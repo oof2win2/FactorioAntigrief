@@ -26,7 +26,7 @@ async function SendWebhookMessages() {
 	const webhooks = await WebhookSchema.find()
 	webhooks.forEach(async (webhook) => {
 		const client = new WebhookClient(webhook.id, webhook.token)
-		client.send({embeds: embeds, username: "FAGC Notifier"}).catch((error) => {
+		client.send({ embeds: embeds, username: "FAGC Notifier" }).catch((error) => {
 			if (error.stack.includes("Unknown Webhook")) {
 				console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildId}. Removing webhook from database.`)
 				WebhookSchema.findByIdAndDelete(webhook.id)
@@ -47,7 +47,7 @@ wss.on("connection", (ws) => {
 		if (message.guildId) {
 			ws.guildId = message.guildId
 			if (!message) return
-			const guildConfig = await GuildConfigModel.findOne({guildId: message.guildId}).then((c) => c?.toObject())
+			const guildConfig = await GuildConfigModel.findOne({ guildId: message.guildId }).then((c) => c?.toObject())
 			if (guildConfig) ws.send(Buffer.from(JSON.stringify({
 				...guildConfig,
 				messageType: "guildConfig"
@@ -102,6 +102,7 @@ async function reportRevokedMessage(revocation) {
 			{ name: "Proof", value: revocation.proof },
 			{ name: "Description", value: revocation.description },
 			{ name: "Revocation ID", value: revocation.id },
+			{ name: "Report ID", value: revocation.reportId },
 			{ name: "Revocation Time", value: revocation.revokedTime },
 			{ name: "Revoked by", value: revocation.revokedBy },
 		)
@@ -133,8 +134,8 @@ async function ruleRemovedMessage(rule) {
 		.setDescription("Rule removed")
 		.setColor("ORANGE")
 		.addFields(
-			{name: "Rule short description", value: rule.shortdesc},
-			{name: "Rule long description", value: rule.longdesc}
+			{ name: "Rule short description", value: rule.shortdesc },
+			{ name: "Rule long description", value: rule.longdesc }
 		)
 	WebhookMessage(ruleEmbed)
 }
