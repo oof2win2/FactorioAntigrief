@@ -1,30 +1,35 @@
-import { getModelForClass, pre, prop } from "@typegoose/typegoose"
+import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import database from "../database"
 import { getUserStringFromID } from "../../utils/functions-databaseless"
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
+@modelOptions({
+	schemaOptions: {
+		collection: "reports"
+	}
+})
 @pre<ReportClass>("save", function(next) {
 	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 export class ReportClass {
 	@prop()
-	id: String
+	id: string
 
 	@prop()
-	playername: String
+	playername: string
 
 	@prop()
-	communityId: String
+	communityId: string
 
 	@prop()
-	brokenRule: String
+	brokenRule: string
 
 	@prop()
-	proof: String
+	proof: string
 
 	@prop()
-	description: String
+	description: string
 
 	@prop()
 	automated: Boolean
@@ -33,7 +38,7 @@ export class ReportClass {
 	reportedTime: Date
 
 	@prop()
-	adminId: String
+	adminId: string
 }
 
 const ReportModel = getModelForClass(ReportClass)

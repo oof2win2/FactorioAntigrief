@@ -1,37 +1,42 @@
-import { getModelForClass, pre, prop } from "@typegoose/typegoose"
+import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import database from "../database"
 import { getUserStringFromID } from "../../utils/functions-databaseless"
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 
+@modelOptions({
+	schemaOptions: {
+		collection: "revocations"
+	}
+})
 @pre<RevocationClass>("save", function(next) {
 	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 export class RevocationClass {
 	@prop()
-	id: String
+	id: string
 	
 	@prop()
-	reportId: String
+	reportId: string
 	
 	@prop()
-	playername: String
+	playername: string
 	
 	@prop()
-	adminId: String
+	adminId: string
 	
 	@prop()
-	communityId: String
+	communityId: string
 	
 	@prop()
-	brokenRule: String
+	brokenRule: string
 	
 	@prop()
-	proof: String
+	proof: string
 	
 	@prop()
-	description: String
+	description: string
 	
 	@prop()
 	automated: Boolean
@@ -43,7 +48,7 @@ export class RevocationClass {
 	revokedTime: Date
 	
 	@prop()
-	revokedBy: String
+	revokedBy: string
 }
 
 const RevocationModel = getModelForClass(RevocationClass)

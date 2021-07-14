@@ -1,20 +1,13 @@
-const AuthSchema = require("../database/fagc/authentication")
-const CommunitySchema = require("../database/fagc/community")
-const fetch = require("node-fetch")
-const config = require("../../config")
+import AuthSchema from "../database/fagc/authentication"
+import CommunitySchema from "../database/fagc/community"
+import fetch from "node-fetch"
+import config from "../../config"
 
-module.exports = {
-	getCommunity,
-	checkUser,
-	sendEmbed,
-	sendEmbedWait,
-}
-
-async function getCommunity(api_key) {
+export async function getCommunity(api_key) {
 	const auth = await AuthSchema.findOne({ api_key: api_key })
 	return CommunitySchema.findById(auth.communityId)
 }
-async function checkUser(userid) {
+export async function checkUser(userid) {
 	const user = await fetch(`https://discord.com/api/users/${userid}`, {
 		headers: {
 			"Content-type": "application/json",
@@ -24,8 +17,12 @@ async function checkUser(userid) {
 	if (!user || !user.id) return false
 	return true
 }
-// sends an embed without checking if it was delivered etc. jus returns based on status code
-async function sendEmbed(webhookid, webhooktoken, content) {
+
+/**
+ * sends an embed without checking if it was delivered etc. jus returns based on status code
+ * @deprecated Deprecated because it does not re-send after rate limits
+ */
+export async function sendEmbed(webhookid: string, webhooktoken: string, content: any) {
 	const res = await fetch(`https://discord.com/api/webhooks/${webhookid}/${webhooktoken}`, {
 		method: "POST",
 		body: JSON.stringify(content),
@@ -34,8 +31,12 @@ async function sendEmbed(webhookid, webhooktoken, content) {
 	if (res.ok) return true
 	return false
 }
-// sends an embed and waits for the sending to finish. returns a Discord message
-async function sendEmbedWait(webhookid, webhooktoken, content) {
+
+/**
+ * sends an embed and waits for the sending to finish. returns a Discord message
+ * @deprecated Deprecated because it does not re-send after rate limits
+ */
+export async function sendEmbedWait(webhookid, webhooktoken, content) {
 	try {
 		const resRaw = await fetch(`https://discord.com/api/webhooks/${webhookid}/${webhooktoken}?wait=true`, {
 			method: "POST",

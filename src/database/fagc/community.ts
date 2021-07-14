@@ -4,18 +4,27 @@ import { getUserStringFromID } from "../../utils/functions-databaseless"
 
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
+@modelOptions({
+	schemaOptions: {
+		collection: "communities"
+	}
+})
+@pre<CommunityClass>("save", function (next) {
+	this.id = getUserStringFromID(this._id.toString())
+	next()
+})
 export class CommunityClass {
 	@prop()
-	id: String
+	id: string
 
 	@prop()
-	name: String
+	name: string
 
 	@prop()
-	contact: String
+	contact: string
 
 	@prop()
-	guildId: String
+	guildId: string
 }
 
 const CommunityModel = getModelForClass(CommunityClass)

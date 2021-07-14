@@ -4,7 +4,6 @@ import { CommunityClass } from "./community"
 
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
-// TODO: add this modelOptions to all
 @modelOptions({
 	schemaOptions: {
 		collection: "authentication"
@@ -15,10 +14,10 @@ export class AuthClass {
 	public communityId: Ref<CommunityClass>
 
 	@prop()
-	api_key: String
+	api_key: string
 
 	@prop()
-	allowed_ips: String[]
+	allowed_ips: string[]
 }
 
 const AuthSchema = getModelForClass(AuthClass)

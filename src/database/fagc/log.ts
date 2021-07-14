@@ -1,25 +1,30 @@
 import database from "../database"
 import { getUserStringFromID } from "../../utils/functions-databaseless"
-import { getModelForClass, pre, prop } from "@typegoose/typegoose"
+import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 
+@modelOptions({
+	schemaOptions: {
+		collection: "logs"
+	}
+})
 @pre<LogClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
 	next()
 })
 export class LogClass {
 	@prop()
-	id: String
+	id: string
 	
 	@prop()
 	timestamp: Date
 	
 	@prop()
-	apikey: String
+	apikey: string
 	
 	@prop()
-	ip: String
+	ip: string
 	
 	@prop()
 	responseBody: Object
@@ -28,7 +33,7 @@ export class LogClass {
 	requestBody: Object
 	
 	@prop()
-	endpointAddress: String
+	endpointAddress: string
 }
 const LogModel = getModelForClass(LogClass)
 export default LogModel

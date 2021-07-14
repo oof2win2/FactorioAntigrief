@@ -7,33 +7,33 @@ const connection = database.connections.find((connection) => connection.n === "b
 
 @modelOptions({
 	schemaOptions: {
-		collection: "config"
+		collection: "configs"
 	}
 })
 export class ConfigClass {
 	@prop({ required: true })
-	communityname: String
+	communityname: string
 
 	@prop()
 	communityId: Ref<CommunityClass>
 
 	@prop()
-	guildId: String
+	guildId: string
 
 	@prop({ required: true })
-	contact: String
+	contact: string
 
 	@prop()
-	apikey: String
+	apikey: string
 
 	@prop()
-	moderatorRoleId: String
+	moderatorRoleId: string
 
 	@prop()
-	trustedCommunities: [String]
+	trustedCommunities: [string]
 
 	@prop()
-	ruleFilters: [String]
+	ruleFilters: [string]
 }
 
 const ConfigModel = getModelForClass(ConfigClass)

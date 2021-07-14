@@ -90,6 +90,8 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
 	const authenticated = await authUser(req)
 	// When running on localhost, IP shows v4 as v6. use ngrok to test IP stuff locally
 	// console.debug(req.headers['x-forwarded-for'] || req.socket.remoteAddress) // get origin IP
+	if (authenticated === 400)
+		return res.status(400).json({error: "AuthenticationError", description: "apikey was an array"})
 	if (authenticated === 404)
 		return res.status(404).json({error: "AuthenticationError", description: "API key is wrong"})
 	if (authenticated === 401)

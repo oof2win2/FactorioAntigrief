@@ -1,11 +1,11 @@
 // Clone from https://github.com/DistroByte/AwF-Bot/blob/master/base/Prometheus.js
 
-const promClient = require("prom-client")
-const http = require("http")
-const config = require("../../config")
-const ConfigModel = require("../database/bot/community")
-const CommunityModel = require("../database/fagc/community")
-const RuleModel = require("../database/fagc/rule")
+import promClient from "prom-client"
+import http from "http"
+import config from "../../config"
+import ConfigModel from "../database/bot/community"
+import CommunityModel from "../database/fagc/community"
+import RuleModel from "../database/fagc/rule"
 
 const collectDefaultMetrics = promClient.collectDefaultMetrics
 const Registry = promClient.Registry
