@@ -1,7 +1,7 @@
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import database from "../database"
 import { getUserStringFromID } from "../../utils/functions-databaseless"
-const connection = database.connections.find((connection) => connection.n === "fagc").c
+// const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 
 @modelOptions({
@@ -15,40 +15,40 @@ const connection = database.connections.find((connection) => connection.n === "f
 })
 export class RevocationClass {
 	@prop()
-	id: string
+	id!: string
 	
 	@prop()
-	reportId: string
+	reportId!: string
 	
 	@prop()
-	playername: string
+	playername!: string
 	
 	@prop()
-	adminId: string
+	adminId!: string
 	
 	@prop()
-	communityId: string
+	communityId!: string
 	
 	@prop()
-	brokenRule: string
+	brokenRule!: string
 	
 	@prop()
-	proof: string
+	proof!: string
 	
 	@prop()
-	description: string
+	description!: string
 	
 	@prop()
-	automated: Boolean
+	automated!: Boolean
 	
 	@prop()
-	reportedTime: Date
+	reportedTime!: Date
 	
 	@prop()
-	revokedTime: Date
+	revokedTime!: Date
 	
 	@prop()
-	revokedBy: string
+	revokedBy!: string
 }
 
 const RevocationModel = getModelForClass(RevocationClass)

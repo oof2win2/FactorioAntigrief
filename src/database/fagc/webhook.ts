@@ -1,6 +1,6 @@
 import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
 import database from "../database"
-const connection = database.connections.find((connection) => connection.n === "fagc").c
+// const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 @modelOptions({
 	schemaOptions: {
@@ -9,14 +9,15 @@ const connection = database.connections.find((connection) => connection.n === "f
 })
 export class WebhookClass {
 	@prop()
-	id: string
+	id!: string
 	
 	@prop()
-	token: string
+	token!: string
 	
 	@prop()
-	guildId: string
+	guildId!: string
 }
 
 const WebhookModel = getModelForClass(WebhookClass)
+
 export default WebhookModel

@@ -58,6 +58,7 @@ const apiLimiter = rateLimit({
 	// lookup: 'connection.remoteAddress',
 	skip: (req) => {
 		const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+		if (!ip) return false
 		if (localIPs.includes(Array.isArray(ip) ? ip[0] : ip)) return true
 		else return false
 	},

@@ -17,6 +17,12 @@ function onError (err: unknown, req: Request, res: Response, next: NextFunction)
 	return res
 }
 
+let faux_fin = { end: () => null }
+
+function isScalar(v) {
+	return typeof v !== "object" && !Array.isArray(v)
+}
+
 const mung = {
 	json: function (fn: Transform, opts: Options = {mungError: true}): RequestHandler {
 		return function (req, res, next) {

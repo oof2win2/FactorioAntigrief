@@ -2,7 +2,7 @@ import { getModelForClass, modelOptions, pre, prop, Ref } from "@typegoose/typeg
 import database from "../database"
 import { getUserStringFromID } from "../../utils/functions-databaseless"
 
-const connection = database.connections.find((connection) => connection.n === "fagc").c
+// const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 @modelOptions({
 	schemaOptions: {
@@ -15,16 +15,16 @@ const connection = database.connections.find((connection) => connection.n === "f
 })
 export class CommunityClass {
 	@prop()
-	id: string
+	id!: string
 
 	@prop()
-	name: string
+	name!: string
 
 	@prop()
-	contact: string
+	contact!: string
 
 	@prop()
-	guildId: string
+	guildId!: string
 }
 
 const CommunityModel = getModelForClass(CommunityClass)

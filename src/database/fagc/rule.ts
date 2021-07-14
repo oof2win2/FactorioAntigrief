@@ -1,7 +1,7 @@
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import database from "../database"
 import { getUserStringFromID } from "../../utils/functions-databaseless"
-const connection = database.connections.find((connection) => connection.n === "fagc").c
+// const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 @modelOptions({
 	schemaOptions: {
@@ -14,13 +14,13 @@ const connection = database.connections.find((connection) => connection.n === "f
 })
 export class RuleClass {
 	@prop()
-	id: string
+	id!: string
 	
 	@prop()
-	shortdesc: string
+	shortdesc!: string
 	
 	@prop()
-	longdesc: string
+	longdesc!: string
 }
 
 const RuleModel = getModelForClass(RuleClass)

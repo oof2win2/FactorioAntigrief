@@ -7,18 +7,6 @@ import GuildConfigModel from "../database/bot/community"
 
 let WebhookQueue = []
 
-module.exports = {
-	WebhookMessage,
-	WebsocketMessage,
-	reportCreatedMessage,
-	reportRevokedMessage,
-	ruleCreatedMessage,
-	ruleRemovedMessage,
-	profileRevokedMessage,
-	communityCreatedMessage,
-	communityRemovedMessage,
-	communityConfigChanged,
-}
 async function SendWebhookMessages() {
 	let embeds = WebhookQueue.slice(0, 10)
 	if (!embeds[0]) return
@@ -37,7 +25,7 @@ async function SendWebhookMessages() {
 }
 setInterval(SendWebhookMessages, 5000)
 
-function WebhookMessage(message) {
+export function WebhookMessage(message) {
 	WebhookQueue.push(message)
 }
 
@@ -56,14 +44,14 @@ wss.on("connection", (ws) => {
 	})
 })
 
-async function WebsocketMessage(message) {
+export async function WebsocketMessage(message) {
 	wss.clients.forEach((client) => {
 		if (client.readyState === WebSocket.OPEN) {
 			client.send(message)
 		}
 	})
 }
-async function reportCreatedMessage(report) {
+export async function reportCreatedMessage(report) {
 	if (report === null || report.playername === undefined) return
 	report.messageType = "report"
 	WebsocketMessage(JSON.stringify(report))
@@ -85,7 +73,7 @@ async function reportCreatedMessage(report) {
 		.setTimestamp()
 	WebhookMessage(reportEmbed)
 }
-async function reportRevokedMessage(revocation) {
+export async function reportRevokedMessage(revocation) {
 	if (revocation === null || revocation.playername === undefined) return
 	revocation.messageType = "revocation"
 	WebsocketMessage(JSON.stringify(revocation))
@@ -110,7 +98,7 @@ async function reportRevokedMessage(revocation) {
 	WebhookMessage(revocationEmbed)
 }
 
-async function ruleCreatedMessage(rule) {
+export async function ruleCreatedMessage(rule) {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
 	rule.messageType = "ruleCreated"
 	WebsocketMessage(JSON.stringify(rule))
@@ -125,7 +113,7 @@ async function ruleCreatedMessage(rule) {
 	WebhookMessage(ruleEmbed)
 }
 
-async function ruleRemovedMessage(rule) {
+export async function ruleRemovedMessage(rule) {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
 	rule.messageType = "ruleRemoved"
 	WebsocketMessage(JSON.stringify(rule))
@@ -140,7 +128,7 @@ async function ruleRemovedMessage(rule) {
 	WebhookMessage(ruleEmbed)
 }
 
-async function profileRevokedMessage(profile) {
+export async function profileRevokedMessage(profile) {
 	profile.messageType = "profileRevoked"
 	WebsocketMessage(JSON.stringify(profile))
 	let embed = new MessageEmbed()
@@ -158,7 +146,7 @@ async function profileRevokedMessage(profile) {
 	WebhookMessage(embed)
 }
 
-async function communityCreatedMessage(community) {
+export async function communityCreatedMessage(community) {
 	community.messageType = "communityCreated"
 	WebsocketMessage(JSON.stringify(community))
 	let embed = new MessageEmbed()
@@ -171,7 +159,7 @@ async function communityCreatedMessage(community) {
 		)
 	WebhookMessage(embed)
 }
-async function communityRemovedMessage(community) {
+export async function communityRemovedMessage(community) {
 	community.messageType = "communityRemoved"
 	WebsocketMessage(JSON.stringify(community))
 	let embed = new MessageEmbed()
@@ -184,7 +172,7 @@ async function communityRemovedMessage(community) {
 		)
 	WebhookMessage(embed)
 }
-async function communityConfigChanged(config) {
+export async function communityConfigChanged(config) {
 	wss.clients.forEach(client => {
 		if (client.guildId == config.guildId) {
 			client.send(Buffer.from(JSON.stringify({

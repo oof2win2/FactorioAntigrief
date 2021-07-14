@@ -1,7 +1,7 @@
 import { getModelForClass, modelOptions, prop, Ref } from "@typegoose/typegoose"
 import database from "../database"
 import { CommunityClass } from "../fagc/community"
-const connection = database.connections.find((connection) => connection.n === "bot").c
+// const connection = database.connections.find((connection) => connection.n === "bot").c
 
 // the thing from https://github.com/oof2win2/fagc-discord-bot/blob/dev/src/database/schemas/config.js
 
@@ -12,28 +12,28 @@ const connection = database.connections.find((connection) => connection.n === "b
 })
 export class ConfigClass {
 	@prop({ required: true })
-	communityname: string
+	communityname!: string
 
 	@prop()
 	communityId: Ref<CommunityClass>
 
 	@prop()
-	guildId: string
+	guildId!: string
 
 	@prop({ required: true })
-	contact: string
+	contact!: string
 
 	@prop()
-	apikey: string
+	apikey?: string
 
 	@prop()
-	moderatorRoleId: string
+	moderatorRoleId!: string
 
 	@prop()
-	trustedCommunities: [string]
+	trustedCommunities?: [string]
 
 	@prop()
-	ruleFilters: [string]
+	ruleFilters?: [string]
 }
 
 const ConfigModel = getModelForClass(ConfigClass)

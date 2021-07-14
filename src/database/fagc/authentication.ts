@@ -2,7 +2,7 @@ import { getModelForClass, modelOptions, pre, prop, Ref } from "@typegoose/typeg
 import database from "../database"
 import { CommunityClass } from "./community"
 
-const connection = database.connections.find((connection) => connection.n === "fagc").c
+// const connection = database.connections.find((connection) => connection.n === "fagc").c
 
 @modelOptions({
 	schemaOptions: {
@@ -11,13 +11,13 @@ const connection = database.connections.find((connection) => connection.n === "f
 })
 export class AuthClass {
 	@prop()
-	public communityId: Ref<CommunityClass>
+	communityId: Ref<CommunityClass>
 
 	@prop()
-	api_key: string
+	api_key!: string
 
 	@prop()
-	allowed_ips: string[]
+	allowed_ips!: string[]
 }
 
 const AuthSchema = getModelForClass(AuthClass)
