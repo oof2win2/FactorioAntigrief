@@ -1,0 +1,12 @@
+{
+  "name": "fagc-api-types",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/types.d.ts",
+  "scripts": {
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
