@@ -1,25 +1,26 @@
-const express = require("express")
-const path = require("path")
-const cookieParser = require("cookie-parser")
-const morgan = require("morgan")
-const cors = require("cors")
+import express from "express"
+import path from "path"
+import cookieParser from "cookie-parser"
+import morgan from "morgan"
+import cors from "cors"
 
-const logger = require("./utils/log")
-const removeId = require("./utils/removeId")
-const authUser = require("./utils/authUser")
+import logger from "./utils/log"
+import removeId from "./utils/removeId"
+import authUser from "./utils/authUser"
 
-const ruleRouter = require("./routes/rules")
-const communityRouter = require("./routes/communities")
-const reportRouter = require("./routes/reports")
-const informaticsRouter = require("./routes/informatics")
-const revocationRouter = require("./routes/revocations")
-const profileRouter = require("./routes/profiles")
+import ruleRouter from "./routes/rules"
+import communityRouter from "./routes/communities"
+import reportRouter from "./routes/reports"
+import informaticsRouter from "./routes/informatics"
+import revocationRouter from "./routes/revocations"
+import profileRouter from "./routes/profiles"
 
 const app = express()
-const Sentry = require("@sentry/node")
-const Tracing = require("@sentry/tracing")
 
-const config = require("../config")
+import Sentry from "@sentry/node"
+import Tracing from "@sentry/tracing"
+
+import config from "../config"
 
 // extenders so they can be used anywhere
 require("./utils/extenders")
@@ -46,7 +47,7 @@ app.use(Sentry.Handlers.requestHandler())
 app.use(Sentry.Handlers.tracingHandler())
 
 // API rate limits
-const rateLimit = require("express-rate-limit")
+import rateLimit from "express-rate-limit"
 const localIPs = [
 	"::ffff:127.0.0.1",
 	"::1"
@@ -57,7 +58,7 @@ const apiLimiter = rateLimit({
 	// lookup: 'connection.remoteAddress',
 	skip: (req) => {
 		const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-		if (localIPs.includes(ip)) return true
+		if (localIPs.includes(Array.isArray(ip) ? ip[0] : ip)) return true
 		else return false
 	},
 	message: JSON.stringify({
@@ -85,7 +86,7 @@ app.use(logger)
 app.use(removeId)
 
 // middleware for authentication
-const authMiddleware = async (req, res, next) => {
+const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 	const authenticated = await authUser(req)
 	// When running on localhost, IP shows v4 as v6. use ngrok to test IP stuff locally
 	// console.debug(req.headers['x-forwarded-for'] || req.socket.remoteAddress) // get origin IP
@@ -117,7 +118,7 @@ app.get("/", (req, res) => {
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler())
 
-app.use((req, res) => {
+app.use((req: express.Request, res: express.Response) => {
 	res.status(404).json({ error: "404 Not Found", message: `Path ${req.path} does not exist on this API` })
 })
 

@@ -1,15 +1,19 @@
-const { Mongoose } = require("mongoose")
+import { Mongoose } from "mongoose"
 // const mongoose = require("mongoose")
 // const mongodb = require("mongo-mock")
-const config = require("../../config")
+import config, { ApiConfig } from "../../config"
 
 class ConnectionManager {
-	constructor(config) {
+	connections: {
+		c: typeof import("mongoose")
+		n?: string
+	}[]
+	constructor(config: ApiConfig) {
 		this.connections = config.dbConnections.map((connectionConfig) => {
 			let connection = new Mongoose()
 			connection.connect(config.mongoURI, connectionConfig).then(() => {
 				console.log(`Database ${connectionConfig.dbName} connected!`)
-			}).catch((e) => {
+			}).catch((e: unknown) => {
 				console.error(`Database ${connectionConfig.dbName} errored: ${e}`)
 			})
 			return {
@@ -19,4 +23,4 @@ class ConnectionManager {
 		})
 	}
 }
-module.exports = new ConnectionManager(config)
+export default new ConnectionManager(config)
