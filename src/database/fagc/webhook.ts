@@ -11,12 +11,12 @@ const connection = database.connections.find((connection) => connection?.n === "
 	existingMongoose: connection
 })
 export class WebhookClass {
-	@prop({_id: false})
+	@prop({ _id: false })
 	id!: string
 
 	@prop()
 	token!: string
-	
+
 	@prop()
 	guildId!: string
 }

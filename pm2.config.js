@@ -1,10 +1,10 @@
 module.exports = {
 	apps: [{
 		name: "fagc-backend",
-		script: "./app.js",
+		script: "npm",
+		args: "pm2",
 		env: {
 			"NODE_ENV": "production"
 		},
-		cwd: "./dist"
 	}]
 }

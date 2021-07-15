@@ -19,10 +19,11 @@ router.post("/addwebhook", async (req, res) => {
 	if (found)
 		return res.status(403).json({ error: "Forbidden", description: `webhook in the guild ${req.body.guildId} already exists` })
 	const dbRes = await WebhookSchema.create({
+		id: req.body.id,
 		token: req.body.token,
 		guildId: req.body.guildId,
 	})
-	const client = new WebhookClient(req.body.id, req.body.token)
+	const client = new WebhookClient(dbRes.id, dbRes.token)
 	client.send("Testing message from the FAGC API!").catch(console.error)
 	res.status(200).json(dbRes)
 })

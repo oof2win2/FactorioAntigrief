@@ -17,7 +17,7 @@ async function SendWebhookMessages() {
 		client.send({ embeds: embeds, username: "FAGC Notifier" }).catch((error) => {
 			if (error.stack.includes("Unknown Webhook")) {
 				console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildId}. Removing webhook from database.`)
-				WebhookSchema.findByIdAndDelete(webhook.id)
+				WebhookSchema.findByIdAndDelete(webhook._id).exec()
 			}
 			else throw error
 		})

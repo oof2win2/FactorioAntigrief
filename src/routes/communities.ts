@@ -88,7 +88,7 @@ router.post("/setconfig", async (req, res) => {
 		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
 	delete OldConfig._id
 	let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, {
-		...OldConfig,
+		...OldConfig.toObject(),
 		...req.body,
 		guildId: OldConfig.guildId,
 		apikey: req.headers.apikey,
