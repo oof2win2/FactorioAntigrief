@@ -1,6 +1,6 @@
-import fetch from "node-fetch"
+import fetch from "isomorphic-fetch"
 import { ManagerOptions } from "../types/types"
-import { Rule, ApiID } from "../types/apitypes"
+import { Rule, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 

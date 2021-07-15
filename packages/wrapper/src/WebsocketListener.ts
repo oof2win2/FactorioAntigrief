@@ -1,77 +1,92 @@
 import { EventEmitter } from "events"
-import WebSocket from "ws"
-import { CommunityConfig, Revocation, Rule, Violation } from "./types"
+import WebSocket from "isomorphic-ws"
+import { CommunityConfig, Revocation, Rule, Report } from "fagc-api-types"
 
 // some typescript stuff so it is strictly typed
 export interface WebSockethandlerOpts {
 	uri: string
+	enabled?: boolean
 }
-export type WebSocketMessageType = 
+export type WebSocketMessageType =
 	| "guildConfig"
-	| "violation"
+	| "report"
 	| "revocation"
 	| "ruleCreated"
 	| "ruleRemoved"
+	| "reconnecting"
+	| "connected"
 export interface WebSocketMessage {
 	messageType: WebSocketMessageType
-	[key: string]: string|boolean|number
+	[key: string]: string | boolean | number
 }
 export declare interface WebSocketEvents {
-    "guildConfig": (message: CommunityConfig) => void
-    "violation": (message: Violation) => void
-    "revocation": (message: Revocation) => void
-    "ruleCreated": (message: Rule) => void
-    "ruleRemoved": (message: Rule) => void
+	"guildConfig": (message: CommunityConfig) => void
+	"report": (message: Report) => void
+	"revocation": (message: Revocation) => void
+	"ruleCreated": (message: Rule) => void
+	"ruleRemoved": (message: Rule) => void
+	
+	"reconnecting": (message: void) => void
+	"connected": (message: void) => void
 }
 
 declare interface WebSocketHandler {
-    on<E extends keyof WebSocketEvents>(event: E, listener: WebSocketEvents[E]): this
-    off<E extends keyof WebSocketEvents>(event: E, listener: WebSocketEvents[E]): this
-    once<E extends keyof WebSocketEvents>(event: E, listener: WebSocketEvents[E]): this
-    emit<E extends keyof WebSocketEvents>(event: E, ...args: Parameters<WebSocketEvents[E]>): boolean;
+	on<E extends keyof WebSocketEvents>(event: E, listener: WebSocketEvents[E]): this
+	off<E extends keyof WebSocketEvents>(event: E, listener: WebSocketEvents[E]): this
+	once<E extends keyof WebSocketEvents>(event: E, listener: WebSocketEvents[E]): this
+	emit<E extends keyof WebSocketEvents>(event: E, ...args: Parameters<WebSocketEvents[E]>): boolean;
 }
 
 class WebSocketHandler extends EventEmitter {
-    private socket: WebSocket
-    private opts: WebSockethandlerOpts
+	private socket: WebSocket
+	private opts: WebSockethandlerOpts
+	public guildid: string
 
-    constructor(opts: WebSockethandlerOpts) {
-        super()
-        this.opts = opts
-        this.socket = new WebSocket(opts.uri)
+	constructor(opts: WebSockethandlerOpts) {
+		super()
+		this.opts = opts
 
-        // handle socket messages
-        this.socket.on("message", (msg) => {
-            this.handleMessage(JSON.parse(msg.toString("utf-8")))
-        })
+		// don't create the websocket if it has not been enabled
+		if (!opts.enabled) return
 
-        this.socket.on("close", () => {
+		this.socket = new WebSocket(this.opts.uri)
+
+		// handle socket messages
+		this.socket.onmessage = (msg) => {
+			this.handleMessage(JSON.parse(msg.data as string))
+		}
+
+		// auto-reconnect for socket
+		this.socket.onclose = () => {
 			const recconect = setInterval(() => {
 				if (this.socket.readyState === this.socket.OPEN) {
-					console.log("connected")
+					this.emit("connected")
 					return clearInterval(recconect)
 				}
 				// if not connected, try connecting again
 				try {
 					this.socket = new WebSocket(opts.uri)
-				// eslint-disable-next-line no-empty
-				} catch (e) {}
-				console.log("reconnection attempt")
+					// eslint-disable-next-line no-empty
+				} catch (e) { }
+				this.emit("reconnecting")
 			}, 5000)
-		})
-
-        // auto-reconnect for socket
-    }
-    handleMessage(message: WebSocketMessage): void {
-        const toEmit = message
-        delete toEmit.messageType
-        switch (message.messageType) {
-            case "guildConfig": this.emit("guildConfig", toEmit as unknown as CommunityConfig); break;
-            case "violation": this.emit("violation", toEmit as unknown as Violation); break;
-            case "revocation": this.emit("revocation", toEmit as unknown as Revocation); break;
-            case "ruleCreated": this.emit("ruleCreated", toEmit as unknown as Rule); break;
-            case "ruleRemoved": this.emit("ruleRemoved", toEmit as unknown as Rule); break
-        }
-    }
+		}
+	}
+	handleMessage(message: WebSocketMessage): void {
+		const messageType = message.messageType
+		delete message.messageType
+		switch (messageType) {
+		case "guildConfig": this.emit("guildConfig", message as unknown as CommunityConfig); break
+		case "report": this.emit("report", message as unknown as Report); break
+		case "revocation": this.emit("revocation", message as unknown as Revocation); break
+		case "ruleCreated": this.emit("ruleCreated", message as unknown as Rule); break
+		case "ruleRemoved": this.emit("ruleRemoved", message as unknown as Rule); break
+		}
+	}
+	setGuildID(guildId: string): void {
+		this.socket?.send(Buffer.from(JSON.stringify({
+			guildId: guildId
+		})))
+	}
 }
 export default WebSocketHandler

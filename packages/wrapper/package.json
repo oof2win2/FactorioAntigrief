@@ -1,6 +1,6 @@
 {
   "name": "fagc-api-wrapper",
-  "version": "1.5.0",
+  "version": "1.8.0",
   "description": "Wrapper for the FAGC API",
   "main": "dist/index.js",
   "module": "es2020",
@@ -29,13 +29,16 @@
   "homepage": "https://github.com/oof2win2/fagc-api-wrapper#readme",
   "dependencies": {
     "@discordjs/collection": "^0.1.6",
-    "discord-api-types": "^0.18.1",
-    "node-fetch": "^2.6.1",
+    "axios": "^0.21.1",
+    "fagc-api-types": "^1.0.1",
+    "isomorphic-fetch": "^3.0.0",
+    "isomorphic-ws": "^4.0.1",
     "strict-uri-encode": "^2.0.0",
     "ws": "^7.5.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.18",
+    "@types/isomorphic-fetch": "0.0.35",
     "@types/mocha": "^8.2.2",
     "@types/strict-uri-encode": "^2.0.0",
     "@types/ws": "^7.4.5",

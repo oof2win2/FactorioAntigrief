@@ -9,7 +9,9 @@ export interface WrapperOptions {
 	apiurl: string
 	apikey?: string
 	socketurl: string
+	enableWebSocket?: boolean
 }
 export interface AddOptions {
 	id?: never
 }
+export type ApiID = string
