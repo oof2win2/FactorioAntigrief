@@ -50,7 +50,6 @@ router.get("/getlogs", async (req, res) => {
 		timestamp: { $gte: new Date(afterDate) }
 	}, {}, { limit: parseInt(req.query.limit) })
 	const logsFiltered = logsRaw.map((log) => {
-		log = log.toObject()
 		delete log.apikey
 		delete log.ip
 		if (log.responseBody && log.responseBody.key) delete log.responseBody.key

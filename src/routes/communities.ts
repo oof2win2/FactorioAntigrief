@@ -38,7 +38,6 @@ router.get("/getconfig", async (req, res) => {
 	})
 
 	if (CommunityConfig) {
-		CommunityConfig = CommunityConfig.toObject()
 		delete CommunityConfig?.apikey
 	}
 	res.status(200).json(CommunityConfig)
@@ -88,15 +87,14 @@ router.post("/setconfig", async (req, res) => {
 	if (!OldConfig)
 		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
 	delete OldConfig._id
-	// FIXME fix the non-existend findOneAndReplace
-	// let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, {
-	// 	...OldConfig,
-	// 	...req.body,
-	// 	guildId: OldConfig.guildId,
-	// 	apikey: req.headers.apikey,
-	// }, { new: true })
-	const CommunityConfig = await CommunityConfigModel.findOne({ guildId: OldConfig.guildId })
-	if (!CommunityConfig) return
+	let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, {
+		...OldConfig,
+		...req.body,
+		guildId: OldConfig.guildId,
+		apikey: req.headers.apikey,
+	}, { new: true })
+	if (!CommunityConfig)
+		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
 	await CommunityModel.findOneAndUpdate({ guildId: OldConfig.guildId }, {
 		guildId: OldConfig.guildId,
 		name: CommunityConfig.communityname,

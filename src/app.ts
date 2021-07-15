@@ -127,7 +127,7 @@ app.use((req: express.Request, res: express.Response) => {
 })
 
 // statistics
-require("./utils/Prometheus")
+import "./utils/Prometheus"
 
 app.listen(config.ports.api, () => {
 	console.log(`API listening on port ${config.ports.api}`)
