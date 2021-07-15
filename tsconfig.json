@@ -3,6 +3,9 @@
 		/* Allow JS for development only */
 		/* TODO: disable before prod */
 		"allowJs": true,
+
+		"noEmitHelpers": true,
+		"importHelpers": true,
 		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 		/* Basic Options */
 		// "incremental": true,                         /* Enable incremental compilation */

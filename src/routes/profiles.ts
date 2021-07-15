@@ -53,4 +53,4 @@ router.get("/getall", async (req, res) => {
 	res.status(200).json(profiles)
 })
 
-module.exports = router
+export default router

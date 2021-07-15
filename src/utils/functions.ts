@@ -3,8 +3,9 @@ import CommunitySchema from "../database/fagc/community"
 import fetch from "node-fetch"
 import config from "../../config"
 
-export async function getCommunity(api_key) {
+export async function getCommunity(api_key: string | undefined) {
 	const auth = await AuthSchema.findOne({ api_key: api_key })
+	if (!auth) return null
 	return CommunitySchema.findById(auth.communityId)
 }
 export async function checkUser(userid) {
@@ -41,7 +42,7 @@ export async function sendEmbedWait(webhookid, webhooktoken, content) {
 		const resRaw = await fetch(`https://discord.com/api/webhooks/${webhookid}/${webhooktoken}?wait=true`, {
 			method: "POST",
 			body: JSON.stringify(content),
-			headers: { "Content-type": "application/json",}
+			headers: { "Content-type": "application/json", }
 		})
 		if (!resRaw.ok) throw "not ok"
 		return resRaw.json()

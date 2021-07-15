@@ -25,4 +25,5 @@ router.get("/getallrevocations", async (req, res) => {
 	})
 	return res.status(200).json(revocations)
 })
-module.exports = router
+
+export default router

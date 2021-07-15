@@ -5,7 +5,7 @@ import WebSocket from "ws"
 const wss = new WebSocket.Server({ port: config.ports.websocket })
 import GuildConfigModel from "../database/bot/community"
 
-let WebhookQueue = []
+let WebhookQueue: any[] = []
 
 async function SendWebhookMessages() {
 	let embeds = WebhookQueue.slice(0, 10)

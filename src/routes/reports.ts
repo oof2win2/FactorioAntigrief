@@ -32,6 +32,7 @@ router.get("/getbyrule", async (req, res) => {
 })
 
 router.post("/create", async (req, res) => {
+	if (Array.isArray(req.headers.apikey)) return
 	if (req.body.playername === undefined || typeof (req.body.playername) !== "string" || !req.body.playername.length)
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}` })
 	if (req.body.adminId === undefined || typeof (req.body.adminId) !== "string" || !req.body.adminId.length)
@@ -67,6 +68,7 @@ router.post("/create", async (req, res) => {
 	return res.status(200).json(msg)
 })
 router.delete("/revoke", async (req, res) => {
+	if (Array.isArray(req.headers.apikey)) return
 	if (req.body.id === undefined || !validateUserString(req.body.id))
 		return res.status(400).json({ error: "Bad Request", description: `id expected ID, got ${typeof (req.body.id)} with value of ${req.body.id}` })
 	if (req.body.adminId === undefined || typeof (req.body.adminId) !== "string")
@@ -103,6 +105,7 @@ router.delete("/revoke", async (req, res) => {
 	res.status(200).json(msg)
 })
 router.delete("/revokeallname", async (req, res) => {
+	if (Array.isArray(req.headers.apikey)) return
 	if (req.body.adminId === undefined || typeof (req.body.adminId) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected string, got ${typeof (req.body.adminId)} with value of ${req.body.adminId}` })
 	if (req.body.playername === undefined || typeof (req.body.playername) !== "string")
@@ -143,4 +146,4 @@ router.delete("/revokeallname", async (req, res) => {
 	res.status(200).json(revocations)
 })
 
-module.exports = router
+export default router

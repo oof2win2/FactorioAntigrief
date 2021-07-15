@@ -14,7 +14,7 @@ export class ConfigClass {
 	@prop({ required: true })
 	communityname!: string
 
-	@prop()
+	@prop({ ref: () => CommunityClass })
 	communityId: Ref<CommunityClass>
 
 	@prop()
@@ -29,10 +29,10 @@ export class ConfigClass {
 	@prop()
 	moderatorRoleId!: string
 
-	@prop()
+	@prop({ type: [String] })
 	trustedCommunities?: [string]
 
-	@prop()
+	@prop({ type: [String] })
 	ruleFilters?: [string]
 }
 

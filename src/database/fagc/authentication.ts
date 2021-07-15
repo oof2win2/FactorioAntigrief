@@ -16,7 +16,7 @@ export class AuthClass {
 	@prop()
 	api_key!: string
 
-	@prop({ default: [] })
+	@prop({ default: [], type: [String] })
 	allowed_ips!: string[]
 }
 

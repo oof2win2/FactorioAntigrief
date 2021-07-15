@@ -19,4 +19,4 @@ router.get("/getid", async (req, res) => {
 	res.status(200).json(rule)
 })
 
-module.exports = router
+export default router

@@ -8,6 +8,10 @@ import logger from "./utils/log"
 import removeId from "./utils/removeId"
 import authUser from "./utils/authUser"
 
+// import Sentry from "@sentry/node"
+import * as Sentry from "@sentry/node"
+import * as Tracing from "@sentry/tracing"
+
 import ruleRouter from "./routes/rules"
 import communityRouter from "./routes/communities"
 import reportRouter from "./routes/reports"
@@ -15,15 +19,12 @@ import informaticsRouter from "./routes/informatics"
 import revocationRouter from "./routes/revocations"
 import profileRouter from "./routes/profiles"
 
-const app = express()
-
-import Sentry from "@sentry/node"
-import Tracing from "@sentry/tracing"
-
 import config from "../config"
 
 // extenders so they can be used anywhere
-require("./utils/extenders")
+import "./utils/extenders"
+
+const app = express()
 
 Sentry.init({
 	dsn: config.sentryLink,
