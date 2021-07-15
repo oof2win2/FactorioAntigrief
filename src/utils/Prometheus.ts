@@ -1,11 +1,12 @@
 // Clone from https://github.com/DistroByte/AwF-Bot/blob/master/base/Prometheus.js
 
-const promClient = require("prom-client")
-const http = require("http")
-const config = require("../../config")
-const ConfigModel = require("../database/bot/community")
-const CommunityModel = require("../database/fagc/community")
-const RuleModel = require("../database/fagc/rule")
+import promClient from "prom-client"
+import http from "http"
+import config from "../../config"
+import ConfigModel, { ConfigClass } from "../database/bot/community"
+import CommunityModel, { CommunityClass } from "../database/fagc/community"
+import RuleModel from "../database/fagc/rule"
+import { DocumentType } from "@typegoose/typegoose"
 
 const collectDefaultMetrics = promClient.collectDefaultMetrics
 const Registry = promClient.Registry
@@ -27,17 +28,17 @@ register.registerMetric(communityGauge)
 register.registerMetric(ruleGauge)
 
 // Format community trust from config
-const trustedCommunities = async (communities) => {
-	let rawResults = []
+const trustedCommunities = async (communities: Omit<DocumentType<ConfigClass>, "apikey">[]) => {
+	let rawResults: { id: string, count: number }[] = []
 	const CachedCommunities = new Map()
-	const getOrFetchCommunity = async (communityId) => {
+	const getOrFetchCommunity = async (communityId: string): Promise<DocumentType<CommunityClass>> => {
 		const cachedCommunity = CachedCommunities.get(communityId)
 		if (cachedCommunity) return cachedCommunity
 		const community = CachedCommunities.set(communityId, CommunityModel.findOne({id: communityId})).get(communityId)
 		return community
 	}
 	communities.forEach((community) => {
-		community.trustedCommunities.forEach((communityId) => {
+		community.trustedCommunities?.forEach((communityId) => {
 			let found = false
 			rawResults.forEach((trusted) => {
 				if (trusted.id === communityId) {
@@ -59,8 +60,8 @@ const trustedCommunities = async (communities) => {
 	return await Promise.all(results)
 }
 // Format rule trust from config
-const trustedRules = async (communities) => {
-	let rawResults = []
+const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey">[]) => {
+	let rawResults: { id: string, count: number }[] = []
 	const CachedRules = new Map()
 	const getOrFetchRule = async (ruleid) => {
 		const cachedRule = CachedRules.get(ruleid)
@@ -69,7 +70,7 @@ const trustedRules = async (communities) => {
 		return rule
 	}
 	communities.forEach((community) => {
-		community.ruleFilters.forEach((ruleID) => {
+		community.ruleFilters?.forEach((ruleID) => {
 			let found = false
 			rawResults.forEach((trusted) => {
 				if (trusted.id === ruleID) {
@@ -93,8 +94,7 @@ const trustedRules = async (communities) => {
 
 // collect statistics and put them to the server
 const collectStatistics = async () => {
-	let communitySettings = await ConfigModel.find({})
-		.then((configs) => configs.map((CommunityConfig) => CommunityConfig.toObject()))
+	let communitySettings = await ConfigModel.find({}).exec()
 		.then((configs) => configs.map((CommunityConfig) => { delete CommunityConfig.apikey; return CommunityConfig }))
 	let rules = await trustedRules(communitySettings)
 	let communities = await trustedCommunities(communitySettings)
@@ -122,10 +122,11 @@ collectStatistics() // initial statistics collection
 
 // Server for data collection
 http.createServer(async (req, res) => {
+	if (!req.url) return
 	if (req.url.endsWith("/metrics")) {
 		return res.end(await register.metrics())
 	}
-}).listen(config.promPort)
+}).listen(config.ports.prometheus)
 
 module.exports = {
 	promClient,

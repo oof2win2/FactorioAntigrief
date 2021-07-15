@@ -1,27 +1,30 @@
-const express = require("express")
-const path = require("path")
-const cookieParser = require("cookie-parser")
-const morgan = require("morgan")
+import express from "express"
+import path from "path"
+import cookieParser from "cookie-parser"
+import morgan from "morgan"
+import cors from "cors"
 
-const logger = require("./utils/log")
-const removeId = require("./utils/removeId")
-const authUser = require("./utils/authUser")
+import logger from "./utils/log"
+import removeId from "./utils/removeId"
+import authUser from "./utils/authUser"
 
-const ruleRouter = require("./routes/rules")
-const communityRouter = require("./routes/communities")
-const violationRouter = require("./routes/violations")
-const informaticsRouter = require("./routes/informatics")
-const revocationRouter = require("./routes/revocations")
+// import Sentry from "@sentry/node"
+import * as Sentry from "@sentry/node"
+import * as Tracing from "@sentry/tracing"
 
-const app = express()
-const Sentry = require("@sentry/node")
-const Tracing = require("@sentry/tracing")
+import ruleRouter from "./routes/rules"
+import communityRouter from "./routes/communities"
+import reportRouter from "./routes/reports"
+import informaticsRouter from "./routes/informatics"
+import revocationRouter from "./routes/revocations"
+import profileRouter from "./routes/profiles"
 
-const config = require("../config")
+import config from "../config"
 
 // extenders so they can be used anywhere
-require("./utils/extenders")
+import "./utils/extenders"
 
+const app = express()
 
 Sentry.init({
 	dsn: config.sentryLink,
@@ -45,20 +48,26 @@ app.use(Sentry.Handlers.requestHandler())
 app.use(Sentry.Handlers.tracingHandler())
 
 // API rate limits
-const rateLimit = require("express-rate-limit")
+import rateLimit from "express-rate-limit"
 const localIPs = [
 	"::ffff:127.0.0.1",
 	"::1"
 ]
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,	// 15 minutes
-	max: 100,	// 100 requests in timeframe
+	max: 10000,	// 10000 requests in timeframe
 	// lookup: 'connection.remoteAddress',
 	skip: (req) => {
 		const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-		if (localIPs.includes(ip)) return true
+		if (!ip) return false
+		if (localIPs.includes(Array.isArray(ip) ? ip[0] : ip)) return true
 		else return false
-	}
+	},
+	message: JSON.stringify({
+		error: "Too Many Requests",
+		description: "You have sent too many requests. Please try again laterp"
+	}),
+	statusCode: 429,
 })
 app.use(apiLimiter)
 
@@ -67,6 +76,7 @@ app.set("views", path.join(__dirname, "views"))
 app.set("view engine", "jade")
 
 // app.set('trust proxy', true)
+app.use(cors())
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -78,10 +88,12 @@ app.use(logger)
 app.use(removeId)
 
 // middleware for authentication
-const authMiddleware = async (req, res, next) => {
+const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 	const authenticated = await authUser(req)
 	// When running on localhost, IP shows v4 as v6. use ngrok to test IP stuff locally
 	// console.debug(req.headers['x-forwarded-for'] || req.socket.remoteAddress) // get origin IP
+	if (authenticated === 400)
+		return res.status(400).json({error: "AuthenticationError", description: "apikey was an array"})
 	if (authenticated === 404)
 		return res.status(404).json({error: "AuthenticationError", description: "API key is wrong"})
 	if (authenticated === 401)
@@ -96,8 +108,9 @@ app.use("/v1/*", authMiddleware)
 
 app.use("/v1/rules", ruleRouter)
 app.use("/v1/communities", communityRouter)
-app.use("/v1/violations", violationRouter)
+app.use("/v1/reports", reportRouter)
 app.use("/v1/revocations", revocationRouter)
+app.use("/v1/profiles", profileRouter)
 
 app.get("/v1", (req, res) => {
 	res.status(200).json({message: "FAGC api v1"})
@@ -109,11 +122,13 @@ app.get("/", (req, res) => {
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler())
 
-app.use((req, res) => {
+app.use((req: express.Request, res: express.Response) => {
 	res.status(404).json({ error: "404 Not Found", message: `Path ${req.path} does not exist on this API` })
 })
 
 // statistics
-require("./utils/Prometheus")
+import "./utils/Prometheus"
 
-module.exports = app
+app.listen(config.ports.api, () => {
+	console.log(`API listening on port ${config.ports.api}`)
+})
