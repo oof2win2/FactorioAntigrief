@@ -1,3 +1,4 @@
+
 ## [1.8.1] - [2021-07-15]
 ### Bugfixes
 - Removed an unnecessary `console.log`
