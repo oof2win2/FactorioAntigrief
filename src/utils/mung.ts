@@ -31,7 +31,7 @@ const mung = {
 				let originalJson = json
 				res.json = original
 				if (res.headersSent) return res
-				if (res.statusCode >= 400) return original.call(this, json)
+				if (res.statusCode >= 400) return res.json(json)
 	
 				// Run the munger
 				try {
@@ -55,50 +55,9 @@ const mung = {
 					return res.send(String(json))
 				}
 	
-				return original.call(this, json)
+				return res.json(json)
 			}
 			res.json = json_hook
-	
-			next && next()
-		}
-	},
-	jsonAsync: function (fn: TransformAsync, options: Options = {mungError: true}) {
-		return function (req: Request, res: Response, next: NextFunction) {
-			let original = res.json
-			let mungError = options.mungError
-	
-			function json_async_hook(json) {
-				let originalJson = json
-				res.json = original
-				if (res.headersSent)
-					return
-				if (!mungError && res.statusCode >= 400)
-					return original.call(this, json)
-				try {
-					fn(json, req, res)
-						.then(json => {
-							if (res.headersSent)
-								return
-	
-							if (json === null || json === undefined)
-								return res.status(404).json(null)
-	
-							// If munged scalar value, then text/plain
-							if (json !== originalJson && isScalar(json)) {
-								res.set("content-type", "text/plain")
-								return res.send(String(json))
-							}
-	
-							return original.call(this, json)
-						})
-						.catch(e => onError(e, req, res, next))
-				} catch (e) {
-					onError(e, req, res, next)
-				}
-	
-				return faux_fin
-			}
-			res.json = json_async_hook
 	
 			next && next()
 		}

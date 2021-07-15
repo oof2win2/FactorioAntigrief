@@ -7,7 +7,8 @@ export function getUserStringFromID(string: string): string {
 }
 
 // validate IDs that are visible to users
-export function validateUserString(string: string): boolean {
+export function validateUserString(string: unknown): string is string {
+	if (!string) return false
 	if (typeof string !== "string") return false // it's not a string so it's obviously wrong
 	if (string.length !== 7) return false
 	return true

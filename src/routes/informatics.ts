@@ -1,8 +1,8 @@
-const express = require("express")
+import express from "express"
 const router = express.Router()
-const WebhookSchema = require("../database/fagc/webhook")
-const LogSchema = require("../database/fagc/log")
-const { WebhookClient } = require("discord.js")
+import WebhookSchema from "../database/fagc/webhook"
+import LogSchema from "../database/fagc/log"
+import { WebhookClient } from "discord.js"
 
 /* GET home page. */
 router.get("/", function (req, res) {
@@ -19,7 +19,6 @@ router.post("/addwebhook", async (req, res) => {
 	if (found)
 		return res.status(403).json({ error: "Forbidden", description: `webhook in the guild ${req.body.guildId} already exists` })
 	const dbRes = await WebhookSchema.create({
-		id: req.body.id,
 		token: req.body.token,
 		guildId: req.body.guildId,
 	})
@@ -42,12 +41,13 @@ router.delete("/removewebhook", async (req, res) => {
 	res.status(200).json(removed)
 })
 router.get("/getlogs", async (req, res) => {
-	if (req.query.limit === undefined || isNaN(req.query.limit))
+	if (req.query.limit === undefined || typeof req.query.limit !== "number")
 		return res.status(400).json({ error: "Bad Request", description: `limit expected number, got ${typeof (req.query.limit)} with value ${req.query.limit}` })
-	if (req.query.afterDate !== undefined && isNaN(req.query.afterDate))
+	if (req.query.afterDate !== undefined && typeof (parseInt(<string>req.query.afterDate)) !== "number")
 		return res.status(400).json({ error: "Bad Request", description: `afterDate expected nothing or number, got ${typeof (req.query.afterDate)} with value ${req.query.afterDate}` })
+	const afterDate = req.query.afterDate ? <number><unknown>req.query.afterDate : 0
 	const logsRaw = await LogSchema.find({
-		timestamp: { $gte: parseInt(req.query.afterDate || 0) }
+		timestamp: { $gte: new Date(afterDate) }
 	}, {}, { limit: parseInt(req.query.limit) })
 	const logsFiltered = logsRaw.map((log) => {
 		log = log.toObject()

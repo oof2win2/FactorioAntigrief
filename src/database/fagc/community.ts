@@ -14,7 +14,7 @@ import { getUserStringFromID } from "../../utils/functions-databaseless"
 	next()
 })
 export class CommunityClass {
-	@prop()
+	@prop({ _id: false })
 	id!: string
 
 	@prop()
@@ -28,4 +28,12 @@ export class CommunityClass {
 }
 
 const CommunityModel = getModelForClass(CommunityClass)
+// FIXME: fix the findOneAndReplace could not be found issue
+// CommunityModel.findOne({}).then((found) => {
+// 	if (!found) return
+// 	CommunityModel.findOneAndReplace({contact: found.contact}, {
+// 		...found,
+// 		contact: "different contact"
+// 	})
+// })
 export default CommunityModel

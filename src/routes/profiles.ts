@@ -1,7 +1,9 @@
-const express = require("express")
+import { DocumentType } from "@typegoose/typegoose"
+import express from "express"
+import ReportModel, { ReportClass } from "../database/fagc/report"
+import { validateUserString } from "../utils/functions-databaseless"
+
 const router = express.Router()
-const ReportModel = require("../database/fagc/report")
-const { validateUserString } = require("../utils/functions-databaseless")
 
 /* GET home page. */
 router.get("/", function (req, res) {
@@ -27,9 +29,13 @@ router.get("/getcommunity", async (req, res) => {
 router.get("/getall", async (req, res) => {
 	if (!req.query.playername || typeof(req.query.playername) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}` })
-	const allReports = await ReportModel.find({playername: req.query.playername}).then(reports=>reports.map(r=>r.toObject()))
-	const profilesMap = new Map()
-	allReports.forEach(report => {
+	const allReports = await ReportModel.find({playername: req.query.playername})
+	const profilesMap = new Map<string, {
+		playername: string
+		communityId: string,
+		reports: DocumentType<ReportClass>[]
+	}>()
+	allReports.forEach((report: DocumentType<ReportClass>) => {
 		let profile = profilesMap.get(report.communityId)
 		if (profile) {
 			profile.reports.push(report)
@@ -42,8 +48,8 @@ router.get("/getall", async (req, res) => {
 			})
 		}
 	})
-	const profiles = []
-	profilesMap.forEach(profile => profiles.push(profile))
+	const profiles: { playername: string, communityId: string, reports: DocumentType<ReportClass>[] }[] = []
+	profilesMap.forEach((profile) => profiles.push(profile))
 	res.status(200).json(profiles)
 })
 

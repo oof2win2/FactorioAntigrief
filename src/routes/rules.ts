@@ -1,7 +1,8 @@
-const express = require("express")
+import express from "express"
+import RuleModel from "../database/fagc/rule"
+import { validateUserString } from "../utils/functions-databaseless"
+
 const router = express.Router()
-const RuleModel = require("../database/fagc/rule")
-const { validateUserString } = require("../utils/functions-databaseless")
 
 /* GET home page. */
 router.get("/", function (req, res) {

@@ -11,11 +11,11 @@ export default mung.json(function(body: any, req: express.Request) {
 		? req.headers["x-forwarded-for"][0]
 		: req.headers["x-forwarded-for"]
 		|| req.socket.remoteAddress
-	if (ip.includes(":") && ip !== "::1") ip = ip.slice(0, ip.indexOf(":"))
+	if (ip?.includes(":") && ip !== "::1") ip = ip.slice(0, ip.indexOf(":"))
 	LogSchema.create({
 		timestamp: new Date(),
 		apikey: req.headers.apikey as string,
-		ip: ip,
+		ip: ip || "unknown",
 		responseBody: body,
 		requestBody: req.body,
 		endpointAddress: req.originalUrl

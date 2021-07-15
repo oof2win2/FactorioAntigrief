@@ -8,6 +8,9 @@ import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 	schemaOptions: {
 		collection: "logs",
 	},
+	options: {
+		allowMixed: 0 // allow mixed types
+	}
 })
 @pre<LogClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
@@ -21,16 +24,16 @@ export class LogClass {
 	timestamp!: Date
 
 	@prop()
-	apikey!: string
+	apikey: string | undefined
 
 	@prop({type: String})
-	ip!: string
+	ip: string | undefined
 
 	@prop()
-	responseBody!: Object
+	responseBody!: any
 
 	@prop()
-	requestBody!: Object
+	requestBody!: any
 
 	@prop()
 	endpointAddress!: string

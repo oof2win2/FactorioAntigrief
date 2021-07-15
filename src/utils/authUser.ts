@@ -21,6 +21,7 @@ const authenticate = async (req: express.Request): Promise<number> => {
 		? req.headers["x-forwarded-for"][0]
 		: req.headers["x-forwarded-for"]
 		|| req.socket.remoteAddress
+	if (!ip) return 401 // no ip so no way to check
 	if (dbRes.allowed_ips[0] == undefined) return 200
 	else if (dbRes.allowed_ips.includes(ip)) return 200 // API key is correct and IP adress is correct
 	return 401  // API key is correct, but wrong IP adress

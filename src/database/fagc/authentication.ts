@@ -10,13 +10,13 @@ import { CommunityClass } from "./community"
 	}
 })
 export class AuthClass {
-	@prop()
+	@prop({ ref: () => CommunityClass })
 	communityId: Ref<CommunityClass>
 
 	@prop()
 	api_key!: string
 
-	@prop()
+	@prop({ default: [] })
 	allowed_ips!: string[]
 }
 
