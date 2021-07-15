@@ -2,11 +2,12 @@
 
 import promClient from "prom-client"
 import http from "http"
-import config from "../../config"
+import config from "../config"
 import ConfigModel, { ConfigClass } from "../database/bot/community"
 import CommunityModel, { CommunityClass } from "../database/fagc/community"
 import RuleModel from "../database/fagc/rule"
 import { DocumentType } from "@typegoose/typegoose"
+import ENV from "./env"
 
 const collectDefaultMetrics = promClient.collectDefaultMetrics
 const Registry = promClient.Registry
@@ -95,7 +96,7 @@ const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey
 // collect statistics and put them to the server
 const collectStatistics = async () => {
 	let communitySettings = await ConfigModel.find({}).exec()
-		.then((configs) => configs.map((CommunityConfig) => { delete CommunityConfig.apikey; return CommunityConfig }))
+		.then((configs) => configs.map((CommunityConfig) => { CommunityConfig.set("apikey", null); return CommunityConfig }))
 	let rules = await trustedRules(communitySettings)
 	let communities = await trustedCommunities(communitySettings)
 
@@ -126,7 +127,7 @@ http.createServer(async (req, res) => {
 	if (req.url.endsWith("/metrics")) {
 		return res.end(await register.metrics())
 	}
-}).listen(config.ports.prometheus)
+}).listen(ENV.PROMETHEUS_PORT)
 
 module.exports = {
 	promClient,

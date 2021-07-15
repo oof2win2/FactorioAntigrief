@@ -1,7 +1,8 @@
 import { Mongoose } from "mongoose"
 // const mongoose = require("mongoose")
 // const mongodb = require("mongo-mock")
-import config, { ApiConfig } from "../../config"
+import config, { ApiConfig } from "../config"
+import ENV from "../utils/env"
 
 class ConnectionManager {
 	connections: ({
@@ -12,7 +13,7 @@ class ConnectionManager {
 		this.connections = config.dbConnections.map((connectionConfig) => {
 			try {
 				let connection = new Mongoose()
-				connection.connect(config.mongoURI, connectionConfig).then(() => {
+				connection.connect(ENV.MONGOURI, connectionConfig).then(() => {
 					console.log(`Database ${connectionConfig.dbName} connected!`)
 				}).catch((e: unknown) => {
 					console.error(`Database ${connectionConfig.dbName} errored: ${e}`)

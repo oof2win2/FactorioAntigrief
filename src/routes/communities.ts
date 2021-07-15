@@ -38,7 +38,7 @@ router.get("/getconfig", async (req, res) => {
 	})
 
 	if (CommunityConfig) {
-		delete CommunityConfig?.apikey
+		CommunityConfig.set("apikey", null)
 	}
 	res.status(200).json(CommunityConfig)
 })
@@ -100,7 +100,7 @@ router.post("/setconfig", async (req, res) => {
 		name: CommunityConfig.communityname,
 		contact: CommunityConfig.contact,
 	})
-	delete CommunityConfig.apikey
+	CommunityConfig.set("apikey", null)
 	communityConfigChanged(CommunityConfig)
 	res.status(200).json(CommunityConfig)
 })

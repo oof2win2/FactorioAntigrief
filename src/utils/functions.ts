@@ -1,20 +1,15 @@
 import AuthSchema from "../database/fagc/authentication"
 import CommunitySchema from "../database/fagc/community"
 import fetch from "node-fetch"
-import config from "../../config"
+import discord from "./discord"
 
 export async function getCommunity(api_key: string | undefined) {
 	const auth = await AuthSchema.findOne({ api_key: api_key })
 	if (!auth) return null
 	return CommunitySchema.findById(auth.communityId)
 }
-export async function checkUser(userid) {
-	const user = await fetch(`https://discord.com/api/users/${userid}`, {
-		headers: {
-			"Content-type": "application/json",
-			"Authorization": `Bot ${config.botToken}`
-		}
-	}).then((r) => r.json())
+export async function checkUser(userid: string) {
+	const user = await discord.users.fetch(userid)
 	if (!user || !user.id) return false
 	return true
 }
