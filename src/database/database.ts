@@ -6,8 +6,8 @@ import config, { ApiConfig } from "../../config"
 class ConnectionManager {
 	connections: ({
 		c: typeof import("mongoose")
-		n?: string
-	}|undefined)[]
+		n: string
+	} | undefined)[]
 	constructor(config: ApiConfig) {
 		this.connections = config.dbConnections.map((connectionConfig) => {
 			try {
@@ -19,7 +19,7 @@ class ConnectionManager {
 				})
 				return {
 					c: connection,
-					n: connectionConfig.dbName
+					n: connectionConfig.dbName!
 				}
 			} catch (e) {
 				console.error(`Database ${connectionConfig.dbName} errored: ${e}`)

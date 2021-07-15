@@ -94,10 +94,8 @@ const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey
 
 // collect statistics and put them to the server
 const collectStatistics = async () => {
-	try {
 	let communitySettings = await ConfigModel.find({}).exec()
 		.then((configs) => configs.map((CommunityConfig) => { delete CommunityConfig.apikey; return CommunityConfig }))
-	console.log("a")
 	let rules = await trustedRules(communitySettings)
 	let communities = await trustedCommunities(communitySettings)
 
@@ -113,8 +111,6 @@ const collectStatistics = async () => {
 			contact: community.community.contact
 		}, community.count)
 	})
-	console.log("prometheus")
-} catch (e) {console.error(e)}
 }
 
 setInterval(async () => {
