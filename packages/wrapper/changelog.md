@@ -1,4 +1,4 @@
-## UNPUBLISHED
+## [1.8.0] - [2021-07-15]
 ### Changed
 - Changed the websocket to be disabled by default
 - Started using `fagc-api-types` for type declarations of the API
