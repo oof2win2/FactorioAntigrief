@@ -1,3 +1,7 @@
+## [1.8.1] - [2021-07-15]
+### Bugfixes
+- Removed an unnecessary `console.log`
+
 ## [1.8.0] - [2021-07-15]
 ### Changed
 - Changed the websocket to be disabled by default
