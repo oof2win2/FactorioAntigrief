@@ -14,3 +14,4 @@ export interface WrapperOptions {
 export interface AddOptions {
 	id?: never
 }
+export type ApiID = string

@@ -1,9 +1,15 @@
+## UNPUBLISHED
+### Changed
+- Changed the websocket to be disabled by default
+- Started using `fagc-api-types` for type declarations of the API
+- Reformatted changelog
+
 ## [1.7.3] - [2021-06-23]
-## Changed
+### Changed
 - Remove `axios` and add in `isomorphic-fetch` as `axios` caused issues when it threw errors on 404s, which are used sometimes on some endpoints
 
 ## [1.7.0] - [2021-06-22]
-## Changed
+### Changed
 - Removed `node-fetch` and instead installed `axios` as node-fetch was behaving funky with the browser
 
 ## [1.6.4] - [2021-06-22]

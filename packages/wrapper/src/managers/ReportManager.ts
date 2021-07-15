@@ -1,6 +1,6 @@
 import fetch from "isomorphic-fetch"
 import { ManagerOptions, RequestConfig } from "../types/types"
-import { ApiID, CreateReport, Revocation, Report } from "../types/apitypes"
+import { Revocation, Report, CreateReport, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError, UnsuccessfulRevocationError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"

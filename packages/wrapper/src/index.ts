@@ -3,10 +3,10 @@ import InfoManager from "./managers/InfoManager"
 import ProfileManager from "./managers/ProfileManager"
 import RevocationManager from "./managers/RevocationManager"
 import { RuleManager } from "./managers/RuleManager"
-import { Revocation } from "./types/apitypes"
 import { ManagerOptions, WrapperOptions } from "./types/types"
 import ReportManager from "./managers/ReportManager"
 import WebSocketHandler from "./WebsocketListener"
+import { Revocation } from "fagc-api-types"
 
 // export types
 export * from "./types/index"
@@ -41,7 +41,7 @@ export class FAGCWrapper {
 		
 		this.websocket = new WebSocketHandler({
 			uri: options.socketurl,
-			disabled: options.enableWebSocket
+			enabled: options.enableWebSocket
 		})
 	}
 }

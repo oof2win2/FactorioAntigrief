@@ -1,11 +1,11 @@
 import { EventEmitter } from "events"
 import WebSocket from "isomorphic-ws"
-import { CommunityConfig, Revocation, Rule, Report } from "./types"
+import { CommunityConfig, Revocation, Rule, Report } from "fagc-api-types"
 
 // some typescript stuff so it is strictly typed
 export interface WebSockethandlerOpts {
 	uri: string
-	disabled?: boolean
+	enabled?: boolean
 }
 export type WebSocketMessageType =
 	| "guildConfig"
@@ -46,8 +46,8 @@ class WebSocketHandler extends EventEmitter {
 		super()
 		this.opts = opts
 
-		// don't create the websocket if it has been set to be disabled
-		if (opts.disabled) return
+		// don't create the websocket if it has not been enabled
+		if (!opts.enabled) return
 
 		this.socket = new WebSocket(this.opts.uri)
 

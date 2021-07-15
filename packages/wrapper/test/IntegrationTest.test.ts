@@ -1,5 +1,6 @@
 import config from "./testconfig"
-import { FAGCWrapper, Revocation, Report, CommunityConfig } from "../src/index"
+import { FAGCWrapper } from "../src/index"
+import { Revocation, Report, CommunityConfig } from "fagc-api-types"
 
 import { expect } from "chai"
 
@@ -22,8 +23,8 @@ const testStuff = {
 		playername: "Windsinger",
 	},
 	reportCount: 5,
-	webhookId: "855703411228147743",
-	webhookToken: "pbMuJ4CN-R-YZTsUL2JCLGHJ-bD7zIjLbMT_AV45ROjiRyJughxvgJ5Mc1VZ1cIAhLQ2"
+	webhookId: "865254241533820959",
+	webhookToken: "m_ROP6uDvag5okV9YcrC9KkxBZ5sWgRDTCcnhrVdQGCi78W29-5jyflOsl1M6PFqoimn"
 }
 
 describe("ApiWrapper", () => {

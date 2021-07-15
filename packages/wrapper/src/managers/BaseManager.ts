@@ -1,5 +1,5 @@
 import Collection from "@discordjs/collection"
-import { Common } from "../types/apitypes"
+import { Common } from "fagc-api-types"
 import { AddOptions, ManagerOptions } from "../types/types"
 
 export default class BaseManager<HoldsWithId extends Common> {
