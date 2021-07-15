@@ -18,7 +18,7 @@ const connection = database.connections.find((connection) => connection?.n === "
 	next()
 })
 export class LogClass {
-	@prop()
+	@prop({ _id: false, type: String })
 	id!: string
 
 	@prop()
@@ -27,7 +27,7 @@ export class LogClass {
 	@prop()
 	apikey: string | undefined
 
-	@prop({type: String})
+	@prop({ type: String })
 	ip: string | undefined
 
 	@prop()

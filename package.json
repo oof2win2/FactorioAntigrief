@@ -2,12 +2,13 @@
   "name": "fagc-backend",
   "version": "1.0.0",
   "private": true,
-  "main": "src/app.ts",
+  "main": "dist/src/app.js",
   "scripts": {
     "start": "node ./src/bin/www",
     "dev": "nodemon --inspect ./src/bin/www",
     "lint": "eslint src/ --fix",
-    "postinstall": "install-types"
+    "postinstall": "install-types",
+	"pm2": "tsc && pm2 start pm2.config.js"
   },
   "dependencies": {
     "@sentry/node": "^6.9.0",

@@ -15,7 +15,7 @@ const connection = database.connections.find((connection) => connection?.n === "
 	next()
 })
 export class ReportClass {
-	@prop()
+	@prop({_id: false})
 	id!: string
 
 	@prop()
