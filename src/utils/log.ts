@@ -14,7 +14,7 @@ export default mung.json(function(body: any, req: express.Request) {
 	if (ip?.includes(":") && ip !== "::1") ip = ip.slice(0, ip.indexOf(":"))
 	LogSchema.create({
 		timestamp: new Date(),
-		apikey: req.headers.apikey as string,
+		apikey: req.headers["authorization"] as string,
 		ip: ip || "unknown",
 		responseBody: body,
 		requestBody: req.body,

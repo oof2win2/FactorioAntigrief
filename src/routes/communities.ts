@@ -10,9 +10,9 @@ import { communityConfigChanged } from "../utils/info"
 const router = express.Router()
 
 router.get("/getown", async (req, res) => {
-	if (req.headers.apikey === undefined)
+	if (req.headers["authorization"] === undefined)
 		return res.status(400).json({ error: "Bad Request", description: "No way to find you community without an API key" })
-	const auth = await AuthModel.findOne({ api_key: req.headers.apikey as string })
+	const auth = await AuthModel.findOne({ api_key: req.headers["authorization"] as string })
 	if (!auth)
 		return res.status(404).json({ error: "Not Found", description: "Community with your API key was not found" })
 	const dbRes = await CommunityModel.findById(auth.communityId) // Internal search
@@ -82,16 +82,16 @@ router.post("/setconfig", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `contact must be Discord User snowflake, got value ${req.body.contact}, which isn't a Discord user` })
 
 	let OldConfig = await CommunityConfigModel.findOne({
-		apikey: req.headers.apikey as string
+		apikey: req.headers["authorization"] as string
 	})
 	if (!OldConfig)
 		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
-	delete OldConfig._id
+	console.log(await CommunityConfigModel.findOne({ guildId: OldConfig.guildId }))
 	let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, {
 		...OldConfig.toObject(),
 		...req.body,
 		guildId: OldConfig.guildId,
-		apikey: req.headers.apikey,
+		apikey: req.headers["authorization"],
 	}, { new: true })
 	if (!CommunityConfig)
 		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
@@ -110,14 +110,14 @@ router.post("/addwhitelist", async (req, res) => {
 	if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}` })
 	// FIXME after express type validation
-	const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey as string }, { $push: { "allowed_ips": req.body.ip } }, { new: true })
+	const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers["authorization"] as string }, { $push: { "allowed_ips": req.body.ip } }, { new: true })
 	res.status(200).json(dbRes)
 })
 router.delete("/removewhitelist", async (req, res) => {
 	if (req.body.ip === undefined || typeof (req.body.ip) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `ip expected string, got ${typeof (req.body.ip)}` })
 	// FIXME after express type validation
-	const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers.apikey as string }, { $pull: { "allowed_ips": req.body.ip } }, { new: true })
+	const dbRes = await AuthModel.findOneAndUpdate({ api_key: req.headers["authorization"] as string }, { $pull: { "allowed_ips": req.body.ip } }, { new: true })
 	res.status(200).json(dbRes)
 })
 

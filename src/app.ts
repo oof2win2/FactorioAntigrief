@@ -1,5 +1,8 @@
 process.chdir(__dirname)
 
+// extenders so they can be used anywhere
+// import "./utils/extenders"
+
 import express from "express"
 import path from "path"
 import cookieParser from "cookie-parser"
@@ -10,7 +13,6 @@ import logger from "./utils/log"
 import removeId from "./utils/removeId"
 import authUser from "./utils/authUser"
 
-// import Sentry from "@sentry/node"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 
@@ -22,9 +24,6 @@ import revocationRouter from "./routes/revocations"
 import profileRouter from "./routes/profiles"
 
 import ENV from "./utils/env"
-
-// extenders so they can be used anywhere
-import "./utils/extenders"
 
 const app = express()
 

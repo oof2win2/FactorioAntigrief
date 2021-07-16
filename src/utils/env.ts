@@ -6,7 +6,7 @@ dotenv.config({
 const ENV = cleanEnv(process.env, {
 	MONGOURI: str({ example: "mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName" }),
 	EXPRESS_PORT: port({ default: 3000 }),
-	WS_PORT: port({ default: 8000 }),
+	WS_PORT: port({ default: 8000, desc: "WebSocket port" }),
 	DISCORD_BOTTOKEN: str({ desc: "Your Discord bot token" }),
 	SENTRY_LINK: str({ desc: "Your sentry.io link" }),
 	PROMETHEUS_PORT: port({ default: 9110, desc: "Port where Prometheus should run for statistics etc." })

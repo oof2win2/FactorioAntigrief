@@ -32,7 +32,7 @@ router.get("/getbyrule", async (req, res) => {
 })
 
 router.post("/create", async (req, res) => {
-	if (Array.isArray(req.headers.apikey)) return
+	if (Array.isArray(req.headers["authorization"])) return
 	if (req.body.playername === undefined || typeof (req.body.playername) !== "string" || !req.body.playername.length)
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}` })
 	if (req.body.adminId === undefined || typeof (req.body.adminId) !== "string" || !req.body.adminId.length)
@@ -51,7 +51,7 @@ router.post("/create", async (req, res) => {
 	} catch (error) {
 		return res.status(400).json({ error: "Bad Request", description: "Rule must be a RuleID" })
 	}
-	const community = await getCommunity(req.headers.apikey)
+	const community = await getCommunity(req.headers["authorization"])
 	if (!community) return res.status(400).json({error: "Bad Request", description: "apikey does not match a community"})
 	const report = await ReportModel.create({
 		playername: req.body.playername,
@@ -68,7 +68,7 @@ router.post("/create", async (req, res) => {
 	return res.status(200).json(msg)
 })
 router.delete("/revoke", async (req, res) => {
-	if (Array.isArray(req.headers.apikey)) return
+	if (Array.isArray(req.headers["authorization"])) return
 	if (req.body.id === undefined || !validateUserString(req.body.id))
 		return res.status(400).json({ error: "Bad Request", description: `id expected ID, got ${typeof (req.body.id)} with value of ${req.body.id}` })
 	if (req.body.adminId === undefined || typeof (req.body.adminId) !== "string")
@@ -77,7 +77,7 @@ router.delete("/revoke", async (req, res) => {
 	if (!isUser)
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 
-	const community = await getCommunity(req.headers.apikey)
+	const community = await getCommunity(req.headers["authorization"])
 	if (!community) return res.status(400).json({error: "Bad Request", description: "apikey does not match a community"})
 	const toRevoke = await ReportModel.findOne({ id: req.body.id })
 	if (toRevoke === undefined || toRevoke === null)
@@ -105,7 +105,7 @@ router.delete("/revoke", async (req, res) => {
 	res.status(200).json(msg)
 })
 router.delete("/revokeallname", async (req, res) => {
-	if (Array.isArray(req.headers.apikey)) return
+	if (Array.isArray(req.headers["authorization"])) return
 	if (req.body.adminId === undefined || typeof (req.body.adminId) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected string, got ${typeof (req.body.adminId)} with value of ${req.body.adminId}` })
 	if (req.body.playername === undefined || typeof (req.body.playername) !== "string")
@@ -114,7 +114,7 @@ router.delete("/revokeallname", async (req, res) => {
 	if (!isUser)
 		return res.status(400).json({ error: "Bad Request", description: `adminId expected Discord user ID, got ${req.body.adminId} which is not one` })
 
-	const community = await getCommunity(req.headers.apikey)
+	const community = await getCommunity(req.headers["authorization"])
 	if (!community) return res.status(400).json({error: "Bad Request", description: "apikey does not match a community"})
 	const toRevoke = await ReportModel.find({
 		playername: req.body.playername,

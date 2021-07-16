@@ -1,9 +1,10 @@
 import { WebhookClient, MessageEmbed } from "discord.js"
 import WebhookSchema from "../database/fagc/webhook"
-import config from "../../config"
 import WebSocket from "ws"
-const wss = new WebSocket.Server({ port: config.ports.websocket })
+import ENV from "./env"
 import GuildConfigModel from "../database/bot/community"
+
+const wss = new WebSocket.Server({ port: ENV.WS_PORT })
 
 let WebhookQueue: any[] = []
 
@@ -30,10 +31,11 @@ export function WebhookMessage(message) {
 }
 
 wss.on("connection", (ws) => {
+	console.log(ws.url)
 	ws.on("message", async (msg) => {
 		const message = JSON.parse(msg.toString("utf-8"))
 		if (message.guildId) {
-			ws.guildId = message.guildId
+			// FIXME fix this weird bug
 			if (!message) return
 			const guildConfig = await GuildConfigModel.findOne({ guildId: message.guildId }).then((c) => c?.toObject())
 			if (guildConfig) ws.send(Buffer.from(JSON.stringify({
@@ -174,12 +176,12 @@ export async function communityRemovedMessage(community) {
 }
 export async function communityConfigChanged(config) {
 	wss.clients.forEach(client => {
-		if (client.guildId == config.guildId) {
-			client.send(Buffer.from(JSON.stringify({
-				...config,
-				messageType: "guildConfig"
-			})))
-		}
+		// if (client.guildId == config.guildId) {
+		// 	client.send(Buffer.from(JSON.stringify({
+		// 		...config,
+		// 		messageType: "guildConfig"
+		// 	})))
+		// }
 	})
 }
 

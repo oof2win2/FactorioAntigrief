@@ -5,7 +5,7 @@
 	"main": "dist/src/app.js",
 	"scripts": {
 		"start": "ts-node ./src/app.ts",
-		"dev": "nodemon --inspect ./src/app.ts",
+		"dev": "nodemon ./src/app.ts",
 		"lint": "eslint src/ --fix",
 		"postinstall": "install-types",
 		"pm2:build": "tsc",
