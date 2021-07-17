@@ -1,8 +1,8 @@
-import express from "express"
+const express = require("express")
 const router = express.Router()
-import WebhookSchema from "../database/fagc/webhook"
-import LogSchema from "../database/fagc/log"
-import { WebhookClient } from "discord.js"
+const WebhookSchema = require("../database/fagc/webhook")
+const LogSchema = require("../database/fagc/log")
+const { WebhookClient } = require("discord.js")
 
 /* GET home page. */
 router.get("/", function (req, res) {
@@ -23,7 +23,7 @@ router.post("/addwebhook", async (req, res) => {
 		token: req.body.token,
 		guildId: req.body.guildId,
 	})
-	const client = new WebhookClient(dbRes.id, dbRes.token)
+	const client = new WebhookClient(req.body.id, req.body.token)
 	client.send("Testing message from the FAGC API!").catch(console.error)
 	res.status(200).json(dbRes)
 })
@@ -42,15 +42,15 @@ router.delete("/removewebhook", async (req, res) => {
 	res.status(200).json(removed)
 })
 router.get("/getlogs", async (req, res) => {
-	if (req.query.limit === undefined || typeof req.query.limit !== "number")
+	if (req.query.limit === undefined || isNaN(req.query.limit))
 		return res.status(400).json({ error: "Bad Request", description: `limit expected number, got ${typeof (req.query.limit)} with value ${req.query.limit}` })
-	if (req.query.afterDate !== undefined && typeof (parseInt(<string>req.query.afterDate)) !== "number")
+	if (req.query.afterDate !== undefined && isNaN(req.query.afterDate))
 		return res.status(400).json({ error: "Bad Request", description: `afterDate expected nothing or number, got ${typeof (req.query.afterDate)} with value ${req.query.afterDate}` })
-	const afterDate = req.query.afterDate ? <number><unknown>req.query.afterDate : 0
 	const logsRaw = await LogSchema.find({
-		timestamp: { $gte: new Date(afterDate) }
+		timestamp: { $gte: parseInt(req.query.afterDate || 0) }
 	}, {}, { limit: parseInt(req.query.limit) })
 	const logsFiltered = logsRaw.map((log) => {
+		log = log.toObject()
 		delete log.apikey
 		delete log.ip
 		if (log.responseBody && log.responseBody.key) delete log.responseBody.key
@@ -60,4 +60,4 @@ router.get("/getlogs", async (req, res) => {
 })
 
 
-export default router
+module.exports = router

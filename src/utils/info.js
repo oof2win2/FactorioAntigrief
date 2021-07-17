@@ -1,12 +1,23 @@
-import { WebhookClient, MessageEmbed } from "discord.js"
-import WebhookSchema from "../database/fagc/webhook"
-import config from "../../config"
-import WebSocket from "ws"
-const wss = new WebSocket.Server({ port: config.ports.websocket })
-import GuildConfigModel from "../database/bot/community"
+const { WebhookClient, MessageEmbed } = require("discord.js")
+const WebhookSchema = require("../database/fagc/webhook")
+const WebSocket = require("ws")
+const wss = new WebSocket.Server({ port: 8001 })
+const GuildConfigModel = require("../database/bot/community")
 
-let WebhookQueue: any[] = []
+let WebhookQueue = []
 
+module.exports = {
+	WebhookMessage,
+	WebsocketMessage,
+	violationCreatedMessage,
+	violationRevokedMessage,
+	ruleCreatedMessage,
+	ruleRemovedMessage,
+	offenseRevokedMessage,
+	communityCreatedMessage,
+	communityRemovedMessage,
+	communityConfigChanged,
+}
 async function SendWebhookMessages() {
 	let embeds = WebhookQueue.slice(0, 10)
 	if (!embeds[0]) return
@@ -14,10 +25,10 @@ async function SendWebhookMessages() {
 	const webhooks = await WebhookSchema.find()
 	webhooks.forEach(async (webhook) => {
 		const client = new WebhookClient(webhook.id, webhook.token)
-		client.send({ embeds: embeds, username: "FAGC Notifier" }).catch((error) => {
+		client.send({embeds: embeds, username: "FAGC Notifier"}).catch((error) => {
 			if (error.stack.includes("Unknown Webhook")) {
 				console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildId}. Removing webhook from database.`)
-				WebhookSchema.findByIdAndDelete(webhook._id).exec()
+				WebhookSchema.findByIdAndDelete(webhook.id)
 			}
 			else throw error
 		})
@@ -25,7 +36,7 @@ async function SendWebhookMessages() {
 }
 setInterval(SendWebhookMessages, 5000)
 
-export function WebhookMessage(message) {
+function WebhookMessage(message) {
 	WebhookQueue.push(message)
 }
 
@@ -35,7 +46,7 @@ wss.on("connection", (ws) => {
 		if (message.guildId) {
 			ws.guildId = message.guildId
 			if (!message) return
-			const guildConfig = await GuildConfigModel.findOne({ guildId: message.guildId }).then((c) => c?.toObject())
+			const guildConfig = await GuildConfigModel.findOne({guildId: message.guildId}).then((c) => c?.toObject())
 			if (guildConfig) ws.send(Buffer.from(JSON.stringify({
 				...guildConfig,
 				messageType: "guildConfig"
@@ -44,42 +55,42 @@ wss.on("connection", (ws) => {
 	})
 })
 
-export async function WebsocketMessage(message) {
+async function WebsocketMessage(message) {
 	wss.clients.forEach((client) => {
 		if (client.readyState === WebSocket.OPEN) {
 			client.send(message)
 		}
 	})
 }
-export async function reportCreatedMessage(report) {
-	if (report === null || report.playername === undefined) return
-	report.messageType = "report"
-	WebsocketMessage(JSON.stringify(report))
-	let reportEmbed = new MessageEmbed()
+async function violationCreatedMessage(violation) {
+	if (violation === null || violation.playername === undefined) return
+	violation.messageType = "violation"
+	WebsocketMessage(JSON.stringify(violation))
+	let violationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Report Created")
+		.setDescription("Violation Created")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Playername", value: report.playername },
-			{ name: "Admin ID", value: report.adminId },
-			{ name: "Community ID", value: report.communityId },
-			{ name: "Broken Rule", value: report.brokenRule },
-			{ name: "Automated", value: report.automated },
-			{ name: "Proof", value: report.proof },
-			{ name: "Description", value: report.description },
-			{ name: "Report ID", value: report.id },
-			{ name: "Report Time", value: report.reportedTime }
+			{ name: "Playername", value: violation.playername },
+			{ name: "Admin ID", value: violation.adminId },
+			{ name: "Community ID", value: violation.communityId },
+			{ name: "Broken Rule", value: violation.brokenRule },
+			{ name: "Automated", value: violation.automated },
+			{ name: "Proof", value: violation.proof },
+			{ name: "Description", value: violation.description },
+			{ name: "Violation ID", value: violation.id },
+			{ name: "Violation Time", value: violation.violatedTime }
 		)
 		.setTimestamp()
-	WebhookMessage(reportEmbed)
+	WebhookMessage(violationEmbed)
 }
-export async function reportRevokedMessage(revocation) {
+async function violationRevokedMessage(revocation) {
 	if (revocation === null || revocation.playername === undefined) return
 	revocation.messageType = "revocation"
 	WebsocketMessage(JSON.stringify(revocation))
 	let revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Report Revoked")
+		.setDescription("Violation Revoked")
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: revocation.playername },
@@ -90,7 +101,6 @@ export async function reportRevokedMessage(revocation) {
 			{ name: "Proof", value: revocation.proof },
 			{ name: "Description", value: revocation.description },
 			{ name: "Revocation ID", value: revocation.id },
-			{ name: "Report ID", value: revocation.reportId },
 			{ name: "Revocation Time", value: revocation.revokedTime },
 			{ name: "Revoked by", value: revocation.revokedBy },
 		)
@@ -98,7 +108,7 @@ export async function reportRevokedMessage(revocation) {
 	WebhookMessage(revocationEmbed)
 }
 
-export async function ruleCreatedMessage(rule) {
+async function ruleCreatedMessage(rule) {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
 	rule.messageType = "ruleCreated"
 	WebsocketMessage(JSON.stringify(rule))
@@ -113,7 +123,7 @@ export async function ruleCreatedMessage(rule) {
 	WebhookMessage(ruleEmbed)
 }
 
-export async function ruleRemovedMessage(rule) {
+async function ruleRemovedMessage(rule) {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
 	rule.messageType = "ruleRemoved"
 	WebsocketMessage(JSON.stringify(rule))
@@ -122,20 +132,20 @@ export async function ruleRemovedMessage(rule) {
 		.setDescription("Rule removed")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Rule short description", value: rule.shortdesc },
-			{ name: "Rule long description", value: rule.longdesc }
+			{name: "Rule short description", value: rule.shortdesc},
+			{name: "Rule long description", value: rule.longdesc}
 		)
 	WebhookMessage(ruleEmbed)
 }
 
-export async function profileRevokedMessage(profile) {
-	profile.messageType = "profileRevoked"
-	WebsocketMessage(JSON.stringify(profile))
+async function offenseRevokedMessage(offense) {
+	offense.messageType = "offenseRevoked"
+	WebsocketMessage(JSON.stringify(offense))
 	let embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Profile revoked")
+		.setDescription("Offense revoked")
 		.setColor("ORANGE")
-	profile.forEach((revocation) => {
+	offense.forEach((revocation) => {
 		embed.addField(
 			`ID: ${revocation.id}`,
 			`Playername: ${revocation.playername}, Admin ID: ${revocation.adminId}, Community ID: ${revocation.communityId}\n` +
@@ -146,7 +156,7 @@ export async function profileRevokedMessage(profile) {
 	WebhookMessage(embed)
 }
 
-export async function communityCreatedMessage(community) {
+async function communityCreatedMessage(community) {
 	community.messageType = "communityCreated"
 	WebsocketMessage(JSON.stringify(community))
 	let embed = new MessageEmbed()
@@ -159,7 +169,7 @@ export async function communityCreatedMessage(community) {
 		)
 	WebhookMessage(embed)
 }
-export async function communityRemovedMessage(community) {
+async function communityRemovedMessage(community) {
 	community.messageType = "communityRemoved"
 	WebsocketMessage(JSON.stringify(community))
 	let embed = new MessageEmbed()
@@ -172,7 +182,7 @@ export async function communityRemovedMessage(community) {
 		)
 	WebhookMessage(embed)
 }
-export async function communityConfigChanged(config) {
+async function communityConfigChanged(config) {
 	wss.clients.forEach(client => {
 		if (client.guildId == config.guildId) {
 			client.send(Buffer.from(JSON.stringify({

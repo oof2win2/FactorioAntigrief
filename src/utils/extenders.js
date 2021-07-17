@@ -1,3 +1,3 @@
-import WebSocket from "ws"
+const WebSocket = require("ws")
 
 WebSocket.prototype.guildId = String

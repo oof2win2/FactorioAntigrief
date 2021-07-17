@@ -1,8 +1,7 @@
-import express from "express"
-import RuleModel from "../database/fagc/rule"
-import { validateUserString } from "../utils/functions-databaseless"
-
+const express = require("express")
 const router = express.Router()
+const RuleModel = require("../database/fagc/rule")
+const { validateUserString } = require("../utils/functions-databaseless")
 
 /* GET home page. */
 router.get("/", function (req, res) {
@@ -19,4 +18,4 @@ router.get("/getid", async (req, res) => {
 	res.status(200).json(rule)
 })
 
-export default router
+module.exports = router

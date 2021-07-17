@@ -1,5 +1,5 @@
 # private stuff
-config.ts
+config.js
 dist/
 *.code-workspace
 

@@ -1,8 +1,7 @@
-import express from "express"
-import RevocationModel from "../database/fagc/revocation"
-import { validateUserString } from "../utils/functions-databaseless"
-
+const express = require("express")
 const router = express.Router()
+const RevocationModel = require("../database/fagc/revocation")
+const { validateUserString } = require("../utils/functions-databaseless")
 
 router.get("/getrevocations", async (req, res) => {
 	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
@@ -25,5 +24,4 @@ router.get("/getallrevocations", async (req, res) => {
 	})
 	return res.status(200).json(revocations)
 })
-
-export default router
+module.exports = router
