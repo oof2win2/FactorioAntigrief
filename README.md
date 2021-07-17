@@ -29,3 +29,5 @@ This README is focused solely on the installation instructions and the workings 
 
 ## TODO:
 - [ ] Maybe migrate the bot's config database to the API and make the bot not use the config database entirely?
+- [ ] Use `fastify-helmet`
+- [ ] Firgure out how to use `yup` with response validation
