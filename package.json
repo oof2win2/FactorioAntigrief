@@ -4,8 +4,8 @@
   "private": true,
   "main": "src/app.js",
   "scripts": {
-    "start": "node ./src/bin/www",
-    "dev": "nodemon --inspect ./src/bin/www",
+    "start": "node ./src/app.js",
+    "dev": "nodemon --inspect ./src/app.js",
     "lint": "eslint src/ --fix"
   },
   "dependencies": {
