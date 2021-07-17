@@ -128,8 +128,3 @@ http.createServer(async (req, res) => {
 		return res.end(await register.metrics())
 	}
 }).listen(ENV.PROMETHEUS_PORT)
-
-module.exports = {
-	promClient,
-	register,
-}

@@ -145,19 +145,21 @@ import fastifyRateLimitPlugin from "fastify-rate-limit"
 import { fastifyRequestContextPlugin, requestContext } from "fastify-request-context"
 import fastifyResponseValidationPlugin from "fastify-response-validation"
 import fastifyHelmetPlugin from "fastify-helmet"
+import fastifyAutoloadPlugin from "fastify-autoload"
+import path from "node:path"
 
 import ENV from "./utils/env"
 
 
-const server: FastifyInstance = Fastify({})
+const fastify: FastifyInstance = Fastify({})
 
 // cors
-server.register(fastifyCorsPlugin, {
+fastify.register(fastifyCorsPlugin, {
 	origin: true // reflect the request origin
 })
 
 // rate limiting
-server.register(fastifyRateLimitPlugin, {
+fastify.register(fastifyRateLimitPlugin, {
 	max: 100,
 	timeWindow: 1000 * 60, // 100 reqs in 60s
 	allowList: [
@@ -168,7 +170,7 @@ server.register(fastifyRateLimitPlugin, {
 })
 
 // context
-server.register(fastifyRequestContextPlugin, {
+fastify.register(fastifyRequestContextPlugin, {
 	hook: 'preValidation',
 	defaultStoreValues: {
 	}
@@ -176,34 +178,39 @@ server.register(fastifyRequestContextPlugin, {
 // typed context
 declare module 'fastify-request-context' {
 	interface RequestContextData {
-
+		community?: DocumentType<AuthClass, BeAnObject>
 	}
 }
 
-// TODO: some authentication middleware
-// server.addHook("onRequest", async (req, res) => {
-// 	const community = await 
-// })
+// helmet
+fastify.register(fastifyHelmetPlugin)
 
-server.register(fastifyHelmetPlugin)
+// Authentication plugin. is in preHandler since stuff is there for the handler
+import authPlugin from "./plugins/authenticate"
+fastify.addHook("preHandler", authPlugin)
+
 
 // middlware to remove garbage from responses
 import removeIdMiddleware from "./utils/removeId"
-server.addHook("onSend", removeIdMiddleware)
+fastify.addHook("onSend", removeIdMiddleware)
 
 import ruleHandler from "./routes/rules"
 import reportHandler from "./routes/reports"
-server.register(ruleHandler, { prefix: "/rules" })
-server.register(reportHandler, { prefix: "/reports" })
+import { CommunityClass } from './database/fagc/community'
+import { DocumentType } from '@typegoose/typegoose'
+import { BeAnObject } from '@typegoose/typegoose/lib/types'
+import { AuthClass } from './database/fagc/authentication'
+fastify.register(ruleHandler, { prefix: "/rules" })
+fastify.register(reportHandler, { prefix: "/reports" })
 
 
-server.register(fastifyResponseValidationPlugin)
+fastify.register(fastifyResponseValidationPlugin)
 
 const start = async () => {
 	try {
-		await server.listen(ENV.API_PORT)
+		await fastify.listen(ENV.API_PORT)
 
-		const address = server.server.address()
+		const address = fastify.server.address()
 		const port = typeof address === 'string' ? address : address?.port
 		console.log(`Server listening on :${ENV.API_PORT}`)
 

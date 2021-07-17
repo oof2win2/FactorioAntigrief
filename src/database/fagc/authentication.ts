@@ -20,5 +20,5 @@ export class AuthClass {
 	allowed_ips!: string[]
 }
 
-const AuthSchema = getModelForClass(AuthClass)
-export default AuthSchema
+const AuthModel = getModelForClass(AuthClass)
+export default AuthModel

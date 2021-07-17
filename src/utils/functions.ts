@@ -1,10 +1,10 @@
-import AuthSchema from "../database/fagc/authentication"
+import AuthModel from "../database/fagc/authentication"
 import CommunitySchema from "../database/fagc/community"
 import fetch from "node-fetch"
 import discord from "./discord"
 
 export async function getCommunity(api_key: string | undefined) {
-	const auth = await AuthSchema.findOne({ api_key: api_key })
+	const auth = await AuthModel.findOne({ api_key: api_key })
 	if (!auth) return null
 	return CommunitySchema.findById(auth.communityId)
 }

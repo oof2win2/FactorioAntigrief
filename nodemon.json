@@ -11,5 +11,6 @@
         "NODE_ENV": "development"
     },
     "ext": "*",
-    "cwd": "./src/"
+    "cwd": "./src/",
+	"delay": 1000
 }

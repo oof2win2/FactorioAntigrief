@@ -156,6 +156,7 @@ import ReportModel from "../database/fagc/report"
 import RevocationModel from "../database/fagc/revocation"
 import RuleModel from "../database/fagc/rule"
 import { CreateReport } from "fagc-api-types"
+import { UnauthenticatedResponse } from '../consts';
 
 const yupOptions = {
 	strict: false,
@@ -214,6 +215,9 @@ export default function (fastify: FastifyInstance, opts, next) {
 			automated,
 			reportedTime
 		} = req.body
+
+		const community = req.requestContext.get("community")
+		if (!community) return res.status(401).send(UnauthenticatedResponse)
 
 		const report = await ReportModel.create({
 			playername: playername,
