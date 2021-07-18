@@ -1,3 +1,6 @@
+## UNRELEASED
+### Additions
+- Added a `.destroy()` method on the wrapper and all managers to cancel all timeouts and exit cleanly
 
 ## [1.8.1] - [2021-07-15]
 ### Bugfixes

@@ -46,8 +46,9 @@ class WebSocketHandler extends EventEmitter {
 		super()
 		this.opts = opts
 
-		// don't create the websocket if it has not been enabled
 		if (!opts.enabled) return
+
+		// don't create the websocket if it has not been enabled
 
 		this.socket = new WebSocket(this.opts.uri)
 
@@ -87,6 +88,12 @@ class WebSocketHandler extends EventEmitter {
 		this.socket?.send(Buffer.from(JSON.stringify({
 			guildId: guildId
 		})))
+	}
+	destroy(): void {
+		if (!this.opts.enabled) return
+
+		this.socket.removeAllListeners()
+		this.socket.terminate()
 	}
 }
 export default WebSocketHandler
