@@ -16,8 +16,8 @@ export class ConfigClass {
 	@prop({ required: true })
 	communityname!: string
 
-	@prop({ ref: () => CommunityClass })
-	communityId: Ref<CommunityClass>
+	@prop()
+	communityId?: string
 
 	@prop()
 	guildId!: string
@@ -38,5 +38,5 @@ export class ConfigClass {
 	ruleFilters?: [string]
 }
 
-const ConfigModel = getModelForClass(ConfigClass)
-export default ConfigModel
+const CommunityConfigModel = getModelForClass(ConfigClass)
+export default CommunityConfigModel

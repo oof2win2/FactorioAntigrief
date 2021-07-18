@@ -33,6 +33,7 @@
 		"fastify": "^3.19.1",
 		"fastify-autoload": "^3.8.0",
 		"fastify-cors": "^6.0.2",
+		"fastify-decorators": "^3.10.0",
 		"fastify-helmet": "^5.3.2",
 		"fastify-plugin": "^3.0.0",
 		"fastify-rate-limit": "^5.5.0",

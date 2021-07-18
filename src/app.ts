@@ -145,6 +145,7 @@ import fastifyRateLimitPlugin from "fastify-rate-limit"
 import { fastifyRequestContextPlugin, requestContext } from "fastify-request-context"
 import fastifyResponseValidationPlugin from "fastify-response-validation"
 import fastifyHelmetPlugin from "fastify-helmet"
+import { bootstrap } from 'fastify-decorators';
 import fastifyAutoloadPlugin from "fastify-autoload"
 import path from "node:path"
 
@@ -178,7 +179,7 @@ fastify.register(fastifyRequestContextPlugin, {
 // typed context
 declare module 'fastify-request-context' {
 	interface RequestContextData {
-		community?: DocumentType<AuthClass, BeAnObject>
+		community?: DocumentType<CommunityClass, BeAnObject>
 	}
 }
 
@@ -186,22 +187,22 @@ declare module 'fastify-request-context' {
 fastify.register(fastifyHelmetPlugin)
 
 // Authentication plugin. is in preHandler since stuff is there for the handler
-import authPlugin from "./plugins/authenticate"
-fastify.addHook("preHandler", authPlugin)
+// import authPlugin from "./plugins/rules"
+// fastify.addHook("preHandler", authPlugin)
 
 
 // middlware to remove garbage from responses
 import removeIdMiddleware from "./utils/removeId"
 fastify.addHook("onSend", removeIdMiddleware)
 
-import ruleHandler from "./routes/rules"
-import reportHandler from "./routes/reports"
 import { CommunityClass } from './database/fagc/community'
 import { DocumentType } from '@typegoose/typegoose'
 import { BeAnObject } from '@typegoose/typegoose/lib/types'
-import { AuthClass } from './database/fagc/authentication'
-fastify.register(ruleHandler, { prefix: "/rules" })
-fastify.register(reportHandler, { prefix: "/reports" })
+
+
+fastify.register(bootstrap, {
+	directory: path.resolve(__dirname, "routes"),
+})
 
 
 fastify.register(fastifyResponseValidationPlugin)

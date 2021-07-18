@@ -3,7 +3,7 @@
 import promClient from "prom-client"
 import http from "http"
 import config from "../config"
-import ConfigModel, { ConfigClass } from "../database/bot/community"
+import CommunityConfigModel, { ConfigClass } from "../database/bot/community"
 import CommunityModel, { CommunityClass } from "../database/fagc/community"
 import RuleModel from "../database/fagc/rule"
 import { DocumentType } from "@typegoose/typegoose"
@@ -95,7 +95,7 @@ const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey
 
 // collect statistics and put them to the server
 const collectStatistics = async () => {
-	let communitySettings = await ConfigModel.find({}).exec()
+	let communitySettings = await CommunityConfigModel.find({}).exec()
 		.then((configs) => configs.map((CommunityConfig) => { CommunityConfig.set("apikey", null); return CommunityConfig }))
 	let rules = await trustedRules(communitySettings)
 	let communities = await trustedCommunities(communitySettings)
