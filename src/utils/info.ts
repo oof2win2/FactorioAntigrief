@@ -6,10 +6,10 @@ import GuildConfigModel from "../database/bot/community"
 
 const wss = new WebSocket.Server({ port: ENV.WS_PORT })
 
-let WebhookQueue: any[] = []
+let WebhookQueue: MessageEmbed[] = []
 
 async function SendWebhookMessages() {
-	let embeds = WebhookQueue.slice(0, 10)
+	const embeds = WebhookQueue.slice(0, 10)
 	if (!embeds[0]) return
 	WebhookQueue = WebhookQueue.slice(10)
 	const webhooks = await WebhookSchema.find()
@@ -26,7 +26,7 @@ async function SendWebhookMessages() {
 }
 setInterval(SendWebhookMessages, 5000)
 
-export function WebhookMessage(message) {
+export function WebhookMessage(message: MessageEmbed): void {
 	WebhookQueue.push(message)
 }
 
@@ -57,7 +57,7 @@ export async function reportCreatedMessage(report) {
 	if (report === null || report.playername === undefined) return
 	report.messageType = "report"
 	WebsocketMessage(JSON.stringify(report))
-	let reportEmbed = new MessageEmbed()
+	const reportEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Report Created")
 		.setColor("ORANGE")
@@ -79,7 +79,7 @@ export async function reportRevokedMessage(revocation) {
 	if (revocation === null || revocation.playername === undefined) return
 	revocation.messageType = "revocation"
 	WebsocketMessage(JSON.stringify(revocation))
-	let revocationEmbed = new MessageEmbed()
+	const revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Report Revoked")
 		.setColor("ORANGE")
@@ -104,7 +104,7 @@ export async function ruleCreatedMessage(rule) {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
 	rule.messageType = "ruleCreated"
 	WebsocketMessage(JSON.stringify(rule))
-	let ruleEmbed = new MessageEmbed()
+	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule created")
 		.setColor("ORANGE")
@@ -119,7 +119,7 @@ export async function ruleRemovedMessage(rule) {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
 	rule.messageType = "ruleRemoved"
 	WebsocketMessage(JSON.stringify(rule))
-	let ruleEmbed = new MessageEmbed()
+	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule removed")
 		.setColor("ORANGE")
@@ -133,7 +133,7 @@ export async function ruleRemovedMessage(rule) {
 export async function profileRevokedMessage(profile) {
 	profile.messageType = "profileRevoked"
 	WebsocketMessage(JSON.stringify(profile))
-	let embed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Profile revoked")
 		.setColor("ORANGE")
@@ -151,7 +151,7 @@ export async function profileRevokedMessage(profile) {
 export async function communityCreatedMessage(community) {
 	community.messageType = "communityCreated"
 	WebsocketMessage(JSON.stringify(community))
-	let embed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community created")
 		.setColor("ORANGE")
@@ -164,7 +164,7 @@ export async function communityCreatedMessage(community) {
 export async function communityRemovedMessage(community) {
 	community.messageType = "communityRemoved"
 	WebsocketMessage(JSON.stringify(community))
-	let embed = new MessageEmbed()
+	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community removed")
 		.setColor("ORANGE")

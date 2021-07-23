@@ -1,13 +1,13 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { Controller, GET, POST } from 'fastify-decorators';
+import { FastifyReply, FastifyRequest } from "fastify"
+import { Controller, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
-import Authenticate from '../utils/authentication';
-import CommunityModel from '../database/fagc/community';
-import CommunityConfigModel from '../database/bot/community';
-import { checkUser } from '../utils/functions';
-import { communityConfigChanged } from '../utils/info';
+import Authenticate from "../utils/authentication"
+import CommunityModel from "../database/fagc/community"
+import CommunityConfigModel from "../database/bot/community"
+import { checkUser } from "../utils/functions"
+import { communityConfigChanged } from "../utils/info"
 
 @Controller({ route: "/communities" })
 export default class CommunityControler {
@@ -101,7 +101,7 @@ export default class CommunityControler {
 		if (contact && !(await checkUser(contact))) return res.status(400).send({ errorCode: 400, error: "Bad Request", message: `contact must be Discord User snowflake, got value ${contact}, which isn't a Discord user` })
 
 		const community = req.requestContext.get("community")!
-		let OldConfig = await CommunityConfigModel.findOne({communityId: community.id})
+		const OldConfig = await CommunityConfigModel.findOne({communityId: community.id})
 		if (!OldConfig) return res.status(400).send({ errorCode: 404, error: "Not Found", message: "Community config was not found" })
 
 		let toReplace = {
@@ -113,7 +113,7 @@ export default class CommunityControler {
 		if (contact) toReplace = Object.assign(toReplace, { contact })
 		if (moderatorRoleId) toReplace = Object.assign(toReplace, { moderatorRoleId })
 		if (communityname) toReplace = Object.assign(toReplace, { communityname })
-		let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, toReplace, { new: true })
+		const CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, toReplace, { new: true })
 		if (!CommunityConfig) return res.status(400).send({ errorCode: 404, error: "Not Found", message: "Community config with your API key was not found" })
 		await CommunityModel.findOneAndUpdate({ guildId: OldConfig.guildId }, {
 			guildId: OldConfig.guildId,

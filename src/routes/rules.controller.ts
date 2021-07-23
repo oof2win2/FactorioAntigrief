@@ -1,15 +1,15 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { Controller, GET } from 'fastify-decorators';
+import { FastifyReply, FastifyRequest } from "fastify"
+import { Controller, GET } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
-import Authenticate from '../utils/authentication';
+import Authenticate from "../utils/authentication"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
 
 	@GET({ url: "/" })
-	async getAllRules(req: FastifyRequest, res: FastifyReply) {
+	async getAllRules(_req: FastifyRequest, res: FastifyReply) {
 		const rules = await RuleModel.find({})
 		return res.send(rules)
 	}
@@ -23,9 +23,12 @@ export default class RuleController {
 			}
 		}
 	})
-	async getRule(req: FastifyRequest, res: FastifyReply) {
-		console.log("get rule")
-		const { id }: { id: string } = <any>req.params
+	async getRule(req: FastifyRequest<{
+		Params: {
+			id: string
+		}
+	}>, res: FastifyReply) {
+		const { id } = req.params
 		const rule = await RuleModel.findOne({id: id})
 		return res.send(rule)
 	}

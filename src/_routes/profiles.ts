@@ -36,7 +36,7 @@ router.get("/getall", async (req, res) => {
 		reports: DocumentType<ReportClass>[]
 	}>()
 	allReports.forEach((report: DocumentType<ReportClass>) => {
-		let profile = profilesMap.get(report.communityId)
+		const profile = profilesMap.get(report.communityId)
 		if (profile) {
 			profile.reports.push(report)
 			profilesMap.set(report.communityId, profile)

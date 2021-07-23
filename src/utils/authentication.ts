@@ -1,7 +1,7 @@
-import { FastifyPluginCallback, FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
-import fastifyPlugin from "fastify-plugin";
-import AuthModel from "../database/fagc/authentication";
-import CommunityModel from "../database/fagc/community";
+import { FastifyPluginCallback, FastifyRequest, FastifyReply, FastifyInstance } from "fastify"
+import fastifyPlugin from "fastify-plugin"
+import AuthModel from "../database/fagc/authentication"
+import CommunityModel from "../database/fagc/community"
 
 // const Authenticate = async (
 // 	req: FastifyRequest,
@@ -11,15 +11,18 @@ import CommunityModel from "../database/fagc/community";
 // console.log(req.headers, "Headers")
 // }
 const Authenticate = (
-	target: Object,
-	propertyKey: string,
+	target: never,
+	propertyKey: never,
 	descriptor: TypedPropertyDescriptor<(
 		req: FastifyRequest,
 		res: FastifyReply,
-	) => any>,
-) => {
+	) => unknown>,
+): TypedPropertyDescriptor<(
+	req: FastifyRequest,
+	res: FastifyReply,
+) => unknown>  => {
 	const originalRoute = descriptor.value
-	if (!originalRoute) return
+	if (!originalRoute) return descriptor
 	descriptor.value = async (...args: [FastifyRequest, FastifyReply]) => {
 		const [req, res] = args
 		// return originalRoute.apply(this, args)

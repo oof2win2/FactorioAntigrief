@@ -12,7 +12,7 @@ class ConnectionManager {
 	constructor(config: ApiConfig) {
 		this.connections = config.dbConnections.map((connectionConfig) => {
 			try {
-				let connection = new Mongoose()
+				const connection = new Mongoose()
 				connection.connect(ENV.MONGOURI, connectionConfig).then(() => {
 					console.log(`Database ${connectionConfig.dbName} connected!`)
 				}).catch((e: unknown) => {
@@ -20,7 +20,7 @@ class ConnectionManager {
 				})
 				return {
 					c: connection,
-					n: connectionConfig.dbName!
+					n: connectionConfig.dbName as string
 				}
 			} catch (e) {
 				console.error(`Database ${connectionConfig.dbName} errored: ${e}`)

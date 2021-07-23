@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-import { cleanEnv, str, port } from 'envalid'
+import { cleanEnv, str, port } from "envalid"
 dotenv.config({
 	path: "../.env"
 })

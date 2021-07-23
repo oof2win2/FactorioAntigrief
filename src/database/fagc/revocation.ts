@@ -40,7 +40,7 @@ export class RevocationClass {
 	description!: string
 	
 	@prop()
-	automated!: Boolean
+	automated!: boolean
 	
 	@prop()
 	reportedTime!: Date

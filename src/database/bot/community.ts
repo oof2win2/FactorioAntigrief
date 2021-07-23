@@ -1,6 +1,5 @@
-import { getModelForClass, modelOptions, prop, Ref } from "@typegoose/typegoose"
+import { getModelForClass, modelOptions, prop} from "@typegoose/typegoose"
 import database from "../database"
-import { CommunityClass } from "../fagc/community"
 
 const connection = database.connections.find((connection) => connection?.n === "bot")?.c
 

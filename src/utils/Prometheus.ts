@@ -2,7 +2,6 @@
 
 import promClient from "prom-client"
 import http from "http"
-import config from "../config"
 import CommunityConfigModel, { ConfigClass } from "../database/bot/community"
 import CommunityModel, { CommunityClass } from "../database/fagc/community"
 import RuleModel from "../database/fagc/rule"
@@ -30,7 +29,7 @@ register.registerMetric(ruleGauge)
 
 // Format community trust from config
 const trustedCommunities = async (communities: Omit<DocumentType<ConfigClass>, "apikey">[]) => {
-	let rawResults: { id: string, count: number }[] = []
+	const rawResults: { id: string, count: number }[] = []
 	const CachedCommunities = new Map()
 	const getOrFetchCommunity = async (communityId: string): Promise<DocumentType<CommunityClass>> => {
 		const cachedCommunity = CachedCommunities.get(communityId)
@@ -52,7 +51,7 @@ const trustedCommunities = async (communities: Omit<DocumentType<ConfigClass>, "
 			}
 		})
 	})
-	let results = rawResults.map(async (community) => {
+	const results = rawResults.map(async (community) => {
 		return {
 			community: await getOrFetchCommunity(community.id),
 			count: community.count
@@ -62,7 +61,7 @@ const trustedCommunities = async (communities: Omit<DocumentType<ConfigClass>, "
 }
 // Format rule trust from config
 const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey">[]) => {
-	let rawResults: { id: string, count: number }[] = []
+	const rawResults: { id: string, count: number }[] = []
 	const CachedRules = new Map()
 	const getOrFetchRule = async (ruleid) => {
 		const cachedRule = CachedRules.get(ruleid)
@@ -84,7 +83,7 @@ const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey
 			}
 		})
 	})
-	let results = rawResults.map(async (rule) => {
+	const results = rawResults.map(async (rule) => {
 		return {
 			rule: await getOrFetchRule(rule.id),
 			count: rule.count
@@ -95,10 +94,10 @@ const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey
 
 // collect statistics and put them to the server
 const collectStatistics = async () => {
-	let communitySettings = await CommunityConfigModel.find({}).exec()
+	const communitySettings = await CommunityConfigModel.find({}).exec()
 		.then((configs) => configs.map((CommunityConfig) => { CommunityConfig.set("apikey", null); return CommunityConfig }))
-	let rules = await trustedRules(communitySettings)
-	let communities = await trustedCommunities(communitySettings)
+	const rules = await trustedRules(communitySettings)
+	const communities = await trustedCommunities(communitySettings)
 
 	rules.forEach((rule) => {
 		if (rule.rule)

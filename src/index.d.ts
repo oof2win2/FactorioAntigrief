@@ -1,1 +1,1 @@
-declare module 'fastify-response-validation';
+declare module "fastify-response-validation";

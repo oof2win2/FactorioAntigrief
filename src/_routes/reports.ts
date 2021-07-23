@@ -148,7 +148,7 @@
 
 // export default router
 
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { Type } from "@sinclair/typebox"
 import DiscordClient from "../utils/discord"
 import { validateUserString } from "../utils/functions-databaseless"
@@ -156,7 +156,7 @@ import ReportModel from "../database/fagc/report"
 import RevocationModel from "../database/fagc/revocation"
 import RuleModel from "../database/fagc/rule"
 import { CreateReport } from "fagc-api-types"
-import { UnauthenticatedResponse } from '../consts';
+import { UnauthenticatedResponse } from "../consts"
 
 const yupOptions = {
 	strict: false,

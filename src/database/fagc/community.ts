@@ -1,4 +1,4 @@
-import { getModelForClass, modelOptions, pre, prop, Ref } from "@typegoose/typegoose"
+import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import database from "../database"
 import { getUserStringFromID } from "../../utils/functions-databaseless"
 

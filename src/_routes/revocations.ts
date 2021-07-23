@@ -11,7 +11,7 @@ router.get("/getrevocations", async (req, res) => {
 		return res.status(400).json({ error: "Bad Request", description: `communityId expected string, got ${typeof (req.body.communityId)} with value of ${req.body.communityId}`})
 	if (!validateUserString(req.query.communityId))
 		return res.status(400).json({ error: "Bad Request", description: `communityId is not correct ID, got value of ${req.query.communityId}` })
-	let revocations = await RevocationModel.find({
+	const revocations = await RevocationModel.find({
 		playername: req.query.playername,
 		communityId: req.query.communityId
 	})
@@ -20,7 +20,7 @@ router.get("/getrevocations", async (req, res) => {
 router.get("/getallrevocations", async (req, res) => {
 	if (req.query.playername === undefined || typeof (req.query.playername) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `playername expected string, got ${typeof (req.body.playername)} with value of ${req.body.playername}`})
-	let revocations = await RevocationModel.find({
+	const revocations = await RevocationModel.find({
 		playername: req.query.playername
 	})
 	return res.status(200).json(revocations)

@@ -34,7 +34,7 @@ export class ReportClass {
 	description!: string
 
 	@prop()
-	automated!: Boolean
+	automated!: boolean
 
 	@prop()
 	reportedTime!: Date

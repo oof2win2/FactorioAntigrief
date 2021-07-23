@@ -1,5 +1,5 @@
 import express from "express"
-import CommunityModel, { CommunityClass } from "../database/fagc/community"
+import CommunityModel from "../database/fagc/community"
 import RuleModel from "../database/fagc/rule"
 import AuthModel from "../database/fagc/authentication"
 import CommunityConfigModel from "../database/bot/community"
@@ -33,7 +33,7 @@ router.get("/getid", async (req, res) => {
 router.get("/getconfig", async (req, res) => {
 	if (req.query.guildId === undefined || typeof (req.query.guildId) !== "string")
 		return res.status(400).json({ error: "Bad Request", description: `guildId must be Discord guildId (snowflake), got ${req.query.guildId}` })
-	let CommunityConfig = await CommunityConfigModel.findOne({
+	const CommunityConfig = await CommunityConfigModel.findOne({
 		guildId: req.query.guildId
 	})
 
@@ -81,13 +81,13 @@ router.post("/setconfig", async (req, res) => {
 	if (req.body.contact && !(await checkUser(req.body.contact)))
 		return res.status(400).json({ error: "Bad Request", description: `contact must be Discord User snowflake, got value ${req.body.contact}, which isn't a Discord user` })
 
-	let OldConfig = await CommunityConfigModel.findOne({
+	const OldConfig = await CommunityConfigModel.findOne({
 		apikey: req.headers["authorization"] as string
 	})
 	if (!OldConfig)
 		return res.status(404).json({ error: "Not Found", description: "Community config with your API key was not found" })
 	console.log(await CommunityConfigModel.findOne({ guildId: OldConfig.guildId }))
-	let CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, {
+	const CommunityConfig = await CommunityConfigModel.findOneAndReplace({ guildId: OldConfig.guildId }, {
 		...OldConfig.toObject(),
 		...req.body,
 		guildId: OldConfig.guildId,

@@ -9,7 +9,7 @@ export default async function (
 	const editResponse = (response: any) => {
 		const removeable = ["_id", "__v", "apikey"]
 		if (response && response.toObject) response = response.toObject()
-		for (let prop in response) {
+		for (const prop in response) {
 			if (removeable.includes(prop)) {
 				delete response[prop]
 			} else {

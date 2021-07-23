@@ -137,16 +137,14 @@
 // so stuff works properly
 process.chdir(__dirname)
 
-import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
-import { Server, IncomingMessage, ServerResponse } from 'http'
+import Fastify, { FastifyInstance } from "fastify"
 
 import fastifyCorsPlugin from "fastify-cors"
 import fastifyRateLimitPlugin from "fastify-rate-limit"
-import { fastifyRequestContextPlugin, requestContext } from "fastify-request-context"
+import { fastifyRequestContextPlugin } from "fastify-request-context"
 import fastifyResponseValidationPlugin from "fastify-response-validation"
 import fastifyHelmetPlugin from "fastify-helmet"
-import { bootstrap } from 'fastify-decorators';
-import fastifyAutoloadPlugin from "fastify-autoload"
+import { bootstrap } from "fastify-decorators"
 import path from "node:path"
 
 import ENV from "./utils/env"
@@ -172,12 +170,12 @@ fastify.register(fastifyRateLimitPlugin, {
 
 // context
 fastify.register(fastifyRequestContextPlugin, {
-	hook: 'preValidation',
+	hook: "preValidation",
 	defaultStoreValues: {
 	}
 })
 // typed context
-declare module 'fastify-request-context' {
+declare module "fastify-request-context" {
 	interface RequestContextData {
 		community?: DocumentType<CommunityClass, BeAnObject>
 	}
@@ -195,9 +193,9 @@ fastify.register(fastifyHelmetPlugin)
 import removeIdMiddleware from "./utils/removeId"
 fastify.addHook("onSend", removeIdMiddleware)
 
-import { CommunityClass } from './database/fagc/community'
-import { DocumentType } from '@typegoose/typegoose'
-import { BeAnObject } from '@typegoose/typegoose/lib/types'
+import { CommunityClass } from "./database/fagc/community"
+import { DocumentType } from "@typegoose/typegoose"
+import { BeAnObject } from "@typegoose/typegoose/lib/types"
 
 
 fastify.register(bootstrap, {
@@ -212,8 +210,8 @@ const start = async () => {
 		await fastify.listen(ENV.API_PORT)
 
 		const address = fastify.server.address()
-		const port = typeof address === 'string' ? address : address?.port
-		console.log(`Server listening on :${ENV.API_PORT}`)
+		const port = typeof address === "string" ? address : address?.port
+		console.log(`Server listening on :${port}`)
 
 	} catch (err) {
 		console.error(err)
