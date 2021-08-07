@@ -10,9 +10,9 @@ import { checkUser } from "../utils/functions"
 import { communityConfigChanged } from "../utils/info"
 
 @Controller({ route: "/communities" })
-export default class CommunityControler {
+export default class CommunityController {
 	@GET({ url: "/" })
-	async getAllCommunities(req: FastifyRequest, res: FastifyReply) {
+	async getAllCommunities(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
 		const communities = await CommunityModel.find({})
 		return res.send(communities)
 	}
@@ -26,15 +26,19 @@ export default class CommunityControler {
 			}
 		}
 	})
-	async getCommunity(req: FastifyRequest, res: FastifyReply) {
-		const { id }: { id: string } = <any>req.params
+	async getCommunity(req: FastifyRequest<{
+		Params: {
+			id: string
+		}
+	}>, res: FastifyReply): Promise<FastifyReply> {
+		const { id } = req.params
 		const community = await CommunityModel.findOne({ id: id })
 		return res.send(community)
 	}
 
 	@GET({ url: "/getown" })
 	@Authenticate
-	async getOwnCommunity(req: FastifyRequest, res: FastifyReply) {
+	async getOwnCommunity(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
 		const community = req.requestContext.get("community")
 		return res.send(community)
 	}
@@ -48,16 +52,21 @@ export default class CommunityControler {
 			}
 		}
 	})
-	async getCommunityConfig(req: FastifyRequest, res: FastifyReply) {
-		const { guildId }: { guildId: string } = <any>req.params
+	async getCommunityConfig(req: FastifyRequest<{
+		Params: {
+			guildId: string
+		}
+	}>, res: FastifyReply): Promise<FastifyReply> {
+		const { guildId } = req.params
 		const config = await CommunityConfigModel.findOne({ guildId: guildId })
 		return res.send(config)
 	}
 
 	@GET({ url: "/config" })
 	@Authenticate
-	async getOwnConfig(req: FastifyRequest, res: FastifyReply) {
-		const community = req.requestContext.get("community")!
+	async getOwnConfig(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+		const community = req.requestContext.get("community")
+		if (!community) return res.send(null)
 		const config = await CommunityConfigModel.findOne({ communityId: community._id })
 		return res.send(config)
 	}
@@ -77,14 +86,16 @@ export default class CommunityControler {
 		}
 	})
 	@Authenticate
-	async setConfig(req: FastifyRequest, res: FastifyReply) {
-		const { ruleFilters, trustedCommunities, contact, moderatorRoleId, communityname }: {
+	async setConfig(req: FastifyRequest<{
+		Body: {
 			ruleFilters?: string[],
 			trustedCommunities?: string[],
 			contact?: string,
 			moderatorRoleId?: string,
 			communityname?: string,
-		} = <any>req.body
+		}
+	}>, res: FastifyReply): Promise<FastifyReply> {
+		const { ruleFilters, trustedCommunities, contact, moderatorRoleId, communityname } = req.body
 
 		// query database if rules and communities actually exist
 		if (ruleFilters) {
@@ -100,9 +111,11 @@ export default class CommunityControler {
 		// check other stuff
 		if (contact && !(await checkUser(contact))) return res.status(400).send({ errorCode: 400, error: "Bad Request", message: `contact must be Discord User snowflake, got value ${contact}, which isn't a Discord user` })
 
-		const community = req.requestContext.get("community")!
-		const OldConfig = await CommunityConfigModel.findOne({communityId: community.id})
-		if (!OldConfig) return res.status(400).send({ errorCode: 404, error: "Not Found", message: "Community config was not found" })
+		const community = req.requestContext.get("community")
+		if (!community) return res.status(400).send({ errorCode: 400, error: "Not Found", message: "Community config was not found" })
+		
+		const OldConfig = await CommunityConfigModel.findOne({ communityId: community.id })
+		if (!OldConfig) return res.status(400).send({ errorCode: 400, error: "Not Found", message: "Community config was not found" })
 
 		let toReplace = {
 			...OldConfig.toObject(),
@@ -122,6 +135,6 @@ export default class CommunityControler {
 		})
 		CommunityConfig.set("apikey", null)
 		communityConfigChanged(CommunityConfig)
-		res.status(200).send(CommunityConfig)
+		return res.status(200).send(CommunityConfig)
 	}
 }

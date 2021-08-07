@@ -3,13 +3,12 @@ import { Controller, GET } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
-import Authenticate from "../utils/authentication"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
 
 	@GET({ url: "/" })
-	async getAllRules(_req: FastifyRequest, res: FastifyReply) {
+	async getAllRules(_req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
 		const rules = await RuleModel.find({})
 		return res.send(rules)
 	}
@@ -27,7 +26,7 @@ export default class RuleController {
 		Params: {
 			id: string
 		}
-	}>, res: FastifyReply) {
+	}>, res: FastifyReply): Promise<FastifyReply> {
 		const { id } = req.params
 		const rule = await RuleModel.findOne({id: id})
 		return res.send(rule)

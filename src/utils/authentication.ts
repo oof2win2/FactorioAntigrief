@@ -1,29 +1,23 @@
 import { FastifyPluginCallback, FastifyRequest, FastifyReply, FastifyInstance } from "fastify"
 import fastifyPlugin from "fastify-plugin"
+import { RouteGenericInterface } from "fastify/types/route"
 import AuthModel from "../database/fagc/authentication"
 import CommunityModel from "../database/fagc/community"
 
-// const Authenticate = async (
-// 	req: FastifyRequest,
-// 	res: FastifyReply,
-// ) => {
-// console.log({req})
-// console.log(req.headers, "Headers")
-// }
-const Authenticate = (
-	target: never,
-	propertyKey: never,
+const Authenticate = <T extends RouteGenericInterface = RouteGenericInterface>(
+	_target: unknown,
+	_propertyKey: unknown,
 	descriptor: TypedPropertyDescriptor<(
-		req: FastifyRequest,
+		req: FastifyRequest<T>,
 		res: FastifyReply,
-	) => unknown>,
+	) => Promise<FastifyReply>>,
 ): TypedPropertyDescriptor<(
-	req: FastifyRequest,
+	req: FastifyRequest<T>,
 	res: FastifyReply,
-) => unknown>  => {
+) => Promise<FastifyReply>> => {
 	const originalRoute = descriptor.value
 	if (!originalRoute) return descriptor
-	descriptor.value = async (...args: [FastifyRequest, FastifyReply]) => {
+	descriptor.value = async (...args) => {
 		const [req, res] = args
 		// return originalRoute.apply(this, args)
 		const auth = req.headers["authorization"]
