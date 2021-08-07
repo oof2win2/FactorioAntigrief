@@ -27,7 +27,7 @@ export interface Revocation extends Report {
 	reportId: ApiID
 }
 
-export interface Profile extends Common {
+export interface Profile {
 	communityId: ApiID
 	playername: string
 	reports: Report[]
