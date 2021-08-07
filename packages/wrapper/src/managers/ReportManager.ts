@@ -15,12 +15,13 @@ export default class ReportManager extends BaseManager<Report> {
 		this.apiurl = apiurl
 		this.createRevocation = createRevocation
 	}
+	
 	async fetchReport (reportid: ApiID, cache=true, force=false): Promise<Report|null> {
 		if (!force) {
 			const cached = this.cache.get(reportid)
 			if (cached) return cached
 		}
-		const fetched = await fetch(`${this.apiurl}/reports/getbyid?id=${strictUriEncode(reportid)}`).then(c=>c.json())
+		const fetched = await fetch(`${this.apiurl}/reports/${strictUriEncode(reportid)}`).then(c=>c.json())
 
 		if (!fetched) return null // return null if the fetch is empty
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
@@ -28,7 +29,7 @@ export default class ReportManager extends BaseManager<Report> {
 		return fetched
 	}
 	async fetchAllName(playername: string, cache=true): Promise<Report[]> {
-		const allReports = await fetch(`${this.apiurl}/reports/getall?playername=${strictUriEncode(playername)}`).then(c=>c.json())
+		const allReports = await fetch(`${this.apiurl}/reports/getplayer/${strictUriEncode(playername)}`).then(c=>c.json())
 
 		if (allReports.error) throw new GenericAPIError(`${allReports.error}: ${allReports.message}`)
 
@@ -43,11 +44,11 @@ export default class ReportManager extends BaseManager<Report> {
 		return null
 	}
 	async fetchByRule(ruleid: ApiID, cache = true): Promise<Report[]> {
-		const ruleReports = await fetch(`${this.apiurl}/reports/getbyrule?id=${strictUriEncode(ruleid)}`).then(c=>c.json())
+		const ruleReports = await fetch(`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`).then(c=>c.json())
 		if (cache) ruleReports.forEach(report => this.add(report))
 		return ruleReports
 	}
-	async create(report: any, cache = true, reqConfig: RequestConfig = {}): Promise<Report> {
+	async create(report: CreateReport, cache = true, reqConfig: RequestConfig = {}): Promise<Report> {
 		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
 
 		const create = await fetch(`${this.apiurl}/reports`, {
@@ -65,7 +66,7 @@ export default class ReportManager extends BaseManager<Report> {
 		return create
 	}
 	async revoke(reportid: ApiID, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
-		const revoked = await fetch(`${this.apiurl}/reports/revoke`, {
+		const revoked = await fetch(`${this.apiurl}/reports`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				id: reportid,
@@ -91,7 +92,7 @@ export default class ReportManager extends BaseManager<Report> {
 				playername: playername,
 				adminId: adminId,
 			}),
-			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
+			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
 		}).then(u=>u.json())
 
 		if (revoked.error) {

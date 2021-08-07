@@ -60,84 +60,84 @@ describe("ApiWrapper", () => {
 			communityname: oldConfig.communityname
 		})
 	})
-	// step("Should be able to create a report, cache it, fetch it by community, and revoke it", async () => {
-	// 	const rules = await FAGC.rules.fetchAll()
-	// 	const report = await FAGC.reports.create({
-	// 		brokenRule: rules[0].id,
-	// 		adminId: testUserId,
-	// 		...testStuff.report, // description, automated, proof, playername
-	// 	})
-	// 	expect(report.adminId).to.equal(testUserId, "Report admin ID mismatch")
-	// 	expect(report.playername).to.equal(testStuff.report.playername, "Report playername mismatch")
-	// 	expect(report.brokenRule).to.equal(rules[0].id, "Report rule mismatch")
-	// 	expect(report.description).to.equal(testStuff.report.description, "Report description mismatch")
-	// 	expect(report.automated).to.equal(testStuff.report.automated, "Report automated mismatch")
-	// 	expect(report.proof).to.equal(testStuff.report.proof, "Report proof mismatch")
+	step("Should be able to create a report, cache it, fetch it by community, and revoke it", async () => {
+		const rules = await FAGC.rules.fetchAll()
+		const report = await FAGC.reports.create({
+			brokenRule: rules[0].id,
+			adminId: testUserId,
+			...testStuff.report, // description, automated, proof, playername
+		})
+		expect(report.adminId).to.equal(testUserId, "Report admin ID mismatch")
+		expect(report.playername).to.equal(testStuff.report.playername, "Report playername mismatch")
+		expect(report.brokenRule).to.equal(rules[0].id, "Report rule mismatch")
+		expect(report.description).to.equal(testStuff.report.description, "Report description mismatch")
+		expect(report.automated).to.equal(testStuff.report.automated, "Report automated mismatch")
+		expect(report.proof).to.equal(testStuff.report.proof, "Report proof mismatch")
 
-	// 	const resolvedReport = FAGC.reports.resolveID(report.id)
-	// 	expect(resolvedReport).to.deep.equal(report, "Cached report mismatch to report")
+		const resolvedReport = FAGC.reports.resolveID(report.id)
+		expect(resolvedReport).to.deep.equal(report, "Cached report mismatch to report")
 
-	// 	const revocation = await FAGC.reports.revoke(report.id, testUserId)
-	// 	// equal report
-	// 	expect(revocation.adminId).to.equal(report.adminId, "Revocation adminId mismatch")
-	// 	expect(revocation.playername).to.equal(report.playername, "Revocation playername mismatch")
-	// 	expect(revocation.brokenRule).to.equal(report.brokenRule, "Revocation brokenRule mismatch")
-	// 	expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
-	// 	expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
-	// 	expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
-	// 	expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
-	// 	// revocation specific
-	// 	expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
+		const revocation = await FAGC.reports.revoke(report.id, testUserId)
+		// equal report
+		expect(revocation.adminId).to.equal(report.adminId, "Revocation adminId mismatch")
+		expect(revocation.playername).to.equal(report.playername, "Revocation playername mismatch")
+		expect(revocation.brokenRule).to.equal(report.brokenRule, "Revocation brokenRule mismatch")
+		expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
+		expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
+		expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
+		expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
+		// revocation specific
+		expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
 
-	// 	const resolvedReportsAfterRevoked = FAGC.reports.resolveID(report.id)
-	// 	expect(resolvedReportsAfterRevoked, "Report not removed from cache properly").to.be.null
-	// })
-	// step("Should be able to create multiple reports, cache them and revoke them", async () => {
-	// 	const rules = await FAGC.rules.fetchAll()
-	// 	const createdReports = await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
-	// 		return FAGC.reports.create({
-	// 			brokenRule: rules[0].id,
-	// 			adminId: testUserId,
-	// 			...testStuff.report, // description, automated, proof, playername
-	// 		})
-	// 	}))
-	// 	createdReports.forEach(report => {
-	// 		// check that all reports were created correctly
-	// 		expect(report.adminId).to.equal(testUserId, "Report admin ID mismatch")
-	// 		expect(report.playername).to.equal(testStuff.report.playername, "Report playername mismatch")
-	// 		expect(report.brokenRule).to.equal(rules[0].id, "Report rule mismatch")
-	// 		expect(report.description).to.equal(testStuff.report.description, "Report description mismatch")
-	// 		expect(report.automated).to.equal(testStuff.report.automated, "Report automated mismatch")
-	// 		expect(report.proof).to.equal(testStuff.report.proof, "Report proof mismatch")
+		const resolvedReportsAfterRevoked = FAGC.reports.resolveID(report.id)
+		expect(resolvedReportsAfterRevoked, "Report not removed from cache properly").to.be.null
+	})
+	step("Should be able to create multiple reports, cache them and revoke them", async () => {
+		const rules = await FAGC.rules.fetchAll()
+		const createdReports = await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
+			return FAGC.reports.create({
+				brokenRule: rules[0].id,
+				adminId: testUserId,
+				...testStuff.report, // description, automated, proof, playername
+			})
+		}))
+		createdReports.forEach(report => {
+			// check that all reports were created correctly
+			expect(report.adminId).to.equal(testUserId, "Report admin ID mismatch")
+			expect(report.playername).to.equal(testStuff.report.playername, "Report playername mismatch")
+			expect(report.brokenRule).to.equal(rules[0].id, "Report rule mismatch")
+			expect(report.description).to.equal(testStuff.report.description, "Report description mismatch")
+			expect(report.automated).to.equal(testStuff.report.automated, "Report automated mismatch")
+			expect(report.proof).to.equal(testStuff.report.proof, "Report proof mismatch")
 
-	// 		// check resolved report
-	// 		const resolved = FAGC.reports.resolveID(report.id)
-	// 		expect(resolved).to.deep.equal(report, "Cached report mismatch to report")
-	// 	})
+			// check resolved report
+			const resolved = FAGC.reports.resolveID(report.id)
+			expect(resolved).to.deep.equal(report, "Cached report mismatch to report")
+		})
 
-	// 	const reports = await FAGC.reports.fetchAllName(testStuff.report.playername)
-	// 	const revocations = await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId)
-	// 	expect(revocations.length).to.equal(reports.length, "Amount of player reports and revocations mismatch")
-	// 	revocations.forEach((revocation, i) => {
-	// 		const report = reports[i]
-	// 		// equal report
-	// 		expect(revocation.adminId).to.equal(report.adminId, "Revocation adminId mismatch")
-	// 		expect(revocation.playername).to.equal(report.playername, "Revocation playername mismatch")
-	// 		expect(revocation.brokenRule).to.equal(report.brokenRule, "Revocation brokenRule mismatch")
-	// 		expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
-	// 		expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
-	// 		expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
-	// 		expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
-	// 		// revocation specific
-	// 		expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
-	// 	})
+		const reports = await FAGC.reports.fetchAllName(testStuff.report.playername)
+		const revocations = await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId)
+		expect(revocations.length).to.equal(reports.length, "Amount of player reports and revocations mismatch")
+		revocations.forEach((revocation, i) => {
+			const report = reports[i]
+			// equal report
+			expect(revocation.adminId).to.equal(report.adminId, "Revocation adminId mismatch")
+			expect(revocation.playername).to.equal(report.playername, "Revocation playername mismatch")
+			expect(revocation.brokenRule).to.equal(report.brokenRule, "Revocation brokenRule mismatch")
+			expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
+			expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
+			expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
+			expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
+			// revocation specific
+			expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
+		})
 
-	// 	reports.forEach(report => {
-	// 		// make sure that reports are removed from cache
-	// 		const resolved = FAGC.reports.resolveID(report.id)
-	// 		expect(resolved, "Report not removed from cache properly").to.be.null
-	// 	})
-	// })
+		reports.forEach(report => {
+			// make sure that reports are removed from cache
+			const resolved = FAGC.reports.resolveID(report.id)
+			expect(resolved, "Report not removed from cache properly").to.be.null
+		})
+	})
 	// step("Should be able to create reports and get a profile from them", async () => {
 	// 	before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
 	// 	after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
@@ -177,7 +177,6 @@ describe("ApiWrapper", () => {
 	// 	// after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
 
 
-	// 	// TODO: fix this bug in tests and let it compare even though the event may be recieved later
 	// 	const rules = await FAGC.rules.fetchAll()
 	// 	const ReportHandler = (evt: Report) => {
 	// 		// expect(evt.id).to.equal(report.id, "Event Report ID mismatch")
