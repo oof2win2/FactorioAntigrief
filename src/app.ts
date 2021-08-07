@@ -203,7 +203,7 @@ fastify.register(bootstrap, {
 })
 
 
-fastify.register(fastifyResponseValidationPlugin)
+// fastify.register(fastifyResponseValidationPlugin)
 
 const start = async () => {
 	try {

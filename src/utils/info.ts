@@ -2,7 +2,13 @@ import { WebhookClient, MessageEmbed } from "discord.js"
 import WebhookSchema from "../database/fagc/webhook"
 import WebSocket from "ws"
 import ENV from "./env"
-import GuildConfigModel from "../database/bot/community"
+import GuildConfigModel, { ConfigClass } from "../database/bot/community"
+import { RevocationClass } from "../database/fagc/revocation"
+import { DocumentType } from "@typegoose/typegoose"
+import { BeAnObject } from "@typegoose/typegoose/lib/types"
+import { RuleClass } from "../database/fagc/rule"
+import { CommunityClass } from "../database/fagc/community"
+import { ReportClass } from "../database/fagc/report"
 
 const wss = new WebSocket.Server({ port: ENV.WS_PORT })
 
@@ -46,17 +52,19 @@ wss.on("connection", (ws) => {
 	})
 })
 
-export async function WebsocketMessage(message) {
+export function WebsocketMessage(message: string): void {
 	wss.clients.forEach((client) => {
 		if (client.readyState === WebSocket.OPEN) {
 			client.send(message)
 		}
 	})
 }
-export async function reportCreatedMessage(report) {
+
+export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>): Promise<void> {
 	if (report === null || report.playername === undefined) return
-	report.messageType = "report"
-	WebsocketMessage(JSON.stringify(report))
+	
+	// set the sent object's messageType to report
+	WebsocketMessage(JSON.stringify(Object.assign({}, report.toObject(), {messageType: "report"})))
 	const reportEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Report Created")
@@ -75,10 +83,11 @@ export async function reportCreatedMessage(report) {
 		.setTimestamp()
 	WebhookMessage(reportEmbed)
 }
-export async function reportRevokedMessage(revocation) {
+export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>): Promise<void> {
 	if (revocation === null || revocation.playername === undefined) return
-	revocation.messageType = "revocation"
-	WebsocketMessage(JSON.stringify(revocation))
+	
+	// set the sent object's messageType to revocation
+	WebsocketMessage(JSON.stringify(Object.assign({}, revocation.toObject(), {messageType: "revocation"})))
 	const revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Report Revoked")
@@ -100,10 +109,11 @@ export async function reportRevokedMessage(revocation) {
 	WebhookMessage(revocationEmbed)
 }
 
-export async function ruleCreatedMessage(rule) {
+export async function ruleCreatedMessage(rule: DocumentType<RuleClass, BeAnObject>): Promise<void> {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
-	rule.messageType = "ruleCreated"
-	WebsocketMessage(JSON.stringify(rule))
+	
+	// set the sent object's messageType to ruleCreated
+	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), {messageType: "ruleCreated"})))
 	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule created")
@@ -115,10 +125,10 @@ export async function ruleCreatedMessage(rule) {
 	WebhookMessage(ruleEmbed)
 }
 
-export async function ruleRemovedMessage(rule) {
+export async function ruleRemovedMessage(rule: DocumentType<RuleClass, BeAnObject>): Promise<void> {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
-	rule.messageType = "ruleRemoved"
-	WebsocketMessage(JSON.stringify(rule))
+	// set the sent object's messageType to ruleRemoved
+	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), {messageType: "ruleRemoved"})))
 	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule removed")
@@ -130,27 +140,10 @@ export async function ruleRemovedMessage(rule) {
 	WebhookMessage(ruleEmbed)
 }
 
-export async function profileRevokedMessage(profile) {
-	profile.messageType = "profileRevoked"
-	WebsocketMessage(JSON.stringify(profile))
-	const embed = new MessageEmbed()
-		.setTitle("FAGC Notifications")
-		.setDescription("Profile revoked")
-		.setColor("ORANGE")
-	profile.forEach((revocation) => {
-		embed.addField(
-			`ID: ${revocation.id}`,
-			`Playername: ${revocation.playername}, Admin ID: ${revocation.adminId}, Community ID: ${revocation.communityId}\n` +
-			`Broken rule: ${revocation.brokenRule}, Automated: ${revocation.automated}, Proof: ${revocation.proof}\n` +
-			`Description: ${revocation.description}, Revocation time: ${revocation.revokedTime}, Revoked by: ${revocation.revokedBy}\n`
-		)
-	})
-	WebhookMessage(embed)
-}
 
-export async function communityCreatedMessage(community) {
-	community.messageType = "communityCreated"
-	WebsocketMessage(JSON.stringify(community))
+export async function communityCreatedMessage(community: DocumentType<CommunityClass, BeAnObject>): Promise<void> {
+	// set the sent object's messageType to communityCreated
+	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), {messageType: "communityCreated"})))
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community created")
@@ -161,9 +154,9 @@ export async function communityCreatedMessage(community) {
 		)
 	WebhookMessage(embed)
 }
-export async function communityRemovedMessage(community) {
-	community.messageType = "communityRemoved"
-	WebsocketMessage(JSON.stringify(community))
+export async function communityRemovedMessage(community: DocumentType<CommunityClass, BeAnObject>): Promise<void> {
+	// set the sent object's messageType to communityRemoved
+	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), {messageType: "communityRemoved"})))
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community removed")
@@ -174,8 +167,9 @@ export async function communityRemovedMessage(community) {
 		)
 	WebhookMessage(embed)
 }
-export async function communityConfigChanged(config) {
+export function communityConfigChanged(config: DocumentType<ConfigClass, BeAnObject>): void {
 	wss.clients.forEach(client => {
+		// TODO: figure out a way to externally store which websocket belongs to which guild
 		// if (client.guildId == config.guildId) {
 		// 	client.send(Buffer.from(JSON.stringify({
 		// 		...config,
