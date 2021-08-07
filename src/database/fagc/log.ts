@@ -31,10 +31,10 @@ export class LogClass {
 	ip: string | undefined
 
 	@prop()
-	responseBody!: any
+	responseBody!: unknown
 
 	@prop()
-	requestBody!: any
+	requestBody!: unknown
 
 	@prop()
 	endpointAddress!: string

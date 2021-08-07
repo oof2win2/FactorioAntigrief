@@ -1,5 +1,4 @@
-import { FastifyPluginCallback, FastifyRequest, FastifyReply, FastifyInstance } from "fastify"
-import fastifyPlugin from "fastify-plugin"
+import { FastifyRequest, FastifyReply } from "fastify"
 import { RouteGenericInterface } from "fastify/types/route"
 import AuthModel from "../database/fagc/authentication"
 import CommunityModel from "../database/fagc/community"

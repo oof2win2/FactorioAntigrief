@@ -4,10 +4,8 @@ import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
 import Authenticate from "../utils/authentication"
-import CommunityModel from "../database/fagc/community"
-import CommunityConfigModel from "../database/bot/community"
 import { checkUser } from "../utils/functions"
-import { communityConfigChanged, reportCreatedMessage, reportRevokedMessage } from "../utils/info"
+import { reportCreatedMessage, reportRevokedMessage } from "../utils/info"
 import ReportModel from "../database/fagc/report"
 import RevocationModel from "../database/fagc/revocation"
 

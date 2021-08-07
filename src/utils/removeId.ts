@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 // remove the _id property from everything using recursion magic
 
-export default async function (
+export default function (
 	_req: FastifyRequest,
 	_res: FastifyReply,
-	payload: unknown
-) {
+	payload: any
+): unknown {
 	const editResponse = (response: any) => {
 		const removeable = ["_id", "__v", "apikey"]
 		if (response && response.toObject) response = response.toObject()
