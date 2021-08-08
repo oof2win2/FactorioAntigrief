@@ -11,11 +11,14 @@ import { bootstrap } from "fastify-decorators"
 import path from "node:path"
 
 import ENV from "./utils/env"
+import { DocumentType } from "@typegoose/typegoose"
+import { CommunityClass } from "./database/fagc/community"
+import { BeAnObject } from "@typegoose/typegoose/lib/types"
 
 
 const fastify: FastifyInstance = Fastify({})
 
-// cors
+// // cors
 fastify.register(fastifyCorsPlugin, {
 	origin: true // reflect the request origin
 })
@@ -47,18 +50,10 @@ declare module "fastify-request-context" {
 // helmet
 fastify.register(fastifyHelmetPlugin)
 
-// Authentication plugin. is in preHandler since stuff is there for the handler
-// import authPlugin from "./plugins/rules"
-// fastify.addHook("preHandler", authPlugin)
-
 
 // middlware to remove garbage from responses
 import removeIdMiddleware from "./utils/removeId"
 fastify.addHook("onSend", removeIdMiddleware)
-
-import { CommunityClass } from "./database/fagc/community"
-import { DocumentType } from "@typegoose/typegoose"
-import { BeAnObject } from "@typegoose/typegoose/lib/types"
 
 
 fastify.register(bootstrap, {

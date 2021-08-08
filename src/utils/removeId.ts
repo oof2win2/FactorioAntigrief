@@ -1,11 +1,13 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 // remove the _id property from everything using recursion magic
 
-export default function (
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export default async function (
 	_req: FastifyRequest,
 	_res: FastifyReply,
-	payload: any
-): unknown {
+	payload: unknown
+) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const editResponse = (response: any) => {
 		const removeable = ["_id", "__v", "apikey"]
 		if (response && response.toObject) response = response.toObject()

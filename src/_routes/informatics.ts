@@ -53,7 +53,7 @@ router.get("/getlogs", async (req, res) => {
 	const logsFiltered = logsRaw.map((log) => {
 		log.set("apikey", null)
 		log.set("ip", null)
-		if (log.responseBody && log.responseBody.key) log.set("responseBody.key", null)
+		// if (log.responseBody && log.responseBody.key) log.set("responseBody.key", null)
 		return log
 	})
 	res.status(200).json(logsFiltered)
