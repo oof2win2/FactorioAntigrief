@@ -10,7 +10,7 @@ import ReportModel from "../database/fagc/report"
 import RevocationModel from "../database/fagc/revocation"
 
 @Controller({ route: "/reports" })
-export default class CommunityController {
+export default class ReportController {
 	@GET({
 		url: "/:id", options: {
 			schema: {
