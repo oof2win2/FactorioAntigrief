@@ -1,6 +1,6 @@
 import config from "./testconfig"
 import { FAGCWrapper } from "../src/index"
-import { Revocation, Report, CommunityConfig } from "fagc-api-types"
+import { CommunityConfig } from "fagc-api-types"
 
 import { expect } from "chai"
 
@@ -157,21 +157,28 @@ describe("ApiWrapper", () => {
 		expect(profile.playername).to.equal(testStuff.report.playername, "Given playername and profile playername mismatch")
 		expect(profile.communityId).to.equal(fetchedReports[0].communityId, "Community IDs mismatch")
 	})
-	// step("Addition and removal of webhooks should work", async () => {
-	// 	before(async () => {
-	// 		return await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
-	// 	})
+	step("test", () => {
+		before(() => console.log("test before"))
+		after(() => console.log("test after"))
+		console.log("test during")
+		expect(1).to.eq(1)
+	})
+	step("Addition and removal of webhooks should work", async () => {
+		// TODO: get the before hook going
+		before(async () => await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken))
+		console.log("aaa")
 
-	// 	const added = await FAGC.info.addWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
-	// 	expect(added.id).to.equal(testStuff.webhookId, "Webhook Creation IDs mismatch")
-	// 	expect(added.token).to.equal(testStuff.webhookToken, "Webhook Creation token mismatch")
-	// 	expect(added.guildId).to.equal(testGuildId, "Webhook Creation guild IDs mismatch")
+		// const added = await FAGC.info.addWebhook(testStuff.webhookId, testStuff.webhookToken)
+		// console.log(added)
+		// expect(added.id).to.equal(testStuff.webhookId, "Webhook Creation IDs mismatch")
+		// expect(added.token).to.equal(testStuff.webhookToken, "Webhook Creation token mismatch")
+		// expect(added.guildId).to.equal(testGuildId, "Webhook Creation guild IDs mismatch")
 
-	// 	const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
-	// 	expect(removed.id).to.equal(testStuff.webhookId, "Webhook Removal IDs mismatch")
-	// 	expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
-	// 	expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
-	// })
+		// const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken)
+		// expect(removed.id).to.equal(testStuff.webhookId, "Webhook Removal IDs mismatch")
+		// expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
+		// expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
+	})
 	// step("Report WebSocket event should work", async () => {
 	// 	// before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
 	// 	// after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
