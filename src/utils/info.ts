@@ -20,7 +20,10 @@ async function SendWebhookMessages() {
 	WebhookQueue = WebhookQueue.slice(10)
 	const webhooks = await WebhookSchema.find()
 	webhooks.forEach(async (webhook) => {
-		const client = new WebhookClient(webhook.id, webhook.token)
+		const client = new WebhookClient({
+			id: webhook.id,
+			token: webhook.token
+		})
 		client.send({ embeds: embeds, username: "FAGC Notifier" }).catch((error) => {
 			if (error.stack.includes("Unknown Webhook")) {
 				console.log(`Unknown webhook ${webhook.id} with token ${webhook.token}. GID ${webhook.guildId}. Removing webhook from database.`)
@@ -65,6 +68,7 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 	
 	// set the sent object's messageType to report
 	WebsocketMessage(JSON.stringify(Object.assign({}, report.toObject(), {messageType: "report"})))
+
 	const reportEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Report Created")
@@ -74,11 +78,11 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 			{ name: "Admin ID", value: report.adminId },
 			{ name: "Community ID", value: report.communityId },
 			{ name: "Broken Rule", value: report.brokenRule },
-			{ name: "Automated", value: report.automated },
+			{ name: "Automated", value: report.automated.toString() },
 			{ name: "Proof", value: report.proof },
 			{ name: "Description", value: report.description },
 			{ name: "Report ID", value: report.id },
-			{ name: "Report Time", value: report.reportedTime }
+			{ name: "Report Time", value: report.reportedTime.toUTCString() }
 		)
 		.setTimestamp()
 	WebhookMessage(reportEmbed)
@@ -92,19 +96,19 @@ export async function reportRevokedMessage(revocation: DocumentType<RevocationCl
 		.setTitle("FAGC Notifications")
 		.setDescription("Report Revoked")
 		.setColor("ORANGE")
-		.addFields(
+		.addFields([
 			{ name: "Playername", value: revocation.playername },
 			{ name: "Admin ID", value: revocation.adminId },
 			{ name: "Community ID", value: revocation.communityId },
 			{ name: "Broken Rules", value: revocation.brokenRule },
-			{ name: "Automated", value: revocation.automated },
+			{ name: "Automated", value: revocation.automated.toString() },
 			{ name: "Proof", value: revocation.proof },
 			{ name: "Description", value: revocation.description },
 			{ name: "Revocation ID", value: revocation.id },
 			{ name: "Report ID", value: revocation.reportId },
-			{ name: "Revocation Time", value: revocation.revokedTime },
+			{ name: "Revocation Time", value: revocation.revokedTime.toUTCString() },
 			{ name: "Revoked by", value: revocation.revokedBy },
-		)
+		])
 		.setTimestamp()
 	WebhookMessage(revocationEmbed)
 }

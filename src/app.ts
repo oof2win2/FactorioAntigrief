@@ -14,6 +14,7 @@ import ENV from "./utils/env"
 import { DocumentType } from "@typegoose/typegoose"
 import { CommunityClass } from "./database/fagc/community"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
+import fastifyFormBodyPlugin from "fastify-formbody"
 
 
 const fastify: FastifyInstance = Fastify({})
@@ -50,6 +51,8 @@ declare module "fastify-request-context" {
 // helmet
 fastify.register(fastifyHelmetPlugin)
 
+// form body for backwards compat with the express api
+fastify.register(fastifyFormBodyPlugin)
 
 // middlware to remove garbage from responses
 import removeIdMiddleware from "./utils/removeId"
