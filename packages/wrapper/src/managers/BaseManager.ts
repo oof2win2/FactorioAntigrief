@@ -5,12 +5,13 @@ import { AddOptions, ManagerOptions } from "../types/types"
 export default class BaseManager<HoldsWithId extends Common> {
 	public cache: Collection<Common["id"], HoldsWithId>
 	private sweepCache: Collection<Common["id"], number>
+	private interval: NodeJS.Timeout
 	constructor(options: ManagerOptions = {}) {
 		this.cache = new Collection()
 		this.sweepCache = new Collection()
 
 		if (options.uncachems) {
-			setInterval(() => {
+			this.interval = setInterval(() => {
 				this.sweepCache.forEach((addedAt, id) => {
 					// if the age of addition + custom age (or 60mins) is larger than now then remove it
 					if (addedAt + (options.uncacheage || 1000*60*60) < Date.now()) {
@@ -20,7 +21,7 @@ export default class BaseManager<HoldsWithId extends Common> {
 				})
 			}, options.uncachems)
 		} else {
-			setInterval(this.sweepCache.clear, 1000*60*15) // clear sweeping cache every 15 mins if its not used properly
+			this.interval = setInterval(this.sweepCache.clear, 1000*60*15) // clear sweeping cache every 15 mins if its not used properly
 		}
 	}
 	add(data: HoldsWithId, cache = true, {id}: AddOptions = {}): HoldsWithId  {
@@ -30,5 +31,8 @@ export default class BaseManager<HoldsWithId extends Common> {
 			return this.cache.set(id || data.id, data).get(data.id)
 		}
 		return data
+	}
+	destroy(): void {
+		clearInterval(this.interval)
 	}
 }

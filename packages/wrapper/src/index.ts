@@ -44,4 +44,15 @@ export class FAGCWrapper {
 			enabled: options.enableWebSocket
 		})
 	}
+	destroy(): void {
+		this.apikey = null
+
+		this.reports.destroy()
+		this.rules.destroy()
+		this.communities.destroy()
+		this.revocations.destroy()
+		this.profiles.destroy()
+		this.info.destroy()
+		this.websocket.destroy()
+	}
 }

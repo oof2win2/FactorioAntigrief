@@ -1,20 +1,25 @@
+## [1.9.0] - [2021-08-12]
+### Additions
+- Added a `.destroy()` method on the wrapper and all managers to cancel all timeouts and exit cleanly
+### Changes
+- Reworked wrapper to work with the new TS API
 
 ## [1.8.1] - [2021-07-15]
 ### Bugfixes
 - Removed an unnecessary `console.log`
 
 ## [1.8.0] - [2021-07-15]
-### Changed
-- Changed the websocket to be disabled by default
+### Changes
+- Changes the websocket to be disabled by default
 - Started using `fagc-api-types` for type declarations of the API
 - Reformatted changelog
 
 ## [1.7.3] - [2021-06-23]
-### Changed
+### Changes
 - Remove `axios` and add in `isomorphic-fetch` as `axios` caused issues when it threw errors on 404s, which are used sometimes on some endpoints
 
 ## [1.7.0] - [2021-06-22]
-### Changed
+### Changes
 - Removed `node-fetch` and instead installed `axios` as node-fetch was behaving funky with the browser
 
 ## [1.6.4] - [2021-06-22]
@@ -35,7 +40,7 @@
 - WebSocket can be disabled with a configuration option
 
 ## [1.5.1] - [2021-06-19]
-### Changed
+### Changes
 - Offenses are now called profiles
 - Violations are now called reports
 

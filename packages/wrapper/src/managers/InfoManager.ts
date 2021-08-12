@@ -12,26 +12,24 @@ export default class InfoManager extends BaseManager<Webhook> {
 		if (apikey) this.apikey = apikey
 		this.apiurl = apiurl
 	}
-	async addWebhook(webhookid: string, webhooktoken: string, guildid: string): Promise<Webhook> {
-		const add = await fetch(`${this.apiurl}/informatics/addwebhook`, {
+	async addWebhook(webhookid: string, webhooktoken: string): Promise<Webhook> {
+		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "POST",
 			body: JSON.stringify({
 				id: webhookid,
 				token: webhooktoken,
-				guildId: guildid
 			}),
 			headers: { "content-type": "application/json" },
 		}).then(w=>w.json())
-		if (add.error) throw new GenericAPIError(`${add.error}: ${add.description}`)
+		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
 		return add
 	} 
-	async removeWebhook(webhookid: string, webhooktoken: string, guildid: string): Promise<Webhook> {
-		const add = await fetch(`${this.apiurl}/informatics/removewebhook`, {
+	async removeWebhook(webhookid: string, webhooktoken: string): Promise<Webhook | null> {
+		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				id: webhookid,
 				token: webhooktoken,
-				guildId: guildid
 			}),
 			headers: { "content-type": "application/json" },
 		}).then(w=>w.json())

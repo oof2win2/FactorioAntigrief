@@ -20,17 +20,17 @@ export default class CommunityManager extends BaseManager<Community> {
 			const cached = this.cache.get(communityId)
 			if (cached) return cached
 		}
-		const fetched = await fetch(`${this.apiurl}/communities/getid?id=${strictUriEncode(communityId)}`).then(c => c.json())
+		const fetched = await fetch(`${this.apiurl}/communities/${strictUriEncode(communityId)}`).then(c => c.json())
 
 		if (!fetched) return null // return null if the fetch is empty
-		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.description}`)
+		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
 		if (cache) this.add(fetched)
 		return fetched
 	}
 	async fetchAll(cache = true): Promise<Community[]> {
-		const allCommunities = await fetch(`${this.apiurl}/communities/getall`).then(c => c.json())
+		const allCommunities = await fetch(`${this.apiurl}/communities`).then(c => c.json())
 
-		if (allCommunities.error) throw new GenericAPIError(`${allCommunities.error}: ${allCommunities.description}`)
+		if (allCommunities.error) throw new GenericAPIError(`${allCommunities.error}: ${allCommunities.message}`)
 
 		if (cache && allCommunities[0]) {
 			return allCommunities.map(community => {
@@ -45,22 +45,22 @@ export default class CommunityManager extends BaseManager<Community> {
 		return null
 	}
 	async fetchConfig(guildId: string): Promise<CommunityConfig | null> {
-		const config = await fetch(`${this.apiurl}/communities/getconfig?guildId=${strictUriEncode(guildId)}`).then(c => c.json())
+		const config = await fetch(`${this.apiurl}/communities/config/${strictUriEncode(guildId)}`).then(c => c.json())
 
-		if (config.error) throw new GenericAPIError(`${config.error}: ${config.description}`)
+		if (config.error) throw new GenericAPIError(`${config.error}: ${config.message}`)
 		if (!config || !config.guildId) return null
 		return config
 	}
 	async setConfig(config: SetCommunityConfig, reqConfig: RequestConfig = {}): Promise<CommunityConfig> {
 		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
-		const update = await fetch(`${this.apiurl}/communities/setconfig`, {
+		const update = await fetch(`${this.apiurl}/communities/config`, {
 			method: "POST",
 			body: JSON.stringify(config),
-			headers: { "apikey": this.apikey || reqConfig.apikey, "content-type": "application/json" },
+			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
 		}).then(u => u.json())
 		if (update.error) {
 			if (update.description === "API key is wrong") throw new AuthenticationError()
-			throw new GenericAPIError(`${update.error}: ${update.description}`)
+			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		}
 		return update
 	}

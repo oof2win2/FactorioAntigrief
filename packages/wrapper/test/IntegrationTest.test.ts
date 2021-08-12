@@ -1,6 +1,6 @@
 import config from "./testconfig"
 import { FAGCWrapper } from "../src/index"
-import { Revocation, Report, CommunityConfig } from "fagc-api-types"
+import { CommunityConfig, Report, Revocation } from "fagc-api-types"
 
 import { expect } from "chai"
 
@@ -158,16 +158,15 @@ describe("ApiWrapper", () => {
 		expect(profile.communityId).to.equal(fetchedReports[0].communityId, "Community IDs mismatch")
 	})
 	step("Addition and removal of webhooks should work", async () => {
-		before(async () => {
-			return await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
-		})
+		// this should probably be in a before() hook but that apparently doesnt work here
+		await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken)
 
-		const added = await FAGC.info.addWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
+		const added = await FAGC.info.addWebhook(testStuff.webhookId, testStuff.webhookToken)
 		expect(added.id).to.equal(testStuff.webhookId, "Webhook Creation IDs mismatch")
 		expect(added.token).to.equal(testStuff.webhookToken, "Webhook Creation token mismatch")
 		expect(added.guildId).to.equal(testGuildId, "Webhook Creation guild IDs mismatch")
 
-		const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken, testGuildId)
+		const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken)
 		expect(removed.id).to.equal(testStuff.webhookId, "Webhook Removal IDs mismatch")
 		expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
 		expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
@@ -177,7 +176,6 @@ describe("ApiWrapper", () => {
 		// after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
 
 
-		// TODO: fix this bug in tests and let it compare even though the event may be recieved later
 		const rules = await FAGC.rules.fetchAll()
 		const ReportHandler = (evt: Report) => {
 			// expect(evt.id).to.equal(report.id, "Event Report ID mismatch")
