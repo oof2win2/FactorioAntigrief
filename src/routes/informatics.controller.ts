@@ -89,6 +89,13 @@ export default class ProfileController {
 			id: id,
 			token: token,
 		})
+		if (found) {
+			const webhook = new WebhookClient({
+				id: found.id,
+				token: found.token
+			})
+			webhook.send("This webhook will no longer recieve FAGC notifications").then(webhook.destroy)
+		}
 		return res.status(200).send(found)
 	}
 }
