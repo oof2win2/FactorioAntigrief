@@ -25,7 +25,6 @@ export default class InfoManager extends BaseManager<Webhook> {
 		return add
 	} 
 	async removeWebhook(webhookid: string, webhooktoken: string): Promise<Webhook | null> {
-		console.log("aaaaa")
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "DELETE",
 			body: JSON.stringify({

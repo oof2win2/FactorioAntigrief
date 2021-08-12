@@ -1,6 +1,6 @@
 import config from "./testconfig"
 import { FAGCWrapper } from "../src/index"
-import { CommunityConfig } from "fagc-api-types"
+import { CommunityConfig, Report, Revocation } from "fagc-api-types"
 
 import { expect } from "chai"
 
@@ -157,66 +157,58 @@ describe("ApiWrapper", () => {
 		expect(profile.playername).to.equal(testStuff.report.playername, "Given playername and profile playername mismatch")
 		expect(profile.communityId).to.equal(fetchedReports[0].communityId, "Community IDs mismatch")
 	})
-	step("test", () => {
-		before(() => console.log("test before"))
-		after(() => console.log("test after"))
-		console.log("test during")
-		expect(1).to.eq(1)
-	})
 	step("Addition and removal of webhooks should work", async () => {
-		// TODO: get the before hook going
-		before(async () => await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken))
-		console.log("aaa")
+		// this should probably be in a before() hook but that apparently doesnt work here
+		await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken)
 
-		// const added = await FAGC.info.addWebhook(testStuff.webhookId, testStuff.webhookToken)
-		// console.log(added)
-		// expect(added.id).to.equal(testStuff.webhookId, "Webhook Creation IDs mismatch")
-		// expect(added.token).to.equal(testStuff.webhookToken, "Webhook Creation token mismatch")
-		// expect(added.guildId).to.equal(testGuildId, "Webhook Creation guild IDs mismatch")
+		const added = await FAGC.info.addWebhook(testStuff.webhookId, testStuff.webhookToken)
+		expect(added.id).to.equal(testStuff.webhookId, "Webhook Creation IDs mismatch")
+		expect(added.token).to.equal(testStuff.webhookToken, "Webhook Creation token mismatch")
+		expect(added.guildId).to.equal(testGuildId, "Webhook Creation guild IDs mismatch")
 
-		// const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken)
-		// expect(removed.id).to.equal(testStuff.webhookId, "Webhook Removal IDs mismatch")
-		// expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
-		// expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
+		const removed = await FAGC.info.removeWebhook(testStuff.webhookId, testStuff.webhookToken)
+		expect(removed.id).to.equal(testStuff.webhookId, "Webhook Removal IDs mismatch")
+		expect(removed.token).to.equal(testStuff.webhookToken, "Webhook Removal token mismatch")
+		expect(removed.guildId).to.equal(testGuildId, "Webhook Removal guild IDs mismatch")
 	})
-	// step("Report WebSocket event should work", async () => {
-	// 	// before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
-	// 	// after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
+	step("Report WebSocket event should work", async () => {
+		// before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
+		// after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId).catch())
 
 
-	// 	const rules = await FAGC.rules.fetchAll()
-	// 	const ReportHandler = (evt: Report) => {
-	// 		// expect(evt.id).to.equal(report.id, "Event Report ID mismatch")
-	// 		expect(evt.adminId).to.equal(testUserId, "Event Report admin ID mismatch")
-	// 		expect(evt.playername).to.equal(testStuff.report.playername, "Event Report playername mismatch")
-	// 		expect(evt.brokenRule).to.equal(rules[0].id, "Event Report rule mismatch")
-	// 		expect(evt.description).to.equal(testStuff.report.description, "Event Report description mismatch")
-	// 		expect(evt.automated).to.equal(testStuff.report.automated, "Event Report automated mismatch")
-	// 		expect(evt.proof).to.equal(testStuff.report.proof, "Event Report proof mismatch")
-	// 	}
-	// 	const RevocationHandler = (evt: Revocation) => {
-	// 		// report stuff
-	// 		// expect(evt.id).to.equal(revocation.id, "Event Revocation ID mismatch")
-	// 		expect(evt.adminId).to.equal(testUserId, "Event Revocation admin ID mismatch")
-	// 		expect(evt.playername).to.equal(testStuff.report.playername, "Event Revocation playername mismatch")
-	// 		expect(evt.brokenRule).to.equal(rules[0].id, "Event Revocation rule mismatch")
-	// 		expect(evt.description).to.equal(testStuff.report.description, "Event Revocation description mismatch")
-	// 		expect(evt.automated).to.equal(testStuff.report.automated, "Event Revocation automated mismatch")
-	// 		expect(evt.proof).to.equal(testStuff.report.proof, "Event Revocation proof mismatch")
+		const rules = await FAGC.rules.fetchAll()
+		const ReportHandler = (evt: Report) => {
+			// expect(evt.id).to.equal(report.id, "Event Report ID mismatch")
+			expect(evt.adminId).to.equal(testUserId, "Event Report admin ID mismatch")
+			expect(evt.playername).to.equal(testStuff.report.playername, "Event Report playername mismatch")
+			expect(evt.brokenRule).to.equal(rules[0].id, "Event Report rule mismatch")
+			expect(evt.description).to.equal(testStuff.report.description, "Event Report description mismatch")
+			expect(evt.automated).to.equal(testStuff.report.automated, "Event Report automated mismatch")
+			expect(evt.proof).to.equal(testStuff.report.proof, "Event Report proof mismatch")
+		}
+		const RevocationHandler = (evt: Revocation) => {
+			// report stuff
+			// expect(evt.id).to.equal(revocation.id, "Event Revocation ID mismatch")
+			expect(evt.adminId).to.equal(testUserId, "Event Revocation admin ID mismatch")
+			expect(evt.playername).to.equal(testStuff.report.playername, "Event Revocation playername mismatch")
+			expect(evt.brokenRule).to.equal(rules[0].id, "Event Revocation rule mismatch")
+			expect(evt.description).to.equal(testStuff.report.description, "Event Revocation description mismatch")
+			expect(evt.automated).to.equal(testStuff.report.automated, "Event Revocation automated mismatch")
+			expect(evt.proof).to.equal(testStuff.report.proof, "Event Revocation proof mismatch")
 
-	// 		// revocation stuff
-	// 		// expect(evt.revokedBy).to.equal(revocation.revokedBy, "Event Revocation revokedBy mismatch")
-	// 		// expect(evt.revokedTime).to.equal(revocation.revokedTime, "Event Revocation revokedTime mismatch")
-	// 	}
-	// 	FAGC.websocket.once("report", ReportHandler)
-	// 	FAGC.websocket.once("revocation", RevocationHandler)
-	// 	const report = await FAGC.reports.create({
-	// 		brokenRule: rules[0].id,
-	// 		adminId: testUserId,
-	// 		...testStuff.report, // description, automated, proof, playername
-	// 	})
-	// 	const revocation = await FAGC.reports.revoke(report.id, testUserId)
-	// })
+			// revocation stuff
+			// expect(evt.revokedBy).to.equal(revocation.revokedBy, "Event Revocation revokedBy mismatch")
+			// expect(evt.revokedTime).to.equal(revocation.revokedTime, "Event Revocation revokedTime mismatch")
+		}
+		FAGC.websocket.once("report", ReportHandler)
+		FAGC.websocket.once("revocation", RevocationHandler)
+		const report = await FAGC.reports.create({
+			brokenRule: rules[0].id,
+			adminId: testUserId,
+			...testStuff.report, // description, automated, proof, playername
+		})
+		const revocation = await FAGC.reports.revoke(report.id, testUserId)
+	})
 	step("Getting Guild Config from websocket should work", async () => {
 		const CommunityConfigChangeHandler = (config: CommunityConfig) => {
 			expect(config.guildId).to.equal(testGuildId, "API sent the wrong guild ID")
