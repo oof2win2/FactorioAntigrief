@@ -1,3 +1,7 @@
+## [1.9.1] - [2021-08-12]
+### Bugfixed
+- Fixed that `Report.reportedTime` was not a date but said it was
+
 ## [1.9.0] - [2021-08-12]
 ### Additions
 - Added a `.destroy()` method on the wrapper and all managers to cancel all timeouts and exit cleanly

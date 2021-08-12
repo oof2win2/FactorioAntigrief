@@ -85,7 +85,7 @@ describe("ApiWrapper", () => {
 		expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
 		expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
 		expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
-		expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
+		expect(revocation.reportedTime.valueOf()).to.equal(report.reportedTime.valueOf(), "Revocation time mismatch")
 		// revocation specific
 		expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
 
@@ -127,7 +127,7 @@ describe("ApiWrapper", () => {
 			expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
 			expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
 			expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
-			expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
+			expect(revocation.reportedTime.valueOf()).to.equal(report.reportedTime.valueOf(), "Revocation time mismatch")
 			// revocation specific
 			expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
 		})

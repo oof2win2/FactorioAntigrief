@@ -25,6 +25,7 @@ export default class ReportManager extends BaseManager<Report> {
 
 		if (!fetched) return null // return null if the fetch is empty
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
+		fetched.reportedTime = new Date(fetched.reportedTime)
 		if (cache) this.add(fetched)
 		return fetched
 	}
@@ -34,7 +35,10 @@ export default class ReportManager extends BaseManager<Report> {
 		if (allReports.error) throw new GenericAPIError(`${allReports.error}: ${allReports.message}`)
 
 		if (cache && allReports[0]) {
-			allReports.forEach(report => this.add(report))
+			allReports.forEach(report => {
+				report.reportedTime = new Date(report.reportedTime)
+				this.add(report)
+			})
 		}
 		return allReports
 	}
@@ -45,7 +49,12 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 	async fetchByRule(ruleid: ApiID, cache = true): Promise<Report[]> {
 		const ruleReports = await fetch(`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`).then(c=>c.json())
-		if (cache) ruleReports.forEach(report => this.add(report))
+		if (cache) {
+			ruleReports.forEach(report => {
+				report.reportedTime = new Date(report.reportedTime)
+				this.add(report)
+			})
+		}
 		return ruleReports
 	}
 	async create(report: CreateReport, cache = true, reqConfig: RequestConfig = {}): Promise<Report> {
@@ -62,6 +71,7 @@ export default class ReportManager extends BaseManager<Report> {
 			console.error(create)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 		}
+		create.reportedTime = new Date(create.reportedTime)
 		if (cache) this.add(create)
 		return create
 	}
@@ -81,6 +91,8 @@ export default class ReportManager extends BaseManager<Report> {
 		}
 
 		if (!revoked?.revokedTime) throw new UnsuccessfulRevocationError()
+		revoked.reportedTime = new Date(revoked.reportedTime)
+		revoked.revokedTime = new Date(revoked.revokedTime)
 		if (cache) this.createRevocation(revoked)
 		this.cache.sweep((report) => report.id === reportid) // remove the revoked report from cache as it isnt working anymore
 		return revoked
@@ -102,6 +114,8 @@ export default class ReportManager extends BaseManager<Report> {
 
 		revoked.forEach(revocation => {
 			if (!revocation?.reportedTime) throw new UnsuccessfulRevocationError()
+			revocation.reportedTime = new Date(revocation.reportedTime)
+			revocation.revokedTime = new Date(revocation.revokedTime)
 			if (cache) this.createRevocation(revocation)
 		})
 		this.cache.sweep((report) => report.playername === playername) // remove the revoked report from cache as it isnt working anymore

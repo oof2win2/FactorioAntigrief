@@ -15,11 +15,13 @@ export default class ProfileManager extends BaseManager<Report> {
 	async fetchCommunity(playername: string, communityId: ApiID): Promise<Profile> {
 		const fetched = await fetch(`${this.apiurl}/profiles/fetchcommunity/${strictUriEncode(playername)}/${strictUriEncode(communityId)}`)
 			.then(o=>o.json())
+		fetched.reports.forEach(report => report.reportedTime = new Date(report.reportedTime))
 		return fetched
 	}
 	async fetchAll(playername: string): Promise<Profile[]> {
 		const fetched = await fetch(`${this.apiurl}/profiles/fetchall/${strictUriEncode(playername)}`)
 			.then(o=>o.json())
+		fetched.reports.forEach(report => report.reportedTime = new Date(report.reportedTime))
 		return fetched
 	}
 }
