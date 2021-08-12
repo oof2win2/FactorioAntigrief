@@ -36,7 +36,8 @@ class CreateReport extends Command {
 		let proof = (await getMessageResponse(message, "Please send a link to proof of the report or `none` if there is no proof"))?.content
 		if (proof.toLowerCase() === "none") proof = undefined
 
-		const timestamp = Math.round(Date.now()/1000)
+		const timestamp = Date.now()
+		console.log(new Date(timestamp), timestamp)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
@@ -50,12 +51,15 @@ class CreateReport extends Command {
 			{ name: "Rule ID", value: ruleid, inline: true },
 			{ name: "Report description", value: desc, inline: true },
 			{ name: "Proof", value: proof },
-			{ name: "Violated At (ISO)", value: new Date(timestamp).toISOString() }
+			{ name: "Violated At", value: `<t:${Math.round(timestamp/1000)}>` }
 		)
 		message.channel.send(embed)
 		const confirm = await getConfirmationMessage(message, "Do you wish to create this rule report?")
 		if (!confirm)
 			return message.channel.send("Report creation cancelled")
+		
+		const rule = await this.client.fagc.rules.fetchRule(ruleid)
+		if (!rule) return message.channel.send(`A rule with the ID of \`${ruleid}\` does not exist!`)
 
 		try {
 			const response = await this.client.fagc.reports.create({

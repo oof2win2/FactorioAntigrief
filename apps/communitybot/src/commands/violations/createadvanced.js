@@ -41,11 +41,12 @@ class CreateReportAdvanced extends Command {
 		let proof = (await getMessageResponse(message, "Please send a link to proof of the report or `none` if there is no proof"))?.content
 		if (proof.toLowerCase() === "none") proof = undefined
 
-		let timestamp = (await getMessageResponse(message, "Please send a value representing the date of the report. Type in `now` to set the current time"))?.content
-		if (timestamp.toLowerCase() === "now") timestamp = (new Date).toISOString()
+		const timestampMsg = (await getMessageResponse(message, "Please send a value representing the date of the report. Type in `now` to set the current time"))?.content
+		let timestamp = new Date()
+		if (timestampMsg.toLowerCase() === "now") timestamp = new Date()
 		else {
-			if (isNaN(Date.parse(timestamp))) timestamp = (new Date).toISOString()
-			else timestamp = Date.parse(timestamp).toISOString()
+			if (isNaN(Date.parse(timestampMsg))) timestamp = new Date()
+			else timestamp = new Date(timestampMsg)
 		}
 
 		let embed = new MessageEmbed()
@@ -60,7 +61,7 @@ class CreateReportAdvanced extends Command {
 			{ name: "Rule ID", value: ruleid, inline: true },
 			{ name: "Report description", value: desc, inline: true },
 			{ name: "Proof", value: proof },
-			{ name: "Violated At (ISO)", value: timestamp }
+			{ name: "Violated At", value: `<t:${Math.floor(timestamp.valueOf()/1000)}>` }
 		)
 		message.channel.send(embed)
 		const confirm = await getConfirmationMessage(message, "Do you wish to create this report?")
