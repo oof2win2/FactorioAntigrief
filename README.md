@@ -2,9 +2,11 @@ fagc-backend
 ---
 
 ## Contents
-- [fagc-backend](#fagc-backend)
-- [Contents](#contents)
-- [Installation](#installation)
+- [Introduction](#introduction)
+	- [Installation](#installation)
+	- [TODO:](#todo)
+
+# Introduction
 
 The backend for the Factorio Anti-Grief community
 
@@ -24,3 +26,10 @@ This README is focused solely on the installation instructions and the workings 
    1. `nodemon`
    2. `pm2 start pm2.config.js`
    3. `node .`
+
+
+## TODO:
+- [ ] Maybe migrate the bot's config database to the API and make the bot not use the config database entirely?
+- [ ] Use `fastify-helmet`
+- [ ] Firgure out how to use `yup` with response validation
+
