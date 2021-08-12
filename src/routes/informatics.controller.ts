@@ -94,7 +94,7 @@ export default class ProfileController {
 				id: found.id,
 				token: found.token
 			})
-			webhook.send("This webhook will no longer recieve FAGC notifications").then(webhook.destroy)
+			webhook.send("This webhook will no longer recieve FAGC notifications").then(() => webhook.destroy())
 		}
 		return res.status(200).send(found)
 	}
