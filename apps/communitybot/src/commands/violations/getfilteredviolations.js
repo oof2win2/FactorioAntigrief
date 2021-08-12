@@ -49,8 +49,8 @@ class GetReports extends Command {
 			return message.channel.send(`Player \`${args[0]}\` doesn't have report that correspond to your rule and community preferences`)
 		const fields = await Promise.all(filteredReports.map(async (report) => {
 			const admin = await this.client.users.fetch(report.adminId)
-			const rule = await this.client.getOrFetchRule(report.brokenRule)
-			const community = await this.client.getOrFetchCommunity(report.communityId)
+			const rule = await this.client.fagc.rules.fetchRule(report.brokenRule)
+			const community = await this.client.fagc.communities.fetchCommunity(report.communityId)
 			return {
 				name: report.id,
 				value: `By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +

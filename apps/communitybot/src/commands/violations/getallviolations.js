@@ -34,14 +34,15 @@ class GetAllReports extends Command {
 		
 		const fields = await Promise.all(reports.map(async (report) => {
 			const admin = await this.client.users.fetch(report.adminId)
-			const rule = await this.client.getOrFetchRule(report.brokenRule)
-			const community = await this.client.getOrFetchCommunity(report.communityId)
+			const rule = await this.client.fagc.rules.fetchRule(report.brokenRule)
+			const community = await this.client.fagc.communities.fetchCommunity(report.communityId)
+			console.log(report.reportedTime)
 			return {
 				name: report.id,
 				value: 	`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
 						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
-						`Violated time: ${(new Date(report.reportedTime)).toUTCString()}`,
+						`Violated time (ISO): ${new Date(report.reportedTime).toISOString()}`,
 				inline: true
 			}
 		}))

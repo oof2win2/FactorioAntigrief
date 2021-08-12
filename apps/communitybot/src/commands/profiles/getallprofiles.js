@@ -34,7 +34,7 @@ class GetAllProfiles extends Command {
 			.setDescription(`FAGC Profiles of player \`${playername}\``)
 		const fields = await Promise.all(profiles.map(async (profile) => {
 			const reports = profile.reports.map((report) => report.id )
-			const community = await this.client.getOrFetchCommunity(profile.communityId)
+			const community = await this.client.fagc.communities.fetchCommunity(profile.communityId)
 			return {
 				name: `Community ${community.name} (\`${profile.communityId}\`)`,
 				value:  `Report ID(s): \`${reports.join("`, `")}\``

@@ -36,7 +36,7 @@ class CreateReport extends Command {
 		let proof = (await getMessageResponse(message, "Please send a link to proof of the report or `none` if there is no proof"))?.content
 		if (proof.toLowerCase() === "none") proof = undefined
 
-		const timestamp = (new Date).toISOString()
+		const timestamp = Math.round(Date.now()/1000)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
@@ -50,7 +50,7 @@ class CreateReport extends Command {
 			{ name: "Rule ID", value: ruleid, inline: true },
 			{ name: "Report description", value: desc, inline: true },
 			{ name: "Proof", value: proof },
-			{ name: "Violated At (ISO)", value: timestamp }
+			{ name: "Violated At (ISO)", value: new Date(timestamp).toISOString() }
 		)
 		message.channel.send(embed)
 		const confirm = await getConfirmationMessage(message, "Do you wish to create this rule report?")
@@ -65,7 +65,7 @@ class CreateReport extends Command {
 				proof: proof,
 				description: desc,
 				automated: false,
-				reportedTime: timestamp
+				reportedTime: new Date(timestamp)
 			}, true, {apikey: config.apikey})
 			if (response.id && response.brokenRule && response.reportedTime) {
 				return message.channel.send(`Report created! id: \`${response.id}\``)
