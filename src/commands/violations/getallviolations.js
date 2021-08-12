@@ -8,7 +8,7 @@ class GetAllReports extends Command {
 			name: "getallreports",
 			description: "Gets all reports of a player",
 			aliases: ["checkall"],
-			category: "reportss",
+			category: "reports",
 			usage: "[playername]",
 			examples: ["{{p}}getallreports Windsinger"],
 			dirname: __dirname,
@@ -42,7 +42,7 @@ class GetAllReports extends Command {
 				value: 	`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
 						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
-						`Violated time (ISO): ${new Date(report.reportedTime).toISOString()}`,
+						`Violated time (ISO): <t:${Math.floor(report.reportedTime.valueOf()/1000)}>`,
 				inline: true
 			}
 		}))

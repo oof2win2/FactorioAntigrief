@@ -45,7 +45,7 @@ class GetAllProfiles extends Command {
 				value: 	`By: <@${report.adminId}> | ${admin?.tag}\n` +
 						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
-						`Violated time: ${(new Date(report.reportedTime)).toUTCString()}`,
+						`Violated time: <t:${Math.round(report.reportedTime.valueOf()/1000)}>`,
 				inline: true
 			}
 		}))

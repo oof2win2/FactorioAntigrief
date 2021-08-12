@@ -1,8 +1,17 @@
+const { Message } = require("discord.js")
+
 module.exports = {
 	getMessageResponse,
 	getConfirmationMessage,
 }
 
+/**
+ * 
+ * @param {Message} message 
+ * @param {string} content 
+ * @param {number} timeout 
+ * @returns {Message}
+ */
 async function getMessageResponse(message, content, timeout = 30000) {
 	const messageFilter = response => response.author.id == message.author.id
 	
