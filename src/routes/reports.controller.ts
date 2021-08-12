@@ -92,7 +92,7 @@ export default class ReportController {
 				playername: Type.String(),
 				brokenRule: Type.String(),
 				automated: Type.Boolean({default: false}),
-				reportedTime: Type.Number({default: Date.now()}),
+				reportedTime: Type.String({default: new Date().toISOString()}),
 				description: Type.String({default: "No description"}),
 				proof: Type.String({default: "No proof"})
 			}))
@@ -105,7 +105,7 @@ export default class ReportController {
 			playername: string,
 			brokenRule: string,
 			automated: boolean,
-			reportedTime: number,
+			reportedTime: string,
 			description: string,
 			proof: string
 		}
