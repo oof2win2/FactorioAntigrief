@@ -41,7 +41,7 @@ class GetProfiles extends Command {
 		if (!filteredProfiles[0]) return message.channel.send(`User \`${playername}\` has no profiles that correspond to your filters`)
 		const fields = await Promise.all(profiles.map(async (profile) => {
 			const reports = profile.reports.map((report) => report.id)
-			const community = await this.client.getOrFetchCommunity(profile.communityId)
+			const community = await this.client.fagc.communities.fetchCommunity(profile.communityId)
 			return {
 				name: `Community ${community.name} (\`${profile.communityId}\`)`,
 				value: `Report ID(s): \`${reports.join("`, `")}\``,
