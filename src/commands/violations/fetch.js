@@ -1,7 +1,7 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 
-class GetAllReports extends Command {
+class FetchReport extends Command {
 	constructor(client) {
 		super(client, {
 			name: "fetchreport",
@@ -30,7 +30,7 @@ class GetAllReports extends Command {
 			return message.reply(`\`${reportID}\` is not a proper report ID`)
 
 		let embed = new MessageEmbed()
-			.setTitle("FAGC Report Revocation")
+			.setTitle("FAGC Report")
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
@@ -47,4 +47,4 @@ class GetAllReports extends Command {
 		return message.channel.send(embed)
 	}
 }
-module.exports = GetAllReports
+module.exports = FetchReport
