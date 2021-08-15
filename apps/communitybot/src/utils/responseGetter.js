@@ -6,11 +6,10 @@ module.exports = {
 }
 
 /**
- * 
  * @param {Message} message 
  * @param {string} content 
  * @param {number} timeout 
- * @returns {Message}
+ * @returns {Promise<Message>}
  */
 async function getMessageResponse(message, content, timeout = 30000) {
 	const messageFilter = response => response.author.id == message.author.id

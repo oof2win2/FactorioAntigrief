@@ -37,7 +37,6 @@ class CreateReport extends Command {
 		if (proof.toLowerCase() === "none") proof = undefined
 
 		const timestamp = Date.now()
-		console.log(new Date(timestamp), timestamp)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")

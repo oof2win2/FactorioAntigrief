@@ -45,8 +45,11 @@ class CreateReportAdvanced extends Command {
 		let timestamp = new Date()
 		if (timestampMsg.toLowerCase() === "now") timestamp = new Date()
 		else {
-			if (isNaN(Date.parse(timestampMsg))) timestamp = new Date()
-			else timestamp = new Date(timestampMsg)
+			timestamp = new Date(timestampMsg)
+			if (isNaN(timestamp.valueOf())) {
+				timestamp = new Date()
+				message.channel.send(`\`${timestampMsg}\` could not be recognized as a date so the current date will be used instead`)
+			}
 		}
 
 		let embed = new MessageEmbed()
