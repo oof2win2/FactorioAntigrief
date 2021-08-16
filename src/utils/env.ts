@@ -9,6 +9,6 @@ const ENV = cleanEnv(process.env, {
 	WS_PORT: port({ default: 8000, desc: "WebSocket port" }),
 	DISCORD_BOTTOKEN: str({ desc: "Your Discord bot token" }),
 	SENTRY_LINK: str({ desc: "Your sentry.io link" }),
-	PROMETHEUS_PORT: port({ default: 9110, desc: "Port where Prometheus should run for statistics etc." })
+	PROMETHEUS_PORT: port({ default: 9110, desc: "Port where Prometheus should run for statistics etc." }),
 })
 export default ENV

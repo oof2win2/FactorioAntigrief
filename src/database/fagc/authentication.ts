@@ -18,6 +18,9 @@ export class AuthClass {
 
 	@prop({ default: [], type: [String] })
 	allowed_ips!: string[]
+
+	@prop({ default: "public", type: String })
+	api_key_type!: "public" | "master"
 }
 
 const AuthModel = getModelForClass(AuthClass)

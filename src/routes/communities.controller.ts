@@ -3,7 +3,7 @@ import { Controller, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
-import Authenticate from "../utils/authentication"
+import { Authenticate } from "../utils/authentication"
 import CommunityModel from "../database/fagc/community"
 import CommunityConfigModel from "../database/bot/community"
 import { checkUser } from "../utils/functions"
