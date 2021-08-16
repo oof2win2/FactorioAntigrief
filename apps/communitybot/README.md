@@ -5,8 +5,8 @@ FAGC Discord Bot
 - [FAGC Discord Bot](#fagc-discord-bot)
 - [Contents](#contents)
 - [Explanation](#explanation)
-  - [Key terms](#key-terms)
-  - [Data Types](#data-types)
+	- [Key terms](#key-terms)
+	- [Data Types](#data-types)
 - [Installation](#installation)
 
 ## Explanation
@@ -21,9 +21,9 @@ FAGC (Factorio Anti-Grief Community) is a community of people who try to work ag
 
 - Community: A community is a group of people that play Factorio together and use this API in a way to prevent griefers on their servers
 - Rule: A single item that describes something that must be followed; rules are categorized by which aspect of gameplay/user interaction it governs.
-- Report: A single instance of a single rule which has been broken (or held up). Can be revoked and then turn into a revocation
-- Profile: A collection of reports. Profiles are specific to a single player at a single community
-- Revocation: When a community removes any profiles from a user. Revocations can never be turned back to reports
+- Report: A single instance of a single rule which has been broken (or upheld). Can be revoked and then the report turns into a revocation (as it has been revoked)
+- Profile: A collection of reports. Profiles are specific to a single player at a single community. If a profile is revoked, all reports in the community of said player are revoked.
+- Revocation: A single instance of a report that has been revoked, i.e. it was found out that the report was false. Revocations can never be turned back to reports
 
 ### Data Types
 
@@ -32,7 +32,7 @@ FAGC (Factorio Anti-Grief Community) is a community of people who try to work ag
 This is a short description of the different data that you may encounter with this bot or its ecosystem, it is however not a complete developer guide.
 All `id` properties are generated automatically by the API and cannot be set by users.
 - **Community**
-  - `id` - ID of the community. Used to fetch it only
+  - `id` - ID of the community. Only used to fetch said community
   - `name` - Name of the community. Does not need to be the same as the name of the community's guild server
   - `contact` - Discord UserID of the contact user for the community
   - `guildid` - Discord GuildID of the Discord guild for the community
@@ -51,7 +51,7 @@ All `id` properties are generated automatically by the API and cannot be set by 
   - `playername` - The name of the player that these reports belong to
   - `reports[]` - The collection of reports that have been created
 - **Revocation**
-    - `id` - ID of the revocation. Can be used to fetch it only
+    - `id` - ID of the revocation. Only used to fetch said revocation
     - `playername` - Name of the player who's report has been revoked
     - `adminId` - Discord UserID of the administrator that created this report
     - `proof` - Proof of the report
@@ -63,7 +63,7 @@ All `id` properties are generated automatically by the API and cannot be set by 
     - `revokedAt` - The time at which the report has been revoked
     - `revokedBy` - The Discord UserID of who revoked the report
 - **Rule**
-  - `id` - The ID of the rule
+  - `id` - The ID of the rule. Used to tell the API which rules were broken with a report. Can also be used to fetch said rule
   - `shortdesc` - A short description/tagline of the rule
   - `longdesc` - A long, verbose definition of the rule
 
