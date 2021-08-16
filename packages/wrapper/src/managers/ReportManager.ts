@@ -1,5 +1,5 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions, RequestConfig } from "../types/types"
+import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
 import { Revocation, Report, CreateReport, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError, UnsuccessfulRevocationError } from "../types/errors"
@@ -9,10 +9,10 @@ export default class ReportManager extends BaseManager<Report> {
 	public apikey?: string
 	private apiurl: string
 	private createRevocation: (revocationObject: Revocation) => void
-	constructor(apiurl: string, createRevocation: (revocationObject: Revocation) => void, apikey?: string, options: ManagerOptions = {}) {
-		super(options)
-		if (apikey) this.apikey = apikey
-		this.apiurl = apiurl
+	constructor(options: WrapperOptions, createRevocation: (revocationObject: Revocation) => void, managerOptions: ManagerOptions = {}) {
+		super(managerOptions)
+		if (options.apikey) this.apikey = options.apikey
+		this.apiurl = options.apiurl
 		this.createRevocation = createRevocation
 	}
 	
@@ -68,7 +68,6 @@ export default class ReportManager extends BaseManager<Report> {
 
 		if (create.error) {
 			if (create.description === "API key is wrong") throw new AuthenticationError()
-			console.error(create)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 		}
 		create.reportedTime = new Date(create.reportedTime)

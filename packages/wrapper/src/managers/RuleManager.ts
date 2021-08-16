@@ -1,16 +1,19 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions } from "../types/types"
+import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
 import { Rule, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
+import { GenericAPIError, MasterAuthenticationError, NoMasterApikeyError } from "../types"
 
 export class RuleManager extends BaseManager<Rule> {
 	public apikey?: string
+	public masterapikey?: string
 	private apiurl: string
-	constructor(apiurl: string, apikey?: string, options: ManagerOptions = {}) {
-		super(options)
-		if (apikey) this.apikey = apikey
-		this.apiurl = apiurl
+	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
+		super(managerOptions)
+		this.apiurl = options.apiurl
+		if (options.apikey) this.apikey = options.apikey
+		if (options.masterapikey) this.masterapikey = options.masterapikey
 	}
 	async fetchRule(ruleid: ApiID, cache=true, force=false): Promise<Rule|null> {
 		if (!force) {
@@ -34,9 +37,45 @@ export class RuleManager extends BaseManager<Rule> {
 		
 		return allRules
 	}
-	resolveID(ruleid: string): Rule {
+	resolveID(ruleid: string): Rule|null {
 		const cached = this.cache.get(ruleid)
 		if (cached) return cached
 		return null
+	}
+
+	async create(rule: Omit<Rule, "id">, reqConfig: RequestConfig = {}): Promise<Rule> {
+		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoMasterApikeyError()
+		const data = await fetch(`${this.apiurl}/rules`, {
+			method: "POST",
+			body: JSON.stringify(rule),
+			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+		}).then(r=>r.json())
+
+		if (data.error) {
+			if (data.error == "Unauthorized") throw new MasterAuthenticationError()
+			throw new GenericAPIError(`${data.error}: ${data.message}`)
+		}
+
+		this.add(data)
+
+		return data
+	}
+
+	async remove(id: string, reqConfig: RequestConfig = {}): Promise<Rule|null> {
+		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoMasterApikeyError()
+		const data = await fetch(`${this.apiurl}/rules/${strictUriEncode(id)}`, {
+			method: "DELETE",
+			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+		}).then(r=>r.json())
+
+		if (data.error) {
+			if (data.error == "Unauthorized") throw new MasterAuthenticationError()
+			throw new GenericAPIError(`${data.error}: ${data.message}`)
+		}
+		if (!data.id) throw data
+
+		this.removeFromCache(data)
+
+		return data
 	}
 }

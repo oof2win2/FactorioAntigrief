@@ -13,7 +13,8 @@ export * from "./types/index"
 
 export class FAGCWrapper {
 	public readonly apiurl: string
-	public apikey: string
+	public apikey?: string
+	public masterapikey?: string
 	public communities: CommunityManager
 	public rules: RuleManager
 	public reports: ReportManager
@@ -28,15 +29,16 @@ export class FAGCWrapper {
 	}) {
 		this.apiurl = options.apiurl
 		this.apikey = options.apikey
+		this.masterapikey = options.masterapikey
 
-		this.revocations = new RevocationManager(this.apiurl, this.apikey, managerOptions)
-		this.communities = new CommunityManager(this.apiurl, this.apikey, managerOptions)
-		this.rules = new RuleManager(this.apiurl, this.apikey, managerOptions)
-		this.info = new InfoManager(this.apiurl, this.apikey, managerOptions)
-		this.profiles = new ProfileManager(this.apiurl, this.apikey, managerOptions)
+		this.revocations = new RevocationManager(options, managerOptions)
+		this.communities = new CommunityManager(options, managerOptions)
+		this.rules = new RuleManager(options, managerOptions)
+		this.info = new InfoManager(options, managerOptions)
+		this.profiles = new ProfileManager(options, managerOptions)
 
 		const createCacheRevocation = (revocation: Revocation) => this.revocations.add(revocation)
-		this.reports = new ReportManager(this.apiurl, createCacheRevocation, this.apikey, managerOptions)
+		this.reports = new ReportManager(options, createCacheRevocation, managerOptions)
 
 		
 		this.websocket = new WebSocketHandler({
@@ -46,6 +48,7 @@ export class FAGCWrapper {
 	}
 	destroy(): void {
 		this.apikey = null
+		this.masterapikey = null
 
 		this.reports.destroy()
 		this.rules.destroy()

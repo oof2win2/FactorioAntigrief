@@ -1,5 +1,5 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions, RequestConfig } from "../types/types"
+import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
@@ -10,10 +10,10 @@ type SetCommunityConfig = Partial<CommunityConfig>
 export default class CommunityManager extends BaseManager<Community> {
 	public apikey?: string
 	private apiurl: string
-	constructor(apiurl: string, apikey?: string, opts: ManagerOptions = {}) {
-		super(opts)
-		if (apikey) this.apikey = apikey
-		this.apiurl = apiurl
+	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
+		super(managerOptions)
+		if (options.apikey) this.apikey = options.apikey
+		this.apiurl = options.apiurl
 	}
 	async fetchCommunity(communityId: ApiID, cache = true, force = false): Promise<Community | null> {
 		if (!force) {

@@ -3,9 +3,19 @@ export class NoApikeyError extends Error {
 		super("No API key has been set")
 	}
 }
+export class NoMasterApikeyError extends Error {
+	constructor() {
+		super("No Master API key has been set")
+	}
+}
 export class AuthenticationError extends Error {
 	constructor() {
 		super("Wrong API key has been set")
+	}
+}
+export class MasterAuthenticationError extends Error {
+	constructor() {
+		super("Wrong Master API key has been set")
 	}
 }
 export class GenericAPIError extends Error {

@@ -32,6 +32,11 @@ export default class BaseManager<HoldsWithId extends Common> {
 		}
 		return data
 	}
+	removeFromCache(data: HoldsWithId): HoldsWithId {
+		if (!data) return null
+		this.cache.sweep(item => item.id == data.id)
+		return data
+	}
 	destroy(): void {
 		clearInterval(this.interval)
 	}

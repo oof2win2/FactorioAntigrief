@@ -10,7 +10,7 @@ const FAGC = new FAGCWrapper({
 	apikey: config.apikey,
 	socketurl: config.websocketurl,
 	apiurl: config.apiurl,
-
+	masterapikey: config.masterapikey
 })
 
 const testGuildId = "749943992719769613"
@@ -24,7 +24,11 @@ const testStuff = {
 	},
 	reportCount: 5,
 	webhookId: "865254241533820959",
-	webhookToken: "m_ROP6uDvag5okV9YcrC9KkxBZ5sWgRDTCcnhrVdQGCi78W29-5jyflOsl1M6PFqoimn"
+	webhookToken: "m_ROP6uDvag5okV9YcrC9KkxBZ5sWgRDTCcnhrVdQGCi78W29-5jyflOsl1M6PFqoimn",
+	rule: {
+		shortdesc: "Some rule short description",
+		longdesc: "Some rule long description"
+	}
 }
 
 describe("ApiWrapper", () => {
@@ -215,5 +219,32 @@ describe("ApiWrapper", () => {
 		}
 		FAGC.websocket.once("guildConfig", CommunityConfigChangeHandler)
 		FAGC.websocket.setGuildID(testGuildId)
+	})
+	step("Should be able to add and remove rules", async () => {
+		const rule = await FAGC.rules.create(testStuff.rule)
+		expect(rule.shortdesc).to.equal(testStuff.rule.shortdesc, "Created rule shortdesc did not match input")
+		expect(rule.longdesc).to.equal(testStuff.rule.longdesc, "Created rule longdesc did not match input")
+
+		const resolvedRule = FAGC.rules.resolveID(rule.id)
+		expect(resolvedRule.id).to.equal(rule.id, "Resolved rule id did not match created")
+		expect(resolvedRule.shortdesc).to.equal(rule.shortdesc, "Resolved rule shortdesc did not match created")
+		expect(resolvedRule.longdesc).to.equal(rule.longdesc, "Resolved rule longdesc did not match created")
+
+		const fetchedRule = await FAGC.rules.fetchRule(rule.id, true, true)
+		expect(fetchedRule.id).to.equal(rule.id, "Fetched rule id did not match created")
+		expect(fetchedRule.shortdesc).to.equal(rule.shortdesc, "Fetched rule shortdesc did not match created")
+		expect(fetchedRule.longdesc).to.equal(rule.longdesc, "Fetched rule longdesc did not match created")
+
+
+		const removedRule = await FAGC.rules.remove(rule.id)
+		expect(removedRule.id).to.equal(rule.id, "Removed rule id did not match created")
+		expect(removedRule.shortdesc).to.equal(rule.shortdesc, "Removed rule shortdesc did not match created")
+		expect(removedRule.longdesc).to.equal(rule.longdesc, "Removed rule longdesc did not match created")
+
+		const resolvedAfterRemove = FAGC.rules.resolveID(rule.id)
+		expect(resolvedAfterRemove, "Resolved rule was not null").to.be.null
+
+		const fetchedAfterRemove = await FAGC.rules.fetchRule(rule.id)
+		expect(fetchedAfterRemove, "Fetched rule was not null").to.be.null
 	})
 })

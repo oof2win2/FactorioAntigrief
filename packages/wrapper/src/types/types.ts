@@ -1,5 +1,6 @@
 export interface RequestConfig {
 	apikey?: string
+	masterapikey?: string
 }
 export interface ManagerOptions {
 	uncachems?: number // at which time it should be uncached
@@ -8,6 +9,7 @@ export interface ManagerOptions {
 export interface WrapperOptions {
 	apiurl: string
 	apikey?: string
+	masterapikey?: string
 	socketurl: string
 	enableWebSocket?: boolean
 }
