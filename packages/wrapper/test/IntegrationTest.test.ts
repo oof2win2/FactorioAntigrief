@@ -1,5 +1,5 @@
 import config from "./testconfig"
-import { FAGCWrapper } from "../src/index"
+import { FAGCWrapper, RequestConfig } from "../src/index"
 import { CommunityConfig, Report, Revocation } from "fagc-api-types"
 
 import { expect } from "chai"
@@ -28,6 +28,9 @@ const testStuff = {
 	rule: {
 		shortdesc: "Some rule short description",
 		longdesc: "Some rule long description"
+	},
+	community: {
+		name: "Testing Community Alpha",
 	}
 }
 
@@ -246,5 +249,43 @@ describe("ApiWrapper", () => {
 
 		const fetchedAfterRemove = await FAGC.rules.fetchRule(rule.id)
 		expect(fetchedAfterRemove, "Fetched rule was not null").to.be.null
+	})
+	step("Should be able to create and remove a community with violations and revocations getting removed", async () => {
+
+		const communityResult = await FAGC.communities.create(testStuff.community.name, testUserId, "548410604679856151")
+		const community = communityResult.community
+		expect(community.name).to.equal(testStuff.community.name, "Community name mismatch")
+		expect(community.contact).to.equal(testUserId, "Community contact mismatch")
+		expect(community.guildId).to.equal("548410604679856151", "Community guildId mismatch")
+		
+		const requestConfig: RequestConfig = {
+			apikey: communityResult.apiKey
+		}
+
+		const rules = await FAGC.rules.fetchAll()
+		const report = await FAGC.reports.create({
+			brokenRule: rules[0].id,
+			adminId: testUserId,
+			...testStuff.report, // description, automated, proof, playername
+		}, true, requestConfig)
+		expect(report.communityId).to.equal(community.id, "Report communityId mismatch")
+		const report2 = await FAGC.reports.create({
+			brokenRule: rules[0].id,
+			adminId: testUserId,
+			...testStuff.report, // description, automated, proof, playername
+		}, true, requestConfig)
+		const revocation = await FAGC.reports.revoke(report2.id, testUserId, true, requestConfig)
+		expect(revocation.communityId).to.equal(community.id, "Revocation communityId mismatch")
+
+		await FAGC.communities.remove(community.id)
+
+		const fetchedCommunity = await FAGC.communities.fetchCommunity(community.id, null, true)
+		expect(fetchedCommunity, "Community exists after it was removed").to.be.null
+		
+		const fetchedReport = await FAGC.reports.fetchReport(report.id, null, true)
+		expect(fetchedReport, "Report exists after community was removed").to.be.null
+		
+		const fetchedRevocation = await FAGC.revocations.fetchRevocations(testStuff.report.playername, community.id, true)
+		expect(fetchedRevocation[0], "Revocation exists after community was removed").to.be.undefined
 	})
 })

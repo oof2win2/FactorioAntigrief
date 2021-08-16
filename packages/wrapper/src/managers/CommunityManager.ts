@@ -9,10 +9,12 @@ type SetCommunityConfig = Partial<CommunityConfig>
 
 export default class CommunityManager extends BaseManager<Community> {
 	public apikey?: string
+	public masterapikey?: string
 	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		if (options.apikey) this.apikey = options.apikey
+		if (options.masterapikey) this.masterapikey = options.masterapikey
 		this.apiurl = options.apiurl
 	}
 	async fetchCommunity(communityId: ApiID, cache = true, force = false): Promise<Community | null> {
@@ -63,5 +65,40 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		}
 		return update
+	}
+
+	async create(name: string, contact: string, guildId: string, reqConfig: RequestConfig = {}): Promise<{
+		community: Community,
+		apiKey: string
+	}> {
+		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoApikeyError()
+		const create = await fetch(`${this.apiurl}/communities`, {
+			method: "POST",
+			body: JSON.stringify({
+				name: name,
+				contact: contact,
+				guildId: guildId
+			}),
+			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+		}).then(u => u.json())
+		if (create.error) {
+			if (create.description === "API key is wrong") throw new AuthenticationError()
+			throw new GenericAPIError(`${create.error}: ${create.message}`)
+		}
+		return create
+	}
+
+	async remove(communityId: string, reqConfig: RequestConfig = {}): Promise<boolean> {
+		// TODO: do tests for this
+		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoApikeyError()
+		const create = await fetch(`${this.apiurl}/communities/${strictUriEncode(communityId)}`, {
+			method: "POST",
+			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+		}).then(u => u.json())
+		if (create.error) {
+			if (create.description === "API key is wrong") throw new AuthenticationError()
+			throw new GenericAPIError(`${create.error}: ${create.message}`)
+		}
+		return create
 	}
 }

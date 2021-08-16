@@ -37,7 +37,7 @@ export class FAGCWrapper {
 		this.info = new InfoManager(options, managerOptions)
 		this.profiles = new ProfileManager(options, managerOptions)
 
-		const createCacheRevocation = (revocation: Revocation) => this.revocations.add(revocation)
+		const createCacheRevocation = (revocation: Revocation) => this.revocations.addRevocation(revocation)
 		this.reports = new ReportManager(options, createCacheRevocation, managerOptions)
 
 		

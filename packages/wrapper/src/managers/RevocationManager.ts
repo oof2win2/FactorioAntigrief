@@ -17,6 +17,9 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		if (cached) return cached
 		return null
 	}
+	addRevocation(revocation: Revocation): void {
+		this.add(revocation)
+	}
 	async fetchRevocations(playername: string, communityId: string, cache = true): Promise<Revocation[]> {
 		const revocations = await fetch(`${this.apiurl}/revocations/community/${strictUriEncode(playername)}/${strictUriEncode(communityId)}`)
 			.then(r=>r.json())
