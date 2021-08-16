@@ -51,6 +51,7 @@ export interface CommunityConfig {
 	contact: string,
 	moderatorRoleId: string,
 	communityname: string
+	communityId?: string
 }
 
 // this also extends common but the ID is a Discord string
