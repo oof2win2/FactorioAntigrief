@@ -1,13 +1,18 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-import { Controller, GET, POST } from "fastify-decorators"
+import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
-import { Authenticate } from "../utils/authentication"
+import { Authenticate, MasterAuthenticate } from "../utils/authentication"
 import CommunityModel from "../database/fagc/community"
 import CommunityConfigModel from "../database/bot/community"
-import { checkUser } from "../utils/functions"
-import { communityConfigChanged } from "../utils/info"
+import { communityConfigChanged, communityCreatedMessage, communityRemovedMessage } from "../utils/info"
+import { validateDiscordGuild, validateDiscordUser } from "../utils/discord"
+import ReportModel from "../database/fagc/report"
+import RevocationModel from "../database/fagc/revocation"
+import WebhookModel from "../database/fagc/webhook"
+import AuthModel from "../database/fagc/authentication"
+import cryptoRandomString from "crypto-random-string"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -109,7 +114,7 @@ export default class CommunityController {
 				return res.status(400).send({ errorCode: 400, error: "Bad Request", message: `trustedCommunities must be array of IDs of communities, got ${trustedCommunities.toString()}, some of which are not real community IDs` })
 		}
 		// check other stuff
-		if (contact && !(await checkUser(contact))) return res.status(400).send({ errorCode: 400, error: "Bad Request", message: `contact must be Discord User snowflake, got value ${contact}, which isn't a Discord user` })
+		if (contact && !(await validateDiscordUser(contact))) return res.status(400).send({ errorCode: 400, error: "Bad Request", message: `contact must be Discord User snowflake, got value ${contact}, which isn't a Discord user` })
 
 		const community = req.requestContext.get("community")
 		if (!community) return res.status(400).send({ errorCode: 400, error: "Not Found", message: "Community config was not found" })
@@ -136,5 +141,99 @@ export default class CommunityController {
 		CommunityConfig.set("apikey", null)
 		communityConfigChanged(CommunityConfig)
 		return res.status(200).send(CommunityConfig)
+	}
+
+	@POST({
+		url: "/", options: {
+			schema: {
+				body: Type.Required(Type.Object({
+					name: Type.String(),
+					contact: Type.String(),
+					guildId: Type.String()
+				}))
+			}
+		}
+	})
+	@MasterAuthenticate
+	async createCommunity(req: FastifyRequest<{
+		Body: {
+			name: string
+			contact: string
+			guildId: string
+		}
+	}>, res: FastifyReply): Promise<FastifyReply> {
+		const {name, contact, guildId} = req.body
+
+		const validDiscordUser = await validateDiscordUser(contact)
+		if (!validDiscordUser) return res.status(400).send({errorCode: 400, error: "Invalid Discord User", message: `${contact} is not a valid Discord user`})
+
+		const validGuild = await validateDiscordGuild(guildId)
+		if (!validGuild) return res.status(400).send({errorCode: 400, error: "Invalid Guild", message: `${guildId} is not a valid Discord guild`})
+
+		const community = await CommunityModel.create({
+			name: name,
+			contact: contact,
+			guildId: guildId
+		})
+		
+		// update community config to have communityId
+		await CommunityConfigModel.updateOne({guildId: guildId}, {
+			$set: {communityId: community.id}
+		})
+
+		// TODO: fix this cryptoRandomString issue
+		const auth = await AuthModel.create({
+			communityId: community._id,
+			api_key: cryptoRandomString({length: 64}),
+		})
+
+		communityCreatedMessage(community)
+
+		return res.send({
+			community: community,
+			apiKey: auth.api_key
+		})
+	}
+
+	@DELETE({
+		url: "/:communityId", options: {
+			schema: {
+				params: Type.Required(Type.Object({
+					communityId: Type.String()
+				}))
+			}
+		}
+	})
+	@MasterAuthenticate
+	async removeCommunity(req: FastifyRequest<{
+		Params: {
+			communityId: string
+		}
+	}>, res: FastifyReply): Promise<FastifyReply> {
+		const {communityId} = req.params
+
+		const community = await CommunityModel.findOneAndDelete({
+			id: communityId
+		})
+		if (!community) return res.status(404).send({errorCode:404, error: "Not found", message: `Community with ID ${communityId} was not found`})
+
+		const communityConfig = await CommunityConfigModel.findOneAndDelete({
+			communityId: community.id
+		})
+
+		await ReportModel.deleteMany({
+			communityId: community.id
+		})
+		await RevocationModel.deleteMany({
+			communityId: community.id
+		})
+		if (communityConfig) {
+			await WebhookModel.deleteMany({
+				guildId: communityConfig.guildId
+			})
+		}
+		communityRemovedMessage(community)
+
+		return res.send(true)
 	}
 }

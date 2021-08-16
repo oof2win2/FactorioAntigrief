@@ -4,10 +4,10 @@ import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
 import { Authenticate } from "../utils/authentication"
-import { checkUser } from "../utils/functions"
 import { reportCreatedMessage, reportRevokedMessage } from "../utils/info"
 import ReportModel from "../database/fagc/report"
 import RevocationModel from "../database/fagc/revocation"
+import { validateDiscordUser } from "../utils/discord"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -118,7 +118,7 @@ export default class ReportController {
 		const rule = await RuleModel.findOne({id: brokenRule})
 		if (!rule) return res.status(400).send({errorCode: 400, error: "Bad Request", message: "brokenRule must be a valid ID"})
 		
-		const isDiscordUser = await checkUser(adminId)
+		const isDiscordUser = await validateDiscordUser(adminId)
 		if (!isDiscordUser) return res.status(400).send({errorCode: 400, error: "Bad Request", message: "adminId must be a valid Discord user"})
 		
 		const report = await ReportModel.create({
@@ -158,7 +158,7 @@ export default class ReportController {
 		if (report.communityId !== community.id)
 			return res.status(403).send({errorCode: 403, error: "Access Denied", message: `You are trying to access a report of community ${report.communityId} but your community ID is ${community.id}`})
 		
-		const isDiscordUser = await checkUser(req.body.adminId)
+		const isDiscordUser = await validateDiscordUser(req.body.adminId)
 		if (!isDiscordUser) return res.status(400).send({errorCode: 400, error: "Bad Request", message: "adminId must be a valid Discord user"})
 		
 		await ReportModel.findByIdAndDelete(report._id)
@@ -200,7 +200,7 @@ export default class ReportController {
 		const community = req.requestContext.get("community")
 		if (!community) return res.status(400).send({errorCode: 400, error: "Community Not Found", message: "Your community could not be found"})
 		
-		const isDiscordUser = await checkUser(adminId)
+		const isDiscordUser = await validateDiscordUser(adminId)
 		if (!isDiscordUser) return res.status(400).send({errorCode: 400, error: "Bad Request", message: "adminId must be a valid Discord user"})
 
 		const reports = await ReportModel.find({

@@ -4,6 +4,7 @@ import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule"
 import { MasterAuthenticate } from "../utils/authentication"
+import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
@@ -55,6 +56,7 @@ export default class RuleController {
 			shortdesc: shortdesc,
 			longdesc: longdesc
 		})
+		ruleCreatedMessage(rule)
 		return res.send(rule)
 	}
 
@@ -77,6 +79,7 @@ export default class RuleController {
 		const rule = await RuleModel.findOneAndRemove({
 			id: id
 		})
+		if (rule) ruleRemovedMessage(rule)
 		return res.send(rule)
 	}
 }
