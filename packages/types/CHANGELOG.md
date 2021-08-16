@@ -1,7 +1,7 @@
 ## [1.0.3] - [2021/08/16]
 ### Changes
 - Modified changelog formatting to fit with other FAGC projects
-- Add `communintyId` to CommunityConfig
+- Add `communintyId` to CommunityConfig as it is in the database
 
 ## [1.0.2] - [2021/08/08]
 ### Changes
