@@ -14,7 +14,7 @@
 	},
 	"dependencies": {
 		"@hapi/joi": "^17.1.1",
-		"@sentry/node": "^6.9.0",
+		"@sentry/node": "^6.11.0",
 		"@sentry/tracing": "^6.4.1",
 		"@sinclair/typebox": "^0.20.4",
 		"@typegoose/typegoose": "^8.1.1",
