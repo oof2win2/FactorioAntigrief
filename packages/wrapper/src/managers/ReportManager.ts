@@ -58,12 +58,12 @@ export default class ReportManager extends BaseManager<Report> {
 		return ruleReports
 	}
 	async create(report: CreateReport, cache = true, reqConfig: RequestConfig = {}): Promise<Report> {
-		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
 
 		const create = await fetch(`${this.apiurl}/reports`, {
 			method: "POST",
 			body: JSON.stringify(report),
-			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`, "content-type": "application/json" },
 		}).then(u=>u.json())
 
 		if (create.error) {
@@ -75,13 +75,15 @@ export default class ReportManager extends BaseManager<Report> {
 		return create
 	}
 	async revoke(reportid: ApiID, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+
 		const revoked = await fetch(`${this.apiurl}/reports`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				id: reportid,
 				adminId: adminId,
 			}),
-			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`, "content-type": "application/json" },
 		}).then(u=>u.json())
 
 		if (revoked.error) {
@@ -97,13 +99,15 @@ export default class ReportManager extends BaseManager<Report> {
 		return revoked
 	}
 	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Report[]|null> {
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+
 		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				playername: playername,
 				adminId: adminId,
 			}),
-			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`, "content-type": "application/json" },
 		}).then(u=>u.json())
 
 		if (revoked.error) {

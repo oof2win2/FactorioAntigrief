@@ -122,7 +122,7 @@ describe("ApiWrapper", () => {
 			expect(resolved).to.deep.equal(report, "Cached report mismatch to report")
 		})
 
-		const reports = await FAGC.reports.fetchAllName(testStuff.report.playername)
+		const reports = (await FAGC.reports.fetchAllName(testStuff.report.playername)).filter((report) => report.communityId == createdReports[0].communityId)
 		const revocations = await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId)
 		expect(revocations.length).to.equal(reports.length, "Amount of player reports and revocations mismatch")
 		revocations.forEach((revocation, i) => {
@@ -146,18 +146,15 @@ describe("ApiWrapper", () => {
 		})
 	})
 	step("Should be able to create reports and get a profile from them", async () => {
-		before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
-		after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
-
 		const rules = await FAGC.rules.fetchAll()
-		await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
+		const createdReports = await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
 			return FAGC.reports.create({
 				brokenRule: rules[0].id,
 				adminId: testUserId,
 				...testStuff.report, // description, automated, proof, playername
 			})
 		}))
-		const fetchedReports = await FAGC.reports.fetchAllName(testStuff.report.playername)
+		const fetchedReports = (await FAGC.reports.fetchAllName(testStuff.report.playername)).filter(report => report.communityId == createdReports[0].communityId)
 		const profile = await FAGC.profiles.fetchCommunity(testStuff.report.playername, fetchedReports[0].communityId)
 		expect(profile.reports.length).to.equal(fetchedReports.length, "Amount of fetched reports and reports in profile did not match")
 		expect(fetchedReports).to.deep.equal(profile.reports, "Fetched reports did not match reports in profile")
@@ -261,7 +258,6 @@ describe("ApiWrapper", () => {
 		const requestConfig: RequestConfig = {
 			apikey: communityResult.apiKey
 		}
-
 		const rules = await FAGC.rules.fetchAll()
 		const report = await FAGC.reports.create({
 			brokenRule: rules[0].id,
@@ -286,6 +282,6 @@ describe("ApiWrapper", () => {
 		expect(fetchedReport, "Report exists after community was removed").to.be.null
 		
 		const fetchedRevocation = await FAGC.revocations.fetchRevocations(testStuff.report.playername, community.id, true)
-		expect(fetchedRevocation[0], "Revocation exists after community was removed").to.be.undefined
+		expect(fetchedRevocation.length).to.equal(0, "Revocations exist after community was removed")
 	})
 })

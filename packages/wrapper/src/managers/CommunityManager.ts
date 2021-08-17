@@ -54,11 +54,12 @@ export default class CommunityManager extends BaseManager<Community> {
 		return config
 	}
 	async setConfig(config: SetCommunityConfig, reqConfig: RequestConfig = {}): Promise<CommunityConfig> {
-		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+
 		const update = await fetch(`${this.apiurl}/communities/config`, {
 			method: "POST",
 			body: JSON.stringify(config),
-			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`, "content-type": "application/json" },
 		}).then(u => u.json())
 		if (update.error) {
 			if (update.description === "API key is wrong") throw new AuthenticationError()
@@ -71,7 +72,8 @@ export default class CommunityManager extends BaseManager<Community> {
 		community: Community,
 		apiKey: string
 	}> {
-		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoApikeyError()
+		if (!reqConfig.masterapikey && !this.masterapikey) throw new NoApikeyError()
+
 		const create = await fetch(`${this.apiurl}/communities`, {
 			method: "POST",
 			body: JSON.stringify({
@@ -79,7 +81,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				contact: contact,
 				guildId: guildId
 			}),
-			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.masterapikey || this.masterapikey}`, "content-type": "application/json" },
 		}).then(u => u.json())
 		if (create.error) {
 			if (create.description === "API key is wrong") throw new AuthenticationError()
@@ -89,16 +91,16 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	async remove(communityId: string, reqConfig: RequestConfig = {}): Promise<boolean> {
-		// TODO: do tests for this
 		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoApikeyError()
-		const create = await fetch(`${this.apiurl}/communities/${strictUriEncode(communityId)}`, {
-			method: "POST",
-			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+
+		const remove = await fetch(`${this.apiurl}/communities/${strictUriEncode(communityId)}`, {
+			method: "DELETE",
+			headers: { "authorization": `Token ${reqConfig.masterapikey || this.masterapikey}` },
 		}).then(u => u.json())
-		if (create.error) {
-			if (create.description === "API key is wrong") throw new AuthenticationError()
-			throw new GenericAPIError(`${create.error}: ${create.message}`)
+		if (remove.error) {
+			if (remove.description === "API key is wrong") throw new AuthenticationError()
+			throw new GenericAPIError(`${remove.error}: ${remove.message}`)
 		}
-		return create
+		return remove
 	}
 }

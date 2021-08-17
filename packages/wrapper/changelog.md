@@ -1,6 +1,8 @@
 ## UNRELEASED
 ### Additions
 - Added Master API rules part to create and remove rules
+- Prioritize request config over assigned props in requests
+- Filter revocations when fetching
 
 ## [1.9.1] - [2021-08-12]
 ### Bugfixed

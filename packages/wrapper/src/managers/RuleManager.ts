@@ -44,11 +44,11 @@ export class RuleManager extends BaseManager<Rule> {
 	}
 
 	async create(rule: Omit<Rule, "id">, reqConfig: RequestConfig = {}): Promise<Rule> {
-		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoMasterApikeyError()
+		if (!reqConfig.masterapikey && !this.masterapikey) throw new NoMasterApikeyError()
 		const data = await fetch(`${this.apiurl}/rules`, {
 			method: "POST",
 			body: JSON.stringify(rule),
-			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.masterapikey || this.masterapikey}`, "content-type": "application/json" },
 		}).then(r=>r.json())
 
 		if (data.error) {
@@ -65,7 +65,7 @@ export class RuleManager extends BaseManager<Rule> {
 		if (!this.masterapikey && !reqConfig.masterapikey) throw new NoMasterApikeyError()
 		const data = await fetch(`${this.apiurl}/rules/${strictUriEncode(id)}`, {
 			method: "DELETE",
-			headers: { "authorization": `Token ${this.masterapikey || reqConfig.masterapikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.masterapikey || this.masterapikey}`, "content-type": "application/json" },
 		}).then(r=>r.json())
 
 		if (data.error) {
