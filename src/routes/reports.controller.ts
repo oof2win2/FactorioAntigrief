@@ -2,12 +2,12 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET, POST, DELETE } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
-import RuleModel from "../database/fagc/rule"
-import { Authenticate } from "../utils/authentication"
-import { reportCreatedMessage, reportRevokedMessage } from "../utils/info"
-import ReportModel from "../database/fagc/report"
-import RevocationModel from "../database/fagc/revocation"
-import { validateDiscordUser } from "../utils/discord"
+import RuleModel from "../database/fagc/rule.js"
+import { Authenticate } from "../utils/authentication.js"
+import { reportCreatedMessage, reportRevokedMessage } from "../utils/info.js"
+import ReportModel from "../database/fagc/report.js"
+import RevocationModel from "../database/fagc/revocation.js"
+import { validateDiscordUser } from "../utils/discord.js"
 
 @Controller({ route: "/reports" })
 export default class ReportController {

@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify"
 import { RouteGenericInterface } from "fastify/types/route"
-import AuthModel from "../database/fagc/authentication"
-import CommunityModel from "../database/fagc/community"
-import ENV from "./env"
+import AuthModel from "../database/fagc/authentication.js"
+import CommunityModel from "../database/fagc/community.js"
+import ENV from "./env.js"
 
 export const Authenticate = <T extends RouteGenericInterface = RouteGenericInterface>(
 	_target: unknown,

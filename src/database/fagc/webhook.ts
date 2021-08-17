@@ -1,5 +1,5 @@
 import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
-import database from "../database"
+import database from "../database.js"
 
 const connection = database.connections.find((connection) => connection?.n === "fagc")?.c
 

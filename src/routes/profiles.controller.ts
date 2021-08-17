@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
-import ReportModel, { ReportClass } from "../database/fagc/report"
+import ReportModel, { ReportClass } from "../database/fagc/report.js"
 import { Profile } from "fagc-api-types"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"

@@ -2,11 +2,11 @@
 
 import promClient from "prom-client"
 import http from "http"
-import CommunityConfigModel, { ConfigClass } from "../database/bot/community"
-import CommunityModel, { CommunityClass } from "../database/fagc/community"
-import RuleModel from "../database/fagc/rule"
+import CommunityConfigModel, { ConfigClass } from "../database/bot/community.js"
+import CommunityModel, { CommunityClass } from "../database/fagc/community.js"
+import RuleModel from "../database/fagc/rule.js"
 import { DocumentType } from "@typegoose/typegoose"
-import ENV from "./env"
+import ENV from "./env.js"
 
 const collectDefaultMetrics = promClient.collectDefaultMetrics
 const Registry = promClient.Registry

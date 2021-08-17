@@ -3,6 +3,7 @@
 	"version": "2.0.0",
 	"private": true,
 	"main": "dist/app.js",
+	"type": "module",
 	"scripts": {
 		"start": "ts-node ./src/app.ts",
 		"dev": "nodemon ./src/app.ts",
@@ -18,6 +19,7 @@
 		"@sentry/tracing": "^6.4.1",
 		"@sinclair/typebox": "^0.20.4",
 		"@typegoose/typegoose": "^8.1.1",
+		"@types/node": "^16.6.1",
 		"cookie-parser": "~1.4.4",
 		"cors": "^2.8.5",
 		"crypto-random-string": "^4.0.0",

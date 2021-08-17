@@ -2,9 +2,9 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
-import RuleModel from "../database/fagc/rule"
-import { MasterAuthenticate } from "../utils/authentication"
-import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info"
+import RuleModel from "../database/fagc/rule.js"
+import { MasterAuthenticate } from "../utils/authentication.js"
+import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info.js"
 
 @Controller({ route: "/rules" })
 export default class RuleController {

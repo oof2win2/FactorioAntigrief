@@ -1,5 +1,5 @@
 import { Client } from "discord.js"
-import ENV from "./env"
+import ENV from "./env.js"
 
 // this is so that the client can be accessed from any file
 const client = new Client({

@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { cleanEnv, str, port } from "envalid"
 dotenv.config({
-	path: "../.env"
+	path: "./.env"
 })
 const ENV = cleanEnv(process.env, {
 	MONGOURI: str({ example: "mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName" }),
