@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.10.0] - [2021-08-17]
 ### Additions
 - Added Master API rules part to create and remove rules
 - Prioritize request config over assigned props in requests
