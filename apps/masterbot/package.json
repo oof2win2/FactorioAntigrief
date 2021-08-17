@@ -1,27 +1,38 @@
 {
 	"name": "fagc-master-bot",
 	"version": "2.0.0",
-	"description": "The master backend for the Factorio Anti-Grief community",
-	"main": "dist/index.js",
+	"description": "The master bot for the Factorio Anti-Grief community",
+	"main": "dist/app.js",
+	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "eslint src/ --fix"
+		"lint": "eslint src/ --fix",
+		"postinstall": "install-types",
+		"build": "tsc",
+		"bot:addcommands": "npm run build && node dist/commands.js"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/oof2win2/fagc-master-backend.git"
+		"url": "git+https://github.com/oof2win2/fagc-master-bot.git"
 	},
 	"author": "oof2win2",
-	"license": "ISC",
+	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/oof2win2/fagc-master-backend/issues"
+		"url": "https://github.com/oof2win2/fagc-master-bot/issues"
 	},
-	"homepage": "https://github.com/oof2win2/fagc-master-backend#readme",
+	"homepage": "https://github.com/oof2win2/fagc-master-bot#readme",
 	"dependencies": {
+		"@discordjs/builders": "^0.5.0",
+		"@discordjs/rest": "^0.1.0-canary.0",
 		"@types/node": "^16.6.1",
 		"@typescript-eslint/eslint-plugin": "^4.29.2",
 		"@typescript-eslint/parser": "^4.29.2",
+		"discord-api-types": "^0.22.0",
+		"discord.js": "^13.1.0",
+		"dotenv": "^10.0.0",
+		"envalid": "^7.2.1",
 		"eslint": "^7.32.0",
+		"fagc-api-wrapper": "^1.10.0",
 		"install-types": "^2.0.1",
 		"nodemon": "^2.0.12",
 		"typescript": "^4.3.5"
