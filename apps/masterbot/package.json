@@ -1,8 +1,8 @@
 {
-	"name": "fagc-masterbot",
-	"version": "1.0.0",
+	"name": "fagc-master-bot",
+	"version": "2.0.0",
 	"description": "The master backend for the Factorio Anti-Grief community",
-	"main": "src/index.js",
+	"main": "dist/index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint src/ --fix"
@@ -18,12 +18,12 @@
 	},
 	"homepage": "https://github.com/oof2win2/fagc-master-backend#readme",
 	"dependencies": {
-		"common-tags": "^1.8.0",
-		"discord.js": "^12.5.3",
-		"mongoose": "^5.12.3",
-		"node-fetch": "^2.6.1"
-	},
-	"devDependencies": {
-		"eslint": "^7.26.0"
+		"@types/node": "^16.6.1",
+		"@typescript-eslint/eslint-plugin": "^4.29.2",
+		"@typescript-eslint/parser": "^4.29.2",
+		"eslint": "^7.32.0",
+		"install-types": "^2.0.1",
+		"nodemon": "^2.0.12",
+		"typescript": "^4.3.5"
 	}
 }
