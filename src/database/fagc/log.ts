@@ -1,5 +1,5 @@
-import database from "../database"
-import { getUserStringFromID } from "../../utils/functions-databaseless"
+import database from "../database.js"
+import { getUserStringFromID } from "../../utils/functions-databaseless.js"
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 
 const connection = database.connections.find((connection) => connection?.n === "fagc")?.c

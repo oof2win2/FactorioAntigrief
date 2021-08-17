@@ -1,7 +1,7 @@
 import { getModelForClass, modelOptions, pre, prop, Ref } from "@typegoose/typegoose"
-import database from "../database"
-import { getUserStringFromID } from "../../utils/functions-databaseless"
-import { CommunityClass } from "./community"
+import database from "../database.js"
+import { getUserStringFromID } from "../../utils/functions-databaseless.js"
+import { CommunityClass } from "./community.js"
 
 const connection = database.connections.find((connection) => connection?.n === "fagc")?.c
 

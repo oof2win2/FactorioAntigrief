@@ -1,8 +1,7 @@
-import { Mongoose } from "mongoose"
-// const mongoose = require("mongoose")
-// const mongodb = require("mongo-mock")
-import config, { ApiConfig } from "../config"
-import ENV from "../utils/env"
+import mongoose from "mongoose"
+const {Mongoose} = mongoose
+import config, { ApiConfig } from "../config.js"
+import ENV from "../utils/env.js"
 
 class ConnectionManager {
 	connections: ({

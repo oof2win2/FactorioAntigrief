@@ -1,14 +1,14 @@
 import { WebhookClient, MessageEmbed } from "discord.js"
-import WebhookSchema from "../database/fagc/webhook"
+import WebhookSchema from "../database/fagc/webhook.js"
 import WebSocket from "ws"
-import ENV from "./env"
-import GuildConfigModel, { ConfigClass } from "../database/bot/community"
-import { RevocationClass } from "../database/fagc/revocation"
+import ENV from "./env.js"
+import GuildConfigModel, { ConfigClass } from "../database/bot/community.js"
+import { RevocationClass } from "../database/fagc/revocation.js"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
-import { RuleClass } from "../database/fagc/rule"
-import { CommunityClass } from "../database/fagc/community"
-import { ReportClass } from "../database/fagc/report"
+import { RuleClass } from "../database/fagc/rule.js"
+import { CommunityClass } from "../database/fagc/community.js"
+import { ReportClass } from "../database/fagc/report.js"
 
 const wss = new WebSocket.Server({ port: ENV.WS_PORT })
 

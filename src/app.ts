@@ -1,6 +1,3 @@
-// so stuff works properly
-process.chdir(__dirname)
-
 import Fastify, { FastifyInstance } from "fastify"
 
 import fastifyCorsPlugin from "fastify-cors"
@@ -10,9 +7,11 @@ import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
 import path from "node:path"
 
-import ENV from "./utils/env"
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+
+import ENV from "./utils/env.js"
 import { DocumentType } from "@typegoose/typegoose"
-import { CommunityClass } from "./database/fagc/community"
+import { CommunityClass } from "./database/fagc/community.js"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
 
@@ -55,7 +54,8 @@ fastify.register(fastifyHelmetPlugin)
 fastify.register(fastifyFormBodyPlugin)
 
 // middlware to remove garbage from responses
-import removeIdMiddleware from "./utils/removeId"
+import removeIdMiddleware from "./utils/removeId.js"
+import { url } from "envalid"
 fastify.addHook("onSend", removeIdMiddleware)
 
 

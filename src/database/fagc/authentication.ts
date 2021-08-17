@@ -1,6 +1,6 @@
 import { getModelForClass, modelOptions, prop, Ref } from "@typegoose/typegoose"
-import database from "../database"
-import { CommunityClass } from "./community"
+import database from "../database.js"
+import { CommunityClass } from "./community.js"
 const connection = database.connections.find(connection => connection?.n === "fagc")?.c
 
 @modelOptions({
@@ -18,6 +18,9 @@ export class AuthClass {
 
 	@prop({ default: [], type: [String] })
 	allowed_ips!: string[]
+
+	@prop({ default: "public", type: String })
+	api_key_type!: "public" | "master"
 }
 
 const AuthModel = getModelForClass(AuthClass)
