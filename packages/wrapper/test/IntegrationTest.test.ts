@@ -1,5 +1,5 @@
 import config from "./testconfig"
-import { FAGCWrapper } from "../src/index"
+import { FAGCWrapper, RequestConfig } from "../src/index"
 import { CommunityConfig, Report, Revocation } from "fagc-api-types"
 
 import { expect } from "chai"
@@ -10,7 +10,7 @@ const FAGC = new FAGCWrapper({
 	apikey: config.apikey,
 	socketurl: config.websocketurl,
 	apiurl: config.apiurl,
-
+	masterapikey: config.masterapikey
 })
 
 const testGuildId = "749943992719769613"
@@ -24,7 +24,14 @@ const testStuff = {
 	},
 	reportCount: 5,
 	webhookId: "865254241533820959",
-	webhookToken: "m_ROP6uDvag5okV9YcrC9KkxBZ5sWgRDTCcnhrVdQGCi78W29-5jyflOsl1M6PFqoimn"
+	webhookToken: "m_ROP6uDvag5okV9YcrC9KkxBZ5sWgRDTCcnhrVdQGCi78W29-5jyflOsl1M6PFqoimn",
+	rule: {
+		shortdesc: "Some rule short description",
+		longdesc: "Some rule long description"
+	},
+	community: {
+		name: "Testing Community Alpha",
+	}
 }
 
 describe("ApiWrapper", () => {
@@ -85,7 +92,7 @@ describe("ApiWrapper", () => {
 		expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
 		expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
 		expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
-		expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
+		expect(revocation.reportedTime.valueOf()).to.equal(report.reportedTime.valueOf(), "Revocation time mismatch")
 		// revocation specific
 		expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
 
@@ -115,7 +122,7 @@ describe("ApiWrapper", () => {
 			expect(resolved).to.deep.equal(report, "Cached report mismatch to report")
 		})
 
-		const reports = await FAGC.reports.fetchAllName(testStuff.report.playername)
+		const reports = (await FAGC.reports.fetchAllName(testStuff.report.playername)).filter((report) => report.communityId == createdReports[0].communityId)
 		const revocations = await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId)
 		expect(revocations.length).to.equal(reports.length, "Amount of player reports and revocations mismatch")
 		revocations.forEach((revocation, i) => {
@@ -127,7 +134,7 @@ describe("ApiWrapper", () => {
 			expect(revocation.description).to.equal(report.description, "Revocation description mismatch")
 			expect(revocation.automated).to.equal(report.automated, "Revocation automated mismatch")
 			expect(revocation.proof).to.equal(report.proof, "Revocation proof mismatch")
-			expect(revocation.reportedTime).to.equal(report.reportedTime, "Revocation time mismatch")
+			expect(revocation.reportedTime.valueOf()).to.equal(report.reportedTime.valueOf(), "Revocation time mismatch")
 			// revocation specific
 			expect(revocation.revokedBy).to.equal(testUserId, "Revocation revokedBy mismatch")
 		})
@@ -139,18 +146,15 @@ describe("ApiWrapper", () => {
 		})
 	})
 	step("Should be able to create reports and get a profile from them", async () => {
-		before(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
-		after(async () => await FAGC.reports.revokeAllName(testStuff.report.playername, testUserId))
-
 		const rules = await FAGC.rules.fetchAll()
-		await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
+		const createdReports = await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
 			return FAGC.reports.create({
 				brokenRule: rules[0].id,
 				adminId: testUserId,
 				...testStuff.report, // description, automated, proof, playername
 			})
 		}))
-		const fetchedReports = await FAGC.reports.fetchAllName(testStuff.report.playername)
+		const fetchedReports = (await FAGC.reports.fetchAllName(testStuff.report.playername)).filter(report => report.communityId == createdReports[0].communityId)
 		const profile = await FAGC.profiles.fetchCommunity(testStuff.report.playername, fetchedReports[0].communityId)
 		expect(profile.reports.length).to.equal(fetchedReports.length, "Amount of fetched reports and reports in profile did not match")
 		expect(fetchedReports).to.deep.equal(profile.reports, "Fetched reports did not match reports in profile")
@@ -215,5 +219,69 @@ describe("ApiWrapper", () => {
 		}
 		FAGC.websocket.once("guildConfig", CommunityConfigChangeHandler)
 		FAGC.websocket.setGuildID(testGuildId)
+	})
+	step("Should be able to add and remove rules", async () => {
+		const rule = await FAGC.rules.create(testStuff.rule)
+		expect(rule.shortdesc).to.equal(testStuff.rule.shortdesc, "Created rule shortdesc did not match input")
+		expect(rule.longdesc).to.equal(testStuff.rule.longdesc, "Created rule longdesc did not match input")
+
+		const resolvedRule = FAGC.rules.resolveID(rule.id)
+		expect(resolvedRule.id).to.equal(rule.id, "Resolved rule id did not match created")
+		expect(resolvedRule.shortdesc).to.equal(rule.shortdesc, "Resolved rule shortdesc did not match created")
+		expect(resolvedRule.longdesc).to.equal(rule.longdesc, "Resolved rule longdesc did not match created")
+
+		const fetchedRule = await FAGC.rules.fetchRule(rule.id, true, true)
+		expect(fetchedRule.id).to.equal(rule.id, "Fetched rule id did not match created")
+		expect(fetchedRule.shortdesc).to.equal(rule.shortdesc, "Fetched rule shortdesc did not match created")
+		expect(fetchedRule.longdesc).to.equal(rule.longdesc, "Fetched rule longdesc did not match created")
+
+
+		const removedRule = await FAGC.rules.remove(rule.id)
+		expect(removedRule.id).to.equal(rule.id, "Removed rule id did not match created")
+		expect(removedRule.shortdesc).to.equal(rule.shortdesc, "Removed rule shortdesc did not match created")
+		expect(removedRule.longdesc).to.equal(rule.longdesc, "Removed rule longdesc did not match created")
+
+		const resolvedAfterRemove = FAGC.rules.resolveID(rule.id)
+		expect(resolvedAfterRemove, "Resolved rule was not null").to.be.null
+
+		const fetchedAfterRemove = await FAGC.rules.fetchRule(rule.id)
+		expect(fetchedAfterRemove, "Fetched rule was not null").to.be.null
+	})
+	step("Should be able to create and remove a community with violations and revocations getting removed", async () => {
+
+		const communityResult = await FAGC.communities.create(testStuff.community.name, testUserId, "548410604679856151")
+		const community = communityResult.community
+		expect(community.name).to.equal(testStuff.community.name, "Community name mismatch")
+		expect(community.contact).to.equal(testUserId, "Community contact mismatch")
+		expect(community.guildId).to.equal("548410604679856151", "Community guildId mismatch")
+		
+		const requestConfig: RequestConfig = {
+			apikey: communityResult.apiKey
+		}
+		const rules = await FAGC.rules.fetchAll()
+		const report = await FAGC.reports.create({
+			brokenRule: rules[0].id,
+			adminId: testUserId,
+			...testStuff.report, // description, automated, proof, playername
+		}, true, requestConfig)
+		expect(report.communityId).to.equal(community.id, "Report communityId mismatch")
+		const report2 = await FAGC.reports.create({
+			brokenRule: rules[0].id,
+			adminId: testUserId,
+			...testStuff.report, // description, automated, proof, playername
+		}, true, requestConfig)
+		const revocation = await FAGC.reports.revoke(report2.id, testUserId, true, requestConfig)
+		expect(revocation.communityId).to.equal(community.id, "Revocation communityId mismatch")
+
+		await FAGC.communities.remove(community.id)
+
+		const fetchedCommunity = await FAGC.communities.fetchCommunity(community.id, null, true)
+		expect(fetchedCommunity, "Community exists after it was removed").to.be.null
+		
+		const fetchedReport = await FAGC.reports.fetchReport(report.id, null, true)
+		expect(fetchedReport, "Report exists after community was removed").to.be.null
+		
+		const fetchedRevocation = await FAGC.revocations.fetchRevocations(testStuff.report.playername, community.id, true)
+		expect(fetchedRevocation.length).to.equal(0, "Revocations exist after community was removed")
 	})
 })

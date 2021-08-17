@@ -1,5 +1,5 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions, RequestConfig } from "../types/types"
+import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
 import { Revocation, Report, CreateReport, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import { AuthenticationError, GenericAPIError, NoApikeyError, UnsuccessfulRevocationError } from "../types/errors"
@@ -9,10 +9,10 @@ export default class ReportManager extends BaseManager<Report> {
 	public apikey?: string
 	private apiurl: string
 	private createRevocation: (revocationObject: Revocation) => void
-	constructor(apiurl: string, createRevocation: (revocationObject: Revocation) => void, apikey?: string, options: ManagerOptions = {}) {
-		super(options)
-		if (apikey) this.apikey = apikey
-		this.apiurl = apiurl
+	constructor(options: WrapperOptions, createRevocation: (revocationObject: Revocation) => void, managerOptions: ManagerOptions = {}) {
+		super(managerOptions)
+		if (options.apikey) this.apikey = options.apikey
+		this.apiurl = options.apiurl
 		this.createRevocation = createRevocation
 	}
 	
@@ -25,6 +25,7 @@ export default class ReportManager extends BaseManager<Report> {
 
 		if (!fetched) return null // return null if the fetch is empty
 		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
+		fetched.reportedTime = new Date(fetched.reportedTime)
 		if (cache) this.add(fetched)
 		return fetched
 	}
@@ -34,7 +35,10 @@ export default class ReportManager extends BaseManager<Report> {
 		if (allReports.error) throw new GenericAPIError(`${allReports.error}: ${allReports.message}`)
 
 		if (cache && allReports[0]) {
-			allReports.forEach(report => this.add(report))
+			allReports.forEach(report => {
+				report.reportedTime = new Date(report.reportedTime)
+				this.add(report)
+			})
 		}
 		return allReports
 	}
@@ -45,34 +49,41 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 	async fetchByRule(ruleid: ApiID, cache = true): Promise<Report[]> {
 		const ruleReports = await fetch(`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`).then(c=>c.json())
-		if (cache) ruleReports.forEach(report => this.add(report))
+		if (cache) {
+			ruleReports.forEach(report => {
+				report.reportedTime = new Date(report.reportedTime)
+				this.add(report)
+			})
+		}
 		return ruleReports
 	}
 	async create(report: CreateReport, cache = true, reqConfig: RequestConfig = {}): Promise<Report> {
-		if (!this.apikey && !reqConfig.apikey) throw new NoApikeyError()
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
 
 		const create = await fetch(`${this.apiurl}/reports`, {
 			method: "POST",
 			body: JSON.stringify(report),
-			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`, "content-type": "application/json" },
 		}).then(u=>u.json())
 
 		if (create.error) {
 			if (create.description === "API key is wrong") throw new AuthenticationError()
-			console.error(create)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 		}
+		create.reportedTime = new Date(create.reportedTime)
 		if (cache) this.add(create)
 		return create
 	}
 	async revoke(reportid: ApiID, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Revocation> {
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+
 		const revoked = await fetch(`${this.apiurl}/reports`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				id: reportid,
 				adminId: adminId,
 			}),
-			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`, "content-type": "application/json" },
 		}).then(u=>u.json())
 
 		if (revoked.error) {
@@ -81,18 +92,22 @@ export default class ReportManager extends BaseManager<Report> {
 		}
 
 		if (!revoked?.revokedTime) throw new UnsuccessfulRevocationError()
+		revoked.reportedTime = new Date(revoked.reportedTime)
+		revoked.revokedTime = new Date(revoked.revokedTime)
 		if (cache) this.createRevocation(revoked)
 		this.cache.sweep((report) => report.id === reportid) // remove the revoked report from cache as it isnt working anymore
 		return revoked
 	}
 	async revokeAllName(playername: string, adminId: string, cache = true, reqConfig: RequestConfig = {}): Promise<Report[]|null> {
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+
 		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {
 			method: "DELETE",
 			body: JSON.stringify({
 				playername: playername,
 				adminId: adminId,
 			}),
-			headers: { "authorization": `Token ${this.apikey || reqConfig.apikey}`, "content-type": "application/json" },
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`, "content-type": "application/json" },
 		}).then(u=>u.json())
 
 		if (revoked.error) {
@@ -102,6 +117,8 @@ export default class ReportManager extends BaseManager<Report> {
 
 		revoked.forEach(revocation => {
 			if (!revocation?.reportedTime) throw new UnsuccessfulRevocationError()
+			revocation.reportedTime = new Date(revocation.reportedTime)
+			revocation.revokedTime = new Date(revocation.revokedTime)
 			if (cache) this.createRevocation(revocation)
 		})
 		this.cache.sweep((report) => report.playername === playername) // remove the revoked report from cache as it isnt working anymore

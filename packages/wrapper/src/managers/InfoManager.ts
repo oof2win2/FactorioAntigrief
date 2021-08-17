@@ -1,5 +1,5 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions } from "../types/types"
+import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Webhook } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import { GenericAPIError } from "../types"
@@ -7,10 +7,10 @@ import { GenericAPIError } from "../types"
 export default class InfoManager extends BaseManager<Webhook> {
 	public apikey?: string
 	private apiurl: string
-	constructor(apiurl: string, apikey?: string, opts: ManagerOptions = {}) {
-		super(opts)
-		if (apikey) this.apikey = apikey
-		this.apiurl = apiurl
+	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
+		super(managerOptions)
+		if (options.apikey) this.apikey = options.apikey
+		this.apiurl = options.apiurl
 	}
 	async addWebhook(webhookid: string, webhooktoken: string): Promise<Webhook> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
