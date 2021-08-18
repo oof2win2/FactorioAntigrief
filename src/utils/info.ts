@@ -12,6 +12,8 @@ import { ReportClass } from "../database/fagc/report.js"
 
 const wss = new WebSocket.Server({ port: ENV.WS_PORT })
 
+const WebhookGuildIDs = new WeakMap<WebSocket, string>()
+
 let WebhookQueue: MessageEmbed[] = []
 
 async function SendWebhookMessages() {
@@ -40,17 +42,15 @@ export function WebhookMessage(message: MessageEmbed): void {
 }
 
 wss.on("connection", (ws) => {
-	console.log(ws.url)
 	ws.on("message", async (msg) => {
 		const message = JSON.parse(msg.toString("utf-8"))
 		if (message.guildId) {
-			// FIXME fix this weird bug
-			if (!message) return
 			const guildConfig = await GuildConfigModel.findOne({ guildId: message.guildId }).then((c) => c?.toObject())
 			if (guildConfig) ws.send(Buffer.from(JSON.stringify({
 				...guildConfig,
 				messageType: "guildConfig"
 			})))
+			WebhookGuildIDs.set(ws, message.guildId)
 		}
 	})
 })
@@ -177,13 +177,14 @@ export async function communityRemovedMessage(community: DocumentType<CommunityC
 }
 export function communityConfigChanged(config: DocumentType<ConfigClass, BeAnObject>): void {
 	wss.clients.forEach(client => {
-		// TODO: figure out a way to externally store which websocket belongs to which guild
-		// if (client.guildId == config.guildId) {
-		// 	client.send(Buffer.from(JSON.stringify({
-		// 		...config,
-		// 		messageType: "guildConfig"
-		// 	})))
-		// }
+		// TODO: test this
+		const guildId = WebhookGuildIDs.get(client)
+		if (guildId == config.guildId) {
+			client.send(Buffer.from(JSON.stringify({
+				...config,
+				messageType: "guildConfig"
+			})))
+		}
 	})
 }
 
