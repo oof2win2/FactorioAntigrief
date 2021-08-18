@@ -12,6 +12,8 @@ import { ReportClass } from "../database/fagc/report.js"
 
 const wss = new WebSocket.Server({ port: ENV.WS_PORT })
 
+const WebhookGuildIDs = new WeakMap<WebSocket, string>()
+
 let WebhookQueue: MessageEmbed[] = []
 
 async function SendWebhookMessages() {
@@ -40,17 +42,15 @@ export function WebhookMessage(message: MessageEmbed): void {
 }
 
 wss.on("connection", (ws) => {
-	console.log(ws.url)
 	ws.on("message", async (msg) => {
 		const message = JSON.parse(msg.toString("utf-8"))
 		if (message.guildId) {
-			// FIXME fix this weird bug
-			if (!message) return
 			const guildConfig = await GuildConfigModel.findOne({ guildId: message.guildId }).then((c) => c?.toObject())
 			if (guildConfig) ws.send(Buffer.from(JSON.stringify({
 				...guildConfig,
 				messageType: "guildConfig"
 			})))
+			WebhookGuildIDs.set(ws, message.guildId)
 		}
 	})
 })
@@ -65,9 +65,9 @@ export function WebsocketMessage(message: string): void {
 
 export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>): Promise<void> {
 	if (report === null || report.playername === undefined) return
-	
+
 	// set the sent object's messageType to report
-	WebsocketMessage(JSON.stringify(Object.assign({}, report.toObject(), {messageType: "report"})))
+	WebsocketMessage(JSON.stringify(Object.assign({}, report.toObject(), { messageType: "report" })))
 
 	const reportEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
@@ -89,9 +89,9 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 }
 export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>): Promise<void> {
 	if (revocation === null || revocation.playername === undefined) return
-	
+
 	// set the sent object's messageType to revocation
-	WebsocketMessage(JSON.stringify(Object.assign({}, revocation.toObject(), {messageType: "revocation"})))
+	WebsocketMessage(JSON.stringify(Object.assign({}, revocation.toObject(), { messageType: "revocation" })))
 	const revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Report Revoked")
@@ -115,14 +115,15 @@ export async function reportRevokedMessage(revocation: DocumentType<RevocationCl
 
 export async function ruleCreatedMessage(rule: DocumentType<RuleClass, BeAnObject>): Promise<void> {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
-	
+
 	// set the sent object's messageType to ruleCreated
-	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), {messageType: "ruleCreated"})))
+	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), { messageType: "ruleCreated" })))
 	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule created")
 		.setColor("ORANGE")
 		.addFields(
+			{ name: "Rule ID", value: `\`${rule.id}\`` },
 			{ name: "Rule short description", value: rule.shortdesc },
 			{ name: "Rule long description", value: rule.longdesc }
 		)
@@ -132,12 +133,13 @@ export async function ruleCreatedMessage(rule: DocumentType<RuleClass, BeAnObjec
 export async function ruleRemovedMessage(rule: DocumentType<RuleClass, BeAnObject>): Promise<void> {
 	if (rule === null || rule.shortdesc === undefined || rule.longdesc === undefined) return
 	// set the sent object's messageType to ruleRemoved
-	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), {messageType: "ruleRemoved"})))
+	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), { messageType: "ruleRemoved" })))
 	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule removed")
 		.setColor("ORANGE")
 		.addFields(
+			{ name: "Rule ID", value: `\`${rule.id}\`` },
 			{ name: "Rule short description", value: rule.shortdesc },
 			{ name: "Rule long description", value: rule.longdesc }
 		)
@@ -147,12 +149,13 @@ export async function ruleRemovedMessage(rule: DocumentType<RuleClass, BeAnObjec
 
 export async function communityCreatedMessage(community: DocumentType<CommunityClass, BeAnObject>): Promise<void> {
 	// set the sent object's messageType to communityCreated
-	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), {messageType: "communityCreated"})))
+	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityCreated" })))
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community created")
 		.setColor("ORANGE")
 		.addFields(
+			{ name: "Community ID", value: `\`${community.id}\`` },
 			{ name: "Community name", value: community.name },
 			{ name: "Contact", value: community.contact }
 		)
@@ -160,12 +163,13 @@ export async function communityCreatedMessage(community: DocumentType<CommunityC
 }
 export async function communityRemovedMessage(community: DocumentType<CommunityClass, BeAnObject>): Promise<void> {
 	// set the sent object's messageType to communityRemoved
-	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), {messageType: "communityRemoved"})))
+	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityRemoved" })))
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community removed")
 		.setColor("ORANGE")
 		.addFields(
+			{ name: "Community ID", value: `\`${community.id}\`` },
 			{ name: "Community name", value: community.name },
 			{ name: "Contact", value: community.contact }
 		)
@@ -173,13 +177,14 @@ export async function communityRemovedMessage(community: DocumentType<CommunityC
 }
 export function communityConfigChanged(config: DocumentType<ConfigClass, BeAnObject>): void {
 	wss.clients.forEach(client => {
-		// TODO: figure out a way to externally store which websocket belongs to which guild
-		// if (client.guildId == config.guildId) {
-		// 	client.send(Buffer.from(JSON.stringify({
-		// 		...config,
-		// 		messageType: "guildConfig"
-		// 	})))
-		// }
+		// TODO: test this
+		const guildId = WebhookGuildIDs.get(client)
+		if (guildId == config.guildId) {
+			client.send(Buffer.from(JSON.stringify({
+				...config,
+				messageType: "guildConfig"
+			})))
+		}
 	})
 }
 
