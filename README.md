@@ -19,7 +19,7 @@ FAGC (Factorio Anti-Grief Community) is a community of people who try to work ag
 
 [⬆️ Head back up](#contents)
 
-- Community: A community is a group of people that play Factorio together and use this API in a way to prevent griefers on their servers
+- Community: A community is a group of people that play Factorio together and use this API in a way to prevent griefing on their servers
 - Rule: A single item that describes something that must be followed; rules are categorized by which aspect of gameplay/user interaction it governs.
 - Report: A single instance of a single rule which has been broken (or upheld). Can be revoked and then the report turns into a revocation (as it has been revoked)
 - Profile: A collection of reports. Profiles are specific to a single player at a single community. If a profile is revoked, all reports in the community of said player are revoked.
