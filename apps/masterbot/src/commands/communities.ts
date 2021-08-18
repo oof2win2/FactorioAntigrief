@@ -1,17 +1,16 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { AuthenticateUser } from '../utils/authenticate.js';
 import {Command, SubCommand} from '../utils/Command.js';
 import { readdirSync } from 'fs';
 
-const commands: SubCommand[] = await Promise.all(readdirSync("./commands/rules").map(async commandName => {
-	const command = await import(`./rules/${commandName}`)
+const commands: SubCommand[] = await Promise.all(readdirSync("./commands/communities").map(async commandName => {
+	const command = await import(`./communities/${commandName}`)
 	return command.default
 }))
 
-const Rules: Command = {
+const Communities: Command = {
 	data: new SlashCommandBuilder()
-		.setName("rules")
-		.setDescription("FAGC Rules")
+		.setName("communities")
+		.setDescription("FAGC Communities")
 	,
 	execute: async (client, interaction) => {
 		const subcommand = interaction.options.getSubcommand()!
@@ -22,7 +21,7 @@ const Rules: Command = {
 }
 
 commands.forEach(command => {
-	Rules.data.addSubcommand(command.data)
+	Communities.data.addSubcommand(command.data)
 })
 
-export default Rules
+export default Communities

@@ -9,6 +9,7 @@
 		"lint": "eslint src/ --fix",
 		"postinstall": "install-types",
 		"build": "tsc",
+		"dev": "tsc -b --watch",
 		"bot:addcommands": "npm run build && node dist/commands.js"
 	},
 	"repository": {

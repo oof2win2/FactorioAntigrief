@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import Command from '../utils/Command';
+import {Command} from '../utils/Command';
 
 const Ping: Command = {
 	data: new SlashCommandBuilder()
@@ -11,7 +11,7 @@ const Ping: Command = {
 		const afterReply = Date.now()
 
 		return interaction.editReply({
-			content: `My ping is: ${afterReply - beforeReply}\nDiscord API ping: ${Math.round(client.ws.ping)}`
+			content: `My ping is: \`${afterReply - beforeReply}ms\`\nDiscord API ping: \`${Math.round(client.ws.ping)}ms\``
 		})
 	}
 }
