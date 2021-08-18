@@ -1,5 +1,8 @@
-# Config
-config.js
+# private stuff
+.env
+config.ts
+dist/
+*.code-workspace
 
 # Logs
 logs

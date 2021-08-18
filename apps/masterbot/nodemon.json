@@ -5,11 +5,12 @@
         "node_modules/**/node_modules"
     ],
     "watch": [
-        "*"
+        "dist"
     ],
     "env": {
         "NODE_ENV": "development"
     },
     "ext": "*",
-    "cwd": "./src/"
+    "cwd": "./src/",
+	"delay": 1000
 }
