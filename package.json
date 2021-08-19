@@ -39,7 +39,7 @@
 		"fastify-formbody": "^5.1.0",
 		"fastify-helmet": "^5.3.2",
 		"fastify-plugin": "^3.0.0",
-		"fastify-rate-limit": "^5.6.0",
+		"fastify-rate-limit": "^5.6.1",
 		"fastify-request-context": "^2.2.0",
 		"fastify-response-validation": "^0.2.0",
 		"joi": "^17.4.2",
