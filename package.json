@@ -46,7 +46,7 @@
 		"lodash": "^4.17.21",
 		"mongoose": "^5.13.2",
 		"morgan": "^1.9.1",
-		"node-fetch": "^2.6.1",
+		"node-fetch": "^3.0.0",
 		"prom-client": "^13.2.0",
 		"tsc": "^2.0.3",
 		"yup": "^0.32.9"
