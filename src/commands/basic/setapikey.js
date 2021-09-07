@@ -27,6 +27,7 @@ class SetAPIKey extends Command {
 		const apikey = args[0]
 
 		try {
+			// TODO: add this fetch to the wrapper and fix this bug of token being wrong etc
 			const community = await fetch(`${this.client.config.apiurl}/communities/getown`, {
 				headers: { "apikey": apikey }
 			}).then((c) => c.json())

@@ -1,4 +1,3 @@
-const fetch = require("node-fetch")
 const Command = require("../../base/Command")
 
 class RemoveWebhook extends Command {
@@ -32,16 +31,8 @@ class RemoveWebhook extends Command {
 		} catch (e) {
 			return message.channel.send("Invalid webhook")
 		}
-		const webRaw = await fetch(`${this.client.config.apiurl}/informatics/removewebhook`, {
-			method: "DELETE",
-			body: JSON.stringify({
-				id: args[0],
-				token: args[1],
-				guildId: message.guild.id
-			}),
-			headers: { "content-type": "application/json" }
-		})
-		const webhook = await webRaw.json()
+		
+		const webhook = await this.client.fagc.info.removeWebhook(args[0], args[1])
 		if (webhook && webhook.guildId) {
 			return message.reply("The webhook will no longer be recieving FAGC notifications!")
 		} else if (webhook === null) {
