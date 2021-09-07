@@ -1,8 +1,7 @@
 const { MessageEmbed } = require("discord.js")
 const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
-const ConfigModel = require("../../database/schemas/config")
-const fetch = require("node-fetch")
+
 class Setup extends Command {
 	constructor(client) {
 		super(client, {
@@ -21,7 +20,9 @@ class Setup extends Command {
 			customPermissions: ["setConfig"],
 		})
 	}
-	async run (message) {
+	async run (message, _, config) {
+		if (!config.apikey) return message.reply("No API key set")
+
 		message.channel.send("Hello! This is the bot setup process for this server")
 
 		const name = (await getMessageResponse(message, "Please type in this community's name"))?.content
@@ -55,13 +56,6 @@ class Setup extends Command {
 			{ name: "Moderator role", value: `<@&${role}>` },
 			{ name: "API key", value: apikey ? "Hidden" : "None" }
 		)
-		let community
-		if (apikey !== "none") {
-			community = await fetch(`${this.client.config.apiurl}/communities/getown`, {
-				headers: { "apikey": apikey }
-			}).then((c) => c.json())
-			if (!community) return message.reply("That API key is not associated with a community")
-		}
 		message.channel.send(embed)
 
 		const confirm = await getConfirmationMessage(message, "Are you sure you want these settings applied?")
@@ -69,19 +63,7 @@ class Setup extends Command {
 			return message.channel.send("Community configuration cancelled")
 		
 		try {
-			const res = await ConfigModel.findOneAndUpdate({guildId: message.guild.id}, {
-				$set: {apikey: apikey}
-			}, {new:true})
-			if (!res) {
-				await ConfigModel.create({
-					communityname: name,
-					guildId: message.guild.id,
-					contact: contact.id,
-					moderatorRoleId: role,
-					apikey: apikey,
-				})
-			}
-			let ConfigToSet = {
+			const updatedConfig = await this.client.fagc.communities.setConfig({
 				communityname: name,
 				guildId: message.guild.id,
 				contact: contact.id,
@@ -89,15 +71,11 @@ class Setup extends Command {
 				apikey: apikey,
 				ruleFilters: [],
 				trustedCommunities: [],
-			}
-			if (community) ConfigToSet.communityId = community.id
-			let config = await fetch(`${this.client.config.apiurl}/communities/setconfig`, {
-				method: "POST",
-				body: JSON.stringify(ConfigToSet),
-				headers: { "apikey": apikey, "content-type": "application/json" }
-			}).then((r) => r.json())
+			}, {
+				apikey: config.apikey
+			})
 			
-			if (config.moderatorRoleId === role)
+			if (updatedConfig.moderatorRoleId === role)
 				return message.channel.send("Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)")
 			else {
 				console.error("setup", config)

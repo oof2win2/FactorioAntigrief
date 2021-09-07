@@ -52,11 +52,11 @@ class SetAPIKey extends Command {
 				.setTimestamp()
 				.setDescription("Your FAGC Role Configuration")
 			embed.addFields(
-				{ name: "Reports Management", value: reports.id },
-				{ name: "Webhook Management", value: webhooks.id },
-				{ name: "Config Management", value: config.id },
-				{ name: "Rule Management", value: rules.id },
-				{ name: "Communities Management", value: communities.id },
+				{ name: "Reports Management", value: reports },
+				{ name: "Webhook Management", value: webhooks },
+				{ name: "Config Management", value: config },
+				{ name: "Rule Management", value: rules },
+				{ name: "Communities Management", value: communities },
 			)
 			message.channel.send(embed)
 			const confirmation = await getConfirmationMessage(message, "Are you sure you want these settings applied?")
@@ -64,7 +64,7 @@ class SetAPIKey extends Command {
 				return message.channel.send("Permission configuration cancelled")
 
 			try {
-				const res = await ConfigModel.findOneAndUpdate({ guildId: message.guild.id },
+				const updatedConfig = await ConfigModel.findOneAndUpdate({ guildId: message.guild.id },
 					{
 						$set: {
 							"roles.reports": reports,
@@ -73,11 +73,14 @@ class SetAPIKey extends Command {
 							"roles.setRules": rules,
 							"roles.setCommunities": communities
 						}
-					}, { new: true })
-				if (res.guildId)
+					}, { new: true }).then(r=>r.toObject())
+				console.log(updatedConfig)
+				if (updatedConfig && updatedConfig.guildId == message.guild.id)
 					return message.channel.send("Role configs successfully applied!")
-				else
+				else {
+					console.error("setrolepermissions", updatedConfig)
 					return message.channel.send("An error occured. Please contact developers")
+				}
 			} catch (e) {
 				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
