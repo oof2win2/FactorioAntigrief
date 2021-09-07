@@ -1,4 +1,3 @@
-const fetch = require("node-fetch")
 const Command = require("../../base/Command")
 
 class AddWebhook extends Command {
@@ -32,17 +31,7 @@ class AddWebhook extends Command {
 			console.error(e)
 			return message.channel.send("Invalid webhook")
 		}
-
-		const webRaw = await fetch(`${this.client.config.apiurl}/informatics/addwebhook`, {
-			method: "POST",
-			body: JSON.stringify({
-				id: args[0],
-				token: args[1],
-				guildId: message.guild.id
-			}),
-			headers: { "content-type": "application/json" }
-		})
-		const webhook = await webRaw.json()
+		const webhook = await this.client.fagc.info.addWebhook(args[0], args[1])
 		if (webhook.guildId)
 			return message.reply("The webhook will recieve FAGC notifications from now on! Testing message has been sent")
 		else if (webhook.error && webhook.error == "Forbidden")
