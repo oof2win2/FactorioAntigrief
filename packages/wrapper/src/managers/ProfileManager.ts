@@ -21,7 +21,10 @@ export default class ProfileManager extends BaseManager<Report> {
 	async fetchAll(playername: string): Promise<Profile[]> {
 		const fetched = await fetch(`${this.apiurl}/profiles/fetchall/${strictUriEncode(playername)}`)
 			.then(o=>o.json())
-		fetched.reports.forEach(report => report.reportedTime = new Date(report.reportedTime))
-		return fetched
+		const datedReports = fetched.map(profile => {
+			profile.reports = profile.reports.map(report => {report.reportedTime = new Date(report.reportedTime); return report})
+			return profile
+		})
+		return datedReports
 	}
 }
