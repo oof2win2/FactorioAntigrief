@@ -7,7 +7,7 @@ module.exports = {
         useFindAndModify: false
     },
     prefix: "fagc!", // bot prefix
-    apiurl: "http://localhost:3000/v1", // URL address of the API
+    apiurl: "http://localhost:3000", // URL address of the API
     adminIDs: [ // Discord UserIDs of users who have complete access over the bot (can restart it etc.)
         "429696038266208258"
     ],
