@@ -9,7 +9,7 @@ class SetAPIKey extends Command {
 			aliases: [],
 			usage: "[API KEY]",
 			examples: ["{{p}}setapikey potatoKey"],
-			category: "basic",
+			category: "config",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: ["ADMINISTRATOR"],
