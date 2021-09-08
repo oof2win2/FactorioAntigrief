@@ -74,15 +74,15 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 		.setDescription("Report Created")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Playername", value: report.playername },
-			{ name: "Admin ID", value: report.adminId },
-			{ name: "Community ID", value: report.communityId },
-			{ name: "Broken Rule", value: report.brokenRule },
-			{ name: "Automated", value: report.automated.toString() },
-			{ name: "Proof", value: report.proof },
-			{ name: "Description", value: report.description },
-			{ name: "Report ID", value: report.id },
-			{ name: "Report Time", value: report.reportedTime.toUTCString() }
+			{ name: "Playername", value: report.playername, inline: true },
+			{ name: "Admin ID", value: report.adminId, inline: true },
+			{ name: "Community ID", value: report.communityId, inline: true },
+			{ name: "Broken Rule", value: report.brokenRule, inline: true },
+			{ name: "Automated", value: report.automated.toString(), inline: true },
+			{ name: "Proof", value: report.proof, inline: true },
+			{ name: "Description", value: report.description, inline: true },
+			{ name: "Report ID", value: report.id, inline: true },
+			{ name: "Report Time", value: `<t:${Math.round(report.reportedTime.valueOf()/1000)}>`, inline: true }
 		)
 		.setTimestamp()
 	WebhookMessage(reportEmbed)
@@ -97,17 +97,17 @@ export async function reportRevokedMessage(revocation: DocumentType<RevocationCl
 		.setDescription("Report Revoked")
 		.setColor("ORANGE")
 		.addFields([
-			{ name: "Playername", value: revocation.playername },
-			{ name: "Admin ID", value: revocation.adminId },
-			{ name: "Community ID", value: revocation.communityId },
-			{ name: "Broken Rules", value: revocation.brokenRule },
-			{ name: "Automated", value: revocation.automated.toString() },
-			{ name: "Proof", value: revocation.proof },
-			{ name: "Description", value: revocation.description },
-			{ name: "Revocation ID", value: revocation.id },
-			{ name: "Report ID", value: revocation.reportId },
-			{ name: "Revocation Time", value: revocation.revokedTime.toUTCString() },
-			{ name: "Revoked by", value: revocation.revokedBy },
+			{ name: "Playername", value: revocation.playername, inline: true },
+			{ name: "Admin ID", value: revocation.adminId, inline: true },
+			{ name: "Community ID", value: revocation.communityId, inline: true },
+			{ name: "Broken Rules", value: revocation.brokenRule, inline: true },
+			{ name: "Automated", value: revocation.automated.toString(), inline: true },
+			{ name: "Proof", value: revocation.proof, inline: true },
+			{ name: "Description", value: revocation.description, inline: true },
+			{ name: "Revocation ID", value: revocation.id, inline: true },
+			{ name: "Report ID", value: revocation.reportId, inline: true },
+			{ name: "Revocation Time", value: `<t:${Math.round(revocation.revokedTime.valueOf()/1000)}>`, inline: true },
+			{ name: "Revoked by", value: revocation.revokedBy, inline: true },
 		])
 		.setTimestamp()
 	WebhookMessage(revocationEmbed)
@@ -123,9 +123,9 @@ export async function ruleCreatedMessage(rule: DocumentType<RuleClass, BeAnObjec
 		.setDescription("Rule created")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Rule ID", value: `\`${rule.id}\`` },
-			{ name: "Rule short description", value: rule.shortdesc },
-			{ name: "Rule long description", value: rule.longdesc }
+			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
+			{ name: "Rule short description", value: rule.shortdesc, inline: true },
+			{ name: "Rule long description", value: rule.longdesc, inline: true },
 		)
 	WebhookMessage(ruleEmbed)
 }
@@ -139,9 +139,9 @@ export async function ruleRemovedMessage(rule: DocumentType<RuleClass, BeAnObjec
 		.setDescription("Rule removed")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Rule ID", value: `\`${rule.id}\`` },
-			{ name: "Rule short description", value: rule.shortdesc },
-			{ name: "Rule long description", value: rule.longdesc }
+			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
+			{ name: "Rule short description", value: rule.shortdesc, inline: true },
+			{ name: "Rule long description", value: rule.longdesc, inline: true },
 		)
 	WebhookMessage(ruleEmbed)
 }
@@ -155,9 +155,9 @@ export async function communityCreatedMessage(community: DocumentType<CommunityC
 		.setDescription("Community created")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Community ID", value: `\`${community.id}\`` },
-			{ name: "Community name", value: community.name },
-			{ name: "Contact", value: community.contact }
+			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
+			{ name: "Community name", value: community.name, inline: true },
+			{ name: "Contact", value: community.contact, inline: true },
 		)
 	WebhookMessage(embed)
 }
@@ -169,9 +169,9 @@ export async function communityRemovedMessage(community: DocumentType<CommunityC
 		.setDescription("Community removed")
 		.setColor("ORANGE")
 		.addFields(
-			{ name: "Community ID", value: `\`${community.id}\`` },
-			{ name: "Community name", value: community.name },
-			{ name: "Contact", value: community.contact }
+			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
+			{ name: "Community name", value: community.name, inline: true },
+			{ name: "Contact", value: community.contact, inline: true },
 		)
 	WebhookMessage(embed)
 }
