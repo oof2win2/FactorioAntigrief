@@ -27,8 +27,9 @@ class CreateReport extends Command {
 		const playername = (await getMessageResponse(message, "Please type in a playername for the report"))?.content
 		if (playername === undefined) return message.channel.send("Didn't send playername in time")
 
-		const ruleid = (await getMessageResponse(message, "Please type in ID of rule that has been broken"))?.content
+		const ruleid = (await getMessageResponse(message, "Please type in ID of rule (or index in filtered rules) that has been broken"))?.content
 		if (ruleid === undefined) return message.channel.send("Didn't send rule ID in time")
+		const ruleNumber = parseInt(ruleid) || undefined
 
 		let desc = (await getMessageResponse(message, "Please type in description of the report or `none` if you don't want to set one"))?.content
 		if (desc.toLowerCase() === "none") desc = undefined
@@ -37,6 +38,15 @@ class CreateReport extends Command {
 		if (proof.toLowerCase() === "none") proof = undefined
 
 		const timestamp = Date.now()
+
+		const rule = ruleNumber
+			? await this.client.getFilteredRules(config).then(rules => rules[ruleNumber-1])
+			: await this.client.fagc.rules.fetchRule(ruleid)
+
+		if (!rule) return message.channel.send(ruleNumber
+			? `A filtered rule with the index of ${ruleNumber} does not exist!`
+			: `A rule with the ID of \`${ruleid}\` does not exist!`
+		)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
@@ -47,29 +57,26 @@ class CreateReport extends Command {
 		embed.addFields(
 			{ name: "Admin user", value: `<@${message.author.id}> | ${message.author.tag}`, inline: true },
 			{ name: "Player name", value: playername, inline: true },
-			{ name: "Rule ID", value: ruleid, inline: true },
+			{ name: "Rule", value: `${rule.shortdesc} (\`${rule.id}\`)`, inline: true },
 			{ name: "Report description", value: desc, inline: true },
 			{ name: "Proof", value: proof },
-			{ name: "Violated At", value: `<t:${Math.round(timestamp/1000)}>` }
+			{ name: "Violated At", value: `<t:${Math.round(timestamp / 1000)}>` }
 		)
 		message.channel.send(embed)
 		const confirm = await getConfirmationMessage(message, "Do you wish to create this rule report?")
 		if (!confirm)
 			return message.channel.send("Report creation cancelled")
-		
-		const rule = await this.client.fagc.rules.fetchRule(ruleid)
-		if (!rule) return message.channel.send(`A rule with the ID of \`${ruleid}\` does not exist!`)
 
 		try {
 			const response = await this.client.fagc.reports.create({
 				playername: playername,
 				adminId: message.author.id,
-				brokenRule: ruleid,
+				brokenRule: rule.id,
 				proof: proof,
 				description: desc,
 				automated: false,
 				reportedTime: new Date(timestamp)
-			}, true, {apikey: config.apikey})
+			}, true, { apikey: config.apikey })
 			if (response.id && response.brokenRule && response.reportedTime) {
 				return message.channel.send(`Report created! id: \`${response.id}\``)
 			} else if (response.error && response.description === "Rule must be a RuleID") {

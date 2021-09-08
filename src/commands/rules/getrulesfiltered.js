@@ -21,7 +21,6 @@ class GetRulesFiltered extends Command {
 	async run(message, _, config) {
 		if (!config.ruleFilters || !config.ruleFilters[0])
 			return message.reply("No rule filters set")
-		const rules = await this.client.fagc.rules.fetchAll()
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")
@@ -30,14 +29,14 @@ class GetRulesFiltered extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription("Filtered FAGC Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 
-		const fields = rules.map(rule => {
-			if (config.ruleFilters.some(id => id === rule.id))
-				return {
-					name: `${rule.shortdesc} (\`${rule.id}\`)`,
-					value: rule.longdesc,
-				}
-			else return null
-		}).filter(r=>r)
+
+		const filteredRules = await this.client.getFilteredRules(config)
+		const fields = filteredRules.map(rule => {
+			return {
+				name: `${rule.shortdesc} (\`${rule.id}\`)`,
+				value: rule.longdesc,
+			}
+		})
 		createPagedEmbed(fields, embed, message, {maxPageCount: 5})
 	}
 }

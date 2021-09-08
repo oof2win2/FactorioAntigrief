@@ -32,8 +32,9 @@ class CreateReportAdvanced extends Command {
 		const admin_user = admin_message.mentions.users.first() || await this.client.users.fetch(admin_message.content)
 		if (!admin_user) return message.channel.send("Sent user is not valid!")
 
-		const ruleid = (await getMessageResponse(message, "Please type in ID of rule that has been broken"))?.content
+		const ruleid = (await getMessageResponse(message, "Please type in ID of rule (or index in filtered rules) that has been broken"))?.content
 		if (ruleid === undefined) return message.channel.send("Didn't send rule ID in time")
+		const ruleNumber = parseInt(ruleid) || undefined
 
 		let desc = (await getMessageResponse(message, "Please type in description of the report or `none` if you don't want to set one"))?.content
 		if (desc.toLowerCase() === "none") desc = undefined
@@ -52,6 +53,15 @@ class CreateReportAdvanced extends Command {
 			}
 		}
 
+		const rule = ruleNumber
+			? await this.client.getFilteredRules(config).then(rules => rules[ruleNumber-1])
+			: await this.client.fagc.rules.fetchRule(ruleid)
+
+		if (!rule) return message.channel.send(ruleNumber
+			? `A filtered rule with the index of ${ruleNumber} does not exist!`
+			: `A rule with the ID of \`${ruleid}\` does not exist!`
+		)
+
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
 			.setColor("RED")
@@ -61,7 +71,7 @@ class CreateReportAdvanced extends Command {
 		embed.addFields(
 			{ name: "Admin user", value: `<@${admin_user.id}> | ${admin_user.tag}`, inline: true },
 			{ name: "Player name", value: playername, inline: true },
-			{ name: "Rule ID", value: ruleid, inline: true },
+			{ name: "Rule", value: `${rule.shortdesc} (\`${rule.id}\`)`, inline: true },
 			{ name: "Report description", value: desc, inline: true },
 			{ name: "Proof", value: proof },
 			{ name: "Violated At", value: `<t:${Math.floor(timestamp.valueOf()/1000)}>` }
@@ -74,7 +84,7 @@ class CreateReportAdvanced extends Command {
 			const response = await this.client.fagc.reports.create({
 				playername: playername,
 				adminId: admin_user.id,
-				brokenRule: ruleid,
+				brokenRule: rule.id,
 				proof: proof,
 				description: desc,
 				automated: false,
