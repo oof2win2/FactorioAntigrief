@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
 const {Mongoose} = mongoose
-import config, { ApiConfig } from "../config.js"
+import config, { ApiConfig } from "../dbConfig.js"
 import ENV from "../utils/env.js"
 
 class ConnectionManager {

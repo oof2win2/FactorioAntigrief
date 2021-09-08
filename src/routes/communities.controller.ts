@@ -85,7 +85,6 @@ export default class CommunityController {
 					contact: Type.Optional(Type.String()),
 					moderatorRoleId: Type.Optional(Type.String()),
 					communityname: Type.Optional(Type.String()),
-
 				})
 			}
 		}
