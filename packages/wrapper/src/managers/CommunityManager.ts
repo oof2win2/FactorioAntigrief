@@ -41,6 +41,23 @@ export default class CommunityManager extends BaseManager<Community> {
 		}
 		return allCommunities
 	}
+	async fetchOwnCommunity(cache = true, reqConfig: RequestConfig = {}): Promise<Community | null> {
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+
+		const community = await fetch(`${this.apiurl}/communities/getown`, {
+			headers: { "authorization": `Token ${reqConfig.apikey || this.apikey}`},
+		}).then(c => c.json())
+
+		if (!community) return null
+
+		if (community.error) {
+			if (community.description === "API key is wrong") throw new AuthenticationError()
+			throw new GenericAPIError(`${community.error}: ${community.message}`)
+		}
+
+		if (cache) this.add(community)
+		return community
+	}
 	resolveID(communityId: string): Community | null {
 		const cached = this.cache.get(communityId)
 		if (cached) return cached

@@ -1,3 +1,11 @@
+## [1.11.0] - [2021-09-08]
+### Additions
+- Added a method to fetch your own community with your API key
+
+## [1.10.1] - [2021-09-07]
+### Bugfixes
+- Fix `ReportManager#fetchAll` not returning expected results
+
 ## [1.10.0] - [2021-08-17]
 ### Additions
 - Added Master API rules part to create and remove rules
@@ -5,7 +13,7 @@
 - Filter revocations when fetching
 
 ## [1.9.1] - [2021-08-12]
-### Bugfixed
+### Bugfixes
 - Fixed that `Report.reportedTime` was not a date but said it was
 
 ## [1.9.0] - [2021-08-12]
