@@ -22,17 +22,19 @@ class RemoveWebhook extends Command {
 	async run (message, args) {
 		message.delete()
 		message.reply("Message removed to prevent unauthorized webhook access")
-		if (!message.member.hasPermission("MANAGE_WEBHOOKS")) return message.reply("Nice try! You need the `MANAGE_WEBHOOKS` permission!")
-		if (!args[0]) return message.reply("Provide a Webhook ID")
-		if (!args[1]) return message.reply("Provide a Webhook token")
+
+		if (!args[0]) return message.reply("Provide a Webhook URL")
+
+		// discord webhook link to id and token separately
+		const [webhookID, webhookToken] = args[0].slice(args[0].indexOf("/api/webhooks")+14).split("/")
 
 		try {
-			await this.client.fetchWebhook(args[0], args[1])
+			await this.client.fetchWebhook(webhookID, webhookToken)
 		} catch (e) {
 			return message.channel.send("Invalid webhook")
 		}
 		
-		const webhook = await this.client.fagc.info.removeWebhook(args[0], args[1])
+		const webhook = await this.client.fagc.info.removeWebhook(webhookID, webhookToken)
 		if (webhook && webhook.guildId) {
 			return message.reply("The webhook will no longer be recieving FAGC notifications!")
 		} else if (webhook === null) {

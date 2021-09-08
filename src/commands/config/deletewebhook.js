@@ -23,7 +23,9 @@ class AddWebhook extends Command {
 		if (!message.mentions.channels.first()) return message.channel.send("Channel not provided!")
 		const channel = message.mentions.channels.first()
 		const webhooks = await channel.fetchWebhooks()
-		webhooks.each(webhook => this.client.fagc.info.removeWebhook(webhook.id, webhook.token))
+			.then(webhooks => webhooks.filter(webhook => webhook.owner.id == this.client.user.id))
+		webhooks.map(webhook => this.client.fagc.info.removeWebhook(webhook.id, webhook.token))
+		webhooks.map(webhook => webhook.delete())
 		return message.channel.send("Attempted at removing webhooks")
 	}
 }
