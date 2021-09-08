@@ -1,4 +1,4 @@
-import { WebhookClient, MessageEmbed } from "discord.js"
+import { WebhookClient, MessageEmbed, User } from "discord.js"
 import WebhookSchema from "../database/fagc/webhook.js"
 import WebSocket from "ws"
 import ENV from "./env.js"
@@ -63,7 +63,7 @@ export function WebsocketMessage(message: string): void {
 	})
 }
 
-export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>): Promise<void> {
+export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>, community: CommunityClass, admin: User): Promise<void> {
 	if (report === null || report.playername === undefined) return
 
 	// set the sent object's messageType to report
@@ -71,43 +71,36 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 
 	const reportEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Report Created")
+		.setDescription(`${report.automated ? "Automated " : ""}Report Created: \`${report.id}\` at <t:${Math.round(report.reportedTime.valueOf()/1000)}>`)
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: report.playername, inline: true },
-			{ name: "Admin ID", value: report.adminId, inline: true },
-			{ name: "Community ID", value: report.communityId, inline: true },
 			{ name: "Broken Rule", value: report.brokenRule, inline: true },
-			{ name: "Automated", value: report.automated.toString(), inline: true },
+			{ name: "Admin", value: `<@${admin.id}> | ${admin.tag}`, inline: true },
+			{ name: "Community", value: `${community.name} (\`${community.id}\`)`, inline: true },
+			{ name: "Description", value: report.description, inline: false },
 			{ name: "Proof", value: report.proof, inline: true },
-			{ name: "Description", value: report.description, inline: true },
-			{ name: "Report ID", value: report.id, inline: true },
-			{ name: "Report Time", value: `<t:${Math.round(report.reportedTime.valueOf()/1000)}>`, inline: true }
 		)
 		.setTimestamp()
 	WebhookMessage(reportEmbed)
 }
-export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>): Promise<void> {
+export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>, community: CommunityClass, admin: User, revokedBy: User): Promise<void> {
 	if (revocation === null || revocation.playername === undefined) return
 
 	// set the sent object's messageType to revocation
 	WebsocketMessage(JSON.stringify(Object.assign({}, revocation.toObject(), { messageType: "revocation" })))
 	const revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
-		.setDescription("Report Revoked")
+		.setDescription(`${revocation.automated ? "Automated " : ""}Report Revoked (\`${revocation.reportId}\`): \`${revocation.id}\` at <t:${Math.round(revocation.revokedTime.valueOf()/1000)}>`)
 		.setColor("ORANGE")
 		.addFields([
 			{ name: "Playername", value: revocation.playername, inline: true },
-			{ name: "Admin ID", value: revocation.adminId, inline: true },
-			{ name: "Community ID", value: revocation.communityId, inline: true },
-			{ name: "Broken Rules", value: revocation.brokenRule, inline: true },
-			{ name: "Automated", value: revocation.automated.toString(), inline: true },
+			{ name: "Broken Rule", value: revocation.brokenRule, inline: true },
+			{ name: "Admin", value: `<@${admin.id}> | ${admin.tag}`, inline: true },
+			{ name: "Community", value: `${community.name} (\`${community.id}\`)`, inline: true },
+			{ name: "Revoked by", value: `<@${revokedBy.id}> | ${revokedBy.tag}`, inline: true },
+			{ name: "Description", value: revocation.description, inline: false },
 			{ name: "Proof", value: revocation.proof, inline: true },
-			{ name: "Description", value: revocation.description, inline: true },
-			{ name: "Revocation ID", value: revocation.id, inline: true },
-			{ name: "Report ID", value: revocation.reportId, inline: true },
-			{ name: "Revocation Time", value: `<t:${Math.round(revocation.revokedTime.valueOf()/1000)}>`, inline: true },
-			{ name: "Revoked by", value: revocation.revokedBy, inline: true },
 		])
 		.setTimestamp()
 	WebhookMessage(revocationEmbed)
@@ -147,7 +140,7 @@ export async function ruleRemovedMessage(rule: DocumentType<RuleClass, BeAnObjec
 }
 
 
-export async function communityCreatedMessage(community: DocumentType<CommunityClass, BeAnObject>): Promise<void> {
+export async function communityCreatedMessage(community: DocumentType<CommunityClass, BeAnObject>, contact: User): Promise<void> {
 	// set the sent object's messageType to communityCreated
 	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityCreated" })))
 	const embed = new MessageEmbed()
@@ -157,11 +150,11 @@ export async function communityCreatedMessage(community: DocumentType<CommunityC
 		.addFields(
 			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
 			{ name: "Community name", value: community.name, inline: true },
-			{ name: "Contact", value: community.contact, inline: true },
+			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}`, inline: true },
 		)
 	WebhookMessage(embed)
 }
-export async function communityRemovedMessage(community: DocumentType<CommunityClass, BeAnObject>): Promise<void> {
+export async function communityRemovedMessage(community: DocumentType<CommunityClass, BeAnObject>, contact: User): Promise<void> {
 	// set the sent object's messageType to communityRemoved
 	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityRemoved" })))
 	const embed = new MessageEmbed()
@@ -171,7 +164,7 @@ export async function communityRemovedMessage(community: DocumentType<CommunityC
 		.addFields(
 			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
 			{ name: "Community name", value: community.name, inline: true },
-			{ name: "Contact", value: community.contact, inline: true },
+			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}`, inline: true },
 		)
 	WebhookMessage(embed)
 }

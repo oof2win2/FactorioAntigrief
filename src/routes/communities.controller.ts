@@ -7,7 +7,7 @@ import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
 import CommunityModel from "../database/fagc/community.js"
 import CommunityConfigModel from "../database/bot/community.js"
 import { communityConfigChanged, communityCreatedMessage, communityRemovedMessage } from "../utils/info.js"
-import { validateDiscordGuild, validateDiscordUser } from "../utils/discord.js"
+import client, { validateDiscordGuild, validateDiscordUser } from "../utils/discord.js"
 import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import WebhookModel from "../database/fagc/webhook.js"
@@ -165,7 +165,7 @@ export default class CommunityController {
 
 		const validDiscordUser = await validateDiscordUser(contact)
 		if (!validDiscordUser) return res.status(400).send({errorCode: 400, error: "Invalid Discord User", message: `${contact} is not a valid Discord user`})
-
+		
 		const validGuild = await validateDiscordGuild(guildId)
 		if (!validGuild) return res.status(400).send({errorCode: 400, error: "Invalid Guild", message: `${guildId} is not a valid Discord guild`})
 
@@ -186,7 +186,9 @@ export default class CommunityController {
 			api_key: cryptoRandomString({length: 64}),
 		})
 
-		communityCreatedMessage(community)
+		const contactUser = await client.users.fetch(contact)
+
+		communityCreatedMessage(community, contactUser)
 
 		return res.send({
 			community: community,
@@ -231,7 +233,9 @@ export default class CommunityController {
 				guildId: communityConfig.guildId
 			})
 		}
-		communityRemovedMessage(community)
+
+		const contactUser = await client.users.fetch(community.contact)
+		communityRemovedMessage(community, contactUser)
 
 		return res.send(true)
 	}
