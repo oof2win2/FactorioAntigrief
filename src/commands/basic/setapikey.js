@@ -1,6 +1,5 @@
 const ConfigModel = require("../../database/schemas/config")
 const Command = require("../../base/Command")
-const fetch = require("node-fetch")
 
 class SetAPIKey extends Command {
 	constructor(client) {
@@ -27,10 +26,9 @@ class SetAPIKey extends Command {
 		const apikey = args[0]
 
 		try {
-			// TODO: add this fetch to the wrapper and fix this bug of token being wrong etc
-			const community = await fetch(`${this.client.config.apiurl}/communities/getown`, {
-				headers: { "apikey": apikey }
-			}).then((c) => c.json())
+			const community = await this.client.fagc.communities.fetchOwnCommunity(null, {
+				apikey: apikey
+			})
 			if (!community) return message.reply("That API key is not associated with a community")
 			const config = await ConfigModel.findOneAndUpdate({ guildId: message.guild.id }, {
 				$set: { "apikey": apikey, "communityId": community.id }
