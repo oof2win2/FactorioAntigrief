@@ -8,7 +8,7 @@ class AddWebhook extends Command {
 			aliases: [],
 			usage: "[webhook ID] [webhook token]",
 			examples: ["{{p}}addwebhook 9945 ThisIsMyToken"],
-			category: "informatics",
+			category: "config",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: ["MANAGE_WEBHOOKS"],
