@@ -3,7 +3,7 @@ const ConfigModel = require("../../database/schemas/config")
 module.exports = async (client, message) => {
 	if (message.author.bot) return
 	if (!message.guild) return
-	const prefix = client.config.prefix
+	const prefix = client.env.BOTPREFIX
 	if (!message.content.startsWith(prefix)) return
 
 	let args = message.content.slice(prefix.length).trim().split(/ +/g)

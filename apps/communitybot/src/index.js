@@ -6,6 +6,8 @@ const util = require("util")
 const fs = require("fs")
 const readdir = util.promisify(fs.readdir)
 const config = require("../config")
+const ENV = require("./utils/env")
+console.log(ENV)
 
 process.chdir(__dirname)
 
@@ -15,7 +17,7 @@ const Sentry = require("@sentry/node")
 const Tracing = require("@sentry/tracing")
 const { CaptureConsole } = require("@sentry/integrations")
 Sentry.init({
-	dsn: config.sentryLink,
+	dsn: ENV.SENTRY_LINK,
 	integrations: [
 		new CaptureConsole({ // capture stuff on console.error
 			levels: ["error"]
@@ -31,7 +33,7 @@ Sentry.init({
 require("./utils/extenders")
 // This enables FAGCBot to access the extenders in any part of the codebase
 
-mongoose.connect(config.mongoURI, config.dbOptions).then(() => {
+mongoose.connect(ENV.MONGOURI, config.dbOptions).then(() => {
 	client.logger.log("Database connected", "log")
 }).catch(err => client.logger.log("Error connecting to database. Error:" + err, "error"))
 
@@ -72,6 +74,6 @@ const init = async () => {
 	})
 
 	// log in to discord
-	client.login(client.config.token)
+	client.login(ENV.DISCORD_BOTTOKEN)
 }
 init()

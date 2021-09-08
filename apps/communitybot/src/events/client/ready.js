@@ -9,7 +9,7 @@ module.exports = async (client) => {
 	setInterval(
 		() =>
 			client.user.setActivity(
-				`${client.config.prefix}help | ${activities[i++ % activities.length]}`,
+				`${client.env.BOTPREFIX}help | ${activities[i++ % activities.length]}`,
 				{ type: "WATCHING" }
 			),
 		15000
