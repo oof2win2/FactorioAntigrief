@@ -7,7 +7,6 @@ const fs = require("fs")
 const readdir = util.promisify(fs.readdir)
 const config = require("../config")
 const ENV = require("./utils/env")
-console.log(ENV)
 
 process.chdir(__dirname)
 

@@ -24,6 +24,9 @@ class AddWebhook extends Command {
 		if (!args[1]) return message.reply("Provide a Webhook token")
 		message.delete()
 		message.reply("Message removed to prevent unauthorized webhook access")
+		
+		// discord webhook link to id and token separately
+		// str.slice(str.indexOf("/api/webhooks")+14).split("/")
 
 		try {
 			await this.client.fetchWebhook(args[0], args[1])
