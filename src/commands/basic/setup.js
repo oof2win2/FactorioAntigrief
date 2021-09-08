@@ -21,7 +21,7 @@ class Setup extends Command {
 		})
 	}
 	async run (message, _, config) {
-		if (!config.apikey) return message.reply("No API key set")
+		if (!config.apikey) return message.reply("No API key set. Set one with `fagc!setapikey`")
 
 		message.channel.send("Hello! This is the bot setup process for this server")
 
@@ -39,12 +39,6 @@ class Setup extends Command {
 		else role = roleMessage.content
 		if (message.guild.roles.cache.get(role) === undefined) return message.channel.send("Role is not correct")
 
-		const apikeyMessage = await getMessageResponse(message, "Please type in your API key that you recieved from the FAGC team, if you did recieve one. Type `none` if you didn't")
-		apikeyMessage.delete()
-		let apikey
-		if (apikeyMessage.content === "none") apikey = undefined
-		else apikey = apikeyMessage.content
-		
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Config")
 			.setAuthor(`${this.client.user.username} | oof2win2#3149`)
@@ -54,7 +48,6 @@ class Setup extends Command {
 			{ name: "Community name", value: name },
 			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}` },
 			{ name: "Moderator role", value: `<@&${role}>` },
-			{ name: "API key", value: apikey ? "Hidden" : "None" }
 		)
 		message.channel.send(embed)
 
@@ -68,7 +61,6 @@ class Setup extends Command {
 				guildId: message.guild.id,
 				contact: contact.id,
 				moderatorRoleId: role,
-				apikey: apikey,
 				ruleFilters: [],
 				trustedCommunities: [],
 			}, {

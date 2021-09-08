@@ -20,11 +20,11 @@ class Help extends Command {
 		})
 	}
 	async run(message, args, config) {
-		const prefix = this.client.config.prefix
+		const prefix = this.client.env.BOTPREFIX
 		if (args[0]) {
 			const cmd = this.client.commands.get(args[0]) || this.client.commands.get(this.client.aliases.get(args[0]))
 			if (!cmd) {
-				return message.error(`\`${args[0]}\` is not a valid command\nType \`${this.client.config.prefix}help\` to see a list of available commands!`)
+				return message.error(`\`${args[0]}\` is not a valid command\nType \`${this.client.env.BOTPREFIX}help\` to see a list of available commands!`)
 			}
 
 			const description = cmd.help.description ? cmd.help.description : "No description"

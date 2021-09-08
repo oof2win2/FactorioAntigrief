@@ -3,20 +3,22 @@ const path = require("path")
 const fetch = require("node-fetch")
 const strictUriEncode = require("strict-uri-encode")
 const { FAGCWrapper } = require("fagc-api-wrapper")
+const ENV = require("../utils/env")
 
 class FAGCBot extends Client {
 	constructor(options) {
 		super(options)
 
 		this.config = require("../../config")
+		this.env = ENV
 		this.emotes = this.config.emotes
 
 		// setup rate limit
 		this.RateLimit = new Collection()
 
 		this.fagc = new FAGCWrapper({
-			apiurl: this.config.apiurl,
-			socketurl: this.config.socketurl
+			apiurl: this.env.APIURL,
+			enableWebSocket: false
 		})
 
 		this.commands = new Collection()
@@ -77,13 +79,13 @@ class FAGCBot extends Client {
 	async getOrFetchCommunity(communityId) {
 		const cachedCommunity = this.CachedCommunities.get(communityId)
 		if (cachedCommunity) return cachedCommunity
-		const community = this.CachedCommunities.set(communityId, fetch(`${this.config.apiurl}/communities/getid?id=${strictUriEncode(communityId)}`).then(c => c.json())).get(communityId)
+		const community = this.CachedCommunities.set(communityId, fetch(`${this.env.APIURL}/communities/getid?id=${strictUriEncode(communityId)}`).then(c => c.json())).get(communityId)
 		return community
 	}
 	async getOrFetchRule(ruleid) {
 		const cachedRule = this.CachedRules.get(ruleid)
 		if (cachedRule) return cachedRule
-		const rule = this.CachedRules.set(ruleid, fetch(`${this.config.apiurl}/rules/getid?id=${strictUriEncode(ruleid)}`).then((c) => c.json())).get(ruleid)
+		const rule = this.CachedRules.set(ruleid, fetch(`${this.env.APIURL}/rules/getid?id=${strictUriEncode(ruleid)}`).then((c) => c.json())).get(ruleid)
 		return rule
 	}
 }

@@ -43,7 +43,7 @@ class Genbanlist extends Command {
 		let banlist = reportArr.map((report) => {
 			return {
 				username: report.playername,
-				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${this.client.config.apiurl}/profiles/getall?playername=${report.playername}`
+				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${this.client.env.APIURL}/profiles/getall?playername=${report.playername}`
 			}
 		})
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab
