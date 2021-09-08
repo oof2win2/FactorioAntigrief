@@ -74,7 +74,7 @@ class SetAPIKey extends Command {
 							"roles.setCommunities": communities
 						}
 					}, { new: true }).then(r=>r.toObject())
-				console.log(updatedConfig)
+					
 				if (updatedConfig && updatedConfig.guildId == message.guild.id)
 					return message.channel.send("Role configs successfully applied!")
 				else {

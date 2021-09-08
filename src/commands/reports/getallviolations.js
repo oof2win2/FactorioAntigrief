@@ -36,7 +36,7 @@ class GetAllReports extends Command {
 			const admin = await this.client.users.fetch(report.adminId)
 			const rule = await this.client.fagc.rules.fetchRule(report.brokenRule)
 			const community = await this.client.fagc.communities.fetchCommunity(report.communityId)
-			console.log(report.reportedTime)
+
 			return {
 				name: report.id,
 				value: 	`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
