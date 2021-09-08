@@ -1,3 +1,7 @@
+## UNRELEASED
+### Additions
+- Added a method to fetch your own community with your API key
+
 ## [1.10.1] - [2021-09-07]
 ### Bugfixes
 - Fix `ReportManager#fetchAll` not returning expected results
