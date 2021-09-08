@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.11.0] - [2021-09-08]
 ### Additions
 - Added a method to fetch your own community with your API key
 
