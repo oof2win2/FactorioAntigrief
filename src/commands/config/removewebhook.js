@@ -8,7 +8,7 @@ class RemoveWebhook extends Command {
 			aliases: [],
 			usage: "[webhook ID] [webhook token]",
 			examples: ["{{p}}removewebhook 9945 ThisIsMyToken"],
-			category: "informatics",
+			category: "config",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: ["MANAGE_WEBHOOKS"],
