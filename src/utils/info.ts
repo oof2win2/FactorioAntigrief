@@ -63,7 +63,7 @@ export function WebsocketMessage(message: string): void {
 	})
 }
 
-export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>, community: CommunityClass, admin: User): Promise<void> {
+export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>, community: CommunityClass, rule: DocumentType<RuleClass, BeAnObject>, admin: User): Promise<void> {
 	if (report === null || report.playername === undefined) return
 
 	// set the sent object's messageType to report
@@ -75,16 +75,16 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: report.playername, inline: true },
-			{ name: "Broken Rule", value: report.brokenRule, inline: true },
+			{ name: "Broken Rule", value: `${rule.shortdesc} (\`${rule.id}\`)`, inline: true },
+			{ name: "Description", value: report.description, inline: false },
 			{ name: "Admin", value: `<@${admin.id}> | ${admin.tag}`, inline: true },
 			{ name: "Community", value: `${community.name} (\`${community.id}\`)`, inline: true },
-			{ name: "Description", value: report.description, inline: false },
-			{ name: "Proof", value: report.proof, inline: true },
 		)
 		.setTimestamp()
+	if (report.proof !== "No Proof") reportEmbed.addField("Proof", report.proof, false)
 	WebhookMessage(reportEmbed)
 }
-export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>, community: CommunityClass, admin: User, revokedBy: User): Promise<void> {
+export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>, community: CommunityClass, rule: DocumentType<RuleClass, BeAnObject>, admin: User, revokedBy: User): Promise<void> {
 	if (revocation === null || revocation.playername === undefined) return
 
 	// set the sent object's messageType to revocation
@@ -92,17 +92,17 @@ export async function reportRevokedMessage(revocation: DocumentType<RevocationCl
 	const revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription(`${revocation.automated ? "Automated " : ""}Report Revoked (\`${revocation.reportId}\`): \`${revocation.id}\` at <t:${Math.round(revocation.revokedTime.valueOf()/1000)}>`)
-		.setColor("ORANGE")
+		.setColor("#0eadf1")
 		.addFields([
 			{ name: "Playername", value: revocation.playername, inline: true },
-			{ name: "Broken Rule", value: revocation.brokenRule, inline: true },
+			{ name: "Broken Rule", value: `${rule.shortdesc} (\`${rule.id}\`)`, inline: true },
+			{ name: "Description", value: revocation.description, inline: false },
 			{ name: "Admin", value: `<@${admin.id}> | ${admin.tag}`, inline: true },
 			{ name: "Community", value: `${community.name} (\`${community.id}\`)`, inline: true },
 			{ name: "Revoked by", value: `<@${revokedBy.id}> | ${revokedBy.tag}`, inline: true },
-			{ name: "Description", value: revocation.description, inline: false },
-			{ name: "Proof", value: revocation.proof, inline: true },
 		])
 		.setTimestamp()
+	if (revocation.proof !== "No Proof") revocationEmbed.addField("Proof", revocation.proof, false)
 	WebhookMessage(revocationEmbed)
 }
 
@@ -114,7 +114,7 @@ export async function ruleCreatedMessage(rule: DocumentType<RuleClass, BeAnObjec
 	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule created")
-		.setColor("ORANGE")
+		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
 			{ name: "Rule short description", value: rule.shortdesc, inline: true },
@@ -130,7 +130,7 @@ export async function ruleRemovedMessage(rule: DocumentType<RuleClass, BeAnObjec
 	const ruleEmbed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Rule removed")
-		.setColor("ORANGE")
+		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
 			{ name: "Rule short description", value: rule.shortdesc, inline: true },
@@ -146,7 +146,7 @@ export async function communityCreatedMessage(community: DocumentType<CommunityC
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community created")
-		.setColor("ORANGE")
+		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
 			{ name: "Community name", value: community.name, inline: true },
@@ -160,7 +160,7 @@ export async function communityRemovedMessage(community: DocumentType<CommunityC
 	const embed = new MessageEmbed()
 		.setTitle("FAGC Notifications")
 		.setDescription("Community removed")
-		.setColor("ORANGE")
+		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
 			{ name: "Community name", value: community.name, inline: true },

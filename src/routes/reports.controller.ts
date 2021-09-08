@@ -2,12 +2,13 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET, POST, DELETE } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
-import RuleModel from "../database/fagc/rule.js"
+import RuleModel, {RuleClass} from "../database/fagc/rule.js"
 import { Authenticate } from "../utils/authentication.js"
 import { reportCreatedMessage, reportRevokedMessage } from "../utils/info.js"
 import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import client, { validateDiscordUser } from "../utils/discord.js"
+import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -132,7 +133,7 @@ export default class ReportController {
 			proof: proof,
 			communityId: community.id
 		})
-		reportCreatedMessage(report, community, admin)
+		reportCreatedMessage(report, community, rule, admin)
 		return res.status(200).send(report)
 	}
 
@@ -163,6 +164,7 @@ export default class ReportController {
 		if (!isDiscordUser) return res.status(400).send({errorCode: 400, error: "Bad Request", message: "adminId must be a valid Discord user"})
 		const revoker = await client.users.fetch(req.body.adminId)
 		const admin = await client.users.fetch(report.adminId)
+		const rule = await RuleModel.findOne({id: report.brokenRule})!
 		
 		await ReportModel.findByIdAndDelete(report._id)
 		
@@ -179,7 +181,8 @@ export default class ReportController {
 			revokedTime: new Date(),
 			revokedBy: req.body.adminId,
 		})
-		reportRevokedMessage(revocation, community, admin, revoker)
+
+		reportRevokedMessage(revocation, community, rule!, admin, revoker)
 		return res.status(200).send(revocation)
 	}
 
@@ -210,6 +213,7 @@ export default class ReportController {
 			communityId: community.id,
 			playername: playername
 		})
+
 		const revocations = await Promise.all(reports.map(async (report) => {
 			const revocation = await RevocationModel.create({
 				reportId: report.id,
@@ -227,10 +231,19 @@ export default class ReportController {
 			await report.remove()
 			return revocation
 		}))
+
+		const RuleMap: Map<string, DocumentType<RuleClass, BeAnObject> | null> = new Map()
+
+		await Promise.all(revocations.map(async (revocation) => {
+			if (RuleMap.get(revocation.brokenRule)) return
+
+			RuleMap.set(revocation.brokenRule, await RuleModel.findOne({id: revocation.brokenRule}).exec())
+
+		}))
 		const revoker = await client.users.fetch(adminId)
 		const admin = await client.users.fetch(reports[0].adminId)
 
-		revocations.forEach((revocation) => reportRevokedMessage(revocation, community, revoker, admin))
+		revocations.forEach((revocation) => reportRevokedMessage(revocation, community, RuleMap.get(revocation.brokenRule)!, revoker, admin))
 
 		return res.status(200).send(revocations)
 	}
