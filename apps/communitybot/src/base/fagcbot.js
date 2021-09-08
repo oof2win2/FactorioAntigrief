@@ -1,7 +1,5 @@
 const { Client, Collection } = require("discord.js")
 const path = require("path")
-const fetch = require("node-fetch")
-const strictUriEncode = require("strict-uri-encode")
 const { FAGCWrapper } = require("fagc-api-wrapper")
 const ENV = require("../utils/env")
 
@@ -26,11 +24,6 @@ class FAGCBot extends Client {
 		// ["commands", "aliases"].forEach(x => this[x] = new Collection());
 		// ["command", "event"].forEach((x) => require(`../handlers/${x}`)(this));
 		this.logger = require("../utils/logger")
-
-		this.CachedCommunities = new Map()
-		setInterval(() => this.CachedCommunities.clear(), 15 * 60 * 1000) // clear cache every 15 minutes
-		this.CachedRules = new Map()
-		setInterval(() => this.CachedRules.clear(), 15 * 60 * 1000)
 	}
 	/**
 	 * Check if a user has sent a command in the past X milliseconds
@@ -76,17 +69,13 @@ class FAGCBot extends Client {
 		delete require.cache[require.resolve(`.${commandPath}${path.sep}${commandName}.js`)]
 		return false
 	}
-	async getOrFetchCommunity(communityId) {
-		const cachedCommunity = this.CachedCommunities.get(communityId)
-		if (cachedCommunity) return cachedCommunity
-		const community = this.CachedCommunities.set(communityId, fetch(`${this.env.APIURL}/communities/getid?id=${strictUriEncode(communityId)}`).then(c => c.json())).get(communityId)
-		return community
-	}
-	async getOrFetchRule(ruleid) {
-		const cachedRule = this.CachedRules.get(ruleid)
-		if (cachedRule) return cachedRule
-		const rule = this.CachedRules.set(ruleid, fetch(`${this.env.APIURL}/rules/getid?id=${strictUriEncode(ruleid)}`).then((c) => c.json())).get(ruleid)
-		return rule
+
+	async getFilteredRules(config) {
+		const allRules = await this.fagc.rules.fetchAll()
+		const filteredRules = allRules.filter(rule =>
+			config.ruleFilters.some(id => id === rule.id)
+		)
+		return filteredRules
 	}
 }
 module.exports = FAGCBot
