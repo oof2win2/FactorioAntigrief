@@ -70,8 +70,8 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 	WebsocketMessage(JSON.stringify(Object.assign({}, report.toObject(), { messageType: "report" })))
 
 	const reportEmbed = new MessageEmbed()
-		.setTitle("FAGC Notifications")
-		.setDescription(`${report.automated ? "Automated " : ""}Report Created: \`${report.id}\` at <t:${Math.round(report.reportedTime.valueOf()/1000)}>`)
+		.setTitle("FAGC - Report Created")
+		.setDescription(`${report.automated ? "Automated " : ""}Report \`${report.id}\` created at <t:${Math.round(report.reportedTime.valueOf()/1000)}>`)
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: report.playername, inline: true },
@@ -90,8 +90,8 @@ export async function reportRevokedMessage(revocation: DocumentType<RevocationCl
 	// set the sent object's messageType to revocation
 	WebsocketMessage(JSON.stringify(Object.assign({}, revocation.toObject(), { messageType: "revocation" })))
 	const revocationEmbed = new MessageEmbed()
-		.setTitle("FAGC Notifications")
-		.setDescription(`${revocation.automated ? "Automated " : ""}Report Revoked (\`${revocation.reportId}\`): \`${revocation.id}\` at <t:${Math.round(revocation.revokedTime.valueOf()/1000)}>`)
+		.setTitle("FAGC - Report Revoked")
+		.setDescription(`${revocation.automated ? "Automated " : ""}Report \`${revocation.reportId}\` revoked with \`${revocation.id}\` at <t:${Math.round(revocation.revokedTime.valueOf()/1000)}>`)
 		.setColor("#0eadf1")
 		.addFields([
 			{ name: "Playername", value: revocation.playername, inline: true },
@@ -112,8 +112,7 @@ export async function ruleCreatedMessage(rule: DocumentType<RuleClass, BeAnObjec
 	// set the sent object's messageType to ruleCreated
 	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), { messageType: "ruleCreated" })))
 	const ruleEmbed = new MessageEmbed()
-		.setTitle("FAGC Notifications")
-		.setDescription("Rule created")
+		.setTitle("FAGC - Rule Created")
 		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
@@ -128,8 +127,7 @@ export async function ruleRemovedMessage(rule: DocumentType<RuleClass, BeAnObjec
 	// set the sent object's messageType to ruleRemoved
 	WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), { messageType: "ruleRemoved" })))
 	const ruleEmbed = new MessageEmbed()
-		.setTitle("FAGC Notifications")
-		.setDescription("Rule removed")
+		.setTitle("FAGC - Rule Removed")
 		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
@@ -144,8 +142,7 @@ export async function communityCreatedMessage(community: DocumentType<CommunityC
 	// set the sent object's messageType to communityCreated
 	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityCreated" })))
 	const embed = new MessageEmbed()
-		.setTitle("FAGC Notifications")
-		.setDescription("Community created")
+		.setTitle("FAGC - Community Created")
 		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
@@ -158,8 +155,7 @@ export async function communityRemovedMessage(community: DocumentType<CommunityC
 	// set the sent object's messageType to communityRemoved
 	WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityRemoved" })))
 	const embed = new MessageEmbed()
-		.setTitle("FAGC Notifications")
-		.setDescription("Community removed")
+		.setTitle("FAGC - Community Removed")
 		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Community ID", value: `\`${community.id}\``, inline: true },
