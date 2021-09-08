@@ -9,7 +9,7 @@ class SetAPIKey extends Command {
 			name: "setrolepermissions",
 			description: "Set role permissions for command access",
 			aliases: ["setroleperms", "setperms", "setpermissions"],
-			category: "basic",
+			category: "config",
 			usage: "([option] [role])",
 			examples: ["{{p}}setrolepermissions reports 841761018380288100"],
 			dirname: __dirname,

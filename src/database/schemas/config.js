@@ -19,7 +19,7 @@ const ConfigSchema = new mongoose.Schema({
 	trustedCommunities: [String],
 	ruleFilters: [String],
 	roles: {
-		violations: { type: String, default: "" },
+		reports: { type: String, default: "" },
 		webhooks: { type: String, default: "" },
 		setConfig: { type: String, default: "" },
 		setRules: { type: String, default: "" },

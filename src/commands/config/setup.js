@@ -9,7 +9,7 @@ class Setup extends Command {
 			description: "Setup your guild",
 			aliases: [],
 			usage: ["{{p}}setup"],
-			category: "basic",
+			category: "config",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: ["ADMINISTRATOR"],
@@ -33,11 +33,11 @@ class Setup extends Command {
 		const contact = await this.client.users.fetch(contactID)
 		if (!contact) return message.reply("Contact user is invalid!")
 
-		let roleMessage = (await getMessageResponse(message, "Please ping (or type in the ID of) your role of people which can create reports"))
-		let role
-		if (roleMessage.mentions.roles.first()) role = roleMessage.mentions.roles.first().id
-		else role = roleMessage.content
-		if (message.guild.roles.cache.get(role) === undefined) return message.channel.send("Role is not correct")
+		// let roleMessage = (await getMessageResponse(message, "Please ping (or type in the ID of) your role of people which can create reports"))
+		// let role
+		// if (roleMessage.mentions.roles.first()) role = roleMessage.mentions.roles.first().id
+		// else role = roleMessage.content
+		// if (message.guild.roles.cache.get(role) === undefined) return message.channel.send("Role is not correct")
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Config")
@@ -47,7 +47,7 @@ class Setup extends Command {
 		embed.addFields(
 			{ name: "Community name", value: name },
 			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}` },
-			{ name: "Moderator role", value: `<@&${role}>` },
+			// { name: "Moderator role", value: `<@&${role}>` },
 		)
 		message.channel.send(embed)
 
@@ -60,14 +60,14 @@ class Setup extends Command {
 				communityname: name,
 				guildId: message.guild.id,
 				contact: contact.id,
-				moderatorRoleId: role,
+				// moderatorRoleId: role,
 				ruleFilters: [],
 				trustedCommunities: [],
 			}, {
 				apikey: config.apikey
 			})
 			
-			if (updatedConfig.moderatorRoleId === role)
+			if (updatedConfig.contact == contact.id)
 				return message.channel.send("Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)")
 			else {
 				console.error("setup", config)
