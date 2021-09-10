@@ -63,7 +63,15 @@ export function WebsocketMessage(message: string): void {
 	})
 }
 
-export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>, community: CommunityClass, rule: DocumentType<RuleClass, BeAnObject>, admin: User): Promise<void> {
+interface ReportMessageOpts {
+	community: CommunityClass,
+	rule: DocumentType<RuleClass, BeAnObject>
+	admin: User
+	totalReports: number
+	totalCommunities: number
+}
+
+export async function reportCreatedMessage(report: DocumentType<ReportClass, BeAnObject>, opts: ReportMessageOpts): Promise<void> {
 	if (report === null || report.playername === undefined) return
 
 	// set the sent object's messageType to report
@@ -71,35 +79,45 @@ export async function reportCreatedMessage(report: DocumentType<ReportClass, BeA
 
 	const reportEmbed = new MessageEmbed()
 		.setTitle("FAGC - Report Created")
-		.setDescription(`${report.automated ? "Automated " : ""}Report \`${report.id}\` created at <t:${Math.round(report.reportedTime.valueOf()/1000)}>`)
+		.setDescription(
+			`${report.automated ? "Automated " : ""}Report \`${report.id}\` created at <t:${Math.round(report.reportedTime.valueOf()/1000)}>\n` +
+			`${opts.totalReports} reports in ${opts.totalCommunities} communities`
+			)
 		.setColor("ORANGE")
 		.addFields(
 			{ name: "Playername", value: report.playername, inline: true },
-			{ name: "Broken Rule", value: `${rule.shortdesc} (\`${rule.id}\`)`, inline: true },
+			{ name: "Broken Rule", value: `${opts.rule.shortdesc} (\`${opts.rule.id}\`)`, inline: true },
 			{ name: "Description", value: report.description, inline: false },
-			{ name: "Admin", value: `<@${admin.id}> | ${admin.tag}`, inline: true },
-			{ name: "Community", value: `${community.name} (\`${community.id}\`)`, inline: true },
+			{ name: "Admin", value: `<@${opts.admin.id}> | ${opts.admin.tag}`, inline: true },
+			{ name: "Community", value: `${opts.community.name} (\`${opts.community.id}\`)`, inline: true },
 		)
 		.setTimestamp()
 	if (report.proof !== "No Proof") reportEmbed.addField("Proof", report.proof, false)
 	WebhookMessage(reportEmbed)
 }
-export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>, community: CommunityClass, rule: DocumentType<RuleClass, BeAnObject>, admin: User, revokedBy: User): Promise<void> {
+
+interface RevocationMessageOpts extends ReportMessageOpts {
+	revokedBy: User
+}
+export async function reportRevokedMessage(revocation: DocumentType<RevocationClass, BeAnObject>, opts: RevocationMessageOpts): Promise<void> {
 	if (revocation === null || revocation.playername === undefined) return
 
 	// set the sent object's messageType to revocation
 	WebsocketMessage(JSON.stringify(Object.assign({}, revocation.toObject(), { messageType: "revocation" })))
 	const revocationEmbed = new MessageEmbed()
 		.setTitle("FAGC - Report Revoked")
-		.setDescription(`${revocation.automated ? "Automated " : ""}Report \`${revocation.reportId}\` revoked with \`${revocation.id}\` at <t:${Math.round(revocation.revokedTime.valueOf()/1000)}>`)
+		.setDescription(
+			`${revocation.automated ? "Automated " : ""}Report \`${revocation.reportId}\` revoked with \`${revocation.id}\` at <t:${Math.round(revocation.revokedTime.valueOf()/1000)}>\n` +
+			`${opts.totalReports} reports in ${opts.totalCommunities} communities`
+		)
 		.setColor("#0eadf1")
 		.addFields([
 			{ name: "Playername", value: revocation.playername, inline: true },
-			{ name: "Broken Rule", value: `${rule.shortdesc} (\`${rule.id}\`)`, inline: true },
+			{ name: "Broken Rule", value: `${opts.rule.shortdesc} (\`${opts.rule.id}\`)`, inline: true },
 			{ name: "Description", value: revocation.description, inline: false },
-			{ name: "Admin", value: `<@${admin.id}> | ${admin.tag}`, inline: true },
-			{ name: "Community", value: `${community.name} (\`${community.id}\`)`, inline: true },
-			{ name: "Revoked by", value: `<@${revokedBy.id}> | ${revokedBy.tag}`, inline: true },
+			{ name: "Admin", value: `<@${opts.admin.id}> | ${opts.admin.tag}`, inline: true },
+			{ name: "Community", value: `${opts.community.name} (\`${opts.community.id}\`)`, inline: true },
+			{ name: "Revoked by", value: `<@${opts.revokedBy.id}> | ${opts.revokedBy.tag}`, inline: true },
 		])
 		.setTimestamp()
 	if (revocation.proof !== "No Proof") revocationEmbed.addField("Proof", revocation.proof, false)
