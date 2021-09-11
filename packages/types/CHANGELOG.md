@@ -1,3 +1,7 @@
+## UNRELEASED
+### Additions
+- Added WebSocket message typings
+
 ## [1.0.3] - [2021/08/16]
 ### Changes
 - Modified changelog formatting to fit with other FAGC projects
