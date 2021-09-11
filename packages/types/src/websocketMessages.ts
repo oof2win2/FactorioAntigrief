@@ -43,7 +43,7 @@ export interface RuleRemovedMessage extends BaseWebsocketMessage {
 }
 
 export interface CommunityCreatedMessageExtraOpts {
-	user: APIUser
+	contact: APIUser
 }
 export interface CommunityCreatedMessage extends BaseWebsocketMessage {
 	messageType: "communityCreated"
@@ -53,7 +53,7 @@ export interface CommunityCreatedMessage extends BaseWebsocketMessage {
 }
 
 export interface CommunityRemovedMessageExtraOpts {
-	user: APIUser
+	contact: APIUser
 }
 export interface CommunityRemovedMessage extends BaseWebsocketMessage {
 	messageType: "communityRemoved"
