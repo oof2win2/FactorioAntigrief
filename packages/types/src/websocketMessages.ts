@@ -62,7 +62,12 @@ export interface CommunityRemovedMessage extends BaseWebsocketMessage {
 	extraData: CommunityRemovedMessageExtraOpts
 }
 
-export interface GuildConfigChanged extends BaseWebsocketMessage {
+export interface GuildConfigChangedMessage extends BaseWebsocketMessage {
 	messageType: "communityConfigChanged"
 	config: CommunityConfig
+}
+
+export interface AnnouncementMessage extends BaseWebsocketMessage {
+	messageType: "announcement"
+	embed: APIEmbed
 }

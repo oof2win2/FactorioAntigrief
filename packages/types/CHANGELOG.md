@@ -1,6 +1,7 @@
 ## UNRELEASED
 ### Additions
 - Added WebSocket message typings
+- Added announcement message for futureproofing
 
 ## [1.0.3] - [2021/08/16]
 ### Changes
