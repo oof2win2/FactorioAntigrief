@@ -8,6 +8,7 @@ export interface BaseWebsocketMessage {
 export interface ReportMessageExtraOpts {
 	community: Community,
 	admin: APIUser
+	rule: Rule
 	totalReports: number
 	totalCommunities: number
 }
@@ -23,7 +24,7 @@ export interface RevocationMessageExtraOpts extends ReportMessageExtraOpts {
 	revokedBy: APIUser
 }
 
-export interface ReportRevokedMessage extends BaseWebsocketMessage {
+export interface RevocationMessage extends BaseWebsocketMessage {
 	messageType: "revocation"
 	embed: APIEmbed
 	revocation: Revocation

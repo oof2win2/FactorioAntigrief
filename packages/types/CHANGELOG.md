@@ -1,9 +1,14 @@
+## [1.1.2] - [2021-09-11]
+### Changes
+- Added `rule` to report message
+- Renamed `ReportRevokedMessage` to `RevocationMessage`
+
 ## [1.1.1] - [2021-09-11]
 ### Bugfixes
 - Renamed `user` to `contact` in community message opts
 
 ## [1.1.0] - [2021-09-11]
-### Additions
+### Changes
 - Added WebSocket message typings
 - Added announcement message for futureproofing
 
