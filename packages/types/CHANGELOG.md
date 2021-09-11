@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.1.0] - [2021/09/11]
 ### Additions
 - Added WebSocket message typings
 - Added announcement message for futureproofing
