@@ -1,6 +1,6 @@
 import { EventEmitter } from "events"
 import WebSocket from "isomorphic-ws"
-import { CommunityConfig, Revocation, Rule, Report } from "fagc-api-types"
+import { CommunityConfig, Revocation, Rule, Report, Community, CommunityCreatedMessage, ReportCreatedMessage, RevocationMessage, RuleCreatedMessage, RuleRemovedMessage, CommunityRemovedMessage } from "fagc-api-types"
 
 // some typescript stuff so it is strictly typed
 export interface WebSockethandlerOpts {
@@ -8,11 +8,14 @@ export interface WebSockethandlerOpts {
 	enabled?: boolean
 }
 export type WebSocketMessageType =
-	| "guildConfig"
+	| "communityConfigChanged"
 	| "report"
 	| "revocation"
 	| "ruleCreated"
 	| "ruleRemoved"
+	| "communityCreated"
+	| "communityRemoved"
+	| "announcement"
 	| "reconnecting"
 	| "connected"
 export interface WebSocketMessage {
@@ -20,11 +23,13 @@ export interface WebSocketMessage {
 	[key: string]: string | boolean | number
 }
 export declare interface WebSocketEvents {
-	"guildConfig": (message: CommunityConfig) => void
-	"report": (message: Report) => void
-	"revocation": (message: Revocation) => void
-	"ruleCreated": (message: Rule) => void
-	"ruleRemoved": (message: Rule) => void
+	"communityConfigChanged": (message: CommunityConfig) => void
+	"report": (message: ReportCreatedMessage) => void
+	"revocation": (message: RevocationMessage) => void
+	"ruleCreated": (message: RuleCreatedMessage) => void
+	"ruleRemoved": (message: RuleRemovedMessage) => void
+	"communityCreated": (message: CommunityCreatedMessage) => void
+	"communityRemoved": (message: CommunityRemovedMessage) => void
 	
 	"reconnecting": (message: void) => void
 	"connected": (message: void) => void
@@ -77,11 +82,13 @@ class WebSocketHandler extends EventEmitter {
 		const messageType = message.messageType
 		delete message.messageType
 		switch (messageType) {
-		case "guildConfig": this.emit("guildConfig", message as unknown as CommunityConfig); break
-		case "report": this.emit("report", message as unknown as Report); break
-		case "revocation": this.emit("revocation", message as unknown as Revocation); break
-		case "ruleCreated": this.emit("ruleCreated", message as unknown as Rule); break
-		case "ruleRemoved": this.emit("ruleRemoved", message as unknown as Rule); break
+		case "communityConfigChanged": this.emit("communityConfigChanged", message as unknown as CommunityConfig); break
+		case "report": this.emit("report", message as unknown as ReportCreatedMessage); break
+		case "revocation": this.emit("revocation", message as unknown as RevocationMessage); break
+		case "ruleCreated": this.emit("ruleCreated", message as unknown as RuleCreatedMessage); break
+		case "ruleRemoved": this.emit("ruleRemoved", message as unknown as RuleRemovedMessage); break
+		case "communityCreated": this.emit("communityCreated", message as unknown as CommunityCreatedMessage); break
+		case "communityRemoved": this.emit("communityRemoved", message as unknown as CommunityRemovedMessage); break
 		}
 	}
 	setGuildID(guildId: string): void {

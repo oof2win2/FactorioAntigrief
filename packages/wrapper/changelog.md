@@ -1,8 +1,12 @@
-## [1.12.0]
+## [1.12.1]
+### Bugfixes
+- Updated WebSocket listeners to have correct events
+
+# [1.12.0]
 ### Changes
 - Added methods to fetch reports and revocations by modified time
 
-## [1.11.0] - [2021-09-08]
+# [1.11.0] - [2021-09-08]
 ### Changes
 - Added a method to fetch your own community with your API key
 
@@ -10,7 +14,7 @@
 ### Bugfixes
 - Fix `ReportManager#fetchAll` not returning expected results
 
-## [1.10.0] - [2021-08-17]
+# [1.10.0] - [2021-08-17]
 ### Changes
 - Added Master API rules part to create and remove rules
 - Prioritize request config over assigned props in requests
@@ -20,7 +24,7 @@
 ### Bugfixes
 - Fixed that `Report.reportedTime` was not a date but said it was
 
-## [1.9.0] - [2021-08-12]
+# [1.9.0] - [2021-08-12]
 ### Changes
 - Added a `.destroy()` method on the wrapper and all managers to cancel all timeouts and exit cleanly
 ### Changes
@@ -30,7 +34,7 @@
 ### Bugfixes
 - Removed an unnecessary `console.log`
 
-## [1.8.0] - [2021-07-15]
+# [1.8.0] - [2021-07-15]
 ### Changes
 - Changes the websocket to be disabled by default
 - Started using `fagc-api-types` for type declarations of the API
@@ -40,7 +44,7 @@
 ### Changes
 - Remove `axios` and add in `isomorphic-fetch` as `axios` caused issues when it threw errors on 404s, which are used sometimes on some endpoints
 
-## [1.7.0] - [2021-06-22]
+# [1.7.0] - [2021-06-22]
 ### Changes
 - Removed `node-fetch` and instead installed `axios` as node-fetch was behaving funky with the browser
 
@@ -56,7 +60,7 @@
 ### Fixed
 - WebSocket will now emit events correctly and not delete their names before checking them
 
-## [1.6.0] - [2021-06-20]
+# [1.6.0] - [2021-06-20]
 ### Added
 - WebSocket can now send the Guild ID to recieve the correct config
 - WebSocket can be disabled with a configuration option
@@ -66,14 +70,14 @@
 - Offenses are now called profiles
 - Violations are now called reports
 
-## [1.5.0] - [2021-06-19]
+# [1.5.0] - [2021-06-19]
 ### Added
 - WebSocket handler for FAGC events [1d639eb2f665e524b9a0822cdac3553f83a5ecb4]
 
-## [1.4.0] - [2021-06-19]
+# [1.4.0] - [2021-06-19]
 ### Added
 - Added back in the profile (offense) manager as stuff was hard without it [6f96ec45ca9e715a92b8b6e6f0813e449ce2c949]
 
-## [1.2.0] - [2021-06-19]
+# [1.2.0] - [2021-06-19]
 ### Added
 - Added in the informatics manager to handle informatics endpoints (currently webhooks) [692341306917b21e59db9e6ae9ffbd039516a9c3]
