@@ -1,13 +1,13 @@
 import fetch from "node-fetch"
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import {Message} from "discord.js"
 
 export const command: Command<void> = {
 	name: "ping",
 	description: "Shows ping to related services",
-	dirname: __dirname,
 	enabled: true,
 	aliases: [],
+	category: "basic",
 	memberPermissions: [],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 	ownerOnly: false,

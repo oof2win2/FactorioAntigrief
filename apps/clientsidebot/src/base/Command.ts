@@ -14,7 +14,7 @@ export type Command <T=void> = {
 	description: string,
 	usage?: string,
 	examples?: string[],
-	dirname: string,
+	category: string,
 	enabled: boolean,
 	ownerOnly: boolean,
 	requiredConfig: boolean,

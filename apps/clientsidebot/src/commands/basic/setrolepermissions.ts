@@ -1,7 +1,7 @@
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import { MessageEmbed, Message } from "discord.js"
-import { getMessageResponse, getConfirmationMessage } from "../../utils/responseGetter"
-import FAGCBot from "../../base/fagcbot"
+import { getMessageResponse, getConfirmationMessage } from "../../utils/responseGetter.js"
+import FAGCBot from "../../base/fagcbot.js"
 
 export const command: Command<Message> = {
 	name: "setrolepermissions",
@@ -9,7 +9,7 @@ export const command: Command<Message> = {
 	aliases: ["setroleperms", "setperms"],
 	usage: "([option] [role])",
 	examples: ["{{p}}setrolepermissions banRole 841761018380288100"],
-	dirname: __dirname,
+	category: "basic",
 	enabled: true,
 	memberPermissions: ["ADMINISTRATOR"],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint src/ --fix --ext .js,.ts",
     "dev": "nodemon"

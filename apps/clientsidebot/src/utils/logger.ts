@@ -1,5 +1,6 @@
 import dateformat from "dateformat"
-import { bgBlue, black, green } from "chalk"
+import chalk from "chalk"
+const { bgBlue, black, green } = chalk
 
 // makes logs look pretty and uniform
 

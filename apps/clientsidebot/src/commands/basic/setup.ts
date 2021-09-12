@@ -1,13 +1,13 @@
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import { Message, MessageEmbed } from "discord.js"
-import { getMessageResponse, getConfirmationMessage } from "../../utils/responseGetter"
+import { getMessageResponse, getConfirmationMessage } from "../../utils/responseGetter.js"
 
 export const command: Command<Message> = {
 	name: "setup",
 	description: "Setup your guild",
 	aliases: [],
+	category: "basic",
 	usage: "{{p}}setup",
-	dirname: __dirname,
 	enabled: true,
 	memberPermissions: ["ADMINISTRATOR"],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

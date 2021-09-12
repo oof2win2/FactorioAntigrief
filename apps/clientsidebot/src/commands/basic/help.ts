@@ -1,5 +1,5 @@
 import { HexColorString, Message, MessageEmbed } from "discord.js"
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import { TextChannel } from "discord.js"
 import { PermissionResolvable } from "discord.js"
 import path from "path"
@@ -10,7 +10,7 @@ export const command: Command<Message> = {
 	aliases: ["h"],
 	usage: "(command)",
 	examples: ["{{p}}help", "{{p}}help ping"],
-	dirname: __dirname,
+	category: "basic",
 	enabled: true,
 	memberPermissions: [],
 	botPermissions: [],
@@ -21,6 +21,7 @@ export const command: Command<Message> = {
 		const channel = message.channel
 		if (!channel.isText() || channel.type === "DM") return
 		const prefix = client.config.prefix
+		console.log(client.getEmbedColor())
 		if (args[0]) {
 			const cmd = client.commands.get(args[0]) || client.commands.get(client.aliases.get(args[0]))
 			if (!cmd) {
@@ -71,7 +72,7 @@ export const command: Command<Message> = {
 		const commands = client.commands
 
 		commands.forEach((command) => {
-			const category = command.dirname.split(path.sep).pop()
+			const category = command.category
 			if (!categories.includes(category)) {
 				if (category === "Owner" && message.author.id !== client.config.owner.id) {
 					return
@@ -86,7 +87,7 @@ export const command: Command<Message> = {
 			.setFooter(client.config.embeds.footer)
 			.setAuthor(`${client.user.username} | Commands`, client.user.displayAvatarURL())
 		categories.sort().forEach((cat) => {
-			const tCommands = commands.filter((cmd) => cmd.dirname.split(path.sep).pop() === cat)
+			const tCommands = commands.filter((cmd) => cmd.category === cat)
 			embed.addField(cat + " - (" + tCommands.size + ")", tCommands.map((cmd) => "`" + cmd.name + "`").join(", "))
 		})
 		return message.channel.send({embeds: [embed]})

@@ -1,7 +1,7 @@
-import FAGCBot from "./fagcbot"
+import FAGCBot from "./fagcbot.js"
 
 import { MessageEmbed, TextChannel } from "discord.js"
-import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler"
+import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler.js"
 import { CommunityConfig, ReportCreatedMessage, RevocationMessage, RuleCreatedMessage, RuleRemovedMessage } from "fagc-api-types"
 
 export function GuildConfigHandler(config: CommunityConfig): void {

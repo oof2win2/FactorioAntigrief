@@ -1,11 +1,11 @@
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import {Message} from "discord.js"
-import { getConfirmationMessage } from "../../utils/responseGetter"
+import { getConfirmationMessage } from "../../utils/responseGetter.js"
 
 export const command: Command<Message|void> = {
 	name: "addinfochannel",
 	description: "Add an info channel",
-	dirname: __dirname,
+	category: "infochannels",
 	usage: "[channel]",
 	enabled: true,
 	aliases: [],

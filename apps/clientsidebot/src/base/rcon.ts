@@ -4,10 +4,10 @@
 import { Snowflake, TextChannel } from "discord.js"
 import { Rcon } from "rcon-client"
 import { FactorioServer } from "../types/types"
-import FAGCBot from "./fagcbot"
-import config from "../../config"
+import FAGCBot from "./fagcbot.js"
+import config from "../config.js"
 const { rconport, rconpw, errorchannel } = config
-import servers from "../../servers"
+import servers from "../servers.js"
 
 
 interface rconConfig {

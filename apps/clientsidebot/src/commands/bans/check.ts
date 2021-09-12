@@ -1,5 +1,5 @@
 import { Message } from "discord.js"
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 
 export const command: Command<Message> = {
 	name: "isbanned",
@@ -7,7 +7,7 @@ export const command: Command<Message> = {
 	aliases: ["check"],
 	usage: "[username]",
 	examples: ["{{p}}isbanned Cooldude2606"],
-	dirname: __dirname,
+	category: "bans",
 	enabled: true,
 	memberPermissions: [],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

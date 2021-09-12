@@ -1,6 +1,6 @@
 import { Message } from "discord.js"
-import Command from "../../base/Command"
-import { getConfirmationMessage } from "../../utils/responseGetter"
+import Command from "../../base/Command.js"
+import { getConfirmationMessage } from "../../utils/responseGetter.js"
 
 export const command: Command<Message> = {
 	name: "whitelist",
@@ -8,7 +8,7 @@ export const command: Command<Message> = {
 	aliases: ["addwhitelist"],
 	usage: "[username]",
 	examples: ["{{p}}whitelist Cooldude2606"],
-	dirname: __dirname,
+	category: "whitelist",
 	enabled: true,
 	memberPermissions: [],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

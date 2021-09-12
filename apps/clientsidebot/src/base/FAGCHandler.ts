@@ -1,5 +1,5 @@
-import FAGCBot from "./fagcbot"
-import rcon from "./rcon"
+import FAGCBot from "./fagcbot.js"
+import rcon from "./rcon.js"
 
 const wait = (time: number): Promise<void> => { 
 	return new Promise(resolve => {
@@ -7,7 +7,7 @@ const wait = (time: number): Promise<void> => {
 	})
 }
 
-import { client } from "../index"
+import { client } from "../index.js"
 import { Report, Revocation } from "fagc-api-types"
 async function IsWhitelisted(playername: string): Promise<boolean> {
 	const res = await client.prisma.whitelist.findFirst({where: {

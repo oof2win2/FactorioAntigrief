@@ -1,6 +1,6 @@
 import { Message } from "discord.js"
-import Command from "../../base/Command"
-import { getConfirmationMessage } from "../../utils/responseGetter"
+import Command from "../../base/Command.js"
+import { getConfirmationMessage } from "../../utils/responseGetter.js"
 
 export const command: Command<Message> = {
 	name: "ban",
@@ -8,7 +8,7 @@ export const command: Command<Message> = {
 	aliases: ["setroleperms", "setperms"],
 	usage: "[username] (reason)",
 	examples: ["{{p}}ban Cooldude2606 hackerman"],
-	dirname: __dirname,
+	category: "bans",
 	enabled: true,
 	memberPermissions: ["BAN_MEMBERS"],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

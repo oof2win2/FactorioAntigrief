@@ -1,13 +1,13 @@
 import { Message } from "discord.js"
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 
 export const command: Command<Message> = {
 	name: "iswhitelisted",
 	description: "Check if a user is whitelisted from FAGC violations",
 	aliases: ["checkwhitelist"],
 	usage: "[username]",
+	category: "whitelist",
 	examples: ["{{p}}iswhitelisted Cooldude2606"],
-	dirname: __dirname,
 	enabled: true,
 	memberPermissions: [],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

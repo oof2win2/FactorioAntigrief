@@ -1,5 +1,5 @@
 import fetch from "node-fetch"
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import {Message, MessageEmbed} from "discord.js"
 
 export const command: Command<Message | MessageEmbed> = {
@@ -8,7 +8,7 @@ export const command: Command<Message | MessageEmbed> = {
 	aliases: [],
 	usage: "(Comic ID)",
 	examples: ["{{p}}xkcd", "{{p}}xkcd search 2286"],
-	dirname: __dirname,
+	category: "basic",
 	enabled: true,
 	memberPermissions: [],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],

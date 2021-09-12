@@ -1,4 +1,3 @@
-import json from "../../../package.json"
 import Command from "../../base/Command"
 import { MessageEmbed, Message } from "discord.js"
 
@@ -6,7 +5,7 @@ export const command: Command<Message> = {
 	name: "stats",
 	description: "Show bot stats",
 	aliases: [],
-	dirname: __dirname,
+	category: "basic",
 	enabled: true,
 	memberPermissions: [],
 	botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
@@ -27,7 +26,6 @@ export const command: Command<Message> = {
 		const servers = client.guilds.cache.size
 		const channels = client.channels.cache.size
 		const nodeVersion = process.version
-		const djsVersion = json.dependencies["discord.js"].slice(1)
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Stats")
 			.setColor("GREEN")
@@ -40,7 +38,6 @@ export const command: Command<Message> = {
 			{ name: "Total Channels", value: channels.toString(), inline:true },
 			{name: "Total Servers", value: servers.toString(), inline: true},
 			{ name: "NodeJS Version", value: nodeVersion, inline:true },
-			{ name: "DJS Version", value: `v${djsVersion}`, inline:true },
 		])
 		return message.channel.send({embeds: [embed]})
 	}

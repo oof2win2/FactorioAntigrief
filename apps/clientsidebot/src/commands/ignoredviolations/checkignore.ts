@@ -1,10 +1,10 @@
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import { Message, MessageEmbed } from "discord.js"
 
 export const command: Command<Message | void> = {
 	name: "checkignore",
 	description: "Checks if a specific violation is being ignored",
-	dirname: __dirname,
+	category: "ignoredviolations",
 	enabled: true,
 	aliases: [],
 	memberPermissions: [],

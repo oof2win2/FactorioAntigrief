@@ -1,6 +1,6 @@
 import { PermissionResolvable } from "discord.js"
 import { Message, TextChannel } from "discord.js"
-import FAGCBot from "../../base/fagcbot"
+import FAGCBot from "../../base/fagcbot.js"
 
 
 export default async (client: FAGCBot, message: Message): Promise<Message|void> => {

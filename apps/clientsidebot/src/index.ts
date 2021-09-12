@@ -6,17 +6,17 @@ import * as util from "util"
 import * as fs from "fs"
 const readdir = util.promisify(fs.readdir)
 
-process.chdir(__dirname)
+process.chdir("dist")
 
-import "./utils/extenders"
+import "./utils/extenders.js"
 // This enables FAGCBot to access the extenders in any part of the codebase
 
-import FAGCBot from "./base/fagcbot"
+import FAGCBot from "./base/fagcbot.js"
 export const client = new FAGCBot({
-	intents: ["GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_WEBHOOKS"]
+	intents: ["GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_WEBHOOKS", "GUILDS"]
 })
 
-import rcon from "./base/rcon"
+import rcon from "./base/rcon.js"
 
 const init = async () => {
 	// Loads commands
@@ -25,7 +25,7 @@ const init = async () => {
 	dirs.forEach(async (dir) => {
 		const cmds = await readdir(`./commands/${dir}/`)
 		// gets every dir inside commands
-		cmds.filter(cmd => cmd.split(".").pop() === "ts").forEach(async (cmd) => {
+		cmds.filter(cmd => cmd.split(".").pop() === "js").forEach(async (cmd) => {
 			const res = await client.loadCommand(`./commands/${dir}`, cmd)
 			// loads each command
 			if (res) client.logger(res)
@@ -49,7 +49,6 @@ const init = async () => {
 			// import * as event from `./events/${dir}/${evt}`
 			// binds client to the event
 			client.on(evtName, (...args) => event(client, ...args))
-			delete require.cache[require.resolve(`./events/${dir}/${evt}`)]
 		})
 	})
 	

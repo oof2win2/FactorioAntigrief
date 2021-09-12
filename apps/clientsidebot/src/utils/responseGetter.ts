@@ -1,10 +1,6 @@
 import { Message } from "discord.js"
 
-module.exports = {
-	getMessageResponse,
-	getConfirmationMessage,
-}
-export async function getMessageResponse(content: string, message: Message, timeout = 30000): Promise<Message> {
+export async function getMessageResponse(content: string, message: Message, timeout = 30000): Promise<Message | null> {
 	const messageFilter = response => response.author.id == message.author.id
 	const resp = await message.channel.send(content)
 	return (await resp.channel.awaitMessages({filter: messageFilter, max: 1, time: timeout })).first()

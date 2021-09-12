@@ -1,4 +1,4 @@
-import { BotConfig } from "./src/types/FAGCBot"
+import { BotConfig } from "./types/FAGCBot"
 
 const config: BotConfig = {
 	token: "", // Discord bot token

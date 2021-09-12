@@ -1,10 +1,10 @@
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import {Message} from "discord.js"
 
 export const command: Command<Message> = {
 	name: "getinfochannels",
 	description: "Gets all info channel",
-	dirname: __dirname,
+	category: "infochannels",
 	enabled: true,
 	aliases: [],
 	memberPermissions: [],

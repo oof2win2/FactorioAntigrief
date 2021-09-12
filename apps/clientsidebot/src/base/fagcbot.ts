@@ -1,7 +1,6 @@
 import { Client, ClientOptions, Collection, HexColorString, Snowflake, TextChannel } from "discord.js"
 import * as path from "path"
-import WebSocket from "ws"
-import { BotConfig, BotConfigEmotes } from "../types/FAGCBot"
+import { BotConfig } from "../types/FAGCBot"
 
 import {
 	GuildConfigHandler,
@@ -9,18 +8,20 @@ import {
 	RevocationHandler,
 	RuleCreatedHandler,
 	RuleRemovedHandler
-} from "./websockethandler"
+} from "./websockethandler.js"
 
-import { InfoChannels, PrismaClient } from "@prisma/client"
+import { InfoChannels } from "@prisma/client"
+import { PrismaClient } from ".prisma/client/index.js"
+// const {PrismaClient} = prisma
 
-import config from "../../config"
-import Logger, { LogType } from "../utils/logger"
+import config from "../config.js"
+import Logger, { LogType } from "../utils/logger.js"
 import { GuildConfig } from ".prisma/client"
-import { FAGCConfig } from "../types/FAGC"
-import Command from "./Command"
+import { FAGCConfig } from "../types/FAGC.js"
+import Command from "./Command.js"
 
 import { FAGCWrapper } from "fagc-api-wrapper"
-import { Report, Revocation, Rule } from "fagc-api-types"
+import { Report } from "fagc-api-types"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FAGCBotOptions extends ClientOptions {
@@ -82,7 +83,7 @@ class FAGCBot extends Client {
 			RuleRemovedHandler(rule, this, channels)
 		})
 
-		
+
 		this._asyncInit()
 	}
 	async _asyncInit(): Promise<void> {
@@ -171,14 +172,14 @@ class FAGCBot extends Client {
 		const allReports = await this.fagc.reports.fetchAllName(playername)
 		const configFilteredReports = allReports.filter(report => {
 			return (FAGCBot.fagcconfig.trustedCommunities.includes(report.communityId)
-			&& FAGCBot.fagcconfig.ruleFilters.includes(report.brokenRule))
+				&& FAGCBot.fagcconfig.ruleFilters.includes(report.brokenRule))
 		})
 		const filteredReports = await Promise.all(configFilteredReports.filter(async (report) => {
-			const ignored = await this.prisma.ignoredViolations.findFirst({where: {violationId: report.id}})
+			const ignored = await this.prisma.ignoredViolations.findFirst({ where: { violationId: report.id } })
 			if (ignored?.id) return null // the report is ignored so don't give it back
 			return report
 		}))
-		return filteredReports.filter(report=>report) // remove nulls
+		return filteredReports.filter(report => report) // remove nulls
 	}
 	getEmbedColor(): HexColorString {
 		return this.config.embeds.color[0] == "#" ? <HexColorString>this.config.embeds.color : `#${this.config.embeds.color}`

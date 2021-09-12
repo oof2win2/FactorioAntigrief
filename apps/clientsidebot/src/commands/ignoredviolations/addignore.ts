@@ -1,13 +1,13 @@
-import Command from "../../base/Command"
+import Command from "../../base/Command.js"
 import {Message, MessageEmbed} from "discord.js"
-import { getConfirmationMessage } from "../../utils/responseGetter"
-import { HandleUnfilteredRevocation } from "../../base/FAGCHandler"
+import { getConfirmationMessage } from "../../utils/responseGetter.js"
+import { HandleUnfilteredRevocation } from "../../base/FAGCHandler.js"
 import { Revocation } from "fagc-api-types"
 
 export const command: Command<Message|void> = {
 	name: "addignore",
 	description: "Ignores a specific violation",
-	dirname: __dirname,
+	category: "ignoredviolations",
 	enabled: true,
 	aliases: [],
 	memberPermissions: ["BAN_MEMBERS"],
