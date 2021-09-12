@@ -1,7 +1,7 @@
 import FAGCBot from "./fagcbot.js"
 
 import { MessageEmbed, TextChannel } from "discord.js"
-import { HandleUnfilteredViolation, HandleUnfilteredRevocation } from "./FAGCHandler.js"
+import { HandleUnfilteredReport, HandleUnfilteredRevocation } from "./FAGCHandler.js"
 import { CommunityConfig, ReportCreatedMessage, RevocationMessage, RuleCreatedMessage, RuleRemovedMessage } from "fagc-api-types"
 
 export function GuildConfigHandler(config: CommunityConfig): void {
@@ -14,7 +14,7 @@ export function GuildConfigHandler(config: CommunityConfig): void {
 
 export async function ReportHandler(ReportMessage: ReportCreatedMessage, client: FAGCBot, channels: TextChannel[]): Promise<void> {
 	const embed = new MessageEmbed({...ReportMessage.embed, timestamp: new Date(ReportMessage.embed.timestamp  || Date.now())})
-	const handled = await HandleUnfilteredViolation(ReportMessage.report, client)
+	const handled = await HandleUnfilteredReport(ReportMessage.report, client)
 	embed.addField("Handled with an action", handled ? "Yes" : "No")
 	channels.forEach(channel => channel.send({embeds: [embed]}))
 }

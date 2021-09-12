@@ -11,14 +11,25 @@ const Config: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("config")
 		.setDescription("Bot Config")
-		.setDefaultPermission(false)
 	,
 	execute: async (client, interaction) => {
 		const subcommand = interaction.options.getSubcommand()!
 		const command = commands.find(command => command.data.name === subcommand)
 		if (!command) return interaction.reply("An error executing the command occured")
 		return command.execute(client, interaction)
-	}
+	},
+	permission_overrides: [
+		{
+			type: PermissionOverrideType.ROLE,
+			id: "777986482962432060", // ev
+			permission: true
+		},
+		{
+			type: PermissionOverrideType.ROLE,
+			id: "749943992719769613",
+			permission: false
+		},
+	]
 }
 
 commands.forEach(command => {

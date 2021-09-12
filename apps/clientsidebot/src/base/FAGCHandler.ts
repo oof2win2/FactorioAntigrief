@@ -27,30 +27,31 @@ export async function PlayerJoin (playername: string, client: FAGCBot): Promise<
 	let rev: boolean[]
 	if (isPlayerBanned) rev = <boolean[]> await Promise.all(revocations.map(revocation => HandleUnfilteredRevocation(revocation, client)))
 	else rev = []
-	const res = <boolean[]> await Promise.all(reports.map(violation => HandleUnfilteredViolation(violation, client)))
+	const res = <boolean[]> await Promise.all(reports.map(violation => HandleUnfilteredReport(violation, client)))
 	return rev.concat(res).filter(v=>v)[0] || false
 }
 
-export async function HandleUnfilteredViolation (violation: Report, client: FAGCBot, overrideHandled = false): Promise<boolean> {
+export async function HandleUnfilteredReport (report: Report, client: FAGCBot, overrideHandled = false): Promise<boolean> {
+	console.log(`handling report ${report.id}!`)
 	if (!FAGCBot.fagcconfig) {
 		await wait(2500)
-		return HandleUnfilteredViolation(violation, client)
+		return HandleUnfilteredReport(report, client)
 	}
-	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === violation.brokenRule)
+	const rule = FAGCBot.fagcconfig.ruleFilters.find(ruleid => ruleid === report.brokenRule)
 	if (!rule) return false
 
-	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityId => communityId === violation.communityId)
+	const community = FAGCBot.fagcconfig.trustedCommunities.find(communityId => communityId === report.communityId)
 	if (!community) return false
 
 	const alreadyHandled = await client.prisma.handledReports.findFirst({where: {
-		reportId: violation.id
+		reportId: report.id
 	}})
 	if (alreadyHandled && !overrideHandled) return false
 	
-	return HandleFilteredViolation(violation, client)
+	return HandleFilteredReport(report, client)
 }
 
-async function HandleFilteredViolation (report: Report, client: FAGCBot): Promise<boolean> {
+async function HandleFilteredReport (report: Report, client: FAGCBot): Promise<boolean> {
 	if (await IsWhitelisted(report.playername, client)) return false
 	// player is not whitelisted
 
@@ -64,7 +65,7 @@ async function HandleFilteredViolation (report: Report, client: FAGCBot): Promis
 		action: FAGCBot.GuildConfig.onReport,
 	}})
 
-	const msg = `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/reports/getall?playername=${report.playername} for why this could be`
+	const msg = `You have a report on FAGC. Please check ${FAGCBot.config.apiurl}/reports/getall/${report.playername} for why this could be`
 	const jailCommand = FAGCBot.config.jailCommand.replace("${PLAYERNAME}", report.playername).replace("${REASON}", msg)
 	const banCommand = FAGCBot.config.banCommand.replace("${PLAYERNAME}", report.playername).replace("${REASON}", msg)
 	switch (FAGCBot.GuildConfig.onReport) {
@@ -80,6 +81,7 @@ async function HandleFilteredViolation (report: Report, client: FAGCBot): Promis
 }
 
 export async function HandleUnfilteredRevocation (revocation: Revocation, client: FAGCBot): Promise<boolean> {
+	console.log(`handling revocation ${revocation.id}!`)
 	if (!FAGCBot.fagcconfig) {
 		setTimeout(() => HandleUnfilteredRevocation(revocation, client), 5000)
 		return false

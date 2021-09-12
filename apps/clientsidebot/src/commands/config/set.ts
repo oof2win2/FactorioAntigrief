@@ -60,7 +60,6 @@ const Setup: SubCommand = {
 					notificationsRole: adminrole?.id || existingConfig.notificationsRole,
 					guildId: interaction.guild.id,
 					apikey: apikey || "",
-					
 				}
 			})
 			FAGCBot.GuildConfig = newConfig
@@ -73,7 +72,8 @@ const Setup: SubCommand = {
 					configRole: adminrole?.id ?? "",
 					notificationsRole: adminrole?.id || "",
 					guildId: interaction.guild.id,
-					apikey: apikey || ""
+					apikey: apikey || "",
+					lastNotificationProcessed: new Date()
 				}
 			})
 			FAGCBot.GuildConfig = newConfig

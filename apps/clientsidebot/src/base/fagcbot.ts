@@ -22,6 +22,7 @@ import {CommandWithSubcommands} from "./Command.js"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { Report } from "fagc-api-types"
 import fs from "fs"
+import { HandleUnfilteredRevocation, HandleUnfilteredReport } from "./FAGCHandler.js"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FAGCBotOptions extends ClientOptions {
@@ -37,6 +38,7 @@ class FAGCBot extends Client {
 	static fagcconfig: FAGCConfig
 	static config: BotConfig
 	public fagc: FAGCWrapper
+	private lastNotificationProcessed: Date
 
 	public commands: Collection<string, CommandWithSubcommands>
 	constructor(options: FAGCBotOptions) {
@@ -69,33 +71,55 @@ class FAGCBot extends Client {
 		})
 
 		this.fagc.websocket.on("communityConfigChanged", (GuildConfig) => {
+			this.lastNotificationProcessed = new Date()
 			GuildConfigHandler(GuildConfig)
 		})
 		this.fagc.websocket.on("report", async (report) => {
 			console.log("report created")
+			this.lastNotificationProcessed = new Date()
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			ReportHandler(report, this, channels)
 		})
 		this.fagc.websocket.on("revocation", async (revocation) => {
 			console.log("revocation created")
+			this.lastNotificationProcessed = new Date()
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RevocationHandler(revocation, this, channels)
 		})
 		this.fagc.websocket.on("ruleCreated", async (rule) => {
+			this.lastNotificationProcessed = new Date()
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RuleCreatedHandler(rule, this, channels)
 		})
 		this.fagc.websocket.on("ruleRemoved", async (rule) => {
+			this.lastNotificationProcessed = new Date()
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RuleRemovedHandler(rule, this, channels)
 		})
+
+		// used to figure out when the last processed notification was during startup
+		setInterval(() => {
+			this.setConfig({
+				...FAGCBot.GuildConfig,
+				lastNotificationProcessed: this.lastNotificationProcessed
+			})
+		}, 5*1000)
 
 
 		this._asyncInit()
 	}
 	async _asyncInit(): Promise<void> {
 		await this.getConfig()
+
+		const lastNotificationProcessed = new Date(FAGCBot.GuildConfig.lastNotificationProcessed.valueOf())
+		this.lastNotificationProcessed = new Date()
+
 		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
+
+		const reportsSince = await this.fagc.reports.fetchModifiedSince(lastNotificationProcessed)
+		reportsSince.forEach(report => HandleUnfilteredReport(report, this))
+		const revocationsSince = await this.fagc.revocations.fetchModifiedSince(lastNotificationProcessed)
+		revocationsSince.forEach(revocation => HandleUnfilteredRevocation(revocation, this))
 	}
 	/**
 	 * Check if a user has sent a command in the past X milliseconds

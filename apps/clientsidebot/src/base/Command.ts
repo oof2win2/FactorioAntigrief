@@ -19,19 +19,19 @@ type PermissionOverride = {
 export interface CommandWithSubcommands {
 	data: SlashCommandBuilder,
 	execute: (client: FAGCBot, interaction: CommandInteraction) => Promise<any>
-	permission_overrides?: [PermissionOverride]
+	permission_overrides?: PermissionOverride[]
 }
 
 export interface Command {
 	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">,
 	execute: (client: FAGCBot, interaction: CommandInteraction) => Promise<any>,
-	permission_overrides?: [PermissionOverride]
+	permission_overrides?: PermissionOverride[]
 }
 
 export interface SubCommand {
 	data: SlashCommandSubcommandBuilder,
 	execute: (client: FAGCBot, interaction: CommandInteraction) => Promise<any>
-	permission_overrides?: [PermissionOverride]
+	permission_overrides?: PermissionOverride[]
 }
 
 // export type Command <T=void> = {

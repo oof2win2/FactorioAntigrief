@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { Revocation } from "fagc-api-types"
 import {SubCommand} from "../../base/Command.js"
-import { HandleUnfilteredViolation } from "../../base/FAGCHandler.js"
+import { HandleUnfilteredReport } from "../../base/FAGCHandler.js"
 
 const CheckIgnoredReport: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -26,7 +26,7 @@ const CheckIgnoredReport: SubCommand = {
 
 		const report = await client.fagc.reports.fetchReport(id.value)
 
-		await HandleUnfilteredViolation(report, client)
+		await HandleUnfilteredReport(report, client)
 
 		return interaction.reply(`Report \`${id.value}\` for ${ignoration.playername} has been unignored`)
 	}

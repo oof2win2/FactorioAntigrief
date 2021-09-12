@@ -8,15 +8,16 @@ datasource db {
 }
 
 model GuildConfig {
-    id                Int            @id @default(autoincrement())
-    onReport          String         @default("info")
-    onRevocation      String         @default("info")
-    banRole           String?
-    configRole        String?
-    notificationsRole String?
-    guildId           String
-    apikey            String?
-    infochannels      InfoChannels[]
+    id                        Int            @id @default(autoincrement())
+    onReport                  String         @default("info")
+    onRevocation              String         @default("info")
+    banRole                   String?
+    configRole                String?
+    notificationsRole         String?
+    guildId                   String
+    apikey                    String?
+    infochannels              InfoChannels[]
+    lastNotificationProcessed DateTime
 }
 
 model InfoChannels {
