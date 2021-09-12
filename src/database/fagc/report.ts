@@ -12,6 +12,7 @@ const connection = database.connections.find((connection) => connection?.n === "
 })
 @pre<ReportClass>("save", function(next) {
 	this.id = getUserStringFromID(this._id.toString())
+	this.createdAt = this.createdAt || new Date()
 	next()
 })
 export class ReportClass {
@@ -41,6 +42,9 @@ export class ReportClass {
 
 	@prop()
 	adminId!: string
+
+	@prop()
+	createdAt!: Date
 }
 
 const ReportModel = getModelForClass(ReportClass)

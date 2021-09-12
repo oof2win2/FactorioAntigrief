@@ -9,6 +9,7 @@ import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import client, { validateDiscordUser } from "../utils/discord.js"
 import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
+import { Community } from "fagc-api-types"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -86,6 +87,28 @@ export default class ReportController {
 		return res.status(200).send(reports)
 	}
 
+	@GET({url: "/modifiedSince/:timestamp", options: {
+		schema: {
+			params: Type.Required(Type.Object({
+				timestamp: Type.String()
+			}))
+		}
+	}})
+	async getModifiedSince(req: FastifyRequest<{
+		Params: {
+			timestamp: string
+		}
+	}>, res: FastifyReply) {
+		const {timestamp} = req.params
+
+		const date = new Date(timestamp)
+
+		const reports = await ReportModel.find({
+			createdAt: {$gt: date}
+		})
+		return res.send(reports)
+	}
+
 	@POST({url: "/", options: {
 		schema: {
 			body: Type.Required(Type.Object({
@@ -141,9 +164,9 @@ export default class ReportController {
 		allReports.forEach(report => differentCommunities.add(report.communityId))
 
 		reportCreatedMessage(report, {
-			community: community,
-			rule: rule,
-			admin: admin,
+			community: <any>community,
+			rule: <any>rule,
+			admin: <any>admin,
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
@@ -202,10 +225,10 @@ export default class ReportController {
 		allReports.forEach(report => differentCommunities.add(report.communityId))
 
 		reportRevokedMessage(revocation, {
-			community: community,
-			rule: rule!,
-			admin: admin,
-			revokedBy: revoker,
+			community: <any>community,
+			rule: <any>rule!,
+			admin: <any>admin,
+			revokedBy: <any>revoker,
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
@@ -276,10 +299,10 @@ export default class ReportController {
 		allReports.forEach(report => differentCommunities.add(report.communityId))
 
 		revocations.forEach((revocation) => reportRevokedMessage(revocation, {
-			community: community,
-			rule: RuleMap.get(revocation.brokenRule)!,
-			admin: admin,
-			revokedBy: revoker,
+			community: <any>community,
+			rule: <any>RuleMap.get(revocation.brokenRule)!,
+			admin: <any>admin,
+			revokedBy: <any>revoker,
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		}))

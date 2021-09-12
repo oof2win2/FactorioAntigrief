@@ -12,6 +12,7 @@ const connection = database.connections.find((connection) => connection?.n === "
 })
 @pre<RevocationClass>("save", function(next) {
 	this.id = getUserStringFromID(this._id.toString())
+	this.createdAt = this.createdAt || new Date()
 	next()
 })
 export class RevocationClass {
@@ -50,6 +51,9 @@ export class RevocationClass {
 	
 	@prop()
 	revokedBy!: string
+
+	@prop()
+	createdAt!: Date
 }
 
 const RevocationModel = getModelForClass(RevocationClass)

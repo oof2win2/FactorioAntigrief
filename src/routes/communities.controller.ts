@@ -188,7 +188,9 @@ export default class CommunityController {
 
 		const contactUser = await client.users.fetch(contact)
 
-		communityCreatedMessage(community, contactUser)
+		communityCreatedMessage(community, {
+			contact: <any>contactUser
+		})
 
 		return res.send({
 			community: community,
@@ -235,7 +237,9 @@ export default class CommunityController {
 		}
 
 		const contactUser = await client.users.fetch(community.contact)
-		communityRemovedMessage(community, contactUser)
+		communityRemovedMessage(community, {
+			contact: <any>contactUser
+		})
 
 		return res.send(true)
 	}
