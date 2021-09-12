@@ -18,11 +18,11 @@
     "common-tags": "^1.8.0",
     "dateformat": "^4.5.1",
     "discord.js": "^12.5.1",
-    "fagc-api-wrapper": "^1.6.2",
+    "fagc-api-wrapper": "^1.12.0",
     "node-fetch": "^2.6.1",
     "path": "^0.12.7",
     "rcon-client": "^4.2.3",
-    "sqlite3": "^5.0.2",
+    "sqlite3": "^4.2.0",
     "tail": "^2.2.2",
     "ws": "^7.4.6"
   },
