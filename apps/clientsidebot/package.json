@@ -6,19 +6,26 @@
   "type": "module",
   "scripts": {
     "lint": "eslint src/ --fix --ext .js,.ts",
-    "dev": "nodemon"
+    "postinstall": "install-types",
+    "build": "tsc",
+    "dev": "tsc -b --watch",
+    "bot:addcommands": "npm run build && node dist/commands.js"
   },
   "prisma": {
     "schema": "src/prisma/schema.prisma"
   },
   "module": "es2020",
   "dependencies": {
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/rest": "^0.1.0-canary.0",
     "@prisma/client": "^2.23.0",
     "@supercharge/strings": "^1.18.0",
     "chalk": "^4.1.1",
     "common-tags": "^1.8.0",
     "dateformat": "^4.5.1",
     "discord.js": "^13.1.0",
+    "dotenv": "^10.0.0",
+    "envalid": "^7.2.1",
     "fagc-api-types": "^1.1.2",
     "fagc-api-wrapper": "^1.12.1",
     "node-fetch": "^2.6.1",
@@ -38,6 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "eslint": "^7.28.0",
+    "install-types": "^2.0.1",
     "nodemon": "^2.0.7",
     "prisma": "^2.23.0",
     "ts-node": "^10.0.0",

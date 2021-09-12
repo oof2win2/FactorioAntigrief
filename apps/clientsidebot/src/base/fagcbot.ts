@@ -18,10 +18,11 @@ import config from "../config.js"
 import Logger, { LogType } from "../utils/logger.js"
 import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC.js"
-import Command from "./Command.js"
+import {Command} from "./Command.js"
 
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { Report } from "fagc-api-types"
+import fs from "fs"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FAGCBotOptions extends ClientOptions {
@@ -30,8 +31,6 @@ interface FAGCBotOptions extends ClientOptions {
 class FAGCBot extends Client {
 	public config: BotConfig
 	public RateLimit: Collection<Snowflake, number>
-	public commands: Collection<string, Command>
-	public aliases: Collection<string, string>
 	public logger: (message: unknown, type?: LogType) => void
 	public prisma: PrismaClient
 	static GuildConfig: GuildConfig
@@ -39,6 +38,8 @@ class FAGCBot extends Client {
 	static fagcconfig: FAGCConfig
 	static config: BotConfig
 	public fagc: FAGCWrapper
+
+	public commands: Collection<string, Command>
 	constructor(options: FAGCBotOptions) {
 		super(options)
 
@@ -49,7 +50,14 @@ class FAGCBot extends Client {
 		this.RateLimit = new Collection()
 
 		this.commands = new Collection()
-		this.aliases = new Collection()
+		fs.readdirSync("./commands")
+			.filter(command => command.endsWith(".js"))
+			.forEach(async commandFile => {
+				const command = await import(`../commands/${commandFile}`)
+				const commandName = commandFile.slice(0, commandFile.indexOf(".js"))
+				this.commands.set(commandName, command.default)
+			})
+
 		this.logger = Logger
 
 		this.prisma = new PrismaClient()
@@ -101,34 +109,6 @@ class FAGCBot extends Client {
 		if (!lastTime) return false
 		if (lastTime < (Date.now() - time)) return false
 		return true
-	}
-	async loadCommand(commandPath: string, commandName: string): Promise<boolean | string> { // load a command
-		try {
-			const command = (await import(`.${commandPath}${path.sep}${commandName}`))?.command
-			this.commands.set(command.name, command) // adds command to commands collection
-			command.aliases?.forEach((alias: string) => {
-				this.aliases.set(alias, command.name) // adds command to alias collection
-			})
-			return false
-		} catch (e) {
-			return `Unable to load command ${commandName}: ${e}`
-		}
-	}
-	async unloadCommand(commandPath: string, commandName: string): Promise<boolean | string> { // unload a command
-		let command
-		if (this.commands.has(commandName)) {
-			command = this.commands.get(commandName)
-		} else if (this.aliases.has(commandName)) {
-			command = this.commands.get(this.aliases.get(commandName))
-		}
-		if (!command) {
-			return `The command \`${commandName}\` doesn't seem to exist, nor is it an alias. Try again!`
-		}
-		if (command.shutdown) {
-			await command.shutdown(this)
-		}
-		delete require.cache[require.resolve(`.${commandPath}${path.sep}${commandName}.js`)]
-		return false
 	}
 	async getConfig(): Promise<GuildConfig> {
 		if (FAGCBot.GuildConfig) return FAGCBot.GuildConfig
