@@ -91,7 +91,7 @@ const Setup: SubCommand = {
 				{ name: "Role that can manage FAGC notifications", value: `<@${config.notificationsRole}> | ${config.notificationsRole}` },
 				{ name: "API key", value: config.apikey ? "Set" : "None" }
 			])
-
+		client.refreshCommandPerms().then(() => client.refreshCommandPerms())
 		return interaction.reply({content: "Config changed. If you want to more precisely set your role access, please use /config setpermissions", embeds: [configEmbed]})
 	},
 }

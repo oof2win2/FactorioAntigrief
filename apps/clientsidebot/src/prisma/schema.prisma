@@ -65,3 +65,8 @@ model HandledReports {
     playername String
     action     String
 }
+
+model Commands {
+    id   String @id
+    name String @unique
+}

@@ -9,8 +9,6 @@ const GetConfig: SubCommand = {
 		.setDescription("Get the config")
 	,
 	execute: async (client, interaction) => {
-		console.log(interaction.guild.roles.everyone)
-
 		const config = FAGCBot.GuildConfig
 		const configEmbed = new MessageEmbed()
 			.setColor(client.getEmbedColor())

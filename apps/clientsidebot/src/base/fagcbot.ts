@@ -17,12 +17,15 @@ import config from "../config.js"
 import Logger, { LogType } from "../utils/logger.js"
 import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC.js"
-import {CommandWithSubcommands} from "./Command.js"
+import { CommandWithSubcommands, PermissionOverride, PermissionOverrideType } from "./Command.js"
 
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { Report } from "fagc-api-types"
 import fs from "fs"
 import { HandleUnfilteredRevocation, HandleUnfilteredReport } from "./FAGCHandler.js"
+import ENV from "../utils/env.js"
+import { REST } from "@discordjs/rest"
+import { Routes } from "discord-api-types/v9"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FAGCBotOptions extends ClientOptions {
@@ -99,11 +102,17 @@ class FAGCBot extends Client {
 
 		// used to figure out when the last processed notification was during startup
 		setInterval(() => {
-			this.setConfig({
-				...FAGCBot.GuildConfig,
-				lastNotificationProcessed: this.lastNotificationProcessed
-			})
-		}, 5*1000)
+			if (FAGCBot.GuildConfig) {
+				this.setConfig({
+					...FAGCBot.GuildConfig,
+					lastNotificationProcessed: this.lastNotificationProcessed
+				})
+			}
+		}, 5 * 60 * 1000)
+
+		setTimeout(() => {
+			if (!FAGCBot.GuildConfig) this.refreshCommandPerms().then(() => this.refreshCommandPerms())
+		}, 5000)
 
 
 		this._asyncInit()
@@ -111,7 +120,7 @@ class FAGCBot extends Client {
 	async _asyncInit(): Promise<void> {
 		await this.getConfig()
 
-		const lastNotificationProcessed = new Date(FAGCBot.GuildConfig.lastNotificationProcessed.valueOf())
+		const lastNotificationProcessed = FAGCBot.GuildConfig?.lastNotificationProcessed || new Date()
 		this.lastNotificationProcessed = new Date()
 
 		FAGCBot.infochannels = await this.prisma.infoChannels.findMany()
@@ -182,6 +191,34 @@ class FAGCBot extends Client {
 	}
 	getEmbedColor(): HexColorString {
 		return this.config.embeds.color[0] == "#" ? <HexColorString>this.config.embeds.color : `#${this.config.embeds.color}`
+	}
+
+	async refreshCommandPerms() {
+		const rest = new REST({ version: "9" }).setToken(ENV.DISCORD_BOTTOKEN)
+		const apicommands = await this.prisma.commands.findMany()
+
+		const isSetUp = FAGCBot.GuildConfig || false
+		const everyoneRole = this.guilds.cache.first().roles.everyone
+
+		await Promise.all(apicommands.map(async (apicommand) => {
+			const command = this.commands.find(c => c.data.name === apicommand.name)!
+
+			const permissions: PermissionOverride[] = isSetUp ? command.permission_overrides : [{
+				id: everyoneRole.id,
+				type: PermissionOverrideType.ROLE,
+				permission: false
+			}]
+			if (command.data.name === "config") permissions.push({
+				id: this.config.owner.id,
+				type: PermissionOverrideType.USER,
+				permission: true
+			})
+
+			return await rest.put(
+				Routes.applicationCommandPermissions(this.user.id, ENV.TESTGUILDID, apicommand.id),
+				{ body: { permissions: permissions } }
+			)
+		}))
 	}
 }
 

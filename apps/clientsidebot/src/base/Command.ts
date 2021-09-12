@@ -6,7 +6,7 @@ export enum PermissionOverrideType {
 	ROLE = 1,
 	USER = 2,
 }
-type PermissionOverride = {
+export type PermissionOverride = {
 	id: string
 	type: PermissionOverrideType.ROLE
 	permission: boolean

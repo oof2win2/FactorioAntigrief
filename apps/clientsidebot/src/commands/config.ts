@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
 import {CommandWithSubcommands, PermissionOverrideType, SubCommand} from "../base/Command.js"
 import { readdirSync } from "fs"
+import config from "../config.js"
 
 const commands: SubCommand[] = await Promise.all(readdirSync("./commands/config/").map(async commandName => {
 	const command = await import(`./config/${commandName}`)
@@ -21,13 +22,8 @@ const Config: CommandWithSubcommands = {
 	permission_overrides: [
 		{
 			type: PermissionOverrideType.ROLE,
-			id: "777986482962432060", // ev
+			id: config.owner.id,
 			permission: true
-		},
-		{
-			type: PermissionOverrideType.ROLE,
-			id: "749943992719769613",
-			permission: false
 		},
 	]
 }
