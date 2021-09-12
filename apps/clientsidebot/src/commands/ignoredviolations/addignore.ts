@@ -2,7 +2,7 @@ import Command from "../../base/Command"
 import {Message, MessageEmbed} from "discord.js"
 import { getConfirmationMessage } from "../../utils/responseGetter"
 import { HandleUnfilteredRevocation } from "../../base/FAGCHandler"
-import { Revocation } from "fagc-api-wrapper"
+import { Revocation } from "fagc-api-types"
 
 export const command: Command<Message|void> = {
 	name: "addignore",
@@ -27,18 +27,18 @@ export const command: Command<Message|void> = {
 			.setDescription("FAGC Violation Ignoration")
 			.setTimestamp()
 			.setAuthor("oof2win2")
-			.addFields(
+			.addFields([
 				{ name: "Playername", value: report.playername, inline:true },
 				{ name: "Admin ID", value: report.adminId, inline:true },
 				{ name: "Community ID", value: report.communityId, inline:true },
 				{ name: "Broken Rule", value: report.brokenRule, inline:true },
-				{ name: "Automated", value: report.automated, inline:true },
+				{ name: "Automated", value: report.automated ? "True" : "False", inline:true },
 				{ name: "Proof", value: report.proof, inline:true },
 				{ name: "Description", value: report.description, inline:true },
 				{ name: "Report ID", value: report.id, inline:true },
-				{ name: "Reported Time", value: report.reportedTime, inline:true }
-			)
-		message.channel.send(embed)
+				{ name: "Reported Time", value: `<t:${Math.round(report.reportedTime.valueOf()/1000)}`, inline:true }
+			])
+		message.channel.send({embeds: [embed]})
 		const confirm = await getConfirmationMessage("Are you sure you want to ignore this report?", message)
 		if (!confirm) return message.channel.send("Report ignoration cancelled")
 

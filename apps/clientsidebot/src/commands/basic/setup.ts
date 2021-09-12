@@ -45,16 +45,16 @@ export const command: Command<Message> = {
 			.setAuthor(`${client.user.username} | oof2win2#3149`)
 			.setTimestamp()
 			.setDescription("Your configuration")
-		embed.addFields(
-			{ name: "Default action on created violation", value: violationAction },
-			{ name: "Default action on revoked violation", value: revocationAction },
-			{ name: "Role that can create and manage bans", value: banRole },
-			{ name: "Role that can manage the bot's configuration", value: configRole },
-			{ name: "Role that can manage FAGC notifications", value: notificationRole },
+		embed.addFields([
+			{ name: "Default action on created violation", value: violationAction.toString() },
+			{ name: "Default action on revoked violation", value: revocationAction.toString() },
+			{ name: "Role that can create and manage bans", value: banRole.toString() },
+			{ name: "Role that can manage the bot's configuration", value: configRole.toString() },
+			{ name: "Role that can manage FAGC notifications", value: notificationRole.toString() },
 			{ name: "API key", value: apikey ? "Set" : "None" }
-		)
+		])
 
-		message.channel.send(embed)
+		message.channel.send({embeds: [embed]})
 		const confirm = await getConfirmationMessage("Are you sure you want these settings applied?", message)
 		if (!confirm)
 			return message.channel.send("Configuration cancelled")

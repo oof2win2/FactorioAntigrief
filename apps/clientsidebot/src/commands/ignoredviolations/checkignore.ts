@@ -25,19 +25,19 @@ export const command: Command<Message | void> = {
 			.setDescription("FAGC Violation Ignoration check")
 			.setTimestamp()
 			.setAuthor("oof2win2")
-			.addFields(
+			.addFields([
 				{ name: "Playername", value: report.playername, inline: true },
 				{ name: "Admin ID", value: report.adminId, inline: true },
 				{ name: "Community ID", value: report.communityId, inline: true },
 				{ name: "Broken Rule", value: report.brokenRule, inline: true },
-				{ name: "Automated", value: report.automated, inline: true },
+				{ name: "Automated", value: report.automated && "True" || "False", inline: true },
 				{ name: "Proof", value: report.proof, inline: true },
 				{ name: "Description", value: report.description, inline: true },
 				{ name: "Report ID", value: report.id, inline: true },
-				{ name: "Reported Time", value: report.reportedTime, inline: true },
-				{ name: "Ignored Since", value: ignoration.whitelistedAt},
+				{ name: "Reported Time", value: `<t:${Math.round(report.reportedTime.valueOf()/1000)}>`, inline: true },
+				{ name: "Ignored Since", value: `<t:${Math.round(ignoration.whitelistedAt.valueOf()/1000)}>`},
 				{name: "Ignored By", value: `<@${ignoration.whitelistedBy}> | ${await client.users.fetch(ignoration.whitelistedBy).then(u=>u?.tag)}`}
-			)
-		message.channel.send(embed)
+			])
+		message.channel.send({embeds: [embed]})
 	}
 }

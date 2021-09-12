@@ -12,7 +12,9 @@ import "./utils/extenders"
 // This enables FAGCBot to access the extenders in any part of the codebase
 
 import FAGCBot from "./base/fagcbot"
-export const client = new FAGCBot({})
+export const client = new FAGCBot({
+	intents: ["GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_WEBHOOKS"]
+})
 
 import rcon from "./base/rcon"
 

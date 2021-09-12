@@ -1,4 +1,4 @@
-import { Client, ClientOptions, Collection, Snowflake, TextChannel } from "discord.js"
+import { Client, ClientOptions, Collection, HexColorString, Snowflake, TextChannel } from "discord.js"
 import * as path from "path"
 import WebSocket from "ws"
 import { BotConfig, BotConfigEmotes } from "../types/FAGCBot"
@@ -19,9 +19,8 @@ import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC"
 import Command from "./Command"
 
-import ServerHandler from "./serverhandler"
-import servers from "../../servers"
-import { FAGCWrapper, Report, Revocation, Rule } from "fagc-api-wrapper"
+import { FAGCWrapper } from "fagc-api-wrapper"
+import { Report, Revocation, Rule } from "fagc-api-types"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FAGCBotOptions extends ClientOptions {
@@ -29,7 +28,6 @@ interface FAGCBotOptions extends ClientOptions {
 
 class FAGCBot extends Client {
 	public config: BotConfig
-	static emotes: BotConfigEmotes
 	public RateLimit: Collection<Snowflake, number>
 	public commands: Collection<string, Command>
 	public aliases: Collection<string, string>
@@ -39,16 +37,12 @@ class FAGCBot extends Client {
 	static infochannels: InfoChannels[]
 	static fagcconfig: FAGCConfig
 	static config: BotConfig
-	public wsHandler: (arg0: unknown, arg1: FAGCBot) => void // TODO: create type for API messages and use it here
-	private messageSocket: WebSocket
 	public fagc: FAGCWrapper
-	private ServerHandler: ServerHandler
 	constructor(options: FAGCBotOptions) {
 		super(options)
 
 		this.config = config
 		FAGCBot.config = config
-		FAGCBot.emotes = this.config.emotes
 
 		// setup rate limit
 		this.RateLimit = new Collection()
@@ -61,31 +55,29 @@ class FAGCBot extends Client {
 		FAGCBot.GuildConfig = null
 		FAGCBot.fagcconfig = null
 
-		this.ServerHandler = new ServerHandler(servers, this)
-
 		this.fagc = new FAGCWrapper({
 			apiurl: this.config.apiurl,
 			socketurl: this.config.websocketurl,
 		})
 
-		this.fagc.websocket.on("guildConfig", (GuildConfig) => {
+		this.fagc.websocket.on("communityConfigChanged", (GuildConfig) => {
 			GuildConfigHandler(GuildConfig)
 		})
-		this.fagc.websocket.on("report", async (report: Report) => {
+		this.fagc.websocket.on("report", async (report) => {
 			console.log("report created")
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			ReportHandler(report, this, channels)
 		})
-		this.fagc.websocket.on("revocation", async (revocation: Revocation) => {
+		this.fagc.websocket.on("revocation", async (revocation) => {
 			console.log("revocation created")
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RevocationHandler(revocation, this, channels)
 		})
-		this.fagc.websocket.on("ruleCreated", async (rule: Rule) => {
+		this.fagc.websocket.on("ruleCreated", async (rule) => {
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RuleCreatedHandler(rule, this, channels)
 		})
-		this.fagc.websocket.on("ruleRemoved", async (rule: Rule) => {
+		this.fagc.websocket.on("ruleRemoved", async (rule) => {
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RuleRemovedHandler(rule, this, channels)
 		})
@@ -187,6 +179,9 @@ class FAGCBot extends Client {
 			return report
 		}))
 		return filteredReports.filter(report=>report) // remove nulls
+	}
+	getEmbedColor(): HexColorString {
+		return this.config.embeds.color[0] == "#" ? <HexColorString>this.config.embeds.color : `#${this.config.embeds.color}`
 	}
 }
 

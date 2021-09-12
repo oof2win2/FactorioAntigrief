@@ -39,12 +39,12 @@ export const command: Command<Message> = {
 				.setAuthor(`${client.user.username} | oof2win2#3149`)
 				.setTimestamp()
 				.setDescription("Your role permissions")
-			embed.addFields(
-				{ name: "Role that can create and manage bans", value: banRole },
-				{ name: "Role that can manage the bot's configuration", value: configRole },
-				{ name: "Role that can manage FAGC notifications", value: notificationRole },
-			)
-			message.channel.send(embed)
+			embed.addFields([
+				{ name: "Role that can create and manage bans", value: banRole.toString() },
+				{ name: "Role that can manage the bot's configuration", value: configRole.toString() },
+				{ name: "Role that can manage FAGC notifications", value: notificationRole.toString() },
+			])
+			message.channel.send({embeds: [embed]})
 			const confirm = await getConfirmationMessage("Are you sure you want these settings applied?", message)
 			if (!confirm)
 				return message.channel.send("Configuration cancelled")

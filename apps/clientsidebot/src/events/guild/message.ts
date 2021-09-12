@@ -5,7 +5,7 @@ import FAGCBot from "../../base/fagcbot"
 
 export default async (client: FAGCBot, message: Message): Promise<Message|void> => {
 	if (message.author.bot) return
-	if (message.channel.type === "dm") return
+	if (!message.channel.isText() || message.channel.type === "DM") return
 
 	message.channel.permissionsFor(message.member).has("ADMINISTRATOR") // TextChannel | NewsChannel
 	const prefix = client.config.prefix
@@ -45,7 +45,6 @@ export default async (client: FAGCBot, message: Message): Promise<Message|void> 
 	neededPermissions = []
 	const neededRoles = []
 	cmd.memberPermissions.forEach((perm) => {
-		message.channel = message.channel as TextChannel
 		if (!channel.permissionsFor(message.member).has(perm as PermissionResolvable))
 			neededPermissions.push(perm)
 	})

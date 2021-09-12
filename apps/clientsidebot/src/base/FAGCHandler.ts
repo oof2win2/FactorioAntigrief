@@ -8,7 +8,7 @@ const wait = (time: number): Promise<void> => {
 }
 
 import { client } from "../index"
-import { Report, Revocation } from "fagc-api-wrapper"
+import { Report, Revocation } from "fagc-api-types"
 async function IsWhitelisted(playername: string): Promise<boolean> {
 	const res = await client.prisma.whitelist.findFirst({where: {
 		playername: playername

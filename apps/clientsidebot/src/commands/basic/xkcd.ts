@@ -33,6 +33,6 @@ export const command: Command<Message | MessageEmbed> = {
 			.setImage(img)
 			.setFooter(`Published ${day}/${month}/${year}`)
 
-		message.channel.send(embed)
+		message.channel.send({embeds: [embed]})
 	}
 }

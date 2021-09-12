@@ -33,15 +33,15 @@ export const command: Command<Message> = {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-		embed.addFields(
+		embed.addFields([
 			{ name: "Memory Usage", value: `${Math.round(memUsage * 100) / 100} MB`, inline:true },
 			{ name: "Uptime", value: duration(client.uptime), inline:true },
-			{ name: "Total Users", value: users, inline:true },
-			{ name: "Total Channels", value: channels, inline:true },
-			{name: "Total Servers", value: servers, inline: true},
+			{ name: "Total Users", value: users.toString(), inline:true },
+			{ name: "Total Channels", value: channels.toString(), inline:true },
+			{name: "Total Servers", value: servers.toString(), inline: true},
 			{ name: "NodeJS Version", value: nodeVersion, inline:true },
 			{ name: "DJS Version", value: `v${djsVersion}`, inline:true },
-		)
-		return message.channel.send(embed)
+		])
+		return message.channel.send({embeds: [embed]})
 	}
 }
