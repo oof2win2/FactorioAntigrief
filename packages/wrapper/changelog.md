@@ -1,5 +1,9 @@
+## UNRELEASED
+### Changes
+- Added methods to fetch reports and revocations by modified time
+
 ## [1.11.0] - [2021-09-08]
-### Additions
+### Changes
 - Added a method to fetch your own community with your API key
 
 ## [1.10.1] - [2021-09-07]
@@ -7,7 +11,7 @@
 - Fix `ReportManager#fetchAll` not returning expected results
 
 ## [1.10.0] - [2021-08-17]
-### Additions
+### Changes
 - Added Master API rules part to create and remove rules
 - Prioritize request config over assigned props in requests
 - Filter revocations when fetching
@@ -17,7 +21,7 @@
 - Fixed that `Report.reportedTime` was not a date but said it was
 
 ## [1.9.0] - [2021-08-12]
-### Additions
+### Changes
 - Added a `.destroy()` method on the wrapper and all managers to cancel all timeouts and exit cleanly
 ### Changes
 - Reworked wrapper to work with the new TS API

@@ -18,8 +18,8 @@ const testUserId = "429696038266208258"
 const testStuff = {
 	report: {
 		automated: false,
-		description: "i like potatoes",
-		proof: "not gonna give it to ya",
+		description: "tortor posuere ac ut consequat semper viverra nam libero justo laoreet sit amet cursus sit amet dictum sit amet justo",
+		proof: "tortor posuere ac ut consequat semper viverra nam libero justo laoreet sit amet cursus sit amet dictum sit amet justo",
 		playername: "Windsinger",
 	},
 	reportCount: 5,
@@ -255,7 +255,6 @@ describe("ApiWrapper", () => {
 		expect(fetchedAfterRemove, "Fetched rule was not null").to.be.null
 	})
 	step("Should be able to create and remove a community with violations and revocations getting removed", async () => {
-
 		const communityResult = await FAGC.communities.create(testStuff.community.name, testUserId, "548410604679856151")
 		const community = communityResult.community
 		expect(community.name).to.equal(testStuff.community.name, "Community name mismatch")
@@ -290,5 +289,32 @@ describe("ApiWrapper", () => {
 		
 		const fetchedRevocation = await FAGC.revocations.fetchRevocations(testStuff.report.playername, community.id, true)
 		expect(fetchedRevocation.length).to.equal(0, "Revocations exist after community was removed")
+	})
+	step("Should be able to fetch reports by timestamp", async () => {
+		const rules = await FAGC.rules.fetchAll()
+
+		const reportTimeBefore = new Date()
+
+		const createdReports = await Promise.all(new Array(testStuff.reportCount).fill(0).map(() => {
+			return FAGC.reports.create({
+				brokenRule: rules[0].id,
+				adminId: testUserId,
+				...testStuff.report, // description, automated, proof, playername
+			})
+		}))
+
+		const reportsFetchedBefore = await FAGC.reports.fetchModifiedSince(reportTimeBefore)
+		expect(createdReports.length).to.be.lessThanOrEqual(reportsFetchedBefore.length, "Number of reports before is smaller than the number of created reports")
+		const reportTimeAfter = new Date(Date.now() + 1000*10)
+		const reportsFetchedAfter = await FAGC.reports.fetchModifiedSince(reportTimeAfter)
+		expect(reportsFetchedAfter.length).to.be.equal(0, "Reports were created in the future")
+
+		const revocationTimeBefore = new Date()
+		const revocations = await Promise.all(createdReports.map(report => FAGC.reports.revoke(report.id, testUserId)))
+		const revocationsFetchedBefore = await FAGC.revocations.fetchModifiedSince(revocationTimeBefore)
+		expect(revocations.length).to.be.lessThanOrEqual(revocationsFetchedBefore.length, "Number of revocations before is smaller than the number of created revocations")
+		const revocationTimeAfter = new Date(Date.now() + 1000*10)
+		const revocationsFetchedAfter = await FAGC.revocations.fetchModifiedSince(revocationTimeAfter)
+		expect(revocationsFetchedAfter.length).to.be.equal(0, "Revocations were created in the future")
 	})
 })

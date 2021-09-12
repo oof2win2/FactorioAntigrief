@@ -42,6 +42,22 @@ export default class ReportManager extends BaseManager<Report> {
 		}
 		return allReports
 	}
+
+	async fetchModifiedSince(timestamp: Date, cache=true): Promise<Report[]> {
+		const reports = await fetch(`${this.apiurl}/reports/modifiedSince/${timestamp.toISOString()}`).then(c=>c.json())
+		
+		if (reports.error) throw new GenericAPIError(`${reports.error}: ${reports.message}`)
+
+		if (cache) {
+			reports.forEach(report => {
+				report.reportedTime = new Date(report.reportedTime)
+				report.timestamp = new Date(report.timestamp)
+				this.add(report)
+			})
+		}
+		return reports
+	}
+
 	resolveID (reportid: ApiID): Report|null {
 		const cached = this.cache.get(reportid)
 		if (cached) return cached

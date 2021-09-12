@@ -3,6 +3,7 @@ import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Revocation, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
+import { GenericAPIError } from ".."
 
 export default class RevocationManager extends BaseManager<Revocation> {
 	public apikey?: string
@@ -32,6 +33,21 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			.then(r=>r.json())
 		if (!revocations || !revocations[0]) return []
 		if (cache) revocations.forEach((revocation: Revocation) => this.add(revocation))
+		return revocations
+	}
+
+	async fetchModifiedSince(timestamp: Date, cache=true): Promise<Revocation[]> {
+		const revocations = await fetch(`${this.apiurl}/revocations/modifiedSince/${timestamp.toISOString()}`).then(c=>c.json())
+		
+		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
+
+		if (cache) {
+			revocations.forEach(revocation => {
+				revocation.reportedTime = new Date(revocation.reportedTime)
+				revocation.timestamp = new Date(revocation.timestamp)
+				this.add(revocation)
+			})
+		}
 		return revocations
 	}
 }
