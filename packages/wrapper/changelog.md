@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.12.0]
 ### Changes
 - Added methods to fetch reports and revocations by modified time
 
