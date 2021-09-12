@@ -12,7 +12,6 @@ import {
 
 import { InfoChannels } from "@prisma/client"
 import { PrismaClient } from ".prisma/client/index.js"
-// const {PrismaClient} = prisma
 
 import config from "../config.js"
 import Logger, { LogType } from "../utils/logger.js"
@@ -155,7 +154,7 @@ class FAGCBot extends Client {
 				&& FAGCBot.fagcconfig.ruleFilters.includes(report.brokenRule))
 		})
 		const filteredReports = await Promise.all(configFilteredReports.filter(async (report) => {
-			const ignored = await this.prisma.ignoredViolations.findFirst({ where: { violationId: report.id } })
+			const ignored = await this.prisma.ignoredReports.findFirst({ where: { reportId: report.id } })
 			if (ignored?.id) return null // the report is ignored so don't give it back
 			return report
 		}))

@@ -9,7 +9,7 @@ datasource db {
 
 model GuildConfig {
     id                Int            @id @default(autoincrement())
-    onViolation       String         @default("info")
+    onReport          String         @default("info")
     onRevocation      String         @default("info")
     banRole           String?
     configRole        String?
@@ -50,10 +50,10 @@ model Whitelist {
     whitelistedBy String
 }
 
-model IgnoredViolations {
+model IgnoredReports {
     id            Int      @id @default(autoincrement())
     playername    String
-    violationId   String   @unique
+    reportId      String   @unique
     whitelistedAt DateTime @default(now())
     whitelistedBy String
 }

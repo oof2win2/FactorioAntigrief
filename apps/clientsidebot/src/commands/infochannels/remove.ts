@@ -2,7 +2,7 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { MessageActionRow, MessageSelectMenu } from "discord.js"
 import {SubCommand} from "../../base/Command.js"
 
-const Ping: SubCommand = {
+const RemoveInfochannel: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
 		.setDescription("Remove an infochannel")
@@ -78,4 +78,4 @@ const Ping: SubCommand = {
 		return component.reply(`Channel <#${channel.id}> has stopped recieving notifications`)
 	}
 }
-export default Ping
+export default RemoveInfochannel

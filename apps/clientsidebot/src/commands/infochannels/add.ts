@@ -2,7 +2,7 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { MessageActionRow, MessageSelectMenu } from "discord.js"
 import {SubCommand} from "../../base/Command.js"
 
-const Ping: SubCommand = {
+const AddInfochannel: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("add")
 		.setDescription("Add an infochannel")
@@ -79,4 +79,4 @@ const Ping: SubCommand = {
 		return component.reply(`Channel <#${channel.id}> will start recieving notifications`)
 	}
 }
-export default Ping
+export default AddInfochannel

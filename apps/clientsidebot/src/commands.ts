@@ -16,7 +16,6 @@ const rest = new REST({ version: "9" }).setToken(ENV.DISCORD_BOTTOKEN)
 
 try {
 	console.log("Started refreshing application (/) commands.")
-	console.log(commands)
 
 	if (ENV.isDev) {
 		console.log(`Refreshing dev in guild ${ENV.TESTGUILDID}`)

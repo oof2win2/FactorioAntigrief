@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "GuildConfig" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "onViolation" TEXT NOT NULL DEFAULT 'info',
+    "onReport" TEXT NOT NULL DEFAULT 'info',
     "onRevocation" TEXT NOT NULL DEFAULT 'info',
     "banRole" TEXT,
     "configRole" TEXT,

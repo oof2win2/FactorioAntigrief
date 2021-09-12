@@ -7,9 +7,8 @@ const wait = (time: number): Promise<void> => {
 	})
 }
 
-import { client } from "../index.js"
 import { Report, Revocation } from "fagc-api-types"
-async function IsWhitelisted(playername: string): Promise<boolean> {
+async function IsWhitelisted(playername: string, client: FAGCBot): Promise<boolean> {
 	const res = await client.prisma.whitelist.findFirst({where: {
 		playername: playername
 	}})
@@ -52,7 +51,7 @@ export async function HandleUnfilteredViolation (violation: Report, client: FAGC
 }
 
 async function HandleFilteredViolation (report: Report, client: FAGCBot): Promise<boolean> {
-	if (await IsWhitelisted(report.playername)) return false
+	if (await IsWhitelisted(report.playername, client)) return false
 	// player is not whitelisted
 
 	// if they are banned then don't do anything
@@ -62,13 +61,13 @@ async function HandleFilteredViolation (report: Report, client: FAGCBot): Promis
 	await client.prisma.handledReports.create({data: {
 		reportId: report.id,
 		playername: report.playername,
-		action: FAGCBot.GuildConfig.onViolation,
+		action: FAGCBot.GuildConfig.onReport,
 	}})
 
 	const msg = `You have a violation on FAGC. Please check ${FAGCBot.config.apiurl}/reports/getall?playername=${report.playername} for why this could be`
 	const jailCommand = FAGCBot.config.jailCommand.replace("${PLAYERNAME}", report.playername).replace("${REASON}", msg)
 	const banCommand = FAGCBot.config.banCommand.replace("${PLAYERNAME}", report.playername).replace("${REASON}", msg)
-	switch (FAGCBot.GuildConfig.onViolation) {
+	switch (FAGCBot.GuildConfig.onReport) {
 	case "info": return false
 	case "jail": 
 		rcon.rconCommandAll(jailCommand)

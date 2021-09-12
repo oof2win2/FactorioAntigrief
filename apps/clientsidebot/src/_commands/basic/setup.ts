@@ -63,7 +63,7 @@ export const command: Command<Message> = {
 			// set to database
 			const res = await client.setConfig({
 				id: 1,
-				onViolation: violationAction,
+				onReport: violationAction,
 				onRevocation: revocationAction,
 				banRole: banRole.id,
 				configRole: configRole.id,

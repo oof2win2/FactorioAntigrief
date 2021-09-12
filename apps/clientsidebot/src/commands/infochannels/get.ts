@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import {SubCommand} from "../../base/Command.js"
 
-const Ping: SubCommand = {
+const GetInfochannels: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("get")
 		.setDescription("Get a list of all infochannels"),
@@ -11,4 +11,4 @@ const Ping: SubCommand = {
 		interaction.reply(`Infochannels for this guild are <#${infochannels.map(channel => channel.channelid).join(">, <#")}>`)
 	}
 }
-export default Ping
+export default GetInfochannels
