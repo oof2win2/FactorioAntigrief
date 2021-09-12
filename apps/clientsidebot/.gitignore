@@ -2,8 +2,8 @@
 .DS_Store
 
 # Config
-config.ts
-servers.ts
+src/config.ts
+src/servers.ts
 /database.sqlite
 /database.sqlite-journal
 *.env

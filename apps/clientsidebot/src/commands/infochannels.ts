@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
-import {Command, SubCommand} from "../base/Command.js"
+import {CommandWithSubcommands, SubCommand} from "../base/Command.js"
 import { readdirSync } from "fs"
 
 const commands: SubCommand[] = await Promise.all(readdirSync("./commands/infochannels/").map(async commandName => {
@@ -7,7 +7,7 @@ const commands: SubCommand[] = await Promise.all(readdirSync("./commands/infocha
 	return command.default
 }))
 
-const Infochannels: Command = {
+const Infochannels: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("infochannels")
 		.setDescription("Infochannels")

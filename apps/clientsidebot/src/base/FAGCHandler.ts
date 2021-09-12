@@ -102,7 +102,6 @@ async function HandleFilteredRevocation (revocation: Revocation, client: FAGCBot
 	const unbanCommand = FAGCBot.config.unbanCommand.replace("${PLAYERNAME}", revocation.playername)
 	switch (FAGCBot.GuildConfig.onRevocation) {
 	case "info": return false
-	case "keepBanned": return false
 	case "removeBan":
 		await client.prisma.handledReports.deleteMany({where: {reportId: revocation.reportId}})
 		rcon.rconCommandAll(unbanCommand)

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
-import {Command, SubCommand} from "../base/Command.js"
+import {CommandWithSubcommands, SubCommand} from "../base/Command.js"
 import { readdirSync } from "fs"
 
 const commands: SubCommand[] = await Promise.all(readdirSync("./commands/ignoredreports/").map(async commandName => {
@@ -7,7 +7,7 @@ const commands: SubCommand[] = await Promise.all(readdirSync("./commands/ignored
 	return command.default
 }))
 
-const IgnoredReports: Command = {
+const IgnoredReports: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("ignoredreports")
 		.setDescription("Ignored Reports")

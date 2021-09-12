@@ -28,4 +28,11 @@ export interface BotConfig {
 	banCommand: string,
 	unjailCommand: string,
 	unbanCommand: string,
+
+	// expandedStrings: {
+	// 	"info": string
+	// 	"ban": string
+	// 	"jail": string
+	// 	"removeBan": string
+	// }
 }

@@ -17,7 +17,7 @@ import config from "../config.js"
 import Logger, { LogType } from "../utils/logger.js"
 import { GuildConfig } from ".prisma/client"
 import { FAGCConfig } from "../types/FAGC.js"
-import {Command} from "./Command.js"
+import {CommandWithSubcommands} from "./Command.js"
 
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { Report } from "fagc-api-types"
@@ -38,7 +38,7 @@ class FAGCBot extends Client {
 	static config: BotConfig
 	public fagc: FAGCWrapper
 
-	public commands: Collection<string, Command>
+	public commands: Collection<string, CommandWithSubcommands>
 	constructor(options: FAGCBotOptions) {
 		super(options)
 
@@ -119,6 +119,7 @@ class FAGCBot extends Client {
 		return config
 	}
 	async setConfig(config: GuildConfig): Promise<GuildConfig> {
+		FAGCBot.GuildConfig = config
 		if (FAGCBot.GuildConfig) {
 			const update = await this.prisma.guildConfig.update({
 				data: config,
@@ -127,13 +128,8 @@ class FAGCBot extends Client {
 			return update
 		} else {
 			const set = await this.prisma.guildConfig.create({ data: config })
-			if (set.id) {
-				FAGCBot.GuildConfig = set
-				// tell the websocket to the api that we have this guild ID
-				this.fagc.websocket.setGuildID(FAGCBot.GuildConfig.guildId)
-
-				return set
-			} else return set
+			this.fagc.websocket.setGuildID(FAGCBot.GuildConfig.guildId)
+			return set
 		}
 	}
 	async getGuildConfig(): Promise<FAGCConfig> {

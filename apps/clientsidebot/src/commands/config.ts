@@ -2,15 +2,16 @@ import { SlashCommandBuilder } from "@discordjs/builders"
 import {CommandWithSubcommands, PermissionOverrideType, SubCommand} from "../base/Command.js"
 import { readdirSync } from "fs"
 
-const commands: SubCommand[] = await Promise.all(readdirSync("./commands/bans/").map(async commandName => {
-	const command = await import(`./bans/${commandName}`)
+const commands: SubCommand[] = await Promise.all(readdirSync("./commands/config/").map(async commandName => {
+	const command = await import(`./config/${commandName}`)
 	return command.default
 }))
 
-const Bans: CommandWithSubcommands = {
+const Config: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
-		.setName("bans")
-		.setDescription("Bans")
+		.setName("config")
+		.setDescription("Bot Config")
+		.setDefaultPermission(false)
 	,
 	execute: async (client, interaction) => {
 		const subcommand = interaction.options.getSubcommand()!
@@ -21,7 +22,7 @@ const Bans: CommandWithSubcommands = {
 }
 
 commands.forEach(command => {
-	Bans.data.addSubcommand(command.data)
+	Config.data.addSubcommand(command.data)
 })
 
-export default Bans
+export default Config
