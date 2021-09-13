@@ -51,4 +51,26 @@ export default class ProfileController {
 		})
 		return res.send(revocations)
 	}
+
+	@GET({url: "/modifiedSince/:timestamp", options: {
+		schema: {
+			params: Type.Required(Type.Object({
+				timestamp: Type.String()
+			}))
+		}
+	}})
+	async getModifiedSince(req: FastifyRequest<{
+		Params: {
+			timestamp: string
+		}
+	}>, res: FastifyReply) {
+		const {timestamp} = req.params
+
+		const date = new Date(timestamp)
+
+		const revocations = await RevocationModel.find({
+			createdAt: {$gt: date}
+		})
+		return res.send(revocations)
+	}
 }

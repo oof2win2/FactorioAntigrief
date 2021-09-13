@@ -9,6 +9,7 @@ import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import client, { validateDiscordUser } from "../utils/discord.js"
 import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
+import { Community } from "fagc-api-types"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -86,6 +87,28 @@ export default class ReportController {
 		return res.status(200).send(reports)
 	}
 
+	@GET({url: "/modifiedSince/:timestamp", options: {
+		schema: {
+			params: Type.Required(Type.Object({
+				timestamp: Type.String()
+			}))
+		}
+	}})
+	async getModifiedSince(req: FastifyRequest<{
+		Params: {
+			timestamp: string
+		}
+	}>, res: FastifyReply) {
+		const {timestamp} = req.params
+
+		const date = new Date(timestamp)
+
+		const reports = await ReportModel.find({
+			createdAt: {$gt: date}
+		})
+		return res.send(reports)
+	}
+
 	@POST({url: "/", options: {
 		schema: {
 			body: Type.Required(Type.Object({
@@ -133,7 +156,20 @@ export default class ReportController {
 			proof: proof,
 			communityId: community.id
 		})
-		reportCreatedMessage(report, community, rule, admin)
+
+		const allReports = await ReportModel.find({
+			playername: playername
+		}).select(["communityId"])
+		const differentCommunities: Set<string> = new Set()
+		allReports.forEach(report => differentCommunities.add(report.communityId))
+
+		reportCreatedMessage(report, {
+			community: <any>community,
+			rule: <any>rule,
+			admin: <any>admin,
+			totalReports: allReports.length,
+			totalCommunities: differentCommunities.size,
+		})
 		return res.status(200).send(report)
 	}
 
@@ -182,7 +218,20 @@ export default class ReportController {
 			revokedBy: req.body.adminId,
 		})
 
-		reportRevokedMessage(revocation, community, rule!, admin, revoker)
+		const allReports = await ReportModel.find({
+			playername: report.playername
+		}).select(["communityId"])
+		const differentCommunities: Set<string> = new Set()
+		allReports.forEach(report => differentCommunities.add(report.communityId))
+
+		reportRevokedMessage(revocation, {
+			community: <any>community,
+			rule: <any>rule!,
+			admin: <any>admin,
+			revokedBy: <any>revoker,
+			totalReports: allReports.length,
+			totalCommunities: differentCommunities.size,
+		})
 		return res.status(200).send(revocation)
 	}
 
@@ -243,7 +292,20 @@ export default class ReportController {
 		const revoker = await client.users.fetch(adminId)
 		const admin = await client.users.fetch(reports[0].adminId)
 
-		revocations.forEach((revocation) => reportRevokedMessage(revocation, community, RuleMap.get(revocation.brokenRule)!, revoker, admin))
+		const allReports = await ReportModel.find({
+			playername: playername
+		}).select(["communityId"])
+		const differentCommunities: Set<string> = new Set()
+		allReports.forEach(report => differentCommunities.add(report.communityId))
+
+		revocations.forEach((revocation) => reportRevokedMessage(revocation, {
+			community: <any>community,
+			rule: <any>RuleMap.get(revocation.brokenRule)!,
+			admin: <any>admin,
+			revokedBy: <any>revoker,
+			totalReports: allReports.length,
+			totalCommunities: differentCommunities.size,
+		}))
 
 		return res.status(200).send(revocations)
 	}
