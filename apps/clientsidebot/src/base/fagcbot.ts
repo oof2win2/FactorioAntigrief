@@ -71,6 +71,7 @@ class FAGCBot extends Client {
 		this.fagc = new FAGCWrapper({
 			apiurl: this.config.apiurl,
 			socketurl: this.config.websocketurl,
+			enableWebSocket: true
 		})
 
 		this.fagc.websocket.on("communityConfigChanged", (GuildConfig) => {
@@ -117,6 +118,8 @@ class FAGCBot extends Client {
 	}
 	async _asyncInit(): Promise<void> {
 		await this.getConfig()
+
+		if (FAGCBot.GuildConfig) this.fagc.websocket.setGuildID(FAGCBot.GuildConfig.guildId)
 
 		const lastNotificationProcessed = FAGCBot.GuildConfig?.lastNotificationProcessed || new Date()
 		this.lastNotificationProcessed = new Date()
