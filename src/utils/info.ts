@@ -41,7 +41,6 @@ setInterval(SendWebhookMessages, 5000)
 export function WebhookMessage(message: MessageEmbed): void {
 	WebhookQueue.push(message)
 }
-
 wss.on("connection", (ws) => {
 	ws.on("message", async (msg) => {
 		const message = JSON.parse(msg.toString("utf-8"))
@@ -49,7 +48,7 @@ wss.on("connection", (ws) => {
 			const guildConfig = await GuildConfigModel.findOne({ guildId: message.guildId }).then((c) => c?.toObject())
 			if (guildConfig) ws.send(Buffer.from(JSON.stringify({
 				...guildConfig,
-				messageType: "guildConfig"
+				messageType: "communityConfigChanged"
 			})))
 			WebhookGuildIDs.set(ws, message.guildId)
 		}
@@ -229,9 +228,6 @@ export function communityConfigChanged(config: DocumentType<ConfigClass, BeAnObj
 	})
 }
 
-wss.on("connection", () => {
-	console.log("new WebSocket connection!")
-})
 wss.on("listening", () => {
-	console.log("Websocket listening!")
+	console.log(`Websocket listening on ${ENV.WS_PORT}!`)
 })
