@@ -3,7 +3,7 @@ import { MessageEmbed } from "discord.js"
 import {SubCommand} from "../../base/Command.js"
 import FAGCBot from "../../base/fagcbot.js"
 
-const Setup: SubCommand = {
+const SetPermissions: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("setpermissions")
 		.setDescription("Set permissions")
@@ -52,12 +52,14 @@ const Setup: SubCommand = {
 			.setColor(client.getEmbedColor())
 			.setTitle("Permissions Config")
 			.addFields([
-				{ name: "Role that can create and manage bans", value: `<@${newConfig.banRole}> | ${newConfig.banRole}` },
-				{ name: "Role that can manage the bot's configuration", value: `<@${newConfig.configRole}> | ${newConfig.configRole}` },
-				{ name: "Role that can manage FAGC notifications", value: `<@${newConfig.notificationsRole}> | ${newConfig.notificationsRole}` },
+				{ name: "Role that can create and manage bans", value: `<@&${newConfig.banRole}> | ${newConfig.banRole}` },
+				{ name: "Role that can manage the bot's configuration", value: `<@&${newConfig.configRole}> | ${newConfig.configRole}` },
+				{ name: "Role that can manage FAGC notifications", value: `<@&${newConfig.notificationsRole}> | ${newConfig.notificationsRole}` },
 			])
-
-		return interaction.reply({content: "Config changed", embeds: [configEmbed]})
+		
+		interaction.reply({content: "Config changed. Will refresh command permissions", embeds: [configEmbed]})
+		await client.refreshCommandPerms()
+		interaction.followUp("Command permissions have been refreshed")
 	},
 }
-export default Setup
+export default SetPermissions

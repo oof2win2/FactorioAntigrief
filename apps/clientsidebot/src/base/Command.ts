@@ -16,15 +16,25 @@ export type PermissionOverride = {
 	permission: boolean
 }
 
+type PermissionType = {
+	type: "banrole"
+} | {
+	type: "configrole"
+} | {
+	type: "notificationsrole"
+}
+
 export interface CommandWithSubcommands {
 	data: SlashCommandBuilder,
 	execute: (client: FAGCBot, interaction: CommandInteraction) => Promise<any>
+	permissionType?: PermissionType
 	permission_overrides?: PermissionOverride[]
 }
 
 export interface Command {
 	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">,
 	execute: (client: FAGCBot, interaction: CommandInteraction) => Promise<any>,
+	permissionType?: PermissionType
 	permission_overrides?: PermissionOverride[]
 }
 

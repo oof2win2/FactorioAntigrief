@@ -12,6 +12,7 @@ const Config: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("config")
 		.setDescription("Bot Config")
+		.setDefaultPermission(false)
 	,
 	execute: async (client, interaction) => {
 		const subcommand = interaction.options.getSubcommand()!
@@ -19,13 +20,9 @@ const Config: CommandWithSubcommands = {
 		if (!command) return interaction.reply("An error executing the command occured")
 		return command.execute(client, interaction)
 	},
-	permission_overrides: [
-		{
-			type: PermissionOverrideType.ROLE,
-			id: config.owner.id,
-			permission: true
-		},
-	]
+	permissionType: {
+		type: "configrole"
+	}
 }
 
 commands.forEach(command => {

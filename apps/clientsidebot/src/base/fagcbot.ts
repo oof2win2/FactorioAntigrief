@@ -78,13 +78,11 @@ class FAGCBot extends Client {
 			GuildConfigHandler(GuildConfig)
 		})
 		this.fagc.websocket.on("report", async (report) => {
-			console.log("report created")
 			this.lastNotificationProcessed = new Date()
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			ReportHandler(report, this, channels)
 		})
 		this.fagc.websocket.on("revocation", async (revocation) => {
-			console.log("revocation created")
 			this.lastNotificationProcessed = new Date()
 			const channels = await Promise.all(FAGCBot.infochannels.map(infochannel => this.channels.fetch(infochannel.channelid))) as TextChannel[]
 			RevocationHandler(revocation, this, channels)
@@ -199,26 +197,59 @@ class FAGCBot extends Client {
 
 		const isSetUp = FAGCBot.GuildConfig || false
 		const everyoneRole = this.guilds.cache.first().roles.everyone
-
 		await Promise.all(apicommands.map(async (apicommand) => {
 			const command = this.commands.find(c => c.data.name === apicommand.name)!
 
-			const permissions: PermissionOverride[] = isSetUp ? command.permission_overrides : [{
+			const permissions: PermissionOverride[] = isSetUp ? (command.permission_overrides || []) : [{
 				id: everyoneRole.id,
 				type: PermissionOverrideType.ROLE,
 				permission: false
 			}]
+
+			if (isSetUp) permissions.push({
+				id: this.guilds.cache.first().ownerId,
+				type: PermissionOverrideType.USER,
+				permission: true
+			}, {
+				id: this.config.owner.id,
+				type: PermissionOverrideType.USER,
+				permission: true
+			})
+
+			if (isSetUp && command.permissionType) {
+				const type = command.permissionType.type
+				switch (type) {
+					case "banrole": permissions.push({
+						id: FAGCBot.GuildConfig.banRole,
+						type: PermissionOverrideType.ROLE,
+						permission: true
+					}); break
+					case "configrole": permissions.push({
+						id: FAGCBot.GuildConfig.configRole,
+						type: PermissionOverrideType.ROLE,
+						permission: true
+					}); break
+					case "notificationsrole": permissions.push({
+						id: FAGCBot.GuildConfig.notificationsRole,
+						type: PermissionOverrideType.ROLE,
+						permission: true
+					}); break
+				}
+			}
+
+
 			if (command.data.name === "config") permissions.push({
 				id: this.config.owner.id,
 				type: PermissionOverrideType.USER,
 				permission: true
 			})
 
-			return await rest.put(
+			return rest.put(
 				Routes.applicationCommandPermissions(this.user.id, ENV.TESTGUILDID, apicommand.id),
 				{ body: { permissions: permissions } }
-			)
+			).catch(console.error)
 		}))
+		return true
 	}
 }
 

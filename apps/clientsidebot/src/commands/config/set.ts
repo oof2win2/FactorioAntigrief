@@ -3,7 +3,7 @@ import { MessageEmbed } from "discord.js"
 import {SubCommand} from "../../base/Command.js"
 import FAGCBot from "../../base/fagcbot.js"
 
-const Setup: SubCommand = {
+const SetConfig: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("set")
 		.setDescription("Set the config")
@@ -86,13 +86,14 @@ const Setup: SubCommand = {
 			.addFields([
 				{ name: "Default action on created report", value: config.onReport.toString() },
 				{ name: "Default action on created revocation", value: config.onRevocation.toString() },
-				{ name: "Role that can create and manage bans", value: `<@${config.banRole}> | ${config.banRole}` },
-				{ name: "Role that can manage the bot's configuration", value: `<@${config.configRole}> | ${config.configRole}` },
-				{ name: "Role that can manage FAGC notifications", value: `<@${config.notificationsRole}> | ${config.notificationsRole}` },
+				{ name: "Role that can create and manage bans", value: `<@&${config.banRole}> | ${config.banRole}` },
+				{ name: "Role that can manage the bot's configuration", value: `<@&${config.configRole}> | ${config.configRole}` },
+				{ name: "Role that can manage FAGC notifications", value: `<@&${config.notificationsRole}> | ${config.notificationsRole}` },
 				{ name: "API key", value: config.apikey ? "Set" : "None" }
 			])
-		client.refreshCommandPerms().then(() => client.refreshCommandPerms())
-		return interaction.reply({content: "Config changed. If you want to more precisely set your role access, please use /config setpermissions", embeds: [configEmbed]})
+		interaction.reply({content: "Config changed. If you want to more precisely set your role access, please use /config setpermissions. Will refresh command permissions", embeds: [configEmbed]})
+		await client.refreshCommandPerms()
+		interaction.followUp("Command permissions have been refreshed")
 	},
 }
-export default Setup
+export default SetConfig

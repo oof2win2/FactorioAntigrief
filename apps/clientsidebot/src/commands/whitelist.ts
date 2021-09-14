@@ -11,12 +11,16 @@ const Whitelist: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("whitelist")
 		.setDescription("Whitelist")
+		.setDefaultPermission(false)
 	,
 	execute: async (client, interaction) => {
 		const subcommand = interaction.options.getSubcommand()!
 		const command = commands.find(command => command.data.name === subcommand)
 		if (!command) return interaction.reply("An error executing the command occured")
 		return command.execute(client, interaction)
+	},
+	permissionType: {
+		type: "banrole"
 	}
 }
 

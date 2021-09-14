@@ -16,9 +16,9 @@ const GetConfig: SubCommand = {
 			.addFields([
 				{ name: "Default action on created report", value: config.onReport.toString() },
 				{ name: "Default action on created revocation", value: config.onRevocation.toString() },
-				{ name: "Role that can create and manage bans", value: `<@${config.banRole}> | ${config.banRole}` },
-				{ name: "Role that can manage the bot's configuration", value: `<@${config.configRole}> | ${config.configRole}` },
-				{ name: "Role that can manage FAGC notifications", value: `<@${config.notificationsRole}> | ${config.notificationsRole}` },
+				{ name: "Role that can create and manage bans", value: `<@&${config.banRole}> | ${config.banRole}` },
+				{ name: "Role that can manage the bot's configuration", value: `<@&${config.configRole}> | ${config.configRole}` },
+				{ name: "Role that can manage FAGC notifications", value: `<@&${config.notificationsRole}> | ${config.notificationsRole}` },
 				{ name: "API key", value: config.apikey ? "Set" : "None" }
 			])
 

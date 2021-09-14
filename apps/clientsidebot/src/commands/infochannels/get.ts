@@ -7,8 +7,8 @@ const GetInfochannels: SubCommand = {
 		.setDescription("Get a list of all infochannels"),
 	execute: async (client, interaction) => {
 		const infochannels = await client.prisma.infoChannels.findMany()
-
-		interaction.reply(`Infochannels for this guild are <#${infochannels.map(channel => channel.channelid).join(">, <#")}>`)
+		if (!infochannels.length) return interaction.reply("This guild has no infochannels")
+		return interaction.reply(`Infochannels for this guild are <#${infochannels.map(channel => channel.channelid).join(">, <#")}>`)
 	}
 }
 export default GetInfochannels

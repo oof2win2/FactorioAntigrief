@@ -7,7 +7,7 @@ const Ping: Command = {
 		.setDescription("Ping the bot"),
 	execute: async (client, interaction) => {
 		const beforeReply = Date.now()
-		await interaction.reply("Pong")
+		await interaction.reply({content: "Pong", ephemeral: true})
 		const afterReply = Date.now()
 		await client.fagc.rules.fetchAll()
 		const afterFAGC = Date.now()
@@ -16,7 +16,7 @@ const Ping: Command = {
 			content: 
 			`My ping is: \`${afterReply - beforeReply}ms\`\n` +
 			`Discord API ping: \`${Math.round(client.ws.ping)}ms\`\n` +
-			`FAGC API ping: \`${afterFAGC - afterReply}ms\`\n`
+			`FAGC API ping: \`${afterFAGC - afterReply}ms\`\n`,
 		})
 	}
 }
