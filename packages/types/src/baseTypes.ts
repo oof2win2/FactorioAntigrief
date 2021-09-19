@@ -6,7 +6,6 @@ export interface Common {
 	[key: string]: string | boolean | Date | Report[]
 }
 
-
 // This exists so that creating a report doesn't need an ID and some stuff is optional
 export interface CreateReport {
 	playername: string
@@ -48,8 +47,8 @@ export interface CommunityConfig {
 	trustedCommunities?: ApiID[]
 	ruleFilters?: ApiID[]
 	guildId: string
-	contact: string,
-	moderatorRoleId: string,
+	contact: string
+	moderatorRoleId: string
 	communityname: string
 	communityId?: string
 }
@@ -58,4 +57,43 @@ export interface CommunityConfig {
 export interface Webhook extends Common {
 	token: string
 	guildId: string
+}
+
+export interface User {
+	discordUserId: string
+	discordUserTag: string
+	/**
+	 * IDs of guilds where the user is has API access
+	 */
+	discordGuildIds: string[]
+	apiAccess: {
+		/**
+		 * ID of the community this access is in
+		 */
+		communityId: string
+		/**
+		 * ID of the user
+		 */
+		discordUserId: string
+		/**
+		 * ID of the guild that this is in
+		 */
+		discordGuildId: string
+		/**
+		 * Whether the user has access to create and remove reports
+		 */
+		reports: boolean
+		/**
+		 * Whether the user has access to modify the community's config
+		 */
+		config: boolean
+		/**
+		 * Whether the user has access to change the community's notification settings
+		 */
+		notifications: boolean
+	}[]
+	/**
+	 * IDs of communities where the user is an owner
+	 */
+	communityOwner: string[]
 }
