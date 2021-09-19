@@ -1,12 +1,18 @@
-import { APIEmbed, APIUser } from "discord-api-types";
-import { Community, CommunityConfig, Report, Revocation, Rule } from "./baseTypes";
+import { APIEmbed, APIUser } from "discord-api-types"
+import {
+	Community,
+	CommunityConfig,
+	Report,
+	Revocation,
+	Rule,
+} from "./baseTypes"
 
 export interface BaseWebsocketMessage {
 	messageType: string
 }
 
 export interface ReportMessageExtraOpts {
-	community: Community,
+	community: Community
 	admin: APIUser
 	rule: Rule
 	totalReports: number
@@ -40,7 +46,7 @@ export interface RuleCreatedMessage extends BaseWebsocketMessage {
 export interface RuleRemovedMessage extends BaseWebsocketMessage {
 	messageType: "ruleRemoved"
 	embed: APIEmbed
-	rule: Rule,
+	rule: Rule
 }
 
 export interface CommunityCreatedMessageExtraOpts {
