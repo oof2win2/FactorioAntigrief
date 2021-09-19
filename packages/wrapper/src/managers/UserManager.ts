@@ -3,6 +3,7 @@ import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from ".."
+import { User } from "fagc-api-types"
 
 export default class UserManager extends BaseManager<null> {
 	public apikey?: string
@@ -12,7 +13,7 @@ export default class UserManager extends BaseManager<null> {
 		if (options.apikey) this.apikey = options.apikey
 		this.apiurl = options.apiurl
 	}
-	async fetchUser(discordUserId: string): Promise<unknown> {
+	async fetchUser(discordUserId: string): Promise<User | null> {
 		const fetched = await fetch(
 			`${this.apiurl}/users/${strictUriEncode(discordUserId)}`
 		).then((c) => c.json())
@@ -36,7 +37,7 @@ export default class UserManager extends BaseManager<null> {
 			notifications?: boolean
 		} = {},
 		reqConfig: RequestConfig = {}
-	): Promise<unknown> {
+	): Promise<User | null> {
 		const fetched = await fetch(
 			`${this.apiurl}/users/addUserToCommunity/${strictUriEncode(
 				discordUserId
@@ -57,7 +58,7 @@ export default class UserManager extends BaseManager<null> {
 	async removeUserFromCommunity(
 		discordUserId: string,
 		reqConfig: RequestConfig = {}
-	): Promise<unknown> {
+	): Promise<User | null> {
 		const fetched = await fetch(
 			`${this.apiurl}/users/removeUserFromCommunity/${strictUriEncode(
 				discordUserId
@@ -69,6 +70,24 @@ export default class UserManager extends BaseManager<null> {
 				},
 			}
 		).then((c) => c.json())
+		if (fetched.error) throw new GenericAPIError(fetched)
+		return fetched
+	}
+
+	async signup(code: string): Promise<User | null> {
+		const fetched = await fetch(
+			`${this.apiurl}/users/signup?code=${strictUriEncode(code)}`,
+			{
+				method: "POST",
+			}
+		).then((c) => c.json())
+		if (fetched.error) throw new GenericAPIError(fetched)
+		return fetched
+	}
+	async login(): Promise<User | null> {
+		const fetched = await fetch(`${this.apiurl}/users/login`, {
+			method: "POST",
+		}).then((c) => c.json())
 		if (fetched.error) throw new GenericAPIError(fetched)
 		return fetched
 	}

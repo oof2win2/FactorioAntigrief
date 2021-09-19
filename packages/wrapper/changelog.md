@@ -1,10 +1,16 @@
-## [1.12.1]
+# [1.13.0] - [2021-09-19]
+
+### Changes
+
+-   Added User API wrapper
+
+## [1.12.1] - [2021-09-11]
 
 ### Bugfixes
 
 -   Updated WebSocket listeners to have correct events
 
-# [1.12.0]
+# [1.12.0] - [2021-09-11]
 
 ### Changes
 
