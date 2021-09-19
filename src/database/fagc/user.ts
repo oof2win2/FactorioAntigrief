@@ -27,10 +27,12 @@ export class ApiAccessClass {
 	@prop()
 	communityId!: string
 	@prop()
+	discordUserId!: string
+	@prop({ default: false })
 	reports!: boolean
-	@prop()
+	@prop({ default: false })
 	config!: boolean
-	@prop()
+	@prop({ default: false })
 	notifications!: boolean
 }
 export const ApiAccessModel = getModelForClass(ApiAccessClass)
@@ -78,7 +80,7 @@ export class UserClass {
 	discordUserTag!: string
 
 	@prop({ default: [], type: [String] })
-	discordGuildIds?: string[]
+	discordGuildIds!: string[]
 
 	// the list of community ids where the user has api access
 	@prop({

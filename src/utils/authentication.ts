@@ -19,7 +19,6 @@ export const Authenticate = <
 	if (!originalRoute) return descriptor
 	descriptor.value = async (...args) => {
 		const [req, res] = args
-		// return originalRoute.apply(this, args)
 		const auth = req.headers["authorization"]
 		if (!auth)
 			return res.status(401).send({

@@ -19,5 +19,6 @@ const ENV = cleanEnv(process.env, {
 	APPID: str({ desc: "Your Discord application ID" }),
 	APPSECRET: str({ desc: "Your Discord application secret" }),
 	APPREDIRECTURI: str({ desc: "Your Discord redirect URI" }),
+	SESSIONSECRET: str({ desc: "Cookie session secret" }),
 })
 export default ENV
