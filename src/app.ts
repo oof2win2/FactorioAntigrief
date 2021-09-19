@@ -15,6 +15,8 @@ import { CommunityClass } from "./database/fagc/community.js"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
 
+import { OAuth2Client } from "./utils/discord.js"
+
 const fastify: FastifyInstance = Fastify({})
 
 // // cors
@@ -32,12 +34,15 @@ fastify.register(fastifyRateLimitPlugin, {
 // context
 fastify.register(fastifyRequestContextPlugin, {
 	hook: "preValidation",
-	defaultStoreValues: {},
+	defaultStoreValues: {
+		oauthclient: OAuth2Client,
+	},
 })
 // typed context
 declare module "fastify-request-context" {
 	interface RequestContextData {
 		community?: DocumentType<CommunityClass, BeAnObject>
+		oauthclient: typeof OAuth2Client
 	}
 }
 
@@ -49,7 +54,6 @@ fastify.register(fastifyFormBodyPlugin)
 
 // middlware to remove garbage from responses
 import removeIdMiddleware from "./utils/removeId.js"
-import { url } from "envalid"
 fastify.addHook("onSend", removeIdMiddleware)
 
 fastify.register(bootstrap, {

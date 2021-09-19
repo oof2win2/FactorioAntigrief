@@ -3,3 +3,5 @@ export const UnauthenticatedResponse = {
 	error: "Unauthenticated",
 	message: 'You must provide authentication with the "authentication" header',
 }
+
+export const OAUTHSCOPES = ["identify", "guilds"]

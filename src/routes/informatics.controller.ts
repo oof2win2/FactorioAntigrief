@@ -5,7 +5,7 @@ import { Type } from "@sinclair/typebox"
 import LogModel from "../database/fagc/log.js"
 import { Webhook, WebhookClient } from "discord.js"
 import WebhookModel from "../database/fagc/webhook.js"
-import client from "../utils/discord.js"
+import { client } from "../utils/discord.js"
 
 @Controller({ route: "/informatics" })
 export default class ProfileController {

@@ -7,7 +7,7 @@ import { Authenticate } from "../utils/authentication.js"
 import { reportCreatedMessage, reportRevokedMessage } from "../utils/info.js"
 import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
-import client, { validateDiscordUser } from "../utils/discord.js"
+import { validateDiscordUser, client } from "../utils/discord.js"
 import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
 import { Community } from "fagc-api-types"
 
@@ -213,7 +213,7 @@ export default class ReportController {
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
-				message: "adminId must be a valid Discord user",
+				message: "adminId must be a valid Discord user ID",
 			})
 		const admin = await client.users.fetch(adminId)
 

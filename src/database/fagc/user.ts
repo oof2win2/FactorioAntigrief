@@ -15,6 +15,53 @@ const connection = database.connections.find(
 
 @modelOptions({
 	schemaOptions: {
+		collection: "apiaccess",
+	},
+	existingMongoose: connection,
+})
+@pre<ApiAccessClass>("save", function (next) {
+	this.id = getUserStringFromID(this._id.toString())
+	next()
+})
+export class ApiAccessClass {
+	@prop()
+	communityId!: string
+	@prop()
+	reports!: boolean
+	@prop()
+	config!: boolean
+	@prop()
+	notifications!: boolean
+}
+export const ApiAccessModel = getModelForClass(ApiAccessClass)
+
+@modelOptions({
+	schemaOptions: {
+		collection: "userauth",
+	},
+	existingMongoose: connection,
+})
+@pre<UserAuthClass>("save", function (next) {
+	this.id = getUserStringFromID(this._id.toString())
+	next()
+})
+export class UserAuthClass {
+	@prop({ required: true })
+	discordUserId!: string
+
+	@prop({ required: true })
+	access_token!: string
+
+	@prop({ required: true })
+	expires_at!: Date
+
+	@prop({ required: true })
+	refresh_token!: string
+}
+export const UserAuthModel = getModelForClass(UserAuthClass)
+
+@modelOptions({
+	schemaOptions: {
 		collection: "users",
 	},
 	existingMongoose: connection,
@@ -24,20 +71,27 @@ const connection = database.connections.find(
 	next()
 })
 export class UserClass {
-	@prop()
+	@prop({ required: true })
 	discordUserId!: string
 
-	@prop()
+	@prop({ required: true })
 	discordUserTag!: string
 
-	@prop()
-	discordGuildId?: string
+	@prop({ default: [], type: [String] })
+	discordGuildIds?: string[]
 
-	@prop({ ref: () => CommunityClass })
-	communityId?: Ref<CommunityClass>
+	// the list of community ids where the user has api access
+	@prop({
+		default: [],
+		ref: ApiAccessClass,
+	})
+	apiAccess!: Ref<ApiAccessClass>[]
 
-	@prop({ default: false })
-	hasApiAccess!: boolean
+	@prop({ default: [], type: [String] })
+	communityOwner!: string[]
+
+	@prop({ ref: () => UserAuthClass, required: true })
+	userAuth!: Ref<UserAuthClass>
 }
 
 const UserModel = getModelForClass(UserClass)

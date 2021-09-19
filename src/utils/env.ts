@@ -16,5 +16,8 @@ const ENV = cleanEnv(process.env, {
 		default: 9110,
 		desc: "Port where Prometheus should run for statistics etc.",
 	}),
+	APPID: str({ desc: "Your Discord application ID" }),
+	APPSECRET: str({ desc: "Your Discord application secret" }),
+	APPREDIRECTURI: str({ desc: "Your Discord redirect URI" }),
 })
 export default ENV

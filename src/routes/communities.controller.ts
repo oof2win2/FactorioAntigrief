@@ -11,7 +11,8 @@ import {
 	communityCreatedMessage,
 	communityRemovedMessage,
 } from "../utils/info.js"
-import client, {
+import {
+	client,
 	validateDiscordGuild,
 	validateDiscordUser,
 } from "../utils/discord.js"
