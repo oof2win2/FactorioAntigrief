@@ -1,3 +1,11 @@
+## [1.2.0] - [2021-09-19]
+
+### Changes
+
+-   Added User type definition
+-   Added ESLint
+-   Added Prettier
+
 ## [1.1.2] - [2021-09-11]
 
 ### Changes
