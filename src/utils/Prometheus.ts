@@ -2,7 +2,9 @@
 
 import promClient from "prom-client"
 import http from "http"
-import CommunityConfigModel, { ConfigClass } from "../database/bot/community.js"
+import CommunityConfigModel, {
+	CommunityConfigClass,
+} from "../database/bot/community.js"
 import CommunityModel, { CommunityClass } from "../database/fagc/community.js"
 import RuleModel from "../database/fagc/rule.js"
 import { DocumentType } from "@typegoose/typegoose"
@@ -29,7 +31,7 @@ register.registerMetric(ruleGauge)
 
 // Format community trust from config
 const trustedCommunities = async (
-	communities: Omit<DocumentType<ConfigClass>, "apikey">[]
+	communities: Omit<DocumentType<CommunityConfigClass>, "apikey">[]
 ) => {
 	const rawResults: { id: string; count: number }[] = []
 	const CachedCommunities = new Map()
@@ -68,7 +70,7 @@ const trustedCommunities = async (
 }
 // Format rule trust from config
 const trustedRules = async (
-	communities: Omit<DocumentType<ConfigClass>, "apikey">[]
+	communities: Omit<DocumentType<CommunityConfigClass>, "apikey">[]
 ) => {
 	const rawResults: { id: string; count: number }[] = []
 	const CachedRules = new Map()

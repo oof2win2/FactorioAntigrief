@@ -2,7 +2,9 @@ import { WebhookClient, MessageEmbed, User } from "discord.js"
 import WebhookSchema from "../database/fagc/webhook.js"
 import WebSocket from "ws"
 import ENV from "./env.js"
-import GuildConfigModel, { ConfigClass } from "../database/bot/community.js"
+import GuildConfigModel, {
+	CommunityConfigClass,
+} from "../database/bot/community.js"
 import { RevocationClass } from "../database/fagc/revocation.js"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
@@ -343,7 +345,7 @@ export async function communityRemovedMessage(
 	)
 }
 export function communityConfigChanged(
-	config: DocumentType<ConfigClass, BeAnObject>
+	config: DocumentType<CommunityConfigClass, BeAnObject>
 ): void {
 	wss.clients.forEach((client) => {
 		// TODO: test this

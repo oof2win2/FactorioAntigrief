@@ -119,6 +119,15 @@ export default class CommunityController {
 					contact: Type.Optional(Type.String()),
 					moderatorRoleId: Type.Optional(Type.String()),
 					communityname: Type.Optional(Type.String()),
+					roles: Type.Optional(
+						Type.Object({
+							reports: Type.Optional(Type.String()),
+							webhooks: Type.Optional(Type.String()),
+							setConfig: Type.Optional(Type.String()),
+							setRules: Type.Optional(Type.String()),
+							setCommunities: Type.Optional(Type.String()),
+						})
+					),
 				}),
 			},
 		},
@@ -132,6 +141,13 @@ export default class CommunityController {
 				contact?: string
 				moderatorRoleId?: string
 				communityname?: string
+				roles: {
+					reports?: string
+					webhooks?: string
+					setConfig?: string
+					setRules?: string
+					setCommunities?: string
+				}
 			}
 		}>,
 		res: FastifyReply
@@ -142,6 +158,7 @@ export default class CommunityController {
 			contact,
 			moderatorRoleId,
 			communityname,
+			roles,
 		} = req.body
 
 		// query database if rules and communities actually exist
@@ -205,6 +222,26 @@ export default class CommunityController {
 			toReplace = Object.assign(toReplace, { moderatorRoleId })
 		if (communityname)
 			toReplace = Object.assign(toReplace, { communityname })
+
+		const findRole = (id: string) => {
+			const guildRoles = client.guilds.cache
+				.map((guild) => guild.roles.resolve(id))
+				.filter((r) => r && r.id)
+			return guildRoles[0]
+		}
+		const toSetRoles: {
+			reports?: string
+			webhooks?: string
+			setConfig?: string
+			setRules?: string
+			setCommunities?: string
+		} = {}
+		Object.keys(roles).map((roleType) => {
+			const role = findRole(roles[roleType])
+			if (role) toSetRoles[roleType] = role.id
+		})
+		toReplace = Object.assign(toReplace, toSetRoles)
+
 		const CommunityConfig = await CommunityConfigModel.findOneAndReplace(
 			{ guildId: OldConfig.guildId },
 			toReplace,

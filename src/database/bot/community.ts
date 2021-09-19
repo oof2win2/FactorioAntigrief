@@ -7,13 +7,21 @@ const connection = database.connections.find(
 
 // the thing from https://github.com/oof2win2/fagc-discord-bot/blob/dev/src/database/schemas/config.js
 
+class Roles {
+	reports!: string
+	webhooks!: string
+	setConfig!: string
+	setRules!: string
+	setCommunities!: string
+}
+
 @modelOptions({
 	schemaOptions: {
 		collection: "configs",
 	},
 	existingMongoose: connection,
 })
-export class ConfigClass {
+export class CommunityConfigClass {
 	@prop({ required: true })
 	communityname!: string
 
@@ -37,7 +45,10 @@ export class ConfigClass {
 
 	@prop({ type: [String] })
 	ruleFilters?: [string]
+
+	@prop({ type: Roles })
+	roles!: Roles
 }
 
-const CommunityConfigModel = getModelForClass(ConfigClass)
+const CommunityConfigModel = getModelForClass(CommunityConfigClass)
 export default CommunityConfigModel
