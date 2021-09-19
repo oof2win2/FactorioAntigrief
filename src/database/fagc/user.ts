@@ -1,15 +1,23 @@
-import { getModelForClass, modelOptions, pre, prop, Ref } from "@typegoose/typegoose"
+import {
+	getModelForClass,
+	modelOptions,
+	pre,
+	prop,
+	Ref,
+} from "@typegoose/typegoose"
 import database from "../database.js"
 import { getUserStringFromID } from "../../utils/functions-databaseless.js"
 import { CommunityClass } from "./community.js"
 
-const connection = database.connections.find((connection) => connection?.n === "fagc")?.c
+const connection = database.connections.find(
+	(connection) => connection?.n === "fagc"
+)?.c
 
 @modelOptions({
 	schemaOptions: {
-		collection: "users"
+		collection: "users",
 	},
-	existingMongoose: connection
+	existingMongoose: connection,
 })
 @pre<UserClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())

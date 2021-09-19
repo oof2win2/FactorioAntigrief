@@ -6,7 +6,7 @@
 
 // export default mung.json(function(body: any, req: express.Request) {
 // 	if (req.method === "GET") return
-// 	let ip = 
+// 	let ip =
 // 		Array.isArray(req.headers["x-forwarded-for"])
 // 			? req.headers["x-forwarded-for"][0]
 // 			: req.headers["x-forwarded-for"]

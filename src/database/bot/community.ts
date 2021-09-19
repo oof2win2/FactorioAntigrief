@@ -1,15 +1,17 @@
-import { getModelForClass, modelOptions, prop} from "@typegoose/typegoose"
+import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
 import database from "../database.js"
 
-const connection = database.connections.find((connection) => connection?.n === "bot")?.c
+const connection = database.connections.find(
+	(connection) => connection?.n === "bot"
+)?.c
 
 // the thing from https://github.com/oof2win2/fagc-discord-bot/blob/dev/src/database/schemas/config.js
 
 @modelOptions({
 	schemaOptions: {
-		collection: "configs"
+		collection: "configs",
 	},
-	existingMongoose: connection
+	existingMongoose: connection,
 })
 export class ConfigClass {
 	@prop({ required: true })

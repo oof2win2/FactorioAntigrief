@@ -18,7 +18,7 @@ const config: ApiConfig = {
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
 			useFindAndModify: false,
-		}
-	]
+		},
+	],
 }
 export default config

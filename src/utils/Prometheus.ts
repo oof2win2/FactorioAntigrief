@@ -16,25 +16,32 @@ collectDefaultMetrics({ register })
 const communityGauge = new promClient.Gauge({
 	name: "community_trust_count",
 	help: "Amount of communities that trust this community",
-	labelNames: ["id", "name", "contact"]
+	labelNames: ["id", "name", "contact"],
 })
 const ruleGauge = new promClient.Gauge({
 	name: "rule_trust_count",
 	help: "Amount of communities that trust this rule",
-	labelNames: ["id", "shortdesc"]
+	labelNames: ["id", "shortdesc"],
 })
 
 register.registerMetric(communityGauge)
 register.registerMetric(ruleGauge)
 
 // Format community trust from config
-const trustedCommunities = async (communities: Omit<DocumentType<ConfigClass>, "apikey">[]) => {
-	const rawResults: { id: string, count: number }[] = []
+const trustedCommunities = async (
+	communities: Omit<DocumentType<ConfigClass>, "apikey">[]
+) => {
+	const rawResults: { id: string; count: number }[] = []
 	const CachedCommunities = new Map()
-	const getOrFetchCommunity = async (communityId: string): Promise<DocumentType<CommunityClass>> => {
+	const getOrFetchCommunity = async (
+		communityId: string
+	): Promise<DocumentType<CommunityClass>> => {
 		const cachedCommunity = CachedCommunities.get(communityId)
 		if (cachedCommunity) return cachedCommunity
-		const community = CachedCommunities.set(communityId, CommunityModel.findOne({id: communityId})).get(communityId)
+		const community = CachedCommunities.set(
+			communityId,
+			CommunityModel.findOne({ id: communityId })
+		).get(communityId)
 		return community
 	}
 	communities.forEach((community) => {
@@ -54,19 +61,24 @@ const trustedCommunities = async (communities: Omit<DocumentType<ConfigClass>, "
 	const results = rawResults.map(async (community) => {
 		return {
 			community: await getOrFetchCommunity(community.id),
-			count: community.count
+			count: community.count,
 		}
 	})
 	return await Promise.all(results)
 }
 // Format rule trust from config
-const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey">[]) => {
-	const rawResults: { id: string, count: number }[] = []
+const trustedRules = async (
+	communities: Omit<DocumentType<ConfigClass>, "apikey">[]
+) => {
+	const rawResults: { id: string; count: number }[] = []
 	const CachedRules = new Map()
 	const getOrFetchRule = async (ruleid) => {
 		const cachedRule = CachedRules.get(ruleid)
 		if (cachedRule) return cachedRule
-		const rule = CachedRules.set(ruleid, RuleModel.findOne({id: ruleid})).get(ruleid)
+		const rule = CachedRules.set(
+			ruleid,
+			RuleModel.findOne({ id: ruleid })
+		).get(ruleid)
 		return rule
 	}
 	communities.forEach((community) => {
@@ -86,7 +98,7 @@ const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey
 	const results = rawResults.map(async (rule) => {
 		return {
 			rule: await getOrFetchRule(rule.id),
-			count: rule.count
+			count: rule.count,
 		}
 	})
 	return await Promise.all(results)
@@ -94,22 +106,34 @@ const trustedRules = async (communities: Omit<DocumentType<ConfigClass>, "apikey
 
 // collect statistics and put them to the server
 const collectStatistics = async () => {
-	const communitySettings = await CommunityConfigModel.find({}).exec()
-		.then((configs) => configs.map((CommunityConfig) => { CommunityConfig.set("apikey", null); return CommunityConfig }))
+	const communitySettings = await CommunityConfigModel.find({})
+		.exec()
+		.then((configs) =>
+			configs.map((CommunityConfig) => {
+				CommunityConfig.set("apikey", null)
+				return CommunityConfig
+			})
+		)
 	const rules = await trustedRules(communitySettings)
 	const communities = await trustedCommunities(communitySettings)
 
 	rules.forEach((rule) => {
 		if (rule.rule)
-			ruleGauge.set({ id: rule.rule.id, shortdesc: rule.rule.shortdesc }, rule.count)
+			ruleGauge.set(
+				{ id: rule.rule.id, shortdesc: rule.rule.shortdesc },
+				rule.count
+			)
 	})
 	communities.forEach((community) => {
 		if (!community.community || !community.community.id) return
-		communityGauge.set({
-			id: community.community.id,
-			name: community.community.name,
-			contact: community.community.contact
-		}, community.count)
+		communityGauge.set(
+			{
+				id: community.community.id,
+				name: community.community.name,
+				contact: community.community.contact,
+			},
+			community.count
+		)
 	})
 }
 
@@ -117,8 +141,6 @@ setInterval(async () => {
 	collectStatistics()
 }, 3600 * 1000 * 3) // collect every 3 hours (3*3600*1000)
 collectStatistics() // initial statistics collection
-
-
 
 // Server for data collection
 http.createServer(async (req, res) => {

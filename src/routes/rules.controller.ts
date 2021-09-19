@@ -8,76 +8,96 @@ import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info.js"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
-
 	@GET({ url: "/" })
-	async getAllRules(_req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+	async getAllRules(
+		_req: FastifyRequest,
+		res: FastifyReply
+	): Promise<FastifyReply> {
 		const rules = await RuleModel.find({})
 		return res.send(rules)
 	}
 
 	@GET({
-		url: "/:id", options: {
+		url: "/:id",
+		options: {
 			schema: {
-				params: Type.Required(Type.Object({
-					id: Type.String()
-				}))
-			}
-		}
+				params: Type.Required(
+					Type.Object({
+						id: Type.String(),
+					})
+				),
+			},
+		},
 	})
-	async getRule(req: FastifyRequest<{
-		Params: {
-			id: string
-		}
-	}>, res: FastifyReply): Promise<FastifyReply> {
+	async getRule(
+		req: FastifyRequest<{
+			Params: {
+				id: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
 		const { id } = req.params
-		const rule = await RuleModel.findOne({id: id})
+		const rule = await RuleModel.findOne({ id: id })
 		return res.send(rule)
 	}
 
 	@POST({
-		url: "/", options: {
+		url: "/",
+		options: {
 			schema: {
-				body: Type.Required(Type.Object({
-					shortdesc: Type.String(),
-					longdesc: Type.String()
-				}))
-			}
-		}
+				body: Type.Required(
+					Type.Object({
+						shortdesc: Type.String(),
+						longdesc: Type.String(),
+					})
+				),
+			},
+		},
 	})
 	@MasterAuthenticate
-	async create(req: FastifyRequest<{
-		Body: {
-			shortdesc: string,
-			longdesc: string,
-		}
-	}>, res: FastifyReply): Promise<FastifyReply> {
-		const {shortdesc, longdesc} = req.body
+	async create(
+		req: FastifyRequest<{
+			Body: {
+				shortdesc: string
+				longdesc: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { shortdesc, longdesc } = req.body
 		const rule = await RuleModel.create({
 			shortdesc: shortdesc,
-			longdesc: longdesc
+			longdesc: longdesc,
 		})
 		ruleCreatedMessage(rule)
 		return res.send(rule)
 	}
 
 	@DELETE({
-		url: "/:id", options: {
+		url: "/:id",
+		options: {
 			schema: {
-				params: Type.Required(Type.Object({
-					id: Type.String()
-				}))
-			}
-		}
+				params: Type.Required(
+					Type.Object({
+						id: Type.String(),
+					})
+				),
+			},
+		},
 	})
 	@MasterAuthenticate
-	async delete(req: FastifyRequest<{
-		Params: {
-			id: string
-		}
-	}>, res: FastifyReply): Promise<FastifyReply> {
-		const {id} = req.params
+	async delete(
+		req: FastifyRequest<{
+			Params: {
+				id: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { id } = req.params
 		const rule = await RuleModel.findOneAndRemove({
-			id: id
+			id: id,
 		})
 		if (rule) ruleRemovedMessage(rule)
 		return res.send(rule)

@@ -16,9 +16,12 @@ export default async function (
 				delete response[prop]
 			} else {
 				if (response[prop]) {
-					if (response[prop].toObject) response[prop] = response[prop].toObject()
-					if (Array.isArray(response[prop])) response[prop] = editResponse(response[prop])
-					if (typeof (response[prop]) == "object") response[prop] = editResponse(response[prop])
+					if (response[prop].toObject)
+						response[prop] = response[prop].toObject()
+					if (Array.isArray(response[prop]))
+						response[prop] = editResponse(response[prop])
+					if (typeof response[prop] == "object")
+						response[prop] = editResponse(response[prop])
 				}
 			}
 		}

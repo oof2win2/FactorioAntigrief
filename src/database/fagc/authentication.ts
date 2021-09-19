@@ -1,13 +1,15 @@
 import { getModelForClass, modelOptions, prop, Ref } from "@typegoose/typegoose"
 import database from "../database.js"
 import { CommunityClass } from "./community.js"
-const connection = database.connections.find(connection => connection?.n === "fagc")?.c
+const connection = database.connections.find(
+	(connection) => connection?.n === "fagc"
+)?.c
 
 @modelOptions({
 	schemaOptions: {
-		collection: "authentication"
+		collection: "authentication",
 	},
-	existingMongoose: connection
+	existingMongoose: connection,
 })
 export class AuthClass {
 	@prop({ ref: () => CommunityClass })

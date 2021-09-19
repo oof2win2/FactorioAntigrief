@@ -10,66 +10,90 @@ import { BeAnObject } from "@typegoose/typegoose/lib/types"
 
 @Controller({ route: "/revocations" })
 export default class ProfileController {
-	@GET({url: "/community/:playername/:communityId", options: {
-		schema: {
-			params: Type.Required(Type.Object({
-				playername: Type.String(),
-				communityId: Type.String()
-			}))
-		}
-	}})
-	async fetchCommunity(req: FastifyRequest<{
-		Params: {
-			playername: string
-			communityId: string
-		}
-	}>, res: FastifyReply): Promise<FastifyReply> {
-		const {playername, communityId} = req.params
-		
+	@GET({
+		url: "/community/:playername/:communityId",
+		options: {
+			schema: {
+				params: Type.Required(
+					Type.Object({
+						playername: Type.String(),
+						communityId: Type.String(),
+					})
+				),
+			},
+		},
+	})
+	async fetchCommunity(
+		req: FastifyRequest<{
+			Params: {
+				playername: string
+				communityId: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { playername, communityId } = req.params
+
 		const revocations = await RevocationModel.find({
 			playername: playername,
-			communityId: communityId
+			communityId: communityId,
 		})
 		return res.send(revocations)
 	}
-	@GET({url: "/player/:playername", options: {
-		schema: {
-			params: Type.Required(Type.Object({
-				playername: Type.String(),
-			}))
-		}
-	}})
-	async fetchPlayer(req: FastifyRequest<{
-		Params: {
-			playername: string
-		}
-	}>, res: FastifyReply): Promise<FastifyReply> {
-		const {playername} = req.params
-		
+	@GET({
+		url: "/player/:playername",
+		options: {
+			schema: {
+				params: Type.Required(
+					Type.Object({
+						playername: Type.String(),
+					})
+				),
+			},
+		},
+	})
+	async fetchPlayer(
+		req: FastifyRequest<{
+			Params: {
+				playername: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { playername } = req.params
+
 		const revocations = await RevocationModel.find({
 			playername: playername,
 		})
 		return res.send(revocations)
 	}
 
-	@GET({url: "/modifiedSince/:timestamp", options: {
-		schema: {
-			params: Type.Required(Type.Object({
-				timestamp: Type.String()
-			}))
-		}
-	}})
-	async getModifiedSince(req: FastifyRequest<{
-		Params: {
-			timestamp: string
-		}
-	}>, res: FastifyReply) {
-		const {timestamp} = req.params
+	@GET({
+		url: "/modifiedSince/:timestamp",
+		options: {
+			schema: {
+				params: Type.Required(
+					Type.Object({
+						timestamp: Type.String(),
+					})
+				),
+			},
+		},
+	})
+	async getModifiedSince(
+		req: FastifyRequest<{
+			Params: {
+				timestamp: string
+			}
+		}>,
+		res: FastifyReply
+	) {
+		const { timestamp } = req.params
 
 		const date = new Date(timestamp)
 
 		const revocations = await RevocationModel.find({
-			createdAt: {$gt: date}
+			createdAt: { $gt: date },
 		})
 		return res.send(revocations)
 	}
