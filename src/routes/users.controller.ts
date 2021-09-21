@@ -10,6 +10,7 @@ import UserModel, {
 import { OAUTHSCOPES } from "../consts.js"
 import { Authenticate } from "../utils/authentication.js"
 import CommunityConfigModel from "../database/bot/community.js"
+import cryptoRandomString from "crypto-random-string"
 
 @Controller({ route: "/users" })
 export default class ProfileController {
@@ -36,62 +37,6 @@ export default class ProfileController {
 			discordUserId: discordUserId,
 		}).populate("apiAccess")
 		return res.send(user ?? null)
-	}
-
-	@GET({
-		url: "/oauth2",
-		options: {
-			schema: {
-				querystring: Type.Required(
-					Type.Object({
-						code: Type.String(),
-					})
-				),
-			},
-		},
-	})
-	async handleOAuth2(
-		req: FastifyRequest<{
-			Querystring: {
-				code: string
-			}
-		}>,
-		res: FastifyReply
-	) {
-		const oauth = req.requestContext.get("oauthclient")
-		if (!oauth) throw "oauthclient did not exist on ctx"
-
-		const access = await oauth.tokenRequest({
-			code: req.query.code,
-			scope: OAUTHSCOPES,
-			grantType: "authorization_code",
-		})
-
-		const discordUser = await oauth.getUser(access.access_token)
-
-		const userAuth = await UserAuthModel.create({
-			discordUserId: discordUser.id,
-			access_token: access.access_token,
-			expires_at: new Date(Date.now() + access.expires_in * 1000), //expires_in is in seconds, not ms
-			refresh_token: access.refresh_token,
-		})
-
-		const user = await UserModel.create({
-			discordUserId: discordUser.id,
-			discordUserTag: `${discordUser.username}#${discordUser.discriminator}`,
-			userAuth: userAuth,
-		})
-
-		return res.send(user)
-	}
-
-	@GET({ url: "/oauth2/url" })
-	async Oauth2URL(req: FastifyRequest, res: FastifyReply) {
-		return res.send({
-			url: req.requestContext.get("oauthclient")?.generateAuthUrl({
-				scope: OAUTHSCOPES.join(" "),
-			}),
-		})
 	}
 
 	@POST({
@@ -162,6 +107,7 @@ export default class ProfileController {
 		const apiAccess = await ApiAccessModel.create({
 			communityId: community.id,
 			discordUserId: discordUserId,
+			discordGuildId: communityConfig.guildId,
 			reports: reports || false,
 			config: config || false,
 			notifications: notifications || false,
@@ -243,5 +189,102 @@ export default class ProfileController {
 		return res
 			.status(200)
 			.send(await user.populate("apiAccess").execPopulate())
+	}
+
+	// this is a GET because it doesnt need to be a POST
+	@GET({ url: "/login" })
+	async loginUser(req: FastifyRequest, res: FastifyReply) {
+		const userId = req.session.get("userId")
+		if (userId) {
+			const user = await UserModel.findOne({ _id: userId })
+			return res.send(user)
+		}
+		return res.send(null)
+	}
+
+	@GET({ url: "/signupurl" })
+	async Oauth2URL(req: FastifyRequest, res: FastifyReply) {
+		const state = cryptoRandomString({ length: 8 })
+		req.session.set("state", state)
+		return res.send({
+			url: req.requestContext.get("oauthclient")?.generateAuthUrl({
+				scope: OAUTHSCOPES.join(" "),
+				state: state,
+			}),
+		})
+	}
+
+	// this is a GET because it doesnt need to be a POST
+	@GET({
+		url: "/signup",
+		options: {
+			schema: {
+				querystring: Type.Required(
+					Type.Object({
+						code: Type.String(),
+						state: Type.String(),
+					})
+				),
+			},
+		},
+	})
+	async signupUser(
+		req: FastifyRequest<{
+			Querystring: {
+				code: string
+				state: string
+			}
+		}>,
+		res: FastifyReply
+	) {
+		if (req.session.get("userId")) {
+			const user = await UserModel.findOne({
+				_id: req.session.get("userId"),
+			})
+			return res.send(user)
+		}
+
+		const { code, state } = req.query
+		if (state !== req.session.get("state"))
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Invalid Request",
+				message: "State does not match set state",
+			})
+
+		const oauth = req.requestContext.get("oauthclient")
+		if (!oauth) throw "oauthclient did not exist on ctx"
+
+		const access = await oauth.tokenRequest({
+			code: code,
+			scope: OAUTHSCOPES,
+			grantType: "authorization_code",
+		})
+
+		const discordUser = await oauth.getUser(access.access_token)
+
+		const existingUser = await UserModel.findOne({
+			discordUserId: discordUser.id,
+		})
+		if (existingUser) {
+			req.session.set("userId", existingUser._id)
+			return res.send(existingUser)
+		}
+
+		const userAuth = await UserAuthModel.create({
+			discordUserId: discordUser.id,
+			access_token: access.access_token,
+			expires_at: new Date(Date.now() + access.expires_in * 1000), //expires_in is in seconds, not ms
+			refresh_token: access.refresh_token,
+		})
+
+		const user = await UserModel.create({
+			discordUserId: discordUser.id,
+			discordUserTag: `${discordUser.username}#${discordUser.discriminator}`,
+			userAuth: userAuth,
+		})
+
+		req.session.set("userId", user._id)
+		return res.send(user)
 	}
 }

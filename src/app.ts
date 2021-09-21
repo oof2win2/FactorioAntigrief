@@ -15,7 +15,8 @@ import fastifyFormBodyPlugin from "fastify-formbody"
 import { OAuth2Client } from "./utils/discord.js"
 import removeIdMiddleware from "./utils/removeId.js"
 import fastifyCookie from "fastify-cookie"
-import fastifySession from "@fastify/session"
+import fastifySession from "@mgcrea/fastify-session"
+import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
 
 const fastify: FastifyInstance = Fastify({})
 
@@ -55,14 +56,33 @@ fastify.register(fastifyFormBodyPlugin)
 // middlware to remove garbage from responses
 fastify.addHook("onSend", removeIdMiddleware)
 
+// yummy snackies
 fastify.register(fastifyCookie)
-fastify.register(fastifySession, { secret: ENV.SESSIONSECRET })
+fastify.register(fastifySession, {
+	secret: ENV.SESSIONSECRET,
+	cookie: {
+		maxAge: 1000 * 86400 * 365, // persist cookie for 1 year
+		// httpOnly: true,
+		// sameSite: "none", //
+		// secure: ENV.isProd, // cookie works only in https
+	},
+	// cookieName: ENV.COOKIENAME,
+	// saveUninitialized: true,
+	crypto: SODIUM_SECRETBOX,
+})
 
-declare module "fastify" {
-	interface Session extends Record<string, any> {
-		discordUserId?: string
+// typed session
+declare module "@mgcrea/fastify-session" {
+	interface SessionData {
+		userId?: string
 	}
 }
+
+// import secureSession from "fastify-secure-session"
+// fastify.register(secureSession, {
+// 	cookieName: ENV.COOKIENAME,
+// 	key: ENV.SESSIONSECRET,
+// })
 
 fastify.register(bootstrap, {
 	directory: path.resolve(__dirname, "routes"),

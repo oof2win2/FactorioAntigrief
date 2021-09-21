@@ -28,6 +28,8 @@ export class ApiAccessClass {
 	communityId!: string
 	@prop()
 	discordUserId!: string
+	@prop()
+	discordGuildId!: string
 	@prop({ default: false })
 	reports!: boolean
 	@prop({ default: false })
