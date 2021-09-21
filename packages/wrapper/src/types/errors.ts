@@ -19,8 +19,8 @@ export class MasterAuthenticationError extends Error {
 	}
 }
 export class GenericAPIError extends Error {
-	constructor(msg: string) {
-		super(msg)
+	constructor(msg: string | { error: string; message: string }) {
+		super(typeof msg == "string" ? msg : `${msg.error}: ${msg.message}`)
 	}
 }
 export class UnsuccessfulRevocationError extends Error {

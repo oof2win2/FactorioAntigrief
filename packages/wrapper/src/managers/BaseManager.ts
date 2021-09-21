@@ -14,17 +14,24 @@ export default class BaseManager<HoldsWithId extends Common> {
 			this.interval = setInterval(() => {
 				this.sweepCache.forEach((addedAt, id) => {
 					// if the age of addition + custom age (or 60mins) is larger than now then remove it
-					if (addedAt + (options.uncacheage || 1000*60*60) < Date.now()) {
+					if (
+						addedAt + (options.uncacheage || 1000 * 60 * 60) <
+						Date.now()
+					) {
 						this.sweepCache.sweep((_, item) => item === id)
 						this.cache.sweep((_, item) => item === id)
 					}
 				})
 			}, options.uncachems)
 		} else {
-			this.interval = setInterval(this.sweepCache.clear, 1000*60*15) // clear sweeping cache every 15 mins if its not used properly
+			this.interval = setInterval(this.sweepCache.clear, 1000 * 60 * 15) // clear sweeping cache every 15 mins if its not used properly
 		}
 	}
-	protected add(data: HoldsWithId, cache = true, {id}: AddOptions = {}): HoldsWithId  {
+	protected add(
+		data: HoldsWithId,
+		cache = true,
+		{ id }: AddOptions = {}
+	): HoldsWithId {
 		if (!data) return null
 		else if (data.id && cache) {
 			this.sweepCache.set(id || data.id, Date.now())
@@ -34,7 +41,7 @@ export default class BaseManager<HoldsWithId extends Common> {
 	}
 	protected removeFromCache(data: HoldsWithId): HoldsWithId {
 		if (!data) return null
-		this.cache.sweep(item => item.id == data.id)
+		this.cache.sweep((item) => item.id == data.id)
 		return data
 	}
 	destroy(): void {

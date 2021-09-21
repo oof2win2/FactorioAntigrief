@@ -12,7 +12,10 @@ export default class InfoManager extends BaseManager<Webhook> {
 		if (options.apikey) this.apikey = options.apikey
 		this.apiurl = options.apiurl
 	}
-	async addWebhook(webhookid: string, webhooktoken: string): Promise<Webhook> {
+	async addWebhook(
+		webhookid: string,
+		webhooktoken: string
+	): Promise<Webhook> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "POST",
 			body: JSON.stringify({
@@ -20,11 +23,14 @@ export default class InfoManager extends BaseManager<Webhook> {
 				token: webhooktoken,
 			}),
 			headers: { "content-type": "application/json" },
-		}).then(w=>w.json())
+		}).then((w) => w.json())
 		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
 		return add
-	} 
-	async removeWebhook(webhookid: string, webhooktoken: string): Promise<Webhook | null> {
+	}
+	async removeWebhook(
+		webhookid: string,
+		webhooktoken: string
+	): Promise<Webhook | null> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "DELETE",
 			body: JSON.stringify({
@@ -32,7 +38,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 				token: webhooktoken,
 			}),
 			headers: { "content-type": "application/json" },
-		}).then(w=>w.json())
+		}).then((w) => w.json())
 		return add
-	} 
+	}
 }
