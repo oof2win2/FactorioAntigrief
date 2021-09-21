@@ -1,3 +1,10 @@
+## [1.13.1] - [2021-09-21]
+
+### Changes
+
+-   Change in signup and login
+-   Renamed `fetchOAuthURL` to `getsignupurl`
+
 # [1.13.0] - [2021-09-19]
 
 ### Changes

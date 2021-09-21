@@ -21,13 +21,6 @@ export default class UserManager extends BaseManager<null> {
 
 		return fetched
 	}
-	async fetchOAuthURL(): Promise<URL> {
-		const fetched = await fetch(`${this.apiurl}/users/oauth2/url`).then(
-			(c) => c.json()
-		)
-		if (fetched.url) return new URL(fetched.url)
-		throw new GenericAPIError(fetched)
-	}
 
 	async addUserToCommunity(
 		discordUserId: string,
@@ -74,20 +67,25 @@ export default class UserManager extends BaseManager<null> {
 		return fetched
 	}
 
+	async getsignupurl(): Promise<string> {
+		const fetched = await fetch(`${this.apiurl}/users/signupurl`).then(
+			(c) => c.json()
+		)
+		if (fetched.error || !fetched.url) throw new GenericAPIError(fetched)
+		return fetched.url
+	}
+
 	async signup(code: string): Promise<User | null> {
 		const fetched = await fetch(
-			`${this.apiurl}/users/signup?code=${strictUriEncode(code)}`,
-			{
-				method: "POST",
-			}
+			`${this.apiurl}/users/signup?code=${strictUriEncode(code)}`
 		).then((c) => c.json())
 		if (fetched.error) throw new GenericAPIError(fetched)
 		return fetched
 	}
 	async login(): Promise<User | null> {
-		const fetched = await fetch(`${this.apiurl}/users/login`, {
-			method: "POST",
-		}).then((c) => c.json())
+		const fetched = await fetch(`${this.apiurl}/users/login`).then((c) =>
+			c.json()
+		)
 		if (fetched.error) throw new GenericAPIError(fetched)
 		return fetched
 	}
