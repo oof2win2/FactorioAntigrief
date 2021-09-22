@@ -17,8 +17,15 @@ module.exports = (client) => {
 					client.aliases.set(a, pull.config.name)
 				)
 		}
-	};
+	}
 	// This is where different command folders are loaded
 	// If you want to create a new category, add the category/folder name here
-	["basic", "rules", "communities", "reports", "profiles", "informatics"].forEach((x) => load(x))
+	;[
+		"basic",
+		"rules",
+		"communities",
+		"reports",
+		"profiles",
+		"informatics",
+	].forEach((x) => load(x))
 }

@@ -20,10 +20,11 @@ class XKCD extends Command {
 			requiredConfig: false,
 		})
 	}
-	async run (message, args) {
-		let search = args[0] && args[1]
-			? `http://xkcd.com/${args[1]}/info.0.json`
-			: "http://xkcd.com/info.0.json"
+	async run(message, args) {
+		let search =
+			args[0] && args[1]
+				? `http://xkcd.com/${args[1]}/info.0.json`
+				: "http://xkcd.com/info.0.json"
 		try {
 			fetch(search)
 				.then((res) => res.json())
@@ -36,7 +37,9 @@ class XKCD extends Command {
 
 					let embed = new MessageEmbed()
 						.setColor("GREEN")
-						.setDescription(alt ? alt : "*crickets* - No Description")
+						.setDescription(
+							alt ? alt : "*crickets* - No Description"
+						)
 						.setAuthor(`XKCD | ${safe_title} [${num}]`)
 						.setImage(img)
 						.setFooter(`Published ${day}/${month}/${year}`)

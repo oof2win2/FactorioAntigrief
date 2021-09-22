@@ -23,9 +23,11 @@ class AddWebhook extends Command {
 		if (!args[0]) return message.reply("Provide a Webhook URL")
 		message.delete()
 		message.reply("Message removed to prevent unauthorized webhook access")
-		
+
 		// discord webhook link to id and token separately
-		const [webhookID, webhookToken] = args[0].slice(args[0].indexOf("/api/webhooks")+14).split("/")
+		const [webhookID, webhookToken] = args[0]
+			.slice(args[0].indexOf("/api/webhooks") + 14)
+			.split("/")
 
 		try {
 			await this.client.fetchWebhook(webhookID, webhookToken)
@@ -33,11 +35,18 @@ class AddWebhook extends Command {
 			console.error(e)
 			return message.channel.send("Invalid webhook")
 		}
-		const webhook = await this.client.fagc.info.addWebhook(webhookID, webhookToken)
+		const webhook = await this.client.fagc.info.addWebhook(
+			webhookID,
+			webhookToken
+		)
 		if (webhook.guildId)
-			return message.reply("The webhook will recieve FAGC notifications from now on! Testing message has been sent")
+			return message.reply(
+				"The webhook will recieve FAGC notifications from now on! Testing message has been sent"
+			)
 		else if (webhook.error && webhook.error == "Forbidden")
-			return message.reply("You already have a webhook running in your server. You cannot have more than 1 webhook per server")
+			return message.reply(
+				"You already have a webhook running in your server. You cannot have more than 1 webhook per server"
+			)
 		else {
 			console.error(webhook, Date.now())
 			return message.reply("Error creating webhook")

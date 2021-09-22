@@ -16,16 +16,18 @@ class FetchReport extends Command {
 			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			ownerOnly: false,
 			cooldown: 3000,
-			requiredConfig: false
+			requiredConfig: false,
 		})
 	}
-	async run (message, args) {
+	async run(message, args) {
 		if (!args[0]) return message.reply("Provide a report to fetch")
 		const reportID = args[0]
-		
+
 		const report = await this.client.fagc.reports.fetchReport(reportID)
 		if (!report?.id)
-			return message.channel.send(`Report with ID \`${reportID}\` doesn't exist`)
+			return message.channel.send(
+				`Report with ID \`${reportID}\` doesn't exist`
+			)
 		if (report.error && report.description.includes("id expected ID"))
 			return message.reply(`\`${reportID}\` is not a proper report ID`)
 
@@ -42,7 +44,12 @@ class FetchReport extends Command {
 			{ name: "Proof", value: report.proof },
 			{ name: "Description", value: report.description },
 			{ name: "Automated", value: report.automated },
-			{ name: "Violated time", value: `<t:${Math.floor(report.reportedTime.valueOf()/1000)}>` }
+			{
+				name: "Violated time",
+				value: `<t:${Math.floor(
+					report.reportedTime.valueOf() / 1000
+				)}>`,
+			}
 		)
 		return message.channel.send(embed)
 	}

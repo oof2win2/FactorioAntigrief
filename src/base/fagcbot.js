@@ -16,7 +16,7 @@ class FAGCBot extends Client {
 
 		this.fagc = new FAGCWrapper({
 			apiurl: this.env.APIURL,
-			enableWebSocket: false
+			enableWebSocket: false,
 		})
 
 		this.commands = new Collection()
@@ -37,9 +37,11 @@ class FAGCBot extends Client {
 		if (lastTime < Date.now() - time) return false
 		return true
 	}
-	loadCommand(commandPath, commandName) { // load a command
+	loadCommand(commandPath, commandName) {
+		// load a command
 		try {
-			const props = new (require(`.${commandPath}${path.sep}${commandName}`))(this) // gets properties
+			const props =
+				new (require(`.${commandPath}${path.sep}${commandName}`))(this) // gets properties
 			props.config.location = commandPath // finds location
 			if (props.init) {
 				props.init(this)
@@ -53,7 +55,8 @@ class FAGCBot extends Client {
 			return `Unable to load command ${commandName}: ${e}`
 		}
 	}
-	async unloadCommand(commandPath, commandName) { // unload a command
+	async unloadCommand(commandPath, commandName) {
+		// unload a command
 		let command
 		if (this.commands.has(commandName)) {
 			command = this.commands.get(commandName)
@@ -66,14 +69,16 @@ class FAGCBot extends Client {
 		if (command.shutdown) {
 			await command.shutdown(this)
 		}
-		delete require.cache[require.resolve(`.${commandPath}${path.sep}${commandName}.js`)]
+		delete require.cache[
+			require.resolve(`.${commandPath}${path.sep}${commandName}.js`)
+		]
 		return false
 	}
 
 	async getFilteredRules(config) {
 		const allRules = await this.fagc.rules.fetchAll()
-		const filteredRules = allRules.filter(rule =>
-			config.ruleFilters.some(id => id === rule.id)
+		const filteredRules = allRules.filter((rule) =>
+			config.ruleFilters.some((id) => id === rule.id)
 		)
 		return filteredRules
 	}
