@@ -27,8 +27,7 @@ class GetIDRule extends Command {
 			return message.reply(`No rule with ID of \`${args[0]}\` exists`)
 		if (rule.error && rule.description.includes("id must be ID"))
 			return message.reply(`\`${args[0]}\` is not a valid rule`)
-		if (rule.error)
-			return message.reply(`Error: ${rule.description}`)
+		if (rule.error) return message.reply(`Error: ${rule.description}`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")

@@ -21,7 +21,10 @@ class GetUserById extends Command {
 	async run(message, args) {
 		const uid = args.shift()
 		const user = await this.client.users.fetch(uid)
-		if (!user && !user.id) return message.reply("This user could not be found. They may not exist")
+		if (!user && !user.id)
+			return message.reply(
+				"This user could not be found. They may not exist"
+			)
 		let embed = new MessageEmbed()
 			.setTitle("FAGC User Info")
 			.setColor(this.client.config.embeds.color)
@@ -30,9 +33,13 @@ class GetUserById extends Command {
 			.setAuthor("FAGC Community")
 			.setImage(user.avatarURL())
 		embed.addFields(
-			{name: "User's ID", value: user.id, inline:true},
-			{name: "User's tag", value: user.tag, inline:true},
-			{ name: "Joined Discord at", value: dateFormat(user.createdAt, "yyyy-mm-dd hh:MM:ss.l"), inline: true}
+			{ name: "User's ID", value: user.id, inline: true },
+			{ name: "User's tag", value: user.tag, inline: true },
+			{
+				name: "Joined Discord at",
+				value: dateFormat(user.createdAt, "yyyy-mm-dd hh:MM:ss.l"),
+				inline: true,
+			}
 		)
 		return message.reply(embed)
 	}

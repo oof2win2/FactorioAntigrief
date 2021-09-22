@@ -6,7 +6,7 @@ module.exports = {
 }
 
 /**
- * 
+ *
  * @param {Object} msg - Discord message
  * @param {Object} response - API error message
  * @param {String} response.error - API error name
@@ -15,27 +15,36 @@ module.exports = {
 async function handleErrors(msg, response) {
 	if (!msg.channel) return
 	switch (response.error) {
-	case "AuthenticationError": {
-		switch (response.description) {
-		case "API key is wrong":
-			return msg.channel.send("Error: API key has been set incorrectly.")
+		case "AuthenticationError": {
+			switch (response.description) {
+				case "API key is wrong":
+					return msg.channel.send(
+						"Error: API key has been set incorrectly."
+					)
+			}
+			break
 		}
-		break
-	}
-	default:
-		msg.channel.send(`Error \`${response.error}\`: \`${response.description}\``)
+		default:
+			msg.channel.send(
+				`Error \`${response.error}\`: \`${response.description}\``
+			)
 	}
 }
 
 /**
- * 
- * @param {Array} fields 
+ *
+ * @param {Array} fields
  * @param {object} embedMsgOptions
- * @param {embedMsgOptions.author} 
+ * @param {embedMsgOptions.author}
  * @param {object} options
  * @param {options.maxPageCount} maxPageCount - maximum number of things on the page
  */
-async function createPagedEmbed(fields, embedMsgOptions, message, options = {}) {
+async function createPagedEmbed(
+	fields,
+	embedMsgOptions,
+	message,
+	options = {}
+) {
 	if (!options.maxPageCount) options.maxPageCount = 25
 	if (options.maxPageCount > 25) options.maxPageCount = 25 // discord limit is 25 things per embed
 	let embed = new MessageEmbed(embedMsgOptions)
@@ -52,7 +61,9 @@ async function createPagedEmbed(fields, embedMsgOptions, message, options = {}) 
 		embedMsg = await embedMsg.edit(null, embed)
 	}
 	const removeReaction = async (emoteName) => {
-		embedMsg.reactions.cache.find(r => r.emoji.name === emoteName).users.remove(message.author.id)
+		embedMsg.reactions.cache
+			.find((r) => r.emoji.name === emoteName)
+			.users.remove(message.author.id)
 	}
 	// if there is only 1 page then no sense to make arrows, just slows other reactions down
 	if (maxPages) {
@@ -60,31 +71,33 @@ async function createPagedEmbed(fields, embedMsgOptions, message, options = {}) 
 		await embedMsg.react("➡️")
 	}
 	await embedMsg.react("🗑️")
-	
+
 	const reactionFilter = (reaction, user) => user.id === message.author.id
 
-	const reactionCollector = embedMsg.createReactionCollector(reactionFilter, { timer: 120000 })
+	const reactionCollector = embedMsg.createReactionCollector(reactionFilter, {
+		timer: 120000,
+	})
 
 	reactionCollector.on("collect", (reaction) => {
 		switch (reaction.emoji.name) {
-		case "⬅️": {
-			page--
-			removeReaction("⬅️") // remove the user's reaction no matter what
-			if (page == -1) page = 0
-			else setData()
-			break
-		}
-		case "➡️": {
-			page++
-			removeReaction("➡️") // remove the user's reaction no matter what
-			if (page > maxPages) page = maxPages
-			else setData()
-			break
-		}
-		case "🗑️": {
-			reactionCollector.stop()
-			embedMsg.delete()
-		}
+			case "⬅️": {
+				page--
+				removeReaction("⬅️") // remove the user's reaction no matter what
+				if (page == -1) page = 0
+				else setData()
+				break
+			}
+			case "➡️": {
+				page++
+				removeReaction("➡️") // remove the user's reaction no matter what
+				if (page > maxPages) page = maxPages
+				else setData()
+				break
+			}
+			case "🗑️": {
+				reactionCollector.stop()
+				embedMsg.delete()
+			}
 		}
 	})
 }

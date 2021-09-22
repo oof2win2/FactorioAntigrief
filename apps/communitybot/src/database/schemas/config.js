@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const ConfigSchema = new mongoose.Schema({
 	communityname: {
 		type: String,
-		required: true
+		required: true,
 	},
 	communityId: String, // the community ID in the fagc database
 	guildid: {
@@ -24,7 +24,7 @@ const ConfigSchema = new mongoose.Schema({
 		setConfig: { type: String, default: "" },
 		setRules: { type: String, default: "" },
 		setCommunities: { type: String, default: "" },
-	}
+	},
 })
 
 module.exports = mongoose.model("config", ConfigSchema)

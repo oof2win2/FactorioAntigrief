@@ -24,15 +24,17 @@ class Revoke extends Command {
 		})
 	}
 	async run(message, args, config) {
-		if (!config.apikey)
-			return message.reply("No API key set")
-        
-		if (!args[0]) return message.reply("Provide a ID for the report to revoke")
+		if (!config.apikey) return message.reply("No API key set")
+
+		if (!args[0])
+			return message.reply("Provide a ID for the report to revoke")
 		const reportID = args.shift()
 
 		const report = await this.client.fagc.reports.fetchReport(reportID)
 		if (!report?.id)
-			return message.channel.send(`Report with ID \`${reportID}\` doesn't exist`)
+			return message.channel.send(
+				`Report with ID \`${reportID}\` doesn't exist`
+			)
 		if (report.error && report.description.includes("id expected ID"))
 			return message.reply(`\`${reportID}\` is not a proper report ID`)
 
@@ -41,7 +43,9 @@ class Revoke extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Report \`${report.id}\` of player \`${report.playername}\` in community ${config.communityname}`)
+			.setDescription(
+				`FAGC Report \`${report.id}\` of player \`${report.playername}\` in community ${config.communityname}`
+			)
 		const creator = await this.client.users.fetch(report.adminId)
 		embed.addFields(
 			{ name: "Admin", value: `<@${creator.id}> | ${creator.tag}` },
@@ -53,12 +57,19 @@ class Revoke extends Command {
 		)
 		message.channel.send(embed)
 
-		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this report?")
-		if (!confirm)
-			return message.channel.send("Report revocation cancelled")
+		const confirm = await getConfirmationMessage(
+			message,
+			"Are you sure you want to revoke this report?"
+		)
+		if (!confirm) return message.channel.send("Report revocation cancelled")
 
 		try {
-			const response = await this.client.fagc.reports.revoke(reportID, message.author.id, true, {apikey: config.apikey})
+			const response = await this.client.fagc.reports.revoke(
+				reportID,
+				message.author.id,
+				true,
+				{ apikey: config.apikey }
+			)
 
 			if (response.id && response.revokedBy && response.revokedTime) {
 				return message.channel.send("Report revoked!")
@@ -66,7 +77,8 @@ class Revoke extends Command {
 				return handleErrors(message, response)
 			}
 		} catch (error) {
-			if (error instanceof AuthenticationError) return message.channel.send("Your API key is set incorrectly")
+			if (error instanceof AuthenticationError)
+				return message.channel.send("Your API key is set incorrectly")
 			message.channel.send("Error revoking report. Please check logs.")
 			throw error
 		}

@@ -23,7 +23,9 @@ class Stats extends Command {
 			const sec = Math.floor((ms / 1000) % 60).toString()
 			const min = Math.floor((ms / (1000 * 60)) % 60).toString()
 			const hrs = Math.floor((ms / (1000 * 60 * 60)) % 24).toString()
-			const days = Math.floor((ms / (1000 * 60 * 60 * 24)) % 60).toString()
+			const days = Math.floor(
+				(ms / (1000 * 60 * 60 * 24)) % 60
+			).toString()
 			return `${days} days, ${hrs} hrs, ${min} mins, ${sec} secs`
 		}
 
@@ -39,13 +41,21 @@ class Stats extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 		embed.addFields(
-			{ name: "Memory Usage", value: `${Math.round(memUsage * 100) / 100} MB`, inline: true },
-			{ name: "Uptime", value: duration(this.client.uptime), inline: true },
+			{
+				name: "Memory Usage",
+				value: `${Math.round(memUsage * 100) / 100} MB`,
+				inline: true,
+			},
+			{
+				name: "Uptime",
+				value: duration(this.client.uptime),
+				inline: true,
+			},
 			{ name: "Total Users", value: users, inline: true },
 			{ name: "Total Channels", value: channels, inline: true },
 			{ name: "Total Servers", value: servers, inline: true },
 			{ name: "NodeJS Version", value: nodeVersion, inline: true },
-			{ name: "DJS Version", value: `v${djsVersion}`, inline: true },
+			{ name: "DJS Version", value: `v${djsVersion}`, inline: true }
 		)
 		message.channel.send(embed)
 	}

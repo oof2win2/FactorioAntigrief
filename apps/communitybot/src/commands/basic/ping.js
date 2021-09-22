@@ -17,7 +17,7 @@ class Ping extends Command {
 			requiredConfig: false,
 		})
 	}
-	async run (message) {
+	async run(message) {
 		let wsPing = this.client.ws.ping
 
 		message.channel.send("Pinging...").then(async (m) => {
@@ -25,7 +25,9 @@ class Ping extends Command {
 			const beforeFetch = Date.now()
 			await fetch(this.client.env.APIURL)
 			const apilatency = Date.now() - beforeFetch
-			m.edit(`Bot Latency: \`${ping}ms\`\nDiscord API Latency: \`${wsPing}ms\`\nFAGC API Latency: \`${apilatency}ms\``)
+			m.edit(
+				`Bot Latency: \`${ping}ms\`\nDiscord API Latency: \`${wsPing}ms\`\nFAGC API Latency: \`${apilatency}ms\``
+			)
 		})
 	}
 }

@@ -4,7 +4,8 @@ class AddWebhook extends Command {
 	constructor(client) {
 		super(client, {
 			name: "createwebhook",
-			description: "Create a webhook in specified channel to send FAGC notifications to",
+			description:
+				"Create a webhook in specified channel to send FAGC notifications to",
 			aliases: [],
 			usage: "[channel]",
 			examples: ["{{p}}createwebhook #notifications"],
@@ -20,7 +21,8 @@ class AddWebhook extends Command {
 		})
 	}
 	async run(message) {
-		if (!message.mentions.channels.first()) return message.channel.send("Channel not provided!")
+		if (!message.mentions.channels.first())
+			return message.channel.send("Channel not provided!")
 		const channel = message.mentions.channels.first()
 		const webhook = await channel.createWebhook("FAGC Notifier")
 		try {
@@ -28,10 +30,14 @@ class AddWebhook extends Command {
 			message.channel.send("Webhook created successfully!")
 		} catch (e) {
 			await webhook.delete()
-			if (e.message.includes("Forbidden")) 
-				return message.channel.send("You already have a webhook in this guild")
+			if (e.message.includes("Forbidden"))
+				return message.channel.send(
+					"You already have a webhook in this guild"
+				)
 			console.error(e)
-			return message.channel.send("An error occured. Please contact developers")
+			return message.channel.send(
+				"An error occured. Please contact developers"
+			)
 		}
 	}
 }

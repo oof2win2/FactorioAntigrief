@@ -1,5 +1,8 @@
 const { MessageEmbed } = require("discord.js")
-const { getMessageResponse, getConfirmationMessage } = require("../../utils/responseGetter")
+const {
+	getMessageResponse,
+	getConfirmationMessage,
+} = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
 
 class Setup extends Command {
@@ -20,16 +23,34 @@ class Setup extends Command {
 			customPermissions: ["setConfig"],
 		})
 	}
-	async run (message, _, config) {
-		if (!config.apikey) return message.reply("No API key set. Set one with `fagc!setapikey`")
+	async run(message, _, config) {
+		if (!config.apikey)
+			return message.reply(
+				"No API key set. Set one with `fagc!setapikey`"
+			)
 
-		message.channel.send("Hello! This is the bot setup process for this server")
+		message.channel.send(
+			"Hello! This is the bot setup process for this server"
+		)
 
-		const name = (await getMessageResponse(message, "Please type in this community's name"))?.content
+		const name = (
+			await getMessageResponse(
+				message,
+				"Please type in this community's name"
+			)
+		)?.content
 		if (!name) return message.reply("No community name!")
 
-		const contactID = (await getMessageResponse(message, "Please ping the user to contact in this community"))?.mentions.users.first()?.id
-		if (contactID === undefined) return message.channel.send("Didn't send contact in time or invalid contact mention")
+		const contactID = (
+			await getMessageResponse(
+				message,
+				"Please ping the user to contact in this community"
+			)
+		)?.mentions.users.first()?.id
+		if (contactID === undefined)
+			return message.channel.send(
+				"Didn't send contact in time or invalid contact mention"
+			)
 		const contact = await this.client.users.fetch(contactID)
 		if (!contact) return message.reply("Contact user is invalid!")
 
@@ -46,36 +67,48 @@ class Setup extends Command {
 			.setDescription("Your FAGC Configuration")
 		embed.addFields(
 			{ name: "Community name", value: name },
-			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}` },
+			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}` }
 			// { name: "Moderator role", value: `<@&${role}>` },
 		)
 		message.channel.send(embed)
 
-		const confirm = await getConfirmationMessage(message, "Are you sure you want these settings applied?")
+		const confirm = await getConfirmationMessage(
+			message,
+			"Are you sure you want these settings applied?"
+		)
 		if (!confirm)
 			return message.channel.send("Community configuration cancelled")
-		
+
 		try {
-			const updatedConfig = await this.client.fagc.communities.setConfig({
-				communityname: name,
-				guildId: message.guild.id,
-				contact: contact.id,
-				// moderatorRoleId: role,
-				ruleFilters: [],
-				trustedCommunities: [],
-			}, {
-				apikey: config.apikey
-			})
-			
+			const updatedConfig = await this.client.fagc.communities.setConfig(
+				{
+					communityname: name,
+					guildId: message.guild.id,
+					contact: contact.id,
+					// moderatorRoleId: role,
+					ruleFilters: [],
+					trustedCommunities: [],
+				},
+				{
+					apikey: config.apikey,
+				}
+			)
+
 			if (updatedConfig.contact == contact.id)
-				return message.channel.send("Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)")
+				return message.channel.send(
+					"Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)"
+				)
 			else {
 				console.error("setup", config)
-				return message.channel.send("Configuration unsuccessful. Please check logs")
+				return message.channel.send(
+					"Configuration unsuccessful. Please check logs"
+				)
 			}
 		} catch (error) {
 			console.error("setup", error)
-			return message.channel.send("Error setting configuration. Please check logs.")
+			return message.channel.send(
+				"Error setting configuration. Please check logs."
+			)
 		}
 	}
 }
