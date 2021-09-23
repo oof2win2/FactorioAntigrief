@@ -2,6 +2,7 @@ const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
 const { AuthenticationError } = require("fagc-api-wrapper")
+const ConfigModel = require("../../database/schemas/config")
 const { createPagedEmbed } = require("../../utils/functions")
 
 class SetRuleFilters extends Command {
@@ -81,16 +82,31 @@ class SetRuleFilters extends Command {
 				if (!confirm)
 					return message.channel.send("Rule setting cancelled")
 
-				const request = await this.client.fagc.communities.setConfig(
-					{ ruleFilters },
-					{ apikey: config.apikey }
-				)
+				if (config.apikey) {
+					const request =
+						await this.client.fagc.communities.setConfig(
+							{ ruleFilters },
+							{ apikey: config.apikey }
+						)
 
-				if (request.guildId === message.guild.id)
-					return message.channel.send(
-						"Rules have successfully been set"
+					if (request.guildId === message.guild.id)
+						return message.channel.send(
+							"Rules have successfully been set"
+						)
+					throw request
+				} else {
+					const request = await ConfigModel.findOneAndUpdate(
+						{ guildId: message.guild.id },
+						{ ruleFilters: ruleFilters },
+						{ new: true }
 					)
-				throw request
+
+					if (request.guildId === message.guild.id)
+						return message.channel.send(
+							"Rules have successfully been set"
+						)
+					throw request
+				}
 			} catch (error) {
 				if (error instanceof AuthenticationError)
 					return message.channel.send(
