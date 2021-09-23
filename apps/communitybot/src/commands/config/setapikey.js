@@ -26,6 +26,9 @@ class SetAPIKey extends Command {
 				"You must provide your API key as a parameter"
 			)
 		message.delete()
+		message.channel.send(
+			`${message.author} Message removed to prevent unauthorized API access`
+		)
 		const apikey = args[0]
 
 		try {
