@@ -8,7 +8,10 @@ class AddWebhook extends Command {
 				"Remove a webhook from a specified channel to stop sending FAGC notifications to",
 			aliases: [],
 			usage: "[channel]",
-			examples: ["{{p}}deletewebhook #notifications"],
+			examples: [
+				"{{p}}deletewebhook #notifications",
+				"{{p}}deletewebhook",
+			],
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
@@ -21,9 +24,7 @@ class AddWebhook extends Command {
 		})
 	}
 	async run(message) {
-		if (!message.mentions.channels.first())
-			return message.channel.send("Channel not provided!")
-		const channel = message.mentions.channels.first()
+		const channel = message.mentions.channels.first() || message.channel
 		const webhooks = await channel
 			.fetchWebhooks()
 			.then((webhooks) =>

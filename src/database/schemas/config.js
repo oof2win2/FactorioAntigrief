@@ -6,7 +6,7 @@ const ConfigSchema = new mongoose.Schema({
 		required: true,
 	},
 	communityId: String, // the community ID in the fagc database
-	guildid: {
+	guildId: {
 		type: String,
 		required: true,
 	},
@@ -15,7 +15,7 @@ const ConfigSchema = new mongoose.Schema({
 		required: true,
 	},
 	apikey: String,
-	moderatorroleId: String,
+	moderatorRoleId: String,
 	trustedCommunities: [String],
 	ruleFilters: [String],
 	roles: {

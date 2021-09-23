@@ -7,8 +7,11 @@ class AddWebhook extends Command {
 			description:
 				"Create a webhook in specified channel to send FAGC notifications to",
 			aliases: [],
-			usage: "[channel]",
-			examples: ["{{p}}createwebhook #notifications"],
+			usage: "(channel or current channel)",
+			examples: [
+				"{{p}}createwebhook #notifications",
+				"{{p}}createwebhook",
+			],
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
@@ -21,9 +24,7 @@ class AddWebhook extends Command {
 		})
 	}
 	async run(message) {
-		if (!message.mentions.channels.first())
-			return message.channel.send("Channel not provided!")
-		const channel = message.mentions.channels.first()
+		const channel = message.mentions.channels.first() || message.channel
 		const webhook = await channel.createWebhook("FAGC Notifier")
 		try {
 			await this.client.fagc.info.addWebhook(webhook.id, webhook.token)
