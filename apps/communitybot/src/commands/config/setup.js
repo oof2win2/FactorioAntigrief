@@ -4,6 +4,7 @@ const {
 	getConfirmationMessage,
 } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
+const ConfigModel = require("../../database/schemas/config")
 
 class Setup extends Command {
 	constructor(client) {
@@ -24,11 +25,6 @@ class Setup extends Command {
 		})
 	}
 	async run(message, _, config) {
-		if (!config.apikey)
-			return message.reply(
-				"No API key set. Set one with `fagc!setapikey`"
-			)
-
 		message.channel.send(
 			"Hello! This is the bot setup process for this server"
 		)
@@ -54,12 +50,6 @@ class Setup extends Command {
 		const contact = await this.client.users.fetch(contactID)
 		if (!contact) return message.reply("Contact user is invalid!")
 
-		// let roleMessage = (await getMessageResponse(message, "Please ping (or type in the ID of) your role of people which can create reports"))
-		// let role
-		// if (roleMessage.mentions.roles.first()) role = roleMessage.mentions.roles.first().id
-		// else role = roleMessage.content
-		// if (message.guild.roles.cache.get(role) === undefined) return message.channel.send("Role is not correct")
-
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Config")
 			.setAuthor(`${this.client.user.username} | oof2win2#3149`)
@@ -68,7 +58,6 @@ class Setup extends Command {
 		embed.addFields(
 			{ name: "Community name", value: name },
 			{ name: "Contact", value: `<@${contact.id}> | ${contact.tag}` }
-			// { name: "Moderator role", value: `<@&${role}>` },
 		)
 		message.channel.send(embed)
 
@@ -80,29 +69,55 @@ class Setup extends Command {
 			return message.channel.send("Community configuration cancelled")
 
 		try {
-			const updatedConfig = await this.client.fagc.communities.setConfig(
-				{
-					communityname: name,
-					guildId: message.guild.id,
-					contact: contact.id,
-					// moderatorRoleId: role,
-					ruleFilters: [],
-					trustedCommunities: [],
-				},
-				{
-					apikey: config.apikey,
-				}
-			)
+			if (config.apikey) {
+				const updatedConfig =
+					await this.client.fagc.communities.setConfig(
+						{
+							communityname: name,
+							guildId: message.guild.id,
+							contact: contact.id,
+							// moderatorRoleId: role,
+							ruleFilters: [],
+							trustedCommunities: [],
+						},
+						{
+							apikey: config.apikey,
+						}
+					)
 
-			if (updatedConfig.contact == contact.id)
-				return message.channel.send(
-					"Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)"
+				if (updatedConfig.contact == contact.id)
+					return message.channel.send(
+						"Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)"
+					)
+				else {
+					console.error("setup", updatedConfig)
+					return message.channel.send(
+						"Configuration unsuccessful. Please check logs"
+					)
+				}
+			} else {
+				const updatedConfig = await ConfigModel.findOneAndUpdate(
+					{ guildId: message.guild.id },
+					{
+						communityname: name,
+						guildId: message.guild.id,
+						contact: contact.id,
+						// moderatorRoleId: role,
+						ruleFilters: [],
+						trustedCommunities: [],
+					},
+					{ upsert: true, new: true }
 				)
-			else {
-				console.error("setup", config)
-				return message.channel.send(
-					"Configuration unsuccessful. Please check logs"
-				)
+				if (updatedConfig.contact == contact.id)
+					return message.channel.send(
+						"Community configured successfully! Please run `fagc!setsetcommunityfilters` and `fagc!setrulefilters` to enable more commands (and set those filters)"
+					)
+				else {
+					console.error("setup", updatedConfig)
+					return message.channel.send(
+						"Configuration unsuccessful. Please check logs"
+					)
+				}
 			}
 		} catch (error) {
 			console.error("setup", error)

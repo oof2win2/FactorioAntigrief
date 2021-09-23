@@ -2,6 +2,7 @@ const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
 const { getConfirmationMessage } = require("../../utils/responseGetter")
+const ConfigModel = require("../../database/schemas/config")
 
 class SetFilters extends Command {
 	constructor(client) {
@@ -87,19 +88,33 @@ class SetFilters extends Command {
 					"Setting of trusted communities has been cancelled"
 				)
 
-			const request = await this.client.fagc.communities.setConfig(
-				{ trustedCommunities },
-				{ apikey: config.apikey }
-			)
-			if (request.guildId)
-				return message.channel.send(
-					"Trusted communities have successfully been set"
+			if (config.apikey) {
+				const request = await this.client.fagc.communities.setConfig(
+					{ trustedCommunities },
+					{ apikey: config.apikey }
+				)
+				if (request.guildId)
+					return message.channel.send(
+						"Trusted communities have successfully been set"
+					)
+
+				message.channel.send(
+					"An error has occured. Please try again in some time"
+				)
+				throw request
+			} else {
+				const request = await ConfigModel.findOneAndUpdate(
+					{ guildId: message.guild.id },
+					{ trustedCommunities: trustedCommunities },
+					{ new: true }
 				)
 
-			message.channel.send(
-				"An error has occured. Please try again in some time"
-			)
-			throw request
+				if (request.guildId === message.guild.id)
+					return message.channel.send(
+						"Rules have successfully been set"
+					)
+				throw request
+			}
 		}
 
 		let collector = await message.channel.createMessageCollector(
