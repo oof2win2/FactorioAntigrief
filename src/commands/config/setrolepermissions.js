@@ -11,7 +11,7 @@ class SetAPIKey extends Command {
 		super(client, {
 			name: "setrolepermissions",
 			description: "Set role permissions for command access",
-			aliases: ["setroleperms", "setperms", "setpermissions"],
+			aliases: ["setroleperms", "setroleperm", "setperms", "setperm", "setpermissions", "setpermissions"],
 			category: "config",
 			usage: "([option] [role])",
 			examples: ["{{p}}setrolepermissions reports 841761018380288100"],

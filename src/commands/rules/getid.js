@@ -6,7 +6,7 @@ class GetIDRule extends Command {
 		super(client, {
 			name: "getruleid",
 			description: "Gets a rule by its ID",
-			aliases: [],
+			aliases: ["getrule"],
 			usage: "[ruleID]",
 			examples: ["{{p}}getruleid 605ee7eae3585679cb881c7b"],
 			category: "rules",

@@ -1,6 +1,7 @@
 const { Client, Collection } = require("discord.js")
 const path = require("path")
 const { FAGCWrapper } = require("fagc-api-wrapper")
+const ConfigModel = require("../database/schemas/config")
 const ENV = require("../utils/env")
 
 class FAGCBot extends Client {
@@ -81,6 +82,15 @@ class FAGCBot extends Client {
 			config.ruleFilters.some((id) => id === rule.id)
 		)
 		return filteredRules
+	}
+
+	async saveGuildConfig(config) {
+		if (config.apikey) return this.fagc.communities.setConfig(config)
+		return await ConfigModel.findOneAndUpdate(
+			{ guildId: config.guildId },
+			config,
+			{ upsert: true, new: true }
+		)
 	}
 }
 module.exports = FAGCBot
