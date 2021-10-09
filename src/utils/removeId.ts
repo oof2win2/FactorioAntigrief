@@ -9,16 +9,19 @@ export default async function (
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const editResponse = (response: any) => {
-		const removeable = ["_id", "__v", "apikey"]
+		const removeable = ["_id", "__v", "apikey", "userAuth"]
 		if (response && response.toObject) response = response.toObject()
 		for (const prop in response) {
 			if (removeable.includes(prop)) {
 				delete response[prop]
 			} else {
 				if (response[prop]) {
-					if (response[prop].toObject) response[prop] = response[prop].toObject()
-					if (Array.isArray(response[prop])) response[prop] = editResponse(response[prop])
-					if (typeof (response[prop]) == "object") response[prop] = editResponse(response[prop])
+					if (response[prop].toObject)
+						response[prop] = response[prop].toObject()
+					if (Array.isArray(response[prop]))
+						response[prop] = editResponse(response[prop])
+					if (typeof response[prop] == "object")
+						response[prop] = editResponse(response[prop])
 				}
 			}
 		}

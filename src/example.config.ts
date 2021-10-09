@@ -14,7 +14,7 @@ const config: ApiConfig = {
 			dbName: "bot",
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
-		}
-	]
+		},
+	],
 }
 export default config

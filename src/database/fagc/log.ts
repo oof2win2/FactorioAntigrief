@@ -2,16 +2,18 @@ import database from "../database.js"
 import { getUserStringFromID } from "../../utils/functions-databaseless.js"
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 
-const connection = database.connections.find((connection) => connection?.n === "fagc")?.c
+const connection = database.connections.find(
+	(connection) => connection?.n === "fagc"
+)?.c
 
 @modelOptions({
 	schemaOptions: {
 		collection: "logs",
 	},
 	options: {
-		allowMixed: 0 // allow mixed types
+		allowMixed: 0, // allow mixed types
 	},
-	existingMongoose: connection
+	existingMongoose: connection,
 })
 @pre<LogClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())

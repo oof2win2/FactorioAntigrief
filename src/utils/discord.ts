@@ -1,12 +1,20 @@
 import { Client } from "discord.js"
+import OAuthClient from "discord-oauth2"
 import ENV from "./env.js"
+import { OAUTHSCOPES } from "../consts.js"
 
 // this is so that the client can be accessed from any file
-const client = new Client({
-	intents: ["GUILD_MEMBERS", "GUILDS"]
+export const client = new Client({
+	intents: ["GUILD_MEMBERS", "GUILDS"],
 })
 client.login(ENV.DISCORD_BOTTOKEN)
-export default client
+
+export const OAuth2Client = new OAuthClient({
+	clientId: ENV.APPID,
+	clientSecret: ENV.APPSECRET,
+
+	redirectUri: ENV.APPREDIRECTURI,
+})
 
 /**
  * Checks if a string is a valid Discord user ID. Returns false if the user is not in a server with the bot
