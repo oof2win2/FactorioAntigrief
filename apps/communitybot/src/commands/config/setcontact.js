@@ -7,7 +7,10 @@ class Setcontact extends Command {
 			description: "Set your community's contact",
 			aliases: [],
 			usage: ["{{p}}setcontact [user]"],
-			examples: ["{{p}}setcontact oof2win2#3149", "{{p}}setcontact 429696038266208258"],
+			examples: [
+				"{{p}}setcontact oof2win2#3149",
+				"{{p}}setcontact 429696038266208258",
+			],
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
@@ -20,16 +23,23 @@ class Setcontact extends Command {
 		})
 	}
 	async run(message, args, config) {
-		if (!config.apikey) return message.channel.send("You must have an API key set for this command")
+		if (!config.apikey)
+			return message.channel.send(
+				"You must have an API key set for this command"
+			)
 		if (!args[0]) return message.channel.send("No user provided")
-		const user = message.mentions.users.first() || await this.client.users.fetch(args[0])
+		const user =
+			message.mentions.users.first() ||
+			(await this.client.users.fetch(args[0]))
 		if (!user) return message.channel.send("User is invalid")
 
 		await this.client.saveGuildConfig({
 			...config.toObject(),
-			contact: user.id
+			contact: user.id,
 		})
-		return message.channel.send("Contact saved successfully. Changes may take a few minutes to take effect")
+		return message.channel.send(
+			"Contact saved successfully. Changes may take a few minutes to take effect"
+		)
 	}
 }
 module.exports = Setcontact

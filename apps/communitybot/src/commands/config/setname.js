@@ -20,14 +20,20 @@ class Setcontact extends Command {
 		})
 	}
 	async run(message, args, config) {
-		if (!config.apikey) return message.channel.send("You must have an API key set for this command")
-		if (!args[0] || !args.join(" ")) return message.channel.send("No name provided")
-		
+		if (!config.apikey)
+			return message.channel.send(
+				"You must have an API key set for this command"
+			)
+		if (!args[0] || !args.join(" "))
+			return message.channel.send("No name provided")
+
 		await this.client.saveGuildConfig({
 			...config.toObject(),
-			communityname: args.join(" ")
+			communityname: args.join(" "),
 		})
-		return message.channel.send("Name saved successfully. Changes may take a few minutes to take effect")
+		return message.channel.send(
+			"Name saved successfully. Changes may take a few minutes to take effect"
+		)
 	}
 }
 module.exports = Setcontact

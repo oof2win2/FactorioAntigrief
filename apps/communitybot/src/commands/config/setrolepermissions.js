@@ -10,7 +10,14 @@ class SetAPIKey extends Command {
 		super(client, {
 			name: "setrolepermissions",
 			description: "Set role permissions for command access",
-			aliases: ["setroleperms", "setroleperm", "setperms", "setperm", "setpermissions", "setpermissions"],
+			aliases: [
+				"setroleperms",
+				"setroleperm",
+				"setperms",
+				"setperm",
+				"setpermissions",
+				"setpermissions",
+			],
 			category: "config",
 			usage: "([option] [role])",
 			examples: ["{{p}}setrolepermissions reports 841761018380288100"],
@@ -119,8 +126,13 @@ class SetAPIKey extends Command {
 				const newConfig = await this.client.saveGuildConfig(guildConfig)
 				console.log(guildConfig, newConfig, reports.id)
 				if (newConfig.roles.reports == reports.id)
-					return message.channel.send("Role setting successfully applied! Changes may take a few minutes to take effect")
-				else return message.channel.send("An error occured. Please contact developers")
+					return message.channel.send(
+						"Role setting successfully applied! Changes may take a few minutes to take effect"
+					)
+				else
+					return message.channel.send(
+						"An error occured. Please contact developers"
+					)
 			} catch (e) {
 				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
@@ -165,8 +177,13 @@ class SetAPIKey extends Command {
 				guildConfig.roles[args[0]] = role.id
 				const newConfig = await this.client.saveGuildConfig(guildConfig)
 				if (newConfig.roles[args[0]] == role.id)
-					return message.channel.send("Role setting successfully applied! Changes may take a few minutes to take effect")
-				else return message.channel.send("An error occured. Please contact developers")
+					return message.channel.send(
+						"Role setting successfully applied! Changes may take a few minutes to take effect"
+					)
+				else
+					return message.channel.send(
+						"An error occured. Please contact developers"
+					)
 			} catch (e) {
 				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
@@ -206,9 +223,13 @@ class SetAPIKey extends Command {
 				guildConfig.roles[args[0]] = role.id
 				const newConfig = await this.client.saveGuildConfig(guildConfig)
 				if (newConfig.roles[args[0]] == role.id)
-					return message.channel.send("Role setting successfully applied! Changes may take a few minutes to take effect")
-				else return message.channel.send("An error occured. Please contact developers")
-				
+					return message.channel.send(
+						"Role setting successfully applied! Changes may take a few minutes to take effect"
+					)
+				else
+					return message.channel.send(
+						"An error occured. Please contact developers"
+					)
 			} catch (e) {
 				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")

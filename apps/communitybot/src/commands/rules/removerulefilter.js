@@ -10,7 +10,10 @@ class RemoveRuleFilter extends Command {
 			description:
 				"Removes a rule filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			aliases: ["addrulefilters"],
-			examples: ["{{p}}removerulefilter XuciBx7", "{{p}}removerulefilter XuciBx7 XuciBx9 XuciBx/"],
+			examples: [
+				"{{p}}removerulefilter XuciBx7",
+				"{{p}}removerulefilter XuciBx7 XuciBx9 XuciBx/",
+			],
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,
@@ -24,7 +27,9 @@ class RemoveRuleFilter extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0]) return message.channel.send("No rules provided")
-		await Promise.all(args.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid)))
+		await Promise.all(
+			args.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid))
+		)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")
@@ -34,11 +39,13 @@ class RemoveRuleFilter extends Command {
 			.setDescription(
 				"Remove Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
 			)
-		const rules = args.map((ruleid) => this.client.fagc.rules.resolveID(ruleid))
-			.filter(r=>r)
-			.filter(r=>config.ruleFilters.includes(r.id))
-		
-		if (!rules.length) return message.channel.send("No valid rules to be removed")
+		const rules = args
+			.map((ruleid) => this.client.fagc.rules.resolveID(ruleid))
+			.filter((r) => r)
+			.filter((r) => config.ruleFilters.includes(r.id))
+
+		if (!rules.length)
+			return message.channel.send("No valid rules to be removed")
 
 		const ruleFields = rules.map((rule) => {
 			return {
@@ -48,12 +55,17 @@ class RemoveRuleFilter extends Command {
 		})
 		createPagedEmbed(ruleFields, embed, message, { maxPageCount: 5 })
 
-		const confirm = await getConfirmationMessage(message, "Are you sure you want to remove these rules from your rule filters?")
+		const confirm = await getConfirmationMessage(
+			message,
+			"Are you sure you want to remove these rules from your rule filters?"
+		)
 		if (!confirm) return message.channel.send("Removing rules cancelled")
-		
-		const ruleIDs = rules.map(rule => rule.id)
-		config.ruleFilters = config.ruleFilters.filter((ruleFilter) => !ruleIDs.includes(ruleFilter))
-		
+
+		const ruleIDs = rules.map((rule) => rule.id)
+		config.ruleFilters = config.ruleFilters.filter(
+			(ruleFilter) => !ruleIDs.includes(ruleFilter)
+		)
+
 		await this.client.saveGuildConfig(config)
 		return message.channel.send("Successfully removed filtered rules")
 	}

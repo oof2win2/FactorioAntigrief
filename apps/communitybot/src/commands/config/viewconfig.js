@@ -24,7 +24,9 @@ class ViewConfig extends Command {
 			.setAuthor(`${this.client.user.username} | oof2win2#3149`)
 			.setTimestamp()
 			.setDescription("Your FAGC Configuration")
-		const community = await this.client.fagc.communities.fetchCommunity(config.communityId)
+		const community = await this.client.fagc.communities.fetchCommunity(
+			config.communityId
+		)
 		embed.addFields(
 			{
 				name: "Community name",
@@ -33,7 +35,9 @@ class ViewConfig extends Command {
 			},
 			{
 				name: "Community contact",
-				value: community ? `<@${community.contact}> | ${community.contact}` : "Community does not exist",
+				value: community
+					? `<@${community.contact}> | ${community.contact}`
+					: "Community does not exist",
 				inline: true,
 			},
 			{
@@ -43,27 +47,37 @@ class ViewConfig extends Command {
 			},
 			{
 				name: "Report management",
-				value: config.roles.reports ? `<@&${config.roles.reports}> | ${config.roles.reports}` : "No role",
+				value: config.roles.reports
+					? `<@&${config.roles.reports}> | ${config.roles.reports}`
+					: "No role",
 				inline: true,
 			},
 			{
 				name: "Webhook management",
-				value: config.roles.webhooks ? `<@&${config.roles.webhooks}> | ${config.roles.webhooks}` : "No role",
+				value: config.roles.webhooks
+					? `<@&${config.roles.webhooks}> | ${config.roles.webhooks}`
+					: "No role",
 				inline: true,
 			},
 			{
 				name: "Config management",
-				value: config.roles.setConfig ? `<@&${config.roles.setConfig}> | ${config.roles.setConfig}` : "No role",
+				value: config.roles.setConfig
+					? `<@&${config.roles.setConfig}> | ${config.roles.setConfig}`
+					: "No role",
 				inline: true,
 			},
 			{
 				name: "Rule filter management",
-				value: config.roles.setRules ? `<@&${config.roles.setRules}> | ${config.roles.setRules}` : "No role",
+				value: config.roles.setRules
+					? `<@&${config.roles.setRules}> | ${config.roles.setRules}`
+					: "No role",
 				inline: true,
 			},
 			{
 				name: "Trusted communities management",
-				value: config.roles.setCommunities ? `<@&${config.roles.setCommunities}> | ${config.roles.setCommunities}` : "No role",
+				value: config.roles.setCommunities
+					? `<@&${config.roles.setCommunities}> | ${config.roles.setCommunities}`
+					: "No role",
 				inline: true,
 			}
 		)
