@@ -7,7 +7,8 @@
 	"scripts": {
 		"start": "ts-node ./src/app.ts",
 		"dev": "nodemon ./src/app.ts",
-		"lint": "eslint src/ --fix --ext .ts && npm run prettier",
+		"lint": "npm run eslint && npm run prettier",
+		"eslint": "eslint src/ --fix --ext .ts",
 		"prettier": "prettier --write .",
 		"postinstall": "install-types",
 		"pm2:build": "tsc",

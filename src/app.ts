@@ -29,7 +29,7 @@ fastify.register(fastifyCorsPlugin, {
 fastify.register(fastifyRateLimitPlugin, {
 	max: 100,
 	timeWindow: 1000 * 60, // 100 reqs in 60s
-	allowList: ["::ffff:127.0.0.1", "::1"],
+	allowList: ["::ffff:127.0.0.1", "::1", "127.0.0.1"],
 })
 
 // context
