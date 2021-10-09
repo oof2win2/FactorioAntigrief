@@ -5,7 +5,7 @@ import { Type } from "@sinclair/typebox"
 import RuleModel from "../database/fagc/rule.js"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
 import CommunityModel from "../database/fagc/community.js"
-import CommunityConfigModel from "../database/bot/community.js"
+import GuildConfigModel from "../database/bot/community.js"
 import {
 	communityConfigChanged,
 	communityCreatedMessage,
@@ -69,7 +69,7 @@ export default class CommunityController {
 	}
 
 	@GET({
-		url: "/config/:guildId",
+		url: "/guildconfig/:guildId",
 		options: {
 			schema: {
 				params: Type.Required(
@@ -89,11 +89,11 @@ export default class CommunityController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { guildId } = req.params
-		const config = await CommunityConfigModel.findOne({ guildId: guildId })
+		const config = await GuildConfigModel.findOne({ guildId: guildId })
 		return res.send(config)
 	}
 
-	@GET({ url: "/config" })
+	@GET({ url: "/guildconfig" })
 	@Authenticate
 	async getOwnConfig(
 		req: FastifyRequest,
@@ -101,14 +101,14 @@ export default class CommunityController {
 	): Promise<FastifyReply> {
 		const community = req.requestContext.get("community")
 		if (!community) return res.send(null)
-		const config = await CommunityConfigModel.findOne({
+		const config = await GuildConfigModel.findOne({
 			communityId: community._id,
 		})
 		return res.send(config)
 	}
 
 	@POST({
-		url: "/config",
+		url: "/guildconfig",
 		options: {
 			schema: {
 				body: Type.Object({
@@ -116,8 +116,6 @@ export default class CommunityController {
 					trustedCommunities: Type.Optional(
 						Type.Array(Type.String())
 					),
-					contact: Type.Optional(Type.String()),
-					communityname: Type.Optional(Type.String()),
 					roles: Type.Optional(
 						Type.Object({
 							reports: Type.Optional(Type.String()),
@@ -132,13 +130,11 @@ export default class CommunityController {
 		},
 	})
 	@Authenticate
-	async setConfig(
+	async setGuildConfig(
 		req: FastifyRequest<{
 			Body: {
 				ruleFilters?: string[]
 				trustedCommunities?: string[]
-				contact?: string
-				communityname?: string
 				roles: {
 					reports?: string
 					webhooks?: string
@@ -150,13 +146,7 @@ export default class CommunityController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const {
-			ruleFilters,
-			trustedCommunities,
-			contact,
-			communityname,
-			roles,
-		} = req.body
+		const { ruleFilters, trustedCommunities, roles } = req.body
 
 		// query database if rules and communities actually exist
 		if (ruleFilters) {
@@ -181,13 +171,8 @@ export default class CommunityController {
 					message: `trustedCommunities must be array of IDs of communities, got ${trustedCommunities.toString()}, some of which are not real community IDs`,
 				})
 		}
+
 		// check other stuff
-		if (contact && !(await validateDiscordUser(contact)))
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Bad Request",
-				message: `contact must be Discord User snowflake, got value ${contact}, which isn't a Discord user`,
-			})
 
 		const community = req.requestContext.get("community")
 		if (!community)
@@ -197,21 +182,19 @@ export default class CommunityController {
 				message: "Community config was not found",
 			})
 
-		const OldConfig = await CommunityConfigModel.findOne({
+		const guildConfig = await GuildConfigModel.findOne({
 			communityId: community.id,
 		})
-		if (!OldConfig)
+		if (!guildConfig)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Not Found",
 				message: "Community config was not found",
 			})
 
-		if (ruleFilters) OldConfig.ruleFilters = ruleFilters
+		if (ruleFilters) guildConfig.ruleFilters = ruleFilters
 		if (trustedCommunities)
-			OldConfig.trustedCommunities = trustedCommunities
-		if (contact) community.contact = contact
-		if (communityname) community.name = communityname
+			guildConfig.trustedCommunities = trustedCommunities
 
 		const findRole = (id: string) => {
 			const guildRoles = client.guilds.cache
@@ -219,8 +202,8 @@ export default class CommunityController {
 				.filter((r) => r && r.id)
 			return guildRoles[0]
 		}
-		if (!OldConfig.roles)
-			OldConfig.roles = {
+		if (!guildConfig.roles)
+			guildConfig.roles = {
 				reports: "",
 				webhooks: "",
 				setConfig: "",
@@ -229,15 +212,101 @@ export default class CommunityController {
 			}
 		Object.keys(roles).map((roleType) => {
 			const role = findRole(roles[roleType])
-			if (role) OldConfig.roles[roleType] = role.id
+			if (role) guildConfig.roles[roleType] = role.id
 		})
 
-		await OldConfig.save()
+		await guildConfig.save()
 		await community.save()
 
-		OldConfig.set("apikey", null)
-		communityConfigChanged(OldConfig)
-		return res.status(200).send(OldConfig)
+		guildConfig.set("apikey", null)
+		communityConfigChanged(guildConfig)
+		return res.status(200).send(guildConfig)
+	}
+
+	@POST({
+		url: "/communityconfig",
+		options: {
+			schema: {
+				body: Type.Optional(
+					Type.Object({
+						contact: Type.Optional(Type.String()),
+						communityname: Type.Optional(Type.String()),
+					})
+				),
+			},
+		},
+	})
+	@Authenticate
+	async setCommunityConfig(
+		req: FastifyRequest<{
+			Body: {
+				contact?: string
+				communityname?: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { contact, communityname } = req.body
+
+		const community = req.requestContext.get("community")
+		if (!community)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Not Found",
+				message: "Community config was not found",
+			})
+
+		if (contact && !(await validateDiscordUser(contact)))
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: `contact must be Discord User snowflake, got value ${contact}, which isn't a known Discord user`,
+			})
+
+		community.name = communityname || community.name
+		community.contact = contact || community.contact
+		await community.save()
+
+		return res.status(200).send(community)
+	}
+
+	@POST({
+		url: "/notifyCommunityConfigChanged/:guildId",
+		options: {
+			schema: {
+				params: Type.Required(
+					Type.Object({
+						guildId: Type.String(),
+					})
+				),
+			},
+		},
+	})
+	@MasterAuthenticate
+	async notifyCommunityConfigChanged(
+		req: FastifyRequest<{
+			Params: {
+				guildId: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { guildId } = req.params
+		const guildConfig = await GuildConfigModel.findOne({
+			guildId: guildId,
+		})
+
+		if (!guildConfig)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Guild config not found",
+				message: `Guild config for guild ${guildId} was not found`,
+			})
+
+		guildConfig.set("apikey", null)
+		communityConfigChanged(guildConfig)
+
+		return res.send({ status: "ok" })
 	}
 
 	@POST({
@@ -290,14 +359,13 @@ export default class CommunityController {
 		})
 
 		// update community config to have communityId
-		await CommunityConfigModel.updateOne(
+		await GuildConfigModel.updateOne(
 			{ guildId: guildId },
 			{
 				$set: { communityId: community.id },
 			}
 		)
 
-		// TODO: fix this cryptoRandomString issue
 		const auth = await AuthModel.create({
 			communityId: community._id,
 			api_key: cryptoRandomString({ length: 64 }),
@@ -348,7 +416,7 @@ export default class CommunityController {
 				message: `Community with ID ${communityId} was not found`,
 			})
 
-		const communityConfig = await CommunityConfigModel.findOneAndDelete({
+		const communityConfig = await GuildConfigModel.findOneAndDelete({
 			communityId: community.id,
 		})
 
@@ -373,5 +441,47 @@ export default class CommunityController {
 		})
 
 		return res.send(true)
+	}
+
+	@POST({
+		url: "/guildLeave/:guildId",
+		options: {
+			schema: {
+				params: Type.Required(
+					Type.Object({
+						guildId: Type.String(),
+					})
+				),
+			},
+		},
+	})
+	@MasterAuthenticate
+	async guildLeave(
+		req: FastifyRequest<{
+			Params: {
+				guildId: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { guildId } = req.params
+
+		await WebhookModel.deleteMany({
+			guildId: guildId,
+		})
+		await GuildConfigModel.deleteMany({
+			guildId: guildId,
+		})
+		const communityConfig = await CommunityModel.findOne({
+			guildIDs: [guildId],
+		})
+		if (communityConfig) {
+			communityConfig.guildIDs = communityConfig.guildIDs.filter(
+				(id) => id !== guildId
+			)
+			await communityConfig.save()
+		}
+
+		return res.status(200).send({ status: "ok" })
 	}
 }
