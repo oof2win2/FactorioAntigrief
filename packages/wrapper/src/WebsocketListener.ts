@@ -1,7 +1,7 @@
 import { EventEmitter } from "events"
 import WebSocket from "isomorphic-ws"
 import {
-	CommunityConfig,
+	GuildConfig,
 	CommunityCreatedMessage,
 	ReportCreatedMessage,
 	RevocationMessage,
@@ -31,7 +31,7 @@ export interface WebSocketMessage {
 	[key: string]: string | boolean | number
 }
 export declare interface WebSocketEvents {
-	communityConfigChanged: (message: CommunityConfig) => void
+	communityConfigChanged: (message: GuildConfig) => void
 	report: (message: ReportCreatedMessage) => void
 	revocation: (message: RevocationMessage) => void
 	ruleCreated: (message: RuleCreatedMessage) => void
@@ -105,7 +105,7 @@ class WebSocketHandler extends EventEmitter {
 			case "communityConfigChanged":
 				this.emit(
 					"communityConfigChanged",
-					message as unknown as CommunityConfig
+					message as unknown as GuildConfig
 				)
 				break
 			case "report":

@@ -162,7 +162,7 @@ export default class ReportManager extends BaseManager<Report> {
 		adminId: string,
 		cache = true,
 		reqConfig: RequestConfig = {}
-	): Promise<Report[] | null> {
+	): Promise<Revocation[] | null> {
 		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
 
 		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {

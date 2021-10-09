@@ -21,9 +21,12 @@ export default class ProfileManager extends BaseManager<Report> {
 				playername
 			)}/${strictUriEncode(communityId)}`
 		).then((o) => o.json())
-		fetched.reports.forEach(
-			(report) => (report.reportedTime = new Date(report.reportedTime))
-		)
+		if (!fetched || !fetched.reports) return fetched
+
+		fetched.reports = fetched.reports.map((report: Report) => {
+			report.reportedTime = new Date(report.reportedTime)
+			return report
+		})
 		return fetched
 	}
 	async fetchAll(playername: string): Promise<Profile[]> {

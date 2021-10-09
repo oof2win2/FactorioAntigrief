@@ -35,7 +35,7 @@
 	"dependencies": {
 		"@discordjs/collection": "^0.1.6",
 		"axios": "^0.21.1",
-		"fagc-api-types": "^1.2.0",
+		"fagc-api-types": "^1.3.0",
 		"isomorphic-fetch": "^3.0.0",
 		"isomorphic-ws": "^4.0.1",
 		"strict-uri-encode": "^2.0.0",
