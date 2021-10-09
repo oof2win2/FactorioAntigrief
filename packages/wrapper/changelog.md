@@ -1,3 +1,9 @@
+## [1.15.0] - [2021-10-09]
+
+### Changes
+
+-   Notify guild with embed or text
+
 ## [1.14.0] - [2021-10-09]
 
 ### Changes
