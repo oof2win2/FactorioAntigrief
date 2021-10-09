@@ -117,7 +117,6 @@ export default class CommunityController {
 						Type.Array(Type.String())
 					),
 					contact: Type.Optional(Type.String()),
-					moderatorRoleId: Type.Optional(Type.String()),
 					communityname: Type.Optional(Type.String()),
 					roles: Type.Optional(
 						Type.Object({
@@ -139,7 +138,6 @@ export default class CommunityController {
 				ruleFilters?: string[]
 				trustedCommunities?: string[]
 				contact?: string
-				moderatorRoleId?: string
 				communityname?: string
 				roles: {
 					reports?: string
@@ -156,7 +154,6 @@ export default class CommunityController {
 			ruleFilters,
 			trustedCommunities,
 			contact,
-			moderatorRoleId,
 			communityname,
 			roles,
 		} = req.body
@@ -218,8 +215,6 @@ export default class CommunityController {
 		if (trustedCommunities)
 			toReplace = Object.assign(toReplace, { trustedCommunities })
 		if (contact) toReplace = Object.assign(toReplace, { contact })
-		if (moderatorRoleId)
-			toReplace = Object.assign(toReplace, { moderatorRoleId })
 		if (communityname)
 			toReplace = Object.assign(toReplace, { communityname })
 

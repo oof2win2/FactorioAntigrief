@@ -37,9 +37,6 @@ export class CommunityConfigClass {
 	@prop()
 	apikey?: string
 
-	@prop()
-	moderatorRoleId!: string
-
 	@prop({ type: [String] })
 	trustedCommunities?: [string]
 
