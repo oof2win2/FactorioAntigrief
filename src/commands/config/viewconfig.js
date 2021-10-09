@@ -35,7 +35,6 @@ class ViewConfig extends Command {
 				value: `<@${config.contact}> | ${config.contact}`,
 				inline: true,
 			},
-			// { name: "Moderator role", value: `<@&${config.moderatorroleId}> | ${config.moderatorroleId}`, inline: true },
 			{
 				name: "API key",
 				value: config.apikey ? "Set" : "None",
