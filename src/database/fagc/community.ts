@@ -27,7 +27,7 @@ export class CommunityClass {
 	contact!: string
 
 	@prop({ type: [String] })
-	guildIDs!: string[]
+	guildIds!: string[]
 }
 
 const CommunityModel = getModelForClass(CommunityClass)

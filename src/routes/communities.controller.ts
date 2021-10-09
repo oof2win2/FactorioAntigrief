@@ -230,7 +230,7 @@ export default class CommunityController {
 				body: Type.Optional(
 					Type.Object({
 						contact: Type.Optional(Type.String()),
-						communityname: Type.Optional(Type.String()),
+						name: Type.Optional(Type.String()),
 					})
 				),
 			},
@@ -241,12 +241,12 @@ export default class CommunityController {
 		req: FastifyRequest<{
 			Body: {
 				contact?: string
-				communityname?: string
+				name?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { contact, communityname } = req.body
+		const { contact, name } = req.body
 
 		const community = req.requestContext.get("community")
 		if (!community)
@@ -263,7 +263,7 @@ export default class CommunityController {
 				message: `contact must be Discord User snowflake, got value ${contact}, which isn't a known Discord user`,
 			})
 
-		community.name = communityname || community.name
+		community.name = name || community.name
 		community.contact = contact || community.contact
 		await community.save()
 
@@ -355,11 +355,11 @@ export default class CommunityController {
 		const community = await CommunityModel.create({
 			name: name,
 			contact: contact,
-			guildId: guildId,
+			guildIds: [guildId],
 		})
 
 		// update community config to have communityId
-		await GuildConfigModel.updateOne(
+		await GuildConfigModel.updateMany(
 			{ guildId: guildId },
 			{
 				$set: { communityId: community.id },
@@ -367,7 +367,7 @@ export default class CommunityController {
 		)
 
 		const auth = await AuthModel.create({
-			communityId: community._id,
+			communityId: community.id,
 			api_key: cryptoRandomString({ length: 64 }),
 		})
 
@@ -476,7 +476,7 @@ export default class CommunityController {
 			guildIDs: [guildId],
 		})
 		if (communityConfig) {
-			communityConfig.guildIDs = communityConfig.guildIDs.filter(
+			communityConfig.guildIds = communityConfig.guildIds.filter(
 				(id) => id !== guildId
 			)
 			await communityConfig.save()
