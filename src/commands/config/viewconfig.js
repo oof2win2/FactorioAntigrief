@@ -28,12 +28,12 @@ class ViewConfig extends Command {
 		embed.addFields(
 			{
 				name: "Community name",
-				value: community.name,
+				value: community ? community.name : "Community does not exist",
 				inline: true,
 			},
 			{
 				name: "Community contact",
-				value: `<@${community.contact}> | ${community.contact}`,
+				value: community ? `<@${community.contact}> | ${community.contact}` : "Community does not exist",
 				inline: true,
 			},
 			{
