@@ -1,5 +1,4 @@
 const Command = require("../../base/Command")
-const ConfigModel = require("../../database/schemas/config")
 const { MessageEmbed } = require("discord.js")
 const {
 	getMessageResponse,
@@ -25,7 +24,7 @@ class SetAPIKey extends Command {
 			customPermissions: ["setConfig"],
 		})
 	}
-	async run(message, args) {
+	async run(message, args, guildConfig) {
 		if (!args[0]) {
 			// all perms
 			message.channel.send("Process of setting roles has started. ")
@@ -34,7 +33,7 @@ class SetAPIKey extends Command {
 				"Please type in the ID or ping the role for report management"
 			)
 			const reports =
-				reportsMsg.mentions.roles.first()?.id ||
+				reportsMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(reportsMsg.content))
 			if (!reports)
 				return message.channel.send(
@@ -46,7 +45,7 @@ class SetAPIKey extends Command {
 				"Please type in the ID or ping the role for webhook management"
 			)
 			const webhooks =
-				webhooksMsg.mentions.roles.first()?.id ||
+				webhooksMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(webhooksMsg.content))
 			if (!webhooks)
 				return message.channel.send(
@@ -57,10 +56,10 @@ class SetAPIKey extends Command {
 				message,
 				"Please type in the ID or ping the role for config management"
 			)
-			const config =
-				configMsg.mentions.roles.first()?.id ||
+			const setConfig =
+				configMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(configMsg.content))
-			if (!config)
+			if (!setConfig)
 				return message.channel.send(
 					`\`${configMsg.content}\` is not a valid role`
 				)
@@ -69,10 +68,10 @@ class SetAPIKey extends Command {
 				message,
 				"Please type in the ID or ping the role for management of filtered rules"
 			)
-			const rules =
-				ruleMsg.mentions.roles.first()?.id ||
+			const setRules =
+				ruleMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(ruleMsg.content))
-			if (!rules)
+			if (!setRules)
 				return message.channel.send(
 					`\`${ruleMsg.content}\` is not a valid role`
 				)
@@ -81,10 +80,10 @@ class SetAPIKey extends Command {
 				message,
 				"Please type in the ID or ping the role for management of trusted communities"
 			)
-			const communities =
-				communitiesMsg.mentions.roles.first()?.id ||
+			const setCommunities =
+				communitiesMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(communitiesMsg.content))
-			if (!communities)
+			if (!setCommunities)
 				return message.channel.send(
 					`\`${communitiesMsg.content}\` is not a valid role`
 				)
@@ -97,9 +96,9 @@ class SetAPIKey extends Command {
 			embed.addFields(
 				{ name: "Reports Management", value: reports },
 				{ name: "Webhook Management", value: webhooks },
-				{ name: "Config Management", value: config },
-				{ name: "Rule Management", value: rules },
-				{ name: "Communities Management", value: communities }
+				{ name: "Config Management", value: setConfig },
+				{ name: "Rule Management", value: setRules },
+				{ name: "Communities Management", value: setCommunities }
 			)
 			message.channel.send(embed)
 			const confirmation = await getConfirmationMessage(
@@ -112,30 +111,16 @@ class SetAPIKey extends Command {
 				)
 
 			try {
-				const updatedConfig = await ConfigModel.findOneAndUpdate(
-					{ guildId: message.guild.id },
-					{
-						$set: {
-							"roles.reports": reports,
-							"roles.webhooks": webhooks,
-							"roles.setConfig": config,
-							"roles.setRules": rules,
-							"roles.setCommunities": communities,
-						},
-					},
-					{ new: true }
-				).then((r) => r.toObject())
-
-				if (updatedConfig && updatedConfig.guildId == message.guild.id)
-					return message.channel.send(
-						"Role configs successfully applied!"
-					)
-				else {
-					console.error("setrolepermissions", updatedConfig)
-					return message.channel.send(
-						"An error occured. Please contact developers"
-					)
-				}
+				guildConfig.roles.reports = reports.id
+				guildConfig.roles.webhooks = webhooks.id
+				guildConfig.roles.setConfig = setConfig.id
+				guildConfig.roles.setRules = setRules.id
+				guildConfig.roles.setCommunities = setCommunities.id
+				const newConfig = await this.client.saveGuildConfig(guildConfig)
+				console.log(guildConfig, newConfig, reports.id)
+				if (newConfig.roles.reports == reports.id)
+					return message.channel.send("Role setting successfully applied! Changes may take a few minutes to take effect")
+				else return message.channel.send("An error occured. Please contact developers")
 			} catch (e) {
 				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
@@ -177,23 +162,11 @@ class SetAPIKey extends Command {
 				)
 
 			try {
-				const res = await ConfigModel.findOneAndUpdate(
-					{ guildId: message.guild.id },
-					{
-						$set: {
-							[`roles.${args[0]}`]: role.id,
-						},
-					},
-					{ new: true }
-				)
-				if (res.guildId && res.roles[args[0]] == role.id)
-					return message.channel.send(
-						"Role configs successfully applied!"
-					)
-				else
-					return message.channel.send(
-						"An error occured. Please contact developers"
-					)
+				guildConfig.roles[args[0]] = role.id
+				const newConfig = await this.client.saveGuildConfig(guildConfig)
+				if (newConfig.roles[args[0]] == role.id)
+					return message.channel.send("Role setting successfully applied! Changes may take a few minutes to take effect")
+				else return message.channel.send("An error occured. Please contact developers")
 			} catch (e) {
 				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
@@ -230,25 +203,12 @@ class SetAPIKey extends Command {
 				)
 
 			try {
-				const res = await ConfigModel.findOneAndUpdate(
-					{ guildId: message.guild.id },
-					{
-						$set: {
-							[`roles.${args[0]}`]: role.id,
-						},
-					},
-					{ new: true }
-				)
-				if (res.guildId && res.roles[args[0]] == role.id)
-					return message.channel.send(
-						"Role setting successfully applied!"
-					)
-				else {
-					console.error("setrolepermissions", res)
-					return message.channel.send(
-						"An error occured. Please contact developers"
-					)
-				}
+				guildConfig.roles[args[0]] = role.id
+				const newConfig = await this.client.saveGuildConfig(guildConfig)
+				if (newConfig.roles[args[0]] == role.id)
+					return message.channel.send("Role setting successfully applied! Changes may take a few minutes to take effect")
+				else return message.channel.send("An error occured. Please contact developers")
+				
 			} catch (e) {
 				console.error("setrolepermissions", e)
 				message.channel.send("An error occured. Please try again later")
