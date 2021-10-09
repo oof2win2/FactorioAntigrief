@@ -2,8 +2,6 @@ export type ApiID = string
 
 export interface Common {
 	id: ApiID
-	// here, there should be everything that keys can be
-	[key: string]: string | boolean | Date | Report[]
 }
 
 // This exists so that creating a report doesn't need an ID and some stuff is optional
@@ -35,7 +33,7 @@ export interface Profile {
 export interface Community extends Common {
 	name: string
 	contact: string
-	guildId: string
+	guildIds: string[]
 }
 
 export interface Rule extends Common {
