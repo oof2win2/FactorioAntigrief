@@ -47,9 +47,14 @@ export interface CommunityConfig {
 	trustedCommunities?: ApiID[]
 	ruleFilters?: ApiID[]
 	guildId: string
-	contact: string
-	communityname: string
 	communityId?: string
+	roles: {
+		reports: string
+		webhooks: string
+		setConfig: string
+		setRules: string
+		setCommunities: string
+	}
 }
 
 // this also extends common but the ID is a Discord string
