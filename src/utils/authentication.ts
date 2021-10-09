@@ -83,7 +83,7 @@ export const MasterAuthenticate = <
 				api_key_type: "master",
 			})
 			const community = await CommunityModel.findOne({
-				_id: authData?.communityId,
+				id: authData?.communityId,
 			})
 			if (!community)
 				return res.status(401).send({

@@ -3,9 +3,10 @@ import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import LogModel from "../database/fagc/log.js"
-import { Webhook, WebhookClient } from "discord.js"
+import { MessageEmbed, Webhook, WebhookClient } from "discord.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import { client } from "../utils/discord.js"
+import { MasterAuthenticate } from "../utils/authentication.js"
 
 @Controller({ route: "/informatics" })
 export default class ProfileController {
@@ -133,5 +134,86 @@ export default class ProfileController {
 				.then(() => webhook.destroy())
 		}
 		return res.status(200).send(found)
+	}
+
+	@POST({
+		url: "/notify/:guildId",
+		options: {
+			schema: {
+				params: Type.Object({
+					guildId: Type.String(),
+				}),
+				body: Type.Object({
+					data: Type.String(),
+				}),
+			},
+		},
+	})
+	@MasterAuthenticate
+	async notifyGuildText(
+		req: FastifyRequest<{
+			Params: {
+				guildId: string
+			}
+			Body: {
+				data: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const savedWebhook = await WebhookModel.findOne({
+			guildId: req.params.guildId,
+		})
+		if (savedWebhook) {
+			const webhook = await client
+				.fetchWebhook(savedWebhook.id, savedWebhook.token)
+				.catch()
+			if (webhook) {
+				webhook.send(req.body.data)
+			}
+		}
+
+		return res.send({ status: "ok" })
+	}
+
+	@POST({
+		url: "/notify/:guildId/embed",
+		options: {
+			schema: {
+				params: Type.Object({
+					guildId: Type.String(),
+				}),
+				body: Type.Object(
+					{},
+					{
+						additionalProperties: true,
+					}
+				),
+			},
+		},
+	})
+	@MasterAuthenticate
+	async notifyGuildEmbed(
+		req: FastifyRequest<{
+			Params: {
+				guildId: string
+			}
+			Body: Record<string, unknown>
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const savedWebhook = await WebhookModel.findOne({
+			guildId: req.params.guildId,
+		})
+		if (savedWebhook) {
+			const webhook = await client
+				.fetchWebhook(savedWebhook.id, savedWebhook.token)
+				.catch()
+			if (webhook) {
+				webhook.send({ embeds: [new MessageEmbed(req.body)] })
+			}
+		}
+
+		return res.send({ status: "ok" })
 	}
 }
