@@ -379,6 +379,9 @@ export default class CommunityController {
 		await RevocationModel.deleteMany({
 			communityId: community.id,
 		})
+		await AuthModel.findOneAndDelete({
+			communityId: community.id,
+		})
 		if (communityConfig) {
 			await WebhookModel.deleteMany({
 				guildId: communityConfig.guildId,

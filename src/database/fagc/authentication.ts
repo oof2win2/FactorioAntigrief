@@ -12,8 +12,8 @@ const connection = database.connections.find(
 	existingMongoose: connection,
 })
 export class AuthClass {
-	@prop({ ref: () => CommunityClass })
-	communityId: Ref<CommunityClass>
+	@prop()
+	communityId!: string
 
 	@prop()
 	api_key!: string
