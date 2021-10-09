@@ -1,4 +1,9 @@
-import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
+import {
+	getModelForClass,
+	modelOptions,
+	Passthrough,
+	prop,
+} from "@typegoose/typegoose"
 import database from "../database.js"
 
 const connection = database.connections.find(
@@ -37,7 +42,16 @@ export class CommunityConfigClass {
 	@prop({ type: [String] })
 	ruleFilters?: string[]
 
-	@prop({ type: Roles })
+	@prop({
+		type: () =>
+			new Passthrough({
+				reports: String,
+				webhooks: String,
+				setConfig: String,
+				setRules: String,
+				setCommunities: String,
+			}),
+	})
 	roles!: Roles
 }
 

@@ -219,7 +219,14 @@ export default class CommunityController {
 				.filter((r) => r && r.id)
 			return guildRoles[0]
 		}
-
+		if (!OldConfig.roles)
+			OldConfig.roles = {
+				reports: "",
+				webhooks: "",
+				setConfig: "",
+				setRules: "",
+				setCommunities: "",
+			}
 		Object.keys(roles).map((roleType) => {
 			const role = findRole(roles[roleType])
 			if (role) OldConfig.roles[roleType] = role.id
