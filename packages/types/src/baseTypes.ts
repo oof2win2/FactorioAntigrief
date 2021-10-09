@@ -41,7 +41,7 @@ export interface Rule extends Common {
 	longdesc: string
 }
 
-export interface CommunityConfig {
+export interface GuildConfig {
 	trustedCommunities?: ApiID[]
 	ruleFilters?: ApiID[]
 	guildId: string

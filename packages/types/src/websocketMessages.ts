@@ -1,11 +1,5 @@
 import { APIEmbed, APIUser } from "discord-api-types"
-import {
-	Community,
-	CommunityConfig,
-	Report,
-	Revocation,
-	Rule,
-} from "./baseTypes"
+import { Community, GuildConfig, Report, Revocation, Rule } from "./baseTypes"
 
 export interface BaseWebsocketMessage {
 	messageType: string
@@ -71,7 +65,7 @@ export interface CommunityRemovedMessage extends BaseWebsocketMessage {
 
 export interface GuildConfigChangedMessage extends BaseWebsocketMessage {
 	messageType: "communityConfigChanged"
-	config: CommunityConfig
+	config: GuildConfig
 }
 
 export interface AnnouncementMessage extends BaseWebsocketMessage {
