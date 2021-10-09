@@ -9,7 +9,7 @@ import UserModel, {
 } from "../database/fagc/user.js"
 import { OAUTHSCOPES } from "../consts.js"
 import { Authenticate } from "../utils/authentication.js"
-import CommunityConfigModel from "../database/bot/community.js"
+import GuildConfigModel from "../database/bot/community.js"
 import cryptoRandomString from "crypto-random-string"
 
 @Controller({ route: "/users" })
@@ -79,7 +79,7 @@ export default class ProfileController {
 				error: "Not Found",
 				message: "Community not found",
 			})
-		const communityConfig = await CommunityConfigModel.findOne({
+		const communityConfig = await GuildConfigModel.findOne({
 			communityId: community.id,
 		})
 		if (!communityConfig)
@@ -144,7 +144,7 @@ export default class ProfileController {
 				error: "Not Found",
 				message: "Community not found",
 			})
-		const communityConfig = await CommunityConfigModel.findOne({
+		const communityConfig = await GuildConfigModel.findOne({
 			communityId: community.id,
 		})
 		if (!communityConfig)

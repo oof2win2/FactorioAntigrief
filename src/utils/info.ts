@@ -3,7 +3,7 @@ import WebhookSchema from "../database/fagc/webhook.js"
 import WebSocket from "ws"
 import ENV from "./env.js"
 import GuildConfigModel, {
-	CommunityConfigClass,
+	GuildConfigClass,
 } from "../database/bot/community.js"
 import { RevocationClass } from "../database/fagc/revocation.js"
 import { DocumentType } from "@typegoose/typegoose"
@@ -345,7 +345,7 @@ export async function communityRemovedMessage(
 	)
 }
 export function communityConfigChanged(
-	config: DocumentType<CommunityConfigClass, BeAnObject>
+	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
 	wss.clients.forEach((client) => {
 		// TODO: test this

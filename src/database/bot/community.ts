@@ -26,7 +26,7 @@ class Roles {
 	},
 	existingMongoose: connection,
 })
-export class CommunityConfigClass {
+export class GuildConfigClass {
 	@prop()
 	communityId?: string
 
@@ -35,12 +35,6 @@ export class CommunityConfigClass {
 
 	@prop()
 	apikey?: string
-
-	@prop({ type: [String] })
-	trustedCommunities?: string[]
-
-	@prop({ type: [String] })
-	ruleFilters?: string[]
 
 	@prop({
 		type: () =>
@@ -53,7 +47,13 @@ export class CommunityConfigClass {
 			}),
 	})
 	roles!: Roles
+
+	@prop({ type: [String] })
+	trustedCommunities?: string[]
+
+	@prop({ type: [String] })
+	ruleFilters?: string[]
 }
 
-const CommunityConfigModel = getModelForClass(CommunityConfigClass)
-export default CommunityConfigModel
+const GuildConfigModel = getModelForClass(GuildConfigClass)
+export default GuildConfigModel
