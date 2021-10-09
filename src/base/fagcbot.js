@@ -18,6 +18,7 @@ class FAGCBot extends Client {
 		this.fagc = new FAGCWrapper({
 			apiurl: this.env.APIURL,
 			enableWebSocket: false,
+			masterapikey: this.env.MASTERAPIKEY,
 		})
 
 		this.commands = new Collection()
@@ -85,14 +86,17 @@ class FAGCBot extends Client {
 	}
 
 	async saveGuildConfig(config) {
-		if (config.apikey) return this.fagc.communities.setConfig(config, {
-			apikey: config.apikey
-		})
-		return await ConfigModel.findOneAndUpdate(
+		if (config.apikey)
+			return this.fagc.communities.setConfig(config, {
+				apikey: config.apikey,
+			})
+		const newConfig = await ConfigModel.findOneAndUpdate(
 			{ guildId: config.guildId },
 			config,
 			{ upsert: true, new: true }
 		)
+		await this.fagc.communities.notifyGuildConfig(config.guildId)
+		return newConfig
 	}
 }
 module.exports = FAGCBot
