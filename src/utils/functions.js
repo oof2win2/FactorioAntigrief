@@ -135,7 +135,7 @@ async function createGuildConfig(guild, client) {
 			name: "Initial Setup",
 			value:
 				"We assume that you want to set your guild up. For now, your guild data has been set to a few defaults, " +
-				"such as the guild contact being the guild's owner. To change this, you can always run `fagc!setup`. " +
+				"such as the guild contact being the guild's owner. Everything with the API is readonly until you run `fagc!setapikey`. " +
 				"Run `fagc!help` to view command help. Commands don't work in DMs!",
 		},
 		{
