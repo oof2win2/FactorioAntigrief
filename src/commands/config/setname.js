@@ -27,10 +27,12 @@ class Setcontact extends Command {
 		if (!args[0] || !args.join(" "))
 			return message.channel.send("No name provided")
 
-		await this.client.saveGuildConfig({
-			...config.toObject(),
-			communityname: args.join(" "),
-		})
+		await this.client.fagc.communities.setCommunityConfig(
+			{
+				name: args.join(" "),
+			},
+			{ apikey: config.apikey }
+		)
 		return message.channel.send(
 			"Name saved successfully. Changes may take a few minutes to take effect"
 		)
