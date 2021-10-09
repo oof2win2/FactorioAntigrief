@@ -24,7 +24,14 @@ import cryptoRandomString from "crypto-random-string"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
-	@GET({ url: "/" })
+	@GET({
+		url: "/",
+		options: {
+			schema: {
+				tags: ["community"],
+			},
+		},
+	})
 	async getAllCommunities(
 		req: FastifyRequest,
 		res: FastifyReply
@@ -42,6 +49,7 @@ export default class CommunityController {
 						id: Type.String(),
 					})
 				),
+				tags: ["community"],
 			},
 		},
 	})
@@ -58,7 +66,7 @@ export default class CommunityController {
 		return res.send(community)
 	}
 
-	@GET({ url: "/getown" })
+	@GET({ url: "/getown", options: { schema: { tags: ["community"] } } })
 	@Authenticate
 	async getOwnCommunity(
 		req: FastifyRequest,
@@ -77,6 +85,7 @@ export default class CommunityController {
 						guildId: Type.String(),
 					})
 				),
+				tags: ["community"],
 			},
 		},
 	})
@@ -93,7 +102,7 @@ export default class CommunityController {
 		return res.send(config)
 	}
 
-	@GET({ url: "/guildconfig" })
+	@GET({ url: "/guildconfig", options: { schema: { tags: ["community"] } } })
 	@Authenticate
 	async getOwnConfig(
 		req: FastifyRequest,
@@ -126,6 +135,7 @@ export default class CommunityController {
 						})
 					),
 				}),
+				tags: ["community"],
 			},
 		},
 	})
@@ -320,6 +330,8 @@ export default class CommunityController {
 						guildId: Type.String(),
 					})
 				),
+				description: "Create a FAGC community",
+				tags: ["community", "master"],
 			},
 		},
 	})
@@ -392,6 +404,8 @@ export default class CommunityController {
 						communityId: Type.String(),
 					})
 				),
+				description: "Delete a FAGC community",
+				tags: ["community", "master"],
 			},
 		},
 	})

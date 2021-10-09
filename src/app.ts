@@ -20,6 +20,7 @@ import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
 import fastifyExpress from "fastify-express"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
+import fastifySwagger from "fastify-swagger"
 
 const fastify: FastifyInstance = Fastify({})
 
@@ -40,6 +41,65 @@ Sentry.init({
 
 await fastify.register(fastifyExpress)
 fastify.use(Sentry.Handlers.requestHandler())
+
+// swagger
+fastify.register(fastifySwagger, {
+	routePrefix: "/documentation",
+	swagger: {
+		info: {
+			title: "FAGC Backend",
+			description: "FAGC Backend",
+			version: "0.1.0",
+		},
+		externalDocs: {
+			url: "https://github.com/FactorioAntigrief/fagc-backend",
+			description: "Find the repo here",
+		},
+		host: "localhost:3000",
+		schemes: ["http"],
+		consumes: ["application/json", "x-www-form-urlencoded"],
+		produces: ["application/json"],
+		tags: [
+			{ name: "community", description: "Community related end-points" },
+			{ name: "report", description: "Report related end-points" },
+			{ name: "master", description: "Master API" },
+		],
+		definitions: {
+			User: {
+				type: "object",
+				required: ["id", "email"],
+				properties: {
+					id: { type: "string", format: "uuid" },
+					firstName: { type: "string" },
+					lastName: { type: "string" },
+					email: { type: "string", format: "email" },
+				},
+			},
+		},
+		securityDefinitions: {
+			apiKey: {
+				type: "apiKey",
+				name: "apikey",
+				in: "header",
+			},
+		},
+	},
+	uiConfig: {
+		docExpansion: "full",
+		deepLinking: false,
+	},
+	uiHooks: {
+		onRequest: function (request, reply, next) {
+			next()
+		},
+		preHandler: function (request, reply, next) {
+			next()
+		},
+	},
+	staticCSP: true,
+	transformStaticCSP: (header) => header,
+	exposeRoute: true,
+})
 
 // cors
 fastify.register(fastifyCorsPlugin, {
@@ -132,6 +192,33 @@ const start = async () => {
 }
 start()
 
+fastify.ready((err) => {
+	if (err) throw err
+	fastify.swagger()
+})
+
 process.on("beforeExit", () => {
 	fastify.close()
 })
+
+// import Fastify from "fastify"
+// import fastifySwagger from "fastify-swagger"
+
+// const fastify = Fastify()
+
+// fastify.register(fastifySwagger, {
+// 	routePrefix: "/documentation",
+// 	staticCSP: true,
+// 	transformStaticCSP: (header) => header,
+// 	exposeRoute: true,
+// })
+
+// fastify.get("/data", async (req, res) => {
+// 	res.send({ msg: "Hi." })
+// })
+
+// fastify.ready((err) => {
+// 	if (err) throw err
+// 	fastify.swagger()
+// })
+// await fastify.listen(3000)
