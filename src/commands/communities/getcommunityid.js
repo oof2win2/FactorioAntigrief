@@ -6,7 +6,7 @@ class GetID extends Command {
 		super(client, {
 			name: "getcommunityid",
 			description: "Gets a community by ID",
-			aliases: [],
+			aliases: ["viewcommunityid"],
 			category: "communities",
 			dirname: __dirname,
 			enabled: true,

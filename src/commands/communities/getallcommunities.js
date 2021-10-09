@@ -7,7 +7,7 @@ class GetAll extends Command {
 		super(client, {
 			name: "getallcommunities",
 			description: "Gets all communities",
-			aliases: [],
+			aliases: ["viewallcommunities", "allcommunities"],
 			category: "communities",
 			dirname: __dirname,
 			enabled: true,

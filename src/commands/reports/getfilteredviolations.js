@@ -8,7 +8,7 @@ class GetReports extends Command {
 			name: "getfilteredreports",
 			description:
 				"Gets reports of a player from only trusted communities and filtered rules",
-			aliases: ["check", "getreports"],
+			aliases: ["check", "viewreports", "viewfilteredreports"],
 			category: "reports",
 			usage: "[playername]",
 			examples: ["{{p}}getfilteredreports Windsinger"],

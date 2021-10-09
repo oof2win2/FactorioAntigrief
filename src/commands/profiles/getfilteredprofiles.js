@@ -8,7 +8,7 @@ class GetProfiles extends Command {
 			name: "getfilteredprofiles",
 			description:
 				"Gets profiles of a player, filtered by trusted communities and rules",
-			aliases: ["getprofiles"],
+			aliases: ["getprofiles", "viewfilteredprofiles", "viewprofiles"],
 			usage: "[playername]",
 			examples: ["{{p}}getfilteredprofiles Windsinger"],
 			category: "profiles",
