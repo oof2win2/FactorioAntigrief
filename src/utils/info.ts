@@ -366,3 +366,7 @@ export function communityConfigChanged(
 wss.on("listening", () => {
 	console.log(`Websocket listening on ${ENV.WS_PORT}!`)
 })
+
+process.on("exit", () => {
+	wss.close()
+})

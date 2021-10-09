@@ -39,4 +39,11 @@ class ConnectionManager {
 		})
 	}
 }
-export default new ConnectionManager(config)
+const manager = new ConnectionManager(config)
+
+// must be beforeExit as disconnect() is aync
+process.on("beforeExit", () => {
+	manager.connections.forEach((connection) => connection?.c.disconnect())
+})
+
+export default manager

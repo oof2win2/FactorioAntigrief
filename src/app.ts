@@ -103,3 +103,7 @@ const start = async () => {
 	}
 }
 start()
+
+process.on("beforeExit", () => {
+	fastify.close()
+})
