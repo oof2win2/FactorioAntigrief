@@ -15,19 +15,19 @@ module.exports = {
 async function handleErrors(msg, response) {
 	if (!msg.channel) return
 	switch (response.error) {
-		case "AuthenticationError": {
-			switch (response.description) {
-				case "API key is wrong":
-					return msg.channel.send(
-						"Error: API key has been set incorrectly."
-					)
-			}
-			break
-		}
-		default:
-			msg.channel.send(
-				`Error \`${response.error}\`: \`${response.description}\``
+	case "AuthenticationError": {
+		switch (response.description) {
+		case "API key is wrong":
+			return msg.channel.send(
+				"Error: API key has been set incorrectly."
 			)
+		}
+		break
+	}
+	default:
+		msg.channel.send(
+			`Error \`${response.error}\`: \`${response.description}\``
+		)
 	}
 }
 
@@ -78,26 +78,33 @@ async function createPagedEmbed(
 		timer: 120000,
 	})
 
+	// remove reactions after timeout runs out
+	setTimeout(async () => {
+		await embedMsg.reactions.cache.get("⬅️")?.remove()
+		await embedMsg.reactions.cache.get("➡️")?.remove()
+		await embedMsg.reactions.cache.get("🗑️")?.remove()
+	}, 120000)
+	
 	reactionCollector.on("collect", (reaction) => {
 		switch (reaction.emoji.name) {
-			case "⬅️": {
-				page--
-				removeReaction("⬅️") // remove the user's reaction no matter what
-				if (page == -1) page = 0
-				else setData()
-				break
-			}
-			case "➡️": {
-				page++
-				removeReaction("➡️") // remove the user's reaction no matter what
-				if (page > maxPages) page = maxPages
-				else setData()
-				break
-			}
-			case "🗑️": {
-				reactionCollector.stop()
-				embedMsg.delete()
-			}
+		case "⬅️": {
+			page--
+			removeReaction("⬅️") // remove the user's reaction no matter what
+			if (page == -1) page = 0
+			else setData()
+			break
+		}
+		case "➡️": {
+			page++
+			removeReaction("➡️") // remove the user's reaction no matter what
+			if (page > maxPages) page = maxPages
+			else setData()
+			break
+		}
+		case "🗑️": {
+			reactionCollector.stop()
+			embedMsg.delete()
+		}
 		}
 	})
 }
