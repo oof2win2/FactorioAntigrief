@@ -1,4 +1,5 @@
 const ConfigModel = require("../../database/schemas/config")
+const { createGuildConfig } = require("../../utils/functions")
 
 module.exports = async (client, message) => {
 	if (message.author.bot) return
@@ -29,10 +30,8 @@ module.exports = async (client, message) => {
 	client.RateLimit.set(message.author.id, Date.now())
 
 	let guildConfig = await ConfigModel.findOne({ guildId: message.guild.id })
-	if (cmd.config.requiredConfig && !guildConfig)
-		return message.reply(
-			"You need to create a guild config first with `fagc!setup`!"
-		)
+	if (!guildConfig) await createGuildConfig(message.guild, client)
+	guildConfig = await ConfigModel.findOne({ guildId: message.guild.id })
 
 	/// permissions
 	let neededPermissions = []

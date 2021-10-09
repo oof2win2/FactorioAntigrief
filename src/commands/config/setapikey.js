@@ -36,6 +36,19 @@ class SetAPIKey extends Command {
 				await this.client.fagc.communities.fetchOwnCommunity(null, {
 					apikey: apikey,
 				})
+			if (community.contact !== message.author.id)
+				return message.channel.send(
+					"You are not the community's owner, therefore you don't have access to set the API key!"
+				)
+		} catch (e) {
+			return message.channel.send("Invalid API key sent")
+		}
+
+		try {
+			const community =
+				await this.client.fagc.communities.fetchOwnCommunity(null, {
+					apikey: apikey,
+				})
 			if (!community)
 				return message.reply(
 					"That API key is not associated with a community"
