@@ -32,10 +32,10 @@ export class CommunityConfigClass {
 	apikey?: string
 
 	@prop({ type: [String] })
-	trustedCommunities?: [string]
+	trustedCommunities?: string[]
 
 	@prop({ type: [String] })
-	ruleFilters?: [string]
+	ruleFilters?: string[]
 
 	@prop({ type: Roles })
 	roles!: Roles

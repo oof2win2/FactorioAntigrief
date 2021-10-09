@@ -207,16 +207,11 @@ export default class CommunityController {
 				message: "Community config was not found",
 			})
 
-		let toReplace = {
-			...OldConfig.toObject(),
-			guildId: OldConfig.guildId,
-		}
-		if (ruleFilters) toReplace = Object.assign(toReplace, { ruleFilters })
+		if (ruleFilters) OldConfig.ruleFilters = ruleFilters
 		if (trustedCommunities)
-			toReplace = Object.assign(toReplace, { trustedCommunities })
-		if (contact) toReplace = Object.assign(toReplace, { contact })
-		if (communityname)
-			toReplace = Object.assign(toReplace, { communityname })
+			OldConfig.trustedCommunities = trustedCommunities
+		if (contact) community.contact = contact
+		if (communityname) community.name = communityname
 
 		const findRole = (id: string) => {
 			const guildRoles = client.guilds.cache
@@ -224,41 +219,18 @@ export default class CommunityController {
 				.filter((r) => r && r.id)
 			return guildRoles[0]
 		}
-		const toSetRoles: {
-			reports?: string
-			webhooks?: string
-			setConfig?: string
-			setRules?: string
-			setCommunities?: string
-		} = {}
+
 		Object.keys(roles).map((roleType) => {
 			const role = findRole(roles[roleType])
-			if (role) toSetRoles[roleType] = role.id
+			if (role) OldConfig.roles[roleType] = role.id
 		})
-		toReplace = Object.assign(toReplace, toSetRoles)
 
-		const CommunityConfig = await CommunityConfigModel.findOneAndReplace(
-			{ guildId: OldConfig.guildId },
-			toReplace,
-			{ new: true }
-		)
-		if (!CommunityConfig)
-			return res.status(400).send({
-				errorCode: 404,
-				error: "Not Found",
-				message: "Community config with your API key was not found",
-			})
-		await CommunityModel.findOneAndUpdate(
-			{ guildId: OldConfig.guildId },
-			{
-				guildId: OldConfig.guildId,
-				name: community.name,
-				contact: community.contact,
-			}
-		)
-		CommunityConfig.set("apikey", null)
-		communityConfigChanged(CommunityConfig)
-		return res.status(200).send(CommunityConfig)
+		await OldConfig.save()
+		await community.save()
+
+		OldConfig.set("apikey", null)
+		communityConfigChanged(OldConfig)
+		return res.status(200).send(OldConfig)
 	}
 
 	@POST({
