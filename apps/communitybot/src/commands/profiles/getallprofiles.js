@@ -7,7 +7,7 @@ class GetAllProfiles extends Command {
 		super(client, {
 			name: "getallprofiles",
 			description: "Gets all profiles of a player",
-			aliases: [],
+			aliases: ["viewallprofiles"],
 			usage: "[playername]",
 			examples: ["{{p}}getallprofiles Windsinger"],
 			category: "profiles",

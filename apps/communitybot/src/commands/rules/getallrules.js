@@ -7,7 +7,7 @@ class GetAllRules extends Command {
 		super(client, {
 			name: "getallrules",
 			description: "Gets all rules",
-			aliases: [],
+			aliases: ["getallrules", "viewallrules"],
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,

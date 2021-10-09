@@ -8,7 +8,7 @@ class GetAllProfiles extends Command {
 			name: "getprofilecommunity",
 			description:
 				"Gets all profiles of a player in a specific community",
-			aliases: [],
+			aliases: ["profile", "viewprofilecommunity"],
 			usage: "[playername] [communityId]",
 			examples: ["{{p}}getprofilecommunity Windsinger p1UgG0G"],
 			category: "profiles",

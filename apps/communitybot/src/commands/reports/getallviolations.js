@@ -7,7 +7,7 @@ class GetAllReports extends Command {
 		super(client, {
 			name: "getallreports",
 			description: "Gets all reports of a player",
-			aliases: ["checkall"],
+			aliases: ["checkall", "viewallreports"],
 			category: "reports",
 			usage: "[playername]",
 			examples: ["{{p}}getallreports Windsinger"],

@@ -7,7 +7,7 @@ class GetUserById extends Command {
 		super(client, {
 			name: "getuserbyid",
 			description: "Gets a Discord user by their ID",
-			aliases: ["getuser"],
+			aliases: ["getuser", "viewuserbyid", "viewuser"],
 			category: "basic",
 			usage: "[Discord User ID]",
 			dirname: __dirname,
