@@ -33,10 +33,12 @@ class Setcontact extends Command {
 			(await this.client.users.fetch(args[0]))
 		if (!user) return message.channel.send("User is invalid")
 
-		await this.client.saveGuildConfig({
-			...config.toObject(),
-			contact: user.id,
-		})
+		await this.client.fagc.communities.setCommunityConfig(
+			{
+				contact: user.id,
+			},
+			{ apikey: config.apikey }
+		)
 		return message.channel.send(
 			"Contact saved successfully. Changes may take a few minutes to take effect"
 		)
