@@ -42,7 +42,9 @@ class AddCommunityFilter extends Command {
 				"Remove Filtered Communities. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
 			)
 		const communities = args
-			.map((ruleid) => this.client.fagc.communities.resolveID(ruleid))
+			.map((communityid) =>
+				this.client.fagc.communities.resolveID(communityid)
+			)
 			.filter((r) => r)
 			.filter((r) => config.trustedCommunities.includes(r.id))
 

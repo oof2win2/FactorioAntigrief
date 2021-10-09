@@ -1,6 +1,6 @@
 const Command = require("../../base/Command")
 
-class Setcontact extends Command {
+class SetName extends Command {
 	constructor(client) {
 		super(client, {
 			name: "setname",
@@ -38,4 +38,4 @@ class Setcontact extends Command {
 		)
 	}
 }
-module.exports = Setcontact
+module.exports = SetName

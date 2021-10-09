@@ -36,10 +36,21 @@ class SetAPIKey extends Command {
 				await this.client.fagc.communities.fetchOwnCommunity(null, {
 					apikey: apikey,
 				})
-			if (community.contact !== message.author.id)
+			if (community.contact !== message.author.id) {
+				const contact = await this.client.users
+					.fetch(community.contact)
+					.catch()
+				if (contact)
+					contact.send(
+						`User <@${message.author.id}> | ${message.author.tag} is attempting to use your API key in guild ${message.guild.name} (\`${message.guild.id}\`)`
+					)
+				this.client.fagc.info.notifyGuildText(
+					`User ${message.author.tag} is attempting to use your API key in guild ${message.guild.name} (\`${message.guild.id}\`)`
+				)
 				return message.channel.send(
 					"You are not the community's owner, therefore you don't have access to set the API key!"
 				)
+			}
 		} catch (e) {
 			return message.channel.send("Invalid API key sent")
 		}
