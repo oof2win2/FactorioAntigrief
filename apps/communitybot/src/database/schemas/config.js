@@ -1,21 +1,12 @@
 const mongoose = require("mongoose")
 
 const ConfigSchema = new mongoose.Schema({
-	communityname: {
-		type: String,
-		required: true,
-	},
 	communityId: String, // the community ID in the fagc database
 	guildId: {
 		type: String,
 		required: true,
 	},
-	contact: {
-		type: String,
-		required: true,
-	},
 	apikey: String,
-	moderatorRoleId: String,
 	trustedCommunities: [String],
 	ruleFilters: [String],
 	roles: {
