@@ -1,3 +1,10 @@
+## [1.2.1] - [2021-10-09]
+
+### Changes
+
+- Removed contact and community name from CommunityConfig 
+- Added roles to CommunityConfig
+
 ## [1.2.0] - [2021-09-19]
 
 ### Changes
