@@ -30,7 +30,7 @@ export const Authenticate = <
 			const token = auth.slice("Token ".length)
 			const authData = await AuthModel.findOne({ api_key: token })
 			const community = await CommunityModel.findOne({
-				_id: authData?.communityId,
+				id: authData?.communityId,
 			})
 			if (!community)
 				return res.status(401).send({

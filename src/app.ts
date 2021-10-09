@@ -17,8 +17,29 @@ import removeIdMiddleware from "./utils/removeId.js"
 import fastifyCookie from "fastify-cookie"
 import fastifySession from "@mgcrea/fastify-session"
 import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
+import fastifyExpress from "fastify-express"
+import * as Sentry from "@sentry/node"
+import * as Tracing from "@sentry/tracing"
 
 const fastify: FastifyInstance = Fastify({})
+
+// fastify.register(sentry, {
+// 	dsn:
+// })
+Sentry.init({
+	dsn: ENV.SENTRY_LINK,
+
+	// We recommend adjusting this value in production, or using tracesSampler
+	// for finer control
+	tracesSampleRate: 1.0,
+	integrations: [
+		new Sentry.Integrations.Http({ tracing: true }),
+		new Sentry.Integrations.Console(),
+	],
+})
+
+await fastify.register(fastifyExpress)
+fastify.use(Sentry.Handlers.requestHandler())
 
 // cors
 fastify.register(fastifyCorsPlugin, {
@@ -89,6 +110,13 @@ fastify.register(bootstrap, {
 })
 
 // fastify.register(fastifyResponseValidationPlugin)
+
+fastify.use(Sentry.Handlers.errorHandler())
+
+fastify.addHook("onError", (req, res, error, next) => {
+	console.error(error)
+	next()
+})
 
 const start = async () => {
 	try {
