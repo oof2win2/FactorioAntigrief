@@ -252,8 +252,8 @@ export default class CommunityController {
 			{ guildId: OldConfig.guildId },
 			{
 				guildId: OldConfig.guildId,
-				name: CommunityConfig.communityname,
-				contact: CommunityConfig.contact,
+				name: community.name,
+				contact: community.contact,
 			}
 		)
 		CommunityConfig.set("apikey", null)

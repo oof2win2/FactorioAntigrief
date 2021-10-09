@@ -22,17 +22,11 @@ class Roles {
 	existingMongoose: connection,
 })
 export class CommunityConfigClass {
-	@prop({ required: true })
-	communityname!: string
-
 	@prop()
 	communityId?: string
 
 	@prop()
 	guildId!: string
-
-	@prop({ required: true })
-	contact!: string
 
 	@prop()
 	apikey?: string
