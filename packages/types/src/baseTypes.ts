@@ -48,7 +48,6 @@ export interface CommunityConfig {
 	ruleFilters?: ApiID[]
 	guildId: string
 	contact: string
-	moderatorRoleId: string
 	communityname: string
 	communityId?: string
 }
