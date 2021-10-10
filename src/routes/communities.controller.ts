@@ -202,6 +202,7 @@ export default class CommunityController {
 				.filter((r) => r && r.id)
 			return guildRoles[0]
 		}
+
 		if (!guildConfig.roles)
 			guildConfig.roles = {
 				reports: "",
@@ -215,8 +216,12 @@ export default class CommunityController {
 			if (role) guildConfig.roles[roleType] = role.id
 		})
 
-		await guildConfig.save()
-		await community.save()
+		await GuildConfigModel.findOneAndReplace(
+			{
+				guildId: guildConfig.guildId,
+			},
+			guildConfig.toObject()
+		)
 
 		guildConfig.set("apikey", null)
 		communityConfigChanged(guildConfig)
@@ -265,13 +270,19 @@ export default class CommunityController {
 
 		community.name = name || community.name
 		community.contact = contact || community.contact
-		await community.save()
+
+		await CommunityModel.findOneAndReplace(
+			{
+				id: community.id,
+			},
+			community.toObject()
+		)
 
 		return res.status(200).send(community)
 	}
 
 	@POST({
-		url: "/notifyCommunityConfigChanged/:guildId",
+		url: "/notifyGuildConfigChanged/:guildId",
 		options: {
 			schema: {
 				params: Type.Required(
@@ -283,7 +294,7 @@ export default class CommunityController {
 		},
 	})
 	@MasterAuthenticate
-	async notifyCommunityConfigChanged(
+	async notifyGuildConfigChanged(
 		req: FastifyRequest<{
 			Params: {
 				guildId: string
