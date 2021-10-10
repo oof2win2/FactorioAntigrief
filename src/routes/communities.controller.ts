@@ -29,6 +29,17 @@ export default class CommunityController {
 		options: {
 			schema: {
 				tags: ["community"],
+				response: {
+					"2xx": {
+						type: "object",
+						properties: {
+							id: Type.String(),
+							name: Type.String(),
+							contact: Type.String(),
+							guildIds: Type.Array(Type.String()),
+						},
+					},
+				},
 			},
 		},
 	})
