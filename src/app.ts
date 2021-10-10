@@ -8,8 +8,8 @@ import { fastifyRequestContextPlugin } from "fastify-request-context"
 import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
 import ENV from "./utils/env.js"
-import { DocumentType } from "@typegoose/typegoose"
-import { CommunityClass } from "./database/fagc/community.js"
+import { DocumentType, mongoose } from "@typegoose/typegoose"
+import CommunityModel, { CommunityClass } from "./database/fagc/community.js"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
 import { OAuth2Client } from "./utils/discord.js"
@@ -21,6 +21,13 @@ import fastifyExpress from "fastify-express"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import fastifySwagger from "fastify-swagger"
+import mongooseToSwagger from "mongoose-to-swagger"
+import ReportModel from "./database/fagc/report.js"
+import RevocationModel from "./database/fagc/revocation.js"
+import RuleModel from "./database/fagc/rule.js"
+import UserModel from "./database/fagc/user.js"
+import WebhookModel from "./database/fagc/webhook.js"
+import GuildConfigModel from "./database/bot/community.js"
 
 const fastify: FastifyInstance = Fastify({})
 
@@ -41,6 +48,42 @@ Sentry.init({
 
 await fastify.register(fastifyExpress)
 fastify.use(Sentry.Handlers.requestHandler())
+
+const SwaggerDefinitions = {}
+
+const swaggerDefOpts = {
+	// omitFields: ["_id"],
+	props: ["id"],
+}
+const communityModelSwagger = mongooseToSwagger(CommunityModel, swaggerDefOpts)
+SwaggerDefinitions[communityModelSwagger.title] = communityModelSwagger
+const ReportModelSwagger = mongooseToSwagger(ReportModel, swaggerDefOpts)
+SwaggerDefinitions[ReportModelSwagger.title] = ReportModelSwagger
+const RevocationModelSwagger = mongooseToSwagger(
+	RevocationModel,
+	swaggerDefOpts
+)
+SwaggerDefinitions[RevocationModelSwagger.title] = RevocationModelSwagger
+const RuleModelSwagger = mongooseToSwagger(RuleModel, swaggerDefOpts)
+SwaggerDefinitions[RuleModelSwagger.title] = RuleModelSwagger
+const UserModelSwagger = mongooseToSwagger(UserModel, swaggerDefOpts)
+SwaggerDefinitions[UserModelSwagger.title] = UserModelSwagger
+const WebhookModelSwagger = mongooseToSwagger(WebhookModel, swaggerDefOpts)
+SwaggerDefinitions[WebhookModelSwagger.title] = WebhookModelSwagger
+
+// add in id because of https://github.com/giddyinc/mongoose-to-swagger/pull/33
+Object.keys(SwaggerDefinitions).map((key) => {
+	SwaggerDefinitions[key].properties = {
+		id: { type: "string" },
+		...SwaggerDefinitions[key].properties,
+	}
+})
+
+const GuildConfigModelSwagger = mongooseToSwagger(
+	GuildConfigModel,
+	swaggerDefOpts
+)
+SwaggerDefinitions[GuildConfigModelSwagger.title] = GuildConfigModelSwagger
 
 // swagger
 fastify.register(fastifySwagger, {
@@ -64,18 +107,7 @@ fastify.register(fastifySwagger, {
 			{ name: "report", description: "Report related end-points" },
 			{ name: "master", description: "Master API" },
 		],
-		definitions: {
-			User: {
-				type: "object",
-				required: ["id", "email"],
-				properties: {
-					id: { type: "string", format: "uuid" },
-					firstName: { type: "string" },
-					lastName: { type: "string" },
-					email: { type: "string", format: "email" },
-				},
-			},
-		},
+		definitions: SwaggerDefinitions,
 		securityDefinitions: {
 			apiKey: {
 				type: "apiKey",
