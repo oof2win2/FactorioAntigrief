@@ -18,7 +18,7 @@ import {
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
 
-const wss = new WebSocket.Server({ port: ENV.WS_PORT })
+const wss = new WebSocket.Server({ port: ENV.WS_PORT, host: ENV.WS_HOST })
 
 const WebhookGuildIDs = new WeakMap<WebSocket, string>()
 

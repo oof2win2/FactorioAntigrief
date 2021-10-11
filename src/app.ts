@@ -120,7 +120,7 @@ fastify.addHook("onError", (req, res, error, next) => {
 
 const start = async () => {
 	try {
-		await fastify.listen(ENV.API_PORT)
+		await fastify.listen(ENV.API_PORT, ENV.API_HOST)
 
 		const address = fastify.server.address()
 		const port = typeof address === "string" ? address : address?.port

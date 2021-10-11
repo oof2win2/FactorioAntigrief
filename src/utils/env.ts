@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-import { cleanEnv, str, port } from "envalid"
+import { cleanEnv, str, port, host } from "envalid"
 dotenv.config({
 	path: "./.env",
 })
@@ -10,6 +10,8 @@ const ENV = cleanEnv(process.env, {
 	}),
 	API_PORT: port({ default: 3000 }),
 	WS_PORT: port({ default: 8000, desc: "WebSocket port" }),
+	API_HOST: host({ default: "0.0.0.0" }),
+	WS_HOST: host({ default: "0.0.0.0" }),
 	DISCORD_BOTTOKEN: str({ desc: "Your Discord bot token" }),
 	SENTRY_LINK: str({ desc: "Your sentry.io link" }),
 	PROMETHEUS_PORT: port({
