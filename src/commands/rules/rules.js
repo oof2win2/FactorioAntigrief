@@ -5,16 +5,9 @@ const { createPagedEmbed } = require("../../utils/functions")
 class GetRulesFiltered extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getrulesfiltered",
+			name: "rules",
 			description:
 				"Gets rules that this community follows. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
-			aliases: [
-				"getfilteredrules",
-				"getrules",
-				"viewrulesfiltered",
-				"viewfilteredrules",
-				"viewrules",
-			],
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,

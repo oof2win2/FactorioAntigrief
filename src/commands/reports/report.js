@@ -4,9 +4,8 @@ const Command = require("../../base/Command")
 class FetchReport extends Command {
 	constructor(client) {
 		super(client, {
-			name: "fetchreport",
+			name: "report",
 			description: "Fetch a report by ID",
-			aliases: [],
 			category: "reports",
 			usage: "[reportId]",
 			examples: ["{{p}}fetchreport FX07kpn"],

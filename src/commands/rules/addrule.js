@@ -6,13 +6,14 @@ const { createPagedEmbed } = require("../../utils/functions")
 class AddRuleFilter extends Command {
 	constructor(client) {
 		super(client, {
-			name: "addrulefilter",
+			name: "addrule",
 			description:
 				"Adds a rule filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
-			aliases: ["addrulefilters"],
+			aliases: ["addrules"],
+			usage: "[...ids]",
 			examples: [
-				"{{p}}addrulefilter XuciBx7",
-				"{{p}}addrulefilter XuciBx7 XuciBx9 XuciBx/",
+				"{{p}}addrule XuciBx7",
+				"{{p}}addrule XuciBx7 XuciBx9 XuciBx/",
 			],
 			category: "rules",
 			dirname: __dirname,
@@ -26,7 +27,29 @@ class AddRuleFilter extends Command {
 		})
 	}
 	async run(message, args, config) {
-		if (!args[0]) return message.channel.send("No rules provided")
+		if (!args[0]) {
+			const rules = await this.client.fagc.rules.fetchAll()
+
+			let embed = new MessageEmbed()
+				.setTitle("FAGC Rules")
+				.setColor("GREEN")
+				.setTimestamp()
+				.setAuthor("FAGC Community")
+				.setDescription("All FAGC Rules")
+			let fields = []
+			for (let i = 0; i < rules.length; i += 5) {
+				fields.push({
+					name: rules
+						.slice(i, i + 5)
+						.map((rule) => `${rule.shortdesc} (\`${rule.id}\`)\n`)
+						.join(""),
+					value: "\u200b",
+				})
+			}
+			createPagedEmbed(fields, embed, message, { maxPageCount: 1 })
+			return message.channel.send("No rules provided. Please provide IDs")
+		}
+
 		await Promise.all(
 			args.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid))
 		)

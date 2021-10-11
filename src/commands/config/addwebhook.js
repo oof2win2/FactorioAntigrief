@@ -43,13 +43,10 @@ class AddWebhook extends Command {
 			return message.reply(
 				"The webhook will recieve FAGC notifications from now on! Testing message has been sent"
 			)
-		else if (webhook.error && webhook.error == "Forbidden")
+		else {
 			return message.reply(
 				"You already have a webhook running in your server. You cannot have more than 1 webhook per server"
 			)
-		else {
-			console.error(webhook, Date.now())
-			return message.reply("Error creating webhook")
 		}
 	}
 }

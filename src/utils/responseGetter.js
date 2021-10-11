@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-unused-vars
+const { Message } = require("discord.js")
+
 module.exports = {
 	getMessageResponse,
 	getConfirmationMessage,
@@ -7,7 +10,7 @@ module.exports = {
  * @param {Message} message
  * @param {string} content
  * @param {number} timeout
- * @returns {Promise<Message>}
+ * @returns {Promise<Message | undefined>}
  */
 async function getMessageResponse(message, content, timeout = 30000) {
 	const messageFilter = (response) => response.author.id == message.author.id

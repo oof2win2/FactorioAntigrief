@@ -5,13 +5,13 @@ const { createPagedEmbed } = require("../../utils/functions")
 class GetReports extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getfilteredreports",
+			name: "reports",
 			description:
 				"Gets reports of a player from only trusted communities and filtered rules",
 			aliases: ["check", "viewreports", "viewfilteredreports"],
 			category: "reports",
 			usage: "[playername]",
-			examples: ["{{p}}getfilteredreports Windsinger"],
+			examples: ["{{p}}reports Windsinger"],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],

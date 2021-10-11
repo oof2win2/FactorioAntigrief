@@ -2,14 +2,14 @@ const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
 
-class GetAllProfiles extends Command {
+class GetProfiles extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getallprofiles",
-			description: "Gets all profiles of a player",
-			aliases: ["viewallprofiles"],
+			name: "profiles",
+			description:
+				"Gets profiles of a player, filtered by trusted communities and rules",
 			usage: "[playername]",
-			examples: ["{{p}}getallprofiles Windsinger"],
+			examples: ["{{p}}profiles Windsinger"],
 			category: "profiles",
 			dirname: __dirname,
 			enabled: true,
@@ -17,17 +17,20 @@ class GetAllProfiles extends Command {
 			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
 			ownerOnly: false,
 			cooldown: 3000,
-			requiredConfig: false,
+			requiredConfig: true,
 		})
 	}
-	async run(message, args) {
+	async run(message, args, config) {
 		if (!args[0])
 			return message.reply("Provide a player name to get profiles of")
+		if (!config.trustedCommunities || !config.trustedCommunities[0])
+			return message.reply("Please set trusted communities first")
+
 		const playername = args.shift()
 		const profiles = await this.client.fagc.profiles.fetchAll(playername)
 		if (!profiles || !profiles[0])
 			return message.channel.send(
-				`User \`${playername}\` has no profiles!`
+				`User \`${playername}\` has no profiles`
 			)
 
 		let embed = new MessageEmbed()
@@ -36,6 +39,14 @@ class GetAllProfiles extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Profiles of player \`${playername}\``)
+
+		const filteredProfiles = profiles.filter((profile) =>
+			config.trustedCommunities.includes(profile.communityId)
+		)
+		if (!filteredProfiles[0])
+			return message.channel.send(
+				`User \`${playername}\` has no profiles that correspond to your filters`
+			)
 		const fields = await Promise.all(
 			profiles.map(async (profile) => {
 				const reports = profile.reports.map((report) => report.id)
@@ -52,4 +63,5 @@ class GetAllProfiles extends Command {
 		createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
 	}
 }
-module.exports = GetAllProfiles
+
+module.exports = GetProfiles
