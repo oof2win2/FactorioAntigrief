@@ -21,7 +21,7 @@ class GetUserById extends Command {
 	async run(message, args) {
 		const uid = args.shift()
 		const user = await this.client.users.fetch(uid)
-		if (!user && !user.id)
+		if (!user || !user.id)
 			return message.reply(
 				"This user could not be found. They may not exist"
 			)
@@ -31,7 +31,8 @@ class GetUserById extends Command {
 			.setFooter(this.client.config.embeds.footer)
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setImage(user.avatarURL())
+		const userURL = user.avatarURL()
+		if (typeof userURL === "string") embed.setImage(userURL)
 		embed.addFields(
 			{ name: "User's ID", value: user.id, inline: true },
 			{ name: "User's tag", value: user.tag, inline: true },

@@ -33,10 +33,13 @@ class SetAPIKey extends Command {
 
 		try {
 			const community =
-				await this.client.fagc.communities.fetchOwnCommunity(null, {
-					apikey: apikey,
-				})
-			if (community.contact !== message.author.id) {
+				await this.client.fagc.communities.fetchOwnCommunity(
+					undefined,
+					{
+						apikey: apikey,
+					}
+				)
+			if (community?.contact && community.contact !== message.author.id) {
 				const contact = await this.client.users
 					.fetch(community.contact)
 					.catch()
@@ -44,9 +47,13 @@ class SetAPIKey extends Command {
 					contact.send(
 						`User <@${message.author.id}> | ${message.author.tag} is attempting to use your API key in guild ${message.guild.name} (\`${message.guild.id}\`)`
 					)
-				this.client.fagc.info.notifyGuildText(
-					`User ${message.author.tag} is attempting to use your API key in guild ${message.guild.name} (\`${message.guild.id}\`)`
-				)
+				if (community.guildIds.length)
+					community.guildIds.map((guildId) => {
+						this.client.fagc.info.notifyGuildText(
+							guildId,
+							`User ${message.author.tag} is attempting to use your API key in guild ${message.guild.name} (\`${message.guild.id}\`)`
+						)
+					})
 				return message.channel.send(
 					"You are not the community's owner, therefore you don't have access to set the API key!"
 				)
@@ -57,9 +64,12 @@ class SetAPIKey extends Command {
 
 		try {
 			const community =
-				await this.client.fagc.communities.fetchOwnCommunity(null, {
-					apikey: apikey,
-				})
+				await this.client.fagc.communities.fetchOwnCommunity(
+					undefined,
+					{
+						apikey: apikey,
+					}
+				)
 			if (!community)
 				return message.reply(
 					"That API key is not associated with a community"

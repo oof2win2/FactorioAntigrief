@@ -18,6 +18,7 @@ class FAGCBot extends Client {
 		this.fagc = new FAGCWrapper({
 			apiurl: this.env.APIURL,
 			enableWebSocket: false,
+			socketurl: "",
 			masterapikey: this.env.MASTERAPIKEY,
 		})
 

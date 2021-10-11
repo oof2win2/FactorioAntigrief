@@ -4,9 +4,9 @@ const Command = require("../../base/Command")
 class GetID extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getcommunityid",
+			name: "community",
 			description: "Gets a community by ID",
-			aliases: ["viewcommunityid"],
+			usage: "[id]",
 			category: "communities",
 			dirname: __dirname,
 			enabled: true,

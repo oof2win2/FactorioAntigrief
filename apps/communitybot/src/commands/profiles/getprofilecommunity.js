@@ -5,12 +5,10 @@ const { createPagedEmbed } = require("../../utils/functions")
 class GetAllProfiles extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getprofilecommunity",
-			description:
-				"Gets all profiles of a player in a specific community",
-			aliases: ["profile", "viewprofilecommunity"],
+			name: "profile",
+			description: "Gets the profile of a player in a specific community",
 			usage: "[playername] [communityId]",
-			examples: ["{{p}}getprofilecommunity Windsinger p1UgG0G"],
+			examples: ["{{p}}profile Windsinger p1UgG0G"],
 			category: "profiles",
 			dirname: __dirname,
 			enabled: true,

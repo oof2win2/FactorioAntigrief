@@ -30,6 +30,7 @@ class Genbanlist extends Command {
 		})
 		let ruleReports = await Promise.all(rulePromises)
 		let reportArr = []
+		const PlayerNames = new Set()
 		ruleReports.forEach((reports) => {
 			reports.forEach((report) => {
 				reportArr.push(report)
@@ -45,11 +46,15 @@ class Genbanlist extends Command {
 			(report, i) => reportArr.indexOf(report) === i
 		)
 
+		reportArr.forEach((report) => {
+			PlayerNames.add(report.playername)
+		})
+
 		// create & send banlist
-		let banlist = reportArr.map((report) => {
+		let banlist = Array.from(PlayerNames).map((playername) => {
 			return {
-				username: report.playername,
-				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${this.client.env.APIURL}/profiles/getall?playername=${report.playername}`,
+				username: playername,
+				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${this.client.env.APIURL}/profiles/getall?playername=${playername}`,
 			}
 		})
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab

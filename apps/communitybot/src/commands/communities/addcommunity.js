@@ -1,18 +1,22 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
-const { getConfirmationMessage } = require("../../utils/responseGetter")
+const {
+	getConfirmationMessage,
+	getMessageResponse,
+} = require("../../utils/responseGetter")
 const { createPagedEmbed } = require("../../utils/functions")
 
 class AddCommunityFilter extends Command {
 	constructor(client) {
 		super(client, {
-			name: "addcommunityfilter",
+			name: "addcommunity",
 			description:
 				"Adds a community filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
-			aliases: ["addcommunityfilters"],
+			usage: "[...ids]",
+			aliases: ["addcommunities"],
 			examples: [
-				"{{p}}addcommunityfilter XuciBx7",
-				"{{p}}addcommunityfilter XuciBx7 XuciBx9 XuciBx/",
+				"{{p}}addcommunity XuciBx7",
+				"{{p}}addcommunity XuciBx7 XuciBx9 XuciBx/",
 			],
 			category: "communities",
 			dirname: __dirname,
@@ -26,7 +30,34 @@ class AddCommunityFilter extends Command {
 		})
 	}
 	async run(message, args, config) {
-		if (!args[0]) return message.channel.send("No communities provided")
+		if (!args[0]) {
+			const communities = await this.client.fagc.communities.fetchAll()
+			let embed = new MessageEmbed()
+				.setTitle("FAGC Communities")
+				.setColor("GREEN")
+				.setTimestamp()
+				.setAuthor("FAGC Community")
+				.setDescription("All FAGC Communities")
+			const fields = await Promise.all(
+				communities.map(async (community) => {
+					const user = await this.client.users.fetch(
+						community.contact
+					)
+					return {
+						name: `${community.name} | \`${community.id}\``,
+						value: `Contact: <@${user.id}> | ${user.tag}`,
+					}
+				})
+			)
+			createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
+			const newIDsMessage = await getMessageResponse(
+				message,
+				"No communities provided. Please provide IDs in a single message, separated with spaces:"
+			)
+			if (!newIDsMessage || !newIDsMessage.content)
+				return message.channel.send("No IDs were provided")
+			args = newIDsMessage.content.split(" ")
+		}
 		await Promise.all(
 			args.map((communityid) =>
 				this.client.fagc.communities.fetchCommunity(communityid)

@@ -29,7 +29,7 @@ class AddWebhook extends Command {
 			.fetchWebhooks()
 			.then((webhooks) =>
 				webhooks.filter(
-					(webhook) => webhook.owner.id == this.client.user.id
+					(webhook) => webhook.owner.id == this.client.user?.id
 				)
 			)
 		webhooks.map((webhook) =>

@@ -8,16 +8,9 @@ const {
 class SetAPIKey extends Command {
 	constructor(client) {
 		super(client, {
-			name: "setrolepermissions",
+			name: "setpermissions",
 			description: "Set role permissions for command access",
-			aliases: [
-				"setroleperms",
-				"setroleperm",
-				"setperms",
-				"setperm",
-				"setpermissions",
-				"setpermissions",
-			],
+			aliases: ["setroleperms", "setroleperm", "setperms", "setperm"],
 			category: "config",
 			usage: "([option] [role])",
 			examples: ["{{p}}setrolepermissions reports 841761018380288100"],
@@ -97,7 +90,7 @@ class SetAPIKey extends Command {
 
 			let embed = new MessageEmbed()
 				.setTitle("FAGC Role Config")
-				.setAuthor(`${this.client.user.username} | oof2win2#3149`)
+				.setAuthor(`${this.client.user?.username} | oof2win2#3149`)
 				.setTimestamp()
 				.setDescription("Your FAGC Role Configuration")
 			embed.addFields(

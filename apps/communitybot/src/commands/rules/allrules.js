@@ -5,9 +5,8 @@ const { createPagedEmbed } = require("../../utils/functions")
 class GetAllRules extends Command {
 	constructor(client) {
 		super(client, {
-			name: "getallrules",
+			name: "allrules",
 			description: "Gets all rules",
-			aliases: ["getallrules", "viewallrules"],
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,

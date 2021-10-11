@@ -107,8 +107,8 @@ class Help extends Command {
 			.setColor(this.client.config.embeds.color)
 			.setFooter(this.client.config.embeds.footer)
 			.setAuthor(
-				`${this.client.user.username} | Commands`,
-				this.client.user.displayAvatarURL()
+				`${this.client.user?.username} | Commands`,
+				this.client.user?.displayAvatarURL()
 			)
 		categories.sort().forEach((cat) => {
 			const tCommands = commands.filter(

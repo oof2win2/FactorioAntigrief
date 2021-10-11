@@ -1,6 +1,9 @@
 # Garbage
 .DS_Store
 
+# output
+/dist
+
 # Config
 config.js
 *.env
