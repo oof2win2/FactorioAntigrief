@@ -25,6 +25,7 @@ class CreateReportAdvanced extends Command {
 			customPermissions: ["reports"],
 		})
 	}
+
 	async run(message, _, config) {
 		if (!config.apikey) return message.reply("No API key set")
 
@@ -37,26 +38,70 @@ class CreateReportAdvanced extends Command {
 		if (playername === undefined)
 			return message.channel.send("Didn't send playername in time")
 
-		const admin_message = await getMessageResponse(
+		const adminMessage = await getMessageResponse(
 			message,
 			"Please type in admin user ID for the report"
 		)
-		if (admin_message === undefined)
+		if (adminMessage === undefined)
 			return message.channel.send("Didn't send admin user ID in time")
-		const admin_user =
-			admin_message.mentions.users.first() ||
-			(await this.client.users.fetch(admin_message.content))
-		if (!admin_user) return message.channel.send("Sent user is not valid!")
+		const adminUser =
+			adminMessage.mentions.users.first() ||
+			(await this.client.users.fetch(adminMessage.content))
+		if (!adminUser) return message.channel.send("Sent user is not valid!")
 
-		const ruleid = (
+		const ruleids = (
 			await getMessageResponse(
 				message,
-				"Please type in ID of rule (or index in filtered rules) that has been broken"
+				"Please type in IDs of rules (or indexes in filtered rules) that has been broken, separated by spaces"
 			)
 		)?.content
-		if (ruleid === undefined)
-			return message.channel.send("Didn't send rule ID in time")
-		const ruleNumber = parseInt(ruleid) || undefined
+		if (ruleids === undefined)
+			return message.channel.send("Didn't send rule IDs in time")
+		let ruleInput = ruleids.split(" ")
+		const ruleNumbers = ruleInput
+			.map((rule, i) => {
+				const ruleNumber = parseInt(rule) || undefined
+				// remove the number from input if it is a numher
+				if (ruleNumber)
+					ruleInput = ruleInput.filter((_, inputI) => inputI != i)
+				return ruleNumber
+			})
+			.filter((r) => r)
+		const filteredRules = await this.client.getFilteredRules(config)
+
+		// validate that all rule indexes do exist
+		const invalid = ruleNumbers
+			.map((number) => filteredRules.length < number && number)
+			.filter((i) => i)
+		if (invalid.length)
+			return message.channel.send(
+				`Invalid indexes were provided: ${invalid.join(", ")}`
+			)
+
+		const numberRules = ruleNumbers.map(
+			(ruleNumber) => filteredRules[ruleNumber - 1]
+		)
+		let rules = await Promise.all(
+			ruleInput.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid))
+		)
+		rules = rules.filter((r) => r).concat(numberRules)
+
+		if (!rules.length)
+			return message.channel.send("No valid rules were provided")
+
+		if (rules.length !== ruleids.split(" ").length) {
+			const invalidRules = ruleids
+				.split(" ")
+				.filter((r) => {
+					if (parseInt(r)) return false
+					return true
+				})
+				.filter((r) => !rules.find((rule) => rule.id == r) && r)
+				.filter((r) => r)
+			return message.channel.send(
+				`Some rules had invalid IDs: \`${invalidRules.join("`, `")}\``
+			)
+		}
 
 		let desc = (
 			await getMessageResponse(
@@ -64,7 +109,7 @@ class CreateReportAdvanced extends Command {
 				"Please type in description of the report or `none` if you don't want to set one"
 			)
 		)?.content
-		if (desc.toLowerCase() === "none") desc = undefined
+		if (!desc || desc.toLowerCase() === "none") desc = undefined
 
 		let proof = (
 			await getMessageResponse(
@@ -72,7 +117,7 @@ class CreateReportAdvanced extends Command {
 				"Please send a link to proof of the report or `none` if there is no proof"
 			)
 		)?.content
-		if (proof.toLowerCase() === "none") proof = undefined
+		if (!proof || proof.toLowerCase() === "none") proof = undefined
 
 		const timestampMsg = (
 			await getMessageResponse(
@@ -92,19 +137,6 @@ class CreateReportAdvanced extends Command {
 			}
 		}
 
-		const rule = ruleNumber
-			? await this.client
-					.getFilteredRules(config)
-					.then((rules) => rules[ruleNumber - 1])
-			: await this.client.fagc.rules.fetchRule(ruleid)
-
-		if (!rule)
-			return message.channel.send(
-				ruleNumber
-					? `A filtered rule with the index of ${ruleNumber} does not exist!`
-					: `A rule with the ID of \`${ruleid}\` does not exist!`
-			)
-
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
 			.setColor("RED")
@@ -114,61 +146,70 @@ class CreateReportAdvanced extends Command {
 		embed.addFields(
 			{
 				name: "Admin user",
-				value: `<@${admin_user.id}> | ${admin_user.tag}`,
+				value: `<@${message.author.id}> | ${message.author.tag}`,
 				inline: true,
 			},
 			{ name: "Player name", value: playername, inline: true },
 			{
-				name: "Rule",
-				value: `${rule.shortdesc} (\`${rule.id}\`)`,
+				name: "Rules",
+				value: rules
+					.map((rule) => `${rule.shortdesc} (\`${rule.id}\`)`)
+					.join(", "),
 				inline: true,
 			},
-			{ name: "Report description", value: desc, inline: true },
-			{ name: "Proof", value: proof },
+			{
+				name: "Report description",
+				value: desc || "No description",
+				inline: true,
+			},
+			{ name: "Proof", value: proof || "No proof" },
 			{
 				name: "Violated At",
-				value: `<t:${Math.floor(timestamp.valueOf() / 1000)}>`,
+				value: `<t:${Math.round(timestamp / 1000)}>`,
 			}
 		)
 		message.channel.send(embed)
 		const confirm = await getConfirmationMessage(
 			message,
-			"Do you wish to create this report?"
+			"Do you wish to create these rule reports?"
 		)
 		if (!confirm) return message.channel.send("Report creation cancelled")
 
 		try {
-			const response = await this.client.fagc.reports.create(
-				{
-					playername: playername,
-					adminId: admin_user.id,
-					brokenRule: rule.id,
-					proof: proof,
-					description: desc,
-					automated: false,
-					reportedTime: timestamp,
-				},
-				true,
-				{ apikey: config.apikey }
-			)
-			if (response.id && response.brokenRule && response.reportedTime) {
-				return message.channel.send(
-					`Report created! id: \`${response.id}\``
+			const reports = await Promise.all(
+				rules.map((rule) =>
+					this.client.fagc.reports.create(
+						{
+							playername: playername,
+							adminId: adminUser.id,
+							brokenRule: rule.id,
+							proof: proof,
+							description: desc,
+							automated: false,
+							reportedTime: timestamp,
+						},
+						true,
+						{ apikey: config.apikey }
+					)
 				)
-			} else if (
-				response.error &&
-				response.description.includes("brokenRule expected ID")
+			)
+			if (
+				reports.length &&
+				reports[0].brokenRule &&
+				reports[0].reportedTime
 			) {
 				return message.channel.send(
-					"RuleID is an invalid rule ID. Please check `fagc!getrules` or `fagc!getallrules`"
+					`Report(s) created! ids: \`${reports
+						.map((report) => report.id)
+						.join("`, `")}\``
 				)
 			} else {
-				return handleErrors(message, response)
+				return handleErrors(message, reports)
 			}
 		} catch (error) {
 			if (error instanceof AuthenticationError)
 				return message.channel.send("Your API key is set incorrectly")
-			message.channel.send("Error creating report. Please check logs.")
+			message.channel.send("Error creating reports. Please check logs.")
 			throw error
 		}
 	}
