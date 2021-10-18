@@ -466,7 +466,8 @@ describe("ApiWrapper", () => {
 	})
 	step(
 		"Should be able to create and remove a community with violations and revocations getting removed",
-		async () => {
+		async function () {
+			this.timeout(5000)
 			const communityResult = await FAGC.communities.create(
 				testStuff.community.name,
 				testUserId,

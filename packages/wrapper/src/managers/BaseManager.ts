@@ -4,11 +4,16 @@ import { AddOptions, ManagerOptions } from "../types/types"
 
 export default class BaseManager<HoldsWithId extends Common> {
 	public cache: Collection<Common["id"], HoldsWithId>
+	protected fetchingCache: Collection<
+		Common["id"],
+		Promise<HoldsWithId | null>
+	>
 	private sweepCache: Collection<Common["id"], number>
 	private interval: NodeJS.Timeout
 	constructor(options: ManagerOptions = {}) {
 		this.cache = new Collection()
 		this.sweepCache = new Collection()
+		this.fetchingCache = new Collection()
 
 		if (options.uncachems) {
 			this.interval = setInterval(() => {

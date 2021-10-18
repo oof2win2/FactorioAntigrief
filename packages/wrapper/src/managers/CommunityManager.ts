@@ -28,9 +28,21 @@ export default class CommunityManager extends BaseManager<Community> {
 		force = false
 	): Promise<Community | null> {
 		if (!force) {
-			const cached = this.cache.get(communityId)
+			const cached =
+				this.cache.get(communityId) ||
+				this.fetchingCache.get(communityId)
 			if (cached) return cached
 		}
+
+		let promiseResolve: (value: unknown) => void
+		const fetchingPromise: Promise<Community | null> = new Promise(
+			(resolve) => {
+				promiseResolve = resolve
+			}
+		)
+
+		this.fetchingCache.set(communityId, fetchingPromise)
+
 		const fetched = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(communityId)}`
 		).then((c) => c.json())
@@ -39,6 +51,10 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (fetched.error)
 			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
 		if (cache) this.add(fetched)
+		promiseResolve(fetched)
+		setImmediate(() => {
+			this.fetchingCache.sweep((data) => typeof data.then === "function")
+		})
 		return fetched
 	}
 	async fetchAll(cache = true): Promise<Community[]> {
