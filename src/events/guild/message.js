@@ -13,8 +13,8 @@ module.exports = async (client, message) => {
 		client.commands.get(command) ||
 		client.commands.get(client.aliases.get(command))
 	if (!cmd)
-		return message.channel.send(
-			`\`${prefix}${command}\` is not a valid command! Use \`fagc!help\` to view commands`
+		return message.reply(
+			"You provided an invalid command! Use `fagc!help` to view commands"
 		)
 
 	if (!cmd.config.enabled)

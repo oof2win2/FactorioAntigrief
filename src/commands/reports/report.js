@@ -8,7 +8,7 @@ class FetchReport extends Command {
 			description: "Fetch a report by ID",
 			category: "reports",
 			usage: "[reportId]",
-			examples: ["{{p}}fetchreport FX07kpn"],
+			examples: ["{{p}}report FX07kpn"],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],

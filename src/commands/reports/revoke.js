@@ -12,7 +12,7 @@ class Revoke extends Command {
 			aliases: ["revokeid"],
 			category: "reports",
 			usage: "[reportid]",
-			examples: ["{{p}}revoke 60689a97674ac1edb15186f0"],
+			examples: ["{{p}}revoke p1UgG0G"],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: ["BAN_MEMBERS"],
