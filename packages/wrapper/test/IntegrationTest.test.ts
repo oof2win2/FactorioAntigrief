@@ -1,6 +1,6 @@
 import config from "./testconfig"
 import { FAGCWrapper, RequestConfig } from "../src/index"
-import { CommunityConfig, Report, Revocation } from "fagc-api-types"
+import { GuildConfig, Report, Revocation } from "fagc-api-types"
 
 import { expect } from "chai"
 
@@ -65,23 +65,26 @@ describe("ApiWrapper", () => {
 	})
 	step("Should be able to set and get configs properly", async function () {
 		this.timeout(5000)
-		const oldConfig = await FAGC.communities.fetchConfig(testGuildId)
-		expect(oldConfig?.guildId).to.equal(
+		const guildConfig = await FAGC.communities.fetchGuildConfig(testGuildId)
+		const oldConfig = await FAGC.communities.fetchCommunityConfig(
+			guildConfig.communityId
+		)
+		expect(oldConfig?.guildIds).to.include(
 			testGuildId,
 			"Guild configs fetched improperly"
 		)
 		const newName = "OOF2 BANBOT"
-		const newConfig = await FAGC.communities.setConfig({
-			communityname: newName,
+		const newConfig = await FAGC.communities.setCommunityConfig({
+			name: newName,
 		})
-		expect(newConfig.communityname).to.equal(
+		expect(newConfig.name).to.equal(
 			newName,
 			"Community config names were set improperly"
 		)
 
 		// reset community name after test
-		await FAGC.communities.setConfig({
-			communityname: oldConfig.communityname,
+		await FAGC.communities.setCommunityConfig({
+			name: oldConfig.name,
 		})
 	})
 	step(
@@ -463,7 +466,8 @@ describe("ApiWrapper", () => {
 	})
 	step(
 		"Should be able to create and remove a community with violations and revocations getting removed",
-		async () => {
+		async function () {
+			this.timeout(5000)
 			const communityResult = await FAGC.communities.create(
 				testStuff.community.name,
 				testUserId,
@@ -478,7 +482,7 @@ describe("ApiWrapper", () => {
 				testUserId,
 				"Community contact mismatch"
 			)
-			expect(community.guildId).to.equal(
+			expect(community.guildIds).to.include(
 				"548410604679856151",
 				"Community guildId mismatch"
 			)

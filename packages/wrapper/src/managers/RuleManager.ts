@@ -25,9 +25,16 @@ export class RuleManager extends BaseManager<Rule> {
 		force = false
 	): Promise<Rule | null> {
 		if (!force) {
-			const cached = this.cache.get(ruleid)
+			const cached =
+				this.cache.get(ruleid) || this.fetchingCache.get(ruleid)
 			if (cached) return cached
 		}
+		let promiseResolve: (value: unknown) => void
+		const fetchingPromise: Promise<Rule | null> = new Promise((resolve) => {
+			promiseResolve = resolve
+		})
+
+		this.fetchingCache.set(ruleid, fetchingPromise)
 
 		const fetched = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(ruleid)}`
@@ -36,6 +43,10 @@ export class RuleManager extends BaseManager<Rule> {
 		if (!fetched || !fetched.id) return null // return null if the fetch is empty
 
 		if (cache) this.add(fetched)
+		promiseResolve(fetched)
+		setImmediate(() => {
+			this.fetchingCache.sweep((data) => typeof data.then === "function")
+		})
 		if (fetched.id === ruleid) return fetched
 		return null
 	}
@@ -108,7 +119,6 @@ export class RuleManager extends BaseManager<Rule> {
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
 		}
 		if (!data.id) throw data
-
 		this.removeFromCache(data)
 
 		return data

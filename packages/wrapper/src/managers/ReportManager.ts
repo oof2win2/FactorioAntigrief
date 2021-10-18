@@ -31,9 +31,20 @@ export default class ReportManager extends BaseManager<Report> {
 		force = false
 	): Promise<Report | null> {
 		if (!force) {
-			const cached = this.cache.get(reportid)
+			const cached =
+				this.cache.get(reportid) || this.fetchingCache.get(reportid)
 			if (cached) return cached
 		}
+
+		let promiseResolve: (value: unknown) => void
+		const fetchingPromise: Promise<Report | null> = new Promise(
+			(resolve) => {
+				promiseResolve = resolve
+			}
+		)
+
+		this.fetchingCache.set(reportid, fetchingPromise)
+
 		const fetched = await fetch(
 			`${this.apiurl}/reports/${strictUriEncode(reportid)}`
 		).then((c) => c.json())
@@ -43,6 +54,10 @@ export default class ReportManager extends BaseManager<Report> {
 			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
 		fetched.reportedTime = new Date(fetched.reportedTime)
 		if (cache) this.add(fetched)
+		promiseResolve(fetched)
+		setImmediate(() => {
+			this.fetchingCache.sweep((data) => typeof data.then === "function")
+		})
 		return fetched
 	}
 	async fetchAllName(playername: string, cache = true): Promise<Report[]> {
@@ -162,7 +177,7 @@ export default class ReportManager extends BaseManager<Report> {
 		adminId: string,
 		cache = true,
 		reqConfig: RequestConfig = {}
-	): Promise<Report[] | null> {
+	): Promise<Revocation[] | null> {
 		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
 
 		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {

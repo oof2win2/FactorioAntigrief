@@ -7,9 +7,10 @@ import {
 	NoApikeyError,
 } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
-import { Community, CommunityConfig, ApiID } from "fagc-api-types"
+import { Community, GuildConfig, ApiID } from "fagc-api-types"
 
-type SetCommunityConfig = Partial<CommunityConfig>
+type SetGuildConfig = Partial<GuildConfig>
+type SetCommunityConfig = Partial<Omit<Community, "id">>
 
 export default class CommunityManager extends BaseManager<Community> {
 	public apikey?: string
@@ -27,9 +28,21 @@ export default class CommunityManager extends BaseManager<Community> {
 		force = false
 	): Promise<Community | null> {
 		if (!force) {
-			const cached = this.cache.get(communityId)
+			const cached =
+				this.cache.get(communityId) ||
+				this.fetchingCache.get(communityId)
 			if (cached) return cached
 		}
+
+		let promiseResolve: (value: unknown) => void
+		const fetchingPromise: Promise<Community | null> = new Promise(
+			(resolve) => {
+				promiseResolve = resolve
+			}
+		)
+
+		this.fetchingCache.set(communityId, fetchingPromise)
+
 		const fetched = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(communityId)}`
 		).then((c) => c.json())
@@ -38,6 +51,10 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (fetched.error)
 			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
 		if (cache) this.add(fetched)
+		promiseResolve(fetched)
+		setImmediate(() => {
+			this.fetchingCache.sweep((data) => typeof data.then === "function")
+		})
 		return fetched
 	}
 	async fetchAll(cache = true): Promise<Community[]> {
@@ -87,9 +104,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (cached) return cached
 		return null
 	}
-	async fetchConfig(guildId: string): Promise<CommunityConfig | null> {
+	async fetchGuildConfig(guildId: string): Promise<GuildConfig | null> {
 		const config = await fetch(
-			`${this.apiurl}/communities/config/${strictUriEncode(guildId)}`
+			`${this.apiurl}/communities/guildconfig/${strictUriEncode(guildId)}`
 		).then((c) => c.json())
 
 		if (config.error)
@@ -97,13 +114,31 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (!config || !config.guildId) return null
 		return config
 	}
-	async setConfig(
-		config: SetCommunityConfig,
+	async fetchOwnGuildConfig(
 		reqConfig: RequestConfig = {}
-	): Promise<CommunityConfig> {
+	): Promise<GuildConfig | null> {
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+		const config = await fetch(`${this.apiurl}/communities/guildconfig`, {
+			headers: {
+				authorization: `Token ${reqConfig.apikey || this.apikey}`,
+			},
+		}).then((u) => u.json())
+
+		if (config.error) {
+			if (config.description === "API key is wrong")
+				throw new AuthenticationError()
+			throw new GenericAPIError(`${config.error}: ${config.message}`)
+		}
+
+		return config
+	}
+	async setGuildConfig(
+		config: SetGuildConfig,
+		reqConfig: RequestConfig = {}
+	): Promise<GuildConfig> {
 		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
 
-		const update = await fetch(`${this.apiurl}/communities/config`, {
+		const update = await fetch(`${this.apiurl}/communities/guildconfig`, {
 			method: "POST",
 			body: JSON.stringify(config),
 			headers: {
@@ -117,6 +152,87 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		}
 		return update
+	}
+	async fetchCommunityConfig(
+		communityId: ApiID,
+		cache = true,
+		force = false
+	): Promise<Community | null> {
+		return this.fetchCommunity(communityId, cache, force)
+	}
+	async setCommunityConfig(
+		config: SetCommunityConfig,
+		reqConfig: RequestConfig = {}
+	): Promise<Community> {
+		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+
+		const update = await fetch(
+			`${this.apiurl}/communities/communityconfig`,
+			{
+				method: "POST",
+				body: JSON.stringify(config),
+				headers: {
+					authorization: `Token ${reqConfig.apikey || this.apikey}`,
+					"content-type": "application/json",
+				},
+			}
+		).then((u) => u.json())
+		if (update.error) {
+			if (update.description === "API key is wrong")
+				throw new AuthenticationError()
+			throw new GenericAPIError(`${update.error}: ${update.message}`)
+		}
+		return update
+	}
+
+	async notifyGuildConfig(
+		guildId: string,
+		reqConfig: RequestConfig = {}
+	): Promise<void> {
+		if (!reqConfig.masterapikey && !this.masterapikey)
+			throw new NoApikeyError()
+		const create = await fetch(
+			`${
+				this.apiurl
+			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildId)}`,
+			{
+				method: "POST",
+				headers: {
+					authorization: `Token ${
+						reqConfig.masterapikey || this.masterapikey
+					}`,
+				},
+			}
+		).then((u) => u.json())
+		if (create.error) {
+			if (create.description === "API key is wrong")
+				throw new AuthenticationError()
+			throw new GenericAPIError(`${create.error}: ${create.message}`)
+		}
+	}
+
+	async guildLeave(
+		guildId: string,
+		reqConfig: RequestConfig = {}
+	): Promise<void> {
+		if (!reqConfig.masterapikey && !this.masterapikey)
+			throw new NoApikeyError()
+		const create = await fetch(
+			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildId)}`,
+			{
+				method: "POST",
+				headers: {
+					authorization: `Token ${
+						reqConfig.masterapikey || this.masterapikey
+					}`,
+				},
+			}
+		).then((u) => u.json())
+		if (create.error) {
+			if (create.description === "API key is wrong")
+				throw new AuthenticationError()
+			throw new GenericAPIError(`${create.error}: ${create.message}`)
+		}
 	}
 
 	async create(

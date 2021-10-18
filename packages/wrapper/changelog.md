@@ -1,3 +1,15 @@
+## [1.15.0] - [2021-10-09]
+
+### Changes
+
+-   Notify guild with embed or text
+
+## [1.14.0] - [2021-10-09]
+
+### Changes
+
+-   Support for multiple guilds per community
+
 ## [1.13.1] - [2021-09-21]
 
 ### Changes
