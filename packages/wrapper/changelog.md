@@ -1,3 +1,9 @@
+## [1.15.1] - [2021-10-18]
+
+### Changes
+
+-   Cache requests when fetching data as to not perform extra requests
+
 ## [1.15.0] - [2021-10-09]
 
 ### Changes
