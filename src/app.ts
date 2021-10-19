@@ -104,14 +104,28 @@ fastify.register(fastifySwagger, {
 		produces: ["application/json"],
 		tags: [
 			{ name: "community", description: "Community related end-points" },
-			{ name: "report", description: "Report related end-points" },
+			{ name: "rules", description: "Rule related end-points" },
+			{ name: "reports", description: "Report related end-points" },
+			{ name: "profiles", description: "Profile related end-points" },
+			{
+				name: "revocations",
+				description: "Revocation related end-points",
+			},
+			{
+				name: "informatics",
+				description: "Informatics related end-points",
+			},
 			{ name: "master", description: "Master API" },
 		],
-		definitions: SwaggerDefinitions,
 		securityDefinitions: {
-			apiKey: {
+			authorization: {
 				type: "apiKey",
-				name: "apikey",
+				name: "authorization",
+				in: "header",
+			},
+			masterAuthorization: {
+				type: "apiKey",
+				name: "authorization",
 				in: "header",
 			},
 		},
@@ -131,6 +145,28 @@ fastify.register(fastifySwagger, {
 	staticCSP: true,
 	transformStaticCSP: (header) => header,
 	exposeRoute: true,
+})
+
+Object.keys(SwaggerDefinitions).map((key) => {
+	fastify.addSchema({
+		...SwaggerDefinitions[key],
+		type: "object",
+		$id: SwaggerDefinitions[key].title,
+	})
+})
+fastify.addSchema({
+	type: "object",
+	$id: "Profile",
+	properties: {
+		communityId: { type: "string" },
+		playername: { type: "string" },
+		reports: {
+			type: "array",
+			items: {
+				$ref: "ReportClass#",
+			},
+		},
+	},
 })
 
 // cors
@@ -232,25 +268,3 @@ fastify.ready((err) => {
 process.on("beforeExit", () => {
 	fastify.close()
 })
-
-// import Fastify from "fastify"
-// import fastifySwagger from "fastify-swagger"
-
-// const fastify = Fastify()
-
-// fastify.register(fastifySwagger, {
-// 	routePrefix: "/documentation",
-// 	staticCSP: true,
-// 	transformStaticCSP: (header) => header,
-// 	exposeRoute: true,
-// })
-
-// fastify.get("/data", async (req, res) => {
-// 	res.send({ msg: "Hi." })
-// })
-
-// fastify.ready((err) => {
-// 	if (err) throw err
-// 	fastify.swagger()
-// })
-// await fastify.listen(3000)

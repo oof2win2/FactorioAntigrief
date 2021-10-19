@@ -20,6 +20,17 @@ export default class ProfileController {
 						communityId: Type.String(),
 					})
 				),
+
+				description: "Fetch all revocations of a player in a community",
+				tags: ["revocation"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "RevocationClass#",
+						},
+					},
+				},
 			},
 		},
 	})
@@ -49,6 +60,17 @@ export default class ProfileController {
 						playername: Type.String(),
 					})
 				),
+
+				description: "Fetch all revocations of a player",
+				tags: ["revocation"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "RevocationClass#",
+						},
+					},
+				},
 			},
 		},
 	})
@@ -77,6 +99,18 @@ export default class ProfileController {
 						timestamp: Type.String(),
 					})
 				),
+
+				description:
+					"Fetch all revocations of a player modified since a timestamp",
+				tags: ["revocation"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "RevocationClass#",
+						},
+					},
+				},
 			},
 		},
 	})

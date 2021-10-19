@@ -10,40 +10,48 @@ import { MasterAuthenticate } from "../utils/authentication.js"
 
 @Controller({ route: "/informatics" })
 export default class ProfileController {
-	@GET({
-		url: "/logs/:count/:since",
-		options: {
-			schema: {
-				params: Type.Required(
-					Type.Object({
-						count: Type.Number(),
-						since: Type.Number(),
-					})
-				),
-			},
-		},
-	})
-	async getLogs(
-		req: FastifyRequest<{
-			Params: {
-				count: number
-				since: number
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { count, since } = req.params
-		const logs = await LogModel.find(
-			{
-				timestamp: { $gte: new Date(since) },
-			},
-			null,
-			{
-				limit: count,
-			}
-		)
-		return res.send(logs)
-	}
+	// @GET({
+	// 	url: "/logs/:count/:since",
+	// 	options: {
+	// 		schema: {
+	// 			params: Type.Required(
+	// 				Type.Object({
+	// 					count: Type.Number(),
+	// 					since: Type.Number(),
+	// 				})
+	// 			),
+
+	// 			description: "Get logs",
+	// 			tags: ["informatics"],
+	// 			security: [
+	// 				{
+	// 					masterAuthorization: [],
+	// 				},
+	// 			],
+	// 		},
+	// 	},
+	// })
+	// async getLogs(
+	// 	req: FastifyRequest<{
+	// 		Params: {
+	// 			count: number
+	// 			since: number
+	// 		}
+	// 	}>,
+	// 	res: FastifyReply
+	// ): Promise<FastifyReply> {
+	// 	const { count, since } = req.params
+	// 	const logs = await LogModel.find(
+	// 		{
+	// 			timestamp: { $gte: new Date(since) },
+	// 		},
+	// 		null,
+	// 		{
+	// 			limit: count,
+	// 		}
+	// 	)
+	// 	return res.send(logs)
+	// }
 
 	@POST({
 		url: "/webhook",
@@ -55,6 +63,14 @@ export default class ProfileController {
 						token: Type.String(),
 					})
 				),
+
+				description: "Add a webhook to FAGC notifications",
+				tags: ["informatics"],
+				response: {
+					"200": {
+						$ref: "WebhookClass#",
+					},
+				},
 			},
 		},
 	})
@@ -107,6 +123,14 @@ export default class ProfileController {
 						token: Type.String(),
 					})
 				),
+
+				description: "Remove a webhook from FAGC notifications",
+				tags: ["informatics"],
+				response: {
+					"200": {
+						$ref: "WebhookClass#",
+					},
+				},
 			},
 		},
 	})
@@ -124,6 +148,7 @@ export default class ProfileController {
 			id: id,
 			token: token,
 		})
+
 		if (found) {
 			const webhook = new WebhookClient({
 				id: found.id,
@@ -132,8 +157,13 @@ export default class ProfileController {
 			webhook
 				.send("This webhook will no longer recieve FAGC notifications")
 				.then(() => webhook.destroy())
+			return res.status(200).send(found)
 		}
-		return res.status(200).send(found)
+		return res.status(404).send({
+			errorCode: 404,
+			error: "Not Found",
+			message: "Provided webhook could not be found",
+		})
 	}
 
 	@POST({
@@ -146,6 +176,15 @@ export default class ProfileController {
 				body: Type.Object({
 					data: Type.String(),
 				}),
+
+				description:
+					"Notify a guild with a text message sent with [Message](https://discord.js.org/#/docs/main/stable/class/Message)",
+				tags: ["informatics"],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
 			},
 		},
 	})
@@ -189,6 +228,15 @@ export default class ProfileController {
 						additionalProperties: true,
 					}
 				),
+
+				description:
+					"Notify a guild with a [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed)",
+				tags: ["informatics"],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
 			},
 		},
 	})
