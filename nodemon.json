@@ -6,6 +6,6 @@
 		"NODE_ENV": "development"
 	},
 	"ext": "*",
-	"cwd": "./src/",
+	"cwd": "./dist/",
 	"delay": 1000
 }

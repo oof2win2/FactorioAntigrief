@@ -4,7 +4,7 @@ import { FastifyReply, FastifyRequest } from "fastify"
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export default async function (
 	_req: FastifyRequest,
-	_res: FastifyReply,
+	res: FastifyReply,
 	payload: unknown
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,6 +27,10 @@ export default async function (
 		}
 		return response
 	}
+
+	// make sure to not modify response if it is not json
+	if (!res.getHeader("content-type")?.startsWith("application/json"))
+		return payload
 
 	// most responses are JSON so this should go through
 	if (typeof payload === "string") {

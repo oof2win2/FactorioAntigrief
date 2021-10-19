@@ -8,7 +8,23 @@ import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info.js"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
-	@GET({ url: "/" })
+	@GET({
+		url: "/",
+		options: {
+			schema: {
+				description: "Fetch all rules",
+				tags: ["rules"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "RuleClass#",
+						},
+					},
+				},
+			},
+		},
+	})
 	async getAllRules(
 		_req: FastifyRequest,
 		res: FastifyReply
@@ -26,6 +42,14 @@ export default class RuleController {
 						id: Type.String(),
 					})
 				),
+
+				description: "Fetch a rule by ID",
+				tags: ["rules"],
+				response: {
+					"200": {
+						$ref: "RuleClass#",
+					},
+				},
 			},
 		},
 	})
@@ -52,6 +76,19 @@ export default class RuleController {
 						longdesc: Type.String(),
 					})
 				),
+
+				description: "Create a rule",
+				tags: ["rules"],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "RuleClass#",
+					},
+				},
 			},
 		},
 	})
@@ -83,6 +120,19 @@ export default class RuleController {
 						id: Type.String(),
 					})
 				),
+
+				description: "Remove a rule",
+				tags: ["rules"],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "RuleClass#",
+					},
+				},
 			},
 		},
 	})

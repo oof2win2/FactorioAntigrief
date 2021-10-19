@@ -22,6 +22,14 @@ export default class ReportController {
 						id: Type.String(),
 					})
 				),
+
+				description: "Fetch a report by it's ID",
+				tags: ["reports"],
+				response: {
+					"200": {
+						$ref: "ReportClass#",
+					},
+				},
 			},
 		},
 	})
@@ -47,6 +55,17 @@ export default class ReportController {
 						id: Type.String(),
 					})
 				),
+
+				description: "Fetch a report by it's broken rule ID",
+				tags: ["reports"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "ReportClass#",
+						},
+					},
+				},
 			},
 		},
 	})
@@ -71,6 +90,17 @@ export default class ReportController {
 						playername: Type.String(),
 					})
 				),
+
+				description: "Fetch reports by their player name",
+				tags: ["reports"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "ReportClass#",
+						},
+					},
+				},
 			},
 		},
 	})
@@ -98,6 +128,18 @@ export default class ReportController {
 						communityId: Type.String(),
 					})
 				),
+
+				description:
+					"Fetch reports by their player name and community ID",
+				tags: ["reports"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "ReportClass#",
+						},
+					},
+				},
 			},
 		},
 	})
@@ -126,6 +168,17 @@ export default class ReportController {
 						timestamp: Type.String(),
 					})
 				),
+
+				description: "Fetch reports modified since a timestamp",
+				tags: ["reports"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "ReportClass#",
+						},
+					},
+				},
 			},
 		},
 	})
@@ -164,6 +217,19 @@ export default class ReportController {
 						proof: Type.String({ default: "No proof" }),
 					})
 				),
+
+				description: "Create a report",
+				tags: ["reports"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "ReportClass#",
+					},
+				},
 			},
 		},
 	})
@@ -256,6 +322,19 @@ export default class ReportController {
 						id: Type.String(),
 					})
 				),
+
+				description: "Revoke a report",
+				tags: ["reports"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "RevocationClass#",
+					},
+				},
 			},
 		},
 	})
@@ -347,6 +426,22 @@ export default class ReportController {
 						playername: Type.String(),
 					})
 				),
+
+				description: "Revoke all report of a player in your community",
+				tags: ["reports"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "RevocationClass#",
+						},
+					},
+				},
 			},
 		},
 	})

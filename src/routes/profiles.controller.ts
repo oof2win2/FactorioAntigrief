@@ -19,6 +19,14 @@ export default class ProfileController {
 						communityId: Type.String(),
 					})
 				),
+
+				description: "Fetch a report of a player in a community",
+				tags: ["profiles"],
+				response: {
+					"200": {
+						$ref: "Profile#",
+					},
+				},
 			},
 		},
 	})
@@ -56,6 +64,17 @@ export default class ProfileController {
 						playername: Type.String(),
 					})
 				),
+
+				description: "Fetch all reports of a player",
+				tags: ["profiles"],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "Profile#",
+						},
+					},
+				},
 			},
 		},
 	})
