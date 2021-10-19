@@ -9,6 +9,7 @@ export const client = new Client({
 })
 client.login(ENV.DISCORD_BOTTOKEN)
 
+// some oauth stuff for the users, used for website. WIP.
 export const OAuth2Client = new OAuthClient({
 	clientId: ENV.APPID,
 	clientSecret: ENV.APPSECRET,

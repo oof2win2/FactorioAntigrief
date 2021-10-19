@@ -3,6 +3,7 @@ import { cleanEnv, str, port } from "envalid"
 dotenv.config({
 	path: "./.env",
 })
+// env validation
 const ENV = cleanEnv(process.env, {
 	MONGOURI: str({
 		example:
