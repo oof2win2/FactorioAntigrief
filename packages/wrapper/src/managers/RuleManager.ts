@@ -44,9 +44,9 @@ export class RuleManager extends BaseManager<Rule> {
 
 		if (cache) this.add(fetched)
 		promiseResolve(fetched)
-		setImmediate(() => {
+		setTimeout(() => {
 			this.fetchingCache.sweep((data) => typeof data.then === "function")
-		})
+		}, 0)
 		if (fetched.id === ruleid) return fetched
 		return null
 	}

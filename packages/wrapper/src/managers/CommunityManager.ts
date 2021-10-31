@@ -52,9 +52,9 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
 		if (cache) this.add(fetched)
 		promiseResolve(fetched)
-		setImmediate(() => {
+		setTimeout(() => {
 			this.fetchingCache.sweep((data) => typeof data.then === "function")
-		})
+		}, 0)
 		return fetched
 	}
 	async fetchAll(cache = true): Promise<Community[]> {

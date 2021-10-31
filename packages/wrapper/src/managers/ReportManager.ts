@@ -55,9 +55,9 @@ export default class ReportManager extends BaseManager<Report> {
 		fetched.reportedTime = new Date(fetched.reportedTime)
 		if (cache) this.add(fetched)
 		promiseResolve(fetched)
-		setImmediate(() => {
+		setTimeout(() => {
 			this.fetchingCache.sweep((data) => typeof data.then === "function")
-		})
+		}, 0)
 		return fetched
 	}
 	async fetchAllName(playername: string, cache = true): Promise<Report[]> {
