@@ -1,3 +1,10 @@
+## [1.15.2] - [2021-10-31]
+
+### Bugfixes
+
+-   Remove incorrect "module" from package.json
+-   Remove setImmediate and replace with setTimeout for browser compat
+
 ## [1.15.1] - [2021-10-18]
 
 ### Changes
