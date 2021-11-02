@@ -1,3 +1,9 @@
+## [1.15.3] - [2021-10-31]
+
+### Bugfixes
+
+-   Add state to API request to signup request
+
 ## [1.15.2] - [2021-10-31]
 
 ### Bugfixes
