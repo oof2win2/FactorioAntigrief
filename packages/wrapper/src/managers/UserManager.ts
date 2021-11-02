@@ -75,9 +75,11 @@ export default class UserManager extends BaseManager<null> {
 		return fetched.url
 	}
 
-	async signup(code: string): Promise<User | null> {
+	async signup(code: string, state: string): Promise<User | null> {
 		const fetched = await fetch(
-			`${this.apiurl}/users/signup?code=${strictUriEncode(code)}`
+			`${this.apiurl}/users/signup?code=${strictUriEncode(
+				code
+			)}&state=${strictUriEncode(state)}`
 		).then((c) => c.json())
 		if (fetched.error) throw new GenericAPIError(fetched)
 		return fetched
