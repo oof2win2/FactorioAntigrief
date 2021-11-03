@@ -14,12 +14,14 @@ import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
 import { OAuth2Client } from "./utils/discord.js"
 import removeIdMiddleware from "./utils/removeId.js"
-import fastifyCookie from "fastify-cookie"
-import fastifySession from "@mgcrea/fastify-session"
 import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
 import fastifyExpress from "fastify-express"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
+import fastifyCookie from "fastify-cookie"
+import fastifySession from "@mgcrea/fastify-session"
+import Redis from "ioredis"
+import { RedisStore } from "@mgcrea/fastify-session-redis-store"
 import fastifySwagger from "fastify-swagger"
 import mongooseToSwagger from "mongoose-to-swagger"
 import ReportModel from "./database/fagc/report.js"
@@ -31,9 +33,6 @@ import GuildConfigModel from "./database/bot/community.js"
 
 const fastify: FastifyInstance = Fastify({})
 
-// fastify.register(sentry, {
-// 	dsn:
-// })
 Sentry.init({
 	dsn: ENV.SENTRY_LINK,
 
@@ -208,16 +207,12 @@ fastify.addHook("onSend", removeIdMiddleware)
 // yummy snackies
 fastify.register(fastifyCookie)
 fastify.register(fastifySession, {
+	store: new RedisStore({
+		client: new Redis(ENV.REDISURI),
+		ttl: ENV.SESSION_TTL,
+	}),
 	secret: ENV.SESSIONSECRET,
-	cookie: {
-		maxAge: 1000 * 86400 * 365, // persist cookie for 1 year
-		// httpOnly: true,
-		// sameSite: "none", //
-		// secure: ENV.isProd, // cookie works only in https
-	},
-	// cookieName: ENV.COOKIENAME,
-	// saveUninitialized: true,
-	crypto: SODIUM_SECRETBOX,
+	cookie: { maxAge: ENV.SESSION_TTL },
 })
 
 // typed session
