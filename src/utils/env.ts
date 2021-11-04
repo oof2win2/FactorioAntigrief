@@ -12,8 +12,9 @@ const ENV = cleanEnv(
 				"mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName",
 			desc: "MongoDB Connection string",
 		}),
-		REDISURI: url({
-			desc: "Redis connection string",
+		SESSION_DBPATH: str({
+			desc: "Session DB path",
+			default: "sessions.sqlite",
 		}),
 		API_PORT: port({ default: 3000 }),
 		WS_PORT: port({ default: 8000, desc: "WebSocket port" }),

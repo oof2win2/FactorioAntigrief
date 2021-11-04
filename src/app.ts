@@ -21,7 +21,7 @@ import * as Tracing from "@sentry/tracing"
 import fastifyCookie from "fastify-cookie"
 import fastifySession from "@mgcrea/fastify-session"
 import Redis from "ioredis"
-import { RedisStore } from "@mgcrea/fastify-session-redis-store"
+import { SQLiteStore } from "fastify-session-sqlite-store"
 import fastifySwagger from "fastify-swagger"
 import mongooseToSwagger from "mongoose-to-swagger"
 import ReportModel from "./database/fagc/report.js"
@@ -207,9 +207,11 @@ fastify.addHook("onSend", removeIdMiddleware)
 // yummy snackies
 fastify.register(fastifyCookie)
 fastify.register(fastifySession, {
-	store: new RedisStore({
-		client: new Redis(ENV.REDISURI),
+	store: new SQLiteStore({
 		ttl: ENV.SESSION_TTL,
+		filename: ENV.SESSION_DBPATH.endsWith(".sqlite")
+			? ENV.SESSION_DBPATH
+			: ENV.SESSION_DBPATH + ".sqlite",
 	}),
 	secret: ENV.SESSIONSECRET,
 	cookie: { maxAge: ENV.SESSION_TTL },
