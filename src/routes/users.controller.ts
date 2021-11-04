@@ -204,12 +204,13 @@ export default class ProfileController {
 
 	@GET({ url: "/signupurl" })
 	async Oauth2URL(req: FastifyRequest, res: FastifyReply) {
-		const state = cryptoRandomString({ length: 8 })
-		req.session.set("state", state)
+		// const state = cryptoRandomString({ length: 8 })
+		// req.session.set("state", state)
 		return res.send({
 			url: req.requestContext.get("oauthclient")?.generateAuthUrl({
 				scope: OAUTHSCOPES.join(" "),
-				state: state,
+				// state: state,
+				state: "1234",
 			}),
 		})
 	}
@@ -245,12 +246,12 @@ export default class ProfileController {
 		}
 
 		const { code, state } = req.query
-		if (state !== req.session.get("state"))
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Invalid Request",
-				message: "State does not match set state",
-			})
+		// if (state !== req.session.get("state"))
+		// 	return res.status(400).send({
+		// 		errorCode: 400,
+		// 		error: "Invalid Request",
+		// 		message: "State does not match set state",
+		// 	})
 
 		const oauth = req.requestContext.get("oauthclient")
 		if (!oauth) throw "oauthclient did not exist on ctx"
