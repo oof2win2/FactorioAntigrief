@@ -60,7 +60,10 @@ export default class CommunityController {
 				tags: ["community"],
 				response: {
 					"200": {
-						$ref: "CommunityClass#",
+						allOf: [
+							{ nullable: true },
+							{ $ref: "CommunityClass#" },
+						],
 					},
 				},
 			},
@@ -91,7 +94,10 @@ export default class CommunityController {
 				],
 				response: {
 					"200": {
-						$ref: "CommunityClass#",
+						allOf: [
+							{ nullable: true },
+							{ $ref: "CommunityClass#" },
+						],
 					},
 				},
 			},
@@ -118,7 +124,10 @@ export default class CommunityController {
 				tags: ["community"],
 				response: {
 					"200": {
-						$ref: "GuildConfigClass#",
+						allOf: [
+							{ nullable: true },
+							{ $ref: "GuildConfigClass#" },
+						],
 					},
 				},
 			},
@@ -149,7 +158,10 @@ export default class CommunityController {
 				],
 				response: {
 					"200": {
-						$ref: "GuildConfigClass#",
+						allOf: [
+							{ nullable: true },
+							{ $ref: "GuildConfigClass#" },
+						],
 					},
 				},
 			},
@@ -195,7 +207,10 @@ export default class CommunityController {
 				],
 				response: {
 					"200": {
-						$ref: "GuildConfigClass#",
+						allOf: [
+							{ nullable: true },
+							{ $ref: "GuildConfigClass#" },
+						],
 					},
 				},
 			},
@@ -318,7 +333,10 @@ export default class CommunityController {
 				],
 				response: {
 					"200": {
-						$ref: "CommunityClass#",
+						allOf: [
+							{ nullable: true },
+							{ $ref: "CommunityClass#" },
+						],
 					},
 				},
 			},

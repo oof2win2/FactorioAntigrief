@@ -27,7 +27,7 @@ export default class ReportController {
 				tags: ["reports"],
 				response: {
 					"200": {
-						$ref: "ReportClass#",
+						allOf: [{ nullable: true }, { $ref: "ReportClass#" }],
 					},
 				},
 			},
@@ -97,7 +97,10 @@ export default class ReportController {
 					"200": {
 						type: "array",
 						items: {
-							$ref: "ReportClass#",
+							allOf: [
+								{ nullable: true },
+								{ $ref: "ReportClass#" },
+							],
 						},
 					},
 				},
