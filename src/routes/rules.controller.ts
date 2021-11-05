@@ -47,7 +47,7 @@ export default class RuleController {
 				tags: ["rules"],
 				response: {
 					"200": {
-						$ref: "RuleClass#",
+						allOf: [{ nullable: true }, { $ref: "RuleClass#" }],
 					},
 				},
 			},

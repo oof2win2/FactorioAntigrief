@@ -24,7 +24,7 @@ export default class ProfileController {
 				tags: ["profiles"],
 				response: {
 					"200": {
-						$ref: "Profile#",
+						allOf: [{ nullable: true }, { $ref: "Profile#" }],
 					},
 				},
 			},
@@ -71,7 +71,7 @@ export default class ProfileController {
 					"200": {
 						type: "array",
 						items: {
-							$ref: "Profile#",
+							allOf: [{ nullable: true }, { $ref: "Profile#" }],
 						},
 					},
 				},

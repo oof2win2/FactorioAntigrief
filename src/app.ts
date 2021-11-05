@@ -14,12 +14,14 @@ import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
 import { OAuth2Client } from "./utils/discord.js"
 import removeIdMiddleware from "./utils/removeId.js"
-import fastifyCookie from "fastify-cookie"
-import fastifySession from "@mgcrea/fastify-session"
 import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
 import fastifyExpress from "fastify-express"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
+import fastifyCookie from "fastify-cookie"
+import fastifySession from "@mgcrea/fastify-session"
+import Redis from "ioredis"
+import { SQLiteStore } from "fastify-session-sqlite-store"
 import fastifySwagger from "fastify-swagger"
 import mongooseToSwagger from "mongoose-to-swagger"
 import ReportModel from "./database/fagc/report.js"
@@ -29,11 +31,10 @@ import UserModel from "./database/fagc/user.js"
 import WebhookModel from "./database/fagc/webhook.js"
 import GuildConfigModel from "./database/bot/community.js"
 
-const fastify: FastifyInstance = Fastify({})
+const fastify: FastifyInstance = Fastify({
+	logger: false,
+})
 
-// fastify.register(sentry, {
-// 	dsn:
-// })
 Sentry.init({
 	dsn: ENV.SENTRY_LINK,
 
@@ -88,7 +89,7 @@ SwaggerDefinitions[GuildConfigModelSwagger.title] = GuildConfigModelSwagger
 // swagger
 fastify.register(fastifySwagger, {
 	routePrefix: "/documentation",
-	swagger: {
+	openapi: {
 		info: {
 			title: "FAGC Backend",
 			description: "FAGC Backend",
@@ -98,10 +99,8 @@ fastify.register(fastifySwagger, {
 			url: "https://github.com/FactorioAntigrief/fagc-backend",
 			description: "Find the repo here",
 		},
-		host: "localhost:3000",
-		schemes: ["http"],
-		consumes: ["application/json", "x-www-form-urlencoded"],
-		produces: ["application/json"],
+		// consumes: ["application/json", "x-www-form-urlencoded"],
+		// produces: ["application/json"],
 		tags: [
 			{ name: "community", description: "Community related end-points" },
 			{ name: "rules", description: "Rule related end-points" },
@@ -117,16 +116,18 @@ fastify.register(fastifySwagger, {
 			},
 			{ name: "master", description: "Master API" },
 		],
-		securityDefinitions: {
-			authorization: {
-				type: "apiKey",
-				name: "authorization",
-				in: "header",
-			},
-			masterAuthorization: {
-				type: "apiKey",
-				name: "authorization",
-				in: "header",
+		components: {
+			securitySchemes: {
+				authorization: {
+					type: "apiKey",
+					name: "authorization",
+					in: "header",
+				},
+				masterAuthorization: {
+					type: "apiKey",
+					name: "authorization",
+					in: "header",
+				},
 			},
 		},
 	},
@@ -208,16 +209,14 @@ fastify.addHook("onSend", removeIdMiddleware)
 // yummy snackies
 fastify.register(fastifyCookie)
 fastify.register(fastifySession, {
+	store: new SQLiteStore({
+		ttl: ENV.SESSION_TTL,
+		filename: ENV.SESSION_DBPATH.endsWith(".sqlite")
+			? ENV.SESSION_DBPATH
+			: ENV.SESSION_DBPATH + ".sqlite",
+	}),
 	secret: ENV.SESSIONSECRET,
-	cookie: {
-		maxAge: 1000 * 86400 * 365, // persist cookie for 1 year
-		// httpOnly: true,
-		// sameSite: "none", //
-		// secure: ENV.isProd, // cookie works only in https
-	},
-	// cookieName: ENV.COOKIENAME,
-	// saveUninitialized: true,
-	crypto: SODIUM_SECRETBOX,
+	cookie: { maxAge: ENV.SESSION_TTL },
 })
 
 // typed session
