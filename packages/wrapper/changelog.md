@@ -1,3 +1,9 @@
+## [1.16.1] - [2021-10-31]
+
+### Bugfixes
+
+-   Make logout actually send to the /logout endpoint
+
 ## [1.16.0] - [2021-10-31]
 
 ### Bugfixes
