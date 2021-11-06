@@ -1,3 +1,13 @@
+## [1.16.0] - [2021-10-31]
+
+### Bugfixes
+
+-   Add state to API request to signup request
+
+### Changes
+
+-   Add method to logout a user
+
 ## [1.15.3] - [2021-10-31]
 
 ### Bugfixes
