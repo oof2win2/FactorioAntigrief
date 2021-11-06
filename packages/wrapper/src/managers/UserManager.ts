@@ -99,4 +99,10 @@ export default class UserManager extends BaseManager<null> {
 		if (fetched.error) throw new GenericAPIError(fetched)
 		return fetched
 	}
+	async logout(): Promise<null> {
+		await fetch(`${this.apiurl}/users/login`, {
+			credentials: "include",
+		}).then((c) => c.json())
+		return null
+	}
 }
