@@ -174,7 +174,8 @@ describe("ApiWrapper", () => {
 	)
 	step(
 		"Should be able to create multiple reports, cache them and revoke them",
-		async () => {
+		async function () {
+			this.timeout(5000)
 			const rules = await FAGC.rules.fetchAll()
 			const createdReports = await Promise.all(
 				new Array(testStuff.reportCount).fill(0).map(() => {

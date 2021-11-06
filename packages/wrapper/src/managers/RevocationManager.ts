@@ -29,7 +29,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		const revocations = await fetch(
 			`${this.apiurl}/revocations/community/${strictUriEncode(
 				playername
-			)}/${strictUriEncode(communityId)}`
+			)}/${strictUriEncode(communityId)}`,
+			{
+				credentials: "include",
+			}
 		).then((r) => r.json())
 		if (!revocations || !revocations[0]) return []
 		if (cache)
@@ -43,7 +46,8 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		cache = true
 	): Promise<Revocation[]> {
 		const revocations = await fetch(
-			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`
+			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
+			{ credentials: "include" }
 		).then((r) => r.json())
 		if (!revocations || !revocations[0]) return []
 		if (cache)
@@ -60,7 +64,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		const revocations = await fetch(
 			`${
 				this.apiurl
-			}/revocations/modifiedSince/${timestamp.toISOString()}`
+			}/revocations/modifiedSince/${timestamp.toISOString()}`,
+			{
+				credentials: "include",
+			}
 		).then((c) => c.json())
 
 		if (revocations.error)

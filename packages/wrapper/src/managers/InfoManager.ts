@@ -26,6 +26,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 				id: webhookid,
 				token: webhooktoken,
 			}),
+			credentials: "include",
 			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
 		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
@@ -41,6 +42,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 				id: webhookid,
 				token: webhooktoken,
 			}),
+			credentials: "include",
 			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
 		return add
@@ -61,6 +63,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 				body: JSON.stringify({
 					data: text,
 				}),
+				credentials: "include",
 				headers: {
 					authorization: `Token ${reqConfig.apikey || this.apikey}`,
 					"content-type": "application/json",
@@ -83,6 +86,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 			{
 				method: "POST",
 				body: JSON.stringify(embed),
+				credentials: "include",
 				headers: {
 					authorization: `Token ${reqConfig.apikey || this.apikey}`,
 					"content-type": "application/json",

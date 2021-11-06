@@ -37,7 +37,10 @@ export class RuleManager extends BaseManager<Rule> {
 		this.fetchingCache.set(ruleid, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/rules/${strictUriEncode(ruleid)}`
+			`${this.apiurl}/rules/${strictUriEncode(ruleid)}`,
+			{
+				credentials: "include",
+			}
 		).then((r) => r.json())
 
 		if (!fetched || !fetched.id) return null // return null if the fetch is empty
@@ -51,9 +54,9 @@ export class RuleManager extends BaseManager<Rule> {
 		return null
 	}
 	async fetchAll(cache = true): Promise<Rule[]> {
-		const allRules = await fetch(`${this.apiurl}/rules`).then((r) =>
-			r.json()
-		)
+		const allRules = await fetch(`${this.apiurl}/rules`, {
+			credentials: "include",
+		}).then((r) => r.json())
 
 		if (cache && allRules[0])
 			return allRules.map((rule: Rule) => this.add(rule))
@@ -75,6 +78,7 @@ export class RuleManager extends BaseManager<Rule> {
 		const data = await fetch(`${this.apiurl}/rules`, {
 			method: "POST",
 			body: JSON.stringify(rule),
+			credentials: "include",
 			headers: {
 				authorization: `Token ${
 					reqConfig.masterapikey || this.masterapikey
@@ -104,6 +108,7 @@ export class RuleManager extends BaseManager<Rule> {
 			`${this.apiurl}/rules/${strictUriEncode(id)}`,
 			{
 				method: "DELETE",
+				credentials: "include",
 				headers: {
 					authorization: `Token ${
 						reqConfig.masterapikey || this.masterapikey

@@ -19,7 +19,10 @@ export default class ProfileManager extends BaseManager<Report> {
 		const fetched = await fetch(
 			`${this.apiurl}/profiles/fetchcommunity/${strictUriEncode(
 				playername
-			)}/${strictUriEncode(communityId)}`
+			)}/${strictUriEncode(communityId)}`,
+			{
+				credentials: "include",
+			}
 		).then((o) => o.json())
 		if (!fetched || !fetched.reports) return fetched
 
@@ -31,7 +34,10 @@ export default class ProfileManager extends BaseManager<Report> {
 	}
 	async fetchAll(playername: string): Promise<Profile[]> {
 		const fetched = await fetch(
-			`${this.apiurl}/profiles/fetchall/${strictUriEncode(playername)}`
+			`${this.apiurl}/profiles/fetchall/${strictUriEncode(playername)}`,
+			{
+				credentials: "include",
+			}
 		).then((o) => o.json())
 		const datedReports = fetched.map((profile) => {
 			profile.reports = profile.reports.map((report) => {

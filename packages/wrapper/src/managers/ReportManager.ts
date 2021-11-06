@@ -46,7 +46,10 @@ export default class ReportManager extends BaseManager<Report> {
 		this.fetchingCache.set(reportid, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/reports/${strictUriEncode(reportid)}`
+			`${this.apiurl}/reports/${strictUriEncode(reportid)}`,
+			{
+				credentials: "include",
+			}
 		).then((c) => c.json())
 
 		if (!fetched) return null // return null if the fetch is empty
@@ -62,7 +65,10 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 	async fetchAllName(playername: string, cache = true): Promise<Report[]> {
 		const allReports = await fetch(
-			`${this.apiurl}/reports/getplayer/${strictUriEncode(playername)}`
+			`${this.apiurl}/reports/getplayer/${strictUriEncode(playername)}`,
+			{
+				credentials: "include",
+			}
 		).then((c) => c.json())
 
 		if (allReports.error)
@@ -81,7 +87,10 @@ export default class ReportManager extends BaseManager<Report> {
 
 	async fetchModifiedSince(timestamp: Date, cache = true): Promise<Report[]> {
 		const reports = await fetch(
-			`${this.apiurl}/reports/modifiedSince/${timestamp.toISOString()}`
+			`${this.apiurl}/reports/modifiedSince/${timestamp.toISOString()}`,
+			{
+				credentials: "include",
+			}
 		).then((c) => c.json())
 
 		if (reports.error)
@@ -104,7 +113,10 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 	async fetchByRule(ruleid: ApiID, cache = true): Promise<Report[]> {
 		const ruleReports = await fetch(
-			`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`
+			`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`,
+			{
+				credentials: "include",
+			}
 		).then((c) => c.json())
 		if (cache) {
 			ruleReports.forEach((report) => {
@@ -124,6 +136,7 @@ export default class ReportManager extends BaseManager<Report> {
 		const create = await fetch(`${this.apiurl}/reports`, {
 			method: "POST",
 			body: JSON.stringify(report),
+			credentials: "include",
 			headers: {
 				authorization: `Token ${reqConfig.apikey || this.apikey}`,
 				"content-type": "application/json",
@@ -153,6 +166,7 @@ export default class ReportManager extends BaseManager<Report> {
 				id: reportid,
 				adminId: adminId,
 			}),
+			credentials: "include",
 			headers: {
 				authorization: `Token ${reqConfig.apikey || this.apikey}`,
 				"content-type": "application/json",
@@ -186,6 +200,7 @@ export default class ReportManager extends BaseManager<Report> {
 				playername: playername,
 				adminId: adminId,
 			}),
+			credentials: "include",
 			headers: {
 				authorization: `Token ${reqConfig.apikey || this.apikey}`,
 				"content-type": "application/json",

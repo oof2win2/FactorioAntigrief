@@ -44,7 +44,10 @@ export default class CommunityManager extends BaseManager<Community> {
 		this.fetchingCache.set(communityId, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/communities/${strictUriEncode(communityId)}`
+			`${this.apiurl}/communities/${strictUriEncode(communityId)}`,
+			{
+				credentials: "include",
+			}
 		).then((c) => c.json())
 
 		if (!fetched) return null // return null if the fetch is empty
@@ -58,9 +61,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		return fetched
 	}
 	async fetchAll(cache = true): Promise<Community[]> {
-		const allCommunities = await fetch(`${this.apiurl}/communities`).then(
-			(c) => c.json()
-		)
+		const allCommunities = await fetch(`${this.apiurl}/communities`, {
+			credentials: "include",
+		}).then((c) => c.json())
 
 		if (allCommunities.error)
 			throw new GenericAPIError(
@@ -81,6 +84,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
 
 		const community = await fetch(`${this.apiurl}/communities/getown`, {
+			credentials: "include",
 			headers: {
 				authorization: `Token ${reqConfig.apikey || this.apikey}`,
 			},
@@ -106,7 +110,12 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 	async fetchGuildConfig(guildId: string): Promise<GuildConfig | null> {
 		const config = await fetch(
-			`${this.apiurl}/communities/guildconfig/${strictUriEncode(guildId)}`
+			`${this.apiurl}/communities/guildconfig/${strictUriEncode(
+				guildId
+			)}`,
+			{
+				credentials: "include",
+			}
 		).then((c) => c.json())
 
 		if (config.error)
@@ -119,6 +128,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	): Promise<GuildConfig | null> {
 		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
 		const config = await fetch(`${this.apiurl}/communities/guildconfig`, {
+			credentials: "include",
 			headers: {
 				authorization: `Token ${reqConfig.apikey || this.apikey}`,
 			},
@@ -141,6 +151,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		const update = await fetch(`${this.apiurl}/communities/guildconfig`, {
 			method: "POST",
 			body: JSON.stringify(config),
+			credentials: "include",
 			headers: {
 				authorization: `Token ${reqConfig.apikey || this.apikey}`,
 				"content-type": "application/json",
@@ -171,6 +182,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			{
 				method: "POST",
 				body: JSON.stringify(config),
+				credentials: "include",
 				headers: {
 					authorization: `Token ${reqConfig.apikey || this.apikey}`,
 					"content-type": "application/json",
@@ -197,6 +209,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildId)}`,
 			{
 				method: "POST",
+				credentials: "include",
 				headers: {
 					authorization: `Token ${
 						reqConfig.masterapikey || this.masterapikey
@@ -221,6 +234,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildId)}`,
 			{
 				method: "POST",
+				credentials: "include",
 				headers: {
 					authorization: `Token ${
 						reqConfig.masterapikey || this.masterapikey
@@ -254,6 +268,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				contact: contact,
 				guildId: guildId,
 			}),
+			credentials: "include",
 			headers: {
 				authorization: `Token ${
 					reqConfig.masterapikey || this.masterapikey
@@ -280,6 +295,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			`${this.apiurl}/communities/${strictUriEncode(communityId)}`,
 			{
 				method: "DELETE",
+				credentials: "include",
 				headers: {
 					authorization: `Token ${
 						reqConfig.masterapikey || this.masterapikey
