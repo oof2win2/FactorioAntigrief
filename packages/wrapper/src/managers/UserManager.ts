@@ -100,7 +100,7 @@ export default class UserManager extends BaseManager<null> {
 		return fetched
 	}
 	async logout(): Promise<null> {
-		await fetch(`${this.apiurl}/users/login`, {
+		await fetch(`${this.apiurl}/users/logout`, {
 			credentials: "include",
 		}).then((c) => c.json())
 		return null
