@@ -1,10 +1,16 @@
-## [1.16.1] - [2021-10-31]
+## [1.16.2] - [2021-11-07]
+
+### Changes
+
+-   Allow for running a request without API key if information about a cookie is provided
+
+## [1.16.1] - [2021-11-06]
 
 ### Bugfixes
 
 -   Make logout actually send to the /logout endpoint
 
-## [1.16.0] - [2021-10-31]
+## [1.16.0] - [2021-11-06]
 
 ### Bugfixes
 
@@ -14,7 +20,7 @@
 
 -   Add method to logout a user
 
-## [1.15.3] - [2021-10-31]
+## [1.15.3] - [2021-11-03]
 
 ### Bugfixes
 
