@@ -138,7 +138,9 @@ export default class ReportManager extends BaseManager<Report> {
 			body: JSON.stringify(report),
 			credentials: "include",
 			headers: {
-				authorization: `Token ${reqConfig.apikey || this.apikey}`,
+				authorization: !reqConfig.cookieAuth
+					? `Token ${reqConfig.apikey || this.apikey}`
+					: "Cookie",
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -166,7 +168,9 @@ export default class ReportManager extends BaseManager<Report> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: `Token ${reqConfig.apikey || this.apikey}`,
+				authorization: !reqConfig.cookieAuth
+					? `Token ${reqConfig.apikey || this.apikey}`
+					: "Cookie",
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -198,7 +202,9 @@ export default class ReportManager extends BaseManager<Report> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: `Token ${reqConfig.apikey || this.apikey}`,
+				authorization: !reqConfig.cookieAuth
+					? `Token ${reqConfig.apikey || this.apikey}`
+					: "Cookie",
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())

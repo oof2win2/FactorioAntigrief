@@ -69,7 +69,9 @@ export default class InfoManager extends BaseManager<Webhook> {
 				}),
 				credentials: "include",
 				headers: {
-					authorization: `Token ${reqConfig.apikey || this.apikey}`,
+					authorization: !reqConfig.cookieAuth
+						? `Token ${reqConfig.masterapikey || this.masterapikey}`
+						: "Cookie",
 					"content-type": "application/json",
 				},
 			}
@@ -96,7 +98,9 @@ export default class InfoManager extends BaseManager<Webhook> {
 				body: JSON.stringify(embed),
 				credentials: "include",
 				headers: {
-					authorization: `Token ${reqConfig.apikey || this.apikey}`,
+					authorization: !reqConfig.cookieAuth
+						? `Token ${reqConfig.masterapikey || this.masterapikey}`
+						: "Cookie",
 					"content-type": "application/json",
 				},
 			}

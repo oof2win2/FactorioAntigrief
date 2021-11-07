@@ -83,7 +83,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		const community = await fetch(`${this.apiurl}/communities/getown`, {
 			credentials: "include",
 			headers: {
-				authorization: `Token ${reqConfig.apikey || this.apikey}`,
+				authorization: !reqConfig.cookieAuth
+					? `Token ${reqConfig.apikey || this.apikey}`
+					: "Cookie",
 			},
 		}).then((c) => c.json())
 
@@ -125,7 +127,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		const config = await fetch(`${this.apiurl}/communities/guildconfig`, {
 			credentials: "include",
 			headers: {
-				authorization: `Token ${reqConfig.apikey || this.apikey}`,
+				authorization: !reqConfig.cookieAuth
+					? `Token ${reqConfig.apikey || this.apikey}`
+					: "Cookie",
 			},
 		}).then((u) => u.json())
 
@@ -146,7 +150,9 @@ export default class CommunityManager extends BaseManager<Community> {
 			body: JSON.stringify(config),
 			credentials: "include",
 			headers: {
-				authorization: `Token ${reqConfig.apikey || this.apikey}`,
+				authorization: !reqConfig.cookieAuth
+					? `Token ${reqConfig.apikey || this.apikey}`
+					: "Cookie",
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -175,7 +181,9 @@ export default class CommunityManager extends BaseManager<Community> {
 				body: JSON.stringify(config),
 				credentials: "include",
 				headers: {
-					authorization: `Token ${reqConfig.apikey || this.apikey}`,
+					authorization: !reqConfig.cookieAuth
+						? `Token ${reqConfig.apikey || this.apikey}`
+						: "Cookie",
 					"content-type": "application/json",
 				},
 			}
@@ -203,9 +211,9 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "POST",
 				credentials: "include",
 				headers: {
-					authorization: `Token ${
-						reqConfig.masterapikey || this.masterapikey
-					}`,
+					authorization: !reqConfig.cookieAuth
+						? `Token ${reqConfig.masterapikey || this.masterapikey}`
+						: "Cookie",
 				},
 			}
 		).then((u) => u.json())
@@ -229,9 +237,9 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "POST",
 				credentials: "include",
 				headers: {
-					authorization: `Token ${
-						reqConfig.masterapikey || this.masterapikey
-					}`,
+					authorization: !reqConfig.cookieAuth
+						? `Token ${reqConfig.masterapikey || this.masterapikey}`
+						: "Cookie",
 				},
 			}
 		).then((u) => u.json())
@@ -264,9 +272,9 @@ export default class CommunityManager extends BaseManager<Community> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: `Token ${
-					reqConfig.masterapikey || this.masterapikey
-				}`,
+				authorization: !reqConfig.cookieAuth
+					? `Token ${reqConfig.masterapikey || this.masterapikey}`
+					: "Cookie",
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -292,9 +300,9 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "DELETE",
 				credentials: "include",
 				headers: {
-					authorization: `Token ${
-						reqConfig.masterapikey || this.masterapikey
-					}`,
+					authorization: !reqConfig.cookieAuth
+						? `Token ${reqConfig.masterapikey || this.masterapikey}`
+						: "Cookie",
 				},
 			}
 		).then((u) => u.json())
