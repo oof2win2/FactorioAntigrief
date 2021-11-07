@@ -1,3 +1,9 @@
+## [1.16.3] - [2021-11-07]
+
+### Changes
+
+-   Change authentication header to Cookie if auth method is cookie
+
 ## [1.16.2] - [2021-11-07]
 
 ### Changes
