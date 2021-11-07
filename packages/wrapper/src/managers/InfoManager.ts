@@ -2,7 +2,7 @@ import fetch from "isomorphic-fetch"
 import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Webhook } from "fagc-api-types"
 import BaseManager from "./BaseManager"
-import { GenericAPIError, RequestConfig, NoApikeyError } from "../types"
+import { GenericAPIError, RequestConfig, NoAuthError } from "../types"
 import strictUriEncode from "strict-uri-encode"
 import { APIEmbed } from "discord-api-types"
 
@@ -53,8 +53,12 @@ export default class InfoManager extends BaseManager<Webhook> {
 		text: string,
 		reqConfig: RequestConfig = {}
 	): Promise<void> {
-		if (!this.masterapikey && !reqConfig.masterapikey)
-			throw new NoApikeyError()
+		if (
+			!this.masterapikey &&
+			!reqConfig.masterapikey &&
+			!reqConfig.cookieAuth
+		)
+			throw new NoAuthError()
 
 		await fetch(
 			`${this.apiurl}/informatics/notify/${strictUriEncode(guildId)}`,
@@ -76,8 +80,12 @@ export default class InfoManager extends BaseManager<Webhook> {
 		embed: APIEmbed,
 		reqConfig: RequestConfig = {}
 	): Promise<void> {
-		if (!this.masterapikey && !reqConfig.masterapikey)
-			throw new NoApikeyError()
+		if (
+			!this.masterapikey &&
+			!reqConfig.masterapikey &&
+			!reqConfig.cookieAuth
+		)
+			throw new NoAuthError()
 
 		await fetch(
 			`${this.apiurl}/informatics/notify/${strictUriEncode(

@@ -1,6 +1,7 @@
 export interface RequestConfig {
 	apikey?: string
 	masterapikey?: string
+	cookieAuth?: boolean
 }
 export interface ManagerOptions {
 	uncachems?: number // at which time it should be uncached

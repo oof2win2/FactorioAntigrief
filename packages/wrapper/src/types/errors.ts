@@ -1,6 +1,8 @@
-export class NoApikeyError extends Error {
+export class NoAuthError extends Error {
 	constructor() {
-		super("No API key has been set")
+		super(
+			"No API key has been set and information about a cookie has not been provided"
+		)
 	}
 }
 export class NoMasterApikeyError extends Error {
@@ -8,16 +10,7 @@ export class NoMasterApikeyError extends Error {
 		super("No Master API key has been set")
 	}
 }
-export class AuthenticationError extends Error {
-	constructor() {
-		super("Wrong API key has been set")
-	}
-}
-export class MasterAuthenticationError extends Error {
-	constructor() {
-		super("Wrong Master API key has been set")
-	}
-}
+
 export class GenericAPIError extends Error {
 	constructor(msg: string | { error: string; message: string }) {
 		super(typeof msg == "string" ? msg : `${msg.error}: ${msg.message}`)

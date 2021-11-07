@@ -3,9 +3,8 @@ import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
 import { Revocation, Report, CreateReport, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import {
-	AuthenticationError,
 	GenericAPIError,
-	NoApikeyError,
+	NoAuthError,
 	UnsuccessfulRevocationError,
 } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
@@ -131,7 +130,8 @@ export default class ReportManager extends BaseManager<Report> {
 		cache = true,
 		reqConfig: RequestConfig = {}
 	): Promise<Report> {
-		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
+			throw new NoAuthError()
 
 		const create = await fetch(`${this.apiurl}/reports`, {
 			method: "POST",
@@ -143,11 +143,8 @@ export default class ReportManager extends BaseManager<Report> {
 			},
 		}).then((u) => u.json())
 
-		if (create.error) {
-			if (create.description === "API key is wrong")
-				throw new AuthenticationError()
+		if (create.error)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
-		}
 		create.reportedTime = new Date(create.reportedTime)
 		if (cache) this.add(create)
 		return create
@@ -158,7 +155,8 @@ export default class ReportManager extends BaseManager<Report> {
 		cache = true,
 		reqConfig: RequestConfig = {}
 	): Promise<Revocation> {
-		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
+			throw new NoAuthError()
 
 		const revoked = await fetch(`${this.apiurl}/reports`, {
 			method: "DELETE",
@@ -173,11 +171,8 @@ export default class ReportManager extends BaseManager<Report> {
 			},
 		}).then((u) => u.json())
 
-		if (revoked.error) {
-			if (revoked.description === "API key is wrong")
-				throw new AuthenticationError()
+		if (revoked.error)
 			throw new GenericAPIError(`${revoked.error}: ${revoked.message}`)
-		}
 
 		if (!revoked?.revokedTime) throw new UnsuccessfulRevocationError()
 		revoked.reportedTime = new Date(revoked.reportedTime)
@@ -192,7 +187,8 @@ export default class ReportManager extends BaseManager<Report> {
 		cache = true,
 		reqConfig: RequestConfig = {}
 	): Promise<Revocation[] | null> {
-		if (!reqConfig.apikey && !this.apikey) throw new NoApikeyError()
+		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
+			throw new NoAuthError()
 
 		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {
 			method: "DELETE",
@@ -207,11 +203,8 @@ export default class ReportManager extends BaseManager<Report> {
 			},
 		}).then((u) => u.json())
 
-		if (revoked.error) {
-			if (revoked.description === "API key is wrong")
-				throw new AuthenticationError()
+		if (revoked.error)
 			throw new GenericAPIError(`${revoked.error}: ${revoked.message}`)
-		}
 
 		revoked.forEach((revocation) => {
 			if (!revocation?.reportedTime)

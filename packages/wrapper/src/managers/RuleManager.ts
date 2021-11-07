@@ -3,11 +3,7 @@ import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
 import { Rule, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import {
-	GenericAPIError,
-	MasterAuthenticationError,
-	NoMasterApikeyError,
-} from "../types"
+import { GenericAPIError, NoMasterApikeyError } from "../types"
 
 export class RuleManager extends BaseManager<Rule> {
 	public apikey?: string
@@ -87,11 +83,8 @@ export class RuleManager extends BaseManager<Rule> {
 			},
 		}).then((r) => r.json())
 
-		if (data.error) {
-			if (data.error == "Unauthorized")
-				throw new MasterAuthenticationError()
+		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
-		}
 
 		this.add(data)
 
@@ -118,11 +111,8 @@ export class RuleManager extends BaseManager<Rule> {
 			}
 		).then((r) => r.json())
 
-		if (data.error) {
-			if (data.error == "Unauthorized")
-				throw new MasterAuthenticationError()
+		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
-		}
 		if (!data.id) throw data
 		this.removeFromCache(data)
 
