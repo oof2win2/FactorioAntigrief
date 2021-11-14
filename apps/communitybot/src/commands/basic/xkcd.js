@@ -46,6 +46,11 @@ class XKCD extends Command {
 
 					message.channel.send(embed)
 				})
+				.catch(() => {
+					return message.channel.send(
+						"No results found for this comic, sorry!"
+					)
+				})
 		} catch (e) {
 			console.error(e)
 			return message.channel.send("looks like ive broken! Try again.")
