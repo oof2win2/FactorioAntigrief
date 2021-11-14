@@ -37,6 +37,7 @@ class GetAllProfiles extends Command {
 			.setDescription(`FAGC Profiles of player \`${playername}\``)
 		const fields = await Promise.all(
 			profiles.map(async (profile) => {
+				// this is because there is a limit of 6k chars per embed
 				const reports = profile.reports.map((report) => report.id)
 				const community =
 					await this.client.fagc.communities.fetchCommunity(
