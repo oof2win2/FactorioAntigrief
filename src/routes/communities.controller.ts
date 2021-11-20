@@ -449,7 +449,7 @@ export default class CommunityController {
 					"200": {
 						type: "object",
 						properties: {
-							api_key: { type: "string" },
+							apiKey: { type: "string" },
 							community: {
 								$ref: "CommunityClass#",
 							},
