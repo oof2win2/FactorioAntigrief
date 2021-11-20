@@ -430,13 +430,11 @@ export default class CommunityController {
 		url: "/",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						name: Type.String(),
-						contact: Type.String(),
-						guildId: Type.String(),
-					})
-				),
+				body: Type.Object({
+					name: Type.String(),
+					contact: Type.String(),
+					guildId: Type.Optional(Type.String()),
+				}),
 
 				description: "Create a FAGC community",
 				tags: ["community", "master"],
@@ -449,7 +447,7 @@ export default class CommunityController {
 					"200": {
 						type: "object",
 						properties: {
-							api_key: { type: "string" },
+							apiKey: { type: "string" },
 							community: {
 								$ref: "CommunityClass#",
 							},
@@ -465,7 +463,7 @@ export default class CommunityController {
 			Body: {
 				name: string
 				contact: string
-				guildId: string
+				guildId?: string
 			}
 		}>,
 		res: FastifyReply
@@ -479,8 +477,7 @@ export default class CommunityController {
 				error: "Invalid Discord User",
 				message: `${contact} is not a valid Discord user`,
 			})
-
-		const validGuild = await validateDiscordGuild(guildId)
+		const validGuild = guildId ? await validateDiscordGuild(guildId) : true
 		if (!validGuild)
 			return res.status(400).send({
 				errorCode: 400,
@@ -491,16 +488,18 @@ export default class CommunityController {
 		const community = await CommunityModel.create({
 			name: name,
 			contact: contact,
-			guildIds: [guildId],
+			guildIds: guildId ? [guildId] : [],
 		})
 
-		// update community config to have communityId
-		await GuildConfigModel.updateMany(
-			{ guildId: guildId },
-			{
-				$set: { communityId: community.id },
-			}
-		)
+		if (guildId) {
+			// update community config to have communityId if guild exists
+			await GuildConfigModel.updateMany(
+				{ guildId: guildId },
+				{
+					$set: { communityId: community.id },
+				}
+			)
+		}
 
 		const auth = await AuthModel.create({
 			communityId: community.id,

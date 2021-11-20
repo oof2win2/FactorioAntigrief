@@ -15,12 +15,10 @@ import fastifyFormBodyPlugin from "fastify-formbody"
 import { OAuth2Client } from "./utils/discord.js"
 import removeIdMiddleware from "./utils/removeId.js"
 import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
-import fastifyExpress from "fastify-express"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import fastifyCookie from "fastify-cookie"
 import fastifySession from "@mgcrea/fastify-session"
-import Redis from "ioredis"
 import { SQLiteStore } from "fastify-session-sqlite-store"
 import fastifySwagger from "fastify-swagger"
 import mongooseToSwagger from "mongoose-to-swagger"
@@ -47,8 +45,10 @@ Sentry.init({
 	],
 })
 
-await fastify.register(fastifyExpress)
-fastify.use(Sentry.Handlers.requestHandler())
+fastify.addHook("onRequest", (req, res, next) => {
+	const handler = Sentry.Handlers.requestHandler()
+	handler(req.raw, res.raw, next)
+})
 
 const SwaggerDefinitions = {}
 
@@ -238,11 +238,28 @@ fastify.register(bootstrap, {
 
 // fastify.register(fastifyResponseValidationPlugin)
 
-fastify.use(Sentry.Handlers.errorHandler())
-
-fastify.addHook("onError", (req, res, error, next) => {
-	console.error(error)
-	next()
+fastify.setErrorHandler(async (error, request, reply) => {
+	if (!error.validation) {
+		// Logging locally
+		console.log(error, error.validation)
+		// Sending error to be logged in Sentry
+		Sentry.captureException(error)
+		reply
+			.status(500)
+			.send({
+				errorCode: 500,
+				error: "Something went wrong",
+				message: error.message,
+			})
+	} else {
+		reply
+			.status(400)
+			.send({
+				errorCode: 400,
+				error: "Invalid request",
+				message: error.message,
+			})
+	}
 })
 
 const start = async () => {
