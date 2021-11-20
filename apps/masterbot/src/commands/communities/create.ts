@@ -20,11 +20,11 @@ const CreateCommunity: SubCommand = {
 				.setDescription("Community contact or owner")
 				.setRequired(true)
 		)
-		.addStringOption(option => 
+		.addStringOption(option =>
 			option
 				.setName("guildid")
 				.setDescription("Guild ID of the guild the community is in")
-				.setRequired(true)
+				.setRequired(false)
 		)
 	,
 	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
@@ -42,7 +42,7 @@ const CreateCommunity: SubCommand = {
 					content: `Community ${name} (\`${community.community.id}\`) has API key \`${community.apiKey}\``,
 					ephemeral: true
 				})
-				return interaction.reply(`Community ${name} (\`${community.community.id}\`) has been created`)
+				return interaction.channel?.send(`Community ${name} (\`${community.community.id}\`) has been created`)
 			}
 		} catch (e) {
 			return interaction.reply(`Error: ${e}`)
