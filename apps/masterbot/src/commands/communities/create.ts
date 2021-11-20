@@ -20,11 +20,11 @@ const CreateCommunity: SubCommand = {
 				.setDescription("Community contact or owner")
 				.setRequired(true)
 		)
-		.addStringOption(option => 
+		.addStringOption(option =>
 			option
 				.setName("guildid")
 				.setDescription("Guild ID of the guild the community is in")
-				.setRequired(true)
+				.setRequired(false)
 		)
 	,
 	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
