@@ -113,8 +113,8 @@ export default class CommunityManager extends BaseManager<Community> {
 				credentials: "include",
 			}
 		).then((c) => c.json())
-
-		if (config.error)
+		console.log(config)
+		if (config?.error)
 			throw new GenericAPIError(`${config.error}: ${config.message}`)
 		if (!config || !config.guildId) return null
 		return config
@@ -133,7 +133,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			},
 		}).then((u) => u.json())
 
-		if (config.error)
+		if (config?.error)
 			throw new GenericAPIError(`${config.error}: ${config.message}`)
 
 		return config
@@ -156,7 +156,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
-		if (update.error)
+		if (update?.error)
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		return update
 	}
@@ -188,7 +188,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				},
 			}
 		).then((u) => u.json())
-		if (update.error)
+		if (update?.error)
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		return update
 	}
@@ -204,8 +204,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		)
 			throw new NoAuthError()
 		const create = await fetch(
-			`${
-				this.apiurl
+			`${this.apiurl
 			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildId)}`,
 			{
 				method: "POST",
@@ -217,7 +216,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				},
 			}
 		).then((u) => u.json())
-		if (create.error)
+		if (create?.error)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
@@ -243,14 +242,14 @@ export default class CommunityManager extends BaseManager<Community> {
 				},
 			}
 		).then((u) => u.json())
-		if (create.error)
+		if (create?.error)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
 	async create(
 		name: string,
 		contact: string,
-		guildId: string,
+		guildId?: string,
 		reqConfig: RequestConfig = {}
 	): Promise<{
 		community: Community
@@ -268,7 +267,9 @@ export default class CommunityManager extends BaseManager<Community> {
 			body: JSON.stringify({
 				name: name,
 				contact: contact,
-				guildId: guildId,
+				...(guildId && { // add it in optionally otherwise it is not in request
+					guildId: guildId
+				})
 			}),
 			credentials: "include",
 			headers: {
@@ -278,7 +279,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
-		if (create.error)
+		if (create?.error)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 		return create
 	}
@@ -306,7 +307,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				},
 			}
 		).then((u) => u.json())
-		if (remove.error)
+		if (remove?.error)
 			throw new GenericAPIError(`${remove.error}: ${remove.message}`)
 		return remove
 	}

@@ -69,7 +69,7 @@ describe("ApiWrapper", () => {
 		const oldConfig = await FAGC.communities.fetchCommunityConfig(
 			guildConfig.communityId
 		)
-		expect(oldConfig?.guildIds).to.include(
+		expect(oldConfig.guildIds).to.include(
 			testGuildId,
 			"Guild configs fetched improperly"
 		)
