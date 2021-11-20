@@ -430,13 +430,11 @@ export default class CommunityController {
 		url: "/",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						name: Type.String(),
-						contact: Type.String(),
-						guildId: Type.Optional(Type.String()),
-					})
-				),
+				body: Type.Object({
+					name: Type.String(),
+					contact: Type.String(),
+					guildId: Type.Optional(Type.String()),
+				}),
 
 				description: "Create a FAGC community",
 				tags: ["community", "master"],
