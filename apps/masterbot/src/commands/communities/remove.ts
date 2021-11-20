@@ -20,7 +20,6 @@ const CreateCommunity: SubCommand = {
 		if (!(await AuthenticateUser(user))) return interaction.reply("You are not allowed to perform this action")
 
 		const id = interaction.options.getString("id")!
-		
 		try {
 			const community = await client.FAGC.communities.remove(id)
 			if (community) {

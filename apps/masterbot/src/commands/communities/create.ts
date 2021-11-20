@@ -42,7 +42,7 @@ const CreateCommunity: SubCommand = {
 					content: `Community ${name} (\`${community.community.id}\`) has API key \`${community.apiKey}\``,
 					ephemeral: true
 				})
-				return interaction.reply(`Community ${name} (\`${community.community.id}\`) has been created`)
+				return interaction.channel?.send(`Community ${name} (\`${community.community.id}\`) has been created`)
 			}
 		} catch (e) {
 			return interaction.reply(`Error: ${e}`)
