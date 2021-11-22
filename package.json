@@ -35,7 +35,7 @@
 		"envalid": "^7.2.1",
 		"eslint": "^7.32.0",
 		"fagc-api-types": "^1.2.1",
-		"fastify": "^3.21.0",
+		"fastify": "^3.24.0",
 		"fastify-autoload": "^3.9.0",
 		"fastify-cookie": "^5.3.1",
 		"fastify-cors": "^6.0.2",
