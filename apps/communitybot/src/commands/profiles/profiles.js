@@ -27,7 +27,14 @@ class GetProfiles extends Command {
 			return message.reply("Please set trusted communities first")
 
 		const playername = args.shift()
-		const profiles = await this.client.fagc.profiles.fetchAll(playername)
+		const profiles = await Promise.all(
+			config.trustedCommunities.map((communityId) =>
+				this.client.fagc.profiles.fetchCommunity(
+					playername,
+					communityId
+				)
+			)
+		)
 		if (!profiles || !profiles[0])
 			return message.channel.send(
 				`User \`${playername}\` has no profiles`
