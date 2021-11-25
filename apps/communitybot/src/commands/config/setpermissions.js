@@ -10,18 +10,18 @@ class SetAPIKey extends Command {
 		super(client, {
 			name: "setpermissions",
 			description: "Set role permissions for command access",
-			aliases: ["setroleperms", "setroleperm", "setperms", "setperm"],
+			aliases: [ "setroleperms", "setroleperm", "setperms", "setperm" ],
 			category: "config",
 			usage: "([option] [role])",
-			examples: ["{{p}}setrolepermissions reports 841761018380288100"],
+			examples: [ "{{p}}setrolepermissions reports 841761018380288100" ],
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["ADMINISTRATOR"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "ADMINISTRATOR" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["setConfig"],
+			customPermissions: [ "setConfig" ],
 		})
 	}
 	async run(message, args, guildConfig) {
@@ -30,62 +30,62 @@ class SetAPIKey extends Command {
 			message.channel.send("Process of setting roles has started. ")
 			const reportsMsg = await getMessageResponse(
 				message,
-				"Please type in the ID or ping the role for report management"
+				`${this.client.emotes.type} Type in the ID or ping the role for report management`
 			)
 			const reports =
 				reportsMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(reportsMsg.content))
 			if (!reports)
 				return message.channel.send(
-					`\`${reportsMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${reportsMsg.content}\` is not a valid role`
 				)
 
 			const webhooksMsg = await getMessageResponse(
 				message,
-				"Please type in the ID or ping the role for webhook management"
+				`${this.client.emotes.type} Type in the ID or ping the role for webhook management`
 			)
 			const webhooks =
 				webhooksMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(webhooksMsg.content))
 			if (!webhooks)
 				return message.channel.send(
-					`\`${webhooksMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${webhooksMsg.content}\` is not a valid role`
 				)
 
 			const configMsg = await getMessageResponse(
 				message,
-				"Please type in the ID or ping the role for config management"
+				`${this.client.emotes.type} Type in the ID or ping the role for config management`
 			)
 			const setConfig =
 				configMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(configMsg.content))
 			if (!setConfig)
 				return message.channel.send(
-					`\`${configMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${configMsg.content}\` is not a valid role`
 				)
 
 			const ruleMsg = await getMessageResponse(
 				message,
-				"Please type in the ID or ping the role for management of filtered rules"
+				`${this.client.emotes.type} Type in the ID or ping the role for management of filtered rules`
 			)
 			const setRules =
 				ruleMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(ruleMsg.content))
 			if (!setRules)
 				return message.channel.send(
-					`\`${ruleMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${ruleMsg.content}\` is not a valid role`
 				)
 
 			const communitiesMsg = await getMessageResponse(
 				message,
-				"Please type in the ID or ping the role for management of trusted communities"
+				`${this.client.emotes.type} Type in the ID or ping the role for management of trusted communities`
 			)
 			const setCommunities =
 				communitiesMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(communitiesMsg.content))
 			if (!setCommunities)
 				return message.channel.send(
-					`\`${communitiesMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${communitiesMsg.content}\` is not a valid role`
 				)
 
 			let embed = new MessageEmbed()
@@ -120,15 +120,15 @@ class SetAPIKey extends Command {
 				console.log(guildConfig, newConfig, reports.id)
 				if (newConfig.roles.reports == reports.id)
 					return message.channel.send(
-						"Role setting successfully applied! Changes may take a few minutes to take effect"
+						`${this.client.emotes.success} Role setting successfully applied! Changes may take a few minutes to take effect`
 					)
 				else
 					return message.channel.send(
-						"An error occured. Please contact developers"
+						`${this.client.emotes.error} An error occured. Please contact developers`
 					)
 			} catch (e) {
 				console.error("setrolepermissions", e)
-				message.channel.send("An error occured. Please try again later")
+				message.channel.send(`${this.client.emotes.error} An error occured. Please try again later`)
 			}
 		} else if (!args[1]) {
 			// set with extra message
@@ -141,21 +141,21 @@ class SetAPIKey extends Command {
 			]
 			if (!options.includes(args[0]))
 				return message.reply(
-					`That is not a valid setting! Use one of \`${options.join(
+					`${this.client.emotes.warn} That is not a valid setting! Use one of \`${options.join(
 						"`, `"
 					)}\``
 				)
 
 			const roleMsg = await getMessageResponse(
 				message,
-				`Please type in the ID or ping the role for the \`${args[0]}\` permission`
+				`${this.client.emotes.type} Type in the ID or ping the role for the \`${args[0]}\` permission`
 			)
 			const role =
 				roleMsg.mentions.roles.first() ||
 				(await message.guild.roles.fetch(roleMsg.content))
 			if (!role)
 				return message.channel.send(
-					`\`${roleMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${roleMsg.content}\` is not a valid role`
 				)
 			const confirm = await getConfirmationMessage(
 				message,
@@ -191,7 +191,7 @@ class SetAPIKey extends Command {
 			]
 			if (!options.includes(args[0]))
 				return message.reply(
-					`That is not a valid setting! Use one of \`${options.join(
+					`${this.client.emotes.warn} That is not a valid setting! Use one of \`${options.join(
 						"`, `"
 					)}\``
 				)

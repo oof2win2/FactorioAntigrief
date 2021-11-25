@@ -1,6 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
-const { getConfirmationMessage } = require("../../utils/responseGetter")
+const { getConfirmationMessage, getMessageResponse } = require("../../utils/responseGetter")
 const { createPagedEmbed } = require("../../utils/functions")
 
 class AddRuleFilter extends Command {
@@ -9,7 +9,7 @@ class AddRuleFilter extends Command {
 			name: "addrule",
 			description:
 				"Adds a rule filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
-			aliases: ["addrules"],
+			aliases: [ "addrules" ],
 			usage: "[...ids]",
 			examples: [
 				"{{p}}addrule XuciBx7",
@@ -18,12 +18,12 @@ class AddRuleFilter extends Command {
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["ADMINISTRATOR"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "ADMINISTRATOR" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["setRules"],
+			customPermissions: [ "setRules" ],
 		})
 	}
 	async run(message, args, config) {
@@ -47,7 +47,14 @@ class AddRuleFilter extends Command {
 				})
 			}
 			createPagedEmbed(fields, embed, message, { maxPageCount: 1 })
-			return message.channel.send("No rules provided. Please provide IDs")
+			const newIDsMessage = await getMessageResponse(
+				message,
+				`${this.client.emotes.type} No rules provided. Please provide IDs`
+			)
+
+			if (!newIDsMessage || !newIDsMessage.content)
+				return message.channel.send("No IDs were provided")
+			args = newIDsMessage.content.split(" ")
 		}
 
 		await Promise.all(

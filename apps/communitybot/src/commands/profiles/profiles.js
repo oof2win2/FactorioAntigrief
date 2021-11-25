@@ -1,6 +1,7 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 class GetProfiles extends Command {
 	constructor(client) {
@@ -9,12 +10,12 @@ class GetProfiles extends Command {
 			description:
 				"Gets profiles of a player, filtered by trusted communities and rules",
 			usage: "[playername]",
-			examples: ["{{p}}profiles Windsinger"],
+			examples: [ "{{p}}profiles Windsinger" ],
 			category: "profiles",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
@@ -22,11 +23,14 @@ class GetProfiles extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0])
-			return message.reply("Provide a player name to get profiles of")
-		if (!config.trustedCommunities || !config.trustedCommunities[0])
-			return message.reply("Please set trusted communities first")
-
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get profiles of`)
+				.then((r) => r?.content)
 		const playername = args.shift()
+		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
+		
+		if (!config.trustedCommunities || !config.trustedCommunities[0])
+			return message.reply(`${this.client.emotes.warn} Please set trusted communities first`)
+
 		const profiles = await Promise.all(
 			config.trustedCommunities.map((communityId) =>
 				this.client.fagc.profiles.fetchCommunity(

@@ -1,6 +1,7 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 class GetAllProfiles extends Command {
 	constructor(client) {
@@ -16,7 +17,7 @@ class GetAllProfiles extends Command {
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
@@ -24,8 +25,11 @@ class GetAllProfiles extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0])
-			return message.reply("Provide a player name to get profiles of")
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get profiles of`)
+				.then((r) => r?.content)
 		const playername = args.shift()
+		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
+		
 		const communityId = args.shift() || config.communityId
 		if (!communityId)
 			return message.channel.send(

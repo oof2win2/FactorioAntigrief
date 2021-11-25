@@ -15,12 +15,12 @@ class AddWebhook extends Command {
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["MANAGE_WEBHOOKS"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "MANAGE_WEBHOOKS" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
-			customPermissions: ["webhooks"],
+			customPermissions: [ "webhooks" ],
 		})
 	}
 	async run(message) {

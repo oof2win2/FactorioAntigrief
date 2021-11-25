@@ -1,6 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const { handleErrors, createPagedEmbed } = require("../../utils/functions")
-const { getConfirmationMessage } = require("../../utils/responseGetter")
+const { getConfirmationMessage, getMessageResponse } = require("../../utils/responseGetter")
 const Command = require("../../base/Command")
 const { AuthenticationError } = require("fagc-api-wrapper")
 
@@ -10,25 +10,29 @@ class RevokeAllname extends Command {
 			name: "revokeallname",
 			description:
 				"Revokes your profile of a player by profile ID (revoke all reports of a player by playername)",
-			aliases: ["revokeprofile"],
+			aliases: [ "revokeprofile" ],
 			category: "reports",
 			usage: "[playername]",
-			examples: ["{{p}}revokeallname Windsinger"],
+			examples: [ "{{p}}revokeallname Windsinger" ],
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["BAN_MEMBERS"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "BAN_MEMBERS" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["reports"],
+			customPermissions: [ "reports" ],
 		})
 	}
 	async run(message, args, config) {
+		if (!config.apikey) return message.reply(`${this.client.emotes.warn} No API key set`)
+
 		if (!args[0])
-			return message.reply("Provide a player name to revoke reports of")
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to revoke reports of`)
+				.then((r) => r?.content)
 		const playername = args.shift()
-		if (!config.apikey) return message.reply("No API key set")
+		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
+
 		const profile = await this.client.fagc.profiles.fetchCommunity(
 			playername,
 			config.communityId
@@ -54,8 +58,7 @@ class RevokeAllname extends Command {
 					value:
 						`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${report.brokenRule}\n` +
 						`Proof: ${report.proof}\nDescription: ${report.description}\n` +
-						`Automated: ${
-							report.automated
+						`Automated: ${report.automated
 						}\nViolated time: ${new Date(
 							report.reportedTime
 						).toUTCString()}`,

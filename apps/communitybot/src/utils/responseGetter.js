@@ -10,7 +10,7 @@ module.exports = {
  * @param {Message} message
  * @param {string} content
  * @param {number} timeout
- * @returns {Promise<Message | undefined>}
+ * @returns {Promise<Message | null>}
  */
 async function getMessageResponse(message, content, timeout = 30000) {
 	const messageFilter = (response) => response.author.id == message.author.id
@@ -21,7 +21,7 @@ async function getMessageResponse(message, content, timeout = 30000) {
 			max: 1,
 			time: timeout,
 		})
-	).first()
+	).first() || null
 }
 async function getConfirmationMessage(message, content, timeout = 120000) {
 	const confirm = await message.channel.send(content)
@@ -33,7 +33,7 @@ async function getConfirmationMessage(message, content, timeout = 120000) {
 		reactions = await confirm.awaitReactions(reactionFilter, {
 			max: 1,
 			time: timeout,
-			errors: ["time"],
+			errors: [ "time" ],
 		})
 	} catch (error) {
 		return false

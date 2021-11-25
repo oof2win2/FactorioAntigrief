@@ -7,8 +7,8 @@ const ConfigSchema = new mongoose.Schema({
 		required: true,
 	},
 	apikey: String,
-	trustedCommunities: [String],
-	ruleFilters: [String],
+	trustedCommunities: [ String ],
+	ruleFilters: [ String ],
 	roles: {
 		reports: { type: String, default: "" },
 		webhooks: { type: String, default: "" },

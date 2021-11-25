@@ -82,9 +82,9 @@ async function createPagedEmbed(
 
 	// remove reactions after timeout runs out
 	setTimeout(async () => {
-		await embedMsg.reactions.cache.get("⬅️")?.remove()
-		await embedMsg.reactions.cache.get("➡️")?.remove()
-		await embedMsg.reactions.cache.get("🗑️")?.remove()
+		await embedMsg.reactions.cache.get("⬅️")?.remove().catch()
+		await embedMsg.reactions.cache.get("➡️")?.remove().catch()
+		await embedMsg.reactions.cache.get("🗑️")?.remove().catch()
 	}, 120000)
 
 	reactionCollector.on("collect", (reaction) => {
@@ -104,9 +104,9 @@ async function createPagedEmbed(
 			break
 		}
 		case "🗑️": {
-			reactionCollector.stop().catch()
-			embedMsg.delete().catch()
-			message.delete().catch()
+			reactionCollector.stop()
+			embedMsg.delete()
+			message.delete()
 		}
 		}
 	})

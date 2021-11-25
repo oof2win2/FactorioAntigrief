@@ -7,33 +7,33 @@ class RemoveWebhook extends Command {
 			description: "Removes a webhook from getting FAGC notifications",
 			aliases: [],
 			usage: "[webhook ID] [webhook token]",
-			examples: ["{{p}}removewebhook 9945 ThisIsMyToken"],
+			examples: [ "{{p}}removewebhook 9945 ThisIsMyToken" ],
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["MANAGE_WEBHOOKS"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "MANAGE_WEBHOOKS" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
-			customPermissions: ["webhooks"],
+			customPermissions: [ "webhooks" ],
 		})
 	}
 	async run(message, args) {
 		message.delete()
 		message.reply("Message removed to prevent unauthorized webhook access")
 
-		if (!args[0]) return message.reply("Provide a Webhook URL")
+		if (!args[0]) return message.reply(`${this.client.emotes.warn} Provide a Webhook URL`)
 
 		// discord webhook link to id and token separately
-		const [webhookID, webhookToken] = args[0]
+		const [ webhookID, webhookToken ] = args[0]
 			.slice(args[0].indexOf("/api/webhooks") + 14)
 			.split("/")
 
 		try {
 			await this.client.fetchWebhook(webhookID, webhookToken)
 		} catch (e) {
-			return message.channel.send("Invalid webhook")
+			return message.channel.send(`${this.client.emotes.warn} Invalid webhook`)
 		}
 
 		const webhook = await this.client.fagc.info.removeWebhook(
@@ -48,7 +48,7 @@ class RemoveWebhook extends Command {
 			return message.reply("Webhook is not linked to FAGC!")
 		} else {
 			console.error(webhook, Date.now())
-			return message.reply("Error removing webhook")
+			return message.reply(`${this.client.emotes.error} Error removing webhook`)
 		}
 	}
 }

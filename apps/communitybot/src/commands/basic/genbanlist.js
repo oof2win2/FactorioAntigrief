@@ -6,12 +6,12 @@ class Genbanlist extends Command {
 		super(client, {
 			name: "generatebanlist",
 			description: "Creates a .json banlist file to use for servers",
-			aliases: ["banlist", "genbanlist"],
+			aliases: [ "banlist", "genbanlist" ],
 			category: "basic",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 5000,
 			requiredConfig: true,
@@ -19,9 +19,9 @@ class Genbanlist extends Command {
 	}
 	async run(message, _, config) {
 		if (!config.trustedCommunities)
-			return message.reply("Please set trusted communities first")
+			return message.reply(`${this.client.emotes.warn} Please set trusted communities first`)
 		if (!config.ruleFilters)
-			return message.reply("Please set rule filters first")
+			return message.reply(`${this.client.emotes.warn} Please set rule filters first`)
 		message.reply("Processing banlist. Please wait")
 
 		// get all reports based off of followed rules
@@ -63,7 +63,7 @@ class Genbanlist extends Command {
 			"banlist.json"
 		)
 		await message.channel.send("Banlist attatched", {
-			files: [file],
+			files: [ file ],
 		})
 	}
 }

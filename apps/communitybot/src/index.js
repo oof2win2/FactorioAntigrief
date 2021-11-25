@@ -20,7 +20,7 @@ Sentry.init({
 	integrations: [
 		new CaptureConsole({
 			// capture stuff on console.error
-			levels: ["error"],
+			levels: [ "error" ],
 		}),
 	],
 
