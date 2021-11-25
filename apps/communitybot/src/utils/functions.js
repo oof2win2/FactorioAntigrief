@@ -104,8 +104,9 @@ async function createPagedEmbed(
 				break
 			}
 			case "🗑️": {
-				reactionCollector.stop()
-				embedMsg.delete()
+				reactionCollector.stop().catch()
+				embedMsg.delete().catch()
+				message.delete().catch()
 			}
 		}
 	})

@@ -77,8 +77,8 @@ class Help extends Command {
 				})
 				if (neededRoles.length > 0)
 					groupEmbed.addField(
-						"The following roles can always use this command",
-						`<@&${neededRoles.join(">, <@&")}>`
+						"The following role can always use this command",
+						`<@&${neededRoles[0]}>`
 					)
 			}
 			// and send the embed in the current channel
