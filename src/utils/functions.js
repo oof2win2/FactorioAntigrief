@@ -144,17 +144,39 @@ async function createGuildConfig(guild, client) {
 			value: "The bot prefix is, and always will be, `fagc!`. This is displayed in the bot's status",
 		}
 	)
-	if (guild.systemChannel) {
-		await guild.systemChannel.createOverwrite(client.user.id, {
-			SEND_MESSAGES: true,
-			EMBED_LINKS: true,
-			ATTACH_FILES: true,
-		})
-		guild.systemChannel.send(embed)
+	if (guild.publicUpdatesChannel) {
+		guild.publicUpdatesChannel
+			.send(embed)
+			.catch(() =>
+				guild.systemChannel
+					.send(embed)
+					.catch(() =>
+						owner
+							.send(embed)
+							.catch(() =>
+								console.log(
+									`Could not send embed for guild ID ${guild.id}`
+								)
+							)
+					)
+			)
+	} else if (guild.systemChannel) {
+		guild.systemChannel
+			.send(embed)
+			.catch(() =>
+				owner
+					.send(embed)
+					.catch(() =>
+						console.log(
+							`Could not send embed for guild ID ${guild.id}`
+						)
+					)
+			)
 	} else {
-		try {
-			owner.send(embed)
-			// eslint-disable-next-line no-empty
-		} catch {}
+		owner
+			.send(embed)
+			.catch(() =>
+				console.log(`Could not send embed for guild ID ${guild.id}`)
+			)
 	}
 }
