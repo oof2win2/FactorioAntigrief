@@ -13,7 +13,7 @@ class AddCommunityFilter extends Command {
 			description:
 				"Adds a community filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			usage: "[...ids]",
-			aliases: ["addcommunities"],
+			aliases: [ "addcommunities" ],
 			examples: [
 				"{{p}}addcommunity XuciBx7",
 				"{{p}}addcommunity XuciBx7 XuciBx9 XuciBx/",
@@ -21,12 +21,12 @@ class AddCommunityFilter extends Command {
 			category: "communities",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["ADMINISTRATOR"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "ADMINISTRATOR" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["setCommunities"],
+			customPermissions: [ "setCommunities" ],
 		})
 	}
 	async run(message, args, config) {
@@ -52,7 +52,7 @@ class AddCommunityFilter extends Command {
 			createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
 			const newIDsMessage = await getMessageResponse(
 				message,
-				"No communities provided. Please provide IDs in a single message, separated with spaces:"
+				`${this.client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces:`
 			)
 			if (!newIDsMessage || !newIDsMessage.content)
 				return message.channel.send("No IDs were provided")

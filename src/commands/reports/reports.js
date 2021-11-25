@@ -1,6 +1,7 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
 const { createPagedEmbed } = require("../../utils/functions")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 class GetReports extends Command {
 	constructor(client) {
@@ -8,14 +9,14 @@ class GetReports extends Command {
 			name: "reports",
 			description:
 				"Gets reports of a player from only trusted communities and filtered rules",
-			aliases: ["check", "viewreports", "viewfilteredreports"],
+			aliases: [ "check", "viewreports", "viewfilteredreports" ],
 			category: "reports",
 			usage: "[playername]",
-			examples: ["{{p}}reports Windsinger"],
+			examples: [ "{{p}}reports Windsinger" ],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
@@ -23,11 +24,15 @@ class GetReports extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0])
-			return message.reply("Provide a player name to get reports of")
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get reports of`)
+				.then((r) => r?.content)
+		const playername = args.shift()
+		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
+		
 		if (!config.trustedCommunities)
 			return message.reply("No filtered communities set")
 		if (!config.ruleFilters) return message.reply("No filtered rules set")
-		const reports = await this.client.fagc.reports.fetchAllName(args[0])
+		const reports = await this.client.fagc.reports.fetchAllName(playername)
 		const communities = await this.client.fagc.communities.fetchAll()
 
 		let embed = new MessageEmbed()

@@ -12,7 +12,7 @@ class GetRulesFiltered extends Command {
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
@@ -20,7 +20,7 @@ class GetRulesFiltered extends Command {
 	}
 	async run(message, _, config) {
 		if (!config.ruleFilters || !config.ruleFilters[0])
-			return message.reply("No rule filters set")
+			return message.reply(`${this.client.emotes.warn} No rule filters set`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")

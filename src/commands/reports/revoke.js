@@ -1,7 +1,7 @@
 const { MessageEmbed } = require("discord.js")
 const { handleErrors } = require("../../utils/functions")
 const Command = require("../../base/Command")
-const { getConfirmationMessage } = require("../../utils/responseGetter")
+const { getConfirmationMessage, getMessageResponse } = require("../../utils/responseGetter")
 const { AuthenticationError } = require("fagc-api-wrapper")
 
 class Revoke extends Command {
@@ -9,26 +9,28 @@ class Revoke extends Command {
 		super(client, {
 			name: "revoke",
 			description: "Revokes a player's report with the report ID",
-			aliases: ["revokeid"],
+			aliases: [ "revokeid" ],
 			category: "reports",
 			usage: "[reportid]",
-			examples: ["{{p}}revoke p1UgG0G"],
+			examples: [ "{{p}}revoke p1UgG0G" ],
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["BAN_MEMBERS"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "BAN_MEMBERS" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["reports"],
+			customPermissions: [ "reports" ],
 		})
 	}
 	async run(message, args, config) {
-		if (!config.apikey) return message.reply("No API key set")
+		if (!config.apikey) return message.reply(`${this.client.emotes.warn} No API key set`)
 
 		if (!args[0])
-			return message.reply("Provide a ID for the report to revoke")
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to fetch`)
+				.then((r) => r?.content)
 		const reportID = args.shift()
+		if (!reportID) return message.channel.send(`${this.client.emotes.warn} No report was provided`)
 
 		const report = await this.client.fagc.reports.fetchReport(reportID)
 		if (!report?.id)

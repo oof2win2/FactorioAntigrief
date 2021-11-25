@@ -6,26 +6,26 @@ class SetName extends Command {
 			name: "setname",
 			description: "Set your community's name",
 			aliases: [],
-			usage: ["{{p}}setname [name]"],
-			examples: ["{{p}}setname AwF"],
+			usage: [ "{{p}}setname [name]" ],
+			examples: [ "{{p}}setname AwF" ],
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["ADMINISTRATOR"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "ADMINISTRATOR" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["setConfig"],
+			customPermissions: [ "setConfig" ],
 		})
 	}
 	async run(message, args, config) {
 		if (!config.apikey)
 			return message.channel.send(
-				"You must have an API key set for this command"
+				`${this.client.emotes.warn} You must have an API key set for this command`
 			)
 		if (!args[0] || !args.join(" "))
-			return message.channel.send("No name provided")
+			return message.channel.send(`${this.client.emotes.warn} No name provided`)
 
 		await this.client.fagc.communities.setCommunityConfig(
 			{

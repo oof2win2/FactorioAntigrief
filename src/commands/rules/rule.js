@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 class GetIDRule extends Command {
 	constructor(client) {
@@ -7,23 +8,27 @@ class GetIDRule extends Command {
 			name: "rule",
 			description: "Gets a rule by its ID",
 			usage: "[ruleID]",
-			examples: ["{{p}}rule XuciBx7"],
+			examples: [ "{{p}}rule XuciBx7" ],
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
 		})
 	}
 	async run(message, args) {
-		if (!args[0]) return message.reply("Provide rule ID to fetch")
-		const rule = await this.client.fagc.rules.fetchRule(args[0])
+		if (!args[0])
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a rule ID to fetch`)
+				.then((r) => r?.content)
+		const ruleID = args.shift()
+		if (!ruleID) return message.channel.send(`${this.client.emotes.warn} No rule ID was provided`)
+		const rule = await this.client.fagc.rules.fetchRule(ruleID)
 
 		if (rule === null)
-			return message.reply(`No rule with ID of \`${args[0]}\` exists`)
+			return message.reply(`${this.client.emotes.warn} No rule with ID of \`${args[0]}\` exists`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")

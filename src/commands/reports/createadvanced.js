@@ -13,50 +13,50 @@ class CreateReportAdvanced extends Command {
 			name: "createadvanced",
 			description:
 				"Creates a report - Advanced method. Allows specification of who created the report and when it was created",
-			aliases: ["banadvanced", "createadv", "banadv"],
+			aliases: [ "banadvanced", "createadv", "banadv" ],
 			category: "reports",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["BAN_MEMBERS"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "BAN_MEMBERS" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: true,
-			customPermissions: ["reports"],
+			customPermissions: [ "reports" ],
 		})
 	}
 
 	async run(message, _, config) {
-		if (!config.apikey) return message.reply("No API key set")
+		if (!config.apikey) return message.reply(`${this.client.emotes.warn} No API key set`)
 
 		const playername = (
 			await getMessageResponse(
 				message,
-				"Please type in a playername for the report"
+				`${this.client.emotes.type} Type in a playername for the report`
 			)
 		)?.content
 		if (playername === undefined)
-			return message.channel.send("Didn't send playername in time")
+			return message.channel.send(`${this.client.emotes.warn} Didn't send playername in time`)
 
 		const adminMessage = await getMessageResponse(
 			message,
-			"Please type in admin user ID for the report"
+			`${this.client.emotes.type} Type in admin user ID for the report`
 		)
 		if (adminMessage === undefined)
-			return message.channel.send("Didn't send admin user ID in time")
+			return message.channel.send(`${this.client.emotes.warn} Didn't send admin user ID in time`)
 		const adminUser =
 			adminMessage.mentions.users.first() ||
 			(await this.client.users.fetch(adminMessage.content))
-		if (!adminUser) return message.channel.send("Sent user is not valid!")
+		if (!adminUser) return message.channel.send(`${this.client.emotes.warn} Sent user is not valid!`)
 
 		const ruleids = (
 			await getMessageResponse(
 				message,
-				"Please type in IDs of rules (or indexes in filtered rules) that has been broken, separated by spaces"
+				`${this.client.emotes.type} Type in IDs of rules (or indexes in filtered rules) that has been broken, separated by spaces`
 			)
 		)?.content
 		if (ruleids === undefined)
-			return message.channel.send("Didn't send rule IDs in time")
+			return message.channel.send(`${this.client.emotes.warn} Didn't send rule IDs in time`)
 		let ruleInput = ruleids.split(" ")
 		const ruleNumbers = ruleInput
 			.map((rule, i) => {
@@ -75,7 +75,7 @@ class CreateReportAdvanced extends Command {
 			.filter((i) => i)
 		if (invalid.length)
 			return message.channel.send(
-				`Invalid indexes were provided: ${invalid.join(", ")}`
+				`${this.client.emotes.warn} Invalid indexes were provided: ${invalid.join(", ")}`
 			)
 
 		const numberRules = ruleNumbers.map(
@@ -87,7 +87,7 @@ class CreateReportAdvanced extends Command {
 		rules = rules.filter((r) => r).concat(numberRules)
 
 		if (!rules.length)
-			return message.channel.send("No valid rules were provided")
+			return message.channel.send(`${this.client.emotes.warn} No valid rules were provided`)
 
 		if (rules.length !== ruleids.split(" ").length) {
 			const invalidRules = ruleids
@@ -99,14 +99,14 @@ class CreateReportAdvanced extends Command {
 				.filter((r) => !rules.find((rule) => rule.id == r) && r)
 				.filter((r) => r)
 			return message.channel.send(
-				`Some rules had invalid IDs: \`${invalidRules.join("`, `")}\``
+				`${this.client.emotes.warn} Some rules had invalid IDs: \`${invalidRules.join("`, `")}\``
 			)
 		}
 
 		let desc = (
 			await getMessageResponse(
 				message,
-				"Please type in description of the report or `none` if you don't want to set one"
+				`${this.client.emotes.type} Type in description of the report or \`none\` if you don't want to set one`
 			)
 		)?.content
 		if (!desc || desc.toLowerCase() === "none") desc = undefined
@@ -114,7 +114,7 @@ class CreateReportAdvanced extends Command {
 		let proof = (
 			await getMessageResponse(
 				message,
-				"Please send a link to proof of the report or `none` if there is no proof"
+				`${this.client.emotes.type} Send a link to proof of the report or \`none\` if there is no proof`
 			)
 		)?.content
 		if (!proof || proof.toLowerCase() === "none") proof = undefined
@@ -122,7 +122,7 @@ class CreateReportAdvanced extends Command {
 		const timestampMsg = (
 			await getMessageResponse(
 				message,
-				"Please send a value representing the date of the report. Type in `now` to set the current time"
+				`${this.client.emotes.type} Send a value representing the date of the report. Type in \`now\` to set the current time`
 			)
 		)?.content
 		let timestamp = new Date()
@@ -132,7 +132,7 @@ class CreateReportAdvanced extends Command {
 			if (isNaN(timestamp.valueOf())) {
 				timestamp = new Date()
 				message.channel.send(
-					`\`${timestampMsg}\` could not be recognized as a date so the current date will be used instead`
+					`${this.client.emotes.warn} \`${timestampMsg}\` could not be recognized as a date so the current date will be used instead`
 				)
 			}
 		}
@@ -209,7 +209,7 @@ class CreateReportAdvanced extends Command {
 		} catch (error) {
 			if (error instanceof AuthenticationError)
 				return message.channel.send("Your API key is set incorrectly")
-			message.channel.send("Error creating reports. Please check logs.")
+			message.channel.send(`${this.client.emotes.error} Error creating reports. Please check logs.`)
 			throw error
 		}
 	}

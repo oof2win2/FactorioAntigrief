@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 class FetchReport extends Command {
 	constructor(client) {
@@ -8,27 +9,30 @@ class FetchReport extends Command {
 			description: "Fetch a report by ID",
 			category: "reports",
 			usage: "[reportId]",
-			examples: ["{{p}}report FX07kpn"],
+			examples: [ "{{p}}report FX07kpn" ],
 			dirname: __dirname,
 			enabled: true,
 			memberPermissions: [],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
 		})
 	}
 	async run(message, args) {
-		if (!args[0]) return message.reply("Provide a report to fetch")
-		const reportID = args[0]
+		if (!args[0])
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to fetch`)
+				.then((r) => r?.content)
+		const reportID = args.shift()
+		if (!reportID) return message.channel.send(`${this.client.emotes.warn} No report was provided`)
 
 		const report = await this.client.fagc.reports.fetchReport(reportID)
 		if (!report?.id)
 			return message.channel.send(
-				`Report with ID \`${reportID}\` doesn't exist`
+				`${this.client.emotes.warn} Report with ID \`${reportID}\` doesn't exist`
 			)
 		if (report.error && report.description.includes("id expected ID"))
-			return message.reply(`\`${reportID}\` is not a proper report ID`)
+			return message.reply(`${this.client.emotes.warn} \`${reportID}\` is not a proper report ID`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Report")

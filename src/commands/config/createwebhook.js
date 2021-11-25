@@ -15,12 +15,12 @@ class AddWebhook extends Command {
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["MANAGE_WEBHOOKS"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "MANAGE_WEBHOOKS" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
-			customPermissions: ["webhooks"],
+			customPermissions: [ "webhooks" ],
 		})
 	}
 	async run(message) {
@@ -33,11 +33,11 @@ class AddWebhook extends Command {
 			await webhook.delete()
 			if (e.message.includes("Forbidden"))
 				return message.channel.send(
-					"You already have a webhook in this guild"
+					`${this.client.emotes.warn} You already have a webhook in this guild`
 				)
 			console.error(e)
 			return message.channel.send(
-				"An error occured. Please contact developers"
+				`${this.client.emotes.error} An error occured. Please contact developers`
 			)
 		}
 	}

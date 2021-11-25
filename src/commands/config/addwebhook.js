@@ -7,25 +7,25 @@ class AddWebhook extends Command {
 			description: "Adds a webhook to send FAGC notifications to",
 			aliases: [],
 			usage: "[webhook ID] [webhook token]",
-			examples: ["{{p}}addwebhook 9945 ThisIsMyToken"],
+			examples: [ "{{p}}addwebhook 9945 ThisIsMyToken" ],
 			category: "config",
 			dirname: __dirname,
 			enabled: true,
-			memberPermissions: ["MANAGE_WEBHOOKS"],
-			botPermissions: ["SEND_MESSAGES", "EMBED_LINKS"],
+			memberPermissions: [ "MANAGE_WEBHOOKS" ],
+			botPermissions: [ "SEND_MESSAGES", "EMBED_LINKS" ],
 			ownerOnly: false,
 			cooldown: 3000,
 			requiredConfig: false,
-			customPermissions: ["webhooks"],
+			customPermissions: [ "webhooks" ],
 		})
 	}
 	async run(message, args) {
-		if (!args[0]) return message.reply("Provide a Webhook URL")
+		if (!args[0]) return message.reply(`${this.client.emotes.warn} Provide a Webhook URL`)
 		message.delete()
 		message.reply("Message removed to prevent unauthorized webhook access")
 
 		// discord webhook link to id and token separately
-		const [webhookID, webhookToken] = args[0]
+		const [ webhookID, webhookToken ] = args[0]
 			.slice(args[0].indexOf("/api/webhooks") + 14)
 			.split("/")
 
@@ -33,7 +33,7 @@ class AddWebhook extends Command {
 			await this.client.fetchWebhook(webhookID, webhookToken)
 		} catch (e) {
 			console.error(e)
-			return message.channel.send("Invalid webhook")
+			return message.channel.send(`${this.client.emotes.warn} Invalid webhook`)
 		}
 		const webhook = await this.client.fagc.info.addWebhook(
 			webhookID,
@@ -45,7 +45,7 @@ class AddWebhook extends Command {
 			)
 		else {
 			return message.reply(
-				"You already have a webhook running in your server. You cannot have more than 1 webhook per server"
+				`${this.client.emotes.warn} You already have a webhook running in your server. You cannot have more than 1 webhook per server`
 			)
 		}
 	}
