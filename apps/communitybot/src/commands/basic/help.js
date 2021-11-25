@@ -44,8 +44,8 @@ class Help extends Command {
 				: prefix + cmd.help.name
 			const examples = cmd.help.examples
 				? `\`\`\`${cmd.help.examples
-						.join("\n")
-						.replace(/\{\{p\}\}/g, prefix)}\`\`\``
+					.join("\n")
+					.replace(/\{\{p\}\}/g, prefix)}\`\`\``
 				: `\`\`\`${prefix}${cmd.help.name}\`\`\``
 			// Creates the help embed
 			const groupEmbed = new Discord.MessageEmbed()
@@ -63,8 +63,8 @@ class Help extends Command {
 					"Member permissions requried",
 					cmd.config.memberPermissions.length > 0
 						? cmd.config.memberPermissions
-								.map((p) => "`" + p + "`")
-								.join("\n")
+							.map((p) => "`" + p + "`")
+							.join("\n")
 						: "No specific permission is required to execute this command"
 				)
 				.setColor(this.client.config.embeds.color)
