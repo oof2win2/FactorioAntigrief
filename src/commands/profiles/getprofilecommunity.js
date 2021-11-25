@@ -7,8 +7,11 @@ class GetAllProfiles extends Command {
 		super(client, {
 			name: "profile",
 			description: "Gets the profile of a player in a specific community",
-			usage: "[playername] [communityId]",
-			examples: ["{{p}}profile Windsinger p1UgG0G"],
+			usage: "[playername] (communityId)",
+			examples: [
+				"{{p}}profile Windsinger p1UgG0G",
+				"{{p}}profile Windsinger",
+			],
 			category: "profiles",
 			dirname: __dirname,
 			enabled: true,
@@ -19,15 +22,15 @@ class GetAllProfiles extends Command {
 			requiredConfig: false,
 		})
 	}
-	async run(message, args) {
+	async run(message, args, config) {
 		if (!args[0])
 			return message.reply("Provide a player name to get profiles of")
-		if (!args[1])
-			return message.reply(
-				"Provide a community ID to get the profiles from"
-			)
 		const playername = args.shift()
-		const communityId = args.shift()
+		const communityId = args.shift() || config.communityId
+		if (!communityId)
+			return message.channel.send(
+				"You do not have a community ID set and none was provided"
+			)
 
 		const community = await this.client.fagc.communities.fetchCommunity(
 			communityId
@@ -40,7 +43,7 @@ class GetAllProfiles extends Command {
 			playername,
 			communityId
 		)
-		if (!profile)
+		if (!profile || !profile.reports.length)
 			return message.channel.send(
 				`User \`${playername}\` has no profile in community ${community.name} (\`${community.id}\`)`
 			)
