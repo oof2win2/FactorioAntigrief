@@ -75,7 +75,7 @@
 		"@typescript-eslint/eslint-plugin": "^4.31.0",
 		"@typescript-eslint/parser": "^4.31.0",
 		"eslint-config-prettier": "^8.3.0",
-		"husky": "^7.0.2",
+		"husky": "^7.0.4",
 		"install-types": "^2.0.1",
 		"lint-staged": "^11.1.2",
 		"nodemon": "^2.0.12",
