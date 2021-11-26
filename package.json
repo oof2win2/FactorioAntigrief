@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@mgcrea/fastify-session": "^0.14.2",
-		"@mgcrea/fastify-session-sodium-crypto": "^0.8.2",
+		"@mgcrea/fastify-session-sodium-crypto": "^0.8.3",
 		"@sentry/node": "^6.15.0",
 		"@sentry/tracing": "^6.13.3",
 		"@sinclair/typebox": "^0.22.1",
