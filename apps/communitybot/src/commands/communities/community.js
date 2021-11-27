@@ -1,5 +1,6 @@
 const { MessageEmbed } = require("discord.js")
 const Command = require("../../base/Command")
+const { getMessageResponse } = require("../../utils/responseGetter")
 
 class GetID extends Command {
 	constructor(client) {
@@ -19,14 +20,13 @@ class GetID extends Command {
 	}
 	async run(message, args) {
 		if (!args[0])
-			return message.channel.send("You need to provide a community ID!")
-		const community = await this.client.fagc.communities.fetchCommunity(
-			args[0]
-		)
+			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a community ID to fetch`)
+				.then((r) => r?.content)
+		const communityId = args.shift()
+		if (!communityId) return message.channel.send(`${this.client.emotes.warn} No community ID was provided`)
+		const community = await this.client.fagc.communities.fetchCommunity(communityId)
 		if (!community)
-			return message.channel.send(
-				`Community with the ID \`${args[0]}\` does not exist!`
-			)
+			return message.channel.send(`${this.client.emotes.warn} Community with the ID \`${communityId}\` does not exist!`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Communities")

@@ -7,7 +7,7 @@ class GetRulesFiltered extends Command {
 		super(client, {
 			name: "rules",
 			description:
-				"Gets rules that this community follows. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
+				"Gets rules that this community follows. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,
@@ -38,7 +38,7 @@ class GetRulesFiltered extends Command {
 				value: rule.longdesc,
 			}
 		})
-		createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
+		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
 }
 module.exports = GetRulesFiltered

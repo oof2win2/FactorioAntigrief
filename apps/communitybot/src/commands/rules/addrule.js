@@ -8,7 +8,7 @@ class AddRuleFilter extends Command {
 		super(client, {
 			name: "addrule",
 			description:
-				"Adds a rule filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
+				"Adds a rule filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md). Get IDs with fagc!allrules",
 			aliases: [ "addrules" ],
 			usage: "[...ids]",
 			examples: [
@@ -37,10 +37,10 @@ class AddRuleFilter extends Command {
 				.setAuthor("FAGC Community")
 				.setDescription("All FAGC Rules")
 			let fields = []
-			for (let i = 0; i < rules.length; i += 5) {
+			for (let i = 0; i < rules.length; i += 10) {
 				fields.push({
 					name: rules
-						.slice(i, i + 5)
+						.slice(i, i + 10)
 						.map((rule) => `${rule.shortdesc} (\`${rule.id}\`)\n`)
 						.join(""),
 					value: "\u200b",

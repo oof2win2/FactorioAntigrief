@@ -7,7 +7,7 @@ class GetWhitelisted extends Command {
 		super(client, {
 			name: "communities",
 			description:
-				"Gets trusted communities. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
+				"Gets trusted communities. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			category: "communities",
 			dirname: __dirname,
 			enabled: true,
@@ -42,7 +42,7 @@ class GetWhitelisted extends Command {
 				}
 			})
 		)
-		createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
+		createPagedEmbed(fields, embed, message, { maxPageCount: 25 })
 	}
 }
 

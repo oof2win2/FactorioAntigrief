@@ -26,15 +26,16 @@ class GetAllRules extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription("All FAGC Rules")
 		let fields = []
-		for (let i = 0; i < rules.length; i += 5) {
+		for (let i = 0; i < rules.length; i += 10) {
 			fields.push({
-				name: rules
-					.slice(i, i + 5)
-					.map((rule) => `${rule.shortdesc} (\`${rule.id}\`)\n`)
+				value: rules
+					.slice(i, i + 10)
+					.map((rule) => `**${rule.shortdesc}** (\`${rule.id}\`)\n`)
 					.join(""),
-				value: "\u200b",
+				name: "\u200b",
 			})
 		}
+		console.log(fields.length)
 		createPagedEmbed(fields, embed, message, { maxPageCount: 1 })
 	}
 }
