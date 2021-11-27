@@ -28,7 +28,7 @@ class GetIDRule extends Command {
 		const rule = await this.client.fagc.rules.fetchRule(ruleID)
 
 		if (rule === null)
-			return message.reply(`${this.client.emotes.warn} No rule with ID of \`${args[0]}\` exists`)
+			return message.reply(`${this.client.emotes.warn} No rule with ID of \`${ruleID}\` exists`)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")

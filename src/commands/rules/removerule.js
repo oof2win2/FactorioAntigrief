@@ -8,7 +8,7 @@ class RemoveRuleFilter extends Command {
 		super(client, {
 			name: "removerule",
 			description:
-				"Removes a rule filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
+				"Removes a rule filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md). Get IDs with fagc!allrules",
 			aliases: [ "removerules" ],
 			usage: "[...ids]",
 			examples: [

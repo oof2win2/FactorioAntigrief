@@ -92,14 +92,14 @@ async function createPagedEmbed(
 		case "⬅️": {
 			page--
 			removeReaction("⬅️") // remove the user's reaction no matter what
-			if (page == -1) page = 0
+			if (page <= -1) page = 0
 			else setData()
 			break
 		}
 		case "➡️": {
 			page++
 			removeReaction("➡️") // remove the user's reaction no matter what
-			if (page > maxPages) page = maxPages
+			if (page >= maxPages) page = maxPages
 			else setData()
 			break
 		}

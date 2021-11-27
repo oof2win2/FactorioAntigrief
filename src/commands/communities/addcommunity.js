@@ -11,7 +11,7 @@ class AddCommunityFilter extends Command {
 		super(client, {
 			name: "addcommunity",
 			description:
-				"Adds a community filter. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
+				"Adds a community filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md). . Get IDs with fagc!allcommunities",
 			usage: "[...ids]",
 			aliases: [ "addcommunities" ],
 			examples: [
@@ -70,7 +70,7 @@ class AddCommunityFilter extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(
-				"Add Filtered Communities. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
+				"Add Filtered Communities. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md). Get IDs with fagc!allcommunities"
 			)
 		const communities = args
 			.map((communityid) =>
@@ -93,7 +93,7 @@ class AddCommunityFilter extends Command {
 				}
 			})
 		)
-		createPagedEmbed(communityFields, embed, message, { maxPageCount: 5 })
+		createPagedEmbed(communityFields, embed, message, { maxPageCount: 25 })
 
 		const confirm = await getConfirmationMessage(
 			message,
