@@ -40,7 +40,7 @@ class GetReports extends Command {
 			.setColor("GREEN")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Reports of player \`${args[0]}\``)
+			.setDescription(`FAGC Reports of player \`${playername}\``)
 
 		const trustedCommunities = communities.filter((community) => {
 			if (
@@ -65,7 +65,7 @@ class GetReports extends Command {
 
 		if (!filteredReports.length)
 			return message.channel.send(
-				`Player \`${args[0]}\` doesn't have report that correspond to your rule and community preferences`
+				`Player \`${playername}\` doesn't have report that correspond to your rule and community preferences`
 			)
 		const fields = await Promise.all(
 			filteredReports.map(async (report) => {

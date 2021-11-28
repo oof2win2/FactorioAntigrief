@@ -37,8 +37,9 @@ class Revoke extends Command {
 			return message.channel.send(
 				`Report with ID \`${reportID}\` doesn't exist`
 			)
-		if (report.error && report.description.includes("id expected ID"))
-			return message.reply(`\`${reportID}\` is not a proper report ID`)
+		if (report.communityId !== config.communityId)
+			return message.channel.send(`You are trying to revoke a report of community \`${report.communityId}\` but you are from community \`${config.communityId}\``)
+		const community = await this.client.fagc.communities.fetchCommunity(report.communityId)
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Report Revocation")
@@ -46,7 +47,7 @@ class Revoke extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(
-				`FAGC Report \`${report.id}\` of player \`${report.playername}\` in community ${config.communityname}`
+				`FAGC Report \`${report.id}\` of player \`${report.playername}\` in community ${community.name} (\`${community.id}\`)`
 			)
 		const creator = await this.client.users.fetch(report.adminId)
 		embed.addFields(
@@ -55,7 +56,7 @@ class Revoke extends Command {
 			{ name: "Proof", value: report.proof },
 			{ name: "Description", value: report.description },
 			{ name: "Automated", value: report.automated },
-			{ name: "Violated time", value: Date(report.reportedTime) }
+			{ name: "Violated time", value: `<t:${Math.round(report.reportedTime/1000)}>` }
 		)
 		message.channel.send(embed)
 

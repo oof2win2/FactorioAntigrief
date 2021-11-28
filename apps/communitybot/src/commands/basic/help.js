@@ -36,11 +36,11 @@ class Help extends Command {
 				: "No description"
 			const usage = cmd.help.usage
 				? "```\n" +
-				  prefix +
-				  cmd.help.name +
-				  " " +
-				  cmd.help.usage +
-				  "\n```"
+					prefix +
+					cmd.help.name +
+					" " +
+					cmd.help.usage +
+					"\n```"
 				: prefix + cmd.help.name
 			const examples = cmd.help.examples
 				? `\`\`\`${cmd.help.examples
