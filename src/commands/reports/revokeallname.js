@@ -39,7 +39,7 @@ class RevokeAllname extends Command {
 		)
 		if (!profile || !profile.reports[0])
 			return message.reply(
-				`Player \`${playername}\` has no profile in community ${config.communityname}`
+				`Player \`${playername}\` has no profile in your community`
 			)
 
 		let embed = new MessageEmbed()
@@ -48,10 +48,10 @@ class RevokeAllname extends Command {
 			.setTimestamp()
 			.setAuthor("FAGC Community")
 			.setDescription(
-				`FAGC Profile of player \`${playername}\` in community ${config.communityname}`
+				`FAGC Profile of player \`${playername}\` in community ${config.communityId}`
 			)
 		const fields = await Promise.all(
-			profile.map(async (report) => {
+			profile.reports.map(async (report) => {
 				const admin = await this.client.users.fetch(report.adminId)
 				return {
 					name: report.id,
@@ -59,9 +59,7 @@ class RevokeAllname extends Command {
 						`By: <@${admin.id}> | ${admin.tag}\nBroken rule: ${report.brokenRule}\n` +
 						`Proof: ${report.proof}\nDescription: ${report.description}\n` +
 						`Automated: ${report.automated
-						}\nViolated time: ${new Date(
-							report.reportedTime
-						).toUTCString()}`,
+						}\nViolated time: <t:${Math.round(report.reportedTime/1000)}>`,
 					inline: true,
 				}
 			})
@@ -78,13 +76,13 @@ class RevokeAllname extends Command {
 		try {
 			const response = await this.client.fagc.reports.revokeAllName(
 				playername,
-				message.author.id
+				message.author.id,
+				null,
+				{
+					apikey: config.apikey
+				}
 			)
-			if (
-				response.reports &&
-				response.playername &&
-				response.communityId
-			) {
+			if (response.length) {
 				return message.channel.send("Profile revoked!")
 			} else {
 				return handleErrors(message, response)

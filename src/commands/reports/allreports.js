@@ -28,17 +28,17 @@ class GetAllReports extends Command {
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
-		const reports = await this.client.fagc.reports.fetchAllName(args[0])
+		const reports = await this.client.fagc.reports.fetchAllName(playername)
 		if (!reports[0])
 			return message.reply(
-				`Player \`${args[0]}\` doesn't have any reports`
+				`Player \`${playername}\` doesn't have any reports`
 			)
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
 			.setColor("ORANGE")
 			.setTimestamp()
 			.setAuthor("FAGC Community")
-			.setDescription(`FAGC Reports of player \`${args[0]}\``)
+			.setDescription(`FAGC Reports of player \`${playername}\``)
 
 		const fields = await Promise.all(
 			reports.map(async (report) => {

@@ -40,13 +40,13 @@ class CreateReportAdvanced extends Command {
 
 		const adminMessage = await getMessageResponse(
 			message,
-			`${this.client.emotes.type} Type in admin user ID for the report`
+			`${this.client.emotes.type} Type in admin user ID, or ping an admin for the report`
 		)
 		if (adminMessage === undefined)
 			return message.channel.send(`${this.client.emotes.warn} Didn't send admin user ID in time`)
 		const adminUser =
 			adminMessage.mentions.users.first() ||
-			(await this.client.users.fetch(adminMessage.content))
+			(await this.client.users.fetch(adminMessage.content).catch(() => null))
 		if (!adminUser) return message.channel.send(`${this.client.emotes.warn} Sent user is not valid!`)
 
 		const ruleids = (
@@ -122,11 +122,18 @@ class CreateReportAdvanced extends Command {
 		const timestampMsg = (
 			await getMessageResponse(
 				message,
-				`${this.client.emotes.type} Send a value representing the date of the report. Type in \`now\` to set the current time`
+				`${this.client.emotes.type} Send a ISO8601 timetsamp representing the date of the report, find one here: <https://www.timestamp-converter.com/>. Type in \`now\` to set the current time`,
+				120*1000 // 120 seconds to make time
 			)
 		)?.content
 		let timestamp = new Date()
-		if (timestampMsg.toLowerCase() === "now") timestamp = new Date()
+		if (!timestampMsg) {
+			message.channel.send(
+				`${this.client.emotes.warn} No date was provided so the current date will be used instead`
+			)
+			timestamp = new Date()
+		}
+		else if (timestampMsg?.toLowerCase() === "now") timestamp = new Date()
 		else {
 			timestamp = new Date(timestampMsg)
 			if (isNaN(timestamp.valueOf())) {
