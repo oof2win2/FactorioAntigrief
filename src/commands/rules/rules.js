@@ -34,7 +34,7 @@ class GetRulesFiltered extends Command {
 		const filteredRules = await this.client.getFilteredRules(config)
 		const fields = filteredRules.map((rule) => {
 			return {
-				name: `${rule.shortdesc} (\`${rule.id}\`)`,
+				name: `${config.ruleFilters.indexOf(rule.id)+1}) ${rule.shortdesc} (\`${rule.id}\`)`,
 				value: rule.longdesc,
 			}
 		})

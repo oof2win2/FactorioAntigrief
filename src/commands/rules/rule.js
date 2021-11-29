@@ -19,7 +19,7 @@ class GetIDRule extends Command {
 			requiredConfig: false,
 		})
 	}
-	async run(message, args) {
+	async run(message, args, config) {
 		if (!args[0])
 			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a rule ID to fetch`)
 				.then((r) => r?.content)
@@ -37,6 +37,13 @@ class GetIDRule extends Command {
 			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Rule with ID \`${rule.id}\``)
 		embed.addField(rule.shortdesc, rule.longdesc)
+		
+		if (config && config.ruleFilters) {
+			if (config.ruleFilters.indexOf(rule.id) != -1) {
+				embed.addField("Rule index", config.ruleFilters.indexOf(rule.id) + 1)
+			}
+		}
+
 		return message.channel.send(embed)
 	}
 }
