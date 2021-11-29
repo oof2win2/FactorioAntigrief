@@ -29,7 +29,7 @@
 		"@types/node": "^16.11.10",
 		"crypto-random-string": "^4.0.0",
 		"debug": "~4.3.2",
-		"discord-oauth2": "^2.7.1",
+		"discord-oauth2": "^2.8.0",
 		"discord.js": "^13.3.1",
 		"dotenv": "^10.0.0",
 		"envalid": "^7.2.1",
