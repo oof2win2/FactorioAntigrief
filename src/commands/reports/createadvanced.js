@@ -3,7 +3,7 @@ const {
 	getMessageResponse,
 	getConfirmationMessage,
 } = require("../../utils/responseGetter")
-const { handleErrors } = require("../../utils/functions")
+const { handleErrors, createPagedEmbed } = require("../../utils/functions")
 const Command = require("../../base/Command")
 const { AuthenticationError } = require("fagc-api-wrapper")
 
@@ -51,6 +51,24 @@ class CreateReportAdvanced extends Command {
 			(await this.client.users.fetch(adminMessage.content).catch(() => null))
 		if (!adminUser) return message.channel.send(`${this.client.emotes.warn} Sent user is not valid!`)
 
+		let ruleEmbed = new MessageEmbed()
+			.setTitle("FAGC Rules")
+			.setColor("GREEN")
+			.setTimestamp()
+			.setAuthor("FAGC Community")
+			.setDescription(
+				"Filtered FAGC Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
+			)
+
+		const filteredRules = await this.client.getFilteredRules(config)
+		const fields = filteredRules.map((rule) => {
+			return {
+				name: `${config.ruleFilters.indexOf(rule.id)+1}) ${rule.shortdesc} (\`${rule.id}\`)`,
+				value: rule.longdesc,
+			}
+		})
+		createPagedEmbed(fields, ruleEmbed, message, { maxPageCount: 10 })
+
 		const ruleids = (
 			await getMessageResponse(
 				message,
@@ -69,7 +87,6 @@ class CreateReportAdvanced extends Command {
 				return ruleNumber
 			})
 			.filter((r) => r)
-		const filteredRules = await this.client.getFilteredRules(config)
 
 		// validate that all rule indexes do exist
 		const invalid = ruleNumbers
@@ -103,6 +120,13 @@ class CreateReportAdvanced extends Command {
 			return message.channel.send(
 				`${this.client.emotes.warn} Some rules had invalid IDs: \`${invalidRules.join("`, `")}\``
 			)
+		}
+
+		for (const rule of rules) {
+			if (config.ruleFilters.indexOf(rule.id) === -1)
+				return message.channel.send(
+					`${this.client.emotes.warn} Rule ${rule.id} is not filtered by your community but you tried to report with it`
+				)
 		}
 
 		let desc = args.join(" ") || (
