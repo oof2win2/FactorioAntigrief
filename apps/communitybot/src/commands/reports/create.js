@@ -14,6 +14,8 @@ class CreateReport extends Command {
 			description:
 				"Creates a report. Use the advanced method to add in time of report created and who created it. This command defaults to now and you",
 			aliases: [ "createreport", "ban", "banhammer" ],
+			usage: "(playername) (description)",
+			examples: [ "{{p}}createadvanced", "{{p}}createadvanced Windsinger", "{{p}}createadvanced Windsinger big bad griefer" ],
 			category: "reports",
 			dirname: __dirname,
 			enabled: true,
@@ -25,10 +27,10 @@ class CreateReport extends Command {
 			customPermissions: [ "reports" ],
 		})
 	}
-	async run(message, _, config) {
+	async run(message, args, config) {
 		if (!config.apikey) return message.reply(`${this.client.emotes.warn} No API key set`)
 
-		const playername = (
+		const playername = args.shift() || (
 			await getMessageResponse(
 				message,
 				`${this.client.emotes.type} Type in a playername for the report`
@@ -91,7 +93,7 @@ class CreateReport extends Command {
 			)
 		}
 
-		let desc = (
+		let desc = args.join(" ") || (
 			await getMessageResponse(
 				message,
 				`${this.client.emotes.type} Type in description of the report or \`none\` if you don't want to set one`
