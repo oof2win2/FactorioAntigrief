@@ -10,6 +10,7 @@ import RevocationModel from "../database/fagc/revocation.js"
 import { validateDiscordUser, client } from "../utils/discord.js"
 import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
 import { Community } from "fagc-api-types"
+import GuildConfigModel from "../database/bot/community.js"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -285,6 +286,30 @@ export default class ReportController {
 				message: "adminId must be a valid Discord user ID",
 			})
 		const admin = await client.users.fetch(adminId)
+
+		// check whether any one of the community configs allows for this rule, if not, then don't accept the report
+		const communityConfigs = await GuildConfigModel.find({
+			communityId: community.id,
+		})
+		if (!communityConfigs.length)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "Your community does not have a community config",
+			})
+		let foundRuleFilter = communityConfigs.find((config) => {
+			return (
+				config.ruleFilters?.length &&
+				config.ruleFilters.indexOf(rule.id) !== -1
+			)
+		})
+		if (!foundRuleFilter)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message:
+					"Your community does not filter for the specified rule",
+			})
 
 		const report = await ReportModel.create({
 			playername: playername,
