@@ -1,11 +1,10 @@
 import { Client } from "discord.js"
 import OAuthClient from "discord-oauth2"
 import ENV from "./env.js"
-import { OAUTHSCOPES } from "../consts.js"
 
 // this is so that the client can be accessed from any file
 export const client = new Client({
-	intents: ["GUILD_MEMBERS", "GUILDS"],
+	intents: [ "GUILD_MEMBERS", "GUILDS" ],
 })
 client.login(ENV.DISCORD_BOTTOKEN)
 

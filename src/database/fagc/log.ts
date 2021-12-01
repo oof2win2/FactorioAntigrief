@@ -21,25 +21,25 @@ const connection = database.connections.find(
 })
 export class LogClass {
 	@prop({ _id: false, type: String })
-	id!: string
+		id!: string
 
 	@prop()
-	timestamp!: Date
+		timestamp!: Date
 
 	@prop()
-	apikey: string | undefined
+		apikey: string | undefined
 
 	@prop({ type: String })
-	ip: string | undefined
+		ip: string | undefined
 
 	@prop()
-	responseBody!: unknown
+		responseBody!: unknown
 
 	@prop()
-	requestBody!: unknown
+		requestBody!: unknown
 
 	@prop()
-	endpointAddress!: string
+		endpointAddress!: string
 }
 const LogModel = getModelForClass(LogClass)
 export default LogModel

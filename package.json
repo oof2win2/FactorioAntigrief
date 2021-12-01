@@ -7,14 +7,12 @@
 	"scripts": {
 		"start": "ts-node ./src/app.ts",
 		"dev": "nodemon ./dist/app.ts",
-		"lint": "npm run eslint && npm run prettier",
+		"lint": "npm run eslint",
 		"eslint": "eslint src/ --fix --ext .ts",
-		"prettier": "prettier --write .",
 		"postinstall": "install-types",
 		"pm2:build": "tsc",
 		"pm2:start": "pm2 start pm2.config.js",
-		"pm2": "npm run pm2:build && npm run pm2:start",
-		"prepare": "husky install"
+		"pm2": "npm run pm2:build && npm run pm2:start"
 	},
 	"lint-staged": {
 		"**/*": "prettier --write --ignore-unknown"
@@ -33,7 +31,6 @@
 		"discord.js": "^13.3.1",
 		"dotenv": "^10.0.0",
 		"envalid": "^7.2.2",
-		"eslint": "^8.3.0",
 		"fagc-api-types": "^1.3.0",
 		"fastify": "^3.24.0",
 		"fastify-autoload": "^3.9.0",
@@ -47,7 +44,7 @@
 		"fastify-request-context": "^2.2.0",
 		"fastify-session-sqlite-store": "^1.0.3",
 		"fastify-swagger": "^4.12.6",
-		"mongoose": "^6.0.13",
+		"mongoose": "^6.0.14",
 		"mongoose-to-swagger": "^1.3.0",
 		"prom-client": "^14.0.1",
 		"tsc": "^2.0.3"
@@ -70,16 +67,13 @@
 		"@types/mongoose": "^5.11.97",
 		"@types/node-fetch": "^3.0.3",
 		"@types/nodemon": "^1.19.1",
-		"@types/prettier": "^2.4.2",
-		"@types/ws": "^8.2.0",
-		"@typescript-eslint/eslint-plugin": "^5.4.0",
-		"@typescript-eslint/parser": "^4.31.0",
-		"eslint-config-prettier": "^8.3.0",
-		"husky": "^7.0.4",
+		"@types/prettier": "^2.4.1",
+		"@types/ws": "^7.4.6",
+		"@typescript-eslint/eslint-plugin": "^5.5.0",
+		"@typescript-eslint/parser": "^5.5.0",
 		"install-types": "^2.0.1",
 		"lint-staged": "^12.1.2",
 		"nodemon": "^2.0.12",
-		"prettier": "2.5.0",
-		"typescript": "^4.5.2"
+		"typescript": "^4.4.3"
 	}
 }

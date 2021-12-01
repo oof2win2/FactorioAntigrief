@@ -1,23 +1,18 @@
-import { ConnectionOptions } from "mongoose"
+import { ConnectOptions } from "mongoose"
+import ENV from "./utils/env"
 
 // This file is NOT for private stuff, rather for database config
 
 export interface ApiConfig {
-	dbConnections: ConnectionOptions[]
+	dbConnections: ConnectOptions[]
 }
 const config: ApiConfig = {
 	dbConnections: [
 		{
-			dbName: "fagc",
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-			useFindAndModify: false,
+			dbName: ENV.BACKENDDBNAME,
 		},
 		{
-			dbName: "bot",
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-			useFindAndModify: false,
+			dbName: ENV.BOTDBNAME,
 		},
 	],
 }

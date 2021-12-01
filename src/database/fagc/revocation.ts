@@ -19,43 +19,43 @@ const connection = database.connections.find(
 })
 export class RevocationClass {
 	@prop({ _id: false })
-	id!: string
+		id!: string
 
 	@prop()
-	reportId!: string
+		reportId!: string
 
 	@prop()
-	playername!: string
+		playername!: string
 
 	@prop()
-	adminId!: string
+		adminId!: string
 
 	@prop()
-	communityId!: string
+		communityId!: string
 
 	@prop()
-	brokenRule!: string
+		brokenRule!: string
 
 	@prop()
-	proof!: string
+		proof!: string
 
 	@prop()
-	description!: string
+		description!: string
 
 	@prop()
-	automated!: boolean
+		automated!: boolean
 
 	@prop()
-	reportedTime!: Date
+		reportedTime!: Date
 
 	@prop()
-	revokedTime!: Date
+		revokedTime!: Date
 
 	@prop()
-	revokedBy!: string
+		revokedBy!: string
 
 	@prop()
-	createdAt!: Date
+		createdAt!: Date
 }
 
 const RevocationModel = getModelForClass(RevocationClass)

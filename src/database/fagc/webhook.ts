@@ -13,13 +13,13 @@ const connection = database.connections.find(
 })
 export class WebhookClass {
 	@prop({ _id: false })
-	id!: string
+		id!: string
 
 	@prop()
-	token!: string
+		token!: string
 
 	@prop()
-	guildId!: string
+		guildId!: string
 }
 
 const WebhookModel = getModelForClass(WebhookClass)

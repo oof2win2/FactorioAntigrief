@@ -21,10 +21,10 @@ export default class ProfileController {
 				),
 
 				description: "Fetch a report of a player in a community",
-				tags: ["profiles"],
+				tags: [ "profiles" ],
 				response: {
 					"200": {
-						allOf: [{ nullable: true }, { $ref: "Profile#" }],
+						allOf: [ { nullable: true }, { $ref: "Profile#" } ],
 					},
 				},
 			},
@@ -66,12 +66,12 @@ export default class ProfileController {
 				),
 
 				description: "Fetch all reports of a player",
-				tags: ["profiles"],
+				tags: [ "profiles" ],
 				response: {
 					"200": {
 						type: "array",
 						items: {
-							allOf: [{ nullable: true }, { $ref: "Profile#" }],
+							allOf: [ { nullable: true }, { $ref: "Profile#" } ],
 						},
 					},
 				},
@@ -110,7 +110,7 @@ export default class ProfileController {
 				profilesMap.set(report.communityId, {
 					playername: report.playername,
 					communityId: report.communityId,
-					reports: [report],
+					reports: [ report ],
 				})
 			}
 		})

@@ -35,6 +35,11 @@ const ENV = cleanEnv(
 			default: 31536000,
 		}), // default to a year
 		COOKIENAME: str({ desc: "Cookie name", default: "sid" }),
+		BACKENDDBNAME: str({
+			desc: "DB name for your backend",
+			default: "fagc",
+		}),
+		BOTDBNAME: str({ desc: "DB name for your bot", default: "bot" }),
 	},
 	{}
 )

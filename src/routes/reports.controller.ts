@@ -9,7 +9,12 @@ import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import { validateDiscordUser, client } from "../utils/discord.js"
 import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
-import { Community } from "fagc-api-types"
+import {
+	Community,
+	Rule,
+	ReportMessageExtraOpts,
+	RevocationMessageExtraOpts,
+} from "fagc-api-types"
 import GuildConfigModel from "../database/bot/community.js"
 
 @Controller({ route: "/reports" })
@@ -25,10 +30,10 @@ export default class ReportController {
 				),
 
 				description: "Fetch a report by it's ID",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
-						allOf: [{ nullable: true }, { $ref: "ReportClass#" }],
+						allOf: [ { nullable: true }, { $ref: "ReportClass#" } ],
 					},
 				},
 			},
@@ -58,7 +63,7 @@ export default class ReportController {
 				),
 
 				description: "Fetch a report by it's broken rule ID",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -93,7 +98,7 @@ export default class ReportController {
 				),
 
 				description: "Fetch reports by their player name",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -135,7 +140,7 @@ export default class ReportController {
 
 				description:
 					"Fetch reports by their player name and community ID",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -174,7 +179,7 @@ export default class ReportController {
 				),
 
 				description: "Fetch reports modified since a timestamp",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -193,7 +198,7 @@ export default class ReportController {
 			}
 		}>,
 		res: FastifyReply
-	) {
+	): Promise<FastifyReply> {
 		const { timestamp } = req.params
 
 		const date = new Date(timestamp)
@@ -223,7 +228,7 @@ export default class ReportController {
 				),
 
 				description: "Create a report",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				security: [
 					{
 						authorization: [],
@@ -297,7 +302,7 @@ export default class ReportController {
 				error: "Bad Request",
 				message: "Your community does not have a community config",
 			})
-		let foundRuleFilter = communityConfigs.find((config) => {
+		const foundRuleFilter = communityConfigs.find((config) => {
 			return (
 				config.ruleFilters?.length &&
 				config.ruleFilters.indexOf(rule.id) !== -1
@@ -324,16 +329,16 @@ export default class ReportController {
 
 		const allReports = await ReportModel.find({
 			playername: playername,
-		}).select(["communityId"])
+		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
 		)
 
 		reportCreatedMessage(report, {
-			community: <any>community,
-			rule: <any>rule,
-			admin: <any>admin,
+			community: <Community>(<unknown>community.toObject()),
+			rule: <Rule>(<unknown>rule.toObject()),
+			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
@@ -352,7 +357,7 @@ export default class ReportController {
 				),
 
 				description: "Revoke a report",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				security: [
 					{
 						authorization: [],
@@ -407,7 +412,9 @@ export default class ReportController {
 			})
 		const revoker = await client.users.fetch(req.body.adminId)
 		const admin = await client.users.fetch(report.adminId)
-		const rule = await RuleModel.findOne({ id: report.brokenRule })!
+		// this is allowed since the rule is GUARANTEED to exist if the report exists
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const rule = await RuleModel.findOne({ id: report.brokenRule })
 
 		await ReportModel.findByIdAndDelete(report._id)
 
@@ -427,17 +434,21 @@ export default class ReportController {
 
 		const allReports = await ReportModel.find({
 			playername: report.playername,
-		}).select(["communityId"])
+		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
 		)
 
 		reportRevokedMessage(revocation, {
-			community: <any>community,
-			rule: <any>rule!,
-			admin: <any>admin,
-			revokedBy: <any>revoker,
+			community: <Community>(<unknown>community),
+			// this is allowed since the rule is GUARANTEED to exist if the report exists
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			rule: <Rule>(<unknown>rule!),
+			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
+			revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
+				(<unknown>revoker)
+			),
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
@@ -456,7 +467,7 @@ export default class ReportController {
 				),
 
 				description: "Revoke all report of a player in your community",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				security: [
 					{
 						authorization: [],
@@ -546,7 +557,7 @@ export default class ReportController {
 
 		const allReports = await ReportModel.find({
 			playername: playername,
-		}).select(["communityId"])
+		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
@@ -554,10 +565,14 @@ export default class ReportController {
 
 		revocations.forEach((revocation) =>
 			reportRevokedMessage(revocation, {
-				community: <any>community,
-				rule: <any>RuleMap.get(revocation.brokenRule)!,
-				admin: <any>admin,
-				revokedBy: <any>revoker,
+				community: <ReportMessageExtraOpts["community"]>(
+					(<unknown>community.toObject())
+				),
+				// this is allowed since the rule is GUARANTEED to exist if the report exists
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
+				admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
+				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
 			})

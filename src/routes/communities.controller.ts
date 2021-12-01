@@ -21,6 +21,7 @@ import RevocationModel from "../database/fagc/revocation.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import AuthModel from "../database/fagc/authentication.js"
 import cryptoRandomString from "crypto-random-string"
+import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -28,7 +29,7 @@ export default class CommunityController {
 		url: "/",
 		options: {
 			schema: {
-				tags: ["community"],
+				tags: [ "community" ],
 				response: {
 					"200": {
 						type: "array",
@@ -57,7 +58,7 @@ export default class CommunityController {
 						id: Type.String(),
 					})
 				),
-				tags: ["community"],
+				tags: [ "community" ],
 				response: {
 					"200": {
 						allOf: [
@@ -86,7 +87,7 @@ export default class CommunityController {
 		url: "/getown",
 		options: {
 			schema: {
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -121,7 +122,7 @@ export default class CommunityController {
 						guildId: Type.String(),
 					})
 				),
-				tags: ["community"],
+				tags: [ "community" ],
 				response: {
 					"200": {
 						allOf: [
@@ -150,7 +151,7 @@ export default class CommunityController {
 		url: "/guildconfig",
 		options: {
 			schema: {
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -199,7 +200,7 @@ export default class CommunityController {
 						})
 					),
 				}),
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -325,7 +326,7 @@ export default class CommunityController {
 						name: Type.Optional(Type.String()),
 					})
 				),
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -437,7 +438,7 @@ export default class CommunityController {
 				}),
 
 				description: "Create a FAGC community",
-				tags: ["community", "master"],
+				tags: [ "community", "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -488,7 +489,7 @@ export default class CommunityController {
 		const community = await CommunityModel.create({
 			name: name,
 			contact: contact,
-			guildIds: guildId ? [guildId] : [],
+			guildIds: guildId ? [ guildId ] : [],
 		})
 
 		if (guildId) {
@@ -509,7 +510,9 @@ export default class CommunityController {
 		const contactUser = await client.users.fetch(contact)
 
 		communityCreatedMessage(community, {
-			contact: <any>contactUser,
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			),
 		})
 
 		return res.send({
@@ -529,7 +532,7 @@ export default class CommunityController {
 				),
 
 				description: "Delete a FAGC community",
-				tags: ["community", "master"],
+				tags: [ "community", "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -585,7 +588,9 @@ export default class CommunityController {
 
 		const contactUser = await client.users.fetch(community.contact)
 		communityRemovedMessage(community, {
-			contact: <any>contactUser,
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			),
 		})
 
 		return res.send(true)
@@ -602,7 +607,7 @@ export default class CommunityController {
 				),
 
 				description: "Delete a FAGC community",
-				tags: ["community", "master"],
+				tags: [ "community", "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -629,7 +634,7 @@ export default class CommunityController {
 			guildId: guildId,
 		})
 		const communityConfig = await CommunityModel.findOne({
-			guildIDs: [guildId],
+			guildIDs: [ guildId ],
 		})
 		if (communityConfig) {
 			communityConfig.guildIds = communityConfig.guildIds.filter(

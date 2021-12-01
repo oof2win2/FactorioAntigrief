@@ -28,13 +28,13 @@ class Roles {
 })
 export class GuildConfigClass {
 	@prop()
-	communityId?: string
+		communityId?: string
 
 	@prop()
-	guildId!: string
+		guildId!: string
 
 	@prop()
-	apikey?: string
+		apikey?: string
 
 	@prop({
 		type: () =>
@@ -46,13 +46,13 @@ export class GuildConfigClass {
 				setCommunities: String,
 			}),
 	})
-	roles!: Roles
+		roles!: Roles
 
-	@prop({ type: [String] })
-	trustedCommunities?: string[]
+	@prop({ type: [ String ] })
+		trustedCommunities?: string[]
 
-	@prop({ type: [String] })
-	ruleFilters?: string[]
+	@prop({ type: [ String ] })
+		ruleFilters?: string[]
 }
 
 const GuildConfigModel = getModelForClass(GuildConfigClass)

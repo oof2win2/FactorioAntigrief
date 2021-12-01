@@ -6,9 +6,9 @@ import ENV from "../utils/env.js"
 class ConnectionManager {
 	connections: (
 		| {
-				c: typeof import("mongoose")
-				n: string
-		  }
+			c: typeof import("mongoose")
+			n: string
+		}
 		| undefined
 	)[]
 	constructor(config: ApiConfig) {

@@ -1,8 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-import { Controller, DELETE, GET, POST } from "fastify-decorators"
+import { Controller, DELETE, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
-import LogModel from "../database/fagc/log.js"
 import { MessageEmbed, Webhook, WebhookClient } from "discord.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import { client } from "../utils/discord.js"
@@ -65,7 +64,7 @@ export default class ProfileController {
 				),
 
 				description: "Add a webhook to FAGC notifications",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				response: {
 					"200": {
 						$ref: "WebhookClass#",
@@ -125,7 +124,7 @@ export default class ProfileController {
 				),
 
 				description: "Remove a webhook from FAGC notifications",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				response: {
 					"200": {
 						$ref: "WebhookClass#",
@@ -179,7 +178,7 @@ export default class ProfileController {
 
 				description:
 					"Notify a guild with a text message sent with [Message](https://discord.js.org/#/docs/main/stable/class/Message)",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -231,7 +230,7 @@ export default class ProfileController {
 
 				description:
 					"Notify a guild with a [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed)",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -258,7 +257,7 @@ export default class ProfileController {
 				.fetchWebhook(savedWebhook.id, savedWebhook.token)
 				.catch()
 			if (webhook) {
-				webhook.send({ embeds: [new MessageEmbed(req.body)] })
+				webhook.send({ embeds: [ new MessageEmbed(req.body) ] })
 			}
 		}
 
