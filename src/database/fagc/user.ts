@@ -1,10 +1,10 @@
-import {
+import typegoose, { Ref } from "@typegoose/typegoose"
+const {
 	getModelForClass,
 	modelOptions,
 	pre,
 	prop,
-	Ref,
-} from "@typegoose/typegoose"
+} = typegoose
 import database from "../database.js"
 import { getUserStringFromID } from "../../utils/functions-databaseless.js"
 

@@ -1,9 +1,10 @@
-import {
+import typegoose from "@typegoose/typegoose"
+const {
 	getModelForClass,
 	modelOptions,
 	Passthrough,
 	prop,
-} from "@typegoose/typegoose"
+} = typegoose
 import database from "../database.js"
 
 const connection = database.connections.find(
