@@ -114,9 +114,7 @@ export default class ProfileController {
 		})
 		user.apiAccess.push(apiAccess._id)
 		await user.save()
-		return res
-			.status(200)
-			.send(await user.populate("apiAccess").execPopulate())
+		return res.status(200).send(await user.populate("apiAccess"))
 	}
 	@DELETE({
 		url: "/removeUserFromCommunity/:discordUserId",
@@ -186,9 +184,7 @@ export default class ProfileController {
 			(access) => access !== apiAccess._id
 		)
 		await user.save()
-		return res
-			.status(200)
-			.send(await user.populate("apiAccess").execPopulate())
+		return res.status(200).send(await user.populate("apiAccess"))
 	}
 
 	// this is a GET because it doesnt need to be a POST
