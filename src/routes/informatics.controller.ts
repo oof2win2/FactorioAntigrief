@@ -1,8 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-import { Controller, DELETE, GET, POST } from "fastify-decorators"
+import { Controller, DELETE, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
-import LogModel from "../database/fagc/log.js"
 import { MessageEmbed, Webhook, WebhookClient } from "discord.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import { client } from "../utils/discord.js"

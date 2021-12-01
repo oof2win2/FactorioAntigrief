@@ -9,7 +9,12 @@ import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import { validateDiscordUser, client } from "../utils/discord.js"
 import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
-import { Community } from "fagc-api-types"
+import {
+	Community,
+	Rule,
+	ReportMessageExtraOpts,
+	RevocationMessageExtraOpts,
+} from "fagc-api-types"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -192,7 +197,7 @@ export default class ReportController {
 			}
 		}>,
 		res: FastifyReply
-	) {
+	): Promise<FastifyReply> {
 		const { timestamp } = req.params
 
 		const date = new Date(timestamp)
@@ -306,9 +311,9 @@ export default class ReportController {
 		)
 
 		reportCreatedMessage(report, {
-			community: <any>community,
-			rule: <any>rule,
-			admin: <any>admin,
+			community: <Community>(<unknown>community.toObject()),
+			rule: <Rule>(<unknown>rule.toObject()),
+			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
@@ -382,7 +387,9 @@ export default class ReportController {
 			})
 		const revoker = await client.users.fetch(req.body.adminId)
 		const admin = await client.users.fetch(report.adminId)
-		const rule = await RuleModel.findOne({ id: report.brokenRule })!
+		// this is allowed since the rule is GUARANTEED to exist if the report exists
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const rule = await RuleModel.findOne({ id: report.brokenRule })
 
 		await ReportModel.findByIdAndDelete(report._id)
 
@@ -409,10 +416,14 @@ export default class ReportController {
 		)
 
 		reportRevokedMessage(revocation, {
-			community: <any>community,
-			rule: <any>rule!,
-			admin: <any>admin,
-			revokedBy: <any>revoker,
+			community: <Community>(<unknown>community),
+			// this is allowed since the rule is GUARANTEED to exist if the report exists
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			rule: <Rule>(<unknown>rule!),
+			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
+			revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
+				(<unknown>revoker)
+			),
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
@@ -529,10 +540,18 @@ export default class ReportController {
 
 		revocations.forEach((revocation) =>
 			reportRevokedMessage(revocation, {
-				community: <any>community,
-				rule: <any>RuleMap.get(revocation.brokenRule)!,
-				admin: <any>admin,
-				revokedBy: <any>revoker,
+				community: <ReportMessageExtraOpts["community"]>(
+					(<unknown>community.toObject())
+				),
+				// this is allowed since the rule is GUARANTEED to exist if the report exists
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				rule: <ReportMessageExtraOpts["rule"]>(
+					(<unknown>RuleMap.get(revocation.brokenRule)!)
+				),
+				admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
+				revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
+					(<unknown>revoker)
+				),
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
 			})

@@ -7,9 +7,8 @@
 	"scripts": {
 		"start": "ts-node ./src/app.ts",
 		"dev": "nodemon ./dist/app.ts",
-		"lint": "npm run eslint && npm run prettier",
+		"lint": "npm run eslint",
 		"eslint": "eslint src/ --fix --ext .ts",
-		"prettier": "prettier --write .",
 		"postinstall": "install-types",
 		"pm2:build": "tsc",
 		"pm2:start": "pm2 start pm2.config.js",
@@ -72,14 +71,13 @@
 		"@types/nodemon": "^1.19.1",
 		"@types/prettier": "^2.4.1",
 		"@types/ws": "^7.4.6",
-		"@typescript-eslint/eslint-plugin": "^4.31.0",
-		"@typescript-eslint/parser": "^4.31.0",
+		"@typescript-eslint/eslint-plugin": "^4.33.0",
+		"@typescript-eslint/parser": "^4.33.0",
 		"eslint-config-prettier": "^8.3.0",
 		"husky": "^7.0.2",
 		"install-types": "^2.0.1",
 		"lint-staged": "^11.1.2",
 		"nodemon": "^2.0.12",
-		"prettier": "2.4.1",
 		"typescript": "^4.4.3"
 	}
 }

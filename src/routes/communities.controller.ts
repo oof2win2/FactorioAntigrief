@@ -21,6 +21,7 @@ import RevocationModel from "../database/fagc/revocation.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import AuthModel from "../database/fagc/authentication.js"
 import cryptoRandomString from "crypto-random-string"
+import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -509,7 +510,9 @@ export default class CommunityController {
 		const contactUser = await client.users.fetch(contact)
 
 		communityCreatedMessage(community, {
-			contact: <any>contactUser,
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			),
 		})
 
 		return res.send({
@@ -585,7 +588,9 @@ export default class CommunityController {
 
 		const contactUser = await client.users.fetch(community.contact)
 		communityRemovedMessage(community, {
-			contact: <any>contactUser,
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			),
 		})
 
 		return res.send(true)

@@ -3,14 +3,12 @@ import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import UserModel, {
-	ApiAccessClass,
 	ApiAccessModel,
 	UserAuthModel,
 } from "../database/fagc/user.js"
 import { OAUTHSCOPES } from "../consts.js"
 import { Authenticate } from "../utils/authentication.js"
 import GuildConfigModel from "../database/bot/community.js"
-import cryptoRandomString from "crypto-random-string"
 
 @Controller({ route: "/users" })
 export default class ProfileController {
@@ -31,7 +29,7 @@ export default class ProfileController {
 			Params: { discordUserId: string }
 		}>,
 		res: FastifyReply
-	) {
+	): Promise<FastifyReply> {
 		const { discordUserId } = req.params
 		const user = await UserModel.findOne({
 			discordUserId: discordUserId,
@@ -189,7 +187,10 @@ export default class ProfileController {
 
 	// this is a GET because it doesnt need to be a POST
 	@GET({ url: "/login" })
-	async loginUser(req: FastifyRequest, res: FastifyReply) {
+	async loginUser(
+		req: FastifyRequest,
+		res: FastifyReply
+	): Promise<FastifyReply> {
 		const userId = req.session.get("userId")
 		if (userId) {
 			const user = await UserModel.findOne({ _id: userId })
@@ -199,7 +200,10 @@ export default class ProfileController {
 	}
 
 	@GET({ url: "/signupurl" })
-	async Oauth2URL(req: FastifyRequest, res: FastifyReply) {
+	async Oauth2URL(
+		req: FastifyRequest,
+		res: FastifyReply
+	): Promise<FastifyReply> {
 		// const state = cryptoRandomString({ length: 8 })
 		// req.session.set("state", state)
 		return res.send({
@@ -233,7 +237,7 @@ export default class ProfileController {
 			}
 		}>,
 		res: FastifyReply
-	) {
+	): Promise<FastifyReply> {
 		if (req.session.get("userId")) {
 			const user = await UserModel.findOne({
 				_id: req.session.get("userId"),
@@ -241,7 +245,7 @@ export default class ProfileController {
 			return res.send(user)
 		}
 
-		const { code, state } = req.query
+		const { code } = req.query
 		// if (state !== req.session.get("state"))
 		// 	return res.status(400).send({
 		// 		errorCode: 400,

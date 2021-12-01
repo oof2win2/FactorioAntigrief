@@ -8,7 +8,7 @@ import { fastifyRequestContextPlugin } from "fastify-request-context"
 import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
 import ENV from "./utils/env.js"
-import { DocumentType, mongoose } from "@typegoose/typegoose"
+import { DocumentType } from "@typegoose/typegoose"
 import CommunityModel, { CommunityClass } from "./database/fagc/community.js"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
@@ -16,6 +16,7 @@ import { OAuth2Client } from "./utils/discord.js"
 import removeIdMiddleware from "./utils/removeId.js"
 import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
 import * as Sentry from "@sentry/node"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from "@sentry/tracing"
 import fastifyCookie from "fastify-cookie"
 import fastifySession from "@mgcrea/fastify-session"
@@ -215,6 +216,7 @@ fastify.register(fastifySession, {
 			? ENV.SESSION_DBPATH
 			: ENV.SESSION_DBPATH + ".sqlite",
 	}),
+	crypto: SODIUM_SECRETBOX,
 	secret: ENV.SESSIONSECRET,
 	cookie: { maxAge: ENV.SESSION_TTL },
 })
@@ -244,21 +246,17 @@ fastify.setErrorHandler(async (error, request, reply) => {
 		console.log(error, error.validation)
 		// Sending error to be logged in Sentry
 		Sentry.captureException(error)
-		reply
-			.status(500)
-			.send({
-				errorCode: 500,
-				error: "Something went wrong",
-				message: error.message,
-			})
+		reply.status(500).send({
+			errorCode: 500,
+			error: "Something went wrong",
+			message: error.message,
+		})
 	} else {
-		reply
-			.status(400)
-			.send({
-				errorCode: 400,
-				error: "Invalid request",
-				message: error.message,
-			})
+		reply.status(400).send({
+			errorCode: 400,
+			error: "Invalid request",
+			message: error.message,
+		})
 	}
 })
 

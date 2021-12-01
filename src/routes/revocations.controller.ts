@@ -2,11 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
-import ReportModel, { ReportClass } from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
-import { Profile } from "fagc-api-types"
-import { DocumentType } from "@typegoose/typegoose"
-import { BeAnObject } from "@typegoose/typegoose/lib/types"
 
 @Controller({ route: "/revocations" })
 export default class ProfileController {
@@ -121,7 +117,7 @@ export default class ProfileController {
 			}
 		}>,
 		res: FastifyReply
-	) {
+	): Promise<FastifyReply> {
 		const { timestamp } = req.params
 
 		const date = new Date(timestamp)

@@ -1,4 +1,4 @@
-import { WebhookClient, MessageEmbed, User } from "discord.js"
+import { WebhookClient, MessageEmbed } from "discord.js"
 import WebhookSchema from "../database/fagc/webhook.js"
 import WebSocket from "ws"
 import ENV from "./env.js"
