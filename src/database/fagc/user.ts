@@ -24,17 +24,17 @@ const connection = database.connections.find(
 })
 export class ApiAccessClass {
 	@prop()
-	communityId!: string
+		communityId!: string
 	@prop()
-	discordUserId!: string
+		discordUserId!: string
 	@prop()
-	discordGuildId!: string
+		discordGuildId!: string
 	@prop({ default: false })
-	reports!: boolean
+		reports!: boolean
 	@prop({ default: false })
-	config!: boolean
+		config!: boolean
 	@prop({ default: false })
-	notifications!: boolean
+		notifications!: boolean
 }
 export const ApiAccessModel = getModelForClass(ApiAccessClass)
 
@@ -50,16 +50,16 @@ export const ApiAccessModel = getModelForClass(ApiAccessClass)
 })
 export class UserAuthClass {
 	@prop({ required: true })
-	discordUserId!: string
+		discordUserId!: string
 
 	@prop({ required: true })
-	access_token!: string
+		access_token!: string
 
 	@prop({ required: true })
-	expires_at!: Date
+		expires_at!: Date
 
 	@prop({ required: true })
-	refresh_token!: string
+		refresh_token!: string
 }
 export const UserAuthModel = getModelForClass(UserAuthClass)
 
@@ -75,26 +75,26 @@ export const UserAuthModel = getModelForClass(UserAuthClass)
 })
 export class UserClass {
 	@prop({ required: true })
-	discordUserId!: string
+		discordUserId!: string
 
 	@prop({ required: true })
-	discordUserTag!: string
+		discordUserTag!: string
 
-	@prop({ default: [], type: [String] })
-	discordGuildIds!: string[]
+	@prop({ default: [], type: [ String ] })
+		discordGuildIds!: string[]
 
 	// the list of community ids where the user has api access
 	@prop({
 		default: [],
 		ref: ApiAccessClass,
 	})
-	apiAccess!: Ref<ApiAccessClass>[]
+		apiAccess!: Ref<ApiAccessClass>[]
 
-	@prop({ default: [], type: [String] })
-	communityOwner!: string[]
+	@prop({ default: [], type: [ String ] })
+		communityOwner!: string[]
 
 	@prop({ ref: () => UserAuthClass, required: true })
-	userAuth!: Ref<UserAuthClass>
+		userAuth!: Ref<UserAuthClass>
 }
 
 const UserModel = getModelForClass(UserClass)

@@ -18,13 +18,13 @@ const connection = database.connections.find(
 })
 export class RuleClass {
 	@prop({ _id: false })
-	id!: string
+		id!: string
 
 	@prop()
-	shortdesc!: string
+		shortdesc!: string
 
 	@prop()
-	longdesc!: string
+		longdesc!: string
 }
 
 const RuleModel = getModelForClass(RuleClass)

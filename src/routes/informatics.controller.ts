@@ -64,7 +64,7 @@ export default class ProfileController {
 				),
 
 				description: "Add a webhook to FAGC notifications",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				response: {
 					"200": {
 						$ref: "WebhookClass#",
@@ -124,7 +124,7 @@ export default class ProfileController {
 				),
 
 				description: "Remove a webhook from FAGC notifications",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				response: {
 					"200": {
 						$ref: "WebhookClass#",
@@ -178,7 +178,7 @@ export default class ProfileController {
 
 				description:
 					"Notify a guild with a text message sent with [Message](https://discord.js.org/#/docs/main/stable/class/Message)",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -230,7 +230,7 @@ export default class ProfileController {
 
 				description:
 					"Notify a guild with a [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed)",
-				tags: ["informatics"],
+				tags: [ "informatics" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -257,7 +257,7 @@ export default class ProfileController {
 				.fetchWebhook(savedWebhook.id, savedWebhook.token)
 				.catch()
 			if (webhook) {
-				webhook.send({ embeds: [new MessageEmbed(req.body)] })
+				webhook.send({ embeds: [ new MessageEmbed(req.body) ] })
 			}
 		}
 

@@ -29,7 +29,7 @@ export default class CommunityController {
 		url: "/",
 		options: {
 			schema: {
-				tags: ["community"],
+				tags: [ "community" ],
 				response: {
 					"200": {
 						type: "array",
@@ -58,7 +58,7 @@ export default class CommunityController {
 						id: Type.String(),
 					})
 				),
-				tags: ["community"],
+				tags: [ "community" ],
 				response: {
 					"200": {
 						allOf: [
@@ -87,7 +87,7 @@ export default class CommunityController {
 		url: "/getown",
 		options: {
 			schema: {
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -122,7 +122,7 @@ export default class CommunityController {
 						guildId: Type.String(),
 					})
 				),
-				tags: ["community"],
+				tags: [ "community" ],
 				response: {
 					"200": {
 						allOf: [
@@ -151,7 +151,7 @@ export default class CommunityController {
 		url: "/guildconfig",
 		options: {
 			schema: {
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -200,7 +200,7 @@ export default class CommunityController {
 						})
 					),
 				}),
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -326,7 +326,7 @@ export default class CommunityController {
 						name: Type.Optional(Type.String()),
 					})
 				),
-				tags: ["community"],
+				tags: [ "community" ],
 				security: [
 					{
 						authorization: [],
@@ -438,7 +438,7 @@ export default class CommunityController {
 				}),
 
 				description: "Create a FAGC community",
-				tags: ["community", "master"],
+				tags: [ "community", "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -489,7 +489,7 @@ export default class CommunityController {
 		const community = await CommunityModel.create({
 			name: name,
 			contact: contact,
-			guildIds: guildId ? [guildId] : [],
+			guildIds: guildId ? [ guildId ] : [],
 		})
 
 		if (guildId) {
@@ -532,7 +532,7 @@ export default class CommunityController {
 				),
 
 				description: "Delete a FAGC community",
-				tags: ["community", "master"],
+				tags: [ "community", "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -607,7 +607,7 @@ export default class CommunityController {
 				),
 
 				description: "Delete a FAGC community",
-				tags: ["community", "master"],
+				tags: [ "community", "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -634,7 +634,7 @@ export default class CommunityController {
 			guildId: guildId,
 		})
 		const communityConfig = await CommunityModel.findOne({
-			guildIDs: [guildId],
+			guildIDs: [ guildId ],
 		})
 		if (communityConfig) {
 			communityConfig.guildIds = communityConfig.guildIds.filter(

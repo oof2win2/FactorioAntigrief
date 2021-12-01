@@ -55,7 +55,7 @@ const SwaggerDefinitions = {}
 
 const swaggerDefOpts = {
 	// omitFields: ["_id"],
-	props: ["id"],
+	props: [ "id" ],
 }
 const communityModelSwagger = mongooseToSwagger(CommunityModel, swaggerDefOpts)
 SwaggerDefinitions[communityModelSwagger.title] = communityModelSwagger
@@ -180,7 +180,7 @@ fastify.register(fastifyCorsPlugin, {
 fastify.register(fastifyRateLimitPlugin, {
 	max: 100,
 	timeWindow: 1000 * 60, // 100 reqs in 60s
-	allowList: ["::ffff:127.0.0.1", "::1", "127.0.0.1"],
+	allowList: [ "::ffff:127.0.0.1", "::1", "127.0.0.1" ],
 })
 
 // context

@@ -18,7 +18,7 @@ export default class ProfileController {
 				),
 
 				description: "Fetch all revocations of a player in a community",
-				tags: ["revocation"],
+				tags: [ "revocation" ],
 				response: {
 					"200": {
 						type: "array",
@@ -58,7 +58,7 @@ export default class ProfileController {
 				),
 
 				description: "Fetch all revocations of a player",
-				tags: ["revocation"],
+				tags: [ "revocation" ],
 				response: {
 					"200": {
 						type: "array",
@@ -98,7 +98,7 @@ export default class ProfileController {
 
 				description:
 					"Fetch all revocations of a player modified since a timestamp",
-				tags: ["revocation"],
+				tags: [ "revocation" ],
 				response: {
 					"200": {
 						type: "array",

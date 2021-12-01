@@ -13,7 +13,7 @@ export default class RuleController {
 		options: {
 			schema: {
 				description: "Fetch all rules",
-				tags: ["rules"],
+				tags: [ "rules" ],
 				response: {
 					"200": {
 						type: "array",
@@ -44,10 +44,10 @@ export default class RuleController {
 				),
 
 				description: "Fetch a rule by ID",
-				tags: ["rules"],
+				tags: [ "rules" ],
 				response: {
 					"200": {
-						allOf: [{ nullable: true }, { $ref: "RuleClass#" }],
+						allOf: [ { nullable: true }, { $ref: "RuleClass#" } ],
 					},
 				},
 			},
@@ -78,7 +78,7 @@ export default class RuleController {
 				),
 
 				description: "Create a rule",
-				tags: ["rules"],
+				tags: [ "rules" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -122,7 +122,7 @@ export default class RuleController {
 				),
 
 				description: "Remove a rule",
-				tags: ["rules"],
+				tags: [ "rules" ],
 				security: [
 					{
 						masterAuthorization: [],

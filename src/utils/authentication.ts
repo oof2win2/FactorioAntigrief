@@ -6,19 +6,19 @@ import CommunityModel from "../database/fagc/community.js"
 export const Authenticate = <
 	T extends RouteGenericInterface = RouteGenericInterface
 >(
-	_target: unknown,
-	_propertyKey: unknown,
-	descriptor: TypedPropertyDescriptor<
+		_target: unknown,
+		_propertyKey: unknown,
+		descriptor: TypedPropertyDescriptor<
 		(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
 	>
-): TypedPropertyDescriptor<
+	): TypedPropertyDescriptor<
 	(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
 > => {
 	// a bit of magic to get the request and response
 	const originalRoute = descriptor.value
 	if (!originalRoute) return descriptor
 	descriptor.value = async (...args) => {
-		const [req, res] = args
+		const [ req, res ] = args
 		const auth = req.headers["authorization"]
 		// if no api key is provided then they are definitely not authed
 		if (!auth)
@@ -63,18 +63,18 @@ export const Authenticate = <
 export const MasterAuthenticate = <
 	T extends RouteGenericInterface = RouteGenericInterface
 >(
-	_target: unknown,
-	_propertyKey: unknown,
-	descriptor: TypedPropertyDescriptor<
+		_target: unknown,
+		_propertyKey: unknown,
+		descriptor: TypedPropertyDescriptor<
 		(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
 	>
-): TypedPropertyDescriptor<
+	): TypedPropertyDescriptor<
 	(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
 > => {
 	const originalRoute = descriptor.value
 	if (!originalRoute) return descriptor
 	descriptor.value = async (...args) => {
-		const [req, res] = args
+		const [ req, res ] = args
 		// return originalRoute.apply(this, args)
 		const auth = req.headers["authorization"]
 		if (!auth)

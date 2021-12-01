@@ -18,12 +18,12 @@ collectDefaultMetrics({ register })
 const communityGauge = new promClient.Gauge({
 	name: "community_trust_count",
 	help: "Amount of communities that trust this community",
-	labelNames: ["id", "name", "contact"],
+	labelNames: [ "id", "name", "contact" ],
 })
 const ruleGauge = new promClient.Gauge({
 	name: "rule_trust_count",
 	help: "Amount of communities that trust this rule",
-	labelNames: ["id", "shortdesc"],
+	labelNames: [ "id", "shortdesc" ],
 })
 
 register.registerMetric(communityGauge)

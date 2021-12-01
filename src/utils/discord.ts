@@ -4,7 +4,7 @@ import ENV from "./env.js"
 
 // this is so that the client can be accessed from any file
 export const client = new Client({
-	intents: ["GUILD_MEMBERS", "GUILDS"],
+	intents: [ "GUILD_MEMBERS", "GUILDS" ],
 })
 client.login(ENV.DISCORD_BOTTOKEN)
 

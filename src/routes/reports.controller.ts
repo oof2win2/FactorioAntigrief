@@ -30,10 +30,10 @@ export default class ReportController {
 				),
 
 				description: "Fetch a report by it's ID",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
-						allOf: [{ nullable: true }, { $ref: "ReportClass#" }],
+						allOf: [ { nullable: true }, { $ref: "ReportClass#" } ],
 					},
 				},
 			},
@@ -63,7 +63,7 @@ export default class ReportController {
 				),
 
 				description: "Fetch a report by it's broken rule ID",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -98,7 +98,7 @@ export default class ReportController {
 				),
 
 				description: "Fetch reports by their player name",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -140,7 +140,7 @@ export default class ReportController {
 
 				description:
 					"Fetch reports by their player name and community ID",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -179,7 +179,7 @@ export default class ReportController {
 				),
 
 				description: "Fetch reports modified since a timestamp",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				response: {
 					"200": {
 						type: "array",
@@ -228,7 +228,7 @@ export default class ReportController {
 				),
 
 				description: "Create a report",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				security: [
 					{
 						authorization: [],
@@ -302,7 +302,7 @@ export default class ReportController {
 				error: "Bad Request",
 				message: "Your community does not have a community config",
 			})
-		let foundRuleFilter = communityConfigs.find((config) => {
+		const foundRuleFilter = communityConfigs.find((config) => {
 			return (
 				config.ruleFilters?.length &&
 				config.ruleFilters.indexOf(rule.id) !== -1
@@ -329,7 +329,7 @@ export default class ReportController {
 
 		const allReports = await ReportModel.find({
 			playername: playername,
-		}).select(["communityId"])
+		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
@@ -357,7 +357,7 @@ export default class ReportController {
 				),
 
 				description: "Revoke a report",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				security: [
 					{
 						authorization: [],
@@ -434,7 +434,7 @@ export default class ReportController {
 
 		const allReports = await ReportModel.find({
 			playername: report.playername,
-		}).select(["communityId"])
+		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
@@ -467,7 +467,7 @@ export default class ReportController {
 				),
 
 				description: "Revoke all report of a player in your community",
-				tags: ["reports"],
+				tags: [ "reports" ],
 				security: [
 					{
 						authorization: [],
@@ -557,7 +557,7 @@ export default class ReportController {
 
 		const allReports = await ReportModel.find({
 			playername: playername,
-		}).select(["communityId"])
+		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
@@ -570,13 +570,9 @@ export default class ReportController {
 				),
 				// this is allowed since the rule is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				rule: <ReportMessageExtraOpts["rule"]>(
-					(<unknown>RuleMap.get(revocation.brokenRule)!)
-				),
+				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
 				admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
-				revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
-					(<unknown>revoker)
-				),
+				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
 			})

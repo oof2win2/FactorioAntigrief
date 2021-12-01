@@ -9,7 +9,7 @@ export default async function (
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const editResponse = (response: any) => {
-		const removeable = ["_id", "__v", "apikey", "userAuth"]
+		const removeable = [ "_id", "__v", "apikey", "userAuth" ]
 		if (response && response.toObject) response = response.toObject()
 		for (const prop in response) {
 			if (removeable.includes(prop)) {

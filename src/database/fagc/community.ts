@@ -18,16 +18,16 @@ const connection = database.connections.find(
 })
 export class CommunityClass {
 	@prop({ _id: false })
-	id!: string
+		id!: string
 
 	@prop()
-	name!: string
+		name!: string
 
 	@prop()
-	contact!: string
+		contact!: string
 
-	@prop({ type: [String] })
-	guildIds!: string[]
+	@prop({ type: [ String ] })
+		guildIds!: string[]
 }
 
 const CommunityModel = getModelForClass(CommunityClass)

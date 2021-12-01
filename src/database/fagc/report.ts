@@ -19,34 +19,34 @@ const connection = database.connections.find(
 })
 export class ReportClass {
 	@prop({ _id: false })
-	id!: string
+		id!: string
 
 	@prop()
-	playername!: string
+		playername!: string
 
 	@prop()
-	communityId!: string
+		communityId!: string
 
 	@prop()
-	brokenRule!: string
+		brokenRule!: string
 
 	@prop()
-	proof!: string
+		proof!: string
 
 	@prop()
-	description!: string
+		description!: string
 
 	@prop()
-	automated!: boolean
+		automated!: boolean
 
 	@prop()
-	reportedTime!: Date
+		reportedTime!: Date
 
 	@prop()
-	adminId!: string
+		adminId!: string
 
 	@prop()
-	createdAt!: Date
+		createdAt!: Date
 }
 
 const ReportModel = getModelForClass(ReportClass)
