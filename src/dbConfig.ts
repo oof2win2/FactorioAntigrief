@@ -1,5 +1,5 @@
 import { ConnectOptions } from "mongoose"
-import ENV from "./utils/env"
+import ENV from "./utils/env.js"
 
 // This file is NOT for private stuff, rather for database config
 
