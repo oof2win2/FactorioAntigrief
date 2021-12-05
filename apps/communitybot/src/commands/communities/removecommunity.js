@@ -30,6 +30,8 @@ class AddCommunityFilter extends Command {
 		})
 	}
 	async run(message, args, config) {
+		if (!config.trustedCommunities?.length)
+			return message.channel.send("You have not set any trusted communities")
 		if (!args[0]) {
 			const communities = await this.client.fagc.communities.fetchAll()
 			let embed = new MessageEmbed()
@@ -39,15 +41,17 @@ class AddCommunityFilter extends Command {
 				.setAuthor("FAGC Community")
 				.setDescription("All FAGC Communities")
 			const fields = await Promise.all(
-				communities.map(async (community) => {
-					const user = await this.client.users.fetch(
-						community.contact
-					)
-					return {
-						name: `${community.name} | \`${community.id}\``,
-						value: `Contact: <@${user.id}> | ${user.tag}`,
-					}
-				})
+				communities
+					.filter((r) => config.trustedCommunities.includes(r.id))
+					.map(async (community) => {
+						const user = await this.client.users.fetch(
+							community.contact
+						)
+						return {
+							name: `${community.name} | \`${community.id}\``,
+							value: `Contact: <@${user.id}> | ${user.tag}`,
+						}
+					})
 			)
 			createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
 			const newIDsMessage = await getMessageResponse(
