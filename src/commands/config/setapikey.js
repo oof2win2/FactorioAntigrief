@@ -83,7 +83,7 @@ class SetAPIKey extends Command {
 			).then((c) => c.toObject())
 			if (config.apikey && config.guildId === message.guild.id) {
 				this.client.users
-					.fetch(config.contact)
+					.fetch(community.contact)
 					.then((owner) =>
 						owner?.send(
 							`${this.client.emotes.success} User ${message.author} (${message.author.tag}) has set your API key to ||${apikey}||`

@@ -87,10 +87,11 @@ class FAGCBot extends Client {
 	}
 
 	async saveGuildConfig(config) {
-		if (config.apikey)
+		if (config.apikey) {
 			return this.fagc.communities.setGuildConfig(config, {
 				apikey: config.apikey,
 			})
+		}
 		const newConfig = await ConfigModel.findOneAndUpdate(
 			{ guildId: config.guildId },
 			config,
