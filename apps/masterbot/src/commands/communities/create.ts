@@ -20,12 +20,6 @@ const CreateCommunity: SubCommand = {
 				.setDescription("Community contact or owner")
 				.setRequired(true)
 		)
-		.addStringOption(option =>
-			option
-				.setName("guildid")
-				.setDescription("Guild ID of the guild the community is in")
-				.setRequired(false)
-		)
 	,
 	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
 		const user = interaction.user
@@ -33,9 +27,8 @@ const CreateCommunity: SubCommand = {
 
 		const name = interaction.options.getString("name")!
 		const contact = interaction.options.getUser("contact")!
-		const guildId = interaction.options.getString("guildid")!
 		try {
-			const community = await client.FAGC.communities.create(name, contact.id, guildId)
+			const community = await client.FAGC.communities.create(name, contact.id)
 			if (community.community) {
 				contact.send(`You have created a new community ${name} (\`${community.community.id}\`). Your API key is \`${community.apiKey}\``)
 				interaction.reply({
