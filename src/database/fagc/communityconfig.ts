@@ -18,7 +18,7 @@ class Roles {
 
 @modelOptions({
 	schemaOptions: {
-		collection: "configs",
+		collection: "guildconfigs",
 	},
 })
 export class GuildConfigClass {
