@@ -1,13 +1,15 @@
 import path from "path"
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
+import ENV from "./utils/env.js"
+
+import mongoose from "mongoose"
 import Fastify, { FastifyInstance } from "fastify"
 import fastifyCorsPlugin from "fastify-cors"
 import fastifyRateLimitPlugin from "fastify-rate-limit"
 import { fastifyRequestContextPlugin } from "fastify-request-context"
 import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
-import ENV from "./utils/env.js"
 import { DocumentType } from "@typegoose/typegoose"
 import CommunityModel, { CommunityClass } from "./database/fagc/community.js"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
@@ -28,7 +30,9 @@ import RevocationModel from "./database/fagc/revocation.js"
 import RuleModel from "./database/fagc/rule.js"
 import UserModel from "./database/fagc/user.js"
 import WebhookModel from "./database/fagc/webhook.js"
-import GuildConfigModel from "./database/bot/community.js"
+import GuildConfigModel from "./database/fagc/communityconfig.js"
+
+mongoose.connect(ENV.MONGOURI) // connect to db before loading other stuff
 
 const fastify: FastifyInstance = Fastify({
 	logger: false,

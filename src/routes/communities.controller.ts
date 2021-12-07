@@ -5,7 +5,7 @@ import { Type } from "@sinclair/typebox"
 import RuleModel from "../database/fagc/rule.js"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
 import CommunityModel from "../database/fagc/community.js"
-import GuildConfigModel from "../database/bot/community.js"
+import GuildConfigModel from "../database/fagc/communityconfig.js"
 import {
 	communityConfigChanged,
 	communityCreatedMessage,

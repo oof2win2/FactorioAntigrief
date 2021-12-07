@@ -1,17 +1,11 @@
 import typegoose from "@typegoose/typegoose"
 const { getModelForClass, modelOptions, pre, prop } = typegoose
-import database from "../database.js"
 import { getUserStringFromID } from "../../utils/functions-databaseless.js"
-
-const connection = database.connections.find(
-	(connection) => connection?.n === "fagc"
-)?.c
 
 @modelOptions({
 	schemaOptions: {
 		collection: "rules",
 	},
-	existingMongoose: connection,
 })
 @pre<RuleClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
