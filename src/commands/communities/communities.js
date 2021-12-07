@@ -42,7 +42,7 @@ class GetWhitelisted extends Command {
 				}
 			})
 		)
-		createPagedEmbed(fields, embed, message, { maxPageCount: 25 })
+		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
 }
 

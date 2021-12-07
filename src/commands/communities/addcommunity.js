@@ -51,7 +51,7 @@ class AddCommunityFilter extends Command {
 						}
 					})
 			)
-			createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
+			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 			const newIDsMessage = await getMessageResponse(
 				message,
 				`${this.client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces:`

@@ -35,7 +35,7 @@ class GetAll extends Command {
 				}
 			})
 		)
-		createPagedEmbed(fields, embed, message, { maxPageCount: 25 })
+		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
 }
 module.exports = GetAll

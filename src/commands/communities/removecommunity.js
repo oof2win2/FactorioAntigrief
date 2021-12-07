@@ -96,7 +96,7 @@ class AddCommunityFilter extends Command {
 				}
 			})
 		)
-		createPagedEmbed(communityFields, embed, message, { maxPageCount: 25 })
+		createPagedEmbed(communityFields, embed, message, { maxPageCount: 10 })
 
 		const confirm = await getConfirmationMessage(
 			message,
