@@ -497,6 +497,13 @@ export default class CommunityController {
 				error: "Invalid Discord User",
 				message: `${contact} is not a valid Discord user`,
 			})
+		if (validDiscordUser.bot) {
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Invalid Discord User",
+				message: `${contact} is a bot`,
+			})
+		}
 		const validGuild = guildId ? await validateDiscordGuild(guildId) : true
 		if (!validGuild)
 			return res.status(400).send({
@@ -604,6 +611,13 @@ export default class CommunityController {
 				guildId: communityConfig.guildId,
 			})
 		}
+
+		// remove the community ID from any guild configs which may have it
+		await GuildConfigModel.updateMany({
+			trustedCommunities: [ community.id ]
+		}, {
+			$pull: { trustedCommunities: community.id }
+		})
 
 		const contactUser = await client.users.fetch(community.contact)
 		communityRemovedMessage(community, {

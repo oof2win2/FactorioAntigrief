@@ -3,6 +3,7 @@ import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule.js"
+import GuildConfigModel from "../database/fagc/communityconfig.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
 import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info.js"
 
@@ -149,7 +150,17 @@ export default class RuleController {
 		const rule = await RuleModel.findOneAndRemove({
 			id: id,
 		})
-		if (rule) ruleRemovedMessage(rule)
+
+		if (rule) {
+			ruleRemovedMessage(rule)
+			
+			// remove the rule ID from any guild configs which may have it
+			await GuildConfigModel.updateMany({
+				ruleFilters: [ rule.id ]
+			}, {
+				$pull: { ruleFilters: rule.id }
+			})
+		}
 		return res.send(rule)
 	}
 }

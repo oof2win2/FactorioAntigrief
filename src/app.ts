@@ -182,7 +182,7 @@ fastify.register(fastifyCorsPlugin, {
 
 // rate limiting
 fastify.register(fastifyRateLimitPlugin, {
-	max: 100,
+	max: 50,
 	timeWindow: 1000 * 60, // 100 reqs in 60s
 	allowList: [ "::ffff:127.0.0.1", "::1", "127.0.0.1" ],
 })
