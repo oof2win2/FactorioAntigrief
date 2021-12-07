@@ -53,7 +53,6 @@ async function createPagedEmbed(
 	let page = 0
 	// if the amount of pages is 1 then there is actually only one page, f.e. 5/5 = 1 but the program will work with 0, 1
 	let maxPages = Math.floor(fields.length / options.maxPageCount)
-	if (maxPages === 1) maxPages = 0
 	embed.fields = fields.slice(0, options.maxPageCount)
 	let embedMsg = await message.channel.send(embed)
 
