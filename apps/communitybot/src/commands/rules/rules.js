@@ -32,12 +32,14 @@ class GetRulesFiltered extends Command {
 			)
 
 		const filteredRules = await this.client.getFilteredRules(config)
-		const fields = filteredRules.map((rule) => {
-			return {
-				name: `${config.ruleFilters.indexOf(rule.id)+1}) ${rule.shortdesc} (\`${rule.id}\`)`,
-				value: rule.longdesc,
-			}
-		})
+		const fields = filteredRules
+			.sort((a, b) => config.ruleFilters.indexOf(a.id) - config.ruleFilters.indexOf(b.id))
+			.map((rule) => {
+				return {
+					name: `${config.ruleFilters.indexOf(rule.id)+1}) ${rule.shortdesc} (\`${rule.id}\`)`,
+					value: rule.longdesc,
+				}
+			})
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
 }
