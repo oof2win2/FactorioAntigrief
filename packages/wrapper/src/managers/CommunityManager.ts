@@ -5,7 +5,7 @@ import { GenericAPIError, NoAuthError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import { Community, GuildConfig, ApiID } from "fagc-api-types"
 
-type SetGuildConfig = Partial<GuildConfig>
+type SetGuildConfig = Partial<GuildConfig> & Pick<GuildConfig, "guildId">
 type SetCommunityConfig = Partial<Omit<Community, "id">>
 
 export default class CommunityManager extends BaseManager<Community> {
@@ -145,7 +145,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 
-		const update = await fetch(`${this.apiurl}/communities/guildconfig`, {
+		const update = await fetch(`${this.apiurl}/communities/guildconfig/${config.guildId}`, {
 			method: "POST",
 			body: JSON.stringify(config),
 			credentials: "include",
