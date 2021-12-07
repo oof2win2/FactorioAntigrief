@@ -5,11 +5,6 @@ const {
 	Passthrough,
 	prop,
 } = typegoose
-import database from "../database.js"
-
-const connection = database.connections.find(
-	(connection) => connection?.n === "bot"
-)?.c
 
 // the thing from https://github.com/oof2win2/fagc-discord-bot/blob/dev/src/database/schemas/config.js
 
@@ -25,7 +20,6 @@ class Roles {
 	schemaOptions: {
 		collection: "configs",
 	},
-	existingMongoose: connection,
 })
 export class GuildConfigClass {
 	@prop()

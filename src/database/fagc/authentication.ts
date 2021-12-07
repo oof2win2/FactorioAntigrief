@@ -1,15 +1,10 @@
 import typegoose from "@typegoose/typegoose"
 const { getModelForClass, modelOptions, prop } = typegoose
-import database from "../database.js"
-const connection = database.connections.find(
-	(connection) => connection?.n === "fagc"
-)?.c
 
 @modelOptions({
 	schemaOptions: {
 		collection: "authentication",
 	},
-	existingMongoose: connection,
 })
 export class AuthClass {
 	@prop()

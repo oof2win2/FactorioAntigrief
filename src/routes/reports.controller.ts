@@ -15,7 +15,7 @@ import {
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
-import GuildConfigModel from "../database/bot/community.js"
+import GuildConfigModel from "../database/fagc/communityconfig.js"
 
 @Controller({ route: "/reports" })
 export default class ReportController {

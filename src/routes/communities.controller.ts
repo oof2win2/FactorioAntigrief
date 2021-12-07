@@ -5,7 +5,7 @@ import { Type } from "@sinclair/typebox"
 import RuleModel from "../database/fagc/rule.js"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
 import CommunityModel from "../database/fagc/community.js"
-import GuildConfigModel from "../database/bot/community.js"
+import GuildConfigModel from "../database/fagc/communityconfig.js"
 import {
 	communityConfigChanged,
 	communityCreatedMessage,
@@ -182,9 +182,14 @@ export default class CommunityController {
 	}
 
 	@POST({
-		url: "/guildconfig",
+		url: "/guildconfig/:guildId",
 		options: {
 			schema: {
+				params: Type.Required(
+					Type.Object({
+						guildId: Type.String(),
+					})
+				),
 				body: Type.Object({
 					ruleFilters: Type.Optional(Type.Array(Type.String())),
 					trustedCommunities: Type.Optional(
@@ -220,6 +225,9 @@ export default class CommunityController {
 	@Authenticate
 	async setGuildConfig(
 		req: FastifyRequest<{
+			Params: {
+				guildId: string
+			}
 			Body: {
 				ruleFilters?: string[]
 				trustedCommunities?: string[]
@@ -235,6 +243,7 @@ export default class CommunityController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { ruleFilters, trustedCommunities, roles } = req.body
+		const { guildId } = req.params
 
 		// query database if rules and communities actually exist
 		if (ruleFilters) {
@@ -269,10 +278,20 @@ export default class CommunityController {
 				error: "Not Found",
 				message: "Community config was not found",
 			})
+		// check if guild exists
+		if (!client.guilds.resolve(guildId)) {
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Not Found",
+				message: "Guild was not found",
+			})
+		}
 
 		const guildConfig = await GuildConfigModel.findOne({
 			communityId: community.id,
+			guildId: guildId,
 		})
+
 		if (!guildConfig)
 			return res.status(400).send({
 				errorCode: 400,

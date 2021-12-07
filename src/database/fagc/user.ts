@@ -5,18 +5,12 @@ const {
 	pre,
 	prop,
 } = typegoose
-import database from "../database.js"
 import { getUserStringFromID } from "../../utils/functions-databaseless.js"
-
-const connection = database.connections.find(
-	(connection) => connection?.n === "fagc"
-)?.c
 
 @modelOptions({
 	schemaOptions: {
 		collection: "apiaccess",
 	},
-	existingMongoose: connection,
 })
 @pre<ApiAccessClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
@@ -42,7 +36,6 @@ export const ApiAccessModel = getModelForClass(ApiAccessClass)
 	schemaOptions: {
 		collection: "userauth",
 	},
-	existingMongoose: connection,
 })
 @pre<UserAuthClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
@@ -67,7 +60,6 @@ export const UserAuthModel = getModelForClass(UserAuthClass)
 	schemaOptions: {
 		collection: "users",
 	},
-	existingMongoose: connection,
 })
 @pre<UserClass>("save", function (next) {
 	this.id = getUserStringFromID(this._id.toString())
