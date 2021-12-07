@@ -27,6 +27,12 @@ const CreateCommunity: SubCommand = {
 
 		const name = interaction.options.getString("name")!
 		const contact = interaction.options.getUser("contact")!
+		if (contact.bot) {
+			return interaction.reply({
+				content: `User <@${contact.id}> is a bot, which is not allowed`,
+				ephemeral: true,
+			})
+		}
 		try {
 			const community = await client.FAGC.communities.create(name, contact.id)
 			if (community.community) {
