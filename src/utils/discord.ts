@@ -1,4 +1,4 @@
-import { Client } from "discord.js"
+import { Client, User } from "discord.js"
 import OAuthClient from "discord-oauth2"
 import ENV from "./env.js"
 
@@ -19,10 +19,10 @@ export const OAuth2Client = new OAuthClient({
 /**
  * Checks if a string is a valid Discord user ID. Returns false if the user is not in a server with the bot
  */
-export async function validateDiscordUser(userId: string): Promise<boolean> {
+export async function validateDiscordUser(userId: string): Promise<false | User> {
 	try {
-		await client.users.fetch(userId)
-		return true
+		const user = await client.users.fetch(userId)
+		return user
 	} catch {
 		return false
 	}
