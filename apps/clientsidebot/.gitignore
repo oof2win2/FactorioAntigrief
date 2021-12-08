@@ -1,5 +1,6 @@
 # Garbage
 .DS_Store
+database.sqlite
 
 # Config
 src/config.ts
