@@ -268,16 +268,17 @@ export default class ReportController {
 			proof,
 		} = req.body
 
-		const splitProof = proof.split(" ")
-		for (const string of splitProof) {
-			if (!validator.isURL(string, {
-				protocols: [ "http", "https" ]
-			})) {
-				return res.status(400).send({
-					errorCode: 400,
-					error: "Bad Request",
-					message: "proof must be a string of URLs separated with spaces"
-				})
+		if (proof !== "No proof") {
+			for (const string of proof.split(" ")) {
+				if (!validator.isURL(string, {
+					protocols: [ "http", "https" ]
+				})) {
+					return res.status(400).send({
+						errorCode: 400,
+						error: "Bad Request",
+						message: "proof must be a string of URLs separated with spaces"
+					})
+				}
 			}
 		}
 
