@@ -1,14 +1,16 @@
 {
-    "restartable": "rs",
-    "ignore": [
-        ".git",
-        "node_modules/**/node_modules",
-        ".vscode",
-        ".git"
-    ],
-    "watch": ["src/", "config.js"],
-    "env": {
-        "NODE_ENV": "development"
-    },
-    "ext": "js,mjs,json,ts,mts"
+	"restartable": "rs",
+	"ignore": [
+		".git",
+		"node_modules/**/node_modules",
+		".vscode",
+		".git"
+	],
+	"watch": [
+		"src/"
+	],
+	"env": {
+		"NODE_ENV": "development"
+	},
+	"ext": "json,ts"
 }
