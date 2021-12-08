@@ -6,9 +6,9 @@ class GetIDRule extends Command {
 	constructor(client) {
 		super(client, {
 			name: "rule",
-			description: "Gets a rule by its ID",
-			usage: "[ruleID]",
-			examples: [ "{{p}}rule XuciBx7" ],
+			description: "Gets a rule by its ID or index in filtered rules",
+			usage: "[ruleID|index]",
+			examples: [ "{{p}}rule XuciBx7", "{{p}}rule 1" ],
 			category: "rules",
 			dirname: __dirname,
 			enabled: true,
@@ -25,7 +25,8 @@ class GetIDRule extends Command {
 				.then((r) => r?.content)
 		const ruleID = args.shift()
 		if (!ruleID) return message.channel.send(`${this.client.emotes.warn} No rule ID was provided`)
-		const rule = await this.client.fagc.rules.fetchRule(ruleID)
+		console.log(config.ruleFilters[Number(ruleID) - 1])
+		const rule = Number(ruleID)? await this.client.fagc.rules.fetchRule(config.ruleFilters[Number(ruleID) - 1]) : await this.client.fagc.rules.fetchRule(ruleID)
 
 		if (rule === null)
 			return message.reply(`${this.client.emotes.warn} No rule with ID of \`${ruleID}\` exists`)

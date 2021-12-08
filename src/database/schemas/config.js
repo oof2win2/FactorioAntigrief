@@ -18,4 +18,4 @@ const ConfigSchema = new mongoose.Schema({
 	},
 })
 
-module.exports = mongoose.model("config", ConfigSchema)
+module.exports = mongoose.model("guildconfigs", ConfigSchema)
