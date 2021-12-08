@@ -179,7 +179,7 @@ class CreateReportAdvanced extends Command {
 		embed.addFields(
 			{
 				name: "Admin user",
-				value: `<@${message.author.id}> | ${message.author.tag}`,
+				value: `<@${adminUser.id}> | ${adminUser.tag}`,
 				inline: true,
 			},
 			{ name: "Player name", value: playername, inline: true },
