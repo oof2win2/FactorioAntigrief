@@ -16,6 +16,7 @@ import {
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
 import GuildConfigModel from "../database/fagc/communityconfig.js"
+import validator from "validator"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -267,6 +268,20 @@ export default class ReportController {
 			proof,
 		} = req.body
 
+		const splitProof = proof.split(" ")
+		for (const string of splitProof) {
+			if (!validator.isURL(string, {
+				protocols: [ "http", "https" ]
+			})) {
+				return res.status(400).send({
+					errorCode: 400,
+					error: "Bad Request",
+					message: "proof must be a string of URLs separated with spaces"
+				})
+			}
+		}
+
+
 		const community = req.requestContext.get("community")
 		if (!community)
 			return res.status(400).send({
@@ -315,6 +330,7 @@ export default class ReportController {
 				message:
 					"Your community does not filter for the specified rule",
 			})
+		
 
 		const report = await ReportModel.create({
 			playername: playername,
