@@ -25,12 +25,14 @@
 		"mongoose": "^5.12.3",
 		"node-fetch": "^2.6.1",
 		"path": "^0.12.7",
-		"strict-uri-encode": "^2.0.0"
+		"strict-uri-encode": "^2.0.0",
+		"validator": "^13.7.0"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^9.0.6",
 		"@types/node": "^14.14.22",
 		"@types/node-fetch": "^2.5.8",
+		"@types/validator": "^13.7.0",
 		"eslint": "^7.26.0",
 		"nodemon": "^2.0.7"
 	},

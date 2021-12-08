@@ -6,6 +6,7 @@ const {
 const { handleErrors, createPagedEmbed } = require("../../utils/functions")
 const Command = require("../../base/Command")
 const { AuthenticationError } = require("fagc-api-wrapper")
+const validator = require("validator").default
 
 class CreateReportAdvanced extends Command {
 	constructor(client) {
@@ -144,6 +145,11 @@ class CreateReportAdvanced extends Command {
 			)
 		)?.content
 		if (!proof || proof.toLowerCase() === "none") proof = undefined
+		for (const string of proof.split(" ")) {
+			if (!validator.isURL(string, { protocols: [ "http", "https" ] })) {
+				return message.channel.send(`${this.client.emotes.warn}  \`${string}\` is an invalid link to proof`)
+			}
+		}
 
 		const timestampMsg = (
 			await getMessageResponse(
