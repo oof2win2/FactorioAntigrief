@@ -6,7 +6,6 @@ import { GenericAPIError } from ".."
 import { User } from "fagc-api-types"
 
 export default class UserManager extends BaseManager<null> {
-	public apikey?: string
 	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)

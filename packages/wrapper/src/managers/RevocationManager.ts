@@ -6,7 +6,6 @@ import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from ".."
 
 export default class RevocationManager extends BaseManager<Revocation> {
-	public apikey?: string
 	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)

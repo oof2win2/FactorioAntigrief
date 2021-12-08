@@ -7,8 +7,6 @@ import strictUriEncode from "strict-uri-encode"
 import { APIEmbed } from "discord-api-types"
 
 export default class InfoManager extends BaseManager<Webhook> {
-	public apikey?: string
-	public masterapikey?: string
 	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)

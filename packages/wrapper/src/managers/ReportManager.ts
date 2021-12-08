@@ -10,7 +10,6 @@ import {
 import strictUriEncode from "strict-uri-encode"
 
 export default class ReportManager extends BaseManager<Report> {
-	public apikey?: string
 	private apiurl: string
 	private createRevocation: (revocationObject: Revocation) => void
 	constructor(

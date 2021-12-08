@@ -68,4 +68,29 @@ export class FAGCWrapper {
 		this.apikey = null
 		this.masterapikey = null
 	}
+	setapikey({
+		apikey, masterapikey
+	}: {
+		apikey?: string,
+		masterapikey?: string
+	}): void {
+		if (apikey) {
+			this.revocations.apikey = apikey
+			this.communities.apikey = apikey
+			this.rules.apikey = apikey
+			this.info.apikey = apikey
+			this.profiles.apikey = apikey
+			this.users.apikey = apikey
+			this.reports.apikey = apikey
+		}
+		if (masterapikey) {
+			this.revocations.masterapikey = masterapikey
+			this.communities.masterapikey = masterapikey
+			this.rules.masterapikey = masterapikey
+			this.info.masterapikey = masterapikey
+			this.profiles.masterapikey = masterapikey
+			this.users.masterapikey = masterapikey
+			this.reports.masterapikey = masterapikey
+		}
+	}
 }

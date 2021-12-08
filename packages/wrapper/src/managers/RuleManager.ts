@@ -6,8 +6,6 @@ import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError, NoMasterApikeyError } from "../types"
 
 export class RuleManager extends BaseManager<Rule> {
-	public apikey?: string
-	public masterapikey?: string
 	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
