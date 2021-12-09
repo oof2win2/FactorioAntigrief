@@ -141,7 +141,7 @@ class CreateReportAdvanced extends Command {
 		let proof = (
 			await getMessageResponse(
 				message,
-				`${this.client.emotes.type} Send a link to proof of the report or \`none\` if there is no proof`
+				`${this.client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`
 			)
 		)?.content
 		if (!proof || proof.toLowerCase() === "none") proof = undefined
