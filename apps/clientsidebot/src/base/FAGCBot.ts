@@ -12,7 +12,7 @@ interface BotOptions extends ClientOptions {
 
 }
 export default class FAGCBot extends Client {
-	guildConfigs: Map<string, GuildConfig>
+	guildConfigs: GuildConfig[]
 	community?: Community
 	fagc: FAGCWrapper
 	db: PrismaClient
@@ -20,7 +20,7 @@ export default class FAGCBot extends Client {
 
 	constructor(options: BotOptions) {
 		super(options)
-		this.guildConfigs = new Map()
+		this.guildConfigs = []
 		this.fagc = new FAGCWrapper({
 			apiurl: ENV.APIURL,
 			socketurl: ENV.WSURL,
@@ -31,17 +31,57 @@ export default class FAGCBot extends Client {
 		this.db = new PrismaClient()
 		this.db.$connect()
 	}
-	async getConfig(): Promise<database.BotConfigType | null> {
-		const record = await this.db.botConfig.findFirst()
-		if (!record) return null
-		return database.BotConfig.parse(record)
+	async getBotConfig(): Promise<database.BotConfigType> {
+		const record = await this.db.botConfig.findFirst({
+			include: {
+				actions: true
+			}
+		})
+		return database.BotConfig.parse(record ?? {})
 	}
-	async setConfig(config: Partial<database.BotConfigType>) {
-		this.db.botConfig.update({
+	async setBotConfig(config: Partial<database.BotConfigType>) {
+		await this.db.botConfig.upsert({
 			where: { id: 1 },
-			data: config
+			create: {
+				...database.BotConfig.parse(config),
+				actions: undefined,
+			},
+			update: {
+				...database.BotConfig.parse(config),
+				actions: undefined,
+			}
+		})
+		if (config.actions) await Promise.all(config.actions.map(action => this.setGuildAction(action)))
+	}
+	async setGuildAction(action: database.PickPartial<database.BotConfigType["actions"][0], "report"|"revocation">) {
+		await this.db.actions.upsert({
+			create: {
+				...action,
+				botConfigId: 1
+			},
+			update: {
+				...action,
+				guildID: undefined, // do not change guild id
+			},
+			where: {
+				guildID: action.guildID
+			}
 		})
 	}
+	async getGuildActions() {
+		const currentConfig = await this.getBotConfig()
+		return currentConfig.actions
+	}
+	async getGuildAction(guildID: string): Promise<database.ActionType | null> {
+		const action = await this.db.actions.findFirst({
+			where: {
+				guildID: guildID
+			}
+		})
+		const parsed = database.Action.safeParse(action)
+		return parsed.success ? parsed.data : null
+	}
+	
 	async syncCommands() {
 		return
 	}

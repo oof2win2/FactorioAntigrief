@@ -6,9 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"bot:addcommands": "node dist/addCommands.js",
-		"knex:migrate:make": "knex --knexfile src/base/knexfile.js migrate:make -x ts -- --useNullAsDefault",
-		"knex:migrate:latest": "knex --knexfile src/base/knexfile.js migrate:latest -- --useNullAsDefault",
-		"knex:migrate:rollback": "knex --knexfile src/base/knexfile.js migrate:rollback -- --useNullAsDefault"
+		"lint": "eslint src/ --fix"
 	},
 	"repository": {
 		"type": "git",

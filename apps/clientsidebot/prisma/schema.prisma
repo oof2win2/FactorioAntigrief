@@ -11,7 +11,39 @@ datasource db {
 }
 
 model BotConfig {
-  id     Int     @id @default(autoincrement())
-  apikey String?
-  owner  String
+  id                        Int       @id @default(autoincrement())
+  apikey                    String?
+  owner                     String
+  lastNotificationProcessed DateTime  @default(now()) @updatedAt
+  actions                   Actions[]
+}
+
+model Command {
+  id   String @id
+  name String
+}
+
+model Actions {
+  id          Int       @id @default(autoincrement())
+  guildID     String    @unique
+  report      String    @default("none")
+  revocation  String    @default("none")
+  config      BotConfig @relation(fields: [botConfigId], references: [id])
+  botConfigId Int
+}
+
+model Privatebans {
+  id         Int      @id @default(autoincrement())
+  adminID    String
+  createdAt  DateTime @default(now())
+  playername String   @unique
+  reason     String   @default("No reason")
+}
+
+model Whitelist {
+  id         Int      @id @default(autoincrement())
+  adminID    String
+  createdAt  DateTime @default(now())
+  playername String   @unique
+  reason     String   @default("No reason")
 }
