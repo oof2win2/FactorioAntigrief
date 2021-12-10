@@ -2,10 +2,12 @@ import { SlashCommandBuilder } from "@discordjs/builders"
 import { CommandWithSubcommands, SubCommand } from "../base/Commands.js"
 import { readdirSync } from "fs"
 
-const commands: SubCommand[] = await Promise.all(readdirSync("./commands/whitelist/").map(async commandName => {
-	const command = await import(`./whitelist/${commandName}`)
-	return command.default
-}))
+const commands: SubCommand[] = await Promise.all(readdirSync("./commands/whitelist/")
+	.filter(command => command.endsWith(".js"))
+	.map(async commandName => {
+		const command = await import(`./whitelist/${commandName}`)
+		return command.default
+	}))
 
 const Bans: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()

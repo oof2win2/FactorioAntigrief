@@ -2,6 +2,7 @@ import { Intents } from "discord.js"
 import { readdir } from "fs/promises"
 import FAGCBot from "./base/FAGCBot.js"
 import ENV from "./utils/env.js"
+import "./extenders.js"
 
 process.chdir("dist")
 
@@ -12,6 +13,7 @@ const client = new FAGCBot({
 
 const events = await readdir("events")
 events.forEach(async (name) => {
+	if (!name.endsWith(".js")) return
 	const handler = await import(`./events/${name}`).then(r=>r.default)
 	client.on(name.slice(0, name.indexOf(".js")), (...args) => handler(client, args))
 })
