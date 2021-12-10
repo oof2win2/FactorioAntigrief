@@ -569,8 +569,6 @@ export default class ReportController {
 				)
 			})
 		)
-		const revoker = await client.users.fetch(adminId)
-		const admin = await client.users.fetch(reports[0].adminId)
 
 		const allReports = await ReportModel.find({
 			playername: playername,
@@ -580,7 +578,9 @@ export default class ReportController {
 			differentCommunities.add(report.communityId)
 		)
 
-		revocations.forEach((revocation) =>
+		const revoker = await client.users.fetch(adminId)
+		revocations.forEach(async (revocation) => {
+			const admin = await client.users.fetch(revocation.adminId)
 			reportRevokedMessage(revocation, {
 				community: <ReportMessageExtraOpts["community"]>(
 					(<unknown>community.toObject())
@@ -593,7 +593,7 @@ export default class ReportController {
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
 			})
-		)
+		})
 
 		return res.status(200).send(revocations)
 	}
