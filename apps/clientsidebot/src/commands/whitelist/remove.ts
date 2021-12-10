@@ -4,18 +4,18 @@ import { SubCommand } from "../../base/Commands.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
-		.setName("revoke")
-		.setDescription("Revoke a private ban")
+		.setName("remove")
+		.setDescription("Remove a whitelist entry")
 		.addStringOption(option => 
 			option
 				.setName("playername")
-				.setDescription("Name of the player to unban")
+				.setDescription("Name of the player to unwhitelist")
 				.setRequired(true)
 		)
 		.addStringOption(option => 
 			option
 				.setName("reason")
-				.setDescription("Reason for the unban")
+				.setDescription("Reason for the unwhitelist")
 				.setRequired(false)
 		)
 	,
@@ -23,18 +23,18 @@ const Setaction: SubCommand = {
 		const playername = z.string().parse(interaction.options.getString("playername"))
 		const reason = z.string().default("No reason").parse(interaction.options.getString("reason") ?? undefined)
 		
-		const result = await client.db.privatebans.deleteMany({
+		const result = await client.db.whitelist.deleteMany({
 			where: {
 				playername: playername
 			}
 		})
 		if (!result.count) return interaction.reply({
-			content: `Player ${playername} was not banned`,
+			content: `Player ${playername} was not whitelisted`,
 			ephemeral: true,
 		})
 		
 		return interaction.reply({
-			content: `Player ${playername} has been unbanned by ${interaction.user} for ${reason}`
+			content: `Player ${playername} has been unwhitelisted by ${interaction.user} for ${reason}`
 		})
 	}
 }
