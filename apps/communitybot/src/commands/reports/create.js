@@ -133,9 +133,11 @@ class CreateReport extends Command {
 			)
 		)?.content
 		if (!proof || proof.toLowerCase() === "none") proof = undefined
-		for (const string of proof.split(" ")) {
-			if (!validator.isURL(string, { protocols: [ "http", "https" ] })) {
-				return message.channel.send(`${this.client.emotes.warn}  \`${string}\` is an invalid link to proof`)
+		else {
+			for (const string of proof.split(" ")) {
+				if (!validator.isURL(string, { protocols: [ "http", "https" ] })) {
+					return message.channel.send(`${this.client.emotes.warn}  \`${string}\` is an invalid link to proof`)
+				}
 			}
 		}
 
