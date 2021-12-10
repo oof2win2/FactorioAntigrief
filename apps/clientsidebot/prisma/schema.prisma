@@ -18,6 +18,12 @@ model BotConfig {
   actions                   Actions[]
 }
 
+model InfoChannel {
+  id        Int    @id @default(autoincrement())
+  channelID String @unique
+  guildID   String
+}
+
 model Command {
   id   String @id
   name String
