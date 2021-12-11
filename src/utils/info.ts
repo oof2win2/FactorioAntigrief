@@ -63,7 +63,7 @@ wss.on("connection", (ws) => {
 					Buffer.from(
 						JSON.stringify({
 							...guildConfig,
-							messageType: "communityConfigChanged",
+							messageType: "guildConfigChanged",
 						})
 					)
 				)
@@ -344,7 +344,7 @@ export async function communityRemovedMessage(
 		})
 	)
 }
-export function communityConfigChanged(
+export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
 	wss.clients.forEach((client) => {
@@ -355,7 +355,7 @@ export function communityConfigChanged(
 				Buffer.from(
 					JSON.stringify({
 						config: config,
-						messageType: "communityConfigChanged",
+						messageType: "guildConfigChanged",
 					})
 				)
 			)

@@ -7,7 +7,7 @@ import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
 import CommunityModel from "../database/fagc/community.js"
 import GuildConfigModel from "../database/fagc/communityconfig.js"
 import {
-	communityConfigChanged,
+	guildConfigChanged,
 	communityCreatedMessage,
 	communityRemovedMessage,
 } from "../utils/info.js"
@@ -331,7 +331,7 @@ export default class CommunityController {
 		)
 
 		guildConfig.set("apikey", null)
-		communityConfigChanged(guildConfig)
+		guildConfigChanged(guildConfig)
 		return res.status(200).send(guildConfig)
 	}
 
@@ -441,7 +441,7 @@ export default class CommunityController {
 			})
 
 		guildConfig.set("apikey", null)
-		communityConfigChanged(guildConfig)
+		guildConfigChanged(guildConfig)
 
 		return res.send({ status: "ok" })
 	}
