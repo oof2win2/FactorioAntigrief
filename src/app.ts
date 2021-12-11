@@ -30,7 +30,7 @@ import RevocationModel from "./database/fagc/revocation.js"
 import RuleModel from "./database/fagc/rule.js"
 import UserModel from "./database/fagc/user.js"
 import WebhookModel from "./database/fagc/webhook.js"
-import GuildConfigModel from "./database/fagc/communityconfig.js"
+import GuildConfigModel from "./database/fagc/guildconfig.js"
 
 mongoose.connect(ENV.MONGOURI) // connect to db before loading other stuff
 

@@ -5,7 +5,7 @@ import { Type } from "@sinclair/typebox"
 import RuleModel from "../database/fagc/rule.js"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
 import CommunityModel from "../database/fagc/community.js"
-import GuildConfigModel from "../database/fagc/communityconfig.js"
+import GuildConfigModel from "../database/fagc/guildconfig.js"
 import {
 	guildConfigChanged,
 	communityCreatedMessage,
@@ -593,7 +593,7 @@ export default class CommunityController {
 				message: `Community with ID ${communityId} was not found`,
 			})
 
-		const communityConfig = await GuildConfigModel.findOneAndDelete({
+		const guildConfig = await GuildConfigModel.findOneAndDelete({
 			communityId: community.id,
 		})
 
@@ -606,9 +606,9 @@ export default class CommunityController {
 		await AuthModel.findOneAndDelete({
 			communityId: community.id,
 		})
-		if (communityConfig) {
+		if (guildConfig) {
 			await WebhookModel.deleteMany({
-				guildId: communityConfig.guildId,
+				guildId: guildConfig.guildId,
 			})
 		}
 

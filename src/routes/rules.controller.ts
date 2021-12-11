@@ -3,7 +3,7 @@ import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule.js"
-import GuildConfigModel from "../database/fagc/communityconfig.js"
+import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
 import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info.js"
 

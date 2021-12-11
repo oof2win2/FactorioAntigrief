@@ -8,7 +8,7 @@ import UserModel, {
 } from "../database/fagc/user.js"
 import { OAUTHSCOPES } from "../consts.js"
 import { Authenticate } from "../utils/authentication.js"
-import GuildConfigModel from "../database/fagc/communityconfig.js"
+import GuildConfigModel from "../database/fagc/guildconfig.js"
 
 @Controller({ route: "/users" })
 export default class ProfileController {

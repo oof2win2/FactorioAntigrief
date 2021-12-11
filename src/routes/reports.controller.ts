@@ -15,7 +15,7 @@ import {
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
-import GuildConfigModel from "../database/fagc/communityconfig.js"
+import GuildConfigModel from "../database/fagc/guildconfig.js"
 import validator from "validator"
 
 @Controller({ route: "/reports" })

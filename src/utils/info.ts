@@ -4,7 +4,7 @@ import WebSocket from "ws"
 import ENV from "./env.js"
 import GuildConfigModel, {
 	GuildConfigClass,
-} from "../database/fagc/communityconfig.js"
+} from "../database/fagc/guildconfig.js"
 import { RevocationClass } from "../database/fagc/revocation.js"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
