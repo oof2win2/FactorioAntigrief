@@ -6,6 +6,7 @@ import { Command } from "./Commands.js"
 import { InfoChannel, PrismaClient } from ".prisma/client/index.js"
 import * as database from "./database.js"
 import * as wshandler from "./wshandler.js"
+import { Report, Revocation } from "fagc-api-types"
 import RCONInterface from "./rcon.js"
 import fs from "fs"
 import { z } from "zod"
@@ -93,8 +94,11 @@ export default class FAGCBot extends Client {
 		
 		this.fagc.websocket.on("communityCreated", (event) => wshandler.communityCreated({ event, client: this }))
 		this.fagc.websocket.on("communityRemoved", (event) => wshandler.communityRemoved({ event, client: this }))
+		this.fagc.websocket.on("ruleCreated", (event) => wshandler.ruleCreated({ event, client: this }))
+		this.fagc.websocket.on("ruleRemoved", (event) => wshandler.ruleRemoved({ event, client: this }))
 		this.fagc.websocket.on("report", (event) => wshandler.report({ event, client: this }))
 		this.fagc.websocket.on("revocation", (event) => wshandler.revocation({ event, client: this }))
+		this.fagc.websocket.on("guildConfigChanged", (event) => wshandler.guildConfigChanged({ event, client: this }))
 
 		setInterval(() => this.sendEmbeds(), 10*1000) // send embeds every 10 seconds
 	}
@@ -185,6 +189,28 @@ export default class FAGCBot extends Client {
 		} else {
 			this.embedQueue.set(channelID, [ embed ])
 		}
+	}
+
+	async ban(report: Report, guildID: string) {
+		const servers = this.servers.get(guildID)
+		if (!servers || !servers.length) return
+		const guildAction = await this.getGuildAction(guildID)
+		if (!guildAction || guildAction.report === "none") return
+
+		const rawBanMessage = guildAction.report === "ban" ? ENV.BANMESSAGE : ENV.CUSTOMBAN
+
+		const command = rawBanMessage
+			.replace("{ADMINID}", report.adminId)
+			.replace("{AUTOMATED}", report.automated ? "true" : "false")
+			.replace("{BROKENRULE}", report.brokenRule)
+			.replace("{COMMUNITYID}", report.communityId)
+			.replace("{REPORTID}", report.id)
+			.replace("{DESCRIPTION}", report.description)
+			.replace("{PLAYERNAME}", report.playername)
+			.replace("{PROOF}", report.proof)
+			.replace("{REPORTEDTIME}", report.reportedTime.toTimeString())
+		
+		this.rcon.rconCommandGuild(command, guildID)
 	}
 	
 	async syncCommands() {

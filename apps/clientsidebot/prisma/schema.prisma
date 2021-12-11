@@ -46,6 +46,13 @@ model Privatebans {
   reason     String   @default("No reason")
 }
 
+model FAGCBans {
+  reportId    String @id
+  playername  String
+  communityId String
+  brokenRule  String
+}
+
 model Whitelist {
   id         Int      @id @default(autoincrement())
   adminID    String

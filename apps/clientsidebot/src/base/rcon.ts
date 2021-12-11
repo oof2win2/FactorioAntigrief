@@ -8,13 +8,15 @@ interface RCONResponse {
 	server: FactorioServerType
 }
 
+interface Connection {
+	rcon: Rcon
+	server: FactorioServerType
+}
+
 export default class RCONInterface {
 	private servers: FactorioServerType[]
 	private client: FAGCBot
-	private connections: {
-		rcon: Rcon
-		server: FactorioServerType
-	}[]
+	private connections: Connection[]
 	constructor(client: FAGCBot, servers: FactorioServerType[]) {
 		this.client = client
 		this.servers = servers
@@ -83,6 +85,17 @@ export default class RCONInterface {
 			response: response,
 			server: server.server
 		}
+	}
+
+	async rconCommandGuild(command: string, guildID: string) {
+		command = command.startsWith("/") ? command : `/${command}`
+		const servers = this.servers
+			.map(s => s.discordGuildID === guildID ? s : undefined)
+			.filter(r=>r !== undefined) as FactorioServerType[]
+		const responses = await Promise.all(
+			servers.map(server => this.rconCommand(command, server.servername))
+		)
+		return responses
 	}
 
 	async rconCommandAll(command: string) {
