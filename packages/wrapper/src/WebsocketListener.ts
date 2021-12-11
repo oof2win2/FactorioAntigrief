@@ -102,42 +102,42 @@ class WebSocketHandler extends EventEmitter {
 		const messageType = message.messageType
 		delete message.messageType
 		switch (messageType) {
-			case "guildConfigChanged":
-				this.emit(
-					"guildConfigChanged",
+		case "guildConfigChanged":
+			this.emit(
+				"guildConfigChanged",
 					message as unknown as GuildConfig
-				)
-				break
-			case "report":
-				this.emit("report", message as unknown as ReportCreatedMessage)
-				break
-			case "revocation":
-				this.emit("revocation", message as unknown as RevocationMessage)
-				break
-			case "ruleCreated":
-				this.emit(
-					"ruleCreated",
+			)
+			break
+		case "report":
+			this.emit("report", message as unknown as ReportCreatedMessage)
+			break
+		case "revocation":
+			this.emit("revocation", message as unknown as RevocationMessage)
+			break
+		case "ruleCreated":
+			this.emit(
+				"ruleCreated",
 					message as unknown as RuleCreatedMessage
-				)
-				break
-			case "ruleRemoved":
-				this.emit(
-					"ruleRemoved",
+			)
+			break
+		case "ruleRemoved":
+			this.emit(
+				"ruleRemoved",
 					message as unknown as RuleRemovedMessage
-				)
-				break
-			case "communityCreated":
-				this.emit(
-					"communityCreated",
+			)
+			break
+		case "communityCreated":
+			this.emit(
+				"communityCreated",
 					message as unknown as CommunityCreatedMessage
-				)
-				break
-			case "communityRemoved":
-				this.emit(
-					"communityRemoved",
+			)
+			break
+		case "communityRemoved":
+			this.emit(
+				"communityRemoved",
 					message as unknown as CommunityRemovedMessage
-				)
-				break
+			)
+			break
 		}
 	}
 	setGuildID(guildId: string): void {
