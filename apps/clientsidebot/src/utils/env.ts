@@ -16,8 +16,10 @@ const ENV = cleanEnv(
 		OWNERID: str({ desc: "Bot owner ID" }),
 		RCONPASSWORD: str({ desc: "RCON password for all servers", default: "" }),
 		BANLIST_PATH: str({ desc: "Path to banlist for all servers", default: "" }),
-		BANMESSAGE: str({ desc: "Message to ban with", default: "/ban {PLAYERNAME} You have been banned for FAGC report {REPORTID} created on {DATE}" }),
+		BANMESSAGE: str({ desc: "Command to ban with", default: "/ban {PLAYERNAME} You have been banned for FAGC report {REPORTID} created on {DATE}" }),
 		CUSTOMBAN: str({ desc: "Custom command to send over RCON", default: "/ban {PLAYERNAME} You have been banned for FAGC report {REPORTID} created on {DATE}" }),
+		UNBANMESSAGE: str({ desc: "Command to unban with", default: "/unban {PLAYERNAME}" }),
+		CUSTOMUNBAN: str({ desc: "Custom command to unban with", default: "/unban {PLAYERNAME}" }),
 		ERRORCHANNELID: str({ desc: "Discord channel ID of error channel" }),
 		SERVERFILEPATH: str({ desc: "Path to JSON file of server descriptions" })
 	},

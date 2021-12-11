@@ -212,6 +212,28 @@ export default class FAGCBot extends Client {
 		
 		this.rcon.rconCommandGuild(command, guildID)
 	}
+
+	async unban(revocation: Revocation, guildID: string) {
+		const servers = this.servers.get(guildID)
+		if (!servers || !servers.length) return
+		const guildAction = await this.getGuildAction(guildID)
+		if (!guildAction || guildAction.report === "none") return
+
+		const rawUnbanMessage = guildAction.revocation === "unban" ? ENV.UNBANMESSAGE : ENV.CUSTOMUNBAN
+
+		const command = rawUnbanMessage
+			.replace("{ADMINID}", revocation.adminId)
+			.replace("{AUTOMATED}", revocation.automated ? "true" : "false")
+			.replace("{BROKENRULE}", revocation.brokenRule)
+			.replace("{COMMUNITYID}", revocation.communityId)
+			.replace("{REPORTID}", revocation.id)
+			.replace("{DESCRIPTION}", revocation.description)
+			.replace("{PLAYERNAME}", revocation.playername)
+			.replace("{PROOF}", revocation.proof)
+			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
+		
+		this.rcon.rconCommandGuild(command, guildID)
+	}
 	
 	async syncCommands() {
 		return
