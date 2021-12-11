@@ -16,7 +16,7 @@ export interface WebSockethandlerOpts {
 	enabled?: boolean
 }
 export type WebSocketMessageType =
-	| "communityConfigChanged"
+	| "guildConfigChanged"
 	| "report"
 	| "revocation"
 	| "ruleCreated"
@@ -31,7 +31,7 @@ export interface WebSocketMessage {
 	[key: string]: string | boolean | number
 }
 export declare interface WebSocketEvents {
-	communityConfigChanged: (message: GuildConfig) => void
+	guildConfigChanged: (message: GuildConfig) => void
 	report: (message: ReportCreatedMessage) => void
 	revocation: (message: RevocationMessage) => void
 	ruleCreated: (message: RuleCreatedMessage) => void
@@ -102,9 +102,9 @@ class WebSocketHandler extends EventEmitter {
 		const messageType = message.messageType
 		delete message.messageType
 		switch (messageType) {
-			case "communityConfigChanged":
+			case "guildConfigChanged":
 				this.emit(
-					"communityConfigChanged",
+					"guildConfigChanged",
 					message as unknown as GuildConfig
 				)
 				break
