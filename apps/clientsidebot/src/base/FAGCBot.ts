@@ -6,8 +6,15 @@ import { Command } from "./Commands.js"
 import { InfoChannel, PrismaClient } from ".prisma/client/index.js"
 import * as database from "./database.js"
 import * as wshandler from "./wshandler.js"
-import { string } from "zod"
+import RCONInterface from "./rcon.js"
+import fs from "fs"
+import { z } from "zod"
 
+function getServers(): database.FactorioServerType[] {
+	const serverJSON = fs.readFileSync(ENV.SERVERFILEPATH, "utf8")
+	const servers = z.array(database.FactorioServer).parse(JSON.parse(serverJSON))
+	return servers
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface BotOptions extends ClientOptions {
@@ -29,6 +36,8 @@ export default class FAGCBot extends Client {
 	community?: Community
 	botconfig: database.BotConfigType
 	embedQueue: Map<string, MessageEmbed[]>
+	servers: Map<string, database.FactorioServerType[]>
+	readonly rcon: RCONInterface
 
 	constructor(options: BotOptions) {
 		super(options)
@@ -43,6 +52,22 @@ export default class FAGCBot extends Client {
 		this.infochannels = new Map()
 		this.configuredActions = new Map()
 		this.embedQueue = new Map()
+		this.servers = new Map()
+
+		const rawServers = getServers()
+
+		rawServers.map((server) => {
+			const existing = this.servers.get(server.discordGuildID)
+			if (existing) {
+				this.servers.set(server.discordGuildID, [ ...existing, server ])
+			} else {
+				this.servers.set(server.discordGuildID, [ server ])
+			}
+		})
+
+		
+
+		this.rcon = new RCONInterface(this, rawServers)
 
 		this.db = new PrismaClient()
 		this.db.$connect()

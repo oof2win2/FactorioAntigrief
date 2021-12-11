@@ -13,7 +13,9 @@ const ENV = cleanEnv(
 		DISCORD_BOTTOKEN: str({ desc: "Discord bot token" }),
 		TESTGUILDID: str({ desc: "Testing guild ID, where to deploy commands when NODE_ENV is development" }),
 		GUILDID: str({ desc: "Guild ID, where to deploy commands when NODE_ENV is production" }),
-		OWNERID: str({ desc: "Bot owner ID" })
+		RCONPASSWORD: str({ desc: "RCON password for all servers", default: "" }),
+		ERRORCHANNELID: str({ desc: "Discord channel ID of error channel" }),
+		SERVERFILEPATH: str({ desc: "Path to JSON file of server descriptions" })
 	},
 	{}
 )
