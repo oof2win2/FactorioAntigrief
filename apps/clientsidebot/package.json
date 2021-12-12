@@ -26,7 +26,7 @@
 		"discord.js": "^13.3.1",
 		"dotenv": "^10.0.0",
 		"envalid": "^7.2.2",
-		"fagc-api-wrapper": "^1.19.0",
+		"fagc-api-wrapper": "^1.20.0",
 		"rcon-client": "^4.2.3",
 		"zod": "^3.11.6"
 	},
