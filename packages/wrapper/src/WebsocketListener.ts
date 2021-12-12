@@ -63,9 +63,8 @@ declare interface WebSocketHandler {
 }
 
 class WebSocketHandler extends EventEmitter {
-	private socket: WebSocket
+	private socket!: WebSocket
 	private opts: WebSockethandlerOpts
-	public guildid: string
 
 	constructor(opts: WebSockethandlerOpts) {
 		super()
@@ -100,42 +99,43 @@ class WebSocketHandler extends EventEmitter {
 	}
 	handleMessage(message: WebSocketMessage): void {
 		const messageType = message.messageType
-		delete message.messageType
+		const newMessage: Omit<WebSocketMessage, "messageType"> = message
+		delete newMessage.messageType
 		switch (messageType) {
 		case "guildConfigChanged":
 			this.emit(
 				"guildConfigChanged",
-					message as unknown as GuildConfig
+				newMessage as unknown as GuildConfig
 			)
 			break
 		case "report":
-			this.emit("report", message as unknown as ReportCreatedMessage)
+			this.emit("report", newMessage as unknown as ReportCreatedMessage)
 			break
 		case "revocation":
-			this.emit("revocation", message as unknown as RevocationMessage)
+			this.emit("revocation", newMessage as unknown as RevocationMessage)
 			break
 		case "ruleCreated":
 			this.emit(
 				"ruleCreated",
-					message as unknown as RuleCreatedMessage
+				newMessage as unknown as RuleCreatedMessage
 			)
 			break
 		case "ruleRemoved":
 			this.emit(
 				"ruleRemoved",
-					message as unknown as RuleRemovedMessage
+				newMessage as unknown as RuleRemovedMessage
 			)
 			break
 		case "communityCreated":
 			this.emit(
 				"communityCreated",
-					message as unknown as CommunityCreatedMessage
+				newMessage as unknown as CommunityCreatedMessage
 			)
 			break
 		case "communityRemoved":
 			this.emit(
 				"communityRemoved",
-					message as unknown as CommunityRemovedMessage
+				newMessage as unknown as CommunityRemovedMessage
 			)
 			break
 		}

@@ -38,15 +38,15 @@ export default class BaseManager<HoldsWithId extends Common> {
 		data: HoldsWithId,
 		cache = true,
 		{ id }: AddOptions = {}
-	): HoldsWithId {
+	): HoldsWithId | null {
 		if (!data) return null
 		else if (data.id && cache) {
 			this.sweepCache.set(id || data.id, Date.now())
-			return this.cache.set(id || data.id, data).get(data.id)
+			return this.cache.set(id || data.id, data).get(data.id) ?? null
 		}
 		return data
 	}
-	protected removeFromCache(data: HoldsWithId): HoldsWithId {
+	protected removeFromCache(data: HoldsWithId): HoldsWithId | null {
 		if (!data) return null
 		this.cache.sweep((item) => item.id == data.id)
 		return data

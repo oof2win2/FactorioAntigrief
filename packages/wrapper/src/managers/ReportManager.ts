@@ -34,7 +34,7 @@ export default class ReportManager extends BaseManager<Report> {
 			if (cached) return cached
 		}
 
-		let promiseResolve: (value: unknown) => void
+		let promiseResolve!: (value: Report | PromiseLike<Report | null> | null) => void
 		const fetchingPromise: Promise<Report | null> = new Promise(
 			(resolve) => {
 				promiseResolve = resolve

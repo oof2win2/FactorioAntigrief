@@ -65,8 +65,8 @@ export class FAGCWrapper {
 				this[key]["destroy"]()
 		})
 
-		this.apikey = null
-		this.masterapikey = null
+		delete this.apikey
+		delete this.masterapikey
 	}
 	setapikey({
 		apikey, masterapikey

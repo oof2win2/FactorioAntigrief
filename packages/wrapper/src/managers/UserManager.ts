@@ -5,7 +5,7 @@ import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from ".."
 import { User } from "fagc-api-types"
 
-export default class UserManager extends BaseManager<null> {
+export default class UserManager extends BaseManager<{id: string}> {
 	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)

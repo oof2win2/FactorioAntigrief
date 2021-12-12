@@ -23,7 +23,7 @@ export class RuleManager extends BaseManager<Rule> {
 				this.cache.get(ruleid) || this.fetchingCache.get(ruleid)
 			if (cached) return cached
 		}
-		let promiseResolve: (value: unknown) => void
+		let promiseResolve!: (value: Rule | PromiseLike<Rule | null> | null) => void
 		const fetchingPromise: Promise<Rule | null> = new Promise((resolve) => {
 			promiseResolve = resolve
 		})

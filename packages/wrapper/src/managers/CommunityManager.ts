@@ -28,7 +28,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			if (cached) return cached
 		}
 
-		let promiseResolve: (value: unknown) => void
+		let promiseResolve!: (value: Community | PromiseLike<Community | null> | null) => void
 		const fetchingPromise: Promise<Community | null> = new Promise(
 			(resolve) => {
 				promiseResolve = resolve
