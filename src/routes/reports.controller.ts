@@ -173,10 +173,8 @@ export default class ReportController {
 		url: "/filteredreports",
 		options: {
 			schema: {
-				body: Type.Optional(Type.Object({
-					playernames: Type.Array(Type.String(), {
-						maxItems: 100
-					}),
+				body: Type.Required(Type.Object({
+					playername: Type.String(),
 					ruleIDs: Type.Array(Type.String(), {
 						maxItems: 100
 					}),
@@ -201,18 +199,16 @@ export default class ReportController {
 	async getFilteredReports(
 		req: FastifyRequest<{
 			Body: {
-				playernames: string[]
+				playername: string
 				ruleIDs: string[]
 				communityIDs: string[]
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { playernames,ruleIDs, communityIDs } = req.body
+		const { playername, ruleIDs, communityIDs } = req.body
 		const reports = await ReportModel.find({
-			playername: {
-				$in: playernames
-			},
+			playername: playername,
 			brokenRule: {
 				$in: ruleIDs
 			},
