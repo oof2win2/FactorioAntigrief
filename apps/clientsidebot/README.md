@@ -14,5 +14,5 @@ Pre-requisites:
 TODO:
 - [X] check for bans with new players when the bot connects
 - [X] clear banlists every week - use `/banlist clear` on servers
-- [ ] remove allowal for one shared banlist, it causes issues when it gets added to due to overwriting
+- [X] remove allowal for one shared banlist, it causes issues when it gets added to due to overwriting
 - [ ] sync command permissions with community bot

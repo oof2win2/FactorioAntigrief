@@ -24,7 +24,7 @@ export const FactorioServer = z.object({
 	discordGuildID: z.string(),
 	rconPort: z.number().max(65535).min(0),
 	rconPassword: z.string().default(ENV.RCONPASSWORD),
-	banlistPath: z.string().default(ENV.BANLIST_PATH).superRefine(async (path, ctx) => {
+	banlistPath: z.string().superRefine(async (path, ctx) => {
 		if (!path.endsWith(".json")) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
