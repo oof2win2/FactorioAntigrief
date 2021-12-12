@@ -112,6 +112,66 @@ export default class RuleController {
 		return res.send(rule)
 	}
 
+	@POST({
+		url: "/:id",
+		options: {
+			schema: {
+				params: Type.Required(
+					Type.Object({
+						id: Type.String(),
+					})
+				),
+				body: Type.Optional(
+					Type.Object({
+						shortdesc: Type.Optional(Type.String()),
+						longdesc: Type.Optional(Type.String()),
+					})
+				),
+
+				description: "Create a rule",
+				tags: [ "rules" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "RuleClass#",
+					},
+				},
+			},
+		},
+	})
+	@MasterAuthenticate
+	async update(
+		req: FastifyRequest<{
+			Params: {
+				id: string
+			}
+			Body: {
+				shortdesc?: string
+				longdesc?: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { shortdesc, longdesc } = req.body
+		const { id } = req.params
+		if (!shortdesc && !longdesc) {
+			return res.send(await RuleModel.findOne({ id: id }))
+		}
+		const rule = await RuleModel.findOneAndUpdate({
+			id: id
+		}, {
+			...Boolean(shortdesc) && { shortdesc: shortdesc },
+			...Boolean(longdesc) && { longdesc: longdesc }
+		}, { new: true })
+		console.log(rule)
+		// ruleCreatedMessage(rule)
+		return res.send(rule)
+	}
+
 	@DELETE({
 		url: "/:id",
 		options: {
