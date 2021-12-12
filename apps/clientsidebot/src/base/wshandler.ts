@@ -114,26 +114,5 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	client.guildConfigs.set(event.guildId, event)
 	
 	// ban players that are online and are banned with the new rules
-	const playercommands = (await client.rcon.rconCommandAll("/p o")).filter(r=>r)
-	const players = playercommands.filter(x => x !== false) as Exclude<typeof playercommands[0], false>[]
-	players.forEach((playeroutput) => {
-		const playerlist = playeroutput.response
-			.split("\n")
-			.slice(1)
-			.map((line) => line.slice(0, line.indexOf(" (online)")))
-		const guildConfig = client.guildConfigs.get(playeroutput.server.discordGuildID)
-		if (!guildConfig) return
-		if (!guildConfig.ruleFilters || !guildConfig.trustedCommunities) return
-		playerlist.forEach(async (player) => {
-			if (!guildConfig.ruleFilters || !guildConfig.trustedCommunities) return // TS requires this
-			const whitelist = await client.db.whitelist.findFirst({
-				where: {
-					playername: player
-				}
-			})
-			if (whitelist) return // ignore whatever if a whielist for that player exists
-			const allreports = await client.fagc.reports.fetchFilteredReports(player, guildConfig.ruleFilters, guildConfig.trustedCommunities)
-			if (allreports.length) client.ban(allreports[0], guildConfig.guildId)
-		})
-	})
+	client.checkBans()
 }

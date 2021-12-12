@@ -26,3 +26,6 @@ commands.forEach(async (name) => {
 })
 
 client.login(ENV.DISCORD_BOTTOKEN)
+
+// check for existing bans on servers after the bot is started
+setTimeout(() => client.checkBans(), 10*1000)

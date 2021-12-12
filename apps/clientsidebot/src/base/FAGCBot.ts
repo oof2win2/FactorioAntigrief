@@ -234,6 +234,31 @@ export default class FAGCBot extends Client {
 		
 		this.rcon.rconCommandGuild(command, guildID)
 	}
+
+	async checkBans() {
+		const playercommands = (await this.rcon.rconCommandAll("/p o")).filter(r=>r)
+		const players = playercommands.filter(x => x !== false) as Exclude<typeof playercommands[0], false>[]
+		players.forEach((playeroutput) => {
+			const playerlist = playeroutput.response
+				.split("\n")
+				.slice(1)
+				.map((line) => line.slice(0, line.indexOf(" (online)")))
+			const guildConfig = this.guildConfigs.get(playeroutput.server.discordGuildID)
+			if (!guildConfig) return
+			if (!guildConfig.ruleFilters || !guildConfig.trustedCommunities) return
+			playerlist.forEach(async (player) => {
+				if (!guildConfig.ruleFilters || !guildConfig.trustedCommunities) return // TS requires this
+				const whitelist = await this.db.whitelist.findFirst({
+					where: {
+						playername: player
+					}
+				})
+				if (whitelist) return // ignore whatever if a whielist for that player exists
+				const allreports = await this.fagc.reports.fetchFilteredReports(player, guildConfig.ruleFilters, guildConfig.trustedCommunities)
+				if (allreports.length) this.ban(allreports[0], guildConfig.guildId)
+			})
+		})
+	}
 	
 	async syncCommands() {
 		return

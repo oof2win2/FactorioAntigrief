@@ -10,3 +10,8 @@ Pre-requisites:
 3. Set configs, importantly the `.env`, `config.ts` and `servers.ts` according to the examples
 4. `npx prisma generate` - generate the database stuff for prisma
 5. `npx prisma db push` - push tables to the database
+
+TODO:
+- [X] check for bans with new players when the bot connects
+- [ ] clear banlists every week - use `/banlist clear` on servers
+- [ ] remove allowal for one shared banlist, it causes issues when it gets added to due to overwriting
