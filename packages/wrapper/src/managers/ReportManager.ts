@@ -124,6 +124,37 @@ export default class ReportManager extends BaseManager<Report> {
 		}
 		return ruleReports
 	}
+
+	async fetchFilteredReports(
+		playernames: string[],
+		ruleIDs: string[],
+		communityIDs: string[],
+		cache = true
+	): Promise<Report[]> {
+		const reports = await fetch(`${this.apiurl}/reports/filteredreports`, {
+			method: "POST",
+			body: JSON.stringify({
+				playernames: playernames,
+				ruleIDs: ruleIDs,
+				communityIDs: communityIDs,
+			}),
+			credentials: "include",
+			headers: {
+				"content-type": "application/json",
+			},
+		}).then((u) => u.json())
+		if (reports.error)
+			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
+		
+		if (cache) {
+			reports.forEach((report) => {
+				report.reportedTime = new Date(report.reportedTime)
+				this.add(report)
+			})
+		}
+		return reports
+	}
+
 	async create(
 		report: CreateReport,
 		cache = true,
