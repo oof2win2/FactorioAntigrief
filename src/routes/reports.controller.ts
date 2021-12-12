@@ -169,6 +169,60 @@ export default class ReportController {
 		return res.status(200).send(reports)
 	}
 
+	@POST({
+		url: "/filteredreports",
+		options: {
+			schema: {
+				body: Type.Optional(Type.Object({
+					playernames: Type.Array(Type.String(), {
+						maxItems: 100
+					}),
+					ruleIDs: Type.Array(Type.String(), {
+						maxItems: 100
+					}),
+					communityIDs: Type.Array(Type.String(), {
+						maxItems: 100
+					}),
+				})),
+				description:
+					"Fetch reports by their player names, community IDs and rule IDs",
+				tags: [ "reports" ],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "ReportClass#",
+						},
+					},
+				},
+			}
+		}
+	})
+	async getFilteredReports(
+		req: FastifyRequest<{
+			Body: {
+				playernames: string[]
+				ruleIDs: string[]
+				communityIDs: string[]
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { playernames,ruleIDs, communityIDs } = req.body
+		const reports = await ReportModel.find({
+			playername: {
+				$in: playernames
+			},
+			brokenRule: {
+				$in: ruleIDs
+			},
+			communityId: {
+				$in: communityIDs
+			}
+		})
+		return res.send(reports)
+	}
+
 	@GET({
 		url: "/modifiedSince/:timestamp",
 		options: {
