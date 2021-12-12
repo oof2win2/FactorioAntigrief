@@ -51,6 +51,7 @@ model FAGCBans {
   playername  String
   communityId String
   brokenRule  String
+  guildIDs    String
 }
 
 model Whitelist {

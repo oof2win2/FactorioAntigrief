@@ -1,7 +1,7 @@
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { GuildConfig, Community } from "fagc-api-types"
 import ENV from "../utils/env.js"
-import { Client, ClientOptions, MessageEmbed, TextBasedChannels, TextChannel } from "discord.js"
+import { Client, ClientOptions, Collection, MessageEmbed, TextBasedChannels, TextChannel } from "discord.js"
 import { Command } from "./Commands.js"
 import { InfoChannel, PrismaClient } from ".prisma/client/index.js"
 import * as database from "./database.js"
@@ -24,36 +24,36 @@ interface BotOptions extends ClientOptions {
 export default class FAGCBot extends Client {
 	fagc: FAGCWrapper
 	db: PrismaClient
-	commands: Map<string, Command>
+	commands: Collection<string, Command>
 	/**
 	 * Info channels, grouped by guild ID
 	 */
-	infochannels: Map<string, InfoChannel[]>
+	infochannels: Collection<string, InfoChannel[]>
 	/**
 	 * Guild configs, by guild ID
 	 */
-	guildConfigs: Map<string, GuildConfig>
-	configuredActions: Map<string, database.ActionType>
+	guildConfigs: Collection<string, GuildConfig>
+	configuredActions: Collection<string, database.ActionType>
 	community?: Community
 	botconfig: database.BotConfigType
-	embedQueue: Map<string, MessageEmbed[]>
-	servers: Map<string, database.FactorioServerType[]>
+	embedQueue: Collection<string, MessageEmbed[]>
+	servers: Collection<string, database.FactorioServerType[]>
 	readonly rcon: RCONInterface
 
 	constructor(options: BotOptions) {
 		super(options)
-		this.guildConfigs = new Map()
+		this.guildConfigs = new Collection()
 		this.fagc = new FAGCWrapper({
 			apiurl: ENV.APIURL,
 			socketurl: ENV.WSURL,
 			enableWebSocket: true
 		})
-		this.commands = new Map()
+		this.commands = new Collection()
 
-		this.infochannels = new Map()
-		this.configuredActions = new Map()
-		this.embedQueue = new Map()
-		this.servers = new Map()
+		this.infochannels = new Collection()
+		this.configuredActions = new Collection()
+		this.embedQueue = new Collection()
+		this.servers = new Collection()
 
 		const rawServers = getServers()
 
