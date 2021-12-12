@@ -27,5 +27,24 @@ commands.forEach(async (name) => {
 
 client.login(ENV.DISCORD_BOTTOKEN)
 
-// check for existing bans on servers after the bot is started
-setTimeout(() => client.checkBans(), 10*1000)
+const checkBans = setTimeout(async() => {
+	// clear banlist from server's memory and also file
+	await client.rcon.rconCommandAll("/banlist clear")
+
+	// check for bans for players that are currently connected
+	client.checkBans(), 10*1000
+})
+
+const purgeBans = setInterval(() => {
+	console.log("Purging banlist")
+	// clear banlist from server's memory and also file
+	client.rcon.rconCommandAll("/banlist clear")
+}, 7 * 86400 * 1000)
+// 7 * 86400 * 1000 is a week in ms
+
+process.on("exit", () => {
+	client.destroy()
+	client.fagc.destroy()
+	clearTimeout(checkBans)
+	clearInterval(purgeBans)
+})
