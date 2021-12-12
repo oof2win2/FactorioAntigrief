@@ -126,7 +126,7 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 
 	async fetchFilteredReports(
-		playernames: string[],
+		playername: string,
 		ruleIDs: string[],
 		communityIDs: string[],
 		cache = true
@@ -134,7 +134,7 @@ export default class ReportManager extends BaseManager<Report> {
 		const reports = await fetch(`${this.apiurl}/reports/filteredreports`, {
 			method: "POST",
 			body: JSON.stringify({
-				playernames: playernames,
+				playername: playername,
 				ruleIDs: ruleIDs,
 				communityIDs: communityIDs,
 			}),
