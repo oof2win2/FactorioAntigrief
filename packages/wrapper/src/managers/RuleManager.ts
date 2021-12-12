@@ -89,6 +89,44 @@ export class RuleManager extends BaseManager<Rule> {
 		return data
 	}
 
+	async modify(
+		id: string,
+		{
+			shortdesc, longdesc
+		}: {shortdesc?: string, longdesc?: string},
+		reqConfig: RequestConfig = {}
+	): Promise<Rule | null> {
+		if (!this.masterapikey && !reqConfig.masterapikey)
+			throw new NoMasterApikeyError()
+		const data = await fetch(
+			`${this.apiurl}/rules/${strictUriEncode(id)}`,
+			{
+				method: "POST",
+				credentials: "include",
+				body: JSON.stringify({
+					shortdesc: shortdesc,
+					longdesc: longdesc
+				}),
+				headers: {
+					authorization: `Token ${
+						reqConfig.masterapikey || this.masterapikey
+					}`,
+					"content-type": "application/json",
+				},
+			}
+		).then((r) => r.json())
+
+		if (data.error)
+			throw new GenericAPIError(`${data.error}: ${data.message}`)
+		if (!data.id) throw data
+
+		// remove old rule from cache and add new rule
+		this.removeFromCache(data)
+		this.add(data)
+
+		return data
+	}
+
 	async remove(
 		id: string,
 		reqConfig: RequestConfig = {}
