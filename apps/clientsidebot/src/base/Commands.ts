@@ -9,21 +9,42 @@ interface CommandParams {
 	botConfig: BotConfigType
 }
 
-type CommandData =
-	| Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
-	| SlashCommandSubcommandBuilder
-
-export interface CommandWithSubcommands {
-	data: SlashCommandBuilder,
-	execute: (params: CommandParams) => Promise<unknown>
+export enum PermissionOverrideType {
+	ROLE = 1,
+	USER = 2,
+}
+export type PermissionOverride = {
+	id: string
+	type: PermissionOverrideType.ROLE
+	permission: boolean
+} | {
+	id: string
+	type: PermissionOverrideType.USER
+	permission: boolean
 }
 
-export interface Command {
-	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">,
-	execute: (params: CommandParams) => Promise<unknown>,
+type PermissionType = {
+	type: "banrole"
+} | {
+	type: "configrole"
+} | {
+	type: "notificationsrole"
 }
 
-export interface SubCommand {
-	data: SlashCommandSubcommandBuilder,
+interface BaseCommand {
 	execute: (params: CommandParams) => Promise<unknown>
+	permissionType?: PermissionType
+	permissionOverrides?: PermissionOverride[]
+}
+
+export interface CommandWithSubcommands extends BaseCommand {
+	data: SlashCommandBuilder
+}
+
+export interface Command extends BaseCommand {
+	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
+}
+
+export interface SubCommand extends BaseCommand {
+	data: SlashCommandSubcommandBuilder
 }

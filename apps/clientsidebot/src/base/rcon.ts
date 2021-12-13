@@ -1,7 +1,7 @@
 import { FactorioServerType } from "./database"
 import { Rcon } from "rcon-client"
-import FAGCBot from "./FAGCBot"
-import ENV from "../utils/env"
+import FAGCBot from "./FAGCBot.js"
+import ENV from "../utils/env.js"
 
 interface RCONResponse {
 	response: string

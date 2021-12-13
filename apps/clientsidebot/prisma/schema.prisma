@@ -25,8 +25,9 @@ model InfoChannel {
 }
 
 model Command {
-  id   String @id
-  name String
+  id      String @id
+  guildID String
+  name    String
 }
 
 model Actions {
