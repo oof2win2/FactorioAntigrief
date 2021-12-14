@@ -40,6 +40,7 @@ const Setapikey: SubCommand = {
 			apikey: apikey.data
 		})
 		await client.setBotConfig({
+			guildID: interaction.guildId,
 			apikey: apikey.data
 		})
 

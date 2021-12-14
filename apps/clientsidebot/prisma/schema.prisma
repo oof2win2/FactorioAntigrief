@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,7 +8,7 @@ datasource db {
 }
 
 model BotConfig {
-  id                        Int       @id @default(autoincrement())
+  guildID                   String    @id
   apikey                    String?
   owner                     String
   lastNotificationProcessed DateTime  @default(now()) @updatedAt
@@ -35,8 +32,8 @@ model Actions {
   guildID     String    @unique
   report      String    @default("none")
   revocation  String    @default("none")
-  config      BotConfig @relation(fields: [botConfigId], references: [id])
-  botConfigId Int
+  botConfigID String
+  config      BotConfig @relation(fields: [botConfigID], references: [guildID])
 }
 
 model Privatebans {

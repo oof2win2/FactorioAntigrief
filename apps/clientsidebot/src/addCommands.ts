@@ -30,7 +30,7 @@ try {
 	
 	console.log("Removing old commands")
 	const existingCommands = await prisma.command.findMany()
-	for (const guildID in guildIDs) {
+	for (const guildID of guildIDs) {
 		console.log(`Removing old commands in guild ${guildID}`)
 		const existingCommandsInGuild = existingCommands.filter(command => command.guildID === guildID)
 		await Promise.all(
@@ -45,7 +45,7 @@ try {
 	await prisma.command.deleteMany()
 
 	console.log("Adding new commands")
-	for (const guildID in guildIDs) {
+	for (const guildID of guildIDs) {
 		console.log(`Adding new commands in guild ${guildID}`)
 		const newCommands = await rest.put(
 			Routes.applicationGuildCommands(self.id, guildID),
@@ -66,7 +66,7 @@ try {
 	}).flat()
 
 	await Promise.all(toSaveCommands.map(async (command) => {
-		prisma.command.create({
+		await prisma.command.create({
 			data: {
 				id: command.id,
 				guildID: command.guildID,

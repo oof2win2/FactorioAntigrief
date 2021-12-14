@@ -12,6 +12,7 @@ export const Action = z.object({
 export type ActionType = z.infer<typeof Action>
 
 export const BotConfig = z.object({
+	guildID: z.string(),
 	apikey: z.string().nullable().optional(),
 	owner: z.string().default(ENV.OWNERID),
 	actions: z.array(Action).default([])

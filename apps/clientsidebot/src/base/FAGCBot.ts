@@ -35,7 +35,7 @@ export default class FAGCBot extends Client {
 	guildConfigs: Collection<string, GuildConfig>
 	configuredActions: Collection<string, database.ActionType>
 	community?: Community
-	botconfig: database.BotConfigType
+	botconfig: Collection<string, database.BotConfigType>
 	embedQueue: Collection<string, MessageEmbed[]>
 	servers: Collection<string, database.FactorioServerType[]>
 	readonly rcon: RCONInterface
@@ -54,6 +54,8 @@ export default class FAGCBot extends Client {
 		this.configuredActions = new Collection()
 		this.embedQueue = new Collection()
 		this.servers = new Collection()
+
+		this.botconfig = new Collection()
 
 		const rawServers = getServers()
 
@@ -85,11 +87,10 @@ export default class FAGCBot extends Client {
 			})
 		})
 
-		this.botconfig = database.BotConfig.parse({})
-		this.getBotConfig().then(config => {
-			if (config) {
-				this.botconfig = config
-			}
+		this.getBotConfigs().then(configs => {
+			configs.forEach(config => {
+				this.botconfig.set(config.guildID, config)
+			})
 		})
 		
 		this.fagc.websocket.on("communityCreated", (event) => wshandler.communityCreated({ event, client: this }))
@@ -102,20 +103,36 @@ export default class FAGCBot extends Client {
 
 		setInterval(() => this.sendEmbeds(), 10*1000) // send embeds every 10 seconds
 	}
-	async getBotConfig(): Promise<database.BotConfigType> {
-		const record = await this.db.botConfig.findFirst({
+	async getBotConfigs(): Promise<database.BotConfigType[]> {
+		const record = await this.db.botConfig.findMany({
 			include: {
 				actions: true
 			}
 		})
-		return database.BotConfig.parse(record ?? {})
+		return z.array(database.BotConfig).parse(record)
 	}
-	async setBotConfig(config: Partial<database.BotConfigType>) {
+	async getBotConfig(guildID: string): Promise<database.BotConfigType> {
+		const existing = this.botconfig.get(guildID)
+		if (existing) return existing
+		const record = await this.db.botConfig.findFirst({
+			where: {
+				guildID: guildID,
+			},
+			include: {
+				actions: true
+			}
+		})
+		const created = database.BotConfig.parse(record ?? { guildID: guildID })
+		if (!record) await this.setBotConfig(created)
+		return created
+	}
+	async setBotConfig(config: Partial<database.BotConfigType> & Pick<database.BotConfigType, "guildID">) {
 		await this.db.botConfig.upsert({
-			where: { id: 1 },
+			where: { guildID: config.guildID },
 			create: {
 				...database.BotConfig.parse(config),
 				actions: undefined,
+				guildID: config.guildID,
 			},
 			update: {
 				...database.BotConfig.parse(config),
@@ -128,17 +145,17 @@ export default class FAGCBot extends Client {
 				actions: true
 			}
 		})
-		this.botconfig = database.BotConfig.parse(newConfig)
+		this.botconfig.set(config.guildID, database.BotConfig.parse(newConfig))
 	}
 	async setGuildAction(action: database.PickPartial<database.BotConfigType["actions"][0], "report"|"revocation">) {
 		await this.db.actions.upsert({
 			create: {
 				...action,
-				botConfigId: 1
+				botConfigID: action.guildID,
 			},
 			update: {
 				...action,
-				guildID: undefined, // do not change guild id
+				guildID: action.guildID,
 			},
 			where: {
 				guildID: action.guildID
@@ -168,7 +185,7 @@ export default class FAGCBot extends Client {
 	}
 
 	async getGuildActions() {
-		const currentConfig = { actions: this.configuredActions } || await this.getBotConfig()
+		const currentConfig = { actions: this.configuredActions } || await this.getBotConfigs()
 		return currentConfig.actions
 	}
 	async getGuildAction(guildID: string): Promise<database.ActionType | null> {
