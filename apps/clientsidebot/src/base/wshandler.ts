@@ -115,4 +115,6 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	
 	// ban players that are online and are banned with the new rules
 	client.checkBans()
+
+	await client.syncCommandPerms(event.guildId)
 }

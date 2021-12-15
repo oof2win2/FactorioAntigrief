@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { CommandInteraction } from "discord.js"
+import { GuildApplicationCommandPermissionData, CommandInteraction } from "discord.js"
 import FAGCBot from "./FAGCBot.js"
 import { BotConfigType } from "./database.js"
 
@@ -14,27 +14,12 @@ export enum PermissionOverrideType {
 	USER = 2,
 }
 
-export type PermissionOverride = {
-	/**
-	 * ID of user or role to set override for
-	 */
-	id: string
-	/**
-	 * Type of the override
-	 */
-	type: PermissionOverrideType.ROLE | PermissionOverrideType.USER
-	/**
-	 * Is the user or role allowed to access this command?
-	 */
-	permission: boolean
-}
-
 type PermissionType = "banrole" | "configrole" | "notificationsrole"
 
 interface BaseCommand {
 	execute: (params: CommandParams) => Promise<unknown>
 	permissionType?: PermissionType
-	permissionOverrides?: PermissionOverride[]
+	permissionOverrides?: GuildApplicationCommandPermissionData["permissions"]
 }
 
 export interface CommandWithSubcommands extends BaseCommand {

@@ -12,6 +12,7 @@ import { Collection } from "discord.js"
 import { Required } from "utility-types"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { GuildConfig } from "fagc-api-types"
+import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 
 const commandCategories = (await fs.readdir("./commands")).filter(command => command.endsWith(".js"))
 const toPushCommmands = await Promise.all(commandCategories.map(async (commandFile) => {
@@ -103,7 +104,7 @@ try {
 			const guildCommand = guildCommands.find(c => c.name === command.data.name)!
 			const perms = command.permissionOverrides
 			perms.push({
-				type: PermissionOverrideType.USER,
+				type: ApplicationCommandPermissionTypes.USER,
 				id: ENV.OWNERID,
 				permission: true,
 			})
@@ -113,7 +114,7 @@ try {
 				case "banrole": {
 					if (guildConfig.roles.reports)
 						perms.push({
-							type: PermissionOverrideType.ROLE,
+							type: ApplicationCommandPermissionTypes.ROLE,
 							id: guildConfig.roles.reports,
 							permission: true
 						})
@@ -122,7 +123,7 @@ try {
 				case "configrole": {
 					if (guildConfig.roles.setConfig)
 						perms.push({
-							type: PermissionOverrideType.ROLE,
+							type: ApplicationCommandPermissionTypes.ROLE,
 							id: guildConfig.roles.setConfig,
 							permission: true
 						})
@@ -131,7 +132,7 @@ try {
 				case "notificationsrole": {
 					if (guildConfig.roles.webhooks)
 						perms.push({
-							type: PermissionOverrideType.ROLE,
+							type: ApplicationCommandPermissionTypes.ROLE,
 							id: guildConfig.roles.webhooks,
 							permission: true
 						})

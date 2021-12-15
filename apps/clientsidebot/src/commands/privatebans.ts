@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders"
 import { CommandWithSubcommands, PermissionOverrideType, SubCommand } from "../base/Commands.js"
 import { readdirSync } from "fs"
 import ENV from "../utils/env.js"
+import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 
 const commands: SubCommand[] = await Promise.all(readdirSync("./commands/privatebans/")
 	.filter(command => command.endsWith(".js"))
@@ -23,13 +24,6 @@ const Bans: CommandWithSubcommands = {
 		return command.execute(args)
 	},
 	permissionType: "banrole",
-	permissionOverrides: [
-		{
-			type: PermissionOverrideType.USER,
-			id: ENV.OWNERID,
-			permission: true,
-		}
-	]
 }
 
 commands.forEach(command => {
