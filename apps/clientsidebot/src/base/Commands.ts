@@ -13,23 +13,23 @@ export enum PermissionOverrideType {
 	ROLE = 1,
 	USER = 2,
 }
+
 export type PermissionOverride = {
+	/**
+	 * ID of user or role to set override for
+	 */
 	id: string
-	type: PermissionOverrideType.ROLE
-	permission: boolean
-} | {
-	id: string
-	type: PermissionOverrideType.USER
+	/**
+	 * Type of the override
+	 */
+	type: PermissionOverrideType.ROLE | PermissionOverrideType.USER
+	/**
+	 * Is the user or role allowed to access this command?
+	 */
 	permission: boolean
 }
 
-type PermissionType = {
-	type: "banrole"
-} | {
-	type: "configrole"
-} | {
-	type: "notificationsrole"
-}
+type PermissionType = "banrole" | "configrole" | "notificationsrole"
 
 interface BaseCommand {
 	execute: (params: CommandParams) => Promise<unknown>
