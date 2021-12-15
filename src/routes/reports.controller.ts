@@ -170,11 +170,10 @@ export default class ReportController {
 	}
 
 	@POST({
-		url: "/filteredreports",
+		url: "/list",
 		options: {
 			schema: {
 				body: Type.Required(Type.Object({
-					playername: Type.String(),
 					ruleIDs: Type.Array(Type.String(), {
 						maxItems: 100
 					}),
@@ -183,7 +182,7 @@ export default class ReportController {
 					}),
 				})),
 				description:
-					"Fetch reports by their player names, community IDs and rule IDs",
+					"Fetch reports by their community IDs and rule IDs",
 				tags: [ "reports" ],
 				response: {
 					"200": {
@@ -199,16 +198,14 @@ export default class ReportController {
 	async getFilteredReports(
 		req: FastifyRequest<{
 			Body: {
-				playername: string
 				ruleIDs: string[]
 				communityIDs: string[]
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { playername, ruleIDs, communityIDs } = req.body
+		const { ruleIDs, communityIDs } = req.body
 		const reports = await ReportModel.find({
-			playername: playername,
 			brokenRule: {
 				$in: ruleIDs
 			},
