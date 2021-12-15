@@ -125,16 +125,14 @@ export default class ReportManager extends BaseManager<Report> {
 		return ruleReports
 	}
 
-	async fetchFilteredReports(
-		playername: string,
+	async listFiltered(
 		ruleIDs: string[],
 		communityIDs: string[],
 		cache = true
 	): Promise<Report[]> {
-		const reports = await fetch(`${this.apiurl}/reports/filteredreports`, {
+		const reports = await fetch(`${this.apiurl}/reports/list`, {
 			method: "POST",
 			body: JSON.stringify({
-				playername: playername,
 				ruleIDs: ruleIDs,
 				communityIDs: communityIDs,
 			}),
