@@ -167,8 +167,7 @@ export default class RuleController {
 			...Boolean(shortdesc) && { shortdesc: shortdesc },
 			...Boolean(longdesc) && { longdesc: longdesc }
 		}, { new: true })
-		console.log(rule)
-		// ruleCreatedMessage(rule)
+
 		return res.send(rule)
 	}
 

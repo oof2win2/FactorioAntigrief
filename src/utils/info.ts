@@ -60,12 +60,10 @@ wss.on("connection", (ws) => {
 			}).then((c) => c?.toObject())
 			if (guildConfig)
 				ws.send(
-					Buffer.from(
-						JSON.stringify({
-							...guildConfig,
-							messageType: "guildConfigChanged",
-						})
-					)
+					JSON.stringify({
+						config: guildConfig,
+						messageType: "guildConfigChanged",
+					})
 				)
 			WebhookGuildIDs.set(ws, message.guildId)
 		}
@@ -352,12 +350,10 @@ export function guildConfigChanged(
 		const guildId = WebhookGuildIDs.get(client)
 		if (guildId == config.guildId) {
 			client.send(
-				Buffer.from(
-					JSON.stringify({
-						config: config,
-						messageType: "guildConfigChanged",
-					})
-				)
+				JSON.stringify({
+					config: config,
+					messageType: "guildConfigChanged",
+				})
 			)
 		}
 	})
