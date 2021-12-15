@@ -1,7 +1,7 @@
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 import FAGCBot from "./FAGCBot"
+import { Report } from "fagc-api-types"
 import { MessageEmbed } from "discord.js"
-import RCONInterface from "./rcon"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -99,8 +99,7 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 				const command = `/ban ${event.revocation.playername} ${privateBans[0].reason}`
 				await client.rcon.rconCommandGuild(command, guildID)
 			} else {
-				const otherBans = await client.fagc.reports.fetchFilteredReports(
-					event.revocation.playername, 
+				const otherBans = await client.fagc.reports.listFiltered(
 					guildConfig.ruleFilters ?? [],
 					guildConfig.trustedCommunities ?? []
 				)
@@ -111,10 +110,41 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 }
 
 export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildConfigChanged">) => {
+	const oldConfig = client.guildConfigs.get(event.guildId)
+
+	if (
+		oldConfig && oldConfig.ruleFilters && oldConfig.trustedCommunities &&
+		event.ruleFilters && event.trustedCommunities
+	) {
+		const oldReports = await client.fagc.reports.listFiltered(oldConfig.ruleFilters, oldConfig.trustedCommunities)
+		const newReports = await client.fagc.reports.listFiltered(event.ruleFilters, event.trustedCommunities)
+
+		const oldReportNames = oldReports.map(report => report.playername)
+		const newReportNames = newReports.map(report => report.playername)
+		const unbanPlayers = oldReportNames
+			.filter((playername) => !newReportNames.includes(playername))
+		const newBans = newReportNames
+			.map((playername) => {
+				if (!oldReportNames.includes(playername)) {
+					const report = newReports.find(report => report.playername === playername)!
+					return report
+				}
+				return false
+			})
+			.filter((r): r is Report => Boolean(r))
+		
+		// TODO: custom ban+unban messages
+		const unbanCommand = unbanPlayers
+			.map((playername) => `game.unban_player("${playername}")`)
+			.join(";")
+		const banCommand = newBans
+			.map((report) => `game.ban_player("${report.playername}")`)
+			.join(";")
+		await client.rcon.rconCommandGuild(`/sc ${unbanCommand}`, event.guildId)
+		await client.rcon.rconCommandGuild(`/sc ${banCommand}` , event.guildId)
+	}
+
 	client.guildConfigs.set(event.guildId, event)
-	
-	// ban players that are online and are banned with the new rules
-	client.checkBans()
 
 	await client.syncCommandPerms(event.guildId)
 }

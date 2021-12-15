@@ -222,14 +222,13 @@ export default class FAGCBot extends Client {
 		return config
 	}
 
-	async ban(report: Report, guildID: string) {
+	createBanMessage(report: Report, guildID: string) {
 		const servers = this.servers.get(guildID)
-		if (!servers || !servers.length) return
-		const guildAction = await this.getGuildAction(guildID)
-		if (!guildAction || guildAction.report === "none") return
+		if (!servers || !servers.length) return false
+		const guildAction = this.configuredActions.get(guildID)
+		if (!guildAction || guildAction.report === "none") return false
 
 		const rawBanMessage = guildAction.report === "ban" ? ENV.BANMESSAGE : ENV.CUSTOMBAN
-
 		const command = rawBanMessage
 			.replace("{ADMINID}", report.adminId)
 			.replace("{AUTOMATED}", report.automated ? "true" : "false")
@@ -240,6 +239,12 @@ export default class FAGCBot extends Client {
 			.replace("{PLAYERNAME}", report.playername)
 			.replace("{PROOF}", report.proof)
 			.replace("{REPORTEDTIME}", report.reportedTime.toTimeString())
+		return command
+	}
+
+	async ban(report: Report, guildID: string) {
+		const command = this.createBanMessage(report, guildID)
+		if (!command) return
 		
 		this.rcon.rconCommandGuild(command, guildID)
 	}
@@ -264,31 +269,6 @@ export default class FAGCBot extends Client {
 			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
 		
 		this.rcon.rconCommandGuild(command, guildID)
-	}
-
-	async checkBans() {
-		const playercommands = (await this.rcon.rconCommandAll("/p o")).filter(r=>r)
-		const players = playercommands.filter(x => x !== false) as Exclude<typeof playercommands[0], false>[]
-		players.forEach((playeroutput) => {
-			const playerlist = playeroutput.response
-				.split("\n")
-				.slice(1)
-				.map((line) => line.slice(0, line.indexOf(" (online)")))
-			const guildConfig = this.guildConfigs.get(playeroutput.server.discordGuildID)
-			if (!guildConfig) return
-			if (!guildConfig.ruleFilters || !guildConfig.trustedCommunities) return
-			playerlist.forEach(async (player) => {
-				if (!guildConfig.ruleFilters || !guildConfig.trustedCommunities) return // TS requires this
-				const whitelist = await this.db.whitelist.findFirst({
-					where: {
-						playername: player
-					}
-				})
-				if (whitelist) return // ignore whatever if a whielist for that player exists
-				const allreports = await this.fagc.reports.fetchFilteredReports(player, guildConfig.ruleFilters, guildConfig.trustedCommunities)
-				if (allreports.length) this.ban(allreports[0], guildConfig.guildId)
-			})
-		})
 	}
 	
 	async syncCommandPerms(guildID: string) {
@@ -357,8 +337,8 @@ export default class FAGCBot extends Client {
 				permissions: perms,
 			}
 		})
-		const x = await this.guilds.cache.get(guildID)?.commands.permissions.set({
-			fullPermissions: toSetPermissions
+		await this.guilds.cache.get(guildID)?.commands.permissions.set({
+			fullPermissions: toSetPermissions,
 		})
 	}
 }
