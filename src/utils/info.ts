@@ -20,7 +20,7 @@ import {
 
 const wss = new WebSocket.Server({ port: ENV.WS_PORT, host: ENV.WS_HOST })
 
-const WebhookGuildIDs = new WeakMap<WebSocket, string>()
+const WebhookGuildIDs = new WeakMap<WebSocket, string[]>()
 
 let WebhookQueue: MessageEmbed[] = []
 
@@ -53,19 +53,44 @@ export function WebhookMessage(message: MessageEmbed): void {
 }
 wss.on("connection", (ws) => {
 	ws.on("message", async (msg) => {
-		const message = JSON.parse(msg.toString("utf-8"))
-		if (message.guildId) {
-			const guildConfig = await GuildConfigModel.findOne({
-				guildId: message.guildId,
-			}).then((c) => c?.toObject())
-			if (guildConfig)
-				ws.send(
-					JSON.stringify({
-						config: guildConfig,
-						messageType: "guildConfigChanged",
-					})
-				)
-			WebhookGuildIDs.set(ws, message.guildId)
+		let message: {
+			guildID?: string,
+			type?: string
+		}
+		try {
+			message = JSON.parse(msg.toString("utf8"))
+		} catch {
+			// if an error with parsing occurs, it's their problem
+			return
+		}
+		
+		if (typeof message.type === "string" && typeof message.guildID === "string") {
+			if (message.type === "addGuildID") {
+				const guildConfig = await GuildConfigModel.findOne({
+					guildId: message.guildID,
+				}).then((c) => c?.toObject())
+				if (guildConfig) {
+					ws.send(
+						JSON.stringify({
+							config: guildConfig,
+							messageType: "guildConfigChanged",
+						})
+					)
+				}
+				const existing = WebhookGuildIDs.get(ws)
+				if (existing) {
+					existing.push(message.guildID)
+					const withoutDuplicates = existing.filter((x, i, arr) => arr.indexOf(x) === i)
+					WebhookGuildIDs.set(ws, withoutDuplicates)
+				} else {
+					WebhookGuildIDs.set(ws, [ message.guildID ])
+				}
+			}
+			if (message.type === "removeGuildID") {
+				const existing = WebhookGuildIDs.get(ws)
+				if (existing)
+					WebhookGuildIDs.set(ws, existing.filter(id => id !== message.guildID))
+			}
 		}
 	})
 })
@@ -347,8 +372,8 @@ export function guildConfigChanged(
 ): void {
 	wss.clients.forEach((client) => {
 		// TODO: test this
-		const guildId = WebhookGuildIDs.get(client)
-		if (guildId == config.guildId) {
+		const guildIds = WebhookGuildIDs.get(client)
+		if (guildIds?.includes(config.guildId)) {
 			client.send(
 				JSON.stringify({
 					config: config,
