@@ -5,7 +5,7 @@ import { Type } from "@sinclair/typebox"
 import RuleModel from "../database/fagc/rule.js"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
-import { ruleCreatedMessage, ruleRemovedMessage } from "../utils/info.js"
+import { ruleCreatedMessage, ruleRemovedMessage, ruleUpdatedMessage } from "../utils/info.js"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
@@ -161,14 +161,19 @@ export default class RuleController {
 		if (!shortdesc && !longdesc) {
 			return res.send(await RuleModel.findOne({ id: id }))
 		}
-		const rule = await RuleModel.findOneAndUpdate({
+		const oldRule = await RuleModel.findOneAndUpdate({ id: id })
+		if (!oldRule) return res.send(null)
+		const newRule = await RuleModel.findOneAndUpdate({
 			id: id
 		}, {
 			...Boolean(shortdesc) && { shortdesc: shortdesc },
 			...Boolean(longdesc) && { longdesc: longdesc }
 		}, { new: true })
+		if (!newRule) return res.send(null)
 
-		return res.send(rule)
+		ruleUpdatedMessage(oldRule, newRule)
+
+		return res.send(newRule)
 	}
 
 	@DELETE({

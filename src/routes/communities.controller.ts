@@ -10,6 +10,7 @@ import {
 	guildConfigChanged,
 	communityCreatedMessage,
 	communityRemovedMessage,
+	communityUpdatedMessage,
 } from "../utils/info.js"
 import {
 	client,
@@ -382,7 +383,8 @@ export default class CommunityController {
 				message: "Community config was not found",
 			})
 
-		if (contact && !(await validateDiscordUser(contact)))
+		const contactUser = await validateDiscordUser(contact || "")
+		if (contact && !contactUser)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
@@ -398,6 +400,12 @@ export default class CommunityController {
 			},
 			community.toObject()
 		)
+
+		communityUpdatedMessage(community, {
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			)
+		})
 
 		return res.status(200).send(community)
 	}

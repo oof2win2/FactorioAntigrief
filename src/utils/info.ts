@@ -299,6 +299,48 @@ export async function ruleRemovedMessage(
 	)
 }
 
+export async function ruleUpdatedMessage(
+	oldRule: DocumentType<RuleClass, BeAnObject>,
+	newRule: DocumentType<RuleClass, BeAnObject>
+): Promise<void> {
+	const ruleEmbed = new MessageEmbed()
+		.setTitle("FAGC - Rule Updated")
+		.setColor("#6f4fe3")
+		.addFields(
+			{ name: "Rule ID", value: `\`${newRule.id}\``, inline: true },
+			{
+				name: "Old Rule short description",
+				value: oldRule.shortdesc,
+				inline: true,
+			},
+			{
+				name: "New Rule short description",
+				value: newRule.shortdesc,
+				inline: true,
+			},
+			{
+				name: "Old Rule long description",
+				value: oldRule.longdesc,
+				inline: true,
+			},
+			{
+				name: "New Rule long description",
+				value: newRule.longdesc,
+				inline: true,
+			}
+		)
+	WebhookMessage(ruleEmbed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "ruleUpdated",
+			embed: ruleEmbed,
+			oldRule: oldRule,
+			newRule: newRule
+		})
+	)
+}
+
 export async function communityCreatedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
 	opts: CommunityCreatedMessageExtraOpts
@@ -367,6 +409,39 @@ export async function communityRemovedMessage(
 		})
 	)
 }
+
+export async function communityUpdatedMessage(
+	community: DocumentType<CommunityClass, BeAnObject>,
+	opts: CommunityCreatedMessageExtraOpts
+): Promise<void> {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC - Community Updated")
+		.setColor("#6f4fe3")
+		.addFields(
+			{
+				name: "Community ID",
+				value: `\`${community.id}\``,
+				inline: true,
+			},
+			{ name: "Community name", value: community.name, inline: true },
+			{
+				name: "Contact",
+				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				inline: true,
+			}
+		)
+	WebhookMessage(embed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "communityUpdated",
+			embed: embed,
+			community: community,
+			extraData: opts,
+		})
+	)
+}
+
 export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
