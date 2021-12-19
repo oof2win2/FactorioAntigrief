@@ -21,8 +21,10 @@ export type WebSocketMessageType =
 	| "revocation"
 	| "ruleCreated"
 	| "ruleRemoved"
+	| "ruleUpdated"
 	| "communityCreated"
 	| "communityRemoved"
+	| "communityUpdated"
 	| "announcement"
 	| "reconnecting"
 	| "connected"
@@ -36,8 +38,10 @@ export declare interface WebSocketEvents {
 	revocation: (message: RevocationMessage) => void
 	ruleCreated: (message: RuleCreatedMessage) => void
 	ruleRemoved: (message: RuleRemovedMessage) => void
+	ruleUpdated: (message: RuleCreatedMessage) => void
 	communityCreated: (message: CommunityCreatedMessage) => void
 	communityRemoved: (message: CommunityRemovedMessage) => void
+	communityUpdated: (message: CommunityCreatedMessage) => void
 
 	reconnecting: (message: void) => void
 	connected: (message: void) => void
@@ -120,6 +124,12 @@ class WebSocketHandler extends EventEmitter {
 				newMessage as unknown as RuleCreatedMessage
 			)
 			break
+		case "ruleUpdated":
+			this.emit(
+				"ruleUpdated",
+				newMessage as unknown as RuleCreatedMessage
+			)
+			break
 		case "ruleRemoved":
 			this.emit(
 				"ruleRemoved",
@@ -136,6 +146,12 @@ class WebSocketHandler extends EventEmitter {
 			this.emit(
 				"communityRemoved",
 				newMessage as unknown as CommunityRemovedMessage
+			)
+			break
+		case "communityUpdated":
+			this.emit(
+				"communityUpdated",
+				newMessage as unknown as CommunityCreatedMessage
 			)
 			break
 		}
