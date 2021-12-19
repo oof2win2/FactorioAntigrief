@@ -156,11 +156,22 @@ class WebSocketHandler extends EventEmitter {
 			break
 		}
 	}
-	setGuildID(guildId: string): void {
+	addGuildID(guildID: string): void {
 		this.socket?.send(
 			Buffer.from(
 				JSON.stringify({
-					guildId: guildId,
+					type: "addGuildID",
+					guildID: guildID,
+				})
+			)
+		)
+	}
+	removeGuildID(guildID: string): void {
+		this.socket?.send(
+			Buffer.from(
+				JSON.stringify({
+					type: "removeGuildID",
+					guildID: guildID,
 				})
 			)
 		)
