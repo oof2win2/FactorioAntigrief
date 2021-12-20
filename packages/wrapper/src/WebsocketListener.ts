@@ -1,5 +1,7 @@
 import { EventEmitter } from "events"
+// TODO: use reconnecting-websocket
 import WebSocket from "isomorphic-ws"
+import ReconnectingWebSocket from "reconnecting-websocket"
 import {
 	GuildConfig,
 	CommunityCreatedMessage,
@@ -67,38 +69,39 @@ declare interface WebSocketHandler {
 }
 
 class WebSocketHandler extends EventEmitter {
-	private socket!: WebSocket
+	private socket!: ReconnectingWebSocket
 	private opts: WebSockethandlerOpts
+	private guildIDs: string[]
 
 	constructor(opts: WebSockethandlerOpts) {
 		super()
 		this.opts = opts
+		this.guildIDs = []
 
 		if (!opts.enabled) return
 
 		// don't create the websocket if it has not been enabled
 
-		this.socket = new WebSocket(this.opts.uri)
-
+		this.socket = new ReconnectingWebSocket(this.opts.uri, undefined, {
+			WebSocket: WebSocket,
+		})
+		setInterval(() => console.log(this.socket.retryCount), 5000)
+		console.log("created")
+		
 		// handle socket messages
 		this.socket.onmessage = (msg) => {
 			this.handleMessage(JSON.parse(msg.data as string))
 		}
-
-		// auto-reconnect for socket
-		this.socket.onclose = () => {
-			const recconect = setInterval(() => {
-				if (this.socket.readyState === this.socket.OPEN) {
-					this.emit("connected")
-					return clearInterval(recconect)
-				}
-				// if not connected, try connecting again
-				try {
-					this.socket = new WebSocket(opts.uri)
-					// eslint-disable-next-line no-empty
-				} catch (e) {}
-				this.emit("reconnecting")
-			}, 5000)
+		this.socket.onopen = () => {
+			console.log("open")
+			this.guildIDs.map((id) => {
+				this.socket.send(
+					JSON.stringify({
+						type: "addGuildID",
+						guildID: id,
+					})
+				)
+			})
 		}
 	}
 	handleMessage(message: WebSocketMessage): void {
@@ -157,30 +160,31 @@ class WebSocketHandler extends EventEmitter {
 		}
 	}
 	addGuildID(guildID: string): void {
+		if (this.guildIDs.includes(guildID)) return // don't do anything if it already is set
+		// save guild id to list
+		this.guildIDs.push(guildID)
 		this.socket?.send(
-			Buffer.from(
-				JSON.stringify({
-					type: "addGuildID",
-					guildID: guildID,
-				})
-			)
+			JSON.stringify({
+				type: "addGuildID",
+				guildID: guildID,
+			})
 		)
 	}
 	removeGuildID(guildID: string): void {
+		if (!this.guildIDs.includes(guildID)) return // don't do anything if it isn't there
+		// remove the id from local list & then send info to backend
+		this.guildIDs = this.guildIDs.filter(id => id !== guildID)
 		this.socket?.send(
-			Buffer.from(
-				JSON.stringify({
-					type: "removeGuildID",
-					guildID: guildID,
-				})
-			)
+			JSON.stringify({
+				type: "removeGuildID",
+				guildID: guildID,
+			})
 		)
 	}
 	destroy(): void {
 		if (!this.opts.enabled) return
 
-		this.socket.removeAllListeners()
-		this.socket.terminate()
+		this.socket.close()
 	}
 }
 export default WebSocketHandler
