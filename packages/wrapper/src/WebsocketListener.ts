@@ -85,15 +85,12 @@ class WebSocketHandler extends EventEmitter {
 		this.socket = new ReconnectingWebSocket(this.opts.uri, undefined, {
 			WebSocket: WebSocket,
 		})
-		setInterval(() => console.log(this.socket.retryCount), 5000)
-		console.log("created")
 		
 		// handle socket messages
 		this.socket.onmessage = (msg) => {
 			this.handleMessage(JSON.parse(msg.data as string))
 		}
 		this.socket.onopen = () => {
-			console.log("open")
 			this.guildIDs.map((id) => {
 				this.socket.send(
 					JSON.stringify({

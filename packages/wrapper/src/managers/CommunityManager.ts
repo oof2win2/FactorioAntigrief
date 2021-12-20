@@ -4,6 +4,7 @@ import BaseManager from "./BaseManager"
 import { GenericAPIError, NoAuthError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import { Community, GuildConfig, ApiID } from "fagc-api-types"
+import { FetchRequestTypes } from "../types/privatetypes"
 
 type SetGuildConfig = Partial<GuildConfig> & Pick<GuildConfig, "guildId">
 type SetCommunityConfig = Partial<Omit<Community, "id">>
@@ -16,15 +17,17 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (options.masterapikey) this.masterapikey = options.masterapikey
 		this.apiurl = options.apiurl
 	}
-	async fetchCommunity(
-		communityId: ApiID,
+	async fetchCommunity({
+		communityID,
 		cache = true,
 		force = false
-	): Promise<Community | null> {
+	}: {
+		communityID: ApiID,
+	} & FetchRequestTypes): Promise<Community | null> {
 		if (!force) {
 			const cached =
-				this.cache.get(communityId) ||
-				this.fetchingCache.get(communityId)
+				this.cache.get(communityID) ||
+				this.fetchingCache.get(communityID)
 			if (cached) return cached
 		}
 
@@ -35,10 +38,10 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		)
 
-		this.fetchingCache.set(communityId, fetchingPromise)
+		this.fetchingCache.set(communityID, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/communities/${strictUriEncode(communityId)}`,
+			`${this.apiurl}/communities/${strictUriEncode(communityID)}`,
 			{
 				credentials: "include",
 			}
@@ -54,7 +57,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		}, 0)
 		return fetched
 	}
-	async fetchAll(cache = true): Promise<Community[]> {
+	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Community[]> {
 		const allCommunities = await fetch(`${this.apiurl}/communities`, {
 			credentials: "include",
 		}).then((c) => c.json())
@@ -71,10 +74,10 @@ export default class CommunityManager extends BaseManager<Community> {
 		}
 		return allCommunities
 	}
-	async fetchOwnCommunity(
+	async fetchOwnCommunity({
 		cache = true,
-		reqConfig: RequestConfig = {}
-	): Promise<Community | null> {
+		reqConfig = {}
+	}: FetchRequestTypes): Promise<Community | null> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 
@@ -102,7 +105,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (cached) return cached
 		return null
 	}
-	async fetchGuildConfig(guildId: string): Promise<GuildConfig | null> {
+	async fetchGuildConfig({
+		guildId
+	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
 		const config = await fetch(
 			`${this.apiurl}/communities/guildconfig/${strictUriEncode(
 				guildId
@@ -117,9 +122,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (!config || !config.guildId) return null
 		return config
 	}
-	async fetchOwnGuildConfig(
-		reqConfig: RequestConfig = {}
-	): Promise<GuildConfig | null> {
+	async fetchOwnGuildConfig({
+		reqConfig = {}
+	}: FetchRequestTypes): Promise<GuildConfig | null> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 		const config = await fetch(`${this.apiurl}/communities/guildconfig`, {
@@ -136,10 +141,12 @@ export default class CommunityManager extends BaseManager<Community> {
 
 		return config
 	}
-	async setGuildConfig(
+	async setGuildConfig({
+		config,
+		reqConfig = {}
+	}: {
 		config: SetGuildConfig,
-		reqConfig: RequestConfig = {}
-	): Promise<GuildConfig> {
+	} & FetchRequestTypes): Promise<GuildConfig> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 
@@ -158,17 +165,21 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		return update
 	}
-	async fetchCommunityConfig(
-		communityId: ApiID,
-		cache = true,
-		force = false
-	): Promise<Community | null> {
-		return this.fetchCommunity(communityId, cache, force)
+	async fetchCommunityConfig({
+		communityID,
+		cache,
+		force,
+	}: {
+		communityID: ApiID
+	} & FetchRequestTypes): Promise<Community | null> {
+		return this.fetchCommunity({ communityID, cache, force })
 	}
-	async setCommunityConfig(
+	async setCommunityConfig({
+		config,
+		reqConfig = {}
+	}: {
 		config: SetCommunityConfig,
-		reqConfig: RequestConfig = {}
-	): Promise<Community> {
+	} & FetchRequestTypes): Promise<Community> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 
@@ -191,10 +202,12 @@ export default class CommunityManager extends BaseManager<Community> {
 		return update
 	}
 
-	async notifyGuildConfig(
-		guildId: string,
-		reqConfig: RequestConfig = {}
-	): Promise<void> {
+	async notifyGuildConfig({
+		guildID,
+		reqConfig = {}
+	}: {
+		guildID: string,
+	} & FetchRequestTypes): Promise<void> {
 		if (
 			!reqConfig.masterapikey &&
 			!this.masterapikey &&
@@ -203,7 +216,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new NoAuthError()
 		const create = await fetch(
 			`${this.apiurl
-			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildId)}`,
+			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildID)}`,
 			{
 				method: "POST",
 				credentials: "include",
@@ -218,10 +231,12 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
-	async guildLeave(
-		guildId: string,
-		reqConfig: RequestConfig = {}
-	): Promise<void> {
+	async guildLeave({
+		guildID,
+		reqConfig = {}
+	}: {
+		guildID: string,
+	} & FetchRequestTypes): Promise<void> {
 		if (
 			!reqConfig.masterapikey &&
 			!this.masterapikey &&
@@ -229,7 +244,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		)
 			throw new NoAuthError()
 		const create = await fetch(
-			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildId)}`,
+			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildID)}`,
 			{
 				method: "POST",
 				credentials: "include",
@@ -244,12 +259,17 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
-	async create(
+	async create({
+		name,
+		contact,
+		guildID,
+		reqConfig = {}
+	}: {
+
 		name: string,
 		contact: string,
-		guildId?: string,
-		reqConfig: RequestConfig = {}
-	): Promise<{
+		guildID?: string,
+	} & FetchRequestTypes): Promise<{
 		community: Community
 		apiKey: string
 	}> {
@@ -265,8 +285,8 @@ export default class CommunityManager extends BaseManager<Community> {
 			body: JSON.stringify({
 				name: name,
 				contact: contact,
-				...(guildId && { // add it in optionally otherwise it is not in request
-					guildId: guildId
+				...(guildID && { // add it in optionally otherwise it is not in request
+					guildId: guildID
 				})
 			}),
 			credentials: "include",
@@ -282,10 +302,12 @@ export default class CommunityManager extends BaseManager<Community> {
 		return create
 	}
 
-	async remove(
-		communityId: string,
-		reqConfig: RequestConfig = {}
-	): Promise<boolean> {
+	async remove({
+		communityID,
+		reqConfig = {}
+	}: {
+		communityID: string
+	} & FetchRequestTypes): Promise<boolean> {
 		if (
 			!this.masterapikey &&
 			!reqConfig.masterapikey &&
@@ -294,7 +316,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new NoAuthError()
 
 		const remove = await fetch(
-			`${this.apiurl}/communities/${strictUriEncode(communityId)}`,
+			`${this.apiurl}/communities/${strictUriEncode(communityID)}`,
 			{
 				method: "DELETE",
 				credentials: "include",

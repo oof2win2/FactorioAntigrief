@@ -1,3 +1,13 @@
+## UNRELEASED
+
+### Changes
+
+-   Add a MIT license
+-   Add events for communities and rules being updated
+-   Make listFiltered accept playername again
+-   Functions to add and remove guild IDs from WS
+-   Websocket that reconnects itself
+
 ## [1.16.3] - [2021-11-07]
 
 ### Changes
