@@ -15,6 +15,7 @@ import {
 } from "fagc-api-types"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { z } from "zod"
+import validator from "validator"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -309,7 +310,20 @@ export default class ReportController {
 			proof,
 		} = req.body
 
-		// proof is validated on request, no need to do so again
+		// TODO: make use of zod's URL validators when i fix them
+		if (proof !== "No proof") {
+			for (const string of proof.split(" ")) {
+				if (!validator.isURL(string, {
+					protocols: [ "http", "https" ]
+				})) {
+					return res.status(400).send({
+						errorCode: 400,
+						error: "Bad Request",
+						message: "proof must be a string of URLs separated with spaces"
+					})
+				}
+			}
+		}
 
 		const community = req.requestContext.get("community")
 		if (!community)
@@ -390,239 +404,235 @@ export default class ReportController {
 		return res.status(200).send(report)
 	}
 
-	// @DELETE({
-	// 	url: "/",
-	// 	options: {
-	// 		schema: {
-	// 			body: Type.Required(
-	// 				Type.Object({
-	// 					adminId: Type.String(),
-	// 					id: Type.String(),
-	// 				})
-	// 			),
+	@DELETE({
+		url: "/",
+		options: {
+			schema: {
+				body: z.object({
+					adminId: z.string(),
+					id: z.string(),
+				}),
 
-	// 			description: "Revoke a report",
-	// 			tags: [ "reports" ],
-	// 			security: [
-	// 				{
-	// 					authorization: [],
-	// 				},
-	// 			],
-	// 			response: {
-	// 				"200": {
-	// 					$ref: "RevocationClass#",
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// })
-	// @Authenticate
-	// async revokeReport(
-	// 	req: FastifyRequest<{
-	// 		Body: {
-	// 			adminId: string
-	// 			id: string
-	// 		}
-	// 	}>,
-	// 	res: FastifyReply
-	// ): Promise<FastifyReply> {
-	// 	const community = req.requestContext.get("community")
-	// 	if (!community)
-	// 		return res.status(400).send({
-	// 			errorCode: 400,
-	// 			error: "Community Not Found",
-	// 			message: "Your community could not be found",
-	// 		})
+				description: "Revoke a report",
+				tags: [ "reports" ],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "RevocationClass#",
+					},
+				},
+			},
+		},
+	})
+	@Authenticate
+	async revokeReport(
+		req: FastifyRequest<{
+			Body: {
+				adminId: string
+				id: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const community = req.requestContext.get("community")
+		if (!community)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Community Not Found",
+				message: "Your community could not be found",
+			})
 
-	// 	const report = await ReportModel.findOne({ id: req.body.id })
-	// 	if (!report)
-	// 		return res.status(404).send({
-	// 			errorCode: 404,
-	// 			error: "Not Found",
-	// 			message: "Report could not be found",
-	// 		})
-	// 	if (report.communityId !== community.id)
-	// 		return res.status(403).send({
-	// 			errorCode: 403,
-	// 			error: "Access Denied",
-	// 			message: `You are trying to access a report of community ${report.communityId} but your community ID is ${community.id}`,
-	// 		})
+		const report = await ReportModel.findOne({ id: req.body.id })
+		if (!report)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not Found",
+				message: "Report could not be found",
+			})
+		if (report.communityId !== community.id)
+			return res.status(403).send({
+				errorCode: 403,
+				error: "Access Denied",
+				message: `You are trying to access a report of community ${report.communityId} but your community ID is ${community.id}`,
+			})
 
-	// 	const isDiscordUser = await validateDiscordUser(req.body.adminId)
-	// 	if (!isDiscordUser)
-	// 		return res.status(400).send({
-	// 			errorCode: 400,
-	// 			error: "Bad Request",
-	// 			message: "adminId must be a valid Discord user",
-	// 		})
-	// 	const revoker = await client.users.fetch(req.body.adminId)
-	// 	const admin = await client.users.fetch(report.adminId)
-	// 	// this is allowed since the rule is GUARANTEED to exist if the report exists
-	// 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	// 	const rule = await RuleModel.findOne({ id: report.brokenRule })
+		const isDiscordUser = await validateDiscordUser(req.body.adminId)
+		if (!isDiscordUser)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "adminId must be a valid Discord user",
+			})
+		const revoker = await client.users.fetch(req.body.adminId)
+		const admin = await client.users.fetch(report.adminId)
+		// this is allowed since the rule is GUARANTEED to exist if the report exists
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const rule = await RuleModel.findOne({ id: report.brokenRule })
 
-	// 	await ReportModel.findByIdAndDelete(report._id)
+		await ReportModel.findByIdAndDelete(report._id)
 
-	// 	const revocation = await RevocationModel.create({
-	// 		reportId: report.id,
-	// 		playername: report.playername,
-	// 		communityId: report.communityId,
-	// 		brokenRule: report.brokenRule,
-	// 		proof: report.proof,
-	// 		description: report.description,
-	// 		automated: report.automated,
-	// 		reportedTime: report.reportedTime,
-	// 		adminId: report.adminId,
-	// 		revokedTime: new Date(),
-	// 		revokedBy: req.body.adminId,
-	// 	})
+		const revocation = await RevocationModel.create({
+			reportId: report.id,
+			playername: report.playername,
+			communityId: report.communityId,
+			brokenRule: report.brokenRule,
+			proof: report.proof,
+			description: report.description,
+			automated: report.automated,
+			reportedTime: report.reportedTime,
+			adminId: report.adminId,
+			revokedTime: new Date(),
+			revokedBy: req.body.adminId,
+		})
 
-	// 	const allReports = await ReportModel.find({
-	// 		playername: report.playername,
-	// 	}).select([ "communityId" ])
-	// 	const differentCommunities: Set<string> = new Set()
-	// 	allReports.forEach((report) =>
-	// 		differentCommunities.add(report.communityId)
-	// 	)
+		const allReports = await ReportModel.find({
+			playername: report.playername,
+		}).select([ "communityId" ])
+		const differentCommunities: Set<string> = new Set()
+		allReports.forEach((report) =>
+			differentCommunities.add(report.communityId)
+		)
 
-	// 	reportRevokedMessage(revocation, {
-	// 		community: <Community>(<unknown>community),
-	// 		// this is allowed since the rule is GUARANTEED to exist if the report exists
-	// 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	// 		rule: <Rule>(<unknown>rule!),
-	// 		admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
-	// 		revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
-	// 			(<unknown>revoker)
-	// 		),
-	// 		totalReports: allReports.length,
-	// 		totalCommunities: differentCommunities.size,
-	// 	})
-	// 	return res.status(200).send(revocation)
-	// }
+		reportRevokedMessage(revocation, {
+			community: <Community>(<unknown>community),
+			// this is allowed since the rule is GUARANTEED to exist if the report exists
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			rule: <Rule>(<unknown>rule!),
+			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
+			revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
+				(<unknown>revoker)
+			),
+			totalReports: allReports.length,
+			totalCommunities: differentCommunities.size,
+		})
+		return res.status(200).send(revocation)
+	}
 
-	// @DELETE({
-	// 	url: "/revokeallname",
-	// 	options: {
-	// 		schema: {
-	// 			body: Type.Required(
-	// 				Type.Object({
-	// 					adminId: Type.String(),
-	// 					playername: Type.String(),
-	// 				})
-	// 			),
+	@DELETE({
+		url: "/revokeallname",
+		options: {
+			schema: {
+				body: z.object({
+					adminId: z.string(),
+					playername: z.string(),
+				}),
 
-	// 			description: "Revoke all report of a player in your community",
-	// 			tags: [ "reports" ],
-	// 			security: [
-	// 				{
-	// 					authorization: [],
-	// 				},
-	// 			],
-	// 			response: {
-	// 				"200": {
-	// 					type: "array",
-	// 					items: {
-	// 						$ref: "RevocationClass#",
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// })
-	// @Authenticate
-	// async revokeAllPlayer(
-	// 	req: FastifyRequest<{
-	// 		Body: {
-	// 			adminId: string
-	// 			playername: string
-	// 		}
-	// 	}>,
-	// 	res: FastifyReply
-	// ): Promise<FastifyReply> {
-	// 	const { adminId, playername } = req.body
+				description: "Revoke all report of a player in your community",
+				tags: [ "reports" ],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "RevocationClass#",
+						},
+					},
+				},
+			},
+		},
+	})
+	@Authenticate
+	async revokeAllPlayer(
+		req: FastifyRequest<{
+			Body: {
+				adminId: string
+				playername: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { adminId, playername } = req.body
 
-	// 	const community = req.requestContext.get("community")
-	// 	if (!community)
-	// 		return res.status(400).send({
-	// 			errorCode: 400,
-	// 			error: "Community Not Found",
-	// 			message: "Your community could not be found",
-	// 		})
+		const community = req.requestContext.get("community")
+		if (!community)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Community Not Found",
+				message: "Your community could not be found",
+			})
 
-	// 	const isDiscordUser = await validateDiscordUser(adminId)
-	// 	if (!isDiscordUser)
-	// 		return res.status(400).send({
-	// 			errorCode: 400,
-	// 			error: "Bad Request",
-	// 			message: "adminId must be a valid Discord user",
-	// 		})
+		const isDiscordUser = await validateDiscordUser(adminId)
+		if (!isDiscordUser)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "adminId must be a valid Discord user",
+			})
 
-	// 	const reports = await ReportModel.find({
-	// 		communityId: community.id,
-	// 		playername: playername,
-	// 	})
+		const reports = await ReportModel.find({
+			communityId: community.id,
+			playername: playername,
+		})
 
-	// 	const revocations = await Promise.all(
-	// 		reports.map(async (report) => {
-	// 			const revocation = await RevocationModel.create({
-	// 				reportId: report.id,
-	// 				playername: report.playername,
-	// 				communityId: report.communityId,
-	// 				brokenRule: report.brokenRule,
-	// 				proof: report.proof,
-	// 				description: report.description,
-	// 				automated: report.automated,
-	// 				reportedTime: report.reportedTime,
-	// 				adminId: report.adminId,
-	// 				revokedTime: new Date(),
-	// 				revokedBy: adminId,
-	// 			})
-	// 			await report.remove()
-	// 			return revocation
-	// 		})
-	// 	)
+		const revocations = await Promise.all(
+			reports.map(async (report) => {
+				const revocation = await RevocationModel.create({
+					reportId: report.id,
+					playername: report.playername,
+					communityId: report.communityId,
+					brokenRule: report.brokenRule,
+					proof: report.proof,
+					description: report.description,
+					automated: report.automated,
+					reportedTime: report.reportedTime,
+					adminId: report.adminId,
+					revokedTime: new Date(),
+					revokedBy: adminId,
+				})
+				await report.remove()
+				return revocation
+			})
+		)
 
-	// 	const RuleMap: Map<string, DocumentType<RuleClass, BeAnObject> | null> =
-	// 		new Map()
+		const RuleMap: Map<string, DocumentType<RuleClass, BeAnObject> | null> =
+			new Map()
 
-	// 	await Promise.all(
-	// 		revocations.map(async (revocation) => {
-	// 			if (RuleMap.get(revocation.brokenRule)) return
+		await Promise.all(
+			revocations.map(async (revocation) => {
+				if (RuleMap.get(revocation.brokenRule)) return
 
-	// 			RuleMap.set(
-	// 				revocation.brokenRule,
-	// 				await RuleModel.findOne({
-	// 					id: revocation.brokenRule,
-	// 				}).exec()
-	// 			)
-	// 		})
-	// 	)
+				RuleMap.set(
+					revocation.brokenRule,
+					await RuleModel.findOne({
+						id: revocation.brokenRule,
+					}).exec()
+				)
+			})
+		)
 
-	// 	const allReports = await ReportModel.find({
-	// 		playername: playername,
-	// 	}).select([ "communityId" ])
-	// 	const differentCommunities: Set<string> = new Set()
-	// 	allReports.forEach((report) =>
-	// 		differentCommunities.add(report.communityId)
-	// 	)
+		const allReports = await ReportModel.find({
+			playername: playername,
+		}).select([ "communityId" ])
+		const differentCommunities: Set<string> = new Set()
+		allReports.forEach((report) =>
+			differentCommunities.add(report.communityId)
+		)
 
-	// 	const revoker = await client.users.fetch(adminId)
-	// 	revocations.forEach(async (revocation) => {
-	// 		const admin = await client.users.fetch(revocation.adminId)
-	// 		reportRevokedMessage(revocation, {
-	// 			community: <ReportMessageExtraOpts["community"]>(
-	// 				(<unknown>community.toObject())
-	// 			),
-	// 			// this is allowed since the rule is GUARANTEED to exist if the report exists
-	// 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	// 			rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
-	// 			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
-	// 			revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
-	// 			totalReports: allReports.length,
-	// 			totalCommunities: differentCommunities.size,
-	// 		})
-	// 	})
+		const revoker = await client.users.fetch(adminId)
+		revocations.forEach(async (revocation) => {
+			const admin = await client.users.fetch(revocation.adminId)
+			reportRevokedMessage(revocation, {
+				community: <ReportMessageExtraOpts["community"]>(
+					(<unknown>community.toObject())
+				),
+				// this is allowed since the rule is GUARANTEED to exist if the report exists
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
+				admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
+				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
+				totalReports: allReports.length,
+				totalCommunities: differentCommunities.size,
+			})
+		})
 
-	// 	return res.status(200).send(revocations)
-	// }
+		return res.status(200).send(revocations)
+	}
 }

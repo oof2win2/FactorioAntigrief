@@ -9,6 +9,7 @@ import { OAUTHSCOPES } from "../consts.js"
 import { Authenticate } from "../utils/authentication.js"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 
+// currently disabled.
 @Controller({ route: "/users" })
 export default class ProfileController {
 	// @GET({
