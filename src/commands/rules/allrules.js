@@ -28,10 +28,11 @@ class GetAllRules extends Command {
 		let fields = []
 		for (let i = 0; i < rules.length; i += 2) {
 			fields.push({
-				value: `**${rules[i].shortdesc}** (\`${rules[i].id}\`)`,
-				name: rules[i + 1] && `${rules[i + 1].shortdesc} (\`${rules[i + 1].id}\`)`,
+				name: `${rules[i].shortdesc} (\`${rules[i].id}\`)`,
+				value: rules[i + 1] ? `**${rules[i + 1].shortdesc}** (\`${rules[i + 1].id}\`)` : "\u200b",
 			})
 		}
+		console.log(fields)
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
 }
