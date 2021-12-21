@@ -253,15 +253,15 @@ export default class RuleController {
 	}
 
 	@POST({
-		url: "/merge/:idone/:idtwo",
+		url: "/:idOne/merge/:idTwo",
 		options: {
 			schema: {
 				params: z.object({
-					idone: z.string(),
-					idtwo: z.string(),
+					idOne: z.string(),
+					idTwo: z.string(),
 				}),
 
-				description: "Remove a rule",
+				description: "Merge rule idTwo into rule idOne",
 				tags: [ "rules" ],
 				security: [
 					{
@@ -280,33 +280,77 @@ export default class RuleController {
 	async mergeRules(
 		req: FastifyRequest<{
 			Params: {
-				idone: string
-				idtwo: string
+				idOne: string
+				idTwo: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { idone, idtwo } = req.params
+		const { idOne, idTwo } = req.params
 		const ruleOne = await RuleModel.findOne({
-			id: idone
+			id: idOne
 		})
+		if (!ruleOne)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "idOne must be a valid rule ID",
+			})
 		const ruleTwo = await RuleModel.findOne({
-			id: idtwo
+			id: idTwo
 		})
+		if (!ruleTwo)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "idTwo must be a valid rule ID",
+			})
 
 
-		// TODO: finish this
 		await RuleModel.findOneAndDelete({
-			id: idtwo
+			id: idTwo
 		})
 		await ReportModel.updateMany({
-			brokenRule: idtwo
+			brokenRule: idTwo
 		}, {
-			brokenRule: idone
+			brokenRule: idOne
+		})
+		await RevocationModel.updateMany({
+			brokenRule: idTwo
+		}, {
+			brokenRule: idOne
+		})
+		
+		await GuildConfigModel.updateMany({
+			ruleFilters: idTwo
+		}, {
+			$addToSet: { ruleFilters: idOne }
+		})
+		await GuildConfigModel.updateMany({
+			ruleFilters: idTwo,
+		}, {
+			$pull: { ruleFilters: idTwo },
 		})
 
-		const affectedGuildConfigs = await GuildConfigModel.find({
-			ruleFilters: [ idone, idtwo ]
+		const affectedConfigs = await GuildConfigModel.find({
+			ruleFilters: idOne
 		})
+
+		const sendGuildConfigInfo = async () => {
+			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
+				setTimeout(() => {
+					resolve()
+				}, ms)
+			})
+			for (const config of affectedConfigs) {
+				guildConfigChanged(config)
+				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
+				// staggered so not everyone at once tries to fetch their new banlists
+				await wait(100)
+			}
+		}
+		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
+
+		return res.send(ruleOne)
 	}
 }

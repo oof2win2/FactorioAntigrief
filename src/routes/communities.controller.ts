@@ -653,6 +653,129 @@ export default class CommunityController {
 	}
 
 	@POST({
+		url: "/:idOne/merge/:idTwo",
+		options: {
+			schema: {
+				params: z.object({
+					idOne: z.string(),
+					idTwo: z.string(),
+				}),
+
+				description: "Merge community idTwo into community idOne",
+				tags: [ "communities" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "CommunityClass#",
+					},
+				},
+			},
+		},
+	})
+	@MasterAuthenticate
+	async mergeCommunities(
+		req: FastifyRequest<{
+			Params: {
+				idOne: string
+				idTwo: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { idOne, idTwo } = req.params
+		const communityOne = await CommunityModel.findOne({
+			id: idOne
+		})
+		if (!communityOne)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "idOne must be a valid community ID",
+			})
+		const communityTwo = await CommunityModel.findOne({
+			id: idTwo
+		})
+		if (!communityTwo)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "idTwo must be a valid community ID",
+			})
+
+
+		await CommunityModel.findOneAndDelete({
+			id: idTwo
+		})
+		await ReportModel.updateMany({
+			communityId: idTwo
+		}, {
+			communityId: idOne
+		})
+		await RevocationModel.updateMany({
+			communityId: idTwo
+		}, {
+			communityId: idOne
+		})
+		
+		// remove old stuff from the config and replace with new
+		await GuildConfigModel.updateMany({
+			trustedCommunities: idTwo
+		}, {
+			$addToSet: { trustedCommunities: idOne }
+		})
+		await GuildConfigModel.updateMany({
+			trustedCommunities: idTwo,
+		}, {
+			$pull: { trustedCommunities: idTwo },
+		})
+
+		const guildConfigs = await GuildConfigModel.find({
+			communityId: { $in: [ idOne, idTwo ] }
+		})
+
+		// change configs + remove old auth
+		await CommunityModel.updateOne({
+			id: idOne
+		}, {
+			$addToSet: { guildIds:  guildConfigs.map(config => config.guildId) }
+		})
+		await GuildConfigModel.updateMany({
+			communityId: idTwo
+		}, {
+			communityId: idOne,
+			apikey: guildConfigs.find(c => c.communityId === idOne)?.apikey || undefined,
+		})
+		await AuthModel.deleteMany({
+			communityId: idTwo
+		})
+
+		const affectedConfigs = await GuildConfigModel.find({
+			trustedCommunities: idOne
+		})
+
+		const sendGuildConfigInfo = async () => {
+			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
+				setTimeout(() => {
+					resolve()
+				}, ms)
+			})
+			for (const config of affectedConfigs) {
+				guildConfigChanged(config)
+				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
+				// staggered so not everyone at once tries to fetch their new banlists
+				await wait(100)
+			}
+		}
+		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
+
+		return res.send(communityOne)
+	}
+
+	@POST({
 		url: "/guildLeave/:guildId",
 		options: {
 			schema: {
