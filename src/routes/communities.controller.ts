@@ -10,6 +10,7 @@ import {
 	communityCreatedMessage,
 	communityRemovedMessage,
 	communityUpdatedMessage,
+	communitiesMergedMessage,
 } from "../utils/info.js"
 import {
 	client,
@@ -23,6 +24,7 @@ import AuthModel from "../database/fagc/authentication.js"
 import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
+import { APIUser } from "discord-api-types"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -653,15 +655,15 @@ export default class CommunityController {
 	}
 
 	@POST({
-		url: "/:idOne/merge/:idTwo",
+		url: "/:idReceiving/merge/:idDissolving",
 		options: {
 			schema: {
 				params: z.object({
-					idOne: z.string(),
-					idTwo: z.string(),
+					idReceiving: z.string(),
+					idDissolving: z.string(),
 				}),
 
-				description: "Merge community idTwo into community idOne",
+				description: "Merge community idDissolving into community idReceiving",
 				tags: [ "communities" ],
 				security: [
 					{
@@ -680,26 +682,26 @@ export default class CommunityController {
 	async mergeCommunities(
 		req: FastifyRequest<{
 			Params: {
-				idOne: string
-				idTwo: string
+				idReceiving: string
+				idDissolving: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { idOne, idTwo } = req.params
-		const communityOne = await CommunityModel.findOne({
-			id: idOne
+		const { idReceiving, idDissolving } = req.params
+		const receiving = await CommunityModel.findOne({
+			id: idReceiving
 		})
-		if (!communityOne)
+		if (!receiving)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
 				message: "idOne must be a valid community ID",
 			})
-		const communityTwo = await CommunityModel.findOne({
-			id: idTwo
+		const dissolving = await CommunityModel.findOne({
+			id: idDissolving
 		})
-		if (!communityTwo)
+		if (!dissolving)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
@@ -708,53 +710,53 @@ export default class CommunityController {
 
 
 		await CommunityModel.findOneAndDelete({
-			id: idTwo
+			id: idDissolving
 		})
 		await ReportModel.updateMany({
-			communityId: idTwo
+			communityId: idDissolving
 		}, {
-			communityId: idOne
+			communityId: idReceiving
 		})
 		await RevocationModel.updateMany({
-			communityId: idTwo
+			communityId: idDissolving
 		}, {
-			communityId: idOne
+			communityId: idReceiving
 		})
 		
 		// remove old stuff from the config and replace with new
 		await GuildConfigModel.updateMany({
-			trustedCommunities: idTwo
+			trustedCommunities: idDissolving
 		}, {
-			$addToSet: { trustedCommunities: idOne }
+			$addToSet: { trustedCommunities: idReceiving }
 		})
 		await GuildConfigModel.updateMany({
-			trustedCommunities: idTwo,
+			trustedCommunities: idDissolving,
 		}, {
-			$pull: { trustedCommunities: idTwo },
+			$pull: { trustedCommunities: idDissolving },
 		})
 
 		const guildConfigs = await GuildConfigModel.find({
-			communityId: { $in: [ idOne, idTwo ] }
+			communityId: { $in: [ idReceiving, idDissolving ] }
 		})
 
 		// change configs + remove old auth
 		await CommunityModel.updateOne({
-			id: idOne
+			id: idReceiving
 		}, {
 			$addToSet: { guildIds:  guildConfigs.map(config => config.guildId) }
 		})
 		await GuildConfigModel.updateMany({
-			communityId: idTwo
+			communityId: idDissolving
 		}, {
-			communityId: idOne,
-			apikey: guildConfigs.find(c => c.communityId === idOne)?.apikey || undefined,
+			communityId: idReceiving,
+			apikey: guildConfigs.find(c => c.communityId === idReceiving)?.apikey || undefined,
 		})
 		await AuthModel.deleteMany({
-			communityId: idTwo
+			communityId: idDissolving
 		})
 
 		const affectedConfigs = await GuildConfigModel.find({
-			trustedCommunities: idOne
+			trustedCommunities: idReceiving
 		})
 
 		const sendGuildConfigInfo = async () => {
@@ -772,7 +774,15 @@ export default class CommunityController {
 		}
 		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 
-		return res.send(communityOne)
+		const contactUser = await validateDiscordUser(receiving.contact)
+
+		communitiesMergedMessage(receiving, dissolving, {
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			)
+		})
+
+		return res.send(receiving)
 	}
 
 	@POST({

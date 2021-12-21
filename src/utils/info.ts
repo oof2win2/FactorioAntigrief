@@ -340,6 +340,47 @@ export async function ruleUpdatedMessage(
 		})
 	)
 }
+export async function rulesMergedMessage(
+	receiving: DocumentType<RuleClass, BeAnObject>,
+	dissolving: DocumentType<RuleClass, BeAnObject>
+): Promise<void> {
+	const ruleEmbed = new MessageEmbed()
+		.setTitle("FAGC - Rules merged")
+		.setColor("#6f4fe3")
+		.addFields(
+			{ name: "Receiving Rule ID", value: `\`${dissolving.id}\``, inline: true },
+			{
+				name: "Dissolving Rule short description",
+				value: receiving.shortdesc,
+				inline: true,
+			},
+			{
+				name: "Receiving Rule short description",
+				value: dissolving.shortdesc,
+				inline: true,
+			},
+			{
+				name: "Dissolving Rule long description",
+				value: receiving.longdesc,
+				inline: true,
+			},
+			{
+				name: "Receiving Rule long description",
+				value: dissolving.longdesc,
+				inline: true,
+			}
+		)
+	WebhookMessage(ruleEmbed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "rulesMerged",
+			embed: ruleEmbed,
+			receiving: receiving,
+			newdissolvingRule: dissolving
+		})
+	)
+}
 
 export async function communityCreatedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
@@ -437,6 +478,46 @@ export async function communityUpdatedMessage(
 			messageType: "communityUpdated",
 			embed: embed,
 			community: community,
+			extraData: opts,
+		})
+	)
+}
+
+export async function communitiesMergedMessage(
+	receiving: DocumentType<CommunityClass, BeAnObject>,
+	dissolving: DocumentType<CommunityClass, BeAnObject>,
+	opts: CommunityCreatedMessageExtraOpts
+): Promise<void> {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC - Communities Updated")
+		.setColor("#6f4fe3")
+		.addFields(
+			{
+				name: "Receiving Community ID",
+				value: `\`${receiving.id}\``,
+				inline: true,
+			},
+			{ name: "Receiving Community name", value: receiving.name, inline: true },
+			{
+				name: "Receiving Community Contact",
+				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				inline: true,
+			},
+			{
+				name: "Dissolving Community ID",
+				value: `\`${dissolving.id}\``,
+				inline: true
+			},
+			{ name: "Dissolving Community name", value: dissolving.name, inline: true },
+		)
+	WebhookMessage(embed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "communitiesMerged",
+			embed: embed,
+			receiving: receiving,
+			dissolving: dissolving,
 			extraData: opts,
 		})
 	)

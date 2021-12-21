@@ -3,7 +3,7 @@ import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import RuleModel from "../database/fagc/rule.js"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
-import { guildConfigChanged, ruleCreatedMessage, ruleRemovedMessage, ruleUpdatedMessage } from "../utils/info.js"
+import { guildConfigChanged, ruleCreatedMessage, ruleRemovedMessage, rulesMergedMessage, ruleUpdatedMessage } from "../utils/info.js"
 import { z } from "zod"
 import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
@@ -253,15 +253,15 @@ export default class RuleController {
 	}
 
 	@POST({
-		url: "/:idOne/merge/:idTwo",
+		url: "/:idReceiving/merge/:idDissolving",
 		options: {
 			schema: {
 				params: z.object({
-					idOne: z.string(),
-					idTwo: z.string(),
+					idReceiving: z.string(),
+					idDissolving: z.string(),
 				}),
 
-				description: "Merge rule idTwo into rule idOne",
+				description: "Merge rule idTwo into rule idReceiving",
 				tags: [ "rules" ],
 				security: [
 					{
@@ -280,26 +280,26 @@ export default class RuleController {
 	async mergeRules(
 		req: FastifyRequest<{
 			Params: {
-				idOne: string
-				idTwo: string
+				idReceiving: string
+				idDissolving: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { idOne, idTwo } = req.params
-		const ruleOne = await RuleModel.findOne({
-			id: idOne
+		const { idReceiving, idDissolving } = req.params
+		const receiving = await RuleModel.findOne({
+			id: idReceiving
 		})
-		if (!ruleOne)
+		if (!receiving)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
 				message: "idOne must be a valid rule ID",
 			})
-		const ruleTwo = await RuleModel.findOne({
-			id: idTwo
+		const dissolving = await RuleModel.findOne({
+			id: idDissolving
 		})
-		if (!ruleTwo)
+		if (!dissolving)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
@@ -308,32 +308,32 @@ export default class RuleController {
 
 
 		await RuleModel.findOneAndDelete({
-			id: idTwo
+			id: idDissolving
 		})
 		await ReportModel.updateMany({
-			brokenRule: idTwo
+			brokenRule: idDissolving
 		}, {
-			brokenRule: idOne
+			brokenRule: idReceiving
 		})
 		await RevocationModel.updateMany({
-			brokenRule: idTwo
+			brokenRule: idDissolving
 		}, {
-			brokenRule: idOne
+			brokenRule: idReceiving
 		})
 		
 		await GuildConfigModel.updateMany({
-			ruleFilters: idTwo
+			ruleFilters: idDissolving
 		}, {
-			$addToSet: { ruleFilters: idOne }
+			$addToSet: { ruleFilters: idReceiving }
 		})
 		await GuildConfigModel.updateMany({
-			ruleFilters: idTwo,
+			ruleFilters: idDissolving,
 		}, {
-			$pull: { ruleFilters: idTwo },
+			$pull: { ruleFilters: idDissolving },
 		})
 
 		const affectedConfigs = await GuildConfigModel.find({
-			ruleFilters: idOne
+			ruleFilters: idReceiving
 		})
 
 		const sendGuildConfigInfo = async () => {
@@ -351,6 +351,8 @@ export default class RuleController {
 		}
 		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 
-		return res.send(ruleOne)
+		rulesMergedMessage(receiving, dissolving)
+
+		return res.send(receiving)
 	}
 }
