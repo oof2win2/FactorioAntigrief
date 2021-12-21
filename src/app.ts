@@ -1,8 +1,5 @@
 import path from "path"
-const __dirname = path.dirname(new URL(import.meta.url).pathname)
-
 import ENV from "./utils/env.js"
-
 import mongoose from "mongoose"
 import Fastify, { FastifyInstance } from "fastify"
 import fastifyCorsPlugin from "fastify-cors"
@@ -31,8 +28,15 @@ import RuleModel from "./database/fagc/rule.js"
 import UserModel from "./database/fagc/user.js"
 import WebhookModel from "./database/fagc/webhook.js"
 import GuildConfigModel from "./database/fagc/guildconfig.js"
+import { z } from "zod"
+import { generateSchema } from "./utils/zodOpenAPI.js"
 
-mongoose.connect(ENV.MONGOURI) // connect to db before loading other stuff
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+
+mongoose.connect(ENV.MONGOURI, {
+	ignoreUndefined: true,
+	loggerLevel: "info"
+}) // connect to db before loading other stuff
 
 const fastify: FastifyInstance = Fastify({
 	logger: false,
@@ -94,6 +98,19 @@ SwaggerDefinitions[GuildConfigModelSwagger.title] = GuildConfigModelSwagger
 // swagger
 fastify.register(fastifySwagger, {
 	routePrefix: "/documentation",
+	transform: (schema) => {
+		const {
+			params = undefined,
+			body = undefined,
+			querystring = undefined,
+			...others
+		} = schema
+		const transformed = { ...others }
+		if (params) transformed.params = generateSchema(params)
+		if (body) transformed.body = generateSchema(body)
+		if (querystring) transformed.querystring = generateSchema(querystring)
+		return transformed
+	},
 	openapi: {
 		info: {
 			title: "FAGC Backend",
@@ -232,36 +249,48 @@ declare module "@mgcrea/fastify-session" {
 	}
 }
 
-// import secureSession from "fastify-secure-session"
-// fastify.register(secureSession, {
-// 	cookieName: ENV.COOKIENAME,
-// 	key: ENV.SESSIONSECRET,
-// })
+
+fastify.setValidatorCompiler(({ schema }: {
+	schema: z.ZodAny
+}) => {
+	return function(data) {
+		const result = schema.safeParse(data)
+		if (!result.success) return { error: result.error }
+		return { value: result.data }
+	}
+})
 
 fastify.register(bootstrap, {
 	directory: path.resolve(__dirname, "routes"),
+	mask: /\.(handler|controller)\.js$/
 })
 
 // fastify.register(fastifyResponseValidationPlugin)
 
 fastify.setErrorHandler(async (error, request, reply) => {
-	if (!error.validation) {
-		// Logging locally
-		console.log(error, error.validation)
-		// Sending error to be logged in Sentry
-		Sentry.captureException(error)
-		reply.status(500).send({
-			errorCode: 500,
-			error: "Something went wrong",
-			message: error.message,
+	if (error instanceof z.ZodError) {
+		// is a validaiton error
+		const x = error.format()
+		delete (x as any)._errors
+		const errorOutput = {}
+		Object.keys(x).forEach((key) => {
+			errorOutput[key] =  x[key]._errors
 		})
-	} else {
-		reply.status(400).send({
+		return reply.status(400).send({
 			errorCode: 400,
-			error: "Invalid request",
-			message: error.message,
+			error: "Invalid Request",
+			message: errorOutput
 		})
 	}
+	
+	console.error(error)
+	// Sending error to be logged in Sentry
+	Sentry.captureException(error)
+	reply.status(500).send({
+		errorCode: 500,
+		error: "Something went wrong",
+		message: error.message,
+	})
 })
 
 const start = async () => {

@@ -1,11 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, POST } from "fastify-decorators"
-import { Type } from "@sinclair/typebox"
-
 import { MessageEmbed, Webhook, WebhookClient } from "discord.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import { client } from "../utils/discord.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
+import { z } from "zod"
 
 @Controller({ route: "/informatics" })
 export default class ProfileController {
@@ -56,12 +55,10 @@ export default class ProfileController {
 		url: "/webhook",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						id: Type.String(),
-						token: Type.String(),
-					})
-				),
+				body: z.object({
+					id: z.string(),
+					token: z.string(),
+				}),
 
 				description: "Add a webhook to FAGC notifications",
 				tags: [ "informatics" ],
@@ -116,12 +113,10 @@ export default class ProfileController {
 		url: "/webhook",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						id: Type.String(),
-						token: Type.String(),
-					})
-				),
+				body: z.object({
+					id: z.string(),
+					token: z.string(),
+				}),
 
 				description: "Remove a webhook from FAGC notifications",
 				tags: [ "informatics" ],
@@ -169,11 +164,11 @@ export default class ProfileController {
 		url: "/notify/:guildId",
 		options: {
 			schema: {
-				params: Type.Object({
-					guildId: Type.String(),
+				params: z.object({
+					guildId: z.string(),
 				}),
-				body: Type.Object({
-					data: Type.String(),
+				body: z.object({
+					data: z.string(),
 				}),
 
 				description:
@@ -218,15 +213,10 @@ export default class ProfileController {
 		url: "/notify/:guildId/embed",
 		options: {
 			schema: {
-				params: Type.Object({
-					guildId: Type.String(),
+				params: z.object({
+					guildId: z.string(),
 				}),
-				body: Type.Object(
-					{},
-					{
-						additionalProperties: true,
-					}
-				),
+				body: z.object({}).passthrough(), // use passthrough because extra data for the embed is needed
 
 				description:
 					"Notify a guild with a [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed)",

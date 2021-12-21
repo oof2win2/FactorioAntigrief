@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, POST } from "fastify-decorators"
-import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule.js"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
@@ -23,6 +22,7 @@ import WebhookModel from "../database/fagc/webhook.js"
 import AuthModel from "../database/fagc/authentication.js"
 import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
+import { z } from "zod"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -54,11 +54,10 @@ export default class CommunityController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						id: Type.String(),
-					})
-				),
+				params: z.object({
+					id: z.string()
+				}),
+
 				tags: [ "community" ],
 				response: {
 					"200": {
@@ -118,11 +117,10 @@ export default class CommunityController {
 		url: "/guildconfig/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
+				params: z.object({
+					guildId: z.string()
+				}),
+
 				tags: [ "community" ],
 				response: {
 					"200": {
@@ -186,26 +184,21 @@ export default class CommunityController {
 		url: "/guildconfig/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
-				body: Type.Object({
-					ruleFilters: Type.Optional(Type.Array(Type.String())),
-					trustedCommunities: Type.Optional(
-						Type.Array(Type.String())
-					),
-					roles: Type.Optional(
-						Type.Object({
-							reports: Type.Optional(Type.String()),
-							webhooks: Type.Optional(Type.String()),
-							setConfig: Type.Optional(Type.String()),
-							setRules: Type.Optional(Type.String()),
-							setCommunities: Type.Optional(Type.String()),
-						})
-					),
+				params: z.object({
+					guildId: z.string()
 				}),
+				body: z.object({
+					ruleFilters: z.array(z.string()).optional(),
+					trustedCommunities: z.array(z.string()).optional(),
+					roles: z.object({
+						reports: z.string().optional(),
+						webhooks: z.string().optional(),
+						setConfig: z.string().optional(),
+						setRules: z.string().optional(),
+						setCommunities: z.string().optional(),
+					}).optional()
+				}),
+
 				tags: [ "community" ],
 				security: [
 					{
@@ -232,7 +225,7 @@ export default class CommunityController {
 			Body: {
 				ruleFilters?: string[]
 				trustedCommunities?: string[]
-				roles: {
+				roles?: {
 					reports?: string
 					webhooks?: string
 					setConfig?: string
@@ -319,10 +312,12 @@ export default class CommunityController {
 				setRules: "",
 				setCommunities: "",
 			}
-		Object.keys(roles).map((roleType) => {
-			const role = findRole(roles[roleType])
-			if (role) guildConfig.roles[roleType] = role.id
-		})
+		if (roles) {
+			Object.keys(roles).map((roleType) => {
+				const role = findRole(roles[roleType])
+				if (role) guildConfig.roles[roleType] = role.id
+			})
+		}
 
 		await GuildConfigModel.findOneAndReplace(
 			{
@@ -340,12 +335,11 @@ export default class CommunityController {
 		url: "/communityconfig",
 		options: {
 			schema: {
-				body: Type.Optional(
-					Type.Object({
-						contact: Type.Optional(Type.String()),
-						name: Type.Optional(Type.String()),
-					})
-				),
+				body: z.object({
+					contact: z.string().optional(),
+					name: z.string().optional()
+				}),
+
 				tags: [ "community" ],
 				security: [
 					{
@@ -414,11 +408,10 @@ export default class CommunityController {
 		url: "/notifyGuildConfigChanged/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
+				params: z.object({
+					guildId: z.string()
+				}),
+
 				security: [
 					{
 						masterAuthorization: [],
@@ -458,10 +451,10 @@ export default class CommunityController {
 		url: "/",
 		options: {
 			schema: {
-				body: Type.Object({
-					name: Type.String(),
-					contact: Type.String(),
-					guildId: Type.Optional(Type.String()),
+				body: z.object({
+					name: z.string(),
+					contact: z.string(),
+					guildId: z.string().optional(),
 				}),
 
 				description: "Create a FAGC community",
@@ -559,11 +552,9 @@ export default class CommunityController {
 		url: "/:communityId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						communityId: Type.String(),
-					})
-				),
+				params: z.object({
+					communityId: z.string(),
+				}),
 
 				description: "Delete a FAGC community",
 				tags: [ "community", "master" ],
@@ -641,11 +632,9 @@ export default class CommunityController {
 		url: "/guildLeave/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
+				params: z.object({
+					guildId: z.string(),
+				}),
 
 				description: "Delete a FAGC community",
 				tags: [ "community", "master" ],

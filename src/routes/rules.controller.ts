@@ -1,11 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, POST } from "fastify-decorators"
-import { Type } from "@sinclair/typebox"
-
 import RuleModel from "../database/fagc/rule.js"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
 import { ruleCreatedMessage, ruleRemovedMessage, ruleUpdatedMessage } from "../utils/info.js"
+import { z } from "zod"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
@@ -38,11 +37,9 @@ export default class RuleController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						id: Type.String(),
-					})
-				),
+				params: z.object({
+					id: z.string(),
+				}).required(),
 
 				description: "Fetch a rule by ID",
 				tags: [ "rules" ],
@@ -71,12 +68,10 @@ export default class RuleController {
 		url: "/",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						shortdesc: Type.String(),
-						longdesc: Type.String(),
-					})
-				),
+				body: z.object({
+					shortdesc: z.string(),
+					longdesc: z.string()
+				}).required(),
 
 				description: "Create a rule",
 				tags: [ "rules" ],
@@ -116,19 +111,15 @@ export default class RuleController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						id: Type.String(),
-					})
-				),
-				body: Type.Optional(
-					Type.Object({
-						shortdesc: Type.Optional(Type.String()),
-						longdesc: Type.Optional(Type.String()),
-					})
-				),
+				params: z.object({
+					id: z.string()
+				}).required(),
+				body: z.object({
+					shortdesc: z.string().optional(),
+					longdesc: z.string().optional(),
+				}).optional(),
 
-				description: "Create a rule",
+				description: "Update a rule",
 				tags: [ "rules" ],
 				security: [
 					{
@@ -158,10 +149,12 @@ export default class RuleController {
 	): Promise<FastifyReply> {
 		const { shortdesc, longdesc } = req.body
 		const { id } = req.params
+
 		if (!shortdesc && !longdesc) {
 			return res.send(await RuleModel.findOne({ id: id }))
 		}
-		const oldRule = await RuleModel.findOneAndUpdate({ id: id })
+		const oldRule = await RuleModel.findOne({ id: id })
+
 		if (!oldRule) return res.send(null)
 		const newRule = await RuleModel.findOneAndUpdate({
 			id: id
@@ -180,11 +173,14 @@ export default class RuleController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						id: Type.String(),
-					})
-				),
+				// params: Type.Required(
+				// 	Type.Object({
+				// 		id: Type.String(),
+				// 	})
+				// ),
+				params: z.object({
+					id: z.string()
+				}),
 
 				description: "Remove a rule",
 				tags: [ "rules" ],

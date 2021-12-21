@@ -1,11 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET } from "fastify-decorators"
-import { Type } from "@sinclair/typebox"
-
 import ReportModel, { ReportClass } from "../database/fagc/report.js"
 import { Profile } from "fagc-api-types"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
+import { z } from "zod"
 
 @Controller({ route: "/profiles" })
 export default class ProfileController {
@@ -13,12 +12,10 @@ export default class ProfileController {
 		url: "/fetchcommunity/:playername/:communityId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						playername: Type.String(),
-						communityId: Type.String(),
-					})
-				),
+				params: z.object({
+					playername: z.string(),
+					communityId: z.string(),
+				}),
 
 				description: "Fetch a report of a player in a community",
 				tags: [ "profiles" ],
@@ -59,11 +56,9 @@ export default class ProfileController {
 		url: "/fetchall/:playername",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						playername: Type.String(),
-					})
-				),
+				params: z.object({
+					playername: z.string(),
+				}),
 
 				description: "Fetch all reports of a player",
 				tags: [ "profiles" ],
