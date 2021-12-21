@@ -3,8 +3,10 @@ import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import RuleModel from "../database/fagc/rule.js"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
-import { ruleCreatedMessage, ruleRemovedMessage, ruleUpdatedMessage } from "../utils/info.js"
+import { guildConfigChanged, ruleCreatedMessage, ruleRemovedMessage, ruleUpdatedMessage } from "../utils/info.js"
 import { z } from "zod"
+import ReportModel from "../database/fagc/report.js"
+import RevocationModel from "../database/fagc/revocation.js"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
@@ -173,11 +175,6 @@ export default class RuleController {
 		url: "/:id",
 		options: {
 			schema: {
-				// params: Type.Required(
-				// 	Type.Object({
-				// 		id: Type.String(),
-				// 	})
-				// ),
 				params: z.object({
 					id: z.string()
 				}),
@@ -213,14 +210,103 @@ export default class RuleController {
 
 		if (rule) {
 			ruleRemovedMessage(rule)
+			// store the IDs of the affected guilds - ones which have the rule filtered
+			const affectedGuildConfigs = await GuildConfigModel.find({
+				ruleFilters: [ rule.id ]
+			})
 			
 			// remove the rule ID from any guild configs which may have it
 			await GuildConfigModel.updateMany({
-				ruleFilters: [ rule.id ]
+				_id: { $in: affectedGuildConfigs.map(config => config._id) }
 			}, {
 				$pull: { ruleFilters: rule.id }
 			})
+
+			const newGuildConfigs = await GuildConfigModel.find({
+				_id: { $in: affectedGuildConfigs.map(config => config._id) }
+			})
+
+			await RevocationModel.deleteMany({
+				brokenRule: rule.id
+			})
+			await ReportModel.deleteMany({
+				brokenRule: rule.id
+			})
+
+			// tell guilds about it after the revocations + reports have been removed
+			const sendGuildConfigInfo = async () => {
+				const wait = (ms: number): Promise<void> => new Promise((resolve) => {
+					setTimeout(() => {
+						resolve()
+					}, ms)
+				})
+				for (const config of newGuildConfigs) {
+					guildConfigChanged(config)
+					// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
+					// staggered so not everyone at once tries to fetch their new banlists
+					await wait(100)
+				}
+			}
+			sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 		}
 		return res.send(rule)
+	}
+
+	@POST({
+		url: "/merge/:idone/:idtwo",
+		options: {
+			schema: {
+				params: z.object({
+					idone: z.string(),
+					idtwo: z.string(),
+				}),
+
+				description: "Remove a rule",
+				tags: [ "rules" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "RuleClass#",
+					},
+				},
+			},
+		},
+	})
+	@MasterAuthenticate
+	async mergeRules(
+		req: FastifyRequest<{
+			Params: {
+				idone: string
+				idtwo: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { idone, idtwo } = req.params
+		const ruleOne = await RuleModel.findOne({
+			id: idone
+		})
+		const ruleTwo = await RuleModel.findOne({
+			id: idtwo
+		})
+
+
+		// TODO: finish this
+		await RuleModel.findOneAndDelete({
+			id: idtwo
+		})
+		await ReportModel.updateMany({
+			brokenRule: idtwo
+		}, {
+			brokenRule: idone
+		})
+
+		const affectedGuildConfigs = await GuildConfigModel.find({
+			ruleFilters: [ idone, idtwo ]
+		})
 	}
 }

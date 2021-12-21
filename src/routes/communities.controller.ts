@@ -592,7 +592,10 @@ export default class CommunityController {
 				message: `Community with ID ${communityId} was not found`,
 			})
 
-		const guildConfig = await GuildConfigModel.findOneAndDelete({
+		const guildConfigs = await GuildConfigModel.find({
+			communityId: community.id,
+		})
+		await GuildConfigModel.deleteMany({
 			communityId: community.id,
 		})
 
@@ -605,18 +608,39 @@ export default class CommunityController {
 		await AuthModel.findOneAndDelete({
 			communityId: community.id,
 		})
-		if (guildConfig) {
+		if (guildConfigs) {
 			await WebhookModel.deleteMany({
-				guildId: guildConfig.guildId,
+				guildId: { $in: guildConfigs.map(config => config.guildId) },
 			})
 		}
 
 		// remove the community ID from any guild configs which may have it
-		await GuildConfigModel.updateMany({
+		const affectedGuildConfigs = await GuildConfigModel.find({
 			trustedCommunities: [ community.id ]
+		})
+		await GuildConfigModel.updateMany({
+			_id: { $in: affectedGuildConfigs.map(config => config._id) }
 		}, {
 			$pull: { trustedCommunities: community.id }
 		})
+		const newGuildConfigs = await GuildConfigModel.find({
+			_id: { $in: affectedGuildConfigs.map(config => config._id) }
+		})
+
+		const sendGuildConfigInfo = async () => {
+			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
+				setTimeout(() => {
+					resolve()
+				}, ms)
+			})
+			for (const config of newGuildConfigs) {
+				guildConfigChanged(config)
+				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
+				// staggered so not everyone at once tries to fetch their new banlists
+				await wait(100)
+			}
+		}
+		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 
 		const contactUser = await client.users.fetch(community.contact)
 		communityRemovedMessage(community, {
