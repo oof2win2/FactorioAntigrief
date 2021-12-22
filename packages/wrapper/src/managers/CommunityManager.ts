@@ -331,4 +331,36 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${remove.error}: ${remove.message}`)
 		return remove
 	}
+
+	async merge({
+		idReceiving,
+		idDissolving,
+		reqConfig = {}
+	}: {
+		idReceiving: string
+		idDissolving: string
+		} & FetchRequestTypes): Promise<Community> {
+		if (
+			!this.masterapikey &&
+			!reqConfig.masterapikey &&
+			!reqConfig.cookieAuth
+		)
+			throw new NoAuthError()
+
+		const remove = await fetch(
+			`${this.apiurl}/communities/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
+			{
+				method: "POST",
+				credentials: "include",
+				headers: {
+					authorization: !reqConfig.cookieAuth
+						? `Token ${reqConfig.masterapikey || this.masterapikey}`
+						: "Cookie",
+				},
+			}
+		).then((u) => u.json())
+		if (remove?.error)
+			throw new GenericAPIError(`${remove.error}: ${remove.message}`)
+		return remove
+	}
 }

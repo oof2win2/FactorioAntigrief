@@ -162,4 +162,36 @@ export class RuleManager extends BaseManager<Rule> {
 
 		return data
 	}
+
+	async merge({
+		idReceiving,
+		idDissolving,
+		reqConfig = {}
+	}: {
+		idReceiving: string
+		idDissolving: string
+		} & FetchRequestTypes): Promise<Rule> {
+		if (!this.masterapikey && !reqConfig.masterapikey)
+			throw new NoMasterApikeyError()
+		const data = await fetch(
+			`${this.apiurl}/rules/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
+			{
+				method: "DELETE",
+				credentials: "include",
+				headers: {
+					authorization: `Token ${
+						reqConfig.masterapikey || this.masterapikey
+					}`,
+					"content-type": "application/json",
+				},
+			}
+		).then((r) => r.json())
+
+		if (data.error)
+			throw new GenericAPIError(`${data.error}: ${data.message}`)
+		if (!data.id) throw data
+		this.removeFromCache(data)
+
+		return data
+	}
 }

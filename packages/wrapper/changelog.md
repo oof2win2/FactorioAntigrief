@@ -5,9 +5,11 @@
 -   Add a MIT license
 -   Add events for communities and rules being updated
 -   Make listFiltered accept playername again
--   Functions to add and remove guild IDs from WS
+-   Add functions to add and remove guild IDs from WS
 -   Websocket that reconnects itself
 -   Disable the /users API endpoints, disable the manager
+-   Add methods to merge rules and communities
+-   Add events for merging rules and communities
 
 ## [1.16.3] - [2021-11-07]
 
