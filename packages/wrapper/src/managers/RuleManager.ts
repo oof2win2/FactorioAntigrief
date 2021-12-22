@@ -176,13 +176,12 @@ export class RuleManager extends BaseManager<Rule> {
 		const data = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
-				method: "DELETE",
+				method: "POST",
 				credentials: "include",
 				headers: {
 					authorization: `Token ${
 						reqConfig.masterapikey || this.masterapikey
 					}`,
-					"content-type": "application/json",
 				},
 			}
 		).then((r) => r.json())

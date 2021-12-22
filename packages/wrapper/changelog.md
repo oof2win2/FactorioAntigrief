@@ -1,3 +1,8 @@
+## [1.22.1] - [2021-12-22]
+
+### Bugfixes
+-	Fixed merging rules being set to be a DELETE request with a JSON body
+
 ## [1.22.0] - [2021-12-22]
 
 ### Changes
