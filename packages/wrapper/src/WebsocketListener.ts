@@ -10,6 +10,10 @@ import {
 	RuleCreatedMessage,
 	RuleRemovedMessage,
 	CommunityRemovedMessage,
+	CommunityUpdatedMessage,
+	CommunitiesMergedMessage,
+	RuleUpdatedMessage,
+	RulesMergedMessage,
 } from "fagc-api-types"
 
 // some typescript stuff so it is strictly typed
@@ -24,9 +28,11 @@ export type WebSocketMessageType =
 	| "ruleCreated"
 	| "ruleRemoved"
 	| "ruleUpdated"
+	| "rulesMerged"
 	| "communityCreated"
 	| "communityRemoved"
 	| "communityUpdated"
+	| "communitiesMerged"
 	| "announcement"
 	| "reconnecting"
 	| "connected"
@@ -40,10 +46,12 @@ export declare interface WebSocketEvents {
 	revocation: (message: RevocationMessage) => void
 	ruleCreated: (message: RuleCreatedMessage) => void
 	ruleRemoved: (message: RuleRemovedMessage) => void
-	ruleUpdated: (message: RuleCreatedMessage) => void
+	ruleUpdated: (message: RuleUpdatedMessage) => void
+	rulesMerged: (message: RulesMergedMessage) => void
 	communityCreated: (message: CommunityCreatedMessage) => void
 	communityRemoved: (message: CommunityRemovedMessage) => void
-	communityUpdated: (message: CommunityCreatedMessage) => void
+	communityUpdated: (message: CommunityUpdatedMessage) => void
+	communitiesMerged: (message: CommunitiesMergedMessage) => void
 
 	reconnecting: (message: void) => void
 	connected: (message: void) => void
@@ -127,13 +135,19 @@ class WebSocketHandler extends EventEmitter {
 		case "ruleUpdated":
 			this.emit(
 				"ruleUpdated",
-				newMessage as unknown as RuleCreatedMessage
+				newMessage as unknown as RuleUpdatedMessage
 			)
 			break
 		case "ruleRemoved":
 			this.emit(
 				"ruleRemoved",
 				newMessage as unknown as RuleRemovedMessage
+			)
+			break
+		case "rulesMerged":
+			this.emit(
+				"rulesMerged",
+				newMessage as unknown as RulesMergedMessage
 			)
 			break
 		case "communityCreated":
@@ -151,9 +165,14 @@ class WebSocketHandler extends EventEmitter {
 		case "communityUpdated":
 			this.emit(
 				"communityUpdated",
-				newMessage as unknown as CommunityCreatedMessage
+				newMessage as unknown as CommunityUpdatedMessage
 			)
 			break
+		case "communitiesMerged":
+			this.emit(
+				"communitiesMerged",
+				newMessage as unknown as CommunitiesMergedMessage
+			)
 		}
 	}
 	addGuildID(guildID: string): void {
