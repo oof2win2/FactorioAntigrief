@@ -43,6 +43,19 @@ export interface RuleRemovedMessage extends BaseWebsocketMessage {
 	rule: Rule
 }
 
+export interface RuleUpdatedMessage extends BaseWebsocketMessage {
+	messageType: "ruleUpdated"
+	embed: APIEmbed
+	receiving: Rule
+	dissolving: Rule
+}
+
+export interface RulesMergedMessage extends BaseWebsocketMessage {
+	messageType: "rulesMerged"
+	embed: APIEmbed
+	rule: Rule
+}
+
 export interface CommunityCreatedMessageExtraOpts {
 	contact: APIUser
 }
@@ -53,14 +66,28 @@ export interface CommunityCreatedMessage extends BaseWebsocketMessage {
 	extraData: CommunityCreatedMessageExtraOpts
 }
 
-export interface CommunityRemovedMessageExtraOpts {
+export interface CommunityCreatedMessageExtraOpts {
 	contact: APIUser
 }
 export interface CommunityRemovedMessage extends BaseWebsocketMessage {
 	messageType: "communityRemoved"
 	embed: APIEmbed
 	community: Community
-	extraData: CommunityRemovedMessageExtraOpts
+	extraData: CommunityCreatedMessageExtraOpts
+}
+export interface CommunityUpdatedMessage extends BaseWebsocketMessage {
+	messageType: "communityRemoved"
+	embed: APIEmbed
+	community: Community
+	extraData: CommunityCreatedMessageExtraOpts
+}
+
+export interface CommunitiesMergedMessage extends BaseWebsocketMessage {
+	messageType: "communitiesMerged"
+	embed: APIEmbed
+	receiving: Community
+	dissolving: Community
+	extraData: CommunityCreatedMessageExtraOpts
 }
 
 export interface GuildConfigChangedMessage extends BaseWebsocketMessage {
