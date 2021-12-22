@@ -377,7 +377,7 @@ export async function rulesMergedMessage(
 			messageType: "rulesMerged",
 			embed: ruleEmbed,
 			receiving: receiving,
-			newdissolvingRule: dissolving
+			dissolving: dissolving
 		})
 	)
 }
