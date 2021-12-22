@@ -1,3 +1,10 @@
+## [1.4.0] - [2021-12-22]
+
+### Changes
+
+-	Add WebSocket messages for merging rules and communities
+-	Add WebSocket messages for updating rules and communities
+
 ## [1.3.0] - [2021-10-09]
 
 ### Changes
