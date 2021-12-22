@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { AuthenticateUser } from '../utils/authenticate.js';
 import {Command, SubCommand} from '../utils/Command.js';
 import { readdirSync } from 'fs';
 

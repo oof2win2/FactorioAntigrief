@@ -1,6 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
-import { AuthenticateUser } from "../../utils/authenticate.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
@@ -17,11 +16,12 @@ const CreateCommunity: SubCommand = {
 	,
 	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
 		const user = interaction.user
-		if (!(await AuthenticateUser(user))) return interaction.reply("You are not allowed to perform this action")
 
 		const id = interaction.options.getString("id")!
 		try {
-			const community = await client.FAGC.communities.remove(id)
+			const community = await client.FAGC.communities.remove({
+				communityID: id
+			})
 			if (community) {
 				return interaction.reply(`Community with ID \`${id}\` has been removed`)
 			}

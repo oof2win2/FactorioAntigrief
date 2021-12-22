@@ -1,6 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
-import { AuthenticateUser } from "../../utils/authenticate.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
@@ -23,7 +22,6 @@ const CreateRule: SubCommand = {
 	,
 	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
 		const user = interaction.user
-		if (!(await AuthenticateUser(user))) return interaction.reply("You are not allowed to perform this action")
 
 		const shortdesc = interaction.options.getString("shortdesc")
 		if (!shortdesc) return interaction.reply("Rule short description not provided")
@@ -31,8 +29,10 @@ const CreateRule: SubCommand = {
 		if (!longdesc) return interaction.reply("Rule long description not provided")
 
 		const rule = await client.FAGC.rules.create({
-			shortdesc: shortdesc,
-			longdesc: longdesc
+			rule: {
+				shortdesc: shortdesc,
+				longdesc: longdesc
+			}
 		})
 
 		return interaction.reply(`Rule ${rule.shortdesc} (\`${rule.id}\`) was created`)

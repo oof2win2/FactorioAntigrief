@@ -1,6 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
-import { AuthenticateUser } from "../../utils/authenticate.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
@@ -29,7 +28,6 @@ const EditRule: SubCommand = {
 	,
 	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
 		const user = interaction.user
-		if (!(await AuthenticateUser(user))) return interaction.reply("You are not allowed to perform this action")
 
 		const id = interaction.options.getString("id", true)
 		const shortdesc = interaction.options.getString("shortdesc")
@@ -39,10 +37,12 @@ const EditRule: SubCommand = {
 			ephemeral: true
 		})
 
-		const rule = await client.FAGC.rules.modify(id, {
+		const rule = await client.FAGC.rules.modify({
+			id: id,
 			shortdesc: shortdesc ?? undefined,
-			longdesc: longdesc ?? undefined
+			longdesc: longdesc ?? undefined,
 		})
+		
 		if (!rule) return interaction.reply({
 			content: `Rule with ID ${id} does not exist, no action was performed`,
 			ephemeral: true

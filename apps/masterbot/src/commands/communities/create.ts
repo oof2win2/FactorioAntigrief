@@ -1,6 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
-import { AuthenticateUser } from "../../utils/authenticate.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
@@ -23,7 +22,6 @@ const CreateCommunity: SubCommand = {
 	,
 	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
 		const user = interaction.user
-		if (!(await AuthenticateUser(user))) return interaction.reply("You are not allowed to perform this action")
 
 		const name = interaction.options.getString("name")!
 		const contact = interaction.options.getUser("contact")!
@@ -34,7 +32,10 @@ const CreateCommunity: SubCommand = {
 			})
 		}
 		try {
-			const community = await client.FAGC.communities.create(name, contact.id)
+			const community = await client.FAGC.communities.create({
+				name: name,
+				contact: contact.id,
+			})
 			if (community.community) {
 				contact.send(`You have created a new community ${name} (\`${community.community.id}\`). Your API key is \`${community.apiKey}\``)
 				interaction.reply({
