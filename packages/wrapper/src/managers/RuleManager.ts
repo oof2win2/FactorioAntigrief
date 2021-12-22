@@ -1,5 +1,5 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
+import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Rule, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"

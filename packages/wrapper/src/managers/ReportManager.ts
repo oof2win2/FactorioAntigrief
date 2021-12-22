@@ -1,5 +1,5 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
+import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Revocation, Report, CreateReport, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import {

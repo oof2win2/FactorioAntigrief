@@ -1,5 +1,5 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions, RequestConfig, WrapperOptions } from "../types/types"
+import { ManagerOptions, WrapperOptions } from "../types/types"
 import BaseManager from "./BaseManager"
 import { GenericAPIError, NoAuthError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
