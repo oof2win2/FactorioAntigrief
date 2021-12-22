@@ -4,27 +4,35 @@ import { Revocation, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from ".."
+import { FetchRequestTypes } from "../types/privatetypes"
 
 export default class RevocationManager extends BaseManager<Revocation> {
 	private apiurl: string
+	
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		if (options.apikey) this.apikey = options.apikey
 		this.apiurl = options.apiurl
 	}
+
 	resolveID(revocationid: ApiID): Revocation | null {
 		const cached = this.cache.get(revocationid)
 		if (cached) return cached
 		return null
 	}
+
 	addRevocation(revocation: Revocation): void {
 		this.add(revocation)
 	}
-	async fetchRevocations(
+
+	async fetchRevocations({
+		playername,
+		communityId,
+		cache = true
+	}: {
 		playername: string,
 		communityId: string,
-		cache = true
-	): Promise<Revocation[]> {
+	} & FetchRequestTypes): Promise<Revocation[]> {
 		const revocations = await fetch(
 			`${this.apiurl}/revocations/community/${strictUriEncode(
 				playername
@@ -40,10 +48,13 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			)
 		return revocations
 	}
-	async fetchAllRevocations(
-		playername: string,
+
+	async fetchAllRevocations({
+		playername,
 		cache = true
-	): Promise<Revocation[]> {
+	}: {
+		playername: string
+	} & FetchRequestTypes): Promise<Revocation[]> {
 		const revocations = await fetch(
 			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
 			{ credentials: "include" }
@@ -56,10 +67,12 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return revocations
 	}
 
-	async fetchModifiedSince(
-		timestamp: Date,
+	async fetchModifiedSince({
+		timestamp,
 		cache = true
-	): Promise<Revocation[]> {
+	}: {
+		timestamp: Date,
+	} & FetchRequestTypes): Promise<Revocation[]> {
 		const revocations = await fetch(
 			`${
 				this.apiurl

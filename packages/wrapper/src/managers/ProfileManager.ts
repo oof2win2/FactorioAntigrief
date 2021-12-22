@@ -11,10 +11,12 @@ export default class ProfileManager extends BaseManager<Report> {
 		if (options.apikey) this.apikey = options.apikey
 		this.apiurl = options.apiurl
 	}
-	async fetchCommunity(
-		playername: string,
+	async fetchCommunity({
+		playername, communityId
+	}: {
+		playername: string
 		communityId: ApiID
-	): Promise<Profile> {
+	}): Promise<Profile> {
 		const fetched = await fetch(
 			`${this.apiurl}/profiles/fetchcommunity/${strictUriEncode(
 				playername
@@ -31,7 +33,7 @@ export default class ProfileManager extends BaseManager<Report> {
 		})
 		return fetched
 	}
-	async fetchAll(playername: string): Promise<Profile[]> {
+	async fetchAll({ playername }: {playername: string}): Promise<Profile[]> {
 		const fetched = await fetch(
 			`${this.apiurl}/profiles/fetchall/${strictUriEncode(playername)}`,
 			{

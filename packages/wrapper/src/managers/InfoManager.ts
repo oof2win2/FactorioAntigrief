@@ -5,6 +5,7 @@ import BaseManager from "./BaseManager"
 import { GenericAPIError, RequestConfig, NoAuthError } from "../types"
 import strictUriEncode from "strict-uri-encode"
 import { APIEmbed } from "discord-api-types"
+import { FetchRequestTypes } from "../types/privatetypes"
 
 export default class InfoManager extends BaseManager<Webhook> {
 	private apiurl: string
@@ -14,10 +15,12 @@ export default class InfoManager extends BaseManager<Webhook> {
 		if (options.masterapikey) this.masterapikey = options.masterapikey
 		this.apiurl = options.apiurl
 	}
-	async addWebhook(
+	async addWebhook({
+		webhookid, webhooktoken
+	}: {
 		webhookid: string,
 		webhooktoken: string
-	): Promise<Webhook> {
+	}): Promise<Webhook> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "POST",
 			body: JSON.stringify({
@@ -30,10 +33,12 @@ export default class InfoManager extends BaseManager<Webhook> {
 		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
 		return add
 	}
-	async removeWebhook(
+	async removeWebhook({
+		webhookid, webhooktoken
+	}: {
 		webhookid: string,
 		webhooktoken: string
-	): Promise<Webhook | null> {
+	}): Promise<Webhook | null> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "DELETE",
 			body: JSON.stringify({
@@ -46,11 +51,14 @@ export default class InfoManager extends BaseManager<Webhook> {
 		return add
 	}
 
-	async notifyGuildText(
+	async notifyGuildText({
+		guildId,
+		text,
+		reqConfig = {}
+	}: {
 		guildId: string,
 		text: string,
-		reqConfig: RequestConfig = {}
-	): Promise<void> {
+	} & FetchRequestTypes): Promise<void> {
 		if (
 			!this.masterapikey &&
 			!reqConfig.masterapikey &&
@@ -75,11 +83,14 @@ export default class InfoManager extends BaseManager<Webhook> {
 			}
 		)
 	}
-	async notifyGuildEmbed(
+	async notifyGuildEmbed({
+		guildId,
+		embed,
+		reqConfig = {}
+	}: {
 		guildId: string,
 		embed: APIEmbed,
-		reqConfig: RequestConfig = {}
-	): Promise<void> {
+	} & FetchRequestTypes): Promise<void> {
 		if (
 			!this.masterapikey &&
 			!reqConfig.masterapikey &&

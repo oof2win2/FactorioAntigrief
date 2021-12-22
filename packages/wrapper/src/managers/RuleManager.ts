@@ -4,6 +4,7 @@ import { Rule, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError, NoMasterApikeyError } from "../types"
+import { FetchRequestTypes } from "../types/privatetypes"
 
 export class RuleManager extends BaseManager<Rule> {
 	private apiurl: string
@@ -13,11 +14,13 @@ export class RuleManager extends BaseManager<Rule> {
 		if (options.apikey) this.apikey = options.apikey
 		if (options.masterapikey) this.masterapikey = options.masterapikey
 	}
-	async fetchRule(
-		ruleid: ApiID,
+	async fetchRule({
+		ruleid,
 		cache = true,
 		force = false
-	): Promise<Rule | null> {
+	}: {
+		ruleid: ApiID
+	} & FetchRequestTypes): Promise<Rule | null> {
 		if (!force) {
 			const cached =
 				this.cache.get(ruleid) || this.fetchingCache.get(ruleid)
@@ -47,7 +50,7 @@ export class RuleManager extends BaseManager<Rule> {
 		if (fetched.id === ruleid) return fetched
 		return null
 	}
-	async fetchAll(cache = true): Promise<Rule[]> {
+	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Rule[]> {
 		const allRules = await fetch(`${this.apiurl}/rules`, {
 			credentials: "include",
 		}).then((r) => r.json())
@@ -63,10 +66,12 @@ export class RuleManager extends BaseManager<Rule> {
 		return null
 	}
 
-	async create(
+	async create({
+		rule,
+		reqConfig = {}
+	}: {
 		rule: Omit<Rule, "id">,
-		reqConfig: RequestConfig = {}
-	): Promise<Rule> {
+	} & FetchRequestTypes): Promise<Rule> {
 		if (!reqConfig.masterapikey && !this.masterapikey)
 			throw new NoMasterApikeyError()
 		const data = await fetch(`${this.apiurl}/rules`, {
@@ -89,13 +94,14 @@ export class RuleManager extends BaseManager<Rule> {
 		return data
 	}
 
-	async modify(
+	async modify({
+		id,
+		shortdesc, longdesc,
+		reqConfig = {}
+	}: {
 		id: string,
-		{
-			shortdesc, longdesc
-		}: {shortdesc?: string, longdesc?: string},
-		reqConfig: RequestConfig = {}
-	): Promise<Rule | null> {
+		shortdesc?: string, longdesc?: string
+	} & FetchRequestTypes): Promise<Rule | null> {
 		if (!this.masterapikey && !reqConfig.masterapikey)
 			throw new NoMasterApikeyError()
 		const data = await fetch(
@@ -127,10 +133,12 @@ export class RuleManager extends BaseManager<Rule> {
 		return data
 	}
 
-	async remove(
+	async remove({
+		id,
+		reqConfig = {}
+	}: {
 		id: string,
-		reqConfig: RequestConfig = {}
-	): Promise<Rule | null> {
+	} & FetchRequestTypes): Promise<Rule | null> {
 		if (!this.masterapikey && !reqConfig.masterapikey)
 			throw new NoMasterApikeyError()
 		const data = await fetch(

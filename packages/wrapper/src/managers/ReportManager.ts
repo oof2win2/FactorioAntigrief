@@ -8,6 +8,7 @@ import {
 	UnsuccessfulRevocationError,
 } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
+import { FetchRequestTypes } from "../types/privatetypes"
 
 export default class ReportManager extends BaseManager<Report> {
 	private apiurl: string
@@ -23,11 +24,13 @@ export default class ReportManager extends BaseManager<Report> {
 		this.createRevocation = createRevocation
 	}
 
-	async fetchReport(
-		reportid: ApiID,
+	async fetchReport({
+		reportid,
 		cache = true,
 		force = false
-	): Promise<Report | null> {
+	}: {
+		reportid: ApiID
+	} & FetchRequestTypes): Promise<Report | null> {
 		if (!force) {
 			const cached =
 				this.cache.get(reportid) || this.fetchingCache.get(reportid)
@@ -61,7 +64,11 @@ export default class ReportManager extends BaseManager<Report> {
 		}, 0)
 		return fetched
 	}
-	async fetchAllName(playername: string, cache = true): Promise<Report[]> {
+	async fetchAllName({
+		playername, cache = true
+	}: {
+		playername: string
+	} & FetchRequestTypes): Promise<Report[]> {
 		const allReports = await fetch(
 			`${this.apiurl}/reports/getplayer/${strictUriEncode(playername)}`,
 			{
@@ -83,7 +90,11 @@ export default class ReportManager extends BaseManager<Report> {
 		return allReports
 	}
 
-	async fetchModifiedSince(timestamp: Date, cache = true): Promise<Report[]> {
+	async fetchModifiedSince({
+		timestamp, cache = true
+	}: {
+		timestamp: Date
+	} & FetchRequestTypes): Promise<Report[]> {
 		const reports = await fetch(
 			`${this.apiurl}/reports/modifiedSince/${timestamp.toISOString()}`,
 			{
@@ -109,7 +120,11 @@ export default class ReportManager extends BaseManager<Report> {
 		if (cached) return cached
 		return null
 	}
-	async fetchByRule(ruleid: ApiID, cache = true): Promise<Report[]> {
+	async fetchByRule({
+		ruleid, cache = true
+	}: {
+		ruleid: ApiID
+	} & FetchRequestTypes): Promise<Report[]> {
 		const ruleReports = await fetch(
 			`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`,
 			{
@@ -160,11 +175,13 @@ export default class ReportManager extends BaseManager<Report> {
 		return reports
 	}
 
-	async create(
-		report: CreateReport,
+	async create({
+		report,
 		cache = true,
-		reqConfig: RequestConfig = {}
-	): Promise<Report> {
+		reqConfig = {}
+	}: {
+		report: CreateReport
+	} & FetchRequestTypes): Promise<Report> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 
@@ -186,12 +203,15 @@ export default class ReportManager extends BaseManager<Report> {
 		if (cache) this.add(create)
 		return create
 	}
-	async revoke(
+	async revoke({
+		reportid,
+		adminId,
+		cache = true,
+		reqConfig = {}
+	}: {
 		reportid: ApiID,
 		adminId: string,
-		cache = true,
-		reqConfig: RequestConfig = {}
-	): Promise<Revocation> {
+	} & FetchRequestTypes): Promise<Revocation> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 
@@ -220,12 +240,15 @@ export default class ReportManager extends BaseManager<Report> {
 		this.cache.sweep((report) => report.id === reportid) // remove the revoked report from cache as it isnt working anymore
 		return revoked
 	}
-	async revokeAllName(
+	async revokeAllName({
+		playername,
+		adminId,
+		cache = true,
+		reqConfig = {}
+	}: {
 		playername: string,
 		adminId: string,
-		cache = true,
-		reqConfig: RequestConfig = {}
-	): Promise<Revocation[] | null> {
+	} & FetchRequestTypes): Promise<Revocation[] | null> {
 		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
 			throw new NoAuthError()
 
