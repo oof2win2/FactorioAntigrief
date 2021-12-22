@@ -7,7 +7,7 @@ import { ManagerOptions, WrapperOptions } from "./types/types"
 import ReportManager from "./managers/ReportManager"
 import WebSocketHandler from "./WebsocketListener"
 import { Revocation } from "fagc-api-types"
-import UserManager from "./managers/UserManager"
+// import UserManager from "./managers/UserManager"
 
 // export types
 export * from "./types/index"
@@ -23,7 +23,7 @@ export class FAGCWrapper {
 	public info: InfoManager
 	public profiles: ProfileManager
 	public websocket: WebSocketHandler
-	public users: UserManager
+	// public users: UserManager
 
 	constructor(
 		options: WrapperOptions,
@@ -41,7 +41,7 @@ export class FAGCWrapper {
 		this.rules = new RuleManager(options, managerOptions)
 		this.info = new InfoManager(options, managerOptions)
 		this.profiles = new ProfileManager(options, managerOptions)
-		this.users = new UserManager(options, managerOptions)
+		// this.users = new UserManager(options, managerOptions)
 
 		const createCacheRevocation = (revocation: Revocation) =>
 			this.revocations.addRevocation(revocation)
@@ -80,7 +80,7 @@ export class FAGCWrapper {
 			this.rules.apikey = apikey
 			this.info.apikey = apikey
 			this.profiles.apikey = apikey
-			this.users.apikey = apikey
+			// this.users.apikey = apikey
 			this.reports.apikey = apikey
 		}
 		if (masterapikey) {
@@ -89,7 +89,7 @@ export class FAGCWrapper {
 			this.rules.masterapikey = masterapikey
 			this.info.masterapikey = masterapikey
 			this.profiles.masterapikey = masterapikey
-			this.users.masterapikey = masterapikey
+			// this.users.masterapikey = masterapikey
 			this.reports.masterapikey = masterapikey
 		}
 	}

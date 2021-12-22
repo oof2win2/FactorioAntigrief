@@ -7,6 +7,7 @@
 -   Make listFiltered accept playername again
 -   Functions to add and remove guild IDs from WS
 -   Websocket that reconnects itself
+-   Disable the /users API endpoints, disable the manager
 
 ## [1.16.3] - [2021-11-07]
 
