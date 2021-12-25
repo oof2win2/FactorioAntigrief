@@ -20,7 +20,7 @@ const ENV = cleanEnv(
 		UNBANMESSAGE: str({ desc: "Command to unban with", default: "/unban {PLAYERNAME}" }),
 		CUSTOMUNBAN: str({ desc: "Custom command to unban with", default: "/unban {PLAYERNAME}" }),
 		ERRORCHANNELID: str({ desc: "Discord channel ID of error channel" }),
-		SERVERFILEPATH: str({ desc: "Path to JSON file of server descriptions" })
+		SERVERSFILEPATH: str({ desc: "Path to JSON file of server descriptions", example: "/home/fagc/fagc-clientside-bot/servers.json" }),
 	},
 	{}
 )

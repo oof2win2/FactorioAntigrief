@@ -21,8 +21,10 @@ const Setapikey: SubCommand = {
 			})
 		}
 		try {
-			const community = await client.fagc.communities.fetchOwnCommunity(undefined, {
-				apikey: apikey.data
+			const community = await client.fagc.communities.fetchOwnCommunity({
+				reqConfig: {
+					apikey: apikey.data
+				}
 			})
 			if (!community) {
 				return interaction.reply({

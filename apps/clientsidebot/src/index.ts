@@ -30,9 +30,6 @@ client.login(ENV.DISCORD_BOTTOKEN)
 const checkBans = setTimeout(async() => {
 	// clear banlist from server's memory and also file
 	await client.rcon.rconCommandAll("/banlist clear")
-
-	// check for bans for players that are currently connected
-	client.checkBans(), 10*1000
 })
 
 const purgeBans = setInterval(() => {

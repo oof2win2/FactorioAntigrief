@@ -7,7 +7,7 @@ import { Routes, RESTGetAPIUserResult, RESTAPIPartialCurrentUserGuild, APIApplic
 import ENV from "./utils/env.js"
 import fs from "fs/promises"
 import { PrismaClient } from ".prisma/client/index.js"
-import { Command, PermissionOverrideType } from "./base/Commands.js"
+import { Command } from "./base/Commands.js"
 import { Collection } from "discord.js"
 import { Required } from "utility-types"
 import { FAGCWrapper } from "fagc-api-wrapper"
@@ -20,7 +20,9 @@ const toPushCommmands = await Promise.all(commandCategories.map(async (commandFi
 	return command
 }))
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+	log: [ "error", "query" ]
+})
 const rest = new REST({ version: "9" }).setToken(ENV.DISCORD_BOTTOKEN)
 
 const FAGC = new FAGCWrapper({
@@ -38,7 +40,7 @@ try {
 	const guildConfigs = new Map<string, GuildConfig>()
 	await Promise.all(
 		guildIDs.map(async (guildID) => {
-			const config = await FAGC.communities.fetchGuildConfig(guildID)
+			const config = await FAGC.communities.fetchGuildConfig({ guildId: guildID })
 			if (config) guildConfigs.set(guildID, config)
 		})
 	)

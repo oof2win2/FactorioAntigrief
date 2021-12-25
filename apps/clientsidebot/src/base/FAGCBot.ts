@@ -1,8 +1,8 @@
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { GuildConfig, Community } from "fagc-api-types"
 import ENV from "../utils/env.js"
-import { Client, ClientOptions, Collection, MessageEmbed, TextBasedChannels, TextChannel } from "discord.js"
-import { Command, PermissionOverrideType } from "./Commands.js"
+import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
+import { Command } from "./Commands.js"
 import { InfoChannel, PrismaClient } from ".prisma/client/index.js"
 import * as database from "./database.js"
 import * as wshandler from "./wshandler.js"
@@ -14,7 +14,7 @@ import { Required } from "utility-types"
 import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 
 function getServers(): database.FactorioServerType[] {
-	const serverJSON = fs.readFileSync(ENV.SERVERFILEPATH, "utf8")
+	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
 	const servers = z.array(database.FactorioServer).parse(JSON.parse(serverJSON))
 	return servers
 }
@@ -107,7 +107,9 @@ export default class FAGCBot extends Client {
 
 		// send info to backend about guilds, get configs
 		setTimeout(() => {
-			this.fagc.websocket.setGuildID("749943992719769613")
+			this.guilds.cache.map((guild => {
+				this.fagc.websocket.addGuildID(guild.id)
+			}))
 		}, 5000)
 	}
 	async getBotConfigs(): Promise<database.BotConfigType[]> {
@@ -216,7 +218,7 @@ export default class FAGCBot extends Client {
 	}
 
 	async getGuildConfig(guildID: string): Promise<GuildConfig | null> {
-		const config = await this.fagc.communities.fetchGuildConfig(guildID)
+		const config = await this.fagc.communities.fetchGuildConfig({ guildId: guildID })
 		if (!config) return null
 		this.guildConfigs.set(guildID, config)
 		return config

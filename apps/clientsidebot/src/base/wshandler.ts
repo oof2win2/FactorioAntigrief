@@ -99,10 +99,11 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 				const command = `/ban ${event.revocation.playername} ${privateBans[0].reason}`
 				await client.rcon.rconCommandGuild(command, guildID)
 			} else {
-				const otherBans = await client.fagc.reports.listFiltered(
-					guildConfig.ruleFilters ?? [],
-					guildConfig.trustedCommunities ?? []
-				)
+				const otherBans = await client.fagc.reports.listFiltered({
+					playername: event.revocation.playername,
+					ruleIDs: guildConfig.ruleFilters ?? [],
+					communityIDs: guildConfig.trustedCommunities ?? []
+				})
 				if (otherBans.length) client.ban(otherBans[0], guildID)
 			}
 		}
@@ -113,11 +114,17 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	const oldConfig = client.guildConfigs.get(event.guildId)
 
 	if (
-		oldConfig && oldConfig.ruleFilters && oldConfig.trustedCommunities &&
 		event.ruleFilters && event.trustedCommunities
 	) {
-		const oldReports = await client.fagc.reports.listFiltered(oldConfig.ruleFilters, oldConfig.trustedCommunities)
-		const newReports = await client.fagc.reports.listFiltered(event.ruleFilters, event.trustedCommunities)
+		// is an empty array if no old config existed
+		const oldReports = (oldConfig && oldConfig.ruleFilters && oldConfig.trustedCommunities) ? await client.fagc.reports.listFiltered({
+			ruleIDs: oldConfig.ruleFilters,
+			communityIDs: oldConfig.trustedCommunities
+		}) : []
+		const newReports = await client.fagc.reports.listFiltered({
+			ruleIDs: event.ruleFilters,
+			communityIDs: event.trustedCommunities,
+		})
 
 		const oldReportNames = oldReports.map(report => report.playername)
 		const newReportNames = newReports.map(report => report.playername)
