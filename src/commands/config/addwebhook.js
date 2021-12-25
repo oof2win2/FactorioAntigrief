@@ -35,10 +35,10 @@ class AddWebhook extends Command {
 			console.error(e)
 			return message.channel.send(`${this.client.emotes.warn} Invalid webhook`)
 		}
-		const webhook = await this.client.fagc.info.addWebhook(
-			webhookID,
-			webhookToken
-		)
+		const webhook = await this.client.fagc.info.addWebhook({
+			webhookid: webhookID,
+			webhooktoken: webhookToken
+		})
 		if (webhook.guildId)
 			return message.reply(
 				"The webhook will recieve FAGC notifications from now on! Testing message has been sent"

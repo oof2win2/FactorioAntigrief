@@ -27,10 +27,14 @@ class AddWebhook extends Command {
 		const channel = message.mentions.channels.first() || message.channel
 		const webhook = await channel.createWebhook("FAGC Notifier")
 		try {
-			await this.client.fagc.info.addWebhook(webhook.id, webhook.token)
+			await this.client.fagc.info.addWebhook({
+				webhookid: webhook.id,
+				webhooktoken: webhook.token,
+			})
 			message.channel.send("Webhook created successfully!")
 		} catch (e) {
 			await webhook.delete()
+			// @ts-ignore
 			if (e.message.includes("Forbidden"))
 				return message.channel.send(
 					`${this.client.emotes.warn} You already have a webhook in this guild`

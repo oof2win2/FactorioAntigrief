@@ -17,7 +17,7 @@ class GetAllRules extends Command {
 		})
 	}
 	async run(message) {
-		const rules = await this.client.fagc.rules.fetchAll()
+		const rules = await this.client.fagc.rules.fetchAll({})
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Rules")
@@ -32,7 +32,7 @@ class GetAllRules extends Command {
 				value: rules[i + 1] ? `**${rules[i + 1].shortdesc}** (\`${rules[i + 1].id}\`)` : "\u200b",
 			})
 		}
-		console.log(fields)
+
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
 }

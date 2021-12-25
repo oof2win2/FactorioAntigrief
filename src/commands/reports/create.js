@@ -5,7 +5,7 @@ const {
 } = require("../../utils/responseGetter")
 const { handleErrors, createPagedEmbed } = require("../../utils/functions")
 const Command = require("../../base/Command")
-const { AuthenticationError } = require("fagc-api-wrapper")
+const { NoAuthError } = require("fagc-api-wrapper")
 const validator = require("validator").default
 
 class CreateReport extends Command {
@@ -64,7 +64,7 @@ class CreateReport extends Command {
 				`${this.client.emotes.type} Type in IDs of rules (or indexes in filtered rules) that has been broken, separated by spaces`
 			)
 		)?.content
-		if (ruleids === undefined)
+		if (!ruleids)
 			return message.channel.send(`${this.client.emotes.warn} Didn't send rule IDs in time`)
 		let ruleInput = ruleids.split(" ")
 		const ruleNumbers = ruleInput
@@ -90,7 +90,7 @@ class CreateReport extends Command {
 			(ruleNumber) => filteredRules[ruleNumber - 1]
 		)
 		let rules = await Promise.all(
-			ruleInput.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid))
+			ruleInput.map((ruleid) => this.client.fagc.rules.fetchRule({ ruleid: ruleid }))
 		)
 		rules = rules.filter((r) => r).concat(numberRules)
 
@@ -184,8 +184,8 @@ class CreateReport extends Command {
 		try {
 			const reports = await Promise.all(
 				rules.map((rule) =>
-					this.client.fagc.reports.create(
-						{
+					this.client.fagc.reports.create({
+						report: {
 							playername: playername,
 							adminId: message.author.id,
 							brokenRule: rule.id,
@@ -194,9 +194,8 @@ class CreateReport extends Command {
 							automated: false,
 							reportedTime: new Date(timestamp),
 						},
-						true,
-						{ apikey: config.apikey }
-					)
+						reqConfig: { apikey: config.apikey }
+					})
 				)
 			)
 			if (
@@ -213,7 +212,7 @@ class CreateReport extends Command {
 				return handleErrors(message, reports)
 			}
 		} catch (error) {
-			if (error instanceof AuthenticationError)
+			if (error instanceof NoAuthError)
 				return message.channel.send(`${this.client.emotes.error} Your API key is set incorrectly`)
 			message.channel.send(`${this.client.emotes.error} Error creating report. Please check logs.`)
 			throw error

@@ -33,10 +33,10 @@ class RevokeAllname extends Command {
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 
-		const profile = await this.client.fagc.profiles.fetchCommunity(
-			playername,
-			config.communityId
-		)
+		const profile = await this.client.fagc.profiles.fetchCommunity({
+			playername: playername,
+			communityId: config.communityId
+		})
 		if (!profile || !profile.reports[0])
 			return message.reply(
 				`Player \`${playername}\` has no profile in your community`

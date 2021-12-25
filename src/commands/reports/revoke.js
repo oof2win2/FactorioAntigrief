@@ -32,7 +32,7 @@ class Revoke extends Command {
 		const reportID = args.shift()
 		if (!reportID) return message.channel.send(`${this.client.emotes.warn} No report was provided`)
 
-		const report = await this.client.fagc.reports.fetchReport(reportID)
+		const report = await this.client.fagc.reports.fetchReport({ reportid: reportID })
 		if (!report?.id)
 			return message.channel.send(
 				`Report with ID \`${reportID}\` doesn't exist`
@@ -67,12 +67,11 @@ class Revoke extends Command {
 		if (!confirm) return message.channel.send("Report revocation cancelled")
 
 		try {
-			const response = await this.client.fagc.reports.revoke(
-				reportID,
-				message.author.id,
-				true,
-				{ apikey: config.apikey }
-			)
+			const response = await this.client.fagc.reports.revoke({
+				reportid: reportID,
+				adminId: message.author.id,
+				reqConfig: { apikey: config.apikey }
+			})
 
 			if (response.id && response.revokedBy && response.revokedTime) {
 				return message.channel.send("Report revoked!")

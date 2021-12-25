@@ -102,7 +102,7 @@ class CreateReportAdvanced extends Command {
 			(ruleNumber) => filteredRules[ruleNumber - 1]
 		)
 		let rules = await Promise.all(
-			ruleInput.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid))
+			ruleInput.map((ruleid) => this.client.fagc.rules.fetchRule({ ruleid: ruleid }))
 		)
 		rules = rules.filter((r) => r).concat(numberRules)
 
@@ -219,8 +219,8 @@ class CreateReportAdvanced extends Command {
 		try {
 			const reports = await Promise.all(
 				rules.map((rule) =>
-					this.client.fagc.reports.create(
-						{
+					this.client.fagc.reports.create({
+						report: {
 							playername: playername,
 							adminId: adminUser.id,
 							brokenRule: rule.id,
@@ -229,9 +229,8 @@ class CreateReportAdvanced extends Command {
 							automated: false,
 							reportedTime: timestamp,
 						},
-						true,
-						{ apikey: config.apikey }
-					)
+						reqConfig: { apikey: config.apikey }
+					})
 				)
 			)
 			if (

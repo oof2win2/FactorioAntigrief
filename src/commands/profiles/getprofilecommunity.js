@@ -43,10 +43,10 @@ class GetAllProfiles extends Command {
 			return message.channel.send(
 				`Community with ID \`${communityId}\` does not exist`
 			)
-		const profile = await this.client.fagc.profiles.fetchCommunity(
-			playername,
-			communityId
-		)
+		const profile = await this.client.fagc.profiles.fetchCommunity({
+			playername: playername,
+			communityId: communityId
+		})
 		if (!profile || !profile.reports.length)
 			return message.channel.send(
 				`User \`${playername}\` has no profile in community ${community.name} (\`${community.id}\`)`
@@ -62,15 +62,15 @@ class GetAllProfiles extends Command {
 			)
 		const fields = await Promise.all(
 			profile.reports.map(async (report) => {
-				const rule = await this.client.fagc.rules.fetchRule(
-					report.brokenRule
-				)
+				const rule = await this.client.fagc.rules.fetchRule({
+					ruleid: report.brokenRule
+				})
 				const admin = await this.client.users.fetch(report.adminId)
 				return {
 					name: report.id,
 					value:
 						`By: <@${report.adminId}> | ${admin?.tag}\n` +
-						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${report.proof}\n` +
+						`Broken rule: ${rule?.shortdesc} (${rule?.id})\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
 						`Violated time: <t:${Math.round(
 							report.reportedTime.valueOf() / 1000
