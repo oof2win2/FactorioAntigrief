@@ -44,11 +44,11 @@ class GetAllProfiles extends Command {
 				// this is because there is a limit of 6k chars per embed
 				const reports = profile.reports.map((report) => report.id)
 				const community =
-					await this.client.fagc.communities.fetchCommunity(
-						profile.communityId
-					)
+					await this.client.fagc.communities.fetchCommunity({
+						communityID: profile.communityId
+					})
 				return {
-					name: `Community ${community.name} (\`${profile.communityId}\`)`,
+					name: `Community ${community?.name} (\`${profile.communityId}\`)`,
 					value: `Report ID(s): \`${reports.join("`, `")}\``,
 				}
 			})

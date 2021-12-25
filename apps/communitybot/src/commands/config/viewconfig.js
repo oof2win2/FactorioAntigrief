@@ -21,7 +21,7 @@ class ViewConfig extends Command {
 	async run(message, _, config) {
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Config")
-			.setAuthor(`${this.client.user.username} | oof2win2#3149`)
+			.setAuthor(`${this.client.user?.username} | oof2win2#3149`)
 			.setTimestamp()
 			.setDescription("Your FAGC Configuration")
 		const community = await this.client.fagc.communities.fetchCommunity(

@@ -33,11 +33,11 @@ class SetAPIKey extends Command {
 				`${this.client.emotes.type} Type in the ID or ping the role for report management`
 			)
 			const reports =
-				reportsMsg.mentions.roles.first() ||
-				(await message.guild.roles.fetch(reportsMsg.content))
+				reportsMsg?.mentions.roles.first() ||
+				(await message.guild.roles.fetch(reportsMsg?.content))
 			if (!reports)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${reportsMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${reportsMsg?.content}\` is not a valid role`
 				)
 
 			const webhooksMsg = await getMessageResponse(
@@ -45,11 +45,11 @@ class SetAPIKey extends Command {
 				`${this.client.emotes.type} Type in the ID or ping the role for webhook management`
 			)
 			const webhooks =
-				webhooksMsg.mentions.roles.first() ||
-				(await message.guild.roles.fetch(webhooksMsg.content))
+				webhooksMsg?.mentions.roles.first() ||
+				(await message.guild.roles.fetch(webhooksMsg?.content))
 			if (!webhooks)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${webhooksMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${webhooksMsg?.content}\` is not a valid role`
 				)
 
 			const configMsg = await getMessageResponse(
@@ -57,11 +57,11 @@ class SetAPIKey extends Command {
 				`${this.client.emotes.type} Type in the ID or ping the role for config management`
 			)
 			const setConfig =
-				configMsg.mentions.roles.first() ||
-				(await message.guild.roles.fetch(configMsg.content))
+				configMsg?.mentions.roles.first() ||
+				(await message.guild.roles.fetch(configMsg?.content))
 			if (!setConfig)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${configMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${configMsg?.content}\` is not a valid role`
 				)
 
 			const ruleMsg = await getMessageResponse(
@@ -69,11 +69,11 @@ class SetAPIKey extends Command {
 				`${this.client.emotes.type} Type in the ID or ping the role for management of filtered rules`
 			)
 			const setRules =
-				ruleMsg.mentions.roles.first() ||
-				(await message.guild.roles.fetch(ruleMsg.content))
+				ruleMsg?.mentions.roles.first() ||
+				(await message.guild.roles.fetch(ruleMsg?.content))
 			if (!setRules)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${ruleMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${ruleMsg?.content}\` is not a valid role`
 				)
 
 			const communitiesMsg = await getMessageResponse(
@@ -81,11 +81,11 @@ class SetAPIKey extends Command {
 				`${this.client.emotes.type} Type in the ID or ping the role for management of trusted communities`
 			)
 			const setCommunities =
-				communitiesMsg.mentions.roles.first() ||
-				(await message.guild.roles.fetch(communitiesMsg.content))
+				communitiesMsg?.mentions.roles.first() ||
+				(await message.guild.roles.fetch(communitiesMsg?.content))
 			if (!setCommunities)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${communitiesMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${communitiesMsg?.content}\` is not a valid role`
 				)
 
 			let embed = new MessageEmbed()
@@ -151,11 +151,11 @@ class SetAPIKey extends Command {
 				`${this.client.emotes.type} Type in the ID or ping the role for the \`${args[0]}\` permission`
 			)
 			const role =
-				roleMsg.mentions.roles.first() ||
-				(await message.guild.roles.fetch(roleMsg.content))
+				roleMsg?.mentions.roles.first() ||
+				(await message.guild.roles.fetch(roleMsg?.content))
 			if (!role)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${roleMsg.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${roleMsg?.content}\` is not a valid role`
 				)
 			const confirm = await getConfirmationMessage(
 				message,

@@ -26,7 +26,7 @@ class GetIDRule extends Command {
 		const ruleID = args.shift()
 		if (!ruleID) return message.channel.send(`${this.client.emotes.warn} No rule ID was provided`)
 		console.log(config.ruleFilters[Number(ruleID) - 1])
-		const rule = Number(ruleID)? await this.client.fagc.rules.fetchRule(config.ruleFilters[Number(ruleID) - 1]) : await this.client.fagc.rules.fetchRule(ruleID)
+		const rule = Number(ruleID)? await this.client.fagc.rules.fetchRule({ ruleid: config.ruleFilters[Number(ruleID) - 1] }) : await this.client.fagc.rules.fetchRule({ ruleid: ruleID })
 
 		if (rule === null)
 			return message.reply(`${this.client.emotes.warn} No rule with ID of \`${ruleID}\` exists`)

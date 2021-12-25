@@ -36,10 +36,10 @@ class RemoveWebhook extends Command {
 			return message.channel.send(`${this.client.emotes.warn} Invalid webhook`)
 		}
 
-		const webhook = await this.client.fagc.info.removeWebhook(
-			webhookID,
-			webhookToken
-		)
+		const webhook = await this.client.fagc.info.removeWebhook({
+			webhookid: webhookID,
+			webhooktoken: webhookToken
+		})
 		if (webhook && webhook.guildId) {
 			return message.reply(
 				"The webhook will no longer be recieving FAGC notifications!"

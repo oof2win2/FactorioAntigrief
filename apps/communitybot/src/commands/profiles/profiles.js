@@ -33,10 +33,10 @@ class GetProfiles extends Command {
 
 		const profiles = await Promise.all(
 			config.trustedCommunities.map((communityId) =>
-				this.client.fagc.profiles.fetchCommunity(
-					playername,
-					communityId
-				)
+				this.client.fagc.profiles.fetchCommunity({
+					playername: playername,
+					communityId: communityId
+				})
 			)
 		)
 		if (!profiles || !profiles[0])
@@ -66,7 +66,7 @@ class GetProfiles extends Command {
 						profile.communityId
 					)
 				return {
-					name: `Community ${community.name} (\`${profile.communityId}\`)`,
+					name: `Community ${community?.name} (\`${profile.communityId}\`)`,
 					value: `Report ID(s): \`${reports.join("`, `")}\``,
 				}
 			})

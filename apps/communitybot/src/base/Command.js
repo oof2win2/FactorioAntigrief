@@ -28,7 +28,7 @@ module.exports = class Command {
 	) {
 		const category = dirname
 			? dirname.split(path.sep)[
-				parseInt(dirname.split(path.sep).length - 1, 10)
+				dirname.split(path.sep).length - 1
 			]
 			: "Other" // what command category the commands live in
 		this.client = client // bind client to this.client
