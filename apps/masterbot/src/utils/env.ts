@@ -9,5 +9,6 @@ const ENV = cleanEnv(process.env, {
 	DISCORD_BOTTOKEN: str({ desc: "Your Discord bot token" }),
 	CLIENTID: str({desc: "Your Discord bot's Client ID"}),
 	TESTGUILDID: str({desc: "Your test guild ID"}),
+	ACCESSROLEID: str({ desc: "Role ID that can access the bot"})
 })
 export default ENV

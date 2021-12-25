@@ -20,7 +20,7 @@ const EditRule: SubCommand = {
 				.setRequired(true)
 		)
 	,
-	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
+	execute: async ({client, interaction}) => {
 		const idReceiving = interaction.options.getString("receiving", true)
 		const idDissolving = interaction.options.getString("dissolving", true)
 		

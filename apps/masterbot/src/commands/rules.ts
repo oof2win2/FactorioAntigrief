@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import {Command, SubCommand} from '../utils/Command.js';
+import {Command, CommandWithSubcommands, SubCommand} from '../utils/Command.js';
 import { readdirSync } from 'fs';
 
 const commands: SubCommand[] = await Promise.all(readdirSync("./commands/rules").map(async commandName => {
@@ -7,16 +7,17 @@ const commands: SubCommand[] = await Promise.all(readdirSync("./commands/rules")
 	return command.default
 }))
 
-const Rules: Command = {
+const Rules: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("rules")
 		.setDescription("FAGC Rules")
+		.setDefaultPermission(false)
 	,
-	execute: async (client, interaction) => {
+	execute: async ({client, interaction}) => {
 		const subcommand = interaction.options.getSubcommand()!
 		const command = commands.find(command => command.data.name === subcommand)
 		if (!command) return interaction.reply("An error executing the command occured")
-		return command.execute(client, interaction)
+		return command.execute({client, interaction})
 	}
 }
 

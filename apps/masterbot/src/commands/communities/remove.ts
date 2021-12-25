@@ -14,7 +14,7 @@ const CreateCommunity: SubCommand = {
 				.setRequired(true)
 		)
 	,
-	execute: async (client: FAGCBot, interaction: CommandInteraction) => {
+	execute: async ({client, interaction}) => {
 		const user = interaction.user
 
 		const id = interaction.options.getString("id")!
