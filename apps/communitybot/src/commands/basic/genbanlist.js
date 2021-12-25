@@ -18,47 +18,31 @@ class Genbanlist extends Command {
 		})
 	}
 	async run(message, _, config) {
-		if (!config.trustedCommunities)
+		if (!config.trustedCommunities || !config.trustedCommunities.length)
 			return message.reply(`${this.client.emotes.warn} Please set trusted communities first`)
-		if (!config.ruleFilters)
+		if (!config.ruleFilters || !config.ruleFilters.length)
 			return message.reply(`${this.client.emotes.warn} Please set rule filters first`)
 		message.reply("Processing banlist. Please wait")
 
-		// get all reports based off of followed rules
-		let rulePromises = config.ruleFilters.map((rule) => {
-			return this.client.fagc.reports.fetchByRule(rule)
-		})
-		let ruleReports = await Promise.all(rulePromises)
-		let reportArr = []
-		const PlayerNames = new Set()
-		ruleReports.forEach((reports) => {
-			reports.forEach((report) => {
-				reportArr.push(report)
-			})
+		const reports = await this.client.fagc.reports.listFiltered({
+			communityIDs: config.trustedCommunities,
+			ruleIDs: config.ruleFilters
 		})
 
-		// filter reports so only trusted communities are on the banlist
-		reportArr = reportArr.filter((report) =>
-			config.trustedCommunities.includes(report.communityId)
-		)
-		// remove duplicates
-		reportArr = reportArr.filter(
-			(report, i) => reportArr.indexOf(report) === i
-		)
-
-		reportArr.forEach((report) => {
-			PlayerNames.add(report.playername)
+		const playerNames = new Set()
+		reports.forEach((report) => {
+			playerNames.add(report.playername)
 		})
 
 		// create & send banlist
-		let banlist = Array.from(PlayerNames).map((playername) => {
+		const banlist = Array.from(playerNames).map((playername) => {
 			return {
 				username: playername,
 				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${this.client.env.APIURL}/profiles/getall?playername=${playername}`,
 			}
 		})
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab
-		let file = new MessageAttachment(
+		const file = new MessageAttachment(
 			Buffer.from(JSON.stringify(banlist, null, 4)),
 			"banlist.json"
 		)
