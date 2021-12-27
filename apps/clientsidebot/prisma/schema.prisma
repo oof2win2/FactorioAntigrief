@@ -51,3 +51,10 @@ model Whitelist {
   playername String   @unique
   reason     String   @default("No reason")
 }
+
+model FagcBan {
+  id          String @id
+  playername  String
+  brokenRule  String
+  communityID String
+}
