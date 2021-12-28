@@ -1,3 +1,5 @@
+import { GuildConfigChangedMessage } from "fagc-api-types"
+
 export interface RequestConfig {
 	apikey?: string
 	masterapikey?: string

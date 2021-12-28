@@ -14,6 +14,7 @@ import {
 	CommunitiesMergedMessage,
 	RuleUpdatedMessage,
 	RulesMergedMessage,
+	GuildConfigChangedMessage,
 } from "fagc-api-types"
 
 // some typescript stuff so it is strictly typed
@@ -40,8 +41,9 @@ export interface WebSocketMessage {
 	messageType: WebSocketMessageType
 	[key: string]: string | boolean | number
 }
+
 export declare interface WebSocketEvents {
-	guildConfigChanged: (message: GuildConfig) => void
+	guildConfigChanged: (message: GuildConfigChangedMessage) => void
 	report: (message: ReportCreatedMessage) => void
 	revocation: (message: RevocationMessage) => void
 	ruleCreated: (message: RuleCreatedMessage) => void
@@ -111,67 +113,65 @@ class WebSocketHandler extends EventEmitter {
 	}
 	handleMessage(message: WebSocketMessage): void {
 		const messageType = message.messageType
-		const newMessage: Omit<WebSocketMessage, "messageType"> = message
-		delete newMessage.messageType
 		switch (messageType) {
 		case "guildConfigChanged":
 			this.emit(
 				"guildConfigChanged",
-				newMessage as unknown as GuildConfig
+				message as unknown as GuildConfigChangedMessage
 			)
 			break
 		case "report":
-			this.emit("report", newMessage as unknown as ReportCreatedMessage)
+			this.emit("report", message as unknown as ReportCreatedMessage)
 			break
 		case "revocation":
-			this.emit("revocation", newMessage as unknown as RevocationMessage)
+			this.emit("revocation", message as unknown as RevocationMessage)
 			break
 		case "ruleCreated":
 			this.emit(
 				"ruleCreated",
-				newMessage as unknown as RuleCreatedMessage
+				message as unknown as RuleCreatedMessage
 			)
 			break
 		case "ruleUpdated":
 			this.emit(
 				"ruleUpdated",
-				newMessage as unknown as RuleUpdatedMessage
+				message as unknown as RuleUpdatedMessage
 			)
 			break
 		case "ruleRemoved":
 			this.emit(
 				"ruleRemoved",
-				newMessage as unknown as RuleRemovedMessage
+				message as unknown as RuleRemovedMessage
 			)
 			break
 		case "rulesMerged":
 			this.emit(
 				"rulesMerged",
-				newMessage as unknown as RulesMergedMessage
+				message as unknown as RulesMergedMessage
 			)
 			break
 		case "communityCreated":
 			this.emit(
 				"communityCreated",
-				newMessage as unknown as CommunityCreatedMessage
+				message as unknown as CommunityCreatedMessage
 			)
 			break
 		case "communityRemoved":
 			this.emit(
 				"communityRemoved",
-				newMessage as unknown as CommunityRemovedMessage
+				message as unknown as CommunityRemovedMessage
 			)
 			break
 		case "communityUpdated":
 			this.emit(
 				"communityUpdated",
-				newMessage as unknown as CommunityUpdatedMessage
+				message as unknown as CommunityUpdatedMessage
 			)
 			break
 		case "communitiesMerged":
 			this.emit(
 				"communitiesMerged",
-				newMessage as unknown as CommunitiesMergedMessage
+				message as unknown as CommunitiesMergedMessage
 			)
 		}
 	}
