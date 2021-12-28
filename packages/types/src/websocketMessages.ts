@@ -91,7 +91,7 @@ export interface CommunitiesMergedMessage extends BaseWebsocketMessage {
 }
 
 export interface GuildConfigChangedMessage extends BaseWebsocketMessage {
-	messageType: "communityConfigChanged"
+	messageType: "guildConfigChanged"
 	config: GuildConfig
 }
 
