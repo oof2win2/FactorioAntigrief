@@ -1,3 +1,9 @@
+## [1.4.1] - [2021-12-28]
+
+### Changes
+
+-	Change typing info on `guildConfigChangedMessage` to match the actual information that is sent
+
 ## [1.4.0] - [2021-12-22]
 
 ### Changes
