@@ -1,3 +1,9 @@
+## UNRELEASED
+
+### Bugfixes
+
+-   Removed an unnecessary `console.log`
+
 ## [1.22.1] - [2021-12-22]
 
 ### Bugfixes

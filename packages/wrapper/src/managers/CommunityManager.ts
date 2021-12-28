@@ -116,7 +116,6 @@ export default class CommunityManager extends BaseManager<Community> {
 				credentials: "include",
 			}
 		).then((c) => c.json())
-		console.log(config)
 		if (config?.error)
 			throw new GenericAPIError(`${config.error}: ${config.message}`)
 		if (!config || !config.guildId) return null
