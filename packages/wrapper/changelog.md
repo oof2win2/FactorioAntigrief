@@ -1,3 +1,9 @@
+## [1.22.3] - [2021-12-28]
+
+### Bugfixes
+
+-   Fix typings of `guildConfigChanged` event on WS
+
 ## [1.22.2] - [2021-12-28]
 
 ### Bugfixes
