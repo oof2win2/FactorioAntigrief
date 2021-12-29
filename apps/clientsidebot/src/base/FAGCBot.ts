@@ -184,7 +184,7 @@ export default class FAGCBot extends Client {
 			.replace("{DESCRIPTION}", report.description)
 			.replace("{PLAYERNAME}", report.playername)
 			.replace("{PROOF}", report.proof)
-			.replace("{REPORTEDTIME}", report.reportedTime.toTimeString())
+			.replace("{REPORTEDTIME}", report.reportedTime.toISOString())
 		return command
 	}
 

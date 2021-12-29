@@ -1,9 +1,7 @@
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 import FAGCBot from "./FAGCBot"
-import { Report } from "fagc-api-types"
 import { MessageEmbed } from "discord.js"
 import { GuildConfig } from "fagc-api-types"
-import { Rcon } from "rcon-client/lib"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -62,19 +60,22 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 
 	let shouldPerformActions = false
 	const guildConfigs: GuildConfig[] = []
-	
-	client.infochannels.forEach(async (guildChannels, guildID) => {
-		const guildConfig = client.guildConfigs.get(guildID)
+
+	client.guilds.cache.forEach((guild) => {
+		const guildConfig = client.guildConfigs.get(guild.id)
 		if (!guildConfig) return
+		const infochannels = client.infochannels.get(guild.id)
 		if (
 			guildConfig.ruleFilters?.includes(event.report.brokenRule) &&
 			guildConfig.trustedCommunities?.includes(event.report.communityId)
 		) {
-			guildChannels.forEach(c => {
-				const channel = client.channels.cache.get(c.channelID)
-				if (!channel || !channel.isNotDMChannel()) return
-				client.addEmbedToQueue(channel.id, embed)
-			})
+			if (infochannels) {
+				infochannels.forEach(c => {
+					const channel = client.channels.cache.get(c.channelID)
+					if (!channel || !channel.isNotDMChannel()) return
+					client.addEmbedToQueue(channel.id, embed)
+				})
+			}
 			shouldPerformActions = true
 			guildConfigs.push(guildConfig)
 		}
@@ -103,7 +104,9 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 	guildConfigs.map((guildConfig) => {
 		const reason = client.createBanMessage(event.report, guildConfig.guildId)
 		if (!reason) return // if it is not supposed to do anything in this guild, then it won't do anything
-		client.rcon.rconCommandGuild(`/sc game.ban_player("${event.report.playername}", "${reason}")`, guildConfig.guildId)
+		// TODO: put in the reason properly when this is resolved https://forums.factorio.com/viewtopic.php?f=7&t=101053
+		client.rcon.rconCommandGuild(`/sc game.ban_player("${event.report.playername}", "${event.report.playername} ${reason}")`, guildConfig.guildId)
+		// client.rcon.rconCommandGuild(`/sc game.ban_player("${event.report.playername}", "${reason}")`, guildConfig.guildId)
 	})
 }
 export const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
@@ -112,24 +115,34 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 	let shouldPerformActions = false
 	const guildConfigs: GuildConfig[] = []
 
-	await Promise.all(client.infochannels.map(async(guildChannels, guildID) => {
-		const guildConfig = client.guildConfigs.get(guildID)
+	client.guilds.cache.forEach((guild) => {
+		const guildConfig = client.guildConfigs.get(guild.id)
 		if (!guildConfig) return
+		const infochannels = client.infochannels.get(guild.id)
 		if (
 			guildConfig.ruleFilters?.includes(event.revocation.brokenRule) &&
 			guildConfig.trustedCommunities?.includes(event.revocation.communityId)
 		) {
-			guildChannels.forEach(c => {
-				const channel = client.channels.cache.get(c.channelID)
-				if (!channel || !channel.isNotDMChannel()) return
-				client.addEmbedToQueue(channel.id, embed)
-			})
+			if (infochannels) {
+				infochannels.forEach(c => {
+					const channel = client.channels.cache.get(c.channelID)
+					if (!channel || !channel.isNotDMChannel()) return
+					client.addEmbedToQueue(channel.id, embed)
+				})
+			}
 			shouldPerformActions = true
 			guildConfigs.push(guildConfig)
 		}
-	}))
+	})
 
 	if (!shouldPerformActions) return // did not match any filters so return
+
+	// remove the report record
+	await client.db.fagcBan.delete({
+		where: {
+			id: event.revocation.reportId
+		}
+	})
 
 	const isPrivateBanned = await client.db.privatebans.findFirst({
 		where: {
@@ -137,13 +150,6 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 		}
 	})
 	if (isPrivateBanned) return // if the player is blacklisted, don't do anything
-
-	// remove the report record
-	await client.db.fagcBan.delete({
-		where: {
-			id: event.revocation.id
-		}
-	})
 
 	const otherBan = await client.db.fagcBan.findFirst({
 		where: {
@@ -154,10 +160,10 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 	// unban the player where it is wanted
 	await Promise.allSettled(
 		guildConfigs.map(async (guildConfig) => {
-			const action = await client.getGuildAction(guildConfig.guildId)
-			if (!action || action.revocation === "none") return // if it is not supposed to do anything in this guild, then it won't do anything
+			const action = await client.getBotConfig(guildConfig.guildId)
+			if (!action || action.revocationAction === "none") return // if it is not supposed to do anything in this guild, then it won't do anything
 			// TODO: handling for custom actions
-			client.rcon.rconCommandGuild(`/sc game.unban_player("${otherBan?.playername}")`, guildConfig.guildId)
+			client.rcon.rconCommandGuild(`/sc game.unban_player("${event.revocation.playername}")`, guildConfig.guildId)
 		})
 	)
 
@@ -171,7 +177,9 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 			const reason = client.createBanMessage(report, guildConfig.guildId)
 			if (!reason) return // if it is not supposed to do anything in this guild, then it won't do anything
 			// TODO: handling for custom actions
-			client.rcon.rconCommandGuild(`/sc game.ban_player("${report.playername}", "${reason}")`, guildConfig.guildId)
+			// TODO: put in the reason properly when this is resolved https://forums.factorio.com/viewtopic.php?f=7&t=101053
+			client.rcon.rconCommandGuild(`/sc game.ban_player("${report.playername}", ""${report.playername} ${reason}")`, guildConfig.guildId)
+			// client.rcon.rconCommandGuild(`/sc game.ban_player("${report.playername}", "${reason}")`, guildConfig.guildId)
 		})
 		
 	}
@@ -179,10 +187,10 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 }
 
 export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildConfigChanged">) => {
-	const oldConfig = client.guildConfigs.get(event.guildId)
+	const oldConfig = client.guildConfigs.get(event.config.guildId)
 
 	// TODO: perform an action
 
-	client.guildConfigs.set(event.guildId, event)
+	client.guildConfigs.set(event.config.guildId, event.config)
 
 }
