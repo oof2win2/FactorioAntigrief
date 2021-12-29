@@ -120,12 +120,19 @@ class WebSocketHandler extends EventEmitter {
 				message as unknown as GuildConfigChangedMessage
 			)
 			break
-		case "report":
-			this.emit("report", message as unknown as ReportCreatedMessage)
+		case "report": {
+			const toSendMessage = message as unknown as ReportCreatedMessage
+			toSendMessage.report.reportedTime = new Date(toSendMessage.report.reportedTime)
+			this.emit("report", toSendMessage as ReportCreatedMessage)
 			break
-		case "revocation":
-			this.emit("revocation", message as unknown as RevocationMessage)
+		}
+		case "revocation": {
+			const toSendMessage = message as unknown as RevocationMessage
+			toSendMessage.revocation.reportedTime = new Date(toSendMessage.revocation.reportedTime)
+			toSendMessage.revocation.revokedTime = new Date(toSendMessage.revocation.revokedTime)
+			this.emit("revocation", toSendMessage)
 			break
+		}
 		case "ruleCreated":
 			this.emit(
 				"ruleCreated",

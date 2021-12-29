@@ -1,3 +1,9 @@
+## UNRELEASED
+
+### Bugfixes
+
+-   Fix date types on `report` and `revocation` WS events
+
 ## [1.22.3] - [2021-12-28]
 
 ### Bugfixes
