@@ -12,19 +12,10 @@ const Setaction: SubCommand = {
 		const embed = new MessageEmbed()
 			.setTitle("Current bot config")
 		const ownerUser = await client.users.fetch(botConfig.owner)
-		let guildAction = botConfig.actions.find(action => action.guildID === interaction.guildId)
-		if (!guildAction) {
-			guildAction = {
-				guildID: interaction.guildId,
-				report: "none",
-				revocation: "none",
-			}
-			await client.setGuildAction(guildAction)
-		}
 		embed.addFields([
 			{ name: "Bot Owner", value: `<@${ownerUser.id}> | ${ownerUser.tag}` , inline: true },
-			{ name: "Report Action", value: guildAction.report, inline: true },
-			{ name: "Revocation action", value: guildAction.revocation, inline: true },
+			{ name: "Report Action", value: botConfig.reportAction, inline: true },
+			{ name: "Revocation action", value: botConfig.revocationAction, inline: true },
 			{ name: "API key", value: botConfig.apikey ? "Set" : "None", inline: true },
 		])
 		return interaction.reply({

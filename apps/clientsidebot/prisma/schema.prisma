@@ -8,11 +8,12 @@ datasource db {
 }
 
 model BotConfig {
-  guildID                   String    @id
-  apikey                    String?
+  guildID                   String   @id
   owner                     String
-  lastNotificationProcessed DateTime  @default(now()) @updatedAt
-  actions                   Actions[]
+  apikey                    String?
+  lastNotificationProcessed DateTime @default(now())
+  reportAction              String   @default("none")
+  revocationAction          String   @default("none")
 }
 
 model InfoChannel {
@@ -25,15 +26,6 @@ model Command {
   id      String @id
   guildID String
   name    String
-}
-
-model Actions {
-  id          Int       @id @default(autoincrement())
-  guildID     String    @unique
-  report      String    @default("none")
-  revocation  String    @default("none")
-  botConfigID String
-  config      BotConfig @relation(fields: [botConfigID], references: [guildID])
 }
 
 model Privatebans {

@@ -35,9 +35,8 @@ export default class FAGCBot extends Client {
 	 * Guild configs, by guild ID
 	 */
 	guildConfigs: Collection<string, GuildConfig>
-	configuredActions: Collection<string, database.ActionType>
 	community?: Community
-	botconfig: Collection<string, database.BotConfigType>
+	botConfigs: Collection<string, database.BotConfigType>
 	embedQueue: Collection<string, MessageEmbed[]>
 	servers: Collection<string, database.FactorioServerType[]>
 	readonly rcon: RCONInterface
@@ -53,11 +52,10 @@ export default class FAGCBot extends Client {
 		this.commands = new Collection()
 
 		this.infochannels = new Collection()
-		this.configuredActions = new Collection()
 		this.embedQueue = new Collection()
 		this.servers = new Collection()
 
-		this.botconfig = new Collection()
+		this.botConfigs = new Collection()
 
 		const rawServers = getServers()
 
@@ -91,7 +89,7 @@ export default class FAGCBot extends Client {
 
 		this.getBotConfigs().then(configs => {
 			configs.forEach(config => {
-				this.botconfig.set(config.guildID, config)
+				this.botConfigs.set(config.guildID, config)
 			})
 		})
 		
@@ -104,31 +102,17 @@ export default class FAGCBot extends Client {
 		this.fagc.websocket.on("guildConfigChanged", (event) => wshandler.guildConfigChanged({ event, client: this }))
 
 		setInterval(() => this.sendEmbeds(), 10*1000) // send embeds every 10 seconds
-
-		// send info to backend about guilds, get configs
-		setTimeout(() => {
-			this.guilds.cache.map((guild => {
-				this.fagc.websocket.addGuildID(guild.id)
-			}))
-		}, 5000)
 	}
 	async getBotConfigs(): Promise<database.BotConfigType[]> {
-		const record = await this.db.botConfig.findMany({
-			include: {
-				actions: true
-			}
-		})
-		return z.array(database.BotConfig).parse(record)
+		const records = await this.db.botConfig.findMany()
+		return z.array(database.BotConfig).parse(records)
 	}
 	async getBotConfig(guildID: string): Promise<database.BotConfigType> {
-		const existing = this.botconfig.get(guildID)
+		const existing = this.botConfigs.get(guildID)
 		if (existing) return existing
 		const record = await this.db.botConfig.findFirst({
 			where: {
 				guildID: guildID,
-			},
-			include: {
-				actions: true
 			}
 		})
 		const created = database.BotConfig.parse(record ?? { guildID: guildID })
@@ -136,49 +120,22 @@ export default class FAGCBot extends Client {
 		return created
 	}
 	async setBotConfig(config: Partial<database.BotConfigType> & Pick<database.BotConfigType, "guildID">) {
-		await this.db.botConfig.upsert({
+		const existingConfig = await this.getBotConfig(config.guildID)
+		const toSetConfig = database.BotConfig.parse({
+			...existingConfig,
+			...config
+		})
+		const newConfig = await this.db.botConfig.upsert({
 			where: { guildID: config.guildID },
 			create: {
-				...database.BotConfig.parse(config),
-				actions: undefined,
+				...toSetConfig,
 				guildID: config.guildID,
 			},
 			update: {
-				...database.BotConfig.parse(config),
-				actions: undefined,
+				...toSetConfig,
 			}
 		})
-		if (config.actions) await Promise.all(config.actions.map(action => this.setGuildAction(action)))
-		const newConfig = await this.db.botConfig.findFirst({
-			include: {
-				actions: true
-			}
-		})
-		this.botconfig.set(config.guildID, database.BotConfig.parse(newConfig))
-	}
-	async setGuildAction(action: database.PickPartial<database.BotConfigType["actions"][0], "report"|"revocation">) {
-		await this.db.actions.upsert({
-			create: {
-				...action,
-				botConfigID: action.guildID,
-			},
-			update: {
-				...action,
-				guildID: action.guildID,
-			},
-			where: {
-				guildID: action.guildID
-			}
-		})
-		const existing = this.configuredActions.get(action.guildID)
-		if (existing) {
-			this.configuredActions.set(action.guildID, {
-				...existing,
-				...action
-			})
-		} else {
-			this.configuredActions.set(action.guildID, database.Action.parse(action))
-		}
+		this.botConfigs.set(config.guildID, database.BotConfig.parse(newConfig))
 	}
 
 	private sendEmbeds() {
@@ -193,19 +150,6 @@ export default class FAGCBot extends Client {
 		}
 	}
 
-	async getGuildActions() {
-		const currentConfig = { actions: this.configuredActions } || await this.getBotConfigs()
-		return currentConfig.actions
-	}
-	async getGuildAction(guildID: string): Promise<database.ActionType | null> {
-		const action = this.configuredActions.get(guildID) || await this.db.actions.findFirst({
-			where: {
-				guildID: guildID
-			}
-		})
-		const parsed = database.Action.safeParse(action)
-		return parsed.success ? parsed.data : null
-	}
 	addEmbedToQueue(channelID: string, embed: MessageEmbed) {
 		const channel = this.channels.resolve(channelID)
 		if (!channel || !channel.isNotDMChannel()) return false
@@ -218,6 +162,8 @@ export default class FAGCBot extends Client {
 	}
 
 	async getGuildConfig(guildID: string): Promise<GuildConfig | null> {
+		const existing = this.guildConfigs.get(guildID)
+		if (existing) return existing
 		const config = await this.fagc.communities.fetchGuildConfig({ guildId: guildID })
 		if (!config) return null
 		this.guildConfigs.set(guildID, config)
@@ -225,12 +171,10 @@ export default class FAGCBot extends Client {
 	}
 
 	createBanMessage(report: Report, guildID: string) {
-		const servers = this.servers.get(guildID)
-		if (!servers || !servers.length) return false
-		const guildAction = this.configuredActions.get(guildID)
-		if (!guildAction || guildAction.report === "none") return false
+		const botConfig = this.botConfigs.get(guildID)
+		if (!botConfig || botConfig.reportAction === "none") return false
 
-		const rawBanMessage = guildAction.report === "ban" ? ENV.BANMESSAGE : ENV.CUSTOMBAN
+		const rawBanMessage = botConfig.reportAction === "ban" ? ENV.BANMESSAGE : ENV.CUSTOMBAN
 		const command = rawBanMessage
 			.replace("{ADMINID}", report.adminId)
 			.replace("{AUTOMATED}", report.automated ? "true" : "false")
@@ -254,10 +198,10 @@ export default class FAGCBot extends Client {
 	async unban(revocation: Revocation, guildID: string) {
 		const servers = this.servers.get(guildID)
 		if (!servers || !servers.length) return
-		const guildAction = await this.getGuildAction(guildID)
-		if (!guildAction || guildAction.report === "none") return
+		const botConfig = await this.getBotConfig(guildID)
+		if (!botConfig || botConfig.revocationAction === "none") return
 
-		const rawUnbanMessage = guildAction.revocation === "unban" ? ENV.UNBANMESSAGE : ENV.CUSTOMUNBAN
+		const rawUnbanMessage = botConfig.revocationAction === "unban" ? ENV.UNBANMESSAGE : ENV.CUSTOMUNBAN
 
 		const command = rawUnbanMessage
 			.replace("{ADMINID}", revocation.adminId)

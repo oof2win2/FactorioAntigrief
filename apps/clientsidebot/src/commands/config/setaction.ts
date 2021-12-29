@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
+import { BotConfigType } from "../../base/database.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -29,16 +30,17 @@ const Setaction: SubCommand = {
 		const revocation = z.enum([ "unban", "custom", "none" ]).nullable().parse(interaction.options.getString("revocation"))
 		const report = z.enum([ "ban", "custom", "none" ]).nullable().parse(interaction.options.getString("report"))
 		
-		await client.setGuildAction({
+		const config: Partial<BotConfigType> & Pick<BotConfigType, "guildID"> = {
 			guildID: interaction.guildId,
-			report: report ?? undefined,
-			revocation: revocation ?? undefined,
-		})
+		} as const
+		if (report) config.reportAction = report
+		if (revocation) config.revocationAction = revocation
+		await client.setBotConfig(config)
 
-		const guildAction = await client.getGuildAction(interaction.guildId)
-		if (!guildAction) return interaction.reply("An error occured")
+		const botConfig = await client.getBotConfig(interaction.guildId)
+		if (!botConfig) return interaction.reply("An error occured")
 		return interaction.reply({
-			content: `Report action is ${guildAction.report}. Revocation action is ${guildAction.revocation}`
+			content: `Report action is ${botConfig.reportAction}. Revocation action is ${botConfig.revocationAction}`
 		})
 	}
 }

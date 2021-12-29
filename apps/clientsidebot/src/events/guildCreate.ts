@@ -11,9 +11,8 @@ export default async (client: FAGCBot, [ guild ]: [Guild]) => {
 	}
 	client.guildConfigs.set(guild.id, fagcconfig)
 	client.fagc.websocket.addGuildID(guild.id)
-	await client.setGuildAction({
+	await client.setBotConfig({
 		guildID: guild.id,
-		report: "none",
-		revocation: "none"
+		owner: guild.ownerId
 	})
 }
