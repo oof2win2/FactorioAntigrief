@@ -170,7 +170,7 @@ export default class FAGCBot extends Client {
 		return config
 	}
 
-	createBanMessage(report: Report, guildID: string) {
+	createBanCommand(report: Report, guildID: string) {
 		const botConfig = this.botConfigs.get(guildID)
 		if (!botConfig || botConfig.reportAction === "none") return false
 
@@ -188,8 +188,18 @@ export default class FAGCBot extends Client {
 		return command
 	}
 
+	createUnbanCommand(playername: string, guildID: string) {
+		const botConfig = this.botConfigs.get(guildID)
+		if (!botConfig || botConfig.revocationAction === "none") return false
+
+		const rawUnbanMessage = botConfig.reportAction === "ban" ? ENV.BANMESSAGE : ENV.CUSTOMBAN
+		const command = rawUnbanMessage
+			.replace("{PLAYERNAME}", playername)
+		return command
+	}
+
 	async ban(report: Report, guildID: string) {
-		const command = this.createBanMessage(report, guildID)
+		const command = this.createBanCommand(report, guildID)
 		if (!command) return
 		
 		this.rcon.rconCommandGuild(command, guildID)
