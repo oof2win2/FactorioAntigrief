@@ -28,7 +28,7 @@ class GetAllReports extends Command {
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
-		const reports = await this.client.fagc.reports.fetchAllName(playername)
+		const reports = await this.client.fagc.reports.fetchAllName({ playername: playername })
 		if (!reports[0])
 			return message.reply(
 				`Player \`${playername}\` doesn't have any reports`

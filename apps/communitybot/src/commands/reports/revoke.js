@@ -39,7 +39,7 @@ class Revoke extends Command {
 			)
 		if (report.communityId !== config.communityId)
 			return message.channel.send(`You are trying to revoke a report of community \`${report.communityId}\` but you are from community \`${config.communityId}\``)
-		const community = await this.client.fagc.communities.fetchCommunity(report.communityId)
+		const community = await this.client.fagc.communities.fetchCommunity({ communityID: report.communityId })
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Report Revocation")

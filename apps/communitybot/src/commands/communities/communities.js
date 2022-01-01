@@ -19,7 +19,7 @@ class GetWhitelisted extends Command {
 		})
 	}
 	async run(message, _, config) {
-		const communities = await this.client.fagc.communities.fetchAll()
+		const communities = await this.client.fagc.communities.fetchAll({})
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Communities")

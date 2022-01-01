@@ -62,9 +62,7 @@ class GetProfiles extends Command {
 			profiles.map(async (profile) => {
 				const reports = profile.reports.map((report) => report.id)
 				const community =
-					await this.client.fagc.communities.fetchCommunity(
-						profile.communityId
-					)
+					await this.client.fagc.communities.fetchCommunity({ communityID: profile.communityId })
 				return {
 					name: `Community ${community?.name} (\`${profile.communityId}\`)`,
 					value: `Report ID(s): \`${reports.join("`, `")}\``,
