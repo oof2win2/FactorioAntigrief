@@ -80,14 +80,20 @@ wss.on("connection", (ws) => {
 							messageType: "guildConfigChanged",
 						})
 					)
-				}
-				const existing = WebhookGuildIDs.get(ws)
-				if (existing) {
-					existing.push(message.guildID)
-					const withoutDuplicates = existing.filter((x, i, arr) => arr.indexOf(x) === i)
-					WebhookGuildIDs.set(ws, withoutDuplicates)
-				} else {
-					WebhookGuildIDs.set(ws, [ message.guildID ])
+
+
+					// add guildID to webhook only if the guild id has an existing config
+					const existing = WebhookGuildIDs.get(ws)
+					if (existing) {
+						// limit to 25 guilds per webhook
+						if (existing.length < 25) {
+							// only add if it's not already in the list
+							if (!existing.includes(message.guildID)) existing.push(message.guildID)
+						}
+						WebhookGuildIDs.set(ws, existing)
+					} else {
+						WebhookGuildIDs.set(ws, [ message.guildID ])
+					}
 				}
 			}
 			if (message.type === "removeGuildID") {
@@ -539,7 +545,6 @@ export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
 	wss.clients.forEach((client) => {
-		// TODO: test this
 		const guildIds = WebhookGuildIDs.get(client)
 		if (guildIds?.includes(config.guildId)) {
 			client.send(
