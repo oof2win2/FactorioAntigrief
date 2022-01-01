@@ -52,6 +52,10 @@ export function WebhookMessage(message: MessageEmbed): void {
 	WebhookQueue.push(message)
 }
 wss.on("connection", (ws) => {
+	ws.on("ping", async () => {
+		// comply with the IETF standard of replying to ping with pong
+		ws.pong()
+	})
 	ws.on("message", async (msg) => {
 		let message: {
 			guildID?: string,
@@ -94,6 +98,14 @@ wss.on("connection", (ws) => {
 		}
 	})
 })
+
+setInterval(() => {
+	wss.clients.forEach((ws) => {
+		// ping the client
+		console.log("ping")
+		ws.ping()
+	})
+}, 30 * 1000)
 
 export function WebsocketMessage(message: string): void {
 	wss.clients.forEach((client) => {
