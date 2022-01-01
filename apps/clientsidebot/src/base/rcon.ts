@@ -20,8 +20,9 @@ export default class RCONInterface {
 	constructor(client: FAGCBot, servers: FactorioServerType[]) {
 		this.client = client
 		this.servers = servers
-		this.servers.map((_, i) => this.initServer(i))
 		this.connections = []
+		
+		this.servers.map((_, i) => this.initServer(i))
 	}
 	private initServer(index: number) {
 		const server = this.servers[index]
@@ -89,6 +90,7 @@ export default class RCONInterface {
 
 	async rconCommandGuild(command: string, guildID: string) {
 		command = command.startsWith("/") ? command : `/${command}`
+		console.log(command)
 		const servers = this.servers
 			.map(s => s.discordGuildID === guildID ? s : undefined)
 			.filter(r=>r !== undefined) as FactorioServerType[]

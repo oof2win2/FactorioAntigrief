@@ -87,12 +87,13 @@ export default class FAGCBot extends Client {
 			})
 		})
 
-		this.getBotConfigs().then(configs => {
+		this.getBotConfigs().then((configs) => {
 			configs.forEach(config => {
 				this.botConfigs.set(config.guildID, config)
 			})
 		})
 		
+		// parsing WS notifications
 		this.fagc.websocket.on("communityCreated", (event) => wshandler.communityCreated({ event, client: this }))
 		this.fagc.websocket.on("communityRemoved", (event) => wshandler.communityRemoved({ event, client: this }))
 		this.fagc.websocket.on("ruleCreated", (event) => wshandler.ruleCreated({ event, client: this }))
@@ -103,6 +104,7 @@ export default class FAGCBot extends Client {
 
 		setInterval(() => this.sendEmbeds(), 10*1000) // send embeds every 10 seconds
 	}
+
 	async getBotConfigs(): Promise<database.BotConfigType[]> {
 		const records = await this.db.botConfig.findMany()
 		return z.array(database.BotConfig).parse(records)
@@ -174,17 +176,17 @@ export default class FAGCBot extends Client {
 		const botConfig = this.botConfigs.get(guildID)
 		if (!botConfig || botConfig.reportAction === "none") return false
 
-		const rawBanMessage = botConfig.reportAction === "ban" ? ENV.BANMESSAGE : ENV.CUSTOMBAN
+		const rawBanMessage = botConfig.reportAction === "ban" ? ENV.BANCOMMAND : ENV.CUSTOMBANCOMMAND
 		const command = rawBanMessage
-			.replace("{ADMINID}", report.adminId)
-			.replace("{AUTOMATED}", report.automated ? "true" : "false")
-			.replace("{BROKENRULE}", report.brokenRule)
-			.replace("{COMMUNITYID}", report.communityId)
-			.replace("{REPORTID}", report.id)
-			.replace("{DESCRIPTION}", report.description)
-			.replace("{PLAYERNAME}", report.playername)
-			.replace("{PROOF}", report.proof)
-			.replace("{REPORTEDTIME}", report.reportedTime.toISOString())
+			.replaceAll("{ADMINID}", report.adminId)
+			.replaceAll("{AUTOMATED}", report.automated ? "true" : "false")
+			.replaceAll("{BROKENRULE}", report.brokenRule)
+			.replaceAll("{COMMUNITYID}", report.communityId)
+			.replaceAll("{REPORTID}", report.id)
+			.replaceAll("{DESCRIPTION}", report.description)
+			.replaceAll("{PLAYERNAME}", report.playername)
+			.replaceAll("{PROOF}", report.proof)
+			.replaceAll("{REPORTEDTIME}", report.reportedTime.toISOString())
 		return command
 	}
 
@@ -192,9 +194,9 @@ export default class FAGCBot extends Client {
 		const botConfig = this.botConfigs.get(guildID)
 		if (!botConfig || botConfig.revocationAction === "none") return false
 
-		const rawUnbanMessage = botConfig.reportAction === "ban" ? ENV.BANMESSAGE : ENV.CUSTOMBAN
+		const rawUnbanMessage = botConfig.reportAction === "ban" ? ENV.UNBANCOMMAND : ENV.CUSTOMUNBANCOMMAND
 		const command = rawUnbanMessage
-			.replace("{PLAYERNAME}", playername)
+			.replaceAll("{PLAYERNAME}", playername)
 		return command
 	}
 
@@ -211,7 +213,7 @@ export default class FAGCBot extends Client {
 		const botConfig = await this.getBotConfig(guildID)
 		if (!botConfig || botConfig.revocationAction === "none") return
 
-		const rawUnbanMessage = botConfig.revocationAction === "unban" ? ENV.UNBANMESSAGE : ENV.CUSTOMUNBAN
+		const rawUnbanMessage = botConfig.revocationAction === "unban" ? ENV.UNBANCOMMAND : ENV.CUSTOMUNBANCOMMAND
 
 		const command = rawUnbanMessage
 			.replace("{ADMINID}", revocation.adminId)

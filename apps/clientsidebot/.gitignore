@@ -3,8 +3,7 @@
 database.sqlite
 
 # Config
-src/config.ts
-src/servers.ts
+servers.json
 /database.sqlite
 /database.sqlite-journal
 *.env

@@ -8,11 +8,9 @@ interface HandlerOpts<T extends keyof WebSocketEvents> {
 	client: FAGCBot
 }
 
-export const communityCreated = ({
-	client,
-	event,
-}: HandlerOpts<"communityCreated">) => {
+export const communityCreated = ({ client,event }: HandlerOpts<"communityCreated">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
 			const channel = client.channels.cache.get(c.channelID)
@@ -24,6 +22,7 @@ export const communityCreated = ({
 
 export const communityRemoved = ({ client, event }: HandlerOpts<"communityRemoved">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
 			const channel = client.channels.cache.get(c.channelID)
@@ -31,10 +30,12 @@ export const communityRemoved = ({ client, event }: HandlerOpts<"communityRemove
 			client.addEmbedToQueue(channel.id, embed)
 		})
 	})
+	
 }
 
 export const ruleCreated = ({ client, event }: HandlerOpts<"ruleCreated">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
 			const channel = client.channels.cache.get(c.channelID)
@@ -46,6 +47,7 @@ export const ruleCreated = ({ client, event }: HandlerOpts<"ruleCreated">) => {
 
 export const ruleRemoved = async ({ client, event }: HandlerOpts<"ruleRemoved">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
 			const channel = client.channels.cache.get(c.channelID)
@@ -84,6 +86,7 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 	if (!shouldPerformActions) return // did not match any filters so return
 	
 	reportHandler(client, guildConfigs, event.report)
+
 }
 /**
  * @param guildConfigs array of guild configs that are affected by the revocation, i.e. it matches their community and rule filters
@@ -108,11 +111,9 @@ const reportHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], repor
 
 	// ban in guilds that its supposed to
 	guildConfigs.map((guildConfig) => {
-		const reason = client.createBanCommand(report, guildConfig.guildId)
-		if (!reason) return // if it is not supposed to do anything in this guild, then it won't do anything
-		// TODO: put in the reason properly when this is resolved https://forums.factorio.com/viewtopic.php?f=7&t=101053
-		client.rcon.rconCommandGuild(`/sc game.ban_player("${report.playername}", "${report.playername} ${reason}")`, guildConfig.guildId)
-		// client.rcon.rconCommandGuild(`/sc game.ban_player("${event.report.playername}", "${reason}")`, guildConfig.guildId)
+		const command = client.createBanCommand(report, guildConfig.guildId)
+		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+		client.rcon.rconCommandGuild(`/sc ${command}; rcon.print(true)`, guildConfig.guildId)
 	})
 }
 
@@ -154,8 +155,8 @@ const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], r
 	await client.db.fagcBan.delete({
 		where: {
 			id: revocation.reportId
-		}
-	})
+		},
+	}).catch(() => null)
 
 	const isPrivateBanned = await client.db.privatebans.findFirst({
 		where: {
@@ -175,7 +176,7 @@ const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], r
 		guildConfigs.map((guildConfig) => {
 			const command = client.createUnbanCommand(revocation.playername, guildConfig.guildId)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-			client.rcon.rconCommandGuild(`/sc ${command}`, guildConfig.guildId)
+			client.rcon.rconCommandGuild(`/sc ${command}; rcon.print(true)`, guildConfig.guildId)
 		})
 	)
 
@@ -188,23 +189,25 @@ const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], r
 		guildConfigs.map((guildConfig) => {
 			const command = client.createBanCommand(report, guildConfig.guildId)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-			client.rcon.rconCommandGuild(`/sc ${command};`, guildConfig.guildId)
+			client.rcon.rconCommandGuild(`/sc ${command}; rcon.print(true)`, guildConfig.guildId)
 		})
 		
 	}
 }
 
 export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildConfigChanged">) => {
+	client.guildConfigs.set(event.config.guildId, event.config) // set the new config
+
 	// unban everyone if no filtered rules or communities on the new config
 	if (!event.config.ruleFilters?.length || !event.config.trustedCommunities?.length) {
 		const currentReports = await client.db.fagcBan.findMany()
 		const playernames: Set<string> = new Set()
 		currentReports.map((record) => playernames.add(record.playername))
 		await client.db.fagcBan.deleteMany() // delete all the records
-		// transform playernames into an array and split into chunks of 250
+		// transform playernames into an array and split into chunks of 500
 		const toUnbanChunks = Array.from(playernames).reduce<string[][]>((acc, name) => {
 			const last = acc[acc.length - 1]
-			if (!last || last.length >= 250) {
+			if (!last || last.length >= 500) {
 				acc.push([])
 			}
 			acc[acc.length - 1].push(name)
@@ -216,19 +219,18 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 			const command = players
 				.map((playername) => client.createUnbanCommand(playername, event.config.guildId))
 				.join(";")
-			await client.rcon.rconCommandGuild(`/sc ${command}`, event.config.guildId)
+			await client.rcon.rconCommandGuild(`/sc ${command}; rcon.print(true)`, event.config.guildId)
 			// sleep for 25ms to prevent servers from getting stuck
 			await new Promise((resolve) => setTimeout(resolve, 25))
 		}
 		return
 	}
 	const newConfig = event.config as typeof event.config & Pick<Required<typeof event.config>, "ruleFilters" | "trustedCommunities">
-
 	// run both at once and then wait for both to finish so no extra time is spent waiting around
 	const [ newReports, currentReports, whitelistRecords, privatebanRecords ] = await Promise.all([
 		client.fagc.reports.listFiltered({
 			ruleIDs: newConfig.ruleFilters,
-			communityIDs: newConfig.ruleFilters
+			communityIDs: newConfig.trustedCommunities
 		}),
 		client.db.fagcBan.findMany(),
 		client.db.whitelist.findMany(),
@@ -276,10 +278,10 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 		})
 		.filter((r): r is Report => Boolean(r))
 	
-	// transform playersToUnban into an array and split into chunks of 250
+	// transform playersToUnban into an array and split into chunks of 500
 	const toUnbanChunks = Array.from(playersToUnban).reduce<string[][]>((acc, name) => {
 		const last = acc[acc.length - 1]
-		if (!last || last.length >= 250) {
+		if (!last || last.length >= 500) {
 			acc.push([])
 		}
 		acc[acc.length - 1].push(name)
@@ -290,16 +292,17 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 		// map over the players and create an unban command for each
 		const command = players
 			.map((playername) => client.createUnbanCommand(playername, event.config.guildId))
+			.filter((x): x is string => Boolean(x))
 			.join(";")
-		await client.rcon.rconCommandGuild(`/sc ${command}`, event.config.guildId)
+		await client.rcon.rconCommandGuild(`/sc ${command}; rcon.print(true)`, event.config.guildId)
 		// sleep for 25ms to prevent servers from getting stuck
 		await new Promise((resolve) => setTimeout(resolve, 25))
 	}
 
-	// transform toBanReports into an array and split into chunks of 250
+	// transform toBanReports into an array and split into chunks of 500
 	const toBanChunks = Array.from(toBanReports).reduce<Report[][]>((acc, report) => {
 		const last = acc[acc.length - 1]
-		if (!last || last.length >= 250) {
+		if (!last || last.length >= 500) {
 			acc.push([])
 		}
 		acc[acc.length - 1].push(report)
@@ -311,18 +314,19 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 		const command = reports
 			.map((report) => client.createBanCommand(report, event.config.guildId))
 			.join(";")
-		await client.rcon.rconCommandGuild(`/sc ${command}`, event.config.guildId)
+		await client.rcon.rconCommandGuild(`/sc ${command}; rcon.print(true)`, event.config.guildId)
 		// sleep for 25ms to prevent servers from getting stuck
 		await new Promise((resolve) => setTimeout(resolve, 25))
 	}
 
 	// create the records of the reports in the db
+
 	const newRecords = toBanReports
 		.map((report) => `('${report.id}', '${report.playername}', '${report.brokenRule}', '${report.communityId}')`)
-	// split newRecords into arrays of 250 and join them with a comma
+	// split newRecords into arrays of 500 and join them with a comma
 	const newRecordChunks = Array.from(newRecords).reduce<string[][]>((acc, record) => {
 		const last = acc[acc.length - 1]
-		if (!last || last.length >= 250) {
+		if (!last || last.length >= 500) {
 			acc.push([])
 		}
 		acc[acc.length - 1].push(record)
@@ -330,10 +334,8 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	}, [])
 	// iterate over the chunks with a for loop and insert the records into the db
 	for (const records of newRecordChunks) {
-		await client.db.$executeRawUnsafe(`INSERT INTO \`main\`.\`fagcban\` VALUES \t${records.join(",\n\t")};`)
+		await client.db.$executeRawUnsafe(`INSERT OR IGNORE INTO \`main\`.\`fagcban\` (id, playername, brokenRule, communityID) VALUES ${records.join(",")};`)
 		// wait for 50ms to allow other queries to run
 		await new Promise((resolve) => setTimeout(resolve, 50))
 	}
-
-	client.guildConfigs.set(event.config.guildId, event.config)
 }

@@ -1,13 +1,13 @@
-import { TextBasedChannels, Channel, TextChannel, DMChannel } from "discord.js"
+import { TextBasedChannel, Channel, TextChannel } from "discord.js"
 
-export function isGuildTextChannel(channel: TextBasedChannels): channel is TextChannel {
+export function isGuildTextChannel(channel: TextBasedChannel): channel is TextChannel {
 	return channel.type !== "DM"
 }
 
 
 declare module "discord.js" {
 	interface Channel {
-		isNotDMChannel(): this is Extract<TextBasedChannels, TextChannel|NewsChannel|ThreadChannel>
+		isNotDMChannel(): this is Extract<TextBasedChannel, TextChannel|NewsChannel|ThreadChannel>
 	}
 }
 

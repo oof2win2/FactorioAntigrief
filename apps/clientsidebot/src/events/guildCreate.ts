@@ -9,7 +9,7 @@ export default async (client: FAGCBot, [ guild ]: [Guild]) => {
 	if (!fagcconfig) {
 		return sendGuildMessage(guild, `You do not have an existing FAGC configuration in the guild ${guild.name}, so none has been saved or synchronized`)
 	}
-	client.guildConfigs.set(guild.id, fagcconfig)
+	
 	client.fagc.websocket.addGuildID(guild.id)
 	await client.setBotConfig({
 		guildID: guild.id,
