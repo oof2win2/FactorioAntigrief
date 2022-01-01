@@ -18,7 +18,7 @@ class GetAll extends Command {
 		})
 	}
 	async run(message) {
-		const communities = await this.client.fagc.communities.fetchAll()
+		const communities = await this.client.fagc.communities.fetchAll({})
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Communities")
