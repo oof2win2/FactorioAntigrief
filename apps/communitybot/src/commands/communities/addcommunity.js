@@ -31,7 +31,7 @@ class AddCommunityFilter extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0]) {
-			const communities = await this.client.fagc.communities.fetchAll()
+			const communities = await this.client.fagc.communities.fetchAll({})
 			let embed = new MessageEmbed()
 				.setTitle("FAGC Communities")
 				.setColor("GREEN")
@@ -60,9 +60,10 @@ class AddCommunityFilter extends Command {
 				return message.channel.send("No IDs were provided")
 			args = newIDsMessage.content.split(" ")
 		}
+
 		await Promise.all(
 			args.map((communityid) =>
-				this.client.fagc.communities.fetchCommunity(communityid)
+				this.client.fagc.communities.fetchCommunity({ communityID: communityid })
 			)
 		)
 
@@ -75,9 +76,7 @@ class AddCommunityFilter extends Command {
 				"Add Filtered Communities. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md). Get IDs with fagc!allcommunities"
 			)
 		const communities = args
-			.map((communityid) =>
-				this.client.fagc.communities.resolveID(communityid)
-			)
+			.map((communityid) => this.client.fagc.communities.resolveID(communityid))
 			.filter((r) => r)
 			.filter((r) => !config.trustedCommunities.includes(r.id))
 
