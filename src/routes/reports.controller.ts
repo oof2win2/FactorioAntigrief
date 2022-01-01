@@ -263,9 +263,7 @@ export default class ReportController {
 						if (input === "No proof") return true
 						return input
 							.split(" ")
-							// TODO: make the zod url validator more precise
-							// logged "http://github.comhttps//reddit.com" as correct which it isnt
-							.map((part) => z.string().url().safeParse(part).success)
+							.map((part) => validator.isURL(part))
 							.reduce((prev, current) => prev && current)
 					}, "Proof must be URLs split by a space"),
 				}),
