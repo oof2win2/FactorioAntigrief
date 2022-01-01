@@ -4,12 +4,12 @@ import { SubCommand } from "../../base/Commands.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
-		.setName("remove")
-		.setDescription("Remove an info channel")
+		.setName("create")
+		.setDescription("Create an info channel in this guild")
 		.addChannelOption(option => 
 			option
 				.setName("channel")
-				.setDescription("Info channel which to remove")
+				.setDescription("Channel where to create an info channel")
 				.setRequired(true)
 				.addChannelTypes([
 					ChannelType.GuildNews,
@@ -19,19 +19,25 @@ const Setaction: SubCommand = {
 	,
 	execute: async ({ client, interaction }) => {
 		const channel = interaction.options.getChannel("channel", true)
-		const removed = await client.db.infoChannel.deleteMany({
+		const existing = await client.db.infoChannel.findFirst({
 			where: {
 				guildID: interaction.guildId,
 				channelID: channel.id,
 			}
 		})
-		if (!removed.count) return interaction.reply({
-			content: `<#${channel.id}> is not an info channel`,
+		if (existing) return interaction.reply({
+			content: `<#${channel.id}> already is an info channel`,
 			ephemeral: true
 		})
 		
+		await client.db.infoChannel.create({
+			data: {
+				guildID: interaction.guildId,
+				channelID: channel.id
+			}
+		})
 		return interaction.reply({
-			content: `Info channel in <#${channel.id}> has been removed`,
+			content: `Info channel in <#${channel.id}> has been created`,
 		})
 	}
 }

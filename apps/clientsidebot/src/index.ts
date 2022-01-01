@@ -1,43 +1,47 @@
-/**
- * @file Index file, opening file for the bot. The bot logs in here, loads the commands, events and handlers.
- */
-
-import * as util from "util"
-import * as fs from "fs"
-const readdir = util.promisify(fs.readdir)
+import { Intents } from "discord.js"
+import { readdir } from "fs/promises"
+import FAGCBot from "./base/FAGCBot.js"
+import ENV from "./utils/env.js"
+import "./extenders.js"
 
 process.chdir("dist")
 
-import "./utils/extenders.js"
-// This enables FAGCBot to access the extenders in any part of the codebase
-
-import FAGCBot from "./base/fagcbot.js"
-export const client = new FAGCBot({
-	intents: ["GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_WEBHOOKS", "GUILDS"]
+const client = new FAGCBot({
+	intents: [ Intents.FLAGS.GUILDS ],
 })
 
-import rcon from "./base/rcon.js"
 
-const init = async () => {
-	// Loads commands
+const events = await readdir("events")
+events.forEach(async (name) => {
+	if (!name.endsWith(".js")) return
+	const handler = await import(`./events/${name}`).then(r=>r.default)
+	client.on(name.slice(0, name.indexOf(".js")), (...args) => handler(client, args))
+})
 
-	// Loads events
-	const evts = await readdir("./events/")
-	// reads the events dir
-	evts.forEach(async (evt) => {
-		// splits the event and gets first part. events are in the format "eventName.js"
-		const evtName = evt.split(".")[0]
-		// const event = (require(`./events/${dir}/${evt}`)).default
-		const event = await import(`./events/${evt}`).then(e=>e.default)
-		// import event from `./events/${dir}/${evt}`
-		// import * as event from `./events/${dir}/${evt}`
-		// binds client to the event
-		client.on(evtName, (...args) => event(client, ...args))
-	})
-	
-	// log in to discord
-	client.login(client.config.token)
+const commands = await readdir("commands")
+commands.forEach(async (name) => {
+	if (!name.endsWith(".js")) return
+	const handler = await import(`./commands/${name}`).then(r=>r.default)
+	client.commands.set(name.slice(0, name.indexOf(".js")), handler)
+})
 
-	rcon.client = client
-}
-init()
+client.login(ENV.DISCORD_BOTTOKEN)
+
+const checkBans = setTimeout(async() => {
+	// clear banlist from server's memory and also file
+	await client.rcon.rconCommandAll("/banlist clear")
+})
+
+const purgeBans = setInterval(() => {
+	console.log("Purging banlist")
+	// clear banlist from server's memory and also file
+	client.rcon.rconCommandAll("/banlist clear")
+}, 7 * 86400 * 1000)
+// 7 * 86400 * 1000 is a week in ms
+
+process.on("exit", () => {
+	client.destroy()
+	client.fagc.destroy()
+	clearTimeout(checkBans)
+	clearInterval(purgeBans)
+})

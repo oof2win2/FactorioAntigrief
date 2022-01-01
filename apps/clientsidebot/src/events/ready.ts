@@ -1,19 +1,17 @@
-import FAGCBot from "../base/fagcbot"
+import FAGCBot from "../base/FAGCBot"
 
-export default async (client: FAGCBot): Promise<void> => {
-	client.logger(`${client.user.username} is online: ${new Date().toString().slice(4, 24)}`)
-	const activities = [
-		`${client.guilds.cache.size} servers!`,
-		`${client.channels.cache.size} channels!`,
-		`${client.users.cache.size} users!`,
-	]
-	let i = 0
-	setInterval(
-		() =>
-			client.user.setActivity(
-				`${client.config.prefix}help | ${activities[i++ % activities.length]}`,
-				{ type: "WATCHING" }
-			),
-		15000
-	)
+export default function handler(client: FAGCBot) {
+	console.log(`${client.user?.tag} is online since ${new Date().toUTCString()}`)
+
+	client.guilds.cache.map((guild => {
+		// send info to backend about guilds, get configs through WS
+		client.fagc.websocket.addGuildID(guild.id)
+
+		// create bot configs if they dont exist
+		const config = client.getBotConfig(guild.id)
+		if (!config) client.setBotConfig({
+			guildID: guild.id,
+			owner: guild.ownerId,
+		})
+	}))
 }

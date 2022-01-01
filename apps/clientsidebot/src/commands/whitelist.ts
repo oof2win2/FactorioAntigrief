@@ -1,31 +1,33 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
-import {CommandWithSubcommands, SubCommand} from "../base/Command.js"
+import { CommandWithSubcommands, PermissionOverrideType, SubCommand } from "../base/Commands.js"
 import { readdirSync } from "fs"
+import ENV from "../utils/env.js"
+import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 
-const commands: SubCommand[] = await Promise.all(readdirSync("./commands/whitelist/").map(async commandName => {
-	const command = await import(`./whitelist/${commandName}`)
-	return command.default
-}))
+const commands: SubCommand[] = await Promise.all(readdirSync("./commands/whitelist/")
+	.filter(command => command.endsWith(".js"))
+	.map(async commandName => {
+		const command = await import(`./whitelist/${commandName}`)
+		return command.default
+	}))
 
-const Whitelist: CommandWithSubcommands = {
+const Bans: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("whitelist")
 		.setDescription("Whitelist")
 		.setDefaultPermission(false)
 	,
-	execute: async (client, interaction) => {
-		const subcommand = interaction.options.getSubcommand()!
+	execute: async (args) => {
+		const subcommand = args.interaction.options.getSubcommand()
 		const command = commands.find(command => command.data.name === subcommand)
-		if (!command) return interaction.reply("An error executing the command occured")
-		return command.execute(client, interaction)
+		if (!command) return args.interaction.reply("An error executing the command occured")
+		return command.execute(args)
 	},
-	permissionType: {
-		type: "banrole"
-	}
+	permissionType: "configrole",
 }
 
 commands.forEach(command => {
-	Whitelist.data.addSubcommand(command.data)
+	Bans.data.addSubcommand(command.data)
 })
 
-export default Whitelist
+export default Bans

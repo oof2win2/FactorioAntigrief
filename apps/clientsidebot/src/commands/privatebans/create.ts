@@ -4,18 +4,18 @@ import { SubCommand } from "../../base/Commands.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
-		.setName("remove")
-		.setDescription("Remove a whitelist entry")
+		.setName("create")
+		.setDescription("Create a private ban")
 		.addStringOption(option => 
 			option
 				.setName("playername")
-				.setDescription("Name of the player to unwhitelist")
+				.setDescription("Name of the player to ban")
 				.setRequired(true)
 		)
 		.addStringOption(option => 
 			option
 				.setName("reason")
-				.setDescription("Reason for the unwhitelist")
+				.setDescription("Reason for the ban")
 				.setRequired(false)
 		)
 	,
@@ -23,18 +23,25 @@ const Setaction: SubCommand = {
 		const playername = z.string().parse(interaction.options.getString("playername"))
 		const reason = z.string().default("No reason").parse(interaction.options.getString("reason") ?? undefined)
 		
-		const result = await client.db.whitelist.deleteMany({
+		const existing = await client.db.privatebans.findFirst({
 			where: {
 				playername: playername
 			}
 		})
-		if (!result.count) return interaction.reply({
-			content: `Player ${playername} was not whitelisted`,
+		if (existing) return interaction.reply({
+			content: `Player ${playername} was already banned by <@${existing.adminID}> on <t:${Math.round(existing.createdAt.valueOf()/1000)}> for ${existing.reason}`,
 			ephemeral: true,
 		})
 		
+		await client.db.privatebans.create({
+			data: {
+				adminID: interaction.user.id,
+				playername: playername,
+				reason: reason ?? undefined,
+			}
+		})
 		return interaction.reply({
-			content: `Player ${playername} has been unwhitelisted by ${interaction.user} for ${reason}`
+			content: `Player ${playername} is now banned for ${reason}`
 		})
 	}
 }

@@ -1,18 +1,19 @@
 import { Interaction } from "discord.js"
-import FAGCBot from "../base/fagcbot"
+import FAGCBot from "../base/FAGCBot.js"
 
-export default async (client: FAGCBot, interaction: Interaction): Promise<unknown> => {
-	if (!interaction.isCommand()) return
+export default async (client: FAGCBot, [ interaction ]: [Interaction]) => {
+	// if interaction is not a command or not in a guild then we dont care
+	if (!interaction.isCommand() || !interaction.inGuild()) return
 
-	console.log(interaction.commandId, interaction.commandName)
-
-	const {commandName} = interaction
+	const { commandName } = interaction
 	if (!client.commands.has(commandName)) return
 
+	const botConfig = await client.getBotConfig(interaction.guildId)
+
 	try {
-		await client.commands.get(commandName)?.execute(client, interaction)
+		await client.commands.get(commandName)?.execute({ client, interaction, botConfig })
 	} catch (e) {
 		console.error(e)
-		return interaction.reply({content: "There was an error whilst executing this command", ephemeral: true})
+		return interaction.reply({ content: "There was an error whilst executing this command", ephemeral: true })
 	}
 }

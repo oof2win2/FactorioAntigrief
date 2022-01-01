@@ -1,56 +1,42 @@
 {
-  "name": "fagc-discord-bot",
-  "version": "0.0.1",
-  "description": "",
-  "main": "dist/index.js",
-  "type": "module",
-  "scripts": {
-    "lint": "eslint src/ --fix --ext .js,.ts",
-    "postinstall": "install-types",
-    "build": "tsc",
-    "dev": "tsc -b --watch",
-    "bot:addcommands": "npm run build && node dist/commands.js"
-  },
-  "prisma": {
-    "schema": "src/prisma/schema.prisma"
-  },
-  "module": "es2020",
-  "dependencies": {
-    "@discordjs/builders": "^0.6.0",
-    "@discordjs/rest": "^0.1.0-canary.0",
-    "@prisma/client": "^2.23.0",
-    "@supercharge/strings": "^1.18.0",
-    "chalk": "^4.1.1",
-    "common-tags": "^1.8.0",
-    "dateformat": "^4.5.1",
-    "discord.js": "^13.1.0",
-    "dotenv": "^10.0.0",
-    "envalid": "^7.2.1",
-    "fagc-api-types": "^1.1.2",
-    "fagc-api-wrapper": "^1.12.1",
-    "node-fetch": "^2.6.1",
-    "path": "^0.12.7",
-    "rcon-client": "^4.2.3",
-    "sqlite3": "^4.2.0",
-    "tail": "^2.2.2",
-    "ws": "^7.4.6"
-  },
-  "devDependencies": {
-    "@types/dateformat": "^3.0.1",
-    "@types/fs-extra": "^9.0.6",
-    "@types/node": "^14.14.22",
-    "@types/node-fetch": "^2.5.8",
-    "@types/sequelize": "^4.28.9",
-    "@types/ws": "^7.4.4",
-    "@typescript-eslint/eslint-plugin": "^4.26.0",
-    "@typescript-eslint/parser": "^4.26.0",
-    "eslint": "^7.28.0",
-    "install-types": "^2.0.1",
-    "nodemon": "^2.0.7",
-    "prisma": "^2.23.0",
-    "ts-node": "^10.0.0",
-    "typescript": "^4.3.2"
-  },
-  "author": "Cooldude2606",
-  "license": "UNLICENSED"
+	"name": "fagc-clientside-bot",
+	"version": "1.0.0",
+	"description": "## Installation",
+	"main": "dist/index.js",
+	"type": "module",
+	"scripts": {
+		"bot:addcommands": "node dist/addCommands.js",
+		"lint": "eslint src/ --fix"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/FactorioAntigrief/fagc-clientside-bot.git"
+	},
+	"author": "oof2win2",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/FactorioAntigrief/fagc-clientside-bot/issues"
+	},
+	"homepage": "https://github.com/FactorioAntigrief/fagc-clientside-bot#readme",
+	"dependencies": {
+		"@discordjs/builders": "^0.9.0",
+		"@discordjs/rest": "^0.1.0-canary.0",
+		"@prisma/client": "^3.6.0",
+		"@types/node": "^16.11.12",
+		"discord.js": "^13.5.0",
+		"dotenv": "^10.0.0",
+		"envalid": "^7.2.2",
+		"fagc-api-wrapper": "^1.22.4",
+		"rcon-client": "^4.2.3",
+		"utility-types": "^3.10.0",
+		"why-is-node-still-running": "^1.0.0",
+		"zod": "^3.11.6"
+	},
+	"devDependencies": {
+		"@types/better-sqlite3": "^7.4.1",
+		"@typescript-eslint/eslint-plugin": "^5.6.0",
+		"@typescript-eslint/parser": "^5.6.0",
+		"eslint": "^8.4.1",
+		"prisma": "^3.6.0"
+	}
 }
