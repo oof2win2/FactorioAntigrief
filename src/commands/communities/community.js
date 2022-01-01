@@ -24,7 +24,7 @@ class GetID extends Command {
 				.then((r) => r?.content)
 		const communityId = args.shift()
 		if (!communityId) return message.channel.send(`${this.client.emotes.warn} No community ID was provided`)
-		const community = await this.client.fagc.communities.fetchCommunity(communityId)
+		const community = await this.client.fagc.communities.fetchCommunity({ communityID: communityId })
 		if (!community)
 			return message.channel.send(`${this.client.emotes.warn} Community with the ID \`${communityId}\` does not exist!`)
 

@@ -24,9 +24,8 @@ class ViewConfig extends Command {
 			.setAuthor(`${this.client.user?.username} | oof2win2#3149`)
 			.setTimestamp()
 			.setDescription("Your FAGC Configuration")
-		const community = await this.client.fagc.communities.fetchCommunity(
-			config.communityId
-		)
+		const community = await this.client.fagc.communities.fetchCommunity({ communityID: config.communityId })
+		
 		embed.addFields(
 			{
 				name: "Community name",

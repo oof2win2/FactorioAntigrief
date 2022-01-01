@@ -27,7 +27,7 @@ class GetAllProfiles extends Command {
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
-		const profiles = await this.client.fagc.profiles.fetchAll(playername)
+		const profiles = await this.client.fagc.profiles.fetchAll({ playername: playername })
 		if (!profiles || !profiles[0])
 			return message.channel.send(
 				`User \`${playername}\` has no profiles!`

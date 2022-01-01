@@ -36,9 +36,7 @@ class GetAllProfiles extends Command {
 				"You do not have a community ID set and none was provided"
 			)
 
-		const community = await this.client.fagc.communities.fetchCommunity(
-			communityId
-		)
+		const community = await this.client.fagc.communities.fetchCommunity({ communityID: communityId })
 		if (!community)
 			return message.channel.send(
 				`Community with ID \`${communityId}\` does not exist`

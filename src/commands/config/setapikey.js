@@ -62,16 +62,14 @@ class SetAPIKey extends Command {
 		}
 
 		try {
-			const community =
-				await this.client.fagc.communities.fetchOwnCommunity({
-					reqConfig: {
-						apikey: apikey
-					}
-				})
+			const community = await this.client.fagc.communities.fetchOwnCommunity({
+				reqConfig: {
+					apikey: apikey
+				}
+			})
 			if (!community)
-				return message.reply(
-					`${this.client.emotes.warn} That API key is not associated with a community`
-				)
+				return message.reply(`${this.client.emotes.warn} That API key is not associated with a community`)
+			
 			const config = await ConfigModel.findOneAndUpdate(
 				{ guildId: message.guild.id },
 				{
@@ -79,6 +77,7 @@ class SetAPIKey extends Command {
 				},
 				{ new: true }
 			).then((c) => c.toObject())
+			
 			if (config.apikey && config.guildId === message.guild.id) {
 				this.client.users
 					.fetch(community.contact)

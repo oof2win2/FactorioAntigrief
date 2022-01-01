@@ -33,7 +33,7 @@ class AddCommunityFilter extends Command {
 		if (!config.trustedCommunities?.length)
 			return message.channel.send("You have not set any trusted communities")
 		if (!args[0]) {
-			const communities = await this.client.fagc.communities.fetchAll()
+			const communities = await this.client.fagc.communities.fetchAll({})
 			let embed = new MessageEmbed()
 				.setTitle("FAGC Communities")
 				.setColor("GREEN")
@@ -63,9 +63,10 @@ class AddCommunityFilter extends Command {
 			args = newIDsMessage.content.split(" ")
 		}
 
+		// fetch the communities into the cache so they can be retrieved later
 		await Promise.all(
-			args.map((communityid) =>
-				this.client.fagc.communities.fetchCommunity(communityid)
+			args.map((communityID) =>
+				this.client.fagc.communities.fetchCommunity({ communityID: communityID })
 			)
 		)
 

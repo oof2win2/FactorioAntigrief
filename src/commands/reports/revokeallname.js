@@ -74,14 +74,13 @@ class RevokeAllname extends Command {
 			return message.channel.send("Profile revocation cancelled")
 
 		try {
-			const response = await this.client.fagc.reports.revokeAllName(
-				playername,
-				message.author.id,
-				null,
-				{
-					apikey: config.apikey
+			const response = await this.client.fagc.reports.revokeAllName({
+				playername: playername,
+				adminId: message.author.id,
+				reqConfig: {
+					apikey: config.apikey,
 				}
-			)
+			})
 			if (response.length) {
 				return message.channel.send("Profile revoked!")
 			} else {
