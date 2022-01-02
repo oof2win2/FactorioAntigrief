@@ -1,11 +1,18 @@
-## [1.24.5] - [2022-01-02]
+## [1.22.6] - [2022-01-02]
+
+### Changes
+
+-	Update `fagc-api-types`
+-	Fix changelog versions
+
+## [1.22.5] - [2022-01-02]
 
 ### Changes
 
 -	Remove useless tests, as they were not updated for a long time and are not ideal
 -	Update all dependencies
 
-## [1.24.4] - [2021-12-29]
+## [1.22.4] - [2021-12-29]
 
 ### Bugfixes
 
