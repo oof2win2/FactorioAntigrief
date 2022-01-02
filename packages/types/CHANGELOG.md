@@ -1,3 +1,9 @@
+## UNRELEASED
+
+### Bugfixes
+
+-	Make `trustedCommunities` and `ruleFilters` on type `GuildConfig` required
+
 ## [1.4.1] - [2021-12-28]
 
 ### Changes

@@ -42,10 +42,10 @@ export interface Rule extends Common {
 }
 
 export interface GuildConfig {
-	trustedCommunities?: ApiID[]
-	ruleFilters?: ApiID[]
 	guildId: string
 	communityId?: string
+	trustedCommunities: ApiID[]
+	ruleFilters: ApiID[]
 	roles: {
 		reports: string
 		webhooks: string
