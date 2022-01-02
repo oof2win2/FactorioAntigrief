@@ -34,10 +34,10 @@ class SetAPIKey extends Command {
 			)
 			const reports =
 				reportsMsg?.mentions.roles.first() ||
-				(await message.guild.roles.fetch(reportsMsg?.content))
+				(await message.guild.roles.fetch(reportsMsg?.content?.split(" ")[0]))
 			if (!reports)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${reportsMsg?.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${reportsMsg?.content?.split(" ")[0]}\` is not a valid role`
 				)
 
 			const webhooksMsg = await getMessageResponse(
@@ -46,10 +46,10 @@ class SetAPIKey extends Command {
 			)
 			const webhooks =
 				webhooksMsg?.mentions.roles.first() ||
-				(await message.guild.roles.fetch(webhooksMsg?.content))
+				(await message.guild.roles.fetch(webhooksMsg?.content?.split(" ")[0]))
 			if (!webhooks)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${webhooksMsg?.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${webhooksMsg?.content?.split(" ")[0]}\` is not a valid role`
 				)
 
 			const configMsg = await getMessageResponse(
@@ -58,10 +58,10 @@ class SetAPIKey extends Command {
 			)
 			const setConfig =
 				configMsg?.mentions.roles.first() ||
-				(await message.guild.roles.fetch(configMsg?.content))
+				(await message.guild.roles.fetch(configMsg?.content?.split(" ")[0]))
 			if (!setConfig)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${configMsg?.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${configMsg?.content?.split(" ")[0]}\` is not a valid role`
 				)
 
 			const ruleMsg = await getMessageResponse(
@@ -70,10 +70,10 @@ class SetAPIKey extends Command {
 			)
 			const setRules =
 				ruleMsg?.mentions.roles.first() ||
-				(await message.guild.roles.fetch(ruleMsg?.content))
+				(await message.guild.roles.fetch(ruleMsg?.content?.split(" ")[0]))
 			if (!setRules)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${ruleMsg?.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${ruleMsg?.content?.split(" ")[0]}\` is not a valid role`
 				)
 
 			const communitiesMsg = await getMessageResponse(
@@ -82,10 +82,10 @@ class SetAPIKey extends Command {
 			)
 			const setCommunities =
 				communitiesMsg?.mentions.roles.first() ||
-				(await message.guild.roles.fetch(communitiesMsg?.content))
+				(await message.guild.roles.fetch(communitiesMsg?.content?.split(" ")[0]))
 			if (!setCommunities)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${communitiesMsg?.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${communitiesMsg?.content?.split(" ")[0]}\` is not a valid role`
 				)
 
 			let embed = new MessageEmbed()
@@ -152,10 +152,10 @@ class SetAPIKey extends Command {
 			)
 			const role =
 				roleMsg?.mentions.roles.first() ||
-				(await message.guild.roles.fetch(roleMsg?.content))
+				(await message.guild.roles.fetch(roleMsg?.content?.split(" ")[0]))
 			if (!role)
 				return message.channel.send(
-					`${this.client.emotes.warn} \`${roleMsg?.content}\` is not a valid role`
+					`${this.client.emotes.warn} \`${roleMsg?.content?.split(" ")[0]}\` is not a valid role`
 				)
 			const confirm = await getConfirmationMessage(
 				message,

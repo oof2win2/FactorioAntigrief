@@ -24,8 +24,8 @@ class GetReports extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0])
-			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get reports of`)
-				.then((r) => r?.content)
+			args = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get reports of`)
+				.then((r) => r?.content?.split(" "))
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		

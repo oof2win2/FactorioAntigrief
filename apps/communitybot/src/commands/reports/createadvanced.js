@@ -37,7 +37,7 @@ class CreateReportAdvanced extends Command {
 				message,
 				`${this.client.emotes.type} Type in a playername for the report`
 			)
-		)?.content
+		)?.content?.split(" ")[0]
 		if (playername === undefined)
 			return message.channel.send(`${this.client.emotes.warn} Didn't send playername in time`)
 
@@ -49,7 +49,7 @@ class CreateReportAdvanced extends Command {
 			return message.channel.send(`${this.client.emotes.warn} Didn't send admin user ID in time`)
 		const adminUser =
 			adminMessage.mentions.users.first() ||
-			(await this.client.users.fetch(adminMessage.content).catch(() => null))
+			(await this.client.users.fetch(adminMessage.content.split(" ")[0]).catch(() => null))
 		if (!adminUser) return message.channel.send(`${this.client.emotes.warn} Sent user is not valid!`)
 
 		let ruleEmbed = new MessageEmbed()
@@ -78,7 +78,7 @@ class CreateReportAdvanced extends Command {
 		)?.content
 		if (ruleids === undefined)
 			return message.channel.send(`${this.client.emotes.warn} Didn't send rule IDs in time`)
-		let ruleInput = ruleids.split(" ")
+		let ruleInput = ruleids.split(" ").map(x => x.toLowerCase())
 		const ruleNumbers = ruleInput
 			.map((rule, i) => {
 				const ruleNumber = parseInt(rule) || undefined
@@ -159,7 +159,7 @@ class CreateReportAdvanced extends Command {
 				`${this.client.emotes.type} Send a ISO8601 timetsamp representing the date of the report, find one here: <https://www.timestamp-converter.com/>. Type in \`now\` to set the current time`,
 				120*1000 // 120 seconds to make time
 			)
-		)?.content
+		)?.content?.split(" ")[0]
 		let timestamp = new Date()
 		if (!timestampMsg) {
 			message.channel.send(

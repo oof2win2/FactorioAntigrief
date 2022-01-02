@@ -21,7 +21,7 @@ class GetIDRule extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0])
-			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a rule ID to fetch`)
+			args = await getMessageResponse(message, `${this.client.emotes.type} Provide a rule ID to fetch`)
 				.then((r) => r?.content)
 		const ruleID = args.shift()
 		if (!ruleID) return message.channel.send(`${this.client.emotes.warn} No rule ID was provided`)

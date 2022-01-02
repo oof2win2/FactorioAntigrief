@@ -66,7 +66,7 @@ class CreateReport extends Command {
 		)?.content
 		if (!ruleids)
 			return message.channel.send(`${this.client.emotes.warn} Didn't send rule IDs in time`)
-		let ruleInput = ruleids.split(" ")
+		let ruleInput = ruleids.split(" ").map(x => x.toLowerCase())
 		const ruleNumbers = ruleInput
 			.map((rule, i) => {
 				const ruleNumber = parseInt(rule) || undefined
