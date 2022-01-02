@@ -27,8 +27,8 @@ class Revoke extends Command {
 		if (!config.apikey) return message.reply(`${this.client.emotes.warn} No API key set`)
 
 		if (!args[0])
-			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to fetch`)
-				.then((r) => r?.content)
+			args = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to revoke`)
+				.then((r) => r?.content?.split(" "))
 		const reportID = args.shift()
 		if (!reportID) return message.channel.send(`${this.client.emotes.warn} No report was provided`)
 

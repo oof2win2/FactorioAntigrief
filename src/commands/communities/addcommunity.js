@@ -61,6 +61,8 @@ class AddCommunityFilter extends Command {
 			args = newIDsMessage.content.split(" ")
 		}
 
+		args = args.map(x => x.toLowerCase())
+
 		await Promise.all(
 			args.map((communityid) =>
 				this.client.fagc.communities.fetchCommunity({ communityID: communityid })

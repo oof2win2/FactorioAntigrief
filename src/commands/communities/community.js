@@ -21,7 +21,8 @@ class GetID extends Command {
 	async run(message, args) {
 		if (!args[0])
 			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a community ID to fetch`)
-				.then((r) => r?.content)
+				.then((r) => r?.content?.split(" ")[0])
+		args = args.map(x => x.toLowerCase())
 		const communityId = args.shift()
 		if (!communityId) return message.channel.send(`${this.client.emotes.warn} No community ID was provided`)
 		const community = await this.client.fagc.communities.fetchCommunity({ communityID: communityId })

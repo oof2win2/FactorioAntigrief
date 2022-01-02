@@ -26,11 +26,11 @@ class GetAllProfiles extends Command {
 	async run(message, args, config) {
 		if (!args[0])
 			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get profiles of`)
-				.then((r) => r?.content)
+				.then((r) => r?.content?.split(" ")[0])
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
-		const communityId = args.shift() || config.communityId
+		const communityId = args.shift()?.toLowerCase() || config.communityId
 		if (!communityId)
 			return message.channel.send(
 				"You do not have a community ID set and none was provided"

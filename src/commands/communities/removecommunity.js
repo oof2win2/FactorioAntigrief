@@ -63,6 +63,8 @@ class AddCommunityFilter extends Command {
 			args = newIDsMessage.content.split(" ")
 		}
 
+		args = args.map(x => x.toLowerCase())
+
 		// fetch the communities into the cache so they can be retrieved later
 		await Promise.all(
 			args.map((communityID) =>

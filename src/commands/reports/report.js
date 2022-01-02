@@ -21,9 +21,9 @@ class FetchReport extends Command {
 	}
 	async run(message, args) {
 		if (!args[0])
-			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to fetch`)
-				.then((r) => r?.content)
-		const reportID = args.shift()
+			args = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to fetch`)
+				.then((r) => r?.content?.split(" "))
+		const reportID = args.shift()?.toLowerCase()
 		if (!reportID) return message.channel.send(`${this.client.emotes.warn} No report was provided`)
 
 		const report = await this.client.fagc.reports.fetchReport({ reportid: reportID })
