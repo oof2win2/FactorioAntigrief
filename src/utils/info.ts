@@ -13,7 +13,6 @@ import { CommunityClass } from "../database/fagc/community.js"
 import { ReportClass } from "../database/fagc/report.js"
 import {
 	CommunityCreatedMessageExtraOpts,
-	CommunityRemovedMessageExtraOpts,
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
@@ -436,7 +435,7 @@ export async function communityCreatedMessage(
 }
 export async function communityRemovedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
-	opts: CommunityRemovedMessageExtraOpts
+	opts: CommunityCreatedMessageExtraOpts
 ): Promise<void> {
 	// set the sent object's messageType to communityRemoved
 	// WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityRemoved" })))
