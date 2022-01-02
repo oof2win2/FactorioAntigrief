@@ -5,8 +5,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"lint": "npm run eslint",
-		"eslint": "eslint src/ --fix --ext .js,.ts",
-		"test": "mocha"
+		"eslint": "eslint src/ --fix --ext .js,.ts"
 	},
 	"files": [
 		"dist/"
@@ -29,7 +28,6 @@
 	"homepage": "https://github.com/oof2win2/fagc-api-wrapper#readme",
 	"dependencies": {
 		"@discordjs/collection": "^0.1.6",
-		"axios": "^0.21.1",
 		"discord-api-types": "^0.23.1",
 		"fagc-api-types": "^1.4.1",
 		"isomorphic-fetch": "^3.0.0",
@@ -39,17 +37,12 @@
 		"ws": "^7.5.0"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.2.18",
 		"@types/isomorphic-fetch": "0.0.35",
-		"@types/mocha": "^8.2.2",
 		"@types/strict-uri-encode": "^2.0.0",
 		"@types/ws": "^7.4.5",
 		"@typescript-eslint/eslint-plugin": "^4.33.0",
 		"@typescript-eslint/parser": "^4.33.0",
-		"chai": "^4.3.4",
 		"eslint": "^7.32.0",
-		"mocha": "^8.4.0",
-		"mocha-steps": "^1.3.0",
 		"ts-node": "^10.0.0",
 		"typescript": "^4.5.4"
 	}

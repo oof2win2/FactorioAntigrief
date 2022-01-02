@@ -1,3 +1,10 @@
+## UNRELEASED
+
+### Changes
+
+-	Remove useless tests, as they were not updated for a long time and are not ideal
+-	Update `fagc-api-types` dependency
+
 ## [1.24.4] - [2021-12-29]
 
 ### Bugfixes
