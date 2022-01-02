@@ -24,7 +24,7 @@ export default class ReportController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string()
+					id: z.string().transform(str => str.toLowerCase()),
 				}),
 
 				description: "Fetch a report by it's ID",
@@ -55,7 +55,7 @@ export default class ReportController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string()
+					id: z.string().transform(str => str.toLowerCase())
 				}),
 
 				description: "Fetch a report by it's broken rule ID",
@@ -127,7 +127,7 @@ export default class ReportController {
 			schema: {
 				params: z.object({
 					playername: z.string(),
-					communityId: z.string(),
+					communityId: z.string().transform(x => x.toLowerCase()),
 				}),
 
 				description:
@@ -166,8 +166,12 @@ export default class ReportController {
 			schema: {
 				body: z.object({
 					playername: z.string().nullish(),
-					ruleIDs: z.array(z.string()).max(100, "Exceeded maximum length of 100"),
-					communityIDs: z.array(z.string()).max(100, "Exceeded maximum length of 100"),
+					ruleIDs: z.array(z.string())
+						.max(100, "Exceeded maximum length of 100")
+						.transform(arr => arr.map(str => str.toLowerCase())),
+					communityIDs: z.array(z.string())
+						.max(100, "Exceeded maximum length of 100")
+						.transform(arr => arr.map(str => str.toLowerCase())),
 
 				}),
 
@@ -255,7 +259,7 @@ export default class ReportController {
 				body: z.object({
 					adminId: z.string(),
 					playername: z.string(),
-					brokenRule: z.string(),
+					brokenRule: z.string().transform(str => str.toLowerCase()),
 					automated: z.boolean().nullish().default(false),
 					reportedTime: z.string().default(new Date().toISOString()),
 					description: z.string().default("No description"),

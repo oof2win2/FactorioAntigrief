@@ -24,7 +24,6 @@ import AuthModel from "../database/fagc/authentication.js"
 import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
-import { APIUser } from "discord-api-types"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -57,7 +56,7 @@ export default class CommunityController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string()
+					id: z.string().transform(x => x.toLowerCase()),
 				}),
 
 				tags: [ "community" ],
@@ -190,8 +189,8 @@ export default class CommunityController {
 					guildId: z.string()
 				}),
 				body: z.object({
-					ruleFilters: z.array(z.string()).optional(),
-					trustedCommunities: z.array(z.string()).optional(),
+					ruleFilters: z.array(z.string()).optional().transform(x => x ? x.map(y => y.toLowerCase()) : x),
+					trustedCommunities: z.array(z.string()).optional().transform(x => x ? x.map(y => y.toLowerCase()) : x),
 					roles: z.object({
 						reports: z.string().optional(),
 						webhooks: z.string().optional(),
@@ -555,7 +554,7 @@ export default class CommunityController {
 		options: {
 			schema: {
 				params: z.object({
-					communityId: z.string(),
+					communityId: z.string().transform(x => x.toLowerCase()),
 				}),
 
 				description: "Delete a FAGC community",
@@ -659,8 +658,8 @@ export default class CommunityController {
 		options: {
 			schema: {
 				params: z.object({
-					idReceiving: z.string(),
-					idDissolving: z.string(),
+					idReceiving: z.string().transform(x => x.toLowerCase()),
+					idDissolving: z.string().transform(x => x.toLowerCase()),
 				}),
 
 				description: "Merge community idDissolving into community idReceiving",

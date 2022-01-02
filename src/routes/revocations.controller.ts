@@ -11,7 +11,7 @@ export default class ProfileController {
 			schema: {
 				params: z.object({
 					playername: z.string(),
-					communityId: z.string(),
+					communityId: z.string().transform(x => x.toLowerCase()),
 				}),
 
 				description: "Fetch all revocations of a player in a community",
