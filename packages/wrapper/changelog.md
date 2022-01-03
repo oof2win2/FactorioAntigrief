@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.23.0] - [2022-01-03]
 
 ### Changes
 
@@ -9,7 +9,7 @@
 
 -	Fix types not being publish with `prepublish` script, change it to a `prepare` script
 
-## [1.22.8] - [2021-01-03]
+## [1.22.8] - [2022-01-03]
 
 ### Changes
 
