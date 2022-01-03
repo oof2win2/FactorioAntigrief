@@ -6,7 +6,7 @@
 	"scripts": {
 		"lint": "npm run eslint",
 		"eslint": "eslint src/ --fix --ext .js,.ts",
-        "prepublish": "npx tsc"
+        "prepare": "npx tsc"
 	},
 	"files": [
 		"dist/"

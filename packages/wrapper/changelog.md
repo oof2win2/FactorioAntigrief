@@ -1,3 +1,9 @@
+## UNRELEASED
+
+### Bugfixes
+
+-	Fix types not being publish with `prepublish` script, change it to a `prepare` script
+
 ## [1.22.8] - [2021-01-03]
 
 ### Changes
