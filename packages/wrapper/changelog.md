@@ -1,3 +1,14 @@
+## UNRELEASED
+
+### Bugfixes
+
+-   Add `tslib` as a dependency for the wrapper to work with JS
+-   Fix comment in ManagerOptions type
+
+### Changes
+
+-   Add `prepublish` script to compile TS
+
 ## [1.22.6] - [2022-01-02]
 
 ### Changes
