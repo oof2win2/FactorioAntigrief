@@ -6,9 +6,7 @@ import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from ".."
 import { FetchRequestTypes } from "../types/privatetypes"
 
-export default class RevocationManager extends BaseManager<Revocation> {
-	private apiurl: string
-	
+export default class RevocationManager extends BaseManager<Revocation> {	
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		if (options.apikey) this.apikey = options.apikey

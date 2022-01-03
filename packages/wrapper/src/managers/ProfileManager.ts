@@ -5,7 +5,6 @@ import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 
 export default class ProfileManager extends BaseManager<Report> {
-	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		if (options.apikey) this.apikey = options.apikey

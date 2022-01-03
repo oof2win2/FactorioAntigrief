@@ -11,7 +11,6 @@ import strictUriEncode from "strict-uri-encode"
 import { FetchRequestTypes } from "../types/privatetypes"
 
 export default class ReportManager extends BaseManager<Report> {
-	private apiurl: string
 	private createRevocation: (revocationObject: Revocation) => void
 	constructor(
 		options: WrapperOptions,

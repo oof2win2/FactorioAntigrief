@@ -1,5 +1,10 @@
 ## UNRELEASED
 
+### Changes
+
+-	Add option to change socket and base API URL
+-	Add methods to open and close socket during runtime
+
 ### Bugfixes
 
 -	Fix types not being publish with `prepublish` script, change it to a `prepare` script

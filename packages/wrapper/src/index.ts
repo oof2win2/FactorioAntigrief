@@ -3,7 +3,7 @@ import InfoManager from "./managers/InfoManager"
 import ProfileManager from "./managers/ProfileManager"
 import RevocationManager from "./managers/RevocationManager"
 import { RuleManager } from "./managers/RuleManager"
-import { ManagerOptions, WrapperOptions } from "./types/types"
+import { ManagerOptions, BaseWrapperOptions, WrapperOptions } from "./types/types"
 import ReportManager from "./managers/ReportManager"
 import WebSocketHandler from "./WebsocketListener"
 import { Revocation } from "fagc-api-types"
@@ -23,15 +23,22 @@ export class FAGCWrapper {
 	public info: InfoManager
 	public profiles: ProfileManager
 	public websocket: WebSocketHandler
-	// public users: UserManager
 
 	constructor(
-		options: WrapperOptions,
+		baseOptions: BaseWrapperOptions,
 		managerOptions: ManagerOptions = {
 			uncacheage: 1000 * 60 * 15,
 			uncachems: 1000 * 60 * 15,
 		}
 	) {
+		const options: WrapperOptions = {
+			apiurl: "https://factoriobans.club/api",
+			socketurl: "https://factoriobans.club/api/ws",
+			...baseOptions
+		}
+		if (!options.apiurl) options.apiurl = "https://factoriobans.club/api"
+		if (!options.socketurl) options.socketurl = "https://factoriobans.club/api/ws"
+
 		this.apiurl = options.apiurl
 		if (options.apikey) this.apikey = options.apikey
 		if (options.masterapikey) this.masterapikey = options.masterapikey
@@ -52,7 +59,7 @@ export class FAGCWrapper {
 		)
 
 		this.websocket = new WebSocketHandler({
-			uri: options.socketurl,
+			uri: options.socketurl || "wss://factoriobans.club/api/ws",
 			enabled: options.enableWebSocket,
 		})
 	}
@@ -60,6 +67,7 @@ export class FAGCWrapper {
 		Object.keys(this).forEach((key) => {
 			if (
 				typeof this[key] == "object" &&
+				this[key] !== null &&
 				typeof this[key]["destroy"] == "function"
 			)
 				this[key]["destroy"]()
@@ -68,11 +76,14 @@ export class FAGCWrapper {
 		this.apikey = null
 		this.masterapikey = null
 	}
-	setapikey({
-		apikey, masterapikey
+	setdata({
+		apikey, masterapikey,
+		url, socketurl,
 	}: {
 		apikey?: string | null,
-		masterapikey?: string | null
+		masterapikey?: string | null,
+		url?: string,
+		socketurl?: string
 	}): void {
 		if (apikey || apikey === null) {
 			this.revocations.apikey = apikey
@@ -80,7 +91,6 @@ export class FAGCWrapper {
 			this.rules.apikey = apikey
 			this.info.apikey = apikey
 			this.profiles.apikey = apikey
-			// this.users.apikey = apikey
 			this.reports.apikey = apikey
 		}
 		if (masterapikey || masterapikey === null) {
@@ -89,8 +99,16 @@ export class FAGCWrapper {
 			this.rules.masterapikey = masterapikey
 			this.info.masterapikey = masterapikey
 			this.profiles.masterapikey = masterapikey
-			// this.users.masterapikey = masterapikey
 			this.reports.masterapikey = masterapikey
 		}
+		if (url) {
+			this.revocations.apiurl = url
+			this.communities.apiurl = url
+			this.rules.apiurl = url
+			this.info.apiurl = url
+			this.profiles.apiurl = url
+			this.reports.apiurl = url
+		}
+		if (socketurl) this.websocket.setUrl(socketurl)
 	}
 }

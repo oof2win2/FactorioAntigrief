@@ -7,7 +7,6 @@ import { GenericAPIError, NoMasterApikeyError } from "../types"
 import { FetchRequestTypes } from "../types/privatetypes"
 
 export class RuleManager extends BaseManager<Rule> {
-	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		this.apiurl = options.apiurl

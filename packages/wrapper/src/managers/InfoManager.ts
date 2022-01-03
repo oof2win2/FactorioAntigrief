@@ -8,7 +8,6 @@ import { APIEmbed } from "discord-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
 
 export default class InfoManager extends BaseManager<Webhook> {
-	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		if (options.apikey) this.apikey = options.apikey

@@ -3,6 +3,7 @@ import { Common } from "fagc-api-types"
 import { AddOptions, ManagerOptions } from "../types/types"
 
 export default class BaseManager<HoldsWithId extends Common> {
+	public apiurl!: string // will be assigned when it is extended
 	public cache: Collection<Common["id"], HoldsWithId>
 	protected fetchingCache: Collection<
 		Common["id"],

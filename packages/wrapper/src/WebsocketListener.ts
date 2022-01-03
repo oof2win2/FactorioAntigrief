@@ -1,5 +1,4 @@
 import { EventEmitter } from "events"
-// TODO: use reconnecting-websocket
 import WebSocket from "isomorphic-ws"
 import ReconnectingWebSocket from "reconnecting-websocket"
 import {
@@ -78,27 +77,33 @@ declare interface WebSocketHandler {
 }
 
 class WebSocketHandler extends EventEmitter {
-	private socket!: ReconnectingWebSocket
+	private socket: ReconnectingWebSocket
 	private opts: WebSockethandlerOpts
 	private guildIDs: string[]
+	private socketurl: string
 
 	constructor(opts: WebSockethandlerOpts) {
 		super()
 		this.opts = opts
 		this.guildIDs = []
 
-		if (!opts.enabled) return
-
 		// don't create the websocket if it has not been enabled
 
-		this.socket = new ReconnectingWebSocket(this.opts.uri, undefined, {
+		this.socketurl = this.opts.uri
+
+		this.socket = new ReconnectingWebSocket(() => this.socketurl, undefined, {
 			WebSocket: WebSocket,
+			startClosed: true
 		})
+
+		if (this.opts.enabled) this.socket.reconnect()
 		
 		// handle socket messages
 		this.socket.onmessage = (msg) => {
-			this.handleMessage(JSON.parse(msg.data as string))
+			console.log(msg)
+			// this.handleMessage(JSON.parse(msg.data as string))
 		}
+		this.socket.onerror = console.error
 		this.socket.onopen = () => {
 			this.guildIDs.map((id) => {
 				this.socket.send(
@@ -110,6 +115,7 @@ class WebSocketHandler extends EventEmitter {
 			})
 		}
 	}
+
 	handleMessage(message: WebSocketMessage): void {
 		const messageType = message.messageType
 		switch (messageType) {
@@ -181,6 +187,7 @@ class WebSocketHandler extends EventEmitter {
 			)
 		}
 	}
+
 	addGuildID(guildID: string): void {
 		if (this.guildIDs.includes(guildID)) return // don't do anything if it already is set
 		// save guild id to list
@@ -192,6 +199,7 @@ class WebSocketHandler extends EventEmitter {
 			})
 		)
 	}
+
 	removeGuildID(guildID: string): void {
 		if (!this.guildIDs.includes(guildID)) return // don't do anything if it isn't there
 		// remove the id from local list & then send info to backend
@@ -203,9 +211,22 @@ class WebSocketHandler extends EventEmitter {
 			})
 		)
 	}
-	destroy(): void {
-		if (!this.opts.enabled) return
 
+	close(): void {
+		this.socket.close()
+	}
+
+	open(): void {
+		this.socket.reconnect()
+	}
+
+	setUrl(url: string): void {
+		this.socket.close()
+		this.socketurl = url
+		this.socket.reconnect()
+	}
+
+	destroy(): void {
 		this.socket.close()
 	}
 }

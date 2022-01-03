@@ -10,7 +10,6 @@ type SetGuildConfig = Partial<GuildConfig> & Pick<GuildConfig, "guildId">
 type SetCommunityConfig = Partial<Omit<Community, "id">>
 
 export default class CommunityManager extends BaseManager<Community> {
-	private apiurl: string
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		if (options.apikey) this.apikey = options.apikey
