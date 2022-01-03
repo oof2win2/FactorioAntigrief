@@ -14,8 +14,8 @@ export * from "./types/index"
 
 export class FAGCWrapper {
 	public readonly apiurl: string
-	public apikey?: string
-	public masterapikey?: string
+	public apikey?: string | null = null
+	public masterapikey?: string | null = null
 	public communities: CommunityManager
 	public rules: RuleManager
 	public reports: ReportManager
@@ -33,8 +33,8 @@ export class FAGCWrapper {
 		}
 	) {
 		this.apiurl = options.apiurl
-		this.apikey = options.apikey
-		this.masterapikey = options.masterapikey
+		if (options.apikey) this.apikey = options.apikey
+		if (options.masterapikey) this.masterapikey = options.masterapikey
 
 		this.revocations = new RevocationManager(options, managerOptions)
 		this.communities = new CommunityManager(options, managerOptions)
@@ -65,16 +65,16 @@ export class FAGCWrapper {
 				this[key]["destroy"]()
 		})
 
-		delete this.apikey
-		delete this.masterapikey
+		this.apikey = null
+		this.masterapikey = null
 	}
 	setapikey({
 		apikey, masterapikey
 	}: {
-		apikey?: string,
-		masterapikey?: string
+		apikey?: string | null,
+		masterapikey?: string | null
 	}): void {
-		if (apikey) {
+		if (apikey || apikey === null) {
 			this.revocations.apikey = apikey
 			this.communities.apikey = apikey
 			this.rules.apikey = apikey
@@ -83,7 +83,7 @@ export class FAGCWrapper {
 			// this.users.apikey = apikey
 			this.reports.apikey = apikey
 		}
-		if (masterapikey) {
+		if (masterapikey || masterapikey === null) {
 			this.revocations.masterapikey = masterapikey
 			this.communities.masterapikey = masterapikey
 			this.rules.masterapikey = masterapikey

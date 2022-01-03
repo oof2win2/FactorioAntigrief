@@ -10,8 +10,8 @@ export default class BaseManager<HoldsWithId extends Common> {
 	>
 	private sweepCache: Collection<Common["id"], number>
 	private interval: NodeJS.Timeout
-	public apikey?: string
-	public masterapikey?: string
+	public apikey?: string | null = null
+	public masterapikey: string | null = null
 	constructor(options: ManagerOptions = {}) {
 		this.cache = new Collection()
 		this.sweepCache = new Collection()
@@ -53,5 +53,7 @@ export default class BaseManager<HoldsWithId extends Common> {
 	}
 	destroy(): void {
 		clearInterval(this.interval)
+		this.apikey = null
+		this.masterapikey = null
 	}
 }

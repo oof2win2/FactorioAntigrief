@@ -3,7 +3,6 @@ import { EventEmitter } from "events"
 import WebSocket from "isomorphic-ws"
 import ReconnectingWebSocket from "reconnecting-websocket"
 import {
-	GuildConfig,
 	CommunityCreatedMessage,
 	ReportCreatedMessage,
 	RevocationMessage,

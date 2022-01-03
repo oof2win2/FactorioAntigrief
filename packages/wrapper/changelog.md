@@ -1,3 +1,9 @@
+## UNRELEASED
+
+### Changes
+
+-	Allow unsetting of API key
+
 ## [1.22.7] - [2022-01-03]
 
 ### Bugfixes
