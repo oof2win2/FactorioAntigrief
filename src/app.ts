@@ -1,6 +1,5 @@
 import path from "path"
 import ENV from "./utils/env.js"
-import mongoose from "mongoose"
 import Fastify, { FastifyInstance } from "fastify"
 import fastifyCorsPlugin from "fastify-cors"
 import fastifyRateLimitPlugin from "fastify-rate-limit"
@@ -30,13 +29,6 @@ import WebhookModel from "./database/fagc/webhook.js"
 import GuildConfigModel from "./database/fagc/guildconfig.js"
 import { z } from "zod"
 import { generateSchema } from "./utils/zodOpenAPI.js"
-
-const __dirname = path.dirname(new URL(import.meta.url).pathname)
-
-mongoose.connect(ENV.MONGOURI, {
-	ignoreUndefined: true,
-	loggerLevel: "info"
-}) // connect to db before loading other stuff
 
 const fastify: FastifyInstance = Fastify({
 	logger: false,
@@ -262,7 +254,7 @@ fastify.setValidatorCompiler(({ schema }: {
 
 fastify.register(bootstrap, {
 	directory: path.resolve(__dirname, "routes"),
-	mask: /\.(handler|controller)\.js$/
+	mask: /\.(handler|controller)\.(js|ts)$/
 })
 
 // fastify.register(fastifyResponseValidationPlugin)
@@ -293,25 +285,9 @@ fastify.setErrorHandler(async (error, request, reply) => {
 	})
 })
 
-const start = async () => {
-	try {
-		await fastify.listen(ENV.API_PORT, ENV.API_HOST)
-
-		const address = fastify.server.address()
-		const port = typeof address === "string" ? address : address?.port
-		console.log(`Server listening on :${port}`)
-	} catch (err) {
-		console.error(err)
-		process.exit(1)
-	}
-}
-start()
-
 fastify.ready((err) => {
 	if (err) throw err
 	fastify.swagger()
 })
 
-process.on("beforeExit", () => {
-	fastify.close()
-})
+export default fastify

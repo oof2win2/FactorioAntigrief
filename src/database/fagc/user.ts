@@ -1,4 +1,5 @@
-import typegoose, { Ref } from "@typegoose/typegoose"
+import * as typegoose from "@typegoose/typegoose"
+import { Ref } from "@typegoose/typegoose"
 const {
 	getModelForClass,
 	modelOptions,

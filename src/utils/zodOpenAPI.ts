@@ -1,7 +1,7 @@
 // this is here because the package @anatine/zod-openapi doesnt work properly
 
 import type { SchemaObject } from "openapi3-ts"
-import m from "ts-deepmerge"
+import * as m from "ts-deepmerge"
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const merge = m.default

@@ -68,6 +68,7 @@
 		"@types/debug": "^4.1.7",
 		"@types/eslint": "^7.28.0",
 		"@types/fastify-rate-limit": "^2.1.0",
+		"@types/jest": "^27.4.0",
 		"@types/mongoose": "^5.11.97",
 		"@types/node-fetch": "^3.0.3",
 		"@types/nodemon": "^1.19.1",
@@ -76,8 +77,13 @@
 		"@typescript-eslint/eslint-plugin": "^5.5.0",
 		"@typescript-eslint/parser": "^5.5.0",
 		"install-types": "^2.0.1",
+		"inversify": "^6.0.1",
+		"jest": "^27.4.7",
+		"jest-mock-extended": "^2.0.4",
 		"lint-staged": "^12.1.2",
 		"nodemon": "^2.0.12",
+		"ts-jest": "^27.1.2",
+		"ts-node": "^10.4.0",
 		"typescript": "^4.4.3"
 	}
 }

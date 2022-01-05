@@ -21,7 +21,7 @@ import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import AuthModel from "../database/fagc/authentication.js"
-import cryptoRandomString from "crypto-random-string"
+// import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
 
@@ -532,7 +532,8 @@ export default class CommunityController {
 
 		const auth = await AuthModel.create({
 			communityId: community.id,
-			api_key: cryptoRandomString({ length: 64 }),
+			// api_key: cryptoRandomString({ length: 64 }),
+			api_key: "xxxx"
 		})
 
 		const contactUser = await client.users.fetch(contact)
