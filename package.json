@@ -62,9 +62,6 @@
 	"devDependencies": {
 		"@types/debug": "^4.1.7",
 		"@types/eslint": "^7.28.0",
-		"@types/fastify-rate-limit": "^2.1.0",
-		"@types/mongoose": "^5.11.97",
-		"@types/node-fetch": "^3.0.3",
 		"@types/nodemon": "^1.19.1",
 		"@types/prettier": "^2.4.1",
 		"@types/ws": "^7.4.6",
