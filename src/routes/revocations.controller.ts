@@ -103,11 +103,7 @@ export default class RevocationController {
 			id: id,
 		})
 		if (!revocation) return res.send(null)
-		if (revocation.communityId !== community.id) return res.status(404).send({
-			errorCode: 404,
-			error: "Revocation not found",
-			message: "Revocation not found",
-		})
+		if (revocation.communityId !== community.id) return res.send(null)
 
 		return res.send(revocation)
 	}
