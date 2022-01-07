@@ -23,7 +23,7 @@
 		"@sentry/node": "^6.15.0",
 		"@sentry/tracing": "^6.13.3",
 		"@typegoose/typegoose": "^9.2.0",
-		"@types/node": "^16.11.10",
+		"@types/node": "^17.0.8",
 		"crypto-random-string": "^4.0.0",
 		"debug": "~4.3.3",
 		"discord-oauth2": "^2.8.0",
