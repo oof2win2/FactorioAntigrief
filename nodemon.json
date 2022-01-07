@@ -13,5 +13,6 @@
 		"NODE_ENV": "development"
 	},
 	"ext": "js,mjs,json",
-	"cwd": "./src/"
+	"cwd": "./src/",
+	"delay": 250
 }
