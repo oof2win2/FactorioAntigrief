@@ -31,6 +31,12 @@ export const Authenticate = <
 		if (auth.startsWith("Token ")) {
 			const token = auth.slice("Token ".length)
 			const authData = await AuthModel.findOne({ api_key: token })
+			if (!authData)
+				return res.status(401).send({
+					statusCode: 401,
+					error: "Unauthorized",
+					message: "Your API key was invalid",
+				})
 			const community = await CommunityModel.findOne({
 				id: authData?.communityId,
 			})
@@ -89,6 +95,12 @@ export const MasterAuthenticate = <
 				api_key: token,
 				api_key_type: "master",
 			})
+			if (!authData)
+				return res.status(401).send({
+					statusCode: 401,
+					error: "Unauthorized",
+					message: "Your API key was invalid",
+				})
 			const community = await CommunityModel.findOne({
 				id: authData?.communityId,
 			})
