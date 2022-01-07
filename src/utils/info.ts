@@ -1,7 +1,6 @@
 import { WebhookClient, MessageEmbed } from "discord.js"
 import WebhookSchema from "../database/fagc/webhook.js"
 import WebSocket from "ws"
-import ENV from "./env.js"
 import GuildConfigModel, {
 	GuildConfigClass,
 } from "../database/fagc/guildconfig.js"
@@ -16,8 +15,6 @@ import {
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
-
-const wss = new WebSocket.Server({ port: ENV.WS_PORT, host: ENV.WS_HOST })
 
 const WebhookGuildIDs = new WeakMap<WebSocket, string[]>()
 
@@ -50,30 +47,46 @@ setInterval(SendWebhookMessages, 5000)
 export function WebhookMessage(message: MessageEmbed): void {
 	WebhookQueue.push(message)
 }
-wss.on("connection", (ws) => {
-	ws.on("ping", async () => {
-		// comply with the IETF standard of replying to ping with pong
-		ws.pong()
-	})
-	ws.on("message", async (msg) => {
-		let message: {
-			guildID?: string,
-			type?: string
-		}
-		try {
-			message = JSON.parse(msg.toString("utf8"))
-		} catch {
-			// if an error with parsing occurs, it's their problem
-			return
-		}
-		
+
+export const wsClients = new Set<WsClient>()
+export class WsClient {
+	constructor(public ws: WebSocket) {
+		wsClients.add(this)
+		ws.on("ping", () => {
+			// comply with the IETF standard of replying to ping with pong
+			ws.pong()
+		})
+		ws.on("message", (data) => {
+			let message: { type: string } | Array<unknown> | string | number | boolean | null
+			try {
+				message = JSON.parse(data.toString("utf8"))
+			} catch {
+				// if an error with parsing occurs, it's their problem
+				return
+			}
+			if (
+				typeof message === "object"
+				&& message !== null
+				&& !(message instanceof Array)
+				&& typeof message.type === "string"
+			) {
+				this.handleMessage(message as { type: string }).catch(console.error)
+			}
+		})
+		ws.on("close", (code, reason) => {
+			void code, reason
+			wsClients.delete(this)
+		})
+	}
+
+	async handleMessage(message: { type: string, [index: string]: unknown }) {
 		if (typeof message.type === "string" && typeof message.guildID === "string") {
 			if (message.type === "addGuildID") {
 				const guildConfig = await GuildConfigModel.findOne({
 					guildId: message.guildID,
 				}).then((c) => c?.toObject())
 				if (guildConfig) {
-					ws.send(
+					this.ws.send(
 						JSON.stringify({
 							config: guildConfig,
 							messageType: "guildConfigChanged",
@@ -82,40 +95,40 @@ wss.on("connection", (ws) => {
 
 
 					// add guildID to webhook only if the guild id has an existing config
-					const existing = WebhookGuildIDs.get(ws)
+					const existing = WebhookGuildIDs.get(this.ws)
 					if (existing) {
 						// limit to 25 guilds per webhook
 						if (existing.length < 25) {
 							// only add if it's not already in the list
 							if (!existing.includes(message.guildID)) existing.push(message.guildID)
 						}
-						WebhookGuildIDs.set(ws, existing)
+						WebhookGuildIDs.set(this.ws, existing)
 					} else {
-						WebhookGuildIDs.set(ws, [ message.guildID ])
+						WebhookGuildIDs.set(this.ws, [ message.guildID ])
 					}
 				}
 			}
 			if (message.type === "removeGuildID") {
-				const existing = WebhookGuildIDs.get(ws)
+				const existing = WebhookGuildIDs.get(this.ws)
 				if (existing)
-					WebhookGuildIDs.set(ws, existing.filter(id => id !== message.guildID))
+					WebhookGuildIDs.set(this.ws, existing.filter(id => id !== message.guildID))
 			}
 		}
-	})
-})
+	}
+}
 
 setInterval(() => {
-	wss.clients.forEach((ws) => {
+	wsClients.forEach((client) => {
 		// ping the client
 		console.log("ping")
-		ws.ping()
+		client.ws.ping()
 	})
 }, 30 * 1000)
 
 export function WebsocketMessage(message: string): void {
-	wss.clients.forEach((client) => {
-		if (client.readyState === WebSocket.OPEN) {
-			client.send(message)
+	wsClients.forEach((client) => {
+		if (client.ws.readyState === WebSocket.OPEN) {
+			client.ws.send(message)
 		}
 	})
 }
@@ -543,10 +556,10 @@ export async function communitiesMergedMessage(
 export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
-	wss.clients.forEach((client) => {
-		const guildIds = WebhookGuildIDs.get(client)
+	wsClients.forEach((client) => {
+		const guildIds = WebhookGuildIDs.get(client.ws)
 		if (guildIds?.includes(config.guildId)) {
-			client.send(
+			client.ws.send(
 				JSON.stringify({
 					config: config,
 					messageType: "guildConfigChanged",
@@ -555,11 +568,3 @@ export function guildConfigChanged(
 		}
 	})
 }
-
-wss.on("listening", () => {
-	console.log(`Websocket listening on ${ENV.WS_PORT}!`)
-})
-
-process.on("exit", () => {
-	wss.close()
-})
