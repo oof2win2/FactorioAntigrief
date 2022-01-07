@@ -3,7 +3,7 @@
 	"version": "2.0.0",
 	"private": true,
 	"main": "dist/app.js",
-	"type": "module",
+	"type": "commonjs",
 	"scripts": {
 		"start": "ts-node ./src/app.ts",
 		"dev": "nodemon ./dist/app.ts",
@@ -24,7 +24,6 @@
 		"@sentry/tracing": "^6.13.3",
 		"@typegoose/typegoose": "^9.2.0",
 		"@types/node": "^16.11.10",
-		"@types/validator": "^13.7.0",
 		"crypto-random-string": "^4.0.0",
 		"debug": "~4.3.3",
 		"discord-oauth2": "^2.8.0",
@@ -49,7 +48,6 @@
 		"openapi3-ts": "^2.0.1",
 		"prom-client": "^14.0.1",
 		"ts-deepmerge": "^1.1.0",
-		"tsc": "^2.0.3",
 		"validator": "^13.7.0",
 		"zod": "^3.11.6"
 	},
@@ -73,6 +71,7 @@
 		"@types/node-fetch": "^3.0.3",
 		"@types/nodemon": "^1.19.1",
 		"@types/prettier": "^2.4.1",
+		"@types/validator": "^13.7.1",
 		"@types/ws": "^7.4.6",
 		"@typescript-eslint/eslint-plugin": "^5.5.0",
 		"@typescript-eslint/parser": "^5.5.0",

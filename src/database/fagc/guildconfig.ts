@@ -1,10 +1,9 @@
-import * as typegoose from "@typegoose/typegoose"
-const {
+import {
 	getModelForClass,
 	modelOptions,
 	Passthrough,
 	prop,
-} = typegoose
+} from "@typegoose/typegoose"
 
 // the thing from https://github.com/oof2win2/fagc-discord-bot/blob/dev/src/database/schemas/config.js
 

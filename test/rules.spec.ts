@@ -1,11 +1,10 @@
 import RuleModel from "../src/database/fagc/rule"
-import Backend from "./prepareTest.js"
+import backend from "./prepareTest.js"
 
 describe("Rules", () => {
 	it("Should fetch all rules", async () => {
-		jest.setTimeout(30000)
 		const fetchedData = await RuleModel.find({})
-		const response = await Backend.inject({
+		const response = await backend.inject({
 			path: "/rules",
 			method: "GET"
 		})
