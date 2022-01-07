@@ -1,6 +1,7 @@
 import ENV from "./utils/env.js"
 import mongoose from "mongoose"
 import fastify from "./app.js"
+import { client } from "./utils/discord.js"
 
 mongoose.connect(ENV.MONGOURI, {
 	ignoreUndefined: true,
@@ -14,6 +15,8 @@ const start = async () => {
 		const address = fastify.server.address()
 		const port = typeof address === "string" ? address : address?.port
 		console.log(`Server listening on :${port}`)
+
+		client.login(ENV.DISCORD_BOTTOKEN)
 	} catch (err) {
 		console.error(err)
 		process.exit(1)
