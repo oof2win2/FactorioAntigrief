@@ -147,40 +147,6 @@ export default class CommunityController {
 		return res.send(config)
 	}
 
-	@GET({
-		url: "/guildconfig",
-		options: {
-			schema: {
-				tags: [ "community" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
-				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "GuildConfigClass#" },
-						],
-					},
-				},
-			},
-		},
-	})
-	@Authenticate
-	async getOwnConfig(
-		req: FastifyRequest,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const community = req.requestContext.get("community")
-		if (!community) return res.send(null)
-		const config = await GuildConfigModel.findOne({
-			communityId: community._id,
-		})
-		return res.send(config)
-	}
-
 	@POST({
 		url: "/guildconfig/:guildId",
 		options: {
