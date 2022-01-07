@@ -64,7 +64,7 @@
 	"homepage": "https://github.com/oof2win2/fagc-backend#readme",
 	"devDependencies": {
 		"@types/debug": "^4.1.7",
-		"@types/eslint": "^7.28.0",
+		"@types/eslint": "^8.2.2",
 		"@types/fastify-rate-limit": "^2.1.0",
 		"@types/jest": "^27.4.0",
 		"@types/mongoose": "^5.11.97",
