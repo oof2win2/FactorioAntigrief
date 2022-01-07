@@ -1,17 +1,14 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-import { Controller, GET, POST, DELETE } from "fastify-decorators"
-import RuleModel, { RuleClass } from "../database/fagc/rule.js"
+import { Controller, GET, POST } from "fastify-decorators"
+import RuleModel from "../database/fagc/rule.js"
 import { Authenticate } from "../utils/authentication.js"
-import { reportCreatedMessage, reportRevokedMessage } from "../utils/info.js"
+import { reportCreatedMessage } from "../utils/info.js"
 import ReportModel from "../database/fagc/report.js"
-import RevocationModel from "../database/fagc/revocation.js"
 import { validateDiscordUser, client } from "../utils/discord.js"
-import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
 import {
 	Community,
 	Rule,
 	ReportMessageExtraOpts,
-	RevocationMessageExtraOpts,
 } from "fagc-api-types"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { z } from "zod"
@@ -19,6 +16,29 @@ import validator from "validator"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
+	@GET({
+		url: "/",
+		options: {
+			schema: {
+				description: "Get all reports",
+				tags: [ "reports" ],
+				response: {
+					"200": {
+						type: "array",
+						items: { $ref: "ReportClass#" }
+					},
+				},
+			},
+		},
+	})
+	async getAllReports(
+		req: FastifyRequest,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const community = await ReportModel.find()
+		return res.send(community)
+	}
+
 	@GET({
 		url: "/:id",
 		options: {
