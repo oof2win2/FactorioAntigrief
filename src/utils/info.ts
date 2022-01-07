@@ -42,7 +42,7 @@ async function SendWebhookMessages() {
 			})
 	})
 }
-setInterval(SendWebhookMessages, 5000)
+setInterval(SendWebhookMessages, 5000).unref()
 
 export function WebhookMessage(message: MessageEmbed): void {
 	WebhookQueue.push(message)
@@ -123,7 +123,7 @@ setInterval(() => {
 		console.log("ping")
 		client.ws.ping()
 	})
-}, 30 * 1000)
+}, 30 * 1000).unref()
 
 export function WebsocketMessage(message: string): void {
 	wsClients.forEach((client) => {
