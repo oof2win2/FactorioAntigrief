@@ -1,7 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET, POST, DELETE } from "fastify-decorators"
-import { Type } from "@sinclair/typebox"
-
 import RuleModel, { RuleClass } from "../database/fagc/rule.js"
 import { Authenticate } from "../utils/authentication.js"
 import { reportCreatedMessage, reportRevokedMessage } from "../utils/info.js"
@@ -15,7 +13,9 @@ import {
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
-import GuildConfigModel from "../database/fagc/communityconfig.js"
+import GuildConfigModel from "../database/fagc/guildconfig.js"
+import { z } from "zod"
+import validator from "validator"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -23,11 +23,9 @@ export default class ReportController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						id: Type.String(),
-					})
-				),
+				params: z.object({
+					id: z.string().transform(str => str.toLowerCase()),
+				}),
 
 				description: "Fetch a report by it's ID",
 				tags: [ "reports" ],
@@ -56,11 +54,9 @@ export default class ReportController {
 		url: "/rule/:id",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						id: Type.String(),
-					})
-				),
+				params: z.object({
+					id: z.string().transform(str => str.toLowerCase())
+				}),
 
 				description: "Fetch a report by it's broken rule ID",
 				tags: [ "reports" ],
@@ -91,11 +87,9 @@ export default class ReportController {
 		url: "/getplayer/:playername",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						playername: Type.String(),
-					})
-				),
+				params: z.object({
+					playername: z.string(),
+				}),
 
 				description: "Fetch reports by their player name",
 				tags: [ "reports" ],
@@ -131,12 +125,10 @@ export default class ReportController {
 		url: "/getplayercommunity/:playername/:communityId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						playername: Type.String(),
-						communityId: Type.String(),
-					})
-				),
+				params: z.object({
+					playername: z.string(),
+					communityId: z.string().transform(x => x.toLowerCase()),
+				}),
 
 				description:
 					"Fetch reports by their player name and community ID",
@@ -168,15 +160,65 @@ export default class ReportController {
 		return res.status(200).send(reports)
 	}
 
+	@POST({
+		url: "/list",
+		options: {
+			schema: {
+				body: z.object({
+					playername: z.string().nullish(),
+					ruleIDs: z.array(z.string())
+						.max(100, "Exceeded maximum length of 100")
+						.transform(arr => arr.map(str => str.toLowerCase())),
+					communityIDs: z.array(z.string())
+						.max(100, "Exceeded maximum length of 100")
+						.transform(arr => arr.map(str => str.toLowerCase())),
+
+				}),
+
+				description:
+					"Fetch reports by their community IDs and rule IDs",
+				tags: [ "reports" ],
+				response: {
+					"200": {
+						type: "array",
+						items: {
+							$ref: "ReportClass#",
+						},
+					},
+				},
+			}
+		}
+	})
+	async getFilteredReports(
+		req: FastifyRequest<{
+			Body: {
+				playername?: string | null
+				ruleIDs: string[]
+				communityIDs: string[]
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { playername, ruleIDs, communityIDs } = req.body
+		const reports = await ReportModel.find({
+			playername: playername ?? undefined,
+			brokenRule: {
+				$in: ruleIDs
+			},
+			communityId: {
+				$in: communityIDs
+			}
+		})
+		return res.send(reports)
+	}
+
 	@GET({
 		url: "/modifiedSince/:timestamp",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						timestamp: Type.String(),
-					})
-				),
+				params: z.object({
+					timestamp: z.string()
+				}),
 
 				description: "Fetch reports modified since a timestamp",
 				tags: [ "reports" ],
@@ -202,6 +244,7 @@ export default class ReportController {
 		const { timestamp } = req.params
 
 		const date = new Date(timestamp)
+		if (isNaN(date.getDate())) return res.send([])
 
 		const reports = await ReportModel.find({
 			createdAt: { $gt: date },
@@ -213,19 +256,21 @@ export default class ReportController {
 		url: "/",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						adminId: Type.String(),
-						playername: Type.String(),
-						brokenRule: Type.String(),
-						automated: Type.Boolean({ default: false }),
-						reportedTime: Type.String({
-							default: new Date().toISOString(),
-						}),
-						description: Type.String({ default: "No description" }),
-						proof: Type.String({ default: "No proof" }),
-					})
-				),
+				body: z.object({
+					adminId: z.string(),
+					playername: z.string(),
+					brokenRule: z.string().transform(str => str.toLowerCase()),
+					automated: z.boolean().nullish().default(false),
+					reportedTime: z.string().default(new Date().toISOString()),
+					description: z.string().default("No description"),
+					proof: z.string().default("No proof").refine((input) => {
+						if (input === "No proof") return true
+						return input
+							.split(" ")
+							.map((part) => validator.isURL(part))
+							.reduce((prev, current) => prev && current)
+					}, "Proof must be URLs split by a space"),
+				}),
 
 				description: "Create a report",
 				tags: [ "reports" ],
@@ -266,6 +311,21 @@ export default class ReportController {
 			description,
 			proof,
 		} = req.body
+
+		// TODO: make use of zod's URL validators when i fix them
+		if (proof !== "No proof") {
+			for (const string of proof.split(" ")) {
+				if (!validator.isURL(string, {
+					protocols: [ "http", "https" ]
+				})) {
+					return res.status(400).send({
+						errorCode: 400,
+						error: "Bad Request",
+						message: "proof must be a string of URLs separated with spaces"
+					})
+				}
+			}
+		}
 
 		const community = req.requestContext.get("community")
 		if (!community)
@@ -315,6 +375,7 @@ export default class ReportController {
 				message:
 					"Your community does not filter for the specified rule",
 			})
+		
 
 		const report = await ReportModel.create({
 			playername: playername,
@@ -349,12 +410,10 @@ export default class ReportController {
 		url: "/",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						adminId: Type.String(),
-						id: Type.String(),
-					})
-				),
+				body: z.object({
+					adminId: z.string(),
+					id: z.string(),
+				}),
 
 				description: "Revoke a report",
 				tags: [ "reports" ],
@@ -459,12 +518,10 @@ export default class ReportController {
 		url: "/revokeallname",
 		options: {
 			schema: {
-				body: Type.Required(
-					Type.Object({
-						adminId: Type.String(),
-						playername: Type.String(),
-					})
-				),
+				body: z.object({
+					adminId: z.string(),
+					playername: z.string(),
+				}),
 
 				description: "Revoke all report of a player in your community",
 				tags: [ "reports" ],
@@ -552,8 +609,6 @@ export default class ReportController {
 				)
 			})
 		)
-		const revoker = await client.users.fetch(adminId)
-		const admin = await client.users.fetch(reports[0].adminId)
 
 		const allReports = await ReportModel.find({
 			playername: playername,
@@ -563,7 +618,9 @@ export default class ReportController {
 			differentCommunities.add(report.communityId)
 		)
 
-		revocations.forEach((revocation) =>
+		const revoker = await client.users.fetch(adminId)
+		revocations.forEach(async (revocation) => {
+			const admin = await client.users.fetch(revocation.adminId)
 			reportRevokedMessage(revocation, {
 				community: <ReportMessageExtraOpts["community"]>(
 					(<unknown>community.toObject())
@@ -576,7 +633,7 @@ export default class ReportController {
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
 			})
-		)
+		})
 
 		return res.status(200).send(revocations)
 	}

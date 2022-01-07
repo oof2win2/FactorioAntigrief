@@ -4,7 +4,7 @@ import WebSocket from "ws"
 import ENV from "./env.js"
 import GuildConfigModel, {
 	GuildConfigClass,
-} from "../database/fagc/communityconfig.js"
+} from "../database/fagc/guildconfig.js"
 import { RevocationClass } from "../database/fagc/revocation.js"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
@@ -13,14 +13,13 @@ import { CommunityClass } from "../database/fagc/community.js"
 import { ReportClass } from "../database/fagc/report.js"
 import {
 	CommunityCreatedMessageExtraOpts,
-	CommunityRemovedMessageExtraOpts,
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
 
 const wss = new WebSocket.Server({ port: ENV.WS_PORT, host: ENV.WS_HOST })
 
-const WebhookGuildIDs = new WeakMap<WebSocket, string>()
+const WebhookGuildIDs = new WeakMap<WebSocket, string[]>()
 
 let WebhookQueue: MessageEmbed[] = []
 
@@ -52,25 +51,66 @@ export function WebhookMessage(message: MessageEmbed): void {
 	WebhookQueue.push(message)
 }
 wss.on("connection", (ws) => {
+	ws.on("ping", async () => {
+		// comply with the IETF standard of replying to ping with pong
+		ws.pong()
+	})
 	ws.on("message", async (msg) => {
-		const message = JSON.parse(msg.toString("utf-8"))
-		if (message.guildId) {
-			const guildConfig = await GuildConfigModel.findOne({
-				guildId: message.guildId,
-			}).then((c) => c?.toObject())
-			if (guildConfig)
-				ws.send(
-					Buffer.from(
+		let message: {
+			guildID?: string,
+			type?: string
+		}
+		try {
+			message = JSON.parse(msg.toString("utf8"))
+		} catch {
+			// if an error with parsing occurs, it's their problem
+			return
+		}
+		
+		if (typeof message.type === "string" && typeof message.guildID === "string") {
+			if (message.type === "addGuildID") {
+				const guildConfig = await GuildConfigModel.findOne({
+					guildId: message.guildID,
+				}).then((c) => c?.toObject())
+				if (guildConfig) {
+					ws.send(
 						JSON.stringify({
-							...guildConfig,
-							messageType: "communityConfigChanged",
+							config: guildConfig,
+							messageType: "guildConfigChanged",
 						})
 					)
-				)
-			WebhookGuildIDs.set(ws, message.guildId)
+
+
+					// add guildID to webhook only if the guild id has an existing config
+					const existing = WebhookGuildIDs.get(ws)
+					if (existing) {
+						// limit to 25 guilds per webhook
+						if (existing.length < 25) {
+							// only add if it's not already in the list
+							if (!existing.includes(message.guildID)) existing.push(message.guildID)
+						}
+						WebhookGuildIDs.set(ws, existing)
+					} else {
+						WebhookGuildIDs.set(ws, [ message.guildID ])
+					}
+				}
+			}
+			if (message.type === "removeGuildID") {
+				const existing = WebhookGuildIDs.get(ws)
+				if (existing)
+					WebhookGuildIDs.set(ws, existing.filter(id => id !== message.guildID))
+			}
 		}
 	})
 })
+
+setInterval(() => {
+	wss.clients.forEach((ws) => {
+		// ping the client
+		console.log("ping")
+		ws.ping()
+	})
+}, 30 * 1000)
 
 export function WebsocketMessage(message: string): void {
 	wss.clients.forEach((client) => {
@@ -276,6 +316,89 @@ export async function ruleRemovedMessage(
 	)
 }
 
+export async function ruleUpdatedMessage(
+	oldRule: DocumentType<RuleClass, BeAnObject>,
+	newRule: DocumentType<RuleClass, BeAnObject>
+): Promise<void> {
+	const ruleEmbed = new MessageEmbed()
+		.setTitle("FAGC - Rule Updated")
+		.setColor("#6f4fe3")
+		.addFields(
+			{ name: "Rule ID", value: `\`${newRule.id}\``, inline: true },
+			{
+				name: "Old Rule short description",
+				value: oldRule.shortdesc,
+				inline: true,
+			},
+			{
+				name: "New Rule short description",
+				value: newRule.shortdesc,
+				inline: true,
+			},
+			{
+				name: "Old Rule long description",
+				value: oldRule.longdesc,
+				inline: true,
+			},
+			{
+				name: "New Rule long description",
+				value: newRule.longdesc,
+				inline: true,
+			}
+		)
+	WebhookMessage(ruleEmbed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "ruleUpdated",
+			embed: ruleEmbed,
+			oldRule: oldRule,
+			newRule: newRule
+		})
+	)
+}
+export async function rulesMergedMessage(
+	receiving: DocumentType<RuleClass, BeAnObject>,
+	dissolving: DocumentType<RuleClass, BeAnObject>
+): Promise<void> {
+	const ruleEmbed = new MessageEmbed()
+		.setTitle("FAGC - Rules merged")
+		.setColor("#6f4fe3")
+		.addFields(
+			{ name: "Receiving Rule ID", value: `\`${dissolving.id}\``, inline: true },
+			{
+				name: "Dissolving Rule short description",
+				value: receiving.shortdesc,
+				inline: true,
+			},
+			{
+				name: "Receiving Rule short description",
+				value: dissolving.shortdesc,
+				inline: true,
+			},
+			{
+				name: "Dissolving Rule long description",
+				value: receiving.longdesc,
+				inline: true,
+			},
+			{
+				name: "Receiving Rule long description",
+				value: dissolving.longdesc,
+				inline: true,
+			}
+		)
+	WebhookMessage(ruleEmbed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "rulesMerged",
+			embed: ruleEmbed,
+			receiving: receiving,
+			dissolving: dissolving
+		})
+	)
+}
+
 export async function communityCreatedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
 	opts: CommunityCreatedMessageExtraOpts
@@ -312,7 +435,7 @@ export async function communityCreatedMessage(
 }
 export async function communityRemovedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
-	opts: CommunityRemovedMessageExtraOpts
+	opts: CommunityCreatedMessageExtraOpts
 ): Promise<void> {
 	// set the sent object's messageType to communityRemoved
 	// WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityRemoved" })))
@@ -344,20 +467,90 @@ export async function communityRemovedMessage(
 		})
 	)
 }
-export function communityConfigChanged(
+
+export async function communityUpdatedMessage(
+	community: DocumentType<CommunityClass, BeAnObject>,
+	opts: CommunityCreatedMessageExtraOpts
+): Promise<void> {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC - Community Updated")
+		.setColor("#6f4fe3")
+		.addFields(
+			{
+				name: "Community ID",
+				value: `\`${community.id}\``,
+				inline: true,
+			},
+			{ name: "Community name", value: community.name, inline: true },
+			{
+				name: "Contact",
+				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				inline: true,
+			}
+		)
+	WebhookMessage(embed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "communityUpdated",
+			embed: embed,
+			community: community,
+			extraData: opts,
+		})
+	)
+}
+
+export async function communitiesMergedMessage(
+	receiving: DocumentType<CommunityClass, BeAnObject>,
+	dissolving: DocumentType<CommunityClass, BeAnObject>,
+	opts: CommunityCreatedMessageExtraOpts
+): Promise<void> {
+	const embed = new MessageEmbed()
+		.setTitle("FAGC - Communities Updated")
+		.setColor("#6f4fe3")
+		.addFields(
+			{
+				name: "Receiving Community ID",
+				value: `\`${receiving.id}\``,
+				inline: true,
+			},
+			{ name: "Receiving Community name", value: receiving.name, inline: true },
+			{
+				name: "Receiving Community Contact",
+				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				inline: true,
+			},
+			{
+				name: "Dissolving Community ID",
+				value: `\`${dissolving.id}\``,
+				inline: true
+			},
+			{ name: "Dissolving Community name", value: dissolving.name, inline: true },
+		)
+	WebhookMessage(embed)
+
+	WebsocketMessage(
+		JSON.stringify({
+			messageType: "communitiesMerged",
+			embed: embed,
+			receiving: receiving,
+			dissolving: dissolving,
+			extraData: opts,
+		})
+	)
+}
+
+export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
 	wss.clients.forEach((client) => {
-		// TODO: test this
-		const guildId = WebhookGuildIDs.get(client)
-		if (guildId == config.guildId) {
+		const guildIds = WebhookGuildIDs.get(client)
+		if (guildIds?.includes(config.guildId)) {
 			client.send(
-				Buffer.from(
-					JSON.stringify({
-						config: config,
-						messageType: "communityConfigChanged",
-					})
-				)
+				JSON.stringify({
+					config: config,
+					messageType: "guildConfigChanged",
+				})
 			)
 		}
 	})

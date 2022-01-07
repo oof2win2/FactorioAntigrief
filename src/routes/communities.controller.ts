@@ -1,15 +1,16 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, POST } from "fastify-decorators"
-import { Type } from "@sinclair/typebox"
 
 import RuleModel from "../database/fagc/rule.js"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
 import CommunityModel from "../database/fagc/community.js"
-import GuildConfigModel from "../database/fagc/communityconfig.js"
+import GuildConfigModel from "../database/fagc/guildconfig.js"
 import {
-	communityConfigChanged,
+	guildConfigChanged,
 	communityCreatedMessage,
 	communityRemovedMessage,
+	communityUpdatedMessage,
+	communitiesMergedMessage,
 } from "../utils/info.js"
 import {
 	client,
@@ -20,8 +21,9 @@ import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import AuthModel from "../database/fagc/authentication.js"
-import cryptoRandomString from "crypto-random-string"
+// import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
+import { z } from "zod"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -53,11 +55,10 @@ export default class CommunityController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						id: Type.String(),
-					})
-				),
+				params: z.object({
+					id: z.string().transform(x => x.toLowerCase()),
+				}),
+
 				tags: [ "community" ],
 				response: {
 					"200": {
@@ -117,11 +118,10 @@ export default class CommunityController {
 		url: "/guildconfig/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
+				params: z.object({
+					guildId: z.string()
+				}),
+
 				tags: [ "community" ],
 				response: {
 					"200": {
@@ -185,26 +185,21 @@ export default class CommunityController {
 		url: "/guildconfig/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
-				body: Type.Object({
-					ruleFilters: Type.Optional(Type.Array(Type.String())),
-					trustedCommunities: Type.Optional(
-						Type.Array(Type.String())
-					),
-					roles: Type.Optional(
-						Type.Object({
-							reports: Type.Optional(Type.String()),
-							webhooks: Type.Optional(Type.String()),
-							setConfig: Type.Optional(Type.String()),
-							setRules: Type.Optional(Type.String()),
-							setCommunities: Type.Optional(Type.String()),
-						})
-					),
+				params: z.object({
+					guildId: z.string()
 				}),
+				body: z.object({
+					ruleFilters: z.array(z.string()).optional().transform(x => x ? x.map(y => y.toLowerCase()) : x),
+					trustedCommunities: z.array(z.string()).optional().transform(x => x ? x.map(y => y.toLowerCase()) : x),
+					roles: z.object({
+						reports: z.string().optional(),
+						webhooks: z.string().optional(),
+						setConfig: z.string().optional(),
+						setRules: z.string().optional(),
+						setCommunities: z.string().optional(),
+					}).optional()
+				}),
+
 				tags: [ "community" ],
 				security: [
 					{
@@ -231,7 +226,7 @@ export default class CommunityController {
 			Body: {
 				ruleFilters?: string[]
 				trustedCommunities?: string[]
-				roles: {
+				roles?: {
 					reports?: string
 					webhooks?: string
 					setConfig?: string
@@ -318,10 +313,12 @@ export default class CommunityController {
 				setRules: "",
 				setCommunities: "",
 			}
-		Object.keys(roles).map((roleType) => {
-			const role = findRole(roles[roleType])
-			if (role) guildConfig.roles[roleType] = role.id
-		})
+		if (roles) {
+			Object.keys(roles).map((roleType) => {
+				const role = findRole(roles[roleType])
+				if (role) guildConfig.roles[roleType] = role.id
+			})
+		}
 
 		await GuildConfigModel.findOneAndReplace(
 			{
@@ -331,7 +328,7 @@ export default class CommunityController {
 		)
 
 		guildConfig.set("apikey", null)
-		communityConfigChanged(guildConfig)
+		guildConfigChanged(guildConfig)
 		return res.status(200).send(guildConfig)
 	}
 
@@ -339,12 +336,11 @@ export default class CommunityController {
 		url: "/communityconfig",
 		options: {
 			schema: {
-				body: Type.Optional(
-					Type.Object({
-						contact: Type.Optional(Type.String()),
-						name: Type.Optional(Type.String()),
-					})
-				),
+				body: z.object({
+					contact: z.string().optional(),
+					name: z.string().optional()
+				}),
+
 				tags: [ "community" ],
 				security: [
 					{
@@ -382,7 +378,8 @@ export default class CommunityController {
 				message: "Community config was not found",
 			})
 
-		if (contact && !(await validateDiscordUser(contact)))
+		const contactUser = await validateDiscordUser(contact || "")
+		if (contact && !contactUser)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
@@ -399,6 +396,12 @@ export default class CommunityController {
 			community.toObject()
 		)
 
+		communityUpdatedMessage(community, {
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			)
+		})
+
 		return res.status(200).send(community)
 	}
 
@@ -406,11 +409,10 @@ export default class CommunityController {
 		url: "/notifyGuildConfigChanged/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
+				params: z.object({
+					guildId: z.string()
+				}),
+
 				security: [
 					{
 						masterAuthorization: [],
@@ -441,7 +443,7 @@ export default class CommunityController {
 			})
 
 		guildConfig.set("apikey", null)
-		communityConfigChanged(guildConfig)
+		guildConfigChanged(guildConfig)
 
 		return res.send({ status: "ok" })
 	}
@@ -450,10 +452,10 @@ export default class CommunityController {
 		url: "/",
 		options: {
 			schema: {
-				body: Type.Object({
-					name: Type.String(),
-					contact: Type.String(),
-					guildId: Type.Optional(Type.String()),
+				body: z.object({
+					name: z.string(),
+					contact: z.string(),
+					guildId: z.string().optional(),
 				}),
 
 				description: "Create a FAGC community",
@@ -530,7 +532,8 @@ export default class CommunityController {
 
 		const auth = await AuthModel.create({
 			communityId: community.id,
-			api_key: cryptoRandomString({ length: 64 }),
+			// api_key: cryptoRandomString({ length: 64 }),
+			api_key: "xxxx"
 		})
 
 		const contactUser = await client.users.fetch(contact)
@@ -551,11 +554,9 @@ export default class CommunityController {
 		url: "/:communityId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						communityId: Type.String(),
-					})
-				),
+				params: z.object({
+					communityId: z.string().transform(x => x.toLowerCase()),
+				}),
 
 				description: "Delete a FAGC community",
 				tags: [ "community", "master" ],
@@ -593,7 +594,10 @@ export default class CommunityController {
 				message: `Community with ID ${communityId} was not found`,
 			})
 
-		const communityConfig = await GuildConfigModel.findOneAndDelete({
+		const guildConfigs = await GuildConfigModel.find({
+			communityId: community.id,
+		})
+		await GuildConfigModel.deleteMany({
 			communityId: community.id,
 		})
 
@@ -606,18 +610,39 @@ export default class CommunityController {
 		await AuthModel.findOneAndDelete({
 			communityId: community.id,
 		})
-		if (communityConfig) {
+		if (guildConfigs) {
 			await WebhookModel.deleteMany({
-				guildId: communityConfig.guildId,
+				guildId: { $in: guildConfigs.map(config => config.guildId) },
 			})
 		}
 
 		// remove the community ID from any guild configs which may have it
-		await GuildConfigModel.updateMany({
+		const affectedGuildConfigs = await GuildConfigModel.find({
 			trustedCommunities: [ community.id ]
+		})
+		await GuildConfigModel.updateMany({
+			_id: { $in: affectedGuildConfigs.map(config => config._id) }
 		}, {
 			$pull: { trustedCommunities: community.id }
 		})
+		const newGuildConfigs = await GuildConfigModel.find({
+			_id: { $in: affectedGuildConfigs.map(config => config._id) }
+		})
+
+		const sendGuildConfigInfo = async () => {
+			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
+				setTimeout(() => {
+					resolve()
+				}, ms)
+			})
+			for (const config of newGuildConfigs) {
+				guildConfigChanged(config)
+				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
+				// staggered so not everyone at once tries to fetch their new banlists
+				await wait(100)
+			}
+		}
+		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 
 		const contactUser = await client.users.fetch(community.contact)
 		communityRemovedMessage(community, {
@@ -630,14 +655,143 @@ export default class CommunityController {
 	}
 
 	@POST({
+		url: "/:idReceiving/merge/:idDissolving",
+		options: {
+			schema: {
+				params: z.object({
+					idReceiving: z.string().transform(x => x.toLowerCase()),
+					idDissolving: z.string().transform(x => x.toLowerCase()),
+				}),
+
+				description: "Merge community idDissolving into community idReceiving",
+				tags: [ "communities" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "CommunityClass#",
+					},
+				},
+			},
+		},
+	})
+	@MasterAuthenticate
+	async mergeCommunities(
+		req: FastifyRequest<{
+			Params: {
+				idReceiving: string
+				idDissolving: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { idReceiving, idDissolving } = req.params
+		const receiving = await CommunityModel.findOne({
+			id: idReceiving
+		})
+		if (!receiving)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "idOne must be a valid community ID",
+			})
+		const dissolving = await CommunityModel.findOne({
+			id: idDissolving
+		})
+		if (!dissolving)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: "idTwo must be a valid community ID",
+			})
+
+
+		await CommunityModel.findOneAndDelete({
+			id: idDissolving
+		})
+		await ReportModel.updateMany({
+			communityId: idDissolving
+		}, {
+			communityId: idReceiving
+		})
+		await RevocationModel.updateMany({
+			communityId: idDissolving
+		}, {
+			communityId: idReceiving
+		})
+		
+		// remove old stuff from the config and replace with new
+		await GuildConfigModel.updateMany({
+			trustedCommunities: idDissolving
+		}, {
+			$addToSet: { trustedCommunities: idReceiving }
+		})
+		await GuildConfigModel.updateMany({
+			trustedCommunities: idDissolving,
+		}, {
+			$pull: { trustedCommunities: idDissolving },
+		})
+
+		const guildConfigs = await GuildConfigModel.find({
+			communityId: { $in: [ idReceiving, idDissolving ] }
+		})
+
+		// change configs + remove old auth
+		await CommunityModel.updateOne({
+			id: idReceiving
+		}, {
+			$addToSet: { guildIds:  guildConfigs.map(config => config.guildId) }
+		})
+		await GuildConfigModel.updateMany({
+			communityId: idDissolving
+		}, {
+			communityId: idReceiving,
+			apikey: guildConfigs.find(c => c.communityId === idReceiving)?.apikey || undefined,
+		})
+		await AuthModel.deleteMany({
+			communityId: idDissolving
+		})
+
+		const affectedConfigs = await GuildConfigModel.find({
+			trustedCommunities: idReceiving
+		})
+
+		const sendGuildConfigInfo = async () => {
+			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
+				setTimeout(() => {
+					resolve()
+				}, ms)
+			})
+			for (const config of affectedConfigs) {
+				guildConfigChanged(config)
+				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
+				// staggered so not everyone at once tries to fetch their new banlists
+				await wait(100)
+			}
+		}
+		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
+
+		const contactUser = await validateDiscordUser(receiving.contact)
+
+		communitiesMergedMessage(receiving, dissolving, {
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			)
+		})
+
+		return res.send(receiving)
+	}
+
+	@POST({
 		url: "/guildLeave/:guildId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						guildId: Type.String(),
-					})
-				),
+				params: z.object({
+					guildId: z.string(),
+				}),
 
 				description: "Delete a FAGC community",
 				tags: [ "community", "master" ],

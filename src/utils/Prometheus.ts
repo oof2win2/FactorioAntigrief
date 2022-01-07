@@ -4,7 +4,7 @@ import promClient from "prom-client"
 import http from "http"
 import GuildConfigModel, {
 	GuildConfigClass,
-} from "../database/fagc/communityconfig.js"
+} from "../database/fagc/guildconfig.js"
 import CommunityModel, { CommunityClass } from "../database/fagc/community.js"
 import RuleModel from "../database/fagc/rule.js"
 import { DocumentType } from "@typegoose/typegoose"

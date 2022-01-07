@@ -1,8 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET } from "fastify-decorators"
-import { Type } from "@sinclair/typebox"
-
 import RevocationModel from "../database/fagc/revocation.js"
+import { z } from "zod"
 
 @Controller({ route: "/revocations" })
 export default class ProfileController {
@@ -10,12 +9,10 @@ export default class ProfileController {
 		url: "/community/:playername/:communityId",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						playername: Type.String(),
-						communityId: Type.String(),
-					})
-				),
+				params: z.object({
+					playername: z.string(),
+					communityId: z.string().transform(x => x.toLowerCase()),
+				}),
 
 				description: "Fetch all revocations of a player in a community",
 				tags: [ "revocation" ],
@@ -47,15 +44,14 @@ export default class ProfileController {
 		})
 		return res.send(revocations)
 	}
+
 	@GET({
 		url: "/player/:playername",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						playername: Type.String(),
-					})
-				),
+				params: z.object({
+					playername: z.string(),
+				}),
 
 				description: "Fetch all revocations of a player",
 				tags: [ "revocation" ],
@@ -90,11 +86,9 @@ export default class ProfileController {
 		url: "/modifiedSince/:timestamp",
 		options: {
 			schema: {
-				params: Type.Required(
-					Type.Object({
-						timestamp: Type.String(),
-					})
-				),
+				params: z.object({
+					timestamp: z.string(), // TODO: better time validation
+				}),
 
 				description:
 					"Fetch all revocations of a player modified since a timestamp",

@@ -1,6 +1,5 @@
 import { getUserStringFromID } from "../../utils/functions-databaseless.js"
-import typegoose from "@typegoose/typegoose"
-const { getModelForClass, modelOptions, pre, prop } = typegoose
+import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 
 
 @modelOptions({

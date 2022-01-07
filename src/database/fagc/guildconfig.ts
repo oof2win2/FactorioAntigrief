@@ -1,10 +1,9 @@
-import typegoose from "@typegoose/typegoose"
-const {
+import {
 	getModelForClass,
 	modelOptions,
 	Passthrough,
 	prop,
-} = typegoose
+} from "@typegoose/typegoose"
 
 // the thing from https://github.com/oof2win2/fagc-discord-bot/blob/dev/src/database/schemas/config.js
 
@@ -40,14 +39,21 @@ export class GuildConfigClass {
 				setRules: String,
 				setCommunities: String,
 			}),
+		default: {
+			reports: "",
+			webhooks: "",
+			setConfig: "",
+			setRules: "",
+			setCommunities: "",
+		}
 	})
 		roles!: Roles
 
-	@prop({ type: [ String ] })
-		trustedCommunities?: string[]
+	@prop({ type: [ String ], default: [] })
+		trustedCommunities!: string[]
 
-	@prop({ type: [ String ] })
-		ruleFilters?: string[]
+	@prop({ type: [ String ], default: [] })
+		ruleFilters!: string[]
 }
 
 const GuildConfigModel = getModelForClass(GuildConfigClass)
