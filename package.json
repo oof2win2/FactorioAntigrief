@@ -2,7 +2,7 @@
 	"name": "fagc-backend",
 	"version": "2.0.0",
 	"private": true,
-	"main": "dist/app.js",
+	"main": "dist/index.js",
 	"type": "commonjs",
 	"scripts": {
 		"start": "ts-node ./src/app.ts",
