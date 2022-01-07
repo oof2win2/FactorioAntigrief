@@ -1,10 +1,7 @@
 // this is here because the package @anatine/zod-openapi doesnt work properly
 
 import type { SchemaObject } from "openapi3-ts"
-import * as m from "ts-deepmerge"
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const merge = m.default
+import merge from "ts-deepmerge"
 import { AnyZodObject, z, ZodTypeAny } from "zod"
 
 export interface OpenApiZodAny extends ZodTypeAny {

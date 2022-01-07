@@ -1,5 +1,4 @@
-import * as typegoose from "@typegoose/typegoose"
-const { getModelForClass, modelOptions, prop } = typegoose
+import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
 
 @modelOptions({
 	schemaOptions: {
