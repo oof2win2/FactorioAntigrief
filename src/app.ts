@@ -6,6 +6,7 @@ import fastifyRateLimitPlugin from "fastify-rate-limit"
 import { fastifyRequestContextPlugin } from "fastify-request-context"
 import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
+import fastifyWebSocket from "fastify-websocket"
 import { DocumentType } from "@typegoose/typegoose"
 import CommunityModel, { CommunityClass } from "./database/fagc/community.js"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
@@ -183,6 +184,9 @@ fastify.addSchema({
 		},
 	},
 })
+
+// ws
+fastify.register(fastifyWebSocket)
 
 // cors
 fastify.register(fastifyCorsPlugin, {

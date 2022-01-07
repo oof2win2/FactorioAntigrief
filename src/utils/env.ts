@@ -17,9 +17,7 @@ const ENV = cleanEnv(
 			default: "sessions.sqlite",
 		}),
 		API_PORT: port({ default: 3000 }),
-		WS_PORT: port({ default: 8000, desc: "WebSocket port" }),
 		API_HOST: host({ default: "0.0.0.0" }),
-		WS_HOST: host({ default: "0.0.0.0" }),
 		DISCORD_BOTTOKEN: str({ desc: "Your Discord bot token" }),
 		SENTRY_LINK: str({ desc: "Your sentry.io link" }),
 		PROMETHEUS_PORT: port({
