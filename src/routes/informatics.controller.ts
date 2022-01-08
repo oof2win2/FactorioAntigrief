@@ -7,50 +7,7 @@ import { MasterAuthenticate } from "../utils/authentication.js"
 import { z } from "zod"
 
 @Controller({ route: "/informatics" })
-export default class ProfileController {
-	// @GET({
-	// 	url: "/logs/:count/:since",
-	// 	options: {
-	// 		schema: {
-	// 			params: Type.Required(
-	// 				Type.Object({
-	// 					count: Type.Number(),
-	// 					since: Type.Number(),
-	// 				})
-	// 			),
-
-	// 			description: "Get logs",
-	// 			tags: ["informatics"],
-	// 			security: [
-	// 				{
-	// 					masterAuthorization: [],
-	// 				},
-	// 			],
-	// 		},
-	// 	},
-	// })
-	// async getLogs(
-	// 	req: FastifyRequest<{
-	// 		Params: {
-	// 			count: number
-	// 			since: number
-	// 		}
-	// 	}>,
-	// 	res: FastifyReply
-	// ): Promise<FastifyReply> {
-	// 	const { count, since } = req.params
-	// 	const logs = await LogModel.find(
-	// 		{
-	// 			timestamp: { $gte: new Date(since) },
-	// 		},
-	// 		null,
-	// 		{
-	// 			limit: count,
-	// 		}
-	// 	)
-	// 	return res.send(logs)
-	// }
-
+export default class InformaticsController {
 	@POST({
 		url: "/webhook",
 		options: {
