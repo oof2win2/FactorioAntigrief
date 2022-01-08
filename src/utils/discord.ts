@@ -6,7 +6,6 @@ import ENV from "./env.js"
 export const client = new Client({
 	intents: [ "GUILD_MEMBERS", "GUILDS" ],
 })
-client.login(ENV.DISCORD_BOTTOKEN)
 
 // some oauth stuff for the users, used for website. WIP.
 export const OAuth2Client = new OAuthClient({
