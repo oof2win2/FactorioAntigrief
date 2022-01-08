@@ -267,15 +267,16 @@ fastify.setErrorHandler(async (error, request, reply) => {
 	if (error instanceof z.ZodError) {
 		// is a validaiton error
 		const x = error.format()
-		delete (x as any)._errors
 		const errorOutput = {}
+
 		Object.keys(x).forEach((key) => {
+			if (key === "_errors") return
 			errorOutput[key] =  x[key]._errors
 		})
 		return reply.status(400).send({
 			errorCode: 400,
 			error: "Invalid Request",
-			message: errorOutput
+			message: Array.isArray(x._errors) && x._errors.length ? x._errors[0] : errorOutput
 		})
 	}
 	
