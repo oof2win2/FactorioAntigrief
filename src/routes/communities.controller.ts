@@ -187,6 +187,56 @@ export default class CommunityController {
 		return res.status(200).send(community)
 	}
 
+	@POST({
+		url: "/guilds",
+		options: {
+			schema: {
+				body: z.object({
+					guildId: z.string(),
+				}),
+
+				tags: [ "community", "master" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "GuildConfigClass#"
+					},
+				},
+			},
+		},
+	})
+	@MasterAuthenticate
+	async createGuildConfig(
+		req: FastifyRequest<{
+			Body: {
+				guildId: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { guildId } = req.body
+
+		const existing = await GuildConfigModel.findOne({ guildId: guildId })
+
+		if (existing)
+			// return an error that the guild already has a config
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: `Guild ${guildId} already has a config`,
+			})
+
+		const guildConfig = await GuildConfigModel.create({
+			guildId: guildId,
+		})
+
+		return res.status(200).send(guildConfig)
+	}
+
 	@PATCH({
 		url: "/guilds/:guildId",
 		options: {
