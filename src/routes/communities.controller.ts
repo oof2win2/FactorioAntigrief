@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-import { Controller, DELETE, GET, POST } from "fastify-decorators"
+import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 
 import RuleModel from "../database/fagc/rule.js"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
@@ -85,7 +85,7 @@ export default class CommunityController {
 	}
 
 	@GET({
-		url: "/getown",
+		url: "/own",
 		options: {
 			schema: {
 				tags: [ "community" ],
@@ -114,41 +114,132 @@ export default class CommunityController {
 		return res.send(community)
 	}
 
-	@GET({
-		url: "/guildconfig/:guildId",
+	@PATCH({
+		url: "/",
 		options: {
 			schema: {
-				params: z.object({
-					guildId: z.string()
+				body: z.object({
+					contact: z.string().optional(),
+					name: z.string().optional()
 				}),
 
 				tags: [ "community" ],
+				description: "Update your community config",
+				security: [
+					{
+						authorization: [],
+					},
+				],
 				response: {
 					"200": {
 						allOf: [
 							{ nullable: true },
-							{ $ref: "GuildConfigClass#" },
+							{ $ref: "CommunityClass#" },
 						],
 					},
 				},
 			},
 		},
 	})
-	async getGuildConfig(
+	@Authenticate
+	async updateCommunity(
 		req: FastifyRequest<{
-			Params: {
+			Body: {
+				contact?: string
+				name?: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { contact, name } = req.body
+
+		const community = req.requestContext.get("community")
+		if (!community)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Not Found",
+				message: "Community config was not found",
+			})
+
+		const contactUser = await validateDiscordUser(contact || "")
+		if (contact && !contactUser)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: `contact must be Discord User snowflake, got value ${contact}, which isn't a known Discord user`,
+			})
+
+		community.name = name || community.name
+		community.contact = contact || community.contact
+
+		await CommunityModel.findOneAndReplace(
+			{
+				id: community.id,
+			},
+			community.toObject()
+		)
+
+		communityUpdatedMessage(community, {
+			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+				(<unknown>contactUser)
+			)
+		})
+
+		return res.status(200).send(community)
+	}
+
+	@POST({
+		url: "/guilds",
+		options: {
+			schema: {
+				body: z.object({
+					guildId: z.string(),
+				}),
+
+				tags: [ "community", "master" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						$ref: "GuildConfigClass#"
+					},
+				},
+			},
+		},
+	})
+	@MasterAuthenticate
+	async createGuildConfig(
+		req: FastifyRequest<{
+			Body: {
 				guildId: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { guildId } = req.params
-		const config = await GuildConfigModel.findOne({ guildId: guildId })
-		return res.send(config)
+		const { guildId } = req.body
+
+		const existing = await GuildConfigModel.findOne({ guildId: guildId })
+
+		if (existing)
+			// return an error that the guild already has a config
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Bad Request",
+				message: `Guild ${guildId} already has a config`,
+			})
+
+		const guildConfig = await GuildConfigModel.create({
+			guildId: guildId,
+		})
+
+		return res.status(200).send(guildConfig)
 	}
 
-	@POST({
-		url: "/guildconfig/:guildId",
+	@PATCH({
+		url: "/guilds/:guildId",
 		options: {
 			schema: {
 				params: z.object({
@@ -298,77 +389,37 @@ export default class CommunityController {
 		return res.status(200).send(guildConfig)
 	}
 
-	@POST({
-		url: "/communityconfig",
+	@GET({
+		url: "/guilds/:guildId",
 		options: {
 			schema: {
-				body: z.object({
-					contact: z.string().optional(),
-					name: z.string().optional()
+				params: z.object({
+					guildId: z.string()
 				}),
 
 				tags: [ "community" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
 				response: {
 					"200": {
 						allOf: [
 							{ nullable: true },
-							{ $ref: "CommunityClass#" },
+							{ $ref: "GuildConfigClass#" },
 						],
 					},
 				},
 			},
 		},
 	})
-	@Authenticate
-	async setCommunityConfig(
+	async getGuildConfig(
 		req: FastifyRequest<{
-			Body: {
-				contact?: string
-				name?: string
+			Params: {
+				guildId: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { contact, name } = req.body
-
-		const community = req.requestContext.get("community")
-		if (!community)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Not Found",
-				message: "Community config was not found",
-			})
-
-		const contactUser = await validateDiscordUser(contact || "")
-		if (contact && !contactUser)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Bad Request",
-				message: `contact must be Discord User snowflake, got value ${contact}, which isn't a known Discord user`,
-			})
-
-		community.name = name || community.name
-		community.contact = contact || community.contact
-
-		await CommunityModel.findOneAndReplace(
-			{
-				id: community.id,
-			},
-			community.toObject()
-		)
-
-		communityUpdatedMessage(community, {
-			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
-				(<unknown>contactUser)
-			)
-		})
-
-		return res.status(200).send(community)
+		const { guildId } = req.params
+		const config = await GuildConfigModel.findOne({ guildId: guildId })
+		return res.send(config)
 	}
 
 	@POST({
@@ -620,7 +671,7 @@ export default class CommunityController {
 		return res.send(true)
 	}
 
-	@POST({
+	@PATCH({
 		url: "/:idReceiving/merge/:idDissolving",
 		options: {
 			schema: {

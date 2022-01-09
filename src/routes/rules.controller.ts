@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-import { Controller, DELETE, GET, POST } from "fastify-decorators"
+import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 import RuleModel from "../database/fagc/rule.js"
 import GuildConfigModel from "../database/fagc/guildconfig.js"
 import { MasterAuthenticate } from "../utils/authentication.js"
@@ -109,7 +109,7 @@ export default class RuleController {
 		return res.send(rule)
 	}
 
-	@POST({
+	@PATCH({
 		url: "/:id",
 		options: {
 			schema: {
@@ -252,7 +252,7 @@ export default class RuleController {
 		return res.send(rule)
 	}
 
-	@POST({
+	@PATCH({
 		url: "/:idReceiving/merge/:idDissolving",
 		options: {
 			schema: {
