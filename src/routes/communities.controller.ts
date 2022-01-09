@@ -124,6 +124,7 @@ export default class CommunityController {
 				}),
 
 				tags: [ "community" ],
+				description: "Update your community config",
 				security: [
 					{
 						authorization: [],
@@ -141,7 +142,7 @@ export default class CommunityController {
 		},
 	})
 	@Authenticate
-	async setCommunityConfig(
+	async updateCommunity(
 		req: FastifyRequest<{
 			Body: {
 				contact?: string
@@ -670,7 +671,7 @@ export default class CommunityController {
 		return res.send(true)
 	}
 
-	@POST({
+	@PATCH({
 		url: "/:idReceiving/merge/:idDissolving",
 		options: {
 			schema: {
