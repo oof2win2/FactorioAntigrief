@@ -1,13 +1,11 @@
 import CommunityManager from "./managers/CommunityManager"
 import InfoManager from "./managers/InfoManager"
-import ProfileManager from "./managers/ProfileManager"
 import RevocationManager from "./managers/RevocationManager"
 import { RuleManager } from "./managers/RuleManager"
 import { ManagerOptions, BaseWrapperOptions, WrapperOptions } from "./types/types"
 import ReportManager from "./managers/ReportManager"
 import WebSocketHandler from "./WebsocketListener"
 import { Revocation } from "fagc-api-types"
-// import UserManager from "./managers/UserManager"
 
 // export types
 export * from "./types/index"
@@ -21,11 +19,10 @@ export class FAGCWrapper {
 	public reports: ReportManager
 	public revocations: RevocationManager
 	public info: InfoManager
-	public profiles: ProfileManager
 	public websocket: WebSocketHandler
 
 	constructor(
-		baseOptions: BaseWrapperOptions,
+		baseOptions: BaseWrapperOptions = {},
 		managerOptions: ManagerOptions = {
 			uncacheage: 1000 * 60 * 15,
 			uncachems: 1000 * 60 * 15,
@@ -47,7 +44,6 @@ export class FAGCWrapper {
 		this.communities = new CommunityManager(options, managerOptions)
 		this.rules = new RuleManager(options, managerOptions)
 		this.info = new InfoManager(options, managerOptions)
-		this.profiles = new ProfileManager(options, managerOptions)
 		// this.users = new UserManager(options, managerOptions)
 
 		const createCacheRevocation = (revocation: Revocation) =>
@@ -90,7 +86,6 @@ export class FAGCWrapper {
 			this.communities.apikey = apikey
 			this.rules.apikey = apikey
 			this.info.apikey = apikey
-			this.profiles.apikey = apikey
 			this.reports.apikey = apikey
 		}
 		if (masterapikey || masterapikey === null) {
@@ -98,7 +93,6 @@ export class FAGCWrapper {
 			this.communities.masterapikey = masterapikey
 			this.rules.masterapikey = masterapikey
 			this.info.masterapikey = masterapikey
-			this.profiles.masterapikey = masterapikey
 			this.reports.masterapikey = masterapikey
 		}
 		if (url) {
@@ -106,7 +100,6 @@ export class FAGCWrapper {
 			this.communities.apiurl = url
 			this.rules.apiurl = url
 			this.info.apiurl = url
-			this.profiles.apiurl = url
 			this.reports.apiurl = url
 		}
 		if (socketurl) this.websocket.setUrl(socketurl)
