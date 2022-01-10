@@ -75,7 +75,7 @@
 		"@types/validator": "^13.7.1",
 		"@types/ws": "^8.2.2",
 		"@typescript-eslint/eslint-plugin": "^5.5.0",
-		"@typescript-eslint/parser": "^5.5.0",
+		"@typescript-eslint/parser": "^5.9.1",
 		"install-types": "^2.0.1",
 		"inversify": "^6.0.1",
 		"jest": "^27.4.7",
