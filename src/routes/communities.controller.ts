@@ -14,14 +14,13 @@ import {
 } from "../utils/info.js"
 import {
 	client,
-	validateDiscordGuild,
 	validateDiscordUser,
 } from "../utils/discord.js"
 import ReportModel from "../database/fagc/report.js"
 import RevocationModel from "../database/fagc/revocation.js"
 import WebhookModel from "../database/fagc/webhook.js"
 import AuthModel from "../database/fagc/authentication.js"
-// import cryptoRandomString from "crypto-random-string"
+import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
 
@@ -472,7 +471,6 @@ export default class CommunityController {
 				body: z.object({
 					name: z.string(),
 					contact: z.string(),
-					guildId: z.string().optional(),
 				}),
 
 				description: "Create a FAGC community",
@@ -502,12 +500,11 @@ export default class CommunityController {
 			Body: {
 				name: string
 				contact: string
-				guildId?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { name, contact, guildId } = req.body
+		const { name, contact } = req.body
 
 		const validDiscordUser = await validateDiscordUser(contact)
 		if (!validDiscordUser)
@@ -523,34 +520,16 @@ export default class CommunityController {
 				message: `${contact} is a bot`,
 			})
 		}
-		const validGuild = guildId ? await validateDiscordGuild(guildId) : true
-		if (!validGuild)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Invalid Guild",
-				message: `${guildId} is not a valid Discord guild`,
-			})
 
 		const community = await CommunityModel.create({
 			name: name,
 			contact: contact,
-			guildIds: guildId ? [ guildId ] : [],
+			guildIds: []
 		})
-
-		if (guildId) {
-			// update community config to have communityId if guild exists
-			await GuildConfigModel.updateMany(
-				{ guildId: guildId },
-				{
-					$set: { communityId: community.id },
-				}
-			)
-		}
 
 		const auth = await AuthModel.create({
 			communityId: community.id,
-			// api_key: cryptoRandomString({ length: 64 }),
-			api_key: "xxxx"
+			api_key: cryptoRandomString({ length: 64 }),
 		})
 
 		const contactUser = await client.users.fetch(contact)
