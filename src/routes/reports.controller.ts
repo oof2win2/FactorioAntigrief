@@ -48,10 +48,7 @@ export default class ReportController {
 					playername: z.string(),
 					brokenRule: z.string().transform(str => str.toLowerCase()),
 					automated: z.boolean().nullish().default(false),
-					reportedTime: z.string().default(new Date().toISOString()).refine((input) => {
-						if (validator.isISO8601(input)) return false // the date is valid
-						return false
-					}, "reportedTime must be a valid ISO8601 date"),
+					reportedTime: z.string().default(new Date().toISOString()).refine((input) => validator.isISO8601(input), "reportedTime must be a valid ISO8601 date"),
 					description: z.string().default("No description"),
 					proof: z.string().default("No proof").refine((input) => {
 						if (input === "No proof") return true
