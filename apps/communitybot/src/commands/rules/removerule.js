@@ -28,7 +28,7 @@ class RemoveRuleFilter extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0]) {
-			const rules = await this.client.fagc.rules.fetchAll()
+			const rules = await this.client.fagc.rules.fetchAll({})
 
 			let embed = new MessageEmbed()
 				.setTitle("FAGC Rules")
@@ -58,7 +58,7 @@ class RemoveRuleFilter extends Command {
 		}
 
 		await Promise.all(
-			args.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid))
+			args.map((ruleid) => this.client.fagc.rules.fetchRule({ ruleid: ruleid }))
 		)
 
 		let embed = new MessageEmbed()

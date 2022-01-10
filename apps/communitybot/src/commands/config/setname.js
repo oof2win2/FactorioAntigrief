@@ -27,12 +27,12 @@ class SetName extends Command {
 		if (!args[0] || !args.join(" "))
 			return message.channel.send(`${this.client.emotes.warn} No name provided`)
 
-		await this.client.fagc.communities.setCommunityConfig(
-			{
+		await this.client.fagc.communities.setCommunityConfig({
+			config: {
 				name: args.join(" "),
 			},
-			{ apikey: config.apikey }
-		)
+			reqConfig: { apikey: config.apikey }
+		})
 		return message.channel.send(
 			"Name saved successfully. Changes may take a few minutes to take effect"
 		)

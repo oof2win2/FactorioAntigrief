@@ -26,6 +26,7 @@ class XKCD extends Command {
 				? `http://xkcd.com/${args[1]}/info.0.json`
 				: "http://xkcd.com/info.0.json"
 		try {
+			// @ts-ignore
 			fetch(search)
 				.then((res) => res.json())
 				.then((res) => {

@@ -28,15 +28,15 @@ class RevokeAllname extends Command {
 		if (!config.apikey) return message.reply(`${this.client.emotes.warn} No API key set`)
 
 		if (!args[0])
-			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to revoke reports of`)
+			args = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to revoke reports of`)
 				.then((r) => r?.content)
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 
-		const profile = await this.client.fagc.profiles.fetchCommunity(
-			playername,
-			config.communityId
-		)
+		const profile = await this.client.fagc.profiles.fetchCommunity({
+			playername: playername,
+			communityId: config.communityId
+		})
 		if (!profile || !profile.reports[0])
 			return message.reply(
 				`Player \`${playername}\` has no profile in your community`
@@ -74,14 +74,13 @@ class RevokeAllname extends Command {
 			return message.channel.send("Profile revocation cancelled")
 
 		try {
-			const response = await this.client.fagc.reports.revokeAllName(
-				playername,
-				message.author.id,
-				null,
-				{
-					apikey: config.apikey
+			const response = await this.client.fagc.reports.revokeAllName({
+				playername: playername,
+				adminId: message.author.id,
+				reqConfig: {
+					apikey: config.apikey,
 				}
-			)
+			})
 			if (response.length) {
 				return message.channel.send("Profile revoked!")
 			} else {

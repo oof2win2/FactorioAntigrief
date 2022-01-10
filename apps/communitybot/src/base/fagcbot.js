@@ -79,24 +79,31 @@ class FAGCBot extends Client {
 	}
 
 	async getFilteredRules(config) {
-		const allRules = await this.fagc.rules.fetchAll()
-		const filteredRules = allRules.filter((rule) =>
-			config.ruleFilters.some((id) => id === rule.id)
-		)
+		const allRules = await this.fagc.rules.fetchAll({})
+		const filteredRules = allRules
+			.filter((rule) =>
+				config.ruleFilters.some((id) => id === rule.id)
+			)
+			.sort((a, b) => config.ruleFilters.indexOf(a.id) - config.ruleFilters.indexOf(b.id))
 		return filteredRules
 	}
-
 	async saveGuildConfig(config) {
-		if (config.apikey)
-			return this.fagc.communities.setGuildConfig(config, {
-				apikey: config.apikey,
+		if (config.apikey) {
+			return this.fagc.communities.setGuildConfig({
+				config: config,
+				reqConfig: {
+					apikey: config.apikey
+				}
 			})
+		}
 		const newConfig = await ConfigModel.findOneAndUpdate(
 			{ guildId: config.guildId },
 			config,
 			{ upsert: true, new: true }
 		)
-		await this.fagc.communities.notifyGuildConfig(config.guildId)
+		await this.fagc.communities.notifyGuildConfig({
+			guildID: config.guildID
+		})
 		return newConfig
 	}
 }

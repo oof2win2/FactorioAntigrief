@@ -31,7 +31,7 @@ class AddCommunityFilter extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0]) {
-			const communities = await this.client.fagc.communities.fetchAll()
+			const communities = await this.client.fagc.communities.fetchAll({})
 			let embed = new MessageEmbed()
 				.setTitle("FAGC Communities")
 				.setColor("GREEN")
@@ -39,17 +39,19 @@ class AddCommunityFilter extends Command {
 				.setAuthor("FAGC Community")
 				.setDescription("All FAGC Communities")
 			const fields = await Promise.all(
-				communities.map(async (community) => {
-					const user = await this.client.users.fetch(
-						community.contact
-					)
-					return {
-						name: `${community.name} | \`${community.id}\``,
-						value: `Contact: <@${user.id}> | ${user.tag}`,
-					}
-				})
+				communities
+					.filter((r) => !config.trustedCommunities.includes(r.id))
+					.map(async (community) => {
+						const user = await this.client.users.fetch(
+							community.contact
+						)
+						return {
+							name: `${community.name} | \`${community.id}\``,
+							value: `Contact: <@${user.id}> | ${user.tag}`,
+						}
+					})
 			)
-			createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
+			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 			const newIDsMessage = await getMessageResponse(
 				message,
 				`${this.client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces:`
@@ -58,9 +60,12 @@ class AddCommunityFilter extends Command {
 				return message.channel.send("No IDs were provided")
 			args = newIDsMessage.content.split(" ")
 		}
+
+		args = args.map(x => x.toLowerCase())
+
 		await Promise.all(
 			args.map((communityid) =>
-				this.client.fagc.communities.fetchCommunity(communityid)
+				this.client.fagc.communities.fetchCommunity({ communityID: communityid })
 			)
 		)
 
@@ -73,9 +78,7 @@ class AddCommunityFilter extends Command {
 				"Add Filtered Communities. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md). Get IDs with fagc!allcommunities"
 			)
 		const communities = args
-			.map((communityid) =>
-				this.client.fagc.communities.resolveID(communityid)
-			)
+			.map((communityid) => this.client.fagc.communities.resolveID(communityid))
 			.filter((r) => r)
 			.filter((r) => !config.trustedCommunities.includes(r.id))
 
