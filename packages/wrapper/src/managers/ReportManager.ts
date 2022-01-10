@@ -1,52 +1,90 @@
 import fetch from "isomorphic-fetch"
 import { ManagerOptions, WrapperOptions } from "../types/types"
-import { Revocation, Report, CreateReport, ApiID } from "fagc-api-types"
+import { Report, CreateReport, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import {
 	GenericAPIError,
-	NoAuthError,
-	UnsuccessfulRevocationError,
 } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import { FetchRequestTypes } from "../types/privatetypes"
+import { Authenticate } from "../utils"
 
 export default class ReportManager extends BaseManager<Report> {
-	private createRevocation: (revocationObject: Revocation) => void
 	constructor(
 		options: WrapperOptions,
-		createRevocation: (revocationObject: Revocation) => void,
 		managerOptions: ManagerOptions = {}
 	) {
 		super(managerOptions)
 		if (options.apikey) this.apikey = options.apikey
 		this.apiurl = options.apiurl
-		this.createRevocation = createRevocation
+	}
+
+	async fetchAll({
+		cache = true,
+	}: FetchRequestTypes): Promise<Report[]> {
+		const reports = await fetch(`${this.apiurl}/reports`, {
+			credentials: "include",
+		}).then((c) => c.json())
+
+		if (reports.error)
+			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
+
+		reports.forEach((report) => {
+			report.reportedTime = new Date(report.reportedTime)
+			if (cache) this.add(report)
+		})
+		return reports
+	}
+
+	@Authenticate()
+	async create({
+		report,
+		cache = true,
+		reqConfig = {}
+	}: {
+		report: CreateReport
+	} & FetchRequestTypes): Promise<Report> {
+		const create = await fetch(`${this.apiurl}/reports`, {
+			method: "POST",
+			body: JSON.stringify(report),
+			credentials: "include",
+			headers: {
+				authorization: `${reqConfig._keystring}`,
+				"content-type": "application/json",
+			},
+		}).then((u) => u.json())
+
+		if (create.error)
+			throw new GenericAPIError(`${create.error}: ${create.message}`)
+		create.reportedTime = new Date(create.reportedTime)
+		if (cache) this.add(create)
+		return create
 	}
 
 	async fetchReport({
-		reportid,
+		id,
 		cache = true,
 		force = false
 	}: {
-		reportid: ApiID
+		id: ApiID
 	} & FetchRequestTypes): Promise<Report | null> {
 		if (!force) {
-			const cached =
-				this.cache.get(reportid) || this.fetchingCache.get(reportid)
+			const cached = this.cache.get(id) || this.fetchingCache.get(id)
 			if (cached) return cached
 		}
 
+		// this is so that if another fetch is created for this same report whilst the first one is still running, it will not execute another fetch
+		// rather it will make it wait for the first one to finish and then return it
 		let promiseResolve!: (value: Report | PromiseLike<Report | null> | null) => void
 		const fetchingPromise: Promise<Report | null> = new Promise(
 			(resolve) => {
 				promiseResolve = resolve
 			}
 		)
-
-		this.fetchingCache.set(reportid, fetchingPromise)
+		this.fetchingCache.set(id, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/reports/${strictUriEncode(reportid)}`,
+			`${this.apiurl}/reports/${strictUriEncode(id)}`,
 			{
 				credentials: "include",
 			}
@@ -58,67 +96,44 @@ export default class ReportManager extends BaseManager<Report> {
 		fetched.reportedTime = new Date(fetched.reportedTime)
 		if (cache) this.add(fetched)
 		promiseResolve(fetched)
+		// remove the data from the fetching cache after 0ms (will run in the next event loop) as it can use the normal cache instead
 		setTimeout(() => {
 			this.fetchingCache.sweep((data) => typeof data.then === "function")
 		}, 0)
 		return fetched
 	}
-	async fetchAllName({
-		playername, cache = true
+
+	async search({
+		playername,
+		ruleId,
+		communityId,
+		cache = true,
 	}: {
-		playername: string
-	} & FetchRequestTypes): Promise<Report[]> {
-		const allReports = await fetch(
-			`${this.apiurl}/reports/getplayer/${strictUriEncode(playername)}`,
-			{
-				credentials: "include",
-			}
-		).then((c) => c.json())
+		playername?: string,
+		ruleId?: string,
+		communityId?: string,
+	} & FetchRequestTypes):	 Promise<Report[]> {
+		if (!playername && !ruleId && !communityId)
+			throw new Error("At least one of the search parameters must be set")
+		
+		const params = new URLSearchParams()
+		if (playername) params.append("playername", playername)
+		if (ruleId) params.append("ruleId", ruleId)
+		if (communityId) params.append("communityId", communityId)
 
-		if (allReports.error)
-			throw new GenericAPIError(
-				`${allReports.error}: ${allReports.message}`
-			)
-
-		if (cache && allReports[0]) {
-			allReports.forEach((report) => {
-				report.reportedTime = new Date(report.reportedTime)
-				this.add(report)
-			})
-		}
-		return allReports
+		const data = await fetch(`${this.apiurl}/reports/search?${params.toString()}`, {
+			credentials: "include",
+		}).then((c) => c.json())
+		if (data.error)
+			throw new GenericAPIError(`${data.error}: ${data.message}`)
+		
+		data.forEach((report) => {
+			report.reportedTime = new Date(report.reportedTime)
+			if (cache) this.add(report)
+		})
+		return data
 	}
-
-	async fetchModifiedSince({
-		timestamp, cache = true
-	}: {
-		timestamp: Date
-	} & FetchRequestTypes): Promise<Report[]> {
-		const reports = await fetch(
-			`${this.apiurl}/reports/modifiedSince/${timestamp.toISOString()}`,
-			{
-				credentials: "include",
-			}
-		).then((c) => c.json())
-
-		if (reports.error)
-			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
-
-		if (cache) {
-			reports.forEach((report) => {
-				report.reportedTime = new Date(report.reportedTime)
-				report.timestamp = new Date(report.timestamp)
-				this.add(report)
-			})
-		}
-		return reports
-	}
-
-	resolveID(reportid: ApiID): Report | null {
-		const cached = this.cache.get(reportid)
-		if (cached) return cached
-		return null
-	}
+	
 	async fetchByRule({
 		ruleid, cache = true
 	}: {
@@ -130,16 +145,61 @@ export default class ReportManager extends BaseManager<Report> {
 				credentials: "include",
 			}
 		).then((c) => c.json())
-		if (cache) {
-			ruleReports.forEach((report) => {
-				report.reportedTime = new Date(report.reportedTime)
-				this.add(report)
-			})
-		}
+
+		ruleReports.forEach((report) => {
+			report.reportedTime = new Date(report.reportedTime)
+			if (cache) this.add(report)
+		})
 		return ruleReports
 	}
 
-	async listFiltered({
+	async fetchAllName({
+		playername, cache = true
+	}: {
+		playername: string
+	} & FetchRequestTypes): Promise<Report[]> {
+		const allReports = await fetch(
+			`${this.apiurl}/reports/player/${strictUriEncode(playername)}`,
+			{
+				credentials: "include",
+			}
+		).then((c) => c.json())
+
+		if (allReports.error)
+			throw new GenericAPIError(
+				`${allReports.error}: ${allReports.message}`
+			)
+
+		allReports.forEach((report) => {
+			report.reportedTime = new Date(report.reportedTime)
+			if (cache) this.add(report)
+		})
+		return allReports
+	}
+
+	async fetchByCommunity({
+		communityId, cache = true
+	}: {
+		communityId: ApiID
+	} & FetchRequestTypes): Promise<Report[]> {
+		const communityReports = await fetch(
+			`${this.apiurl}/reports/community/${strictUriEncode(communityId)}`,
+			{
+				credentials: "include",
+			}
+		).then((c) => c.json())
+		if (communityReports.error)
+			throw new GenericAPIError(
+				`${communityReports.error}: ${communityReports.message}`
+			)
+		communityReports.forEach((report) => {
+			report.reportedTime = new Date(report.reportedTime)
+			if (cache) this.add(report)
+		})
+		return communityReports
+	}
+
+	async list({
 		playername,
 		ruleIDs,
 		communityIDs,
@@ -174,109 +234,28 @@ export default class ReportManager extends BaseManager<Report> {
 		return reports
 	}
 
-	async create({
-		report,
-		cache = true,
-		reqConfig = {}
+	async fetchSince({
+		timestamp, cache = true
 	}: {
-		report: CreateReport
-	} & FetchRequestTypes): Promise<Report> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
+		timestamp: Date
+	} & FetchRequestTypes): Promise<Report[]> {
+		const reports = await fetch(
+			`${this.apiurl}/reports/since/${timestamp.toISOString()}`,
+			{
+				credentials: "include",
+			}
+		).then((c) => c.json())
 
-		const create = await fetch(`${this.apiurl}/reports`, {
-			method: "POST",
-			body: JSON.stringify(report),
-			credentials: "include",
-			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
-				"content-type": "application/json",
-			},
-		}).then((u) => u.json())
+		if (reports.error)
+			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
 
-		if (create.error)
-			throw new GenericAPIError(`${create.error}: ${create.message}`)
-		create.reportedTime = new Date(create.reportedTime)
-		if (cache) this.add(create)
-		return create
-	}
-	async revoke({
-		reportid,
-		adminId,
-		cache = true,
-		reqConfig = {}
-	}: {
-		reportid: ApiID,
-		adminId: string,
-	} & FetchRequestTypes): Promise<Revocation> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-
-		const revoked = await fetch(`${this.apiurl}/reports`, {
-			method: "DELETE",
-			body: JSON.stringify({
-				id: reportid,
-				adminId: adminId,
-			}),
-			credentials: "include",
-			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
-				"content-type": "application/json",
-			},
-		}).then((u) => u.json())
-
-		if (revoked.error)
-			throw new GenericAPIError(`${revoked.error}: ${revoked.message}`)
-
-		if (!revoked?.revokedTime) throw new UnsuccessfulRevocationError()
-		revoked.reportedTime = new Date(revoked.reportedTime)
-		revoked.revokedTime = new Date(revoked.revokedTime)
-		if (cache) this.createRevocation(revoked)
-		this.cache.sweep((report) => report.id === reportid) // remove the revoked report from cache as it isnt working anymore
-		return revoked
-	}
-	async revokeAllName({
-		playername,
-		adminId,
-		cache = true,
-		reqConfig = {}
-	}: {
-		playername: string,
-		adminId: string,
-	} & FetchRequestTypes): Promise<Revocation[] | null> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-
-		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {
-			method: "DELETE",
-			body: JSON.stringify({
-				playername: playername,
-				adminId: adminId,
-			}),
-			credentials: "include",
-			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
-				"content-type": "application/json",
-			},
-		}).then((u) => u.json())
-
-		if (revoked.error)
-			throw new GenericAPIError(`${revoked.error}: ${revoked.message}`)
-
-		revoked.forEach((revocation) => {
-			if (!revocation?.reportedTime)
-				throw new UnsuccessfulRevocationError()
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.createRevocation(revocation)
-		})
-		this.cache.sweep((report) => report.playername === playername) // remove the revoked report from cache as it isnt working anymore
-		return revoked
+		if (cache) {
+			reports.forEach((report) => {
+				report.reportedTime = new Date(report.reportedTime)
+				report.timestamp = new Date(report.timestamp)
+				this.add(report)
+			})
+		}
+		return reports
 	}
 }

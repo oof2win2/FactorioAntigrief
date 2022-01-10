@@ -1,13 +1,13 @@
 import fetch from "isomorphic-fetch"
-import { ManagerOptions, WrapperOptions } from "../types/types"
+import { ManagerOptions, WrapperOptions, GenericAPIError } from "../types"
 import BaseManager from "./BaseManager"
-import { GenericAPIError, NoAuthError } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import { Community, GuildConfig, ApiID } from "fagc-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
+import { Authenticate, MasterAuthenticate } from "../utils"
 
 type SetGuildConfig = Partial<GuildConfig> & Pick<GuildConfig, "guildId">
-type SetCommunityConfig = Partial<Omit<Community, "id">>
+type SetCommunityConfig = Partial<Omit<Community, "id"|"guildIds">>
 
 export default class CommunityManager extends BaseManager<Community> {
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
@@ -16,6 +16,49 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (options.masterapikey) this.masterapikey = options.masterapikey
 		this.apiurl = options.apiurl
 	}
+
+	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Community[]> {
+		const allCommunities = await fetch(`${this.apiurl}/communities`, {
+			credentials: "include",
+		}).then((c) => c.json())
+
+		if (allCommunities.error)
+			throw new GenericAPIError(
+				`${allCommunities.error}: ${allCommunities.message}`
+			)
+
+		if (cache && allCommunities[0]) {
+			return allCommunities.map((community) => {
+				return this.add(community)
+			})
+		}
+		return allCommunities
+	}
+
+	@Authenticate()
+	async setCommunityConfig({
+		config,
+		reqConfig = {}
+	}: {
+		config: SetCommunityConfig,
+	} & FetchRequestTypes): Promise<Community> {
+		const update = await fetch(
+			`${this.apiurl}/communities`,
+			{
+				method: "PATCH",
+				body: JSON.stringify(config),
+				credentials: "include",
+				headers: {
+					authorization: `${reqConfig._keystring}`,
+					"content-type": "application/json",
+				},
+			}
+		).then((u) => u.json())
+		if (update?.error)
+			throw new GenericAPIError(`${update.error}: ${update.message}`)
+		return update
+	}
+
 	async fetchCommunity({
 		communityID,
 		cache = true,
@@ -56,36 +99,16 @@ export default class CommunityManager extends BaseManager<Community> {
 		}, 0)
 		return fetched
 	}
-	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Community[]> {
-		const allCommunities = await fetch(`${this.apiurl}/communities`, {
-			credentials: "include",
-		}).then((c) => c.json())
-
-		if (allCommunities.error)
-			throw new GenericAPIError(
-				`${allCommunities.error}: ${allCommunities.message}`
-			)
-
-		if (cache && allCommunities[0]) {
-			return allCommunities.map((community) => {
-				return this.add(community)
-			})
-		}
-		return allCommunities
-	}
+	
+	@Authenticate()
 	async fetchOwnCommunity({
 		cache = true,
 		reqConfig = {}
 	}: FetchRequestTypes): Promise<Community | null> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-
 		const community = await fetch(`${this.apiurl}/communities/getown`, {
 			credentials: "include",
 			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
+				authorization: `${reqConfig._keystring}`,
 			},
 		}).then((c) => c.json())
 
@@ -99,63 +122,20 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (cache) this.add(community)
 		return community
 	}
-	resolveID(communityId: string): Community | null {
-		const cached = this.cache.get(communityId)
-		if (cached) return cached
-		return null
-	}
-	async fetchGuildConfig({
-		guildId
-	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
-		const config = await fetch(
-			`${this.apiurl}/communities/guildconfig/${strictUriEncode(
-				guildId
-			)}`,
-			{
-				credentials: "include",
-			}
-		).then((c) => c.json())
-		if (config?.error)
-			throw new GenericAPIError(`${config.error}: ${config.message}`)
-		if (!config || !config.guildId) return null
-		return config
-	}
-	async fetchOwnGuildConfig({
-		reqConfig = {}
-	}: FetchRequestTypes): Promise<GuildConfig | null> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-		const config = await fetch(`${this.apiurl}/communities/guildconfig`, {
-			credentials: "include",
-			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
-			},
-		}).then((u) => u.json())
 
-		if (config?.error)
-			throw new GenericAPIError(`${config.error}: ${config.message}`)
-
-		return config
-	}
+	@Authenticate()
 	async setGuildConfig({
 		config,
 		reqConfig = {}
 	}: {
 		config: SetGuildConfig,
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-
 		const update = await fetch(`${this.apiurl}/communities/guildconfig/${config.guildId}`, {
 			method: "POST",
 			body: JSON.stringify(config),
 			credentials: "include",
 			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
+				authorization: `${reqConfig._keystring}`,
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -163,135 +143,41 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		return update
 	}
-	async fetchCommunityConfig({
-		communityID,
-		cache,
-		force,
-	}: {
-		communityID: ApiID
-	} & FetchRequestTypes): Promise<Community | null> {
-		return this.fetchCommunity({ communityID, cache, force })
-	}
-	async setCommunityConfig({
-		config,
-		reqConfig = {}
-	}: {
-		config: SetCommunityConfig,
-	} & FetchRequestTypes): Promise<Community> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
 
-		const update = await fetch(
-			`${this.apiurl}/communities/communityconfig`,
+	async fetchGuildConfig({
+		guildId
+	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
+		const config = await fetch(
+			`${this.apiurl}/communities/guilds/${strictUriEncode(guildId)}`,
 			{
-				method: "POST",
-				body: JSON.stringify(config),
 				credentials: "include",
-				headers: {
-					authorization: !reqConfig.cookieAuth
-						? `Token ${reqConfig.apikey || this.apikey}`
-						: "Cookie",
-					"content-type": "application/json",
-				},
 			}
-		).then((u) => u.json())
-		if (update?.error)
-			throw new GenericAPIError(`${update.error}: ${update.message}`)
-		return update
+		).then((c) => c.json())
+		if (config?.error) throw new GenericAPIError(`${config.error}: ${config.message}`)
+		return config
 	}
 
-	async notifyGuildConfig({
-		guildID,
-		reqConfig = {}
-	}: {
-		guildID: string,
-	} & FetchRequestTypes): Promise<void> {
-		if (
-			!reqConfig.masterapikey &&
-			!this.masterapikey &&
-			!reqConfig.cookieAuth
-		)
-			throw new NoAuthError()
-		const create = await fetch(
-			`${this.apiurl
-			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildID)}`,
-			{
-				method: "POST",
-				credentials: "include",
-				headers: {
-					authorization: !reqConfig.cookieAuth
-						? `Token ${reqConfig.masterapikey || this.masterapikey}`
-						: "Cookie",
-				},
-			}
-		).then((u) => u.json())
-		if (create?.error)
-			throw new GenericAPIError(`${create.error}: ${create.message}`)
-	}
-
-	async guildLeave({
-		guildID,
-		reqConfig = {}
-	}: {
-		guildID: string,
-	} & FetchRequestTypes): Promise<void> {
-		if (
-			!reqConfig.masterapikey &&
-			!this.masterapikey &&
-			!reqConfig.cookieAuth
-		)
-			throw new NoAuthError()
-		const create = await fetch(
-			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildID)}`,
-			{
-				method: "POST",
-				credentials: "include",
-				headers: {
-					authorization: !reqConfig.cookieAuth
-						? `Token ${reqConfig.masterapikey || this.masterapikey}`
-						: "Cookie",
-				},
-			}
-		).then((u) => u.json())
-		if (create?.error)
-			throw new GenericAPIError(`${create.error}: ${create.message}`)
-	}
-
+	@MasterAuthenticate()
 	async create({
 		name,
 		contact,
-		guildID,
 		reqConfig = {}
 	}: {
-
 		name: string,
 		contact: string,
-		guildID?: string,
 	} & FetchRequestTypes): Promise<{
 		community: Community
 		apiKey: string
 	}> {
-		if (
-			!reqConfig.masterapikey &&
-			!this.masterapikey &&
-			!reqConfig.cookieAuth
-		)
-			throw new NoAuthError()
-
 		const create = await fetch(`${this.apiurl}/communities`, {
 			method: "POST",
 			body: JSON.stringify({
 				name: name,
 				contact: contact,
-				...(guildID && { // add it in optionally otherwise it is not in request
-					guildId: guildID
-				})
 			}),
 			credentials: "include",
 			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.masterapikey || this.masterapikey}`
-					: "Cookie",
+				authorization: `${reqConfig._keystring}`,
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -300,28 +186,84 @@ export default class CommunityManager extends BaseManager<Community> {
 		return create
 	}
 
+	@MasterAuthenticate()
+	async createGuildConfig({
+		guildId,
+		reqConfig = {}
+	}: {
+		guildId: string
+	} & FetchRequestTypes): Promise<GuildConfig> {
+		const create = await fetch(`${this.apiurl}/communities/guilds`, {
+			method: "POST",
+			body: JSON.stringify({
+				guildId: guildId,
+			}),
+			credentials: "include",
+			headers: {
+				authorization: `${reqConfig._keystring}`,
+			},
+		}).then((u) => u.json())
+		if (create.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
+		return create
+	}
+
+	@MasterAuthenticate()
+	async notifyGuildConfig({
+		guildID,
+		reqConfig = {}
+	}: {
+		guildID: string,
+	} & FetchRequestTypes): Promise<void> {
+		const create = await fetch(
+			`${this.apiurl
+			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildID)}`,
+			{
+				method: "POST",
+				credentials: "include",
+				headers: {
+					authorization: `${reqConfig._keystring}`,
+				},
+			}
+		).then((u) => u.json())
+		if (create?.error)
+			throw new GenericAPIError(`${create.error}: ${create.message}`)
+	}
+
+	@MasterAuthenticate()
+	async guildLeave({
+		guildID,
+		reqConfig = {}
+	}: {
+		guildID: string,
+	} & FetchRequestTypes): Promise<void> {
+		const create = await fetch(
+			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildID)}`,
+			{
+				method: "POST",
+				credentials: "include",
+				headers: {
+					authorization: `${reqConfig._keystring}`,
+				},
+			}
+		).then((u) => u.json())
+		if (create?.error)
+			throw new GenericAPIError(`${create.error}: ${create.message}`)
+	}
+
+	@MasterAuthenticate()
 	async remove({
 		communityID,
 		reqConfig = {}
 	}: {
 		communityID: string
 	} & FetchRequestTypes): Promise<boolean> {
-		if (
-			!this.masterapikey &&
-			!reqConfig.masterapikey &&
-			!reqConfig.cookieAuth
-		)
-			throw new NoAuthError()
-
 		const remove = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(communityID)}`,
 			{
 				method: "DELETE",
 				credentials: "include",
 				headers: {
-					authorization: !reqConfig.cookieAuth
-						? `Token ${reqConfig.masterapikey || this.masterapikey}`
-						: "Cookie",
+					authorization: `${reqConfig._keystring}`,
 				},
 			}
 		).then((u) => u.json())
@@ -330,6 +272,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		return remove
 	}
 
+	@MasterAuthenticate()
 	async merge({
 		idReceiving,
 		idDissolving,
@@ -338,22 +281,13 @@ export default class CommunityManager extends BaseManager<Community> {
 		idReceiving: string
 		idDissolving: string
 		} & FetchRequestTypes): Promise<Community> {
-		if (
-			!this.masterapikey &&
-			!reqConfig.masterapikey &&
-			!reqConfig.cookieAuth
-		)
-			throw new NoAuthError()
-
 		const remove = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
-				method: "POST",
+				method: "PATCH",
 				credentials: "include",
 				headers: {
-					authorization: !reqConfig.cookieAuth
-						? `Token ${reqConfig.masterapikey || this.masterapikey}`
-						: "Cookie",
+					authorization: `${reqConfig._keystring}`,
 				},
 			}
 		).then((u) => u.json())
