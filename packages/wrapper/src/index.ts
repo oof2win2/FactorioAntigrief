@@ -44,15 +44,7 @@ export class FAGCWrapper {
 		this.communities = new CommunityManager(options, managerOptions)
 		this.rules = new RuleManager(options, managerOptions)
 		this.info = new InfoManager(options, managerOptions)
-		// this.users = new UserManager(options, managerOptions)
-
-		const createCacheRevocation = (revocation: Revocation) =>
-			this.revocations.addRevocation(revocation)
-		this.reports = new ReportManager(
-			options,
-			createCacheRevocation,
-			managerOptions
-		)
+		this.reports = new ReportManager(options, managerOptions)
 
 		this.websocket = new WebSocketHandler({
 			uri: options.socketurl || "wss://factoriobans.club/api/ws",

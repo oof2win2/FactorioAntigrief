@@ -60,11 +60,6 @@ export class RuleManager extends BaseManager<Rule> {
 
 		return allRules
 	}
-	resolveID(ruleid: string): Rule | null {
-		const cached = this.cache.get(ruleid)
-		if (cached) return cached
-		return null
-	}
 
 	@MasterAuthenticate()
 	async create({

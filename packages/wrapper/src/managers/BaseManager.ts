@@ -52,6 +52,13 @@ export default class BaseManager<HoldsWithId extends Common> {
 		this.cache.sweep((item) => item.id == data.id)
 		return data
 	}
+
+	resolveID(id: Common["id"]): HoldsWithId | null {
+		const cached = this.cache.get(id)
+		if (cached) return cached
+		return null
+	}
+
 	destroy(): void {
 		clearInterval(this.interval)
 		this.apikey = null

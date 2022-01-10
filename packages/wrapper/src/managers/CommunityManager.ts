@@ -99,12 +99,6 @@ export default class CommunityManager extends BaseManager<Community> {
 		return community
 	}
 
-	resolveID(communityId: string): Community | null {
-		const cached = this.cache.get(communityId)
-		if (cached) return cached
-		return null
-	}
-
 	async fetchGuildConfig({
 		guildId
 	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
