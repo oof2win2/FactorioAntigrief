@@ -5,7 +5,6 @@ import { RuleManager } from "./managers/RuleManager"
 import { ManagerOptions, BaseWrapperOptions, WrapperOptions } from "./types/types"
 import ReportManager from "./managers/ReportManager"
 import WebSocketHandler from "./WebsocketListener"
-import { Revocation } from "fagc-api-types"
 
 // export types
 export * from "./types/index"

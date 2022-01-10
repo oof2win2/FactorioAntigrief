@@ -14,6 +14,43 @@ export class RuleManager extends BaseManager<Rule> {
 		if (options.apikey) this.apikey = options.apikey
 		if (options.masterapikey) this.masterapikey = options.masterapikey
 	}
+	
+	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Rule[]> {
+		const allRules = await fetch(`${this.apiurl}/rules`, {
+			credentials: "include",
+		}).then((r) => r.json())
+
+		if (cache && allRules[0])
+			return allRules.map((rule: Rule) => this.add(rule))
+
+		return allRules
+	}
+
+	@MasterAuthenticate()
+	async create({
+		rule,
+		reqConfig = {}
+	}: {
+		rule: Omit<Rule, "id">,
+	} & FetchRequestTypes): Promise<Rule> {
+		const data = await fetch(`${this.apiurl}/rules`, {
+			method: "POST",
+			body: JSON.stringify(rule),
+			credentials: "include",
+			headers: {
+				authorization: `${reqConfig._keystring}`,
+				"content-type": "application/json",
+			},
+		}).then((r) => r.json())
+
+		if (data.error)
+			throw new GenericAPIError(`${data.error}: ${data.message}`)
+
+		this.add(data)
+
+		return data
+	}
+
 	async fetchRule({
 		ruleid,
 		cache = true,
@@ -50,41 +87,7 @@ export class RuleManager extends BaseManager<Rule> {
 		if (fetched.id === ruleid) return fetched
 		return null
 	}
-	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Rule[]> {
-		const allRules = await fetch(`${this.apiurl}/rules`, {
-			credentials: "include",
-		}).then((r) => r.json())
 
-		if (cache && allRules[0])
-			return allRules.map((rule: Rule) => this.add(rule))
-
-		return allRules
-	}
-
-	@MasterAuthenticate()
-	async create({
-		rule,
-		reqConfig = {}
-	}: {
-		rule: Omit<Rule, "id">,
-	} & FetchRequestTypes): Promise<Rule> {
-		const data = await fetch(`${this.apiurl}/rules`, {
-			method: "POST",
-			body: JSON.stringify(rule),
-			credentials: "include",
-			headers: {
-				authorization: `${reqConfig._keystring}`,
-				"content-type": "application/json",
-			},
-		}).then((r) => r.json())
-
-		if (data.error)
-			throw new GenericAPIError(`${data.error}: ${data.message}`)
-
-		this.add(data)
-
-		return data
-	}
 	@MasterAuthenticate()
 	async modify({
 		id,
@@ -97,7 +100,7 @@ export class RuleManager extends BaseManager<Rule> {
 		const data = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(id)}`,
 			{
-				method: "POST",
+				method: "PATCH",
 				credentials: "include",
 				body: JSON.stringify({
 					shortdesc: shortdesc,
@@ -120,6 +123,7 @@ export class RuleManager extends BaseManager<Rule> {
 
 		return data
 	}
+
 	@MasterAuthenticate()
 	async remove({
 		id,
@@ -146,6 +150,7 @@ export class RuleManager extends BaseManager<Rule> {
 
 		return data
 	}
+
 	@MasterAuthenticate()
 	async merge({
 		idReceiving,
@@ -158,7 +163,7 @@ export class RuleManager extends BaseManager<Rule> {
 		const data = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
-				method: "POST",
+				method: "PATCH",
 				credentials: "include",
 				headers: {
 					authorization: `${reqConfig._keystring}`,
