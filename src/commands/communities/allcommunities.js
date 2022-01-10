@@ -18,7 +18,7 @@ class GetAll extends Command {
 		})
 	}
 	async run(message) {
-		const communities = await this.client.fagc.communities.fetchAll()
+		const communities = await this.client.fagc.communities.fetchAll({})
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Communities")
@@ -35,7 +35,7 @@ class GetAll extends Command {
 				}
 			})
 		)
-		createPagedEmbed(fields, embed, message, { maxPageCount: 25 })
+		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
 }
 module.exports = GetAll

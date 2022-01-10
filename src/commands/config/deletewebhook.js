@@ -33,7 +33,10 @@ class AddWebhook extends Command {
 				)
 			)
 		webhooks.map((webhook) =>
-			this.client.fagc.info.removeWebhook(webhook.id, webhook.token)
+			this.client.fagc.info.removeWebhook({
+				webhookid: webhook.id,
+				webhooktoken: webhook.token,
+			})
 		)
 		webhooks.map((webhook) => webhook.delete())
 		return message.channel.send("Attempted at removing webhooks")

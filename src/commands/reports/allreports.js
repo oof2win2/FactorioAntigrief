@@ -24,11 +24,11 @@ class GetAllReports extends Command {
 	async run(message, args) {
 		if (!args[0])
 			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get profiles of`)
-				.then((r) => r?.content)
+				.then((r) => r?.content?.split(" ")[0])
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
-		const reports = await this.client.fagc.reports.fetchAllName(playername)
+		const reports = await this.client.fagc.reports.fetchAllName({ playername: playername })
 		if (!reports[0])
 			return message.reply(
 				`Player \`${playername}\` doesn't have any reports`
@@ -43,20 +43,20 @@ class GetAllReports extends Command {
 		const fields = await Promise.all(
 			reports.map(async (report) => {
 				const admin = await this.client.users.fetch(report.adminId)
-				const rule = await this.client.fagc.rules.fetchRule(
-					report.brokenRule
-				)
+				const rule = await this.client.fagc.rules.fetchRule({
+					ruleid: report.brokenRule
+				})
 				const community =
-					await this.client.fagc.communities.fetchCommunity(
-						report.communityId
-					)
+					await this.client.fagc.communities.fetchCommunity({
+						communityID: report.communityId
+					})
 
 				return {
 					name: report.id,
 					value:
-						`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community.name} (${community.id})\n` +
-						`Broken rule: ${rule.shortdesc} (${rule.id})\nProof: ${report.proof}\n` +
+						`By: <@${admin.id}> | ${admin.tag}\nCommunity ID: ${community?.name} (${community?.id})\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
+						`Broken rule: ${rule?.shortdesc} (${rule?.id})\nProof: ${report.proof}\n` +
 						`Violated time: <t:${Math.floor(
 							report.reportedTime.valueOf() / 1000
 						)}>`,

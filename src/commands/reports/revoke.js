@@ -27,19 +27,19 @@ class Revoke extends Command {
 		if (!config.apikey) return message.reply(`${this.client.emotes.warn} No API key set`)
 
 		if (!args[0])
-			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to fetch`)
-				.then((r) => r?.content)
+			args = await getMessageResponse(message, `${this.client.emotes.type} Provide a report to revoke`)
+				.then((r) => r?.content?.split(" "))
 		const reportID = args.shift()
 		if (!reportID) return message.channel.send(`${this.client.emotes.warn} No report was provided`)
 
-		const report = await this.client.fagc.reports.fetchReport(reportID)
+		const report = await this.client.fagc.reports.fetchReport({ reportid: reportID })
 		if (!report?.id)
 			return message.channel.send(
 				`Report with ID \`${reportID}\` doesn't exist`
 			)
 		if (report.communityId !== config.communityId)
 			return message.channel.send(`You are trying to revoke a report of community \`${report.communityId}\` but you are from community \`${config.communityId}\``)
-		const community = await this.client.fagc.communities.fetchCommunity(report.communityId)
+		const community = await this.client.fagc.communities.fetchCommunity({ communityID: report.communityId })
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Report Revocation")
@@ -67,12 +67,11 @@ class Revoke extends Command {
 		if (!confirm) return message.channel.send("Report revocation cancelled")
 
 		try {
-			const response = await this.client.fagc.reports.revoke(
-				reportID,
-				message.author.id,
-				true,
-				{ apikey: config.apikey }
-			)
+			const response = await this.client.fagc.reports.revoke({
+				reportid: reportID,
+				adminId: message.author.id,
+				reqConfig: { apikey: config.apikey }
+			})
 
 			if (response.id && response.revokedBy && response.revokedTime) {
 				return message.channel.send("Report revoked!")

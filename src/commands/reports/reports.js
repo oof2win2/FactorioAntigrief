@@ -24,16 +24,16 @@ class GetReports extends Command {
 	}
 	async run(message, args, config) {
 		if (!args[0])
-			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get reports of`)
-				.then((r) => r?.content)
+			args = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get reports of`)
+				.then((r) => r?.content?.split(" "))
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
 		if (!config.trustedCommunities)
 			return message.reply("No filtered communities set")
 		if (!config.ruleFilters) return message.reply("No filtered rules set")
-		const reports = await this.client.fagc.reports.fetchAllName(playername)
-		const communities = await this.client.fagc.communities.fetchAll()
+		const reports = await this.client.fagc.reports.fetchAllName({ playername: playername })
+		const communities = await this.client.fagc.communities.fetchAll({})
 
 		let embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
@@ -70,13 +70,13 @@ class GetReports extends Command {
 		const fields = await Promise.all(
 			filteredReports.map(async (report) => {
 				const admin = await this.client.users.fetch(report.adminId)
-				const rule = await this.client.fagc.rules.fetchRule(
-					report.brokenRule
-				)
+				const rule = await this.client.fagc.rules.fetchRule({
+					ruleid: report.brokenRule
+				})
 				const community =
-					await this.client.fagc.communities.fetchCommunity(
-						report.communityId
-					)
+					await this.client.fagc.communities.fetchCommunity({
+						communityID: report.communityId
+					})
 				return {
 					name: report.id,
 					value:

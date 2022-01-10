@@ -23,6 +23,7 @@ class Ping extends Command {
 		message.channel.send("Pinging...").then(async (m) => {
 			let ping = m.createdTimestamp - message.createdTimestamp
 			const beforeFetch = Date.now()
+			// @ts-ignore
 			await fetch(this.client.env.APIURL)
 			const apilatency = Date.now() - beforeFetch
 			m.edit(

@@ -33,12 +33,14 @@ class SetContact extends Command {
 			(await this.client.users.fetch(args[0]))
 		if (!user) return message.channel.send(`${this.client.emotes.warn} Provided user is invalid`)
 
-		await this.client.fagc.communities.setCommunityConfig(
-			{
-				contact: user.id,
+		await this.client.fagc.communities.setCommunityConfig({
+			config: {
+				contact: user.id
 			},
-			{ apikey: config.apikey }
-		)
+			reqConfig: {
+				apikey: config.apikey
+			}
+		})
 		return message.channel.send(
 			"Contact saved successfully. Changes may take a few minutes to take effect"
 		)

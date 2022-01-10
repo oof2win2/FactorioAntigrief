@@ -6,6 +6,7 @@ const {
 const { handleErrors, createPagedEmbed } = require("../../utils/functions")
 const Command = require("../../base/Command")
 const { AuthenticationError } = require("fagc-api-wrapper")
+const validator = require("validator").default
 
 class CreateReportAdvanced extends Command {
 	constructor(client) {
@@ -36,7 +37,7 @@ class CreateReportAdvanced extends Command {
 				message,
 				`${this.client.emotes.type} Type in a playername for the report`
 			)
-		)?.content
+		)?.content?.split(" ")[0]
 		if (playername === undefined)
 			return message.channel.send(`${this.client.emotes.warn} Didn't send playername in time`)
 
@@ -48,7 +49,7 @@ class CreateReportAdvanced extends Command {
 			return message.channel.send(`${this.client.emotes.warn} Didn't send admin user ID in time`)
 		const adminUser =
 			adminMessage.mentions.users.first() ||
-			(await this.client.users.fetch(adminMessage.content).catch(() => null))
+			(await this.client.users.fetch(adminMessage.content.split(" ")[0]).catch(() => null))
 		if (!adminUser) return message.channel.send(`${this.client.emotes.warn} Sent user is not valid!`)
 
 		let ruleEmbed = new MessageEmbed()
@@ -77,7 +78,7 @@ class CreateReportAdvanced extends Command {
 		)?.content
 		if (ruleids === undefined)
 			return message.channel.send(`${this.client.emotes.warn} Didn't send rule IDs in time`)
-		let ruleInput = ruleids.split(" ")
+		let ruleInput = ruleids.split(" ").map(x => x.toLowerCase())
 		const ruleNumbers = ruleInput
 			.map((rule, i) => {
 				const ruleNumber = parseInt(rule) || undefined
@@ -101,7 +102,7 @@ class CreateReportAdvanced extends Command {
 			(ruleNumber) => filteredRules[ruleNumber - 1]
 		)
 		let rules = await Promise.all(
-			ruleInput.map((ruleid) => this.client.fagc.rules.fetchRule(ruleid))
+			ruleInput.map((ruleid) => this.client.fagc.rules.fetchRule({ ruleid: ruleid }))
 		)
 		rules = rules.filter((r) => r).concat(numberRules)
 
@@ -140,10 +141,17 @@ class CreateReportAdvanced extends Command {
 		let proof = (
 			await getMessageResponse(
 				message,
-				`${this.client.emotes.type} Send a link to proof of the report or \`none\` if there is no proof`
+				`${this.client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`
 			)
 		)?.content
 		if (!proof || proof.toLowerCase() === "none") proof = undefined
+		else {
+			for (const string of proof.split(" ")) {
+				if (!validator.isURL(string, { protocols: [ "http", "https" ] })) {
+					return message.channel.send(`${this.client.emotes.warn}  \`${string}\` is an invalid link to proof`)
+				}
+			}
+		}
 
 		const timestampMsg = (
 			await getMessageResponse(
@@ -151,7 +159,7 @@ class CreateReportAdvanced extends Command {
 				`${this.client.emotes.type} Send a ISO8601 timetsamp representing the date of the report, find one here: <https://www.timestamp-converter.com/>. Type in \`now\` to set the current time`,
 				120*1000 // 120 seconds to make time
 			)
-		)?.content
+		)?.content?.split(" ")[0]
 		let timestamp = new Date()
 		if (!timestampMsg) {
 			message.channel.send(
@@ -179,7 +187,7 @@ class CreateReportAdvanced extends Command {
 		embed.addFields(
 			{
 				name: "Admin user",
-				value: `<@${message.author.id}> | ${message.author.tag}`,
+				value: `<@${adminUser.id}> | ${adminUser.tag}`,
 				inline: true,
 			},
 			{ name: "Player name", value: playername, inline: true },
@@ -211,8 +219,8 @@ class CreateReportAdvanced extends Command {
 		try {
 			const reports = await Promise.all(
 				rules.map((rule) =>
-					this.client.fagc.reports.create(
-						{
+					this.client.fagc.reports.create({
+						report: {
 							playername: playername,
 							adminId: adminUser.id,
 							brokenRule: rule.id,
@@ -221,9 +229,8 @@ class CreateReportAdvanced extends Command {
 							automated: false,
 							reportedTime: timestamp,
 						},
-						true,
-						{ apikey: config.apikey }
-					)
+						reqConfig: { apikey: config.apikey }
+					})
 				)
 			)
 			if (

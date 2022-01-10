@@ -23,11 +23,11 @@ class GetAllProfiles extends Command {
 	async run(message, args) {
 		if (!args[0])
 			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get profiles of`)
-				.then((r) => r?.content)
+				.then((r) => r?.content?.split(" ")[0])
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
-		const profiles = await this.client.fagc.profiles.fetchAll(playername)
+		const profiles = await this.client.fagc.profiles.fetchAll({ playername: playername })
 		if (!profiles || !profiles[0])
 			return message.channel.send(
 				`User \`${playername}\` has no profiles!`
@@ -44,11 +44,11 @@ class GetAllProfiles extends Command {
 				// this is because there is a limit of 6k chars per embed
 				const reports = profile.reports.map((report) => report.id)
 				const community =
-					await this.client.fagc.communities.fetchCommunity(
-						profile.communityId
-					)
+					await this.client.fagc.communities.fetchCommunity({
+						communityID: profile.communityId
+					})
 				return {
-					name: `Community ${community.name} (\`${profile.communityId}\`)`,
+					name: `Community ${community?.name} (\`${profile.communityId}\`)`,
 					value: `Report ID(s): \`${reports.join("`, `")}\``,
 				}
 			})

@@ -24,7 +24,7 @@ class GetProfiles extends Command {
 	async run(message, args, config) {
 		if (!args[0])
 			args[0] = await getMessageResponse(message, `${this.client.emotes.type} Provide a player name to get profiles of`)
-				.then((r) => r?.content)
+				.then((r) => r?.content?.split(" ")[0])
 		const playername = args.shift()
 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
 		
@@ -33,10 +33,10 @@ class GetProfiles extends Command {
 
 		const profiles = await Promise.all(
 			config.trustedCommunities.map((communityId) =>
-				this.client.fagc.profiles.fetchCommunity(
-					playername,
-					communityId
-				)
+				this.client.fagc.profiles.fetchCommunity({
+					playername: playername,
+					communityId: communityId
+				})
 			)
 		)
 		if (!profiles || !profiles[0])
@@ -62,11 +62,9 @@ class GetProfiles extends Command {
 			profiles.map(async (profile) => {
 				const reports = profile.reports.map((report) => report.id)
 				const community =
-					await this.client.fagc.communities.fetchCommunity(
-						profile.communityId
-					)
+					await this.client.fagc.communities.fetchCommunity({ communityID: profile.communityId })
 				return {
-					name: `Community ${community.name} (\`${profile.communityId}\`)`,
+					name: `Community ${community?.name} (\`${profile.communityId}\`)`,
 					value: `Report ID(s): \`${reports.join("`, `")}\``,
 				}
 			})

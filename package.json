@@ -19,18 +19,20 @@
 		"discord.js": "^12.5.1",
 		"dotenv": "^8.2.0",
 		"envalid": "^7.2.1",
-		"fagc-api-wrapper": "^1.15.0",
+		"fagc-api-wrapper": "^1.22.1",
 		"fs-extra": "^9.1.0",
 		"moment": "^2.29.1",
 		"mongoose": "^5.12.3",
 		"node-fetch": "^2.6.1",
 		"path": "^0.12.7",
-		"strict-uri-encode": "^2.0.0"
+		"strict-uri-encode": "^2.0.0",
+		"validator": "^13.7.0"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^9.0.6",
 		"@types/node": "^14.14.22",
 		"@types/node-fetch": "^2.5.8",
+		"@types/validator": "^13.7.0",
 		"eslint": "^7.26.0",
 		"nodemon": "^2.0.7"
 	},
