@@ -3,6 +3,7 @@
 ### Changes
 
 -	Remove profile and user managers
+-	Use decorators for handling of authentication in one place
 
 ## [1.23.0] - [2022-01-03]
 

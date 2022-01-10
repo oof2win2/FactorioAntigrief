@@ -4,11 +4,11 @@ import { Revocation, Report, CreateReport, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import {
 	GenericAPIError,
-	NoAuthError,
 	UnsuccessfulRevocationError,
 } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import { FetchRequestTypes } from "../types/privatetypes"
+import { Authenticate } from "../utils"
 
 export default class ReportManager extends BaseManager<Report> {
 	private createRevocation: (revocationObject: Revocation) => void
@@ -174,6 +174,7 @@ export default class ReportManager extends BaseManager<Report> {
 		return reports
 	}
 
+	@Authenticate()
 	async create({
 		report,
 		cache = true,
@@ -181,17 +182,12 @@ export default class ReportManager extends BaseManager<Report> {
 	}: {
 		report: CreateReport
 	} & FetchRequestTypes): Promise<Report> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-
 		const create = await fetch(`${this.apiurl}/reports`, {
 			method: "POST",
 			body: JSON.stringify(report),
 			credentials: "include",
 			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
+				authorization: `${reqConfig._keystring}`,
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -202,6 +198,7 @@ export default class ReportManager extends BaseManager<Report> {
 		if (cache) this.add(create)
 		return create
 	}
+	@Authenticate()
 	async revoke({
 		reportid,
 		adminId,
@@ -211,9 +208,6 @@ export default class ReportManager extends BaseManager<Report> {
 		reportid: ApiID,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-
 		const revoked = await fetch(`${this.apiurl}/reports`, {
 			method: "DELETE",
 			body: JSON.stringify({
@@ -222,9 +216,7 @@ export default class ReportManager extends BaseManager<Report> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
+				authorization: `${reqConfig._keystring}`,
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -239,6 +231,7 @@ export default class ReportManager extends BaseManager<Report> {
 		this.cache.sweep((report) => report.id === reportid) // remove the revoked report from cache as it isnt working anymore
 		return revoked
 	}
+	@Authenticate()
 	async revokeAllName({
 		playername,
 		adminId,
@@ -248,9 +241,6 @@ export default class ReportManager extends BaseManager<Report> {
 		playername: string,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation[] | null> {
-		if (!reqConfig.apikey && !this.apikey && !reqConfig.cookieAuth)
-			throw new NoAuthError()
-
 		const revoked = await fetch(`${this.apiurl}/reports/revokeallname`, {
 			method: "DELETE",
 			body: JSON.stringify({
@@ -259,9 +249,7 @@ export default class ReportManager extends BaseManager<Report> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: !reqConfig.cookieAuth
-					? `Token ${reqConfig.apikey || this.apikey}`
-					: "Cookie",
+				authorization: `${reqConfig._keystring}`,
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())

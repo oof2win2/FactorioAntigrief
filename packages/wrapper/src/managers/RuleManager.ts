@@ -3,8 +3,9 @@ import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Rule, ApiID } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import { GenericAPIError, NoMasterApikeyError } from "../types"
+import { GenericAPIError } from "../types"
 import { FetchRequestTypes } from "../types/privatetypes"
+import { MasterAuthenticate } from "../utils"
 
 export class RuleManager extends BaseManager<Rule> {
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
@@ -65,22 +66,19 @@ export class RuleManager extends BaseManager<Rule> {
 		return null
 	}
 
+	@MasterAuthenticate()
 	async create({
 		rule,
 		reqConfig = {}
 	}: {
 		rule: Omit<Rule, "id">,
 	} & FetchRequestTypes): Promise<Rule> {
-		if (!reqConfig.masterapikey && !this.masterapikey)
-			throw new NoMasterApikeyError()
 		const data = await fetch(`${this.apiurl}/rules`, {
 			method: "POST",
 			body: JSON.stringify(rule),
 			credentials: "include",
 			headers: {
-				authorization: `Token ${
-					reqConfig.masterapikey || this.masterapikey
-				}`,
+				authorization: `${reqConfig._keystring}`,
 				"content-type": "application/json",
 			},
 		}).then((r) => r.json())
@@ -92,7 +90,7 @@ export class RuleManager extends BaseManager<Rule> {
 
 		return data
 	}
-
+	@MasterAuthenticate()
 	async modify({
 		id,
 		shortdesc, longdesc,
@@ -101,8 +99,6 @@ export class RuleManager extends BaseManager<Rule> {
 		id: string,
 		shortdesc?: string, longdesc?: string
 	} & FetchRequestTypes): Promise<Rule | null> {
-		if (!this.masterapikey && !reqConfig.masterapikey)
-			throw new NoMasterApikeyError()
 		const data = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(id)}`,
 			{
@@ -113,9 +109,7 @@ export class RuleManager extends BaseManager<Rule> {
 					longdesc: longdesc
 				}),
 				headers: {
-					authorization: `Token ${
-						reqConfig.masterapikey || this.masterapikey
-					}`,
+					authorization: `${reqConfig._keystring}`,
 					"content-type": "application/json",
 				},
 			}
@@ -131,24 +125,20 @@ export class RuleManager extends BaseManager<Rule> {
 
 		return data
 	}
-
+	@MasterAuthenticate()
 	async remove({
 		id,
 		reqConfig = {}
 	}: {
 		id: string,
 	} & FetchRequestTypes): Promise<Rule | null> {
-		if (!this.masterapikey && !reqConfig.masterapikey)
-			throw new NoMasterApikeyError()
 		const data = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(id)}`,
 			{
 				method: "DELETE",
 				credentials: "include",
 				headers: {
-					authorization: `Token ${
-						reqConfig.masterapikey || this.masterapikey
-					}`,
+					authorization: `${reqConfig._keystring}`,
 					"content-type": "application/json",
 				},
 			}
@@ -161,7 +151,7 @@ export class RuleManager extends BaseManager<Rule> {
 
 		return data
 	}
-
+	@MasterAuthenticate()
 	async merge({
 		idReceiving,
 		idDissolving,
@@ -170,17 +160,13 @@ export class RuleManager extends BaseManager<Rule> {
 		idReceiving: string
 		idDissolving: string
 		} & FetchRequestTypes): Promise<Rule> {
-		if (!this.masterapikey && !reqConfig.masterapikey)
-			throw new NoMasterApikeyError()
 		const data = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
 				method: "POST",
 				credentials: "include",
 				headers: {
-					authorization: `Token ${
-						reqConfig.masterapikey || this.masterapikey
-					}`,
+					authorization: `${reqConfig._keystring}`,
 				},
 			}
 		).then((r) => r.json())
