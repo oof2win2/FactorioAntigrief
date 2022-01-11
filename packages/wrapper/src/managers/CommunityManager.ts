@@ -59,6 +59,16 @@ export default class CommunityManager extends BaseManager<Community> {
 		return update
 	}
 
+	async getCommunityConfig({
+		communityID,
+		cache = true,
+		reqConfig = {}
+	}: {
+		communityID: ApiID,
+	} & FetchRequestTypes): Promise<Community | null> {
+		return this.fetchCommunity({ communityID: communityID, cache, reqConfig })
+	}
+	
 	async fetchCommunity({
 		communityID,
 		cache = true,
