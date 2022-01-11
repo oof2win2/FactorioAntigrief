@@ -114,9 +114,12 @@ async function createPagedEmbed(
 async function createGuildConfig(guild, client) {
 	const owner = guild.owner || (await client.users.fetch(guild.ownerID))
 	// create initial config only if it doesn't exist yet
-	ConfigModel.findOne({ guildId: guild.id }).then((config) => {
+	client.fagc.communities.fetchGuildConfig({
+		guildId: guild.id,
+	}).then((config) => {
 		if (config) return
 		console.log(`Creating config for guild with ID ${guild.id}`)
+		// TODO: use the api when a contact can be passed in
 		ConfigModel.create({
 			communityname: guild.name,
 			guildId: guild.id,

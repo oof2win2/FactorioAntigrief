@@ -5,8 +5,8 @@ const {
 } = require("../../utils/responseGetter")
 const { handleErrors, createPagedEmbed } = require("../../utils/functions")
 const Command = require("../../base/Command")
-const { AuthenticationError } = require("fagc-api-wrapper")
 const validator = require("validator").default
+const { NoAuthError } = require("fagc-api-wrapper")
 
 class CreateReportAdvanced extends Command {
 	constructor(client) {
@@ -247,7 +247,7 @@ class CreateReportAdvanced extends Command {
 				return handleErrors(message, reports)
 			}
 		} catch (error) {
-			if (error instanceof AuthenticationError)
+			if (error instanceof NoAuthError)
 				return message.channel.send("Your API key is set incorrectly")
 			message.channel.send(`${this.client.emotes.error} Error creating reports. Please check logs.`)
 			throw error

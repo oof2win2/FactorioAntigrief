@@ -24,7 +24,7 @@ class Ping extends Command {
 			let ping = m.createdTimestamp - message.createdTimestamp
 			const beforeFetch = Date.now()
 			// @ts-ignore
-			await fetch(this.client.env.APIURL)
+			await fetch(this.client.fagc.apiurl)
 			const apilatency = Date.now() - beforeFetch
 			m.edit(
 				`Bot Latency: \`${ping}ms\`\nDiscord API Latency: \`${wsPing}ms\`\nFAGC API Latency: \`${apilatency}ms\``
