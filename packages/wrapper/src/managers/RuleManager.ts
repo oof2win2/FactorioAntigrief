@@ -113,7 +113,6 @@ export class RuleManager extends BaseManager<Rule> {
 
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
-		if (!data.id) throw data
 
 		// remove old rule from cache and add new rule
 		this.removeFromCache(data)

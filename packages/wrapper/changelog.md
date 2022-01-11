@@ -1,3 +1,9 @@
+## UNRELEASED
+
+### Bugfixes
+
+-	Fix issues with wrong authentication, routes and HTTP methods
+
 ## [1.24.0] - [2022-01-03]
 
 ### Changes
