@@ -26,7 +26,7 @@ class FetchReport extends Command {
 		const reportID = args.shift()?.toLowerCase()
 		if (!reportID) return message.channel.send(`${this.client.emotes.warn} No report was provided`)
 
-		const report = await this.client.fagc.reports.fetchReport({ reportid: reportID })
+		const report = await this.client.fagc.reports.fetchReport({ id: reportID })
 		if (!report?.id)
 			return message.channel.send(
 				`${this.client.emotes.warn} Report with ID \`${reportID}\` doesn't exist`

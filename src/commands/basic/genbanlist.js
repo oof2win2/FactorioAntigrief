@@ -24,7 +24,7 @@ class Genbanlist extends Command {
 			return message.reply(`${this.client.emotes.warn} Please set rule filters first`)
 		message.reply("Processing banlist. Please wait")
 
-		const reports = await this.client.fagc.reports.listFiltered({
+		const reports = await this.client.fagc.reports.list({
 			communityIDs: config.trustedCommunities,
 			ruleIDs: config.ruleFilters
 		})
