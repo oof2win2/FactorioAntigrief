@@ -768,7 +768,7 @@ export default class RevocationController {
 	}
 
 	@GET({
-		url: "/modifiedSince/:timestamp",
+		url: "/since/:timestamp",
 		options: {
 			schema: {
 				params: z.object({
