@@ -89,64 +89,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		if (cache) this.add(res)
 		return res
 	}
-
-	async fetchPlayer({
-		playername,
-		cache = true,
-		reqConfig = {}
-	}: {
-		playername: string
-	} & FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
-			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
-			{
-				credentials: "include",
-				headers: {
-					authorization: authenticate(this, reqConfig),
-				},
-			}
-		).then((r) => r.json())
-		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
-		revocations.forEach((revocation: Revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.add(revocation)
-		})
-		return revocations
-	}
-
-	async revokePlayer({
-		playername,
-		adminId,
-		cache = true,
-		reqConfig = {}
-	}: {
-		playername: string,
-		adminId: string,
-	} & FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
-			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
-			{
-				body: JSON.stringify({
-					adminId: adminId
-				}),
-				credentials: "include",
-				headers: {
-					authorization: authenticate(this, reqConfig),
-					"content-type": "application/json",
-				}
-			}
-		).then((r) => r.json())
-		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
-
-		revocations.forEach((revocation: Revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.add(revocation)
-		})
-		return revocations
-	}
-
+	
 	async fetchRule({
 		ruleId,
 		cache = true,
@@ -196,6 +139,64 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			}
 		).then((r) => r.json())
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
+		revocations.forEach((revocation: Revocation) => {
+			revocation.reportedTime = new Date(revocation.reportedTime)
+			revocation.revokedTime = new Date(revocation.revokedTime)
+			if (cache) this.add(revocation)
+		})
+		return revocations
+	}
+
+	async fetchPlayer({
+		playername,
+		cache = true,
+		reqConfig = {}
+	}: {
+		playername: string
+	} & FetchRequestTypes): Promise<Revocation[]> {
+		const revocations = await fetch(
+			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
+			{
+				credentials: "include",
+				headers: {
+					authorization: authenticate(this, reqConfig),
+				},
+			}
+		).then((r) => r.json())
+		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
+		revocations.forEach((revocation: Revocation) => {
+			revocation.reportedTime = new Date(revocation.reportedTime)
+			revocation.revokedTime = new Date(revocation.revokedTime)
+			if (cache) this.add(revocation)
+		})
+		return revocations
+	}
+
+	async revokePlayer({
+		playername,
+		adminId,
+		cache = true,
+		reqConfig = {}
+	}: {
+		playername: string,
+		adminId: string,
+	} & FetchRequestTypes): Promise<Revocation[]> {
+		const revocations = await fetch(
+			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
+			{
+				method: "POST",
+				body: JSON.stringify({
+					adminId: adminId
+				}),
+				credentials: "include",
+				headers: {
+					authorization: authenticate(this, reqConfig),
+					"content-type": "application/json",
+				}
+			}
+		).then((r) => r.json())
+		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
+
 		revocations.forEach((revocation: Revocation) => {
 			revocation.reportedTime = new Date(revocation.reportedTime)
 			revocation.revokedTime = new Date(revocation.revokedTime)

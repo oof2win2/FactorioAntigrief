@@ -138,7 +138,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		config: SetGuildConfig,
 	} & FetchRequestTypes): Promise<GuildConfig> {
 		const update = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
-			method: "POST",
+			method: "PATCH",
 			body: JSON.stringify(config),
 			credentials: "include",
 			headers: {
@@ -183,7 +183,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: authenticate(this, reqConfig),
+				authorization: masterAuthenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -205,7 +205,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: authenticate(this, reqConfig),
+				authorization: masterAuthenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -289,7 +289,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "PATCH",
 				credentials: "include",
 				headers: {
-					authorization: authenticate(this, reqConfig),
+					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
 		).then((u) => u.json())
