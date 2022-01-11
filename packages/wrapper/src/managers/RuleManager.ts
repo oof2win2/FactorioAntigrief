@@ -5,7 +5,7 @@ import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from "../types"
 import { FetchRequestTypes } from "../types/privatetypes"
-import { MasterAuthenticate } from "../utils"
+import { masterAuthenticate } from "../utils"
 
 export class RuleManager extends BaseManager<Rule> {
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
@@ -26,7 +26,6 @@ export class RuleManager extends BaseManager<Rule> {
 		return allRules
 	}
 
-	@MasterAuthenticate()
 	async create({
 		rule,
 		reqConfig = {}
@@ -38,7 +37,7 @@ export class RuleManager extends BaseManager<Rule> {
 			body: JSON.stringify(rule),
 			credentials: "include",
 			headers: {
-				authorization: `${reqConfig._keystring}`,
+				authorization: masterAuthenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
 		}).then((r) => r.json())
@@ -88,7 +87,6 @@ export class RuleManager extends BaseManager<Rule> {
 		return null
 	}
 
-	@MasterAuthenticate()
 	async modify({
 		id,
 		shortdesc, longdesc,
@@ -107,7 +105,7 @@ export class RuleManager extends BaseManager<Rule> {
 					longdesc: longdesc
 				}),
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 					"content-type": "application/json",
 				},
 			}
@@ -124,7 +122,6 @@ export class RuleManager extends BaseManager<Rule> {
 		return data
 	}
 
-	@MasterAuthenticate()
 	async remove({
 		id,
 		reqConfig = {}
@@ -137,7 +134,7 @@ export class RuleManager extends BaseManager<Rule> {
 				method: "DELETE",
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 					"content-type": "application/json",
 				},
 			}
@@ -151,7 +148,6 @@ export class RuleManager extends BaseManager<Rule> {
 		return data
 	}
 
-	@MasterAuthenticate()
 	async merge({
 		idReceiving,
 		idDissolving,
@@ -166,7 +162,7 @@ export class RuleManager extends BaseManager<Rule> {
 				method: "PATCH",
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
 		).then((r) => r.json())

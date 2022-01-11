@@ -6,7 +6,7 @@ import { GenericAPIError } from "../types"
 import strictUriEncode from "strict-uri-encode"
 import { APIEmbed } from "discord-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
-import { MasterAuthenticate } from "../utils"
+import { masterAuthenticate } from "../utils"
 
 export default class InfoManager extends BaseManager<Webhook> {
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
@@ -51,7 +51,6 @@ export default class InfoManager extends BaseManager<Webhook> {
 		return add
 	}
 
-	@MasterAuthenticate()
 	async notifyGuildText({
 		guildId,
 		text,
@@ -69,13 +68,13 @@ export default class InfoManager extends BaseManager<Webhook> {
 				}),
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 					"content-type": "application/json",
 				},
 			}
 		)
 	}
-	@MasterAuthenticate()
+
 	async notifyGuildEmbed({
 		guildId,
 		embed,
@@ -93,7 +92,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 				body: JSON.stringify(embed),
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 					"content-type": "application/json",
 				},
 			}
