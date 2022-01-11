@@ -5,7 +5,7 @@ import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from ".."
 import { FetchRequestTypes } from "../types/privatetypes"
-import { Authenticate } from "../utils"
+import { authenticate } from "../utils"
 
 export default class RevocationManager extends BaseManager<Revocation> {	
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
@@ -14,7 +14,6 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		this.apiurl = options.apiurl
 	}
 
-	@Authenticate()
 	async fetchAll({
 		cache = true,
 		reqConfig = {}
@@ -24,7 +23,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			{
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 				},
 			}
 		).then((r) => r.json())
@@ -38,7 +37,6 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return revocations
 	}
 
-	@Authenticate()
 	async fetchRevocation({
 		id,
 		cache = true,
@@ -51,7 +49,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			{
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 				},
 			}
 		).then((r) => r.json())
@@ -62,7 +60,6 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return revocation
 	}
 
-	@Authenticate()
 	async revoke({
 		reportId,
 		adminId,
@@ -82,7 +79,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 				credentials: "include",
 				headers: {
 					"content-cype": "application/json",
-					"authorization": `${reqConfig._keystring}`,
+					"authorization": authenticate(this, reqConfig),
 				},
 			}
 		).then((r) => r.json())
@@ -93,7 +90,6 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return res
 	}
 
-	@Authenticate()
 	async fetchPlayer({
 		playername,
 		cache = true,
@@ -106,7 +102,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			{
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 				},
 			}
 		).then((r) => r.json())
@@ -119,7 +115,6 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return revocations
 	}
 
-	@Authenticate()
 	async revokePlayer({
 		playername,
 		adminId,
@@ -137,7 +132,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 				}),
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 					"content-type": "application/json",
 				}
 			}
@@ -152,7 +147,6 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return revocations
 	}
 
-	@Authenticate()
 	async fetchRule({
 		ruleId,
 		cache = true,
@@ -165,7 +159,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			{
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 				},
 			}
 		).then((r) => r.json())
@@ -178,7 +172,6 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return revocations
 	}
 
-	@Authenticate()
 	async revokeRule({
 		ruleId,
 		adminId,
@@ -197,7 +190,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 				}),
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 					"content-type": "application/json",
 				}
 			}

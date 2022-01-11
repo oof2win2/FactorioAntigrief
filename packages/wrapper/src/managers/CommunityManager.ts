@@ -4,7 +4,7 @@ import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { Community, GuildConfig, ApiID } from "fagc-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
-import { Authenticate, MasterAuthenticate } from "../utils"
+import { authenticate, masterAuthenticate } from "../utils"
 
 type SetGuildConfig = Partial<GuildConfig> & Pick<GuildConfig, "guildId">
 type SetCommunityConfig = Partial<Omit<Community, "id"|"guildIds">>
@@ -35,7 +35,6 @@ export default class CommunityManager extends BaseManager<Community> {
 		return allCommunities
 	}
 
-	@Authenticate()
 	async setCommunityConfig({
 		config,
 		reqConfig = {}
@@ -49,7 +48,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				body: JSON.stringify(config),
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 					"content-type": "application/json",
 				},
 			}
@@ -59,6 +58,16 @@ export default class CommunityManager extends BaseManager<Community> {
 		return update
 	}
 
+	async getCommunityConfig({
+		communityID,
+		cache = true,
+		reqConfig = {}
+	}: {
+		communityID: ApiID,
+	} & FetchRequestTypes): Promise<Community | null> {
+		return this.fetchCommunity({ communityID: communityID, cache, reqConfig })
+	}
+	
 	async fetchCommunity({
 		communityID,
 		cache = true,
@@ -100,15 +109,14 @@ export default class CommunityManager extends BaseManager<Community> {
 		return fetched
 	}
 	
-	@Authenticate()
 	async fetchOwnCommunity({
 		cache = true,
 		reqConfig = {}
 	}: FetchRequestTypes): Promise<Community | null> {
-		const community = await fetch(`${this.apiurl}/communities/getown`, {
+		const community = await fetch(`${this.apiurl}/communities/own`, {
 			credentials: "include",
 			headers: {
-				authorization: `${reqConfig._keystring}`,
+				authorization: authenticate(this, reqConfig),
 			},
 		}).then((c) => c.json())
 
@@ -123,19 +131,18 @@ export default class CommunityManager extends BaseManager<Community> {
 		return community
 	}
 
-	@Authenticate()
 	async setGuildConfig({
 		config,
 		reqConfig = {}
 	}: {
 		config: SetGuildConfig,
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		const update = await fetch(`${this.apiurl}/communities/guildconfig/${config.guildId}`, {
+		const update = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
 			method: "POST",
 			body: JSON.stringify(config),
 			credentials: "include",
 			headers: {
-				authorization: `${reqConfig._keystring}`,
+				authorization: authenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -157,7 +164,6 @@ export default class CommunityManager extends BaseManager<Community> {
 		return config
 	}
 
-	@MasterAuthenticate()
 	async create({
 		name,
 		contact,
@@ -177,7 +183,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: `${reqConfig._keystring}`,
+				authorization: authenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
@@ -186,7 +192,6 @@ export default class CommunityManager extends BaseManager<Community> {
 		return create
 	}
 
-	@MasterAuthenticate()
 	async createGuildConfig({
 		guildId,
 		reqConfig = {}
@@ -200,14 +205,14 @@ export default class CommunityManager extends BaseManager<Community> {
 			}),
 			credentials: "include",
 			headers: {
-				authorization: `${reqConfig._keystring}`,
+				authorization: authenticate(this, reqConfig),
+				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
 		if (create.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
 		return create
 	}
 
-	@MasterAuthenticate()
 	async notifyGuildConfig({
 		guildID,
 		reqConfig = {}
@@ -221,7 +226,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "POST",
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
 		).then((u) => u.json())
@@ -229,7 +234,6 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
-	@MasterAuthenticate()
 	async guildLeave({
 		guildID,
 		reqConfig = {}
@@ -242,7 +246,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "POST",
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
 		).then((u) => u.json())
@@ -250,7 +254,6 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
-	@MasterAuthenticate()
 	async remove({
 		communityID,
 		reqConfig = {}
@@ -263,7 +266,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "DELETE",
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
 		).then((u) => u.json())
@@ -272,7 +275,6 @@ export default class CommunityManager extends BaseManager<Community> {
 		return remove
 	}
 
-	@MasterAuthenticate()
 	async merge({
 		idReceiving,
 		idDissolving,
@@ -287,7 +289,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				method: "PATCH",
 				credentials: "include",
 				headers: {
-					authorization: `${reqConfig._keystring}`,
+					authorization: authenticate(this, reqConfig),
 				},
 			}
 		).then((u) => u.json())

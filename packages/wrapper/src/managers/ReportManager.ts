@@ -7,7 +7,7 @@ import {
 } from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import { FetchRequestTypes } from "../types/privatetypes"
-import { Authenticate } from "../utils"
+import { authenticate } from "../utils"
 
 export default class ReportManager extends BaseManager<Report> {
 	constructor(
@@ -36,7 +36,6 @@ export default class ReportManager extends BaseManager<Report> {
 		return reports
 	}
 
-	@Authenticate()
 	async create({
 		report,
 		cache = true,
@@ -49,7 +48,7 @@ export default class ReportManager extends BaseManager<Report> {
 			body: JSON.stringify(report),
 			credentials: "include",
 			headers: {
-				authorization: `${reqConfig._keystring}`,
+				authorization: authenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
