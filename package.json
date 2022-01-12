@@ -71,7 +71,7 @@
 		"@types/mongoose": "^5.11.97",
 		"@types/node-fetch": "^3.0.3",
 		"@types/nodemon": "^1.19.1",
-		"@types/prettier": "^2.4.1",
+		"@types/prettier": "^2.4.3",
 		"@types/validator": "^13.7.1",
 		"@types/ws": "^8.2.2",
 		"@typescript-eslint/eslint-plugin": "^5.9.1",
