@@ -44,7 +44,7 @@
 		"fastify-session-sqlite-store": "^1.0.3",
 		"fastify-swagger": "^4.13.1",
 		"fastify-websocket": "^4.0.0",
-		"mongoose": "^6.1.5",
+		"mongoose": "^6.1.6",
 		"mongoose-to-swagger": "^1.3.0",
 		"openapi3-ts": "^2.0.1",
 		"prom-client": "^14.0.1",
