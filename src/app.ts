@@ -35,22 +35,26 @@ const fastify: FastifyInstance = Fastify({
 	logger: false,
 })
 
-Sentry.init({
-	dsn: ENV.SENTRY_LINK,
+const hasSentry = Boolean(ENV.SENTRY_LINK);
+if (hasSentry) {
+	Sentry.init({
+		dsn: ENV.SENTRY_LINK,
 
-	// We recommend adjusting this value in production, or using tracesSampler
-	// for finer control
-	tracesSampleRate: 1.0,
-	integrations: [
-		new Sentry.Integrations.Http({ tracing: true }),
-		new Sentry.Integrations.Console(),
-	],
-})
+		// We recommend adjusting this value in production, or using tracesSampler
+		// for finer control
+		tracesSampleRate: 1.0,
+		integrations: [
+			new Sentry.Integrations.Http({ tracing: true }),
+			new Sentry.Integrations.Console(),
+		],
+	})
 
-fastify.addHook("onRequest", (req, res, next) => {
-	const handler = Sentry.Handlers.requestHandler()
-	handler(req.raw, res.raw, next)
-})
+	fastify.addHook("onRequest", (req, res, next) => {
+		const handler = Sentry.Handlers.requestHandler()
+		handler(req.raw, res.raw, next)
+	})
+}
+
 
 const SwaggerDefinitions = {}
 
@@ -290,10 +294,11 @@ fastify.setErrorHandler(async (error, request, reply) => {
 			message: Array.isArray(x._errors) && x._errors.length ? x._errors[0] : errorOutput
 		})
 	}
-	
+
 	console.error(error)
 	// Sending error to be logged in Sentry
-	Sentry.captureException(error)
+	if (hasSentry)
+		Sentry.captureException(error)
 	reply.status(500).send({
 		errorCode: 500,
 		error: "Something went wrong",
