@@ -159,7 +159,11 @@ fastify.register(fastifySwagger, {
 		},
 	},
 	staticCSP: true,
-	transformStaticCSP: (header) => header,
+	transformStaticCSP: (header) => {
+		if (ENV.NODE_ENV == "development")
+			return header.replace("upgrade-insecure-requests;", "");
+		return header;
+	},
 	exposeRoute: true,
 })
 
@@ -216,7 +220,14 @@ declare module "fastify-request-context" {
 }
 
 // helmet
-fastify.register(fastifyHelmetPlugin)
+fastify.register(fastifyHelmetPlugin, {
+	contentSecurityPolicy: {
+		directives: {
+			...(ENV.NODE_ENV === "development" ? { "upgrade-insecure-requests": null } : {}),
+		},
+	},
+	...(ENV.NODE_ENV === "development" ? { hsts: false, } : {}),
+})
 
 // form body for backwards compat with the express api
 fastify.register(fastifyFormBodyPlugin)
