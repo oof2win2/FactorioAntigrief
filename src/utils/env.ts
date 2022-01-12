@@ -7,6 +7,7 @@ dotenv.config({
 const ENV = cleanEnv(
 	process.env,
 	{
+		NODE_ENV: str({ default: "production", choices: ["development", "production"] }),
 		MONGOURI: url({
 			example:
 				"mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName",
