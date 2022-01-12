@@ -29,7 +29,7 @@ import UserModel from "./database/fagc/user"
 import WebhookModel from "./database/fagc/webhook"
 import GuildConfigModel from "./database/fagc/guildconfig"
 import { z } from "zod"
-import { generateSchema } from "./utils/zodOpenAPI"
+import { generateSchema } from "@anatine/zod-openapi"
 
 const fastify: FastifyInstance = Fastify({
 	logger: false,
