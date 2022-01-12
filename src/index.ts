@@ -1,7 +1,7 @@
-import ENV from "./utils/env.js"
+import ENV from "./utils/env"
 import mongoose from "mongoose"
-import fastify from "./app.js"
-import { client } from "./utils/discord.js"
+import fastify from "./app"
+import { client } from "./utils/discord"
 
 mongoose.connect(ENV.MONGOURI, {
 	ignoreUndefined: true,

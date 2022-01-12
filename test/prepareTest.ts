@@ -1,6 +1,6 @@
-import ENV from "../src/utils/env.js"
+import ENV from "../src/utils/env"
 import mongoose from "mongoose"
-import backend from "../src/app.js"
+import backend from "../src/app"
 
 jest.setTimeout(10000)
 beforeAll(async () => {

@@ -1,5 +1,5 @@
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
-import { getUserStringFromID } from "../../utils/functions-databaseless.js"
+import { getUserStringFromID } from "../../utils/functions-databaseless"
 
 @modelOptions({
 	schemaOptions: {

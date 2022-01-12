@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, POST } from "fastify-decorators"
 import { MessageEmbed, Webhook, WebhookClient } from "discord.js"
-import WebhookModel from "../database/fagc/webhook.js"
-import { client } from "../utils/discord.js"
-import { MasterAuthenticate } from "../utils/authentication.js"
+import WebhookModel from "../database/fagc/webhook"
+import { client } from "../utils/discord"
+import { MasterAuthenticate } from "../utils/authentication"
 import { z } from "zod"
 
 @Controller({ route: "/informatics" })

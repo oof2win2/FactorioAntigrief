@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET } from "fastify-decorators"
-import ReportModel, { ReportClass } from "../database/fagc/report.js"
+import ReportModel, { ReportClass } from "../database/fagc/report"
 import { Profile } from "fagc-api-types"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"

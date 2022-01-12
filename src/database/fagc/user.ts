@@ -5,7 +5,7 @@ import {
 	prop,
 } from "@typegoose/typegoose"
 import { Ref } from "@typegoose/typegoose"
-import { getUserStringFromID } from "../../utils/functions-databaseless.js"
+import { getUserStringFromID } from "../../utils/functions-databaseless"
 
 @modelOptions({
 	schemaOptions: {

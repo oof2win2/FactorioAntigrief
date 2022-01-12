@@ -1,6 +1,6 @@
 import { Client, User } from "discord.js"
 import OAuthClient from "discord-oauth2"
-import ENV from "./env.js"
+import ENV from "./env"
 
 // this is so that the client can be accessed from any file
 export const client = new Client({
