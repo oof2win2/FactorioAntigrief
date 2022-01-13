@@ -1,3 +1,9 @@
+### UNRELEASED
+
+### Bugfixes
+
+-	Fix issue with `Report` type not having required fields
+
 ## [1.5.0] - [2022-01-13]
 
 ### Changes
