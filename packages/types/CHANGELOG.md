@@ -1,3 +1,8 @@
+## UNRELEASED
+
+### Changes
+-	Change typings to `zod` structures and infer typings from that
+
 ## [1.4.2] - [2022-01-02]
 
 ### Bugfixes

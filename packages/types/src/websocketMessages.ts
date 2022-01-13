@@ -1,101 +1,122 @@
 import { APIEmbed, APIUser } from "discord-api-types"
+import { z } from "zod"
 import { Community, GuildConfig, Report, Revocation, Rule } from "./baseTypes"
 
-export interface BaseWebsocketMessage {
-	messageType: string
-}
+export const BaseWebsocketMessage = z.object({
+	messageType: z.enum([
+		"report", "revocation",
+		"ruleCreated", "ruleRemoved", "ruleUpdated", "rulesMerged",
+		"communityCreated", "communityRemoved", "communityUpdated", "communitiesMerged",
+		"guildConfigChanged",
+		"announcement" ]),
+})
+export type BaseWebsocketMessage = z.infer<typeof BaseWebsocketMessage>
 
-export interface ReportMessageExtraOpts {
-	community: Community
-	admin: APIUser
-	rule: Rule
-	totalReports: number
-	totalCommunities: number
-}
+export const ReportMessageExtraOpts = z.object({
+	community: Community,
+	admin: z.string(),
+	rule: Rule,
+	totalReports: z.number(),
+	totalCommunities: z.number(),
+})
+export type ReportMessageExtraOpts = z.infer<typeof ReportMessageExtraOpts>
 
-export interface ReportCreatedMessage extends BaseWebsocketMessage {
-	messageType: "report"
-	embed: APIEmbed
-	report: Report
-	extraData: ReportMessageExtraOpts
-}
+export const ReportCreatedMessage = z.object({
+	messageType: z.literal("report"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	report: Report,
+	extra: ReportMessageExtraOpts,
+}).merge(BaseWebsocketMessage)
+export type ReportCreatedMessage = z.infer<typeof ReportCreatedMessage> & { embed: APIEmbed }
 
-export interface RevocationMessageExtraOpts extends ReportMessageExtraOpts {
-	revokedBy: APIUser
-}
+export const RevocationMessageExtraOpts = z.object({
+	revokedBy: z.object({}).passthrough(), // no way to validate this
+})
+export type RevocationMessageExtraOpts = z.infer<typeof RevocationMessageExtraOpts> & { revokedBy: APIUser }
 
-export interface RevocationMessage extends BaseWebsocketMessage {
-	messageType: "revocation"
-	embed: APIEmbed
-	revocation: Revocation
-	extraData: RevocationMessageExtraOpts
-}
+export const RevocationMessage = z.object({
+	messageType: z.literal("revocation"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	revocation: Revocation,
+	extra: RevocationMessageExtraOpts,
+}).merge(BaseWebsocketMessage)
+export type RevocationMessage = z.infer<typeof RevocationMessage> & { embed: APIEmbed }
 
-export interface RuleCreatedMessage extends BaseWebsocketMessage {
-	messageType: "ruleCreated"
-	embed: APIEmbed
-	rule: Rule
-}
+export const RuleCreatedMessage = z.object({
+	messageType: z.literal("ruleCreated"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	rule: Rule,
+}).merge(BaseWebsocketMessage)
+export type RuleCreatedMessage = z.infer<typeof RuleCreatedMessage> & { embed: APIEmbed }
 
-export interface RuleRemovedMessage extends BaseWebsocketMessage {
-	messageType: "ruleRemoved"
-	embed: APIEmbed
-	rule: Rule
-}
+export const RuleRemovedMessage = z.object({
+	messageType: z.literal("ruleRemoved"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	rule: Rule,
+}).merge(BaseWebsocketMessage)
+export type RuleRemovedMessage = z.infer<typeof RuleRemovedMessage> & { embed: APIEmbed }
 
-export interface RuleUpdatedMessage extends BaseWebsocketMessage {
-	messageType: "ruleUpdated"
-	embed: APIEmbed
-	receiving: Rule
-	dissolving: Rule
-}
+export const RuleUpdatedMessage = z.object({
+	messageType: z.literal("ruleUpdated"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	rule: Rule,
+}).merge(BaseWebsocketMessage)
+export type RuleUpdatedMessage = z.infer<typeof RuleUpdatedMessage> & { embed: APIEmbed }
 
-export interface RulesMergedMessage extends BaseWebsocketMessage {
-	messageType: "rulesMerged"
-	embed: APIEmbed
-	rule: Rule
-}
+export const RulesMergedMessage = z.object({
+	messageType: z.literal("rulesMerged"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	rules: Rule,
+}).merge(BaseWebsocketMessage)
+export type RulesMergedMessage = z.infer<typeof RulesMergedMessage> & { embed: APIEmbed }
 
-export interface CommunityCreatedMessageExtraOpts {
-	contact: APIUser
-}
-export interface CommunityCreatedMessage extends BaseWebsocketMessage {
-	messageType: "communityCreated"
-	embed: APIEmbed
-	community: Community
+export const CommunityCreatedMessageExtraOpts = z.object({
+	createdBy: z.object({}).passthrough(), // no way to validate this
+})
+export type CommunityCreatedMessageExtraOpts = z.infer<typeof CommunityCreatedMessageExtraOpts> & { createdBy: APIUser }
+
+export const CommunityCreatedMessage = z.object({
+	messageType: z.literal("communityCreated"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	community: Community,
+	extraData: CommunityCreatedMessageExtraOpts,
+}).merge(BaseWebsocketMessage)
+export type CommunityCreatedMessage = z.infer<typeof CommunityCreatedMessage> & { embed: APIEmbed }
+
+export const CommunityRemovedMessage = z.object({
+	messageType: z.literal("communityRemoved"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	community: Community,
 	extraData: CommunityCreatedMessageExtraOpts
-}
+}).merge(BaseWebsocketMessage)
+export type CommunityRemovedMessage = z.infer<typeof CommunityRemovedMessage> & { embed: APIEmbed }
 
-export interface CommunityCreatedMessageExtraOpts {
-	contact: APIUser
-}
-export interface CommunityRemovedMessage extends BaseWebsocketMessage {
-	messageType: "communityRemoved"
-	embed: APIEmbed
-	community: Community
+export const CommunityUpdatedMessage = z.object({
+	messageType: z.literal("communityRemoved"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	community: Community,
 	extraData: CommunityCreatedMessageExtraOpts
-}
-export interface CommunityUpdatedMessage extends BaseWebsocketMessage {
-	messageType: "communityRemoved"
-	embed: APIEmbed
-	community: Community
-	extraData: CommunityCreatedMessageExtraOpts
-}
+}).merge(BaseWebsocketMessage)
+export type CommunityUpdatedMessage = z.infer<typeof CommunityUpdatedMessage> & { embed: APIEmbed }
 
-export interface CommunitiesMergedMessage extends BaseWebsocketMessage {
-	messageType: "communitiesMerged"
-	embed: APIEmbed
-	receiving: Community
-	dissolving: Community
+export const CommunitiesMergedMessage = z.object({
+	messageType: z.literal("communitiesMerged"),
+	embed: z.object({}).passthrough(), // no way to validate this
+	receiving: Community,
+	dissolving: Community,
 	extraData: CommunityCreatedMessageExtraOpts
-}
+}).merge(BaseWebsocketMessage)
+export type CommunitiesMergedMessage = z.infer<typeof CommunitiesMergedMessage> & { embed: APIEmbed }
 
-export interface GuildConfigChangedMessage extends BaseWebsocketMessage {
-	messageType: "guildConfigChanged"
+export const GuildConfigChangedMessage = z.object({
+	messageType: z.literal("guildConfigChanged"),
 	config: GuildConfig
-}
+}).merge(BaseWebsocketMessage)
+export type GuildConfigChangedMessage = z.infer<typeof GuildConfigChangedMessage>
 
-export interface AnnouncementMessage extends BaseWebsocketMessage {
-	messageType: "announcement"
-	embed: APIEmbed
-}
+export const AnnouncementMessage = z.object({
+	messageType: z.literal("announcement"),
+	embed: z.object({}).passthrough(), // no way to validate this
+})
+export type AnnouncementMessage = z.infer<typeof AnnouncementMessage> & { embed: APIEmbed }
+
