@@ -19,7 +19,7 @@ export type CreateReport = z.infer<typeof CreateReport>
 
 export const Report = z.object({
 	communityId: z.string(),
-}).merge(Common).merge(CreateReport)
+}).merge(Common).merge(CreateReport.required())
 export type Report = z.infer<typeof Report>
 
 export const Revocation = z.object({
