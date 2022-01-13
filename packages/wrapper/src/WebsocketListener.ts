@@ -13,6 +13,7 @@ import {
 	RuleUpdatedMessage,
 	RulesMergedMessage,
 	GuildConfigChangedMessage,
+	BaseWebsocketMessage,
 } from "fagc-api-types"
 
 // some typescript stuff so it is strictly typed
@@ -35,10 +36,11 @@ export type WebSocketMessageType =
 	| "announcement"
 	| "reconnecting"
 	| "connected"
-export interface WebSocketMessage {
-	messageType: WebSocketMessageType
-	[key: string]: string | boolean | number
-}
+
+/**
+ * @deprecated Use BaseWebsocketMessage instead
+ */
+export type WebSocketMessage = BaseWebsocketMessage
 
 export declare interface WebSocketEvents {
 	guildConfigChanged: (message: GuildConfigChangedMessage) => void
@@ -101,7 +103,8 @@ class WebSocketHandler extends EventEmitter {
 		// handle socket messages
 		this.socket.onmessage = (msg) => {
 			try {
-				this.handleMessage(JSON.parse(msg.data as string))
+				const parsed = BaseWebsocketMessage.safeParse(JSON.parse(msg.data as string))
+				if (parsed.success) this.handleMessage(parsed.data)
 			} catch (e) {
 				console.error(e)
 			}
@@ -119,75 +122,75 @@ class WebSocketHandler extends EventEmitter {
 		}
 	}
 
-	handleMessage(message: WebSocketMessage): void {
+	handleMessage(message: BaseWebsocketMessage): void {
 		const messageType = message.messageType
 		switch (messageType) {
-		case "guildConfigChanged":
-			this.emit(
-				"guildConfigChanged",
-				message as unknown as GuildConfigChangedMessage
-			)
+		case "guildConfigChanged": {
+			const parsed = GuildConfigChangedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("guildConfigChanged", parsed.data as GuildConfigChangedMessage)
 			break
+		}
 		case "report": {
-			const toSendMessage = message as unknown as ReportCreatedMessage
-			toSendMessage.report.reportedTime = new Date(toSendMessage.report.reportedTime)
-			this.emit("report", toSendMessage as ReportCreatedMessage)
+			const parsed = ReportCreatedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("report", parsed.data as ReportCreatedMessage)
 			break
 		}
 		case "revocation": {
-			const toSendMessage = message as unknown as RevocationMessage
-			toSendMessage.revocation.reportedTime = new Date(toSendMessage.revocation.reportedTime)
-			toSendMessage.revocation.revokedTime = new Date(toSendMessage.revocation.revokedTime)
-			this.emit("revocation", toSendMessage)
+			const parsed = RevocationMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("revocation", parsed.data as RevocationMessage)
 			break
 		}
-		case "ruleCreated":
-			this.emit(
-				"ruleCreated",
-				message as unknown as RuleCreatedMessage
-			)
+		case "ruleCreated": {
+			const parsed = RuleCreatedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("ruleCreated", parsed.data as RuleCreatedMessage)
 			break
-		case "ruleUpdated":
-			this.emit(
-				"ruleUpdated",
-				message as unknown as RuleUpdatedMessage
-			)
+		}
+		case "ruleUpdated": {
+			const parsed = RuleUpdatedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("ruleUpdated", parsed.data as RuleUpdatedMessage)
 			break
-		case "ruleRemoved":
-			this.emit(
-				"ruleRemoved",
-				message as unknown as RuleRemovedMessage
-			)
+		}
+		case "ruleRemoved": {
+			const parsed = RuleRemovedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("ruleRemoved", parsed.data as RuleRemovedMessage)
 			break
-		case "rulesMerged":
-			this.emit(
-				"rulesMerged",
-				message as unknown as RulesMergedMessage
-			)
+		}
+		case "rulesMerged": {
+			const parsed = RulesMergedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("rulesMerged",parsed.data as RulesMergedMessage)
 			break
-		case "communityCreated":
-			this.emit(
-				"communityCreated",
-				message as unknown as CommunityCreatedMessage
-			)
+		}
+		case "communityCreated": {
+			const parsed = CommunityCreatedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("communityCreated", parsed.data as CommunityCreatedMessage)
 			break
-		case "communityRemoved":
-			this.emit(
-				"communityRemoved",
-				message as unknown as CommunityRemovedMessage
-			)
+		}
+		case "communityRemoved": {
+			const parsed = CommunityRemovedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("communityRemoved", parsed.data as CommunityRemovedMessage)
 			break
-		case "communityUpdated":
-			this.emit(
-				"communityUpdated",
-				message as unknown as CommunityUpdatedMessage
-			)
+		}
+		case "communityUpdated": {
+			const parsed = CommunityUpdatedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("communityUpdated", parsed.data as CommunityUpdatedMessage)
 			break
-		case "communitiesMerged":
-			this.emit(
-				"communitiesMerged",
-				message as unknown as CommunitiesMergedMessage
-			)
+		}
+		case "communitiesMerged": {
+			const parsed = CommunitiesMergedMessage.safeParse(message)
+			if (parsed.success)
+				this.emit("communitiesMerged", parsed.data as CommunitiesMergedMessage)
+			break
+		}
 		}
 	}
 
