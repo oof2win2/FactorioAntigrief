@@ -1,33 +1,31 @@
-export type ApiID = string
+import { z } from "zod"
 
-export interface Common {
-	id: ApiID
-}
+export const Common = z.object({
+	id: z.string(),
+})
+export type Common = z.infer<typeof Common>
 
 // This exists so that creating a report doesn't need an ID and some stuff is optional
-export interface CreateReport {
-	playername: string
-	brokenRule: ApiID
-	proof?: string
-	description?: string
-	automated?: boolean
-	reportedTime?: Date
-	adminId: string
-}
-export interface Report extends Common, Required<CreateReport> {
-	communityId: ApiID
-}
+export const CreateReport = z.object({
+	playername: z.string(),
+	brokenRule: z.string(),
+	proof: z.string().default("No proof"),
+	description: z.string().default("No description"),
+	automated: z.boolean().default(false),
+	reportedTime: z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)),
+	adminId: z.string(),
+})
+export type CreateReport = z.infer<typeof CreateReport>
+
+export const Report = z.object({
+	communityId: z.string(),
+}).merge(Common).merge(CreateReport)
+export type Report = z.infer<typeof Report>
 
 export interface Revocation extends Report {
 	revokedTime: Date
 	revokedBy: string
 	reportId: ApiID
-}
-
-export interface Profile {
-	communityId: ApiID
-	playername: string
-	reports: Report[]
 }
 
 export interface Community extends Common {
