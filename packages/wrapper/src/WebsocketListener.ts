@@ -100,8 +100,11 @@ class WebSocketHandler extends EventEmitter {
 		
 		// handle socket messages
 		this.socket.onmessage = (msg) => {
-			console.log(msg)
-			// this.handleMessage(JSON.parse(msg.data as string))
+			try {
+				this.handleMessage(JSON.parse(msg.data as string))
+			} catch (e) {
+				console.error(e)
+			}
 		}
 		this.socket.onerror = console.error
 		this.socket.onopen = () => {
