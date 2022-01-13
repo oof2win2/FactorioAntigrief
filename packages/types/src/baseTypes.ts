@@ -1,101 +1,65 @@
-export type ApiID = string
+import { z } from "zod"
 
-export interface Common {
-	id: ApiID
-}
+export const Common = z.object({
+	id: z.string(),
+})
+export type Common = z.infer<typeof Common>
 
 // This exists so that creating a report doesn't need an ID and some stuff is optional
-export interface CreateReport {
-	playername: string
-	brokenRule: ApiID
-	proof?: string
-	description?: string
-	automated?: boolean
-	reportedTime?: Date
-	adminId: string
-}
-export interface Report extends Common, Required<CreateReport> {
-	communityId: ApiID
-}
+export const CreateReport = z.object({
+	playername: z.string(),
+	brokenRule: z.string(),
+	proof: z.string().default("No proof"),
+	description: z.string().default("No description"),
+	automated: z.boolean().default(false),
+	reportedTime: z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)),
+	adminId: z.string(),
+})
+export type CreateReport = z.infer<typeof CreateReport>
 
-export interface Revocation extends Report {
-	revokedTime: Date
-	revokedBy: string
-	reportId: ApiID
-}
+export const Report = z.object({
+	communityId: z.string(),
+}).merge(Common).merge(CreateReport)
+export type Report = z.infer<typeof Report>
 
-export interface Profile {
-	communityId: ApiID
-	playername: string
-	reports: Report[]
-}
+export const Revocation = z.object({
+	revokedTime: z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)),
+	revokedBy: z.string(),
+	reportId: z.string(),
+}).merge(Report)
+export type Revocation = z.infer<typeof Revocation>
 
-export interface Community extends Common {
-	name: string
-	contact: string
-	guildIds: string[]
-}
+export const Community = z.object({
+	name: z.string(),
+	contact: z.string(),
+	guildIds: z.array(z.string()),
+}).merge(Common)
+export type Community = z.infer<typeof Community>
 
-export interface Rule extends Common {
-	shortdesc: string
-	longdesc: string
-}
+export const Rule = z.object({
+	shortdesc: z.string(),
+	longdesc: z.string(),
+}).merge(Common)
+export type Rule = z.infer<typeof Rule>
 
-export interface GuildConfig {
-	guildId: string
-	communityId?: string
-	trustedCommunities: ApiID[]
-	ruleFilters: ApiID[]
-	roles: {
-		reports: string
-		webhooks: string
-		setConfig: string
-		setRules: string
-		setCommunities: string
-	}
-}
+export const GuildConfig = z.object({
+	guildId: z.string(),
+	communityId: z.string().optional(),
+	trustedCommunities: z.array(z.string()).default([]),
+	ruleFilters: z.array(z.string()).default([]),
+	roles: z.object({
+		reports: z.string().default(""),
+		webhooks: z.string().default(""),
+		setConfig: z.string().default(""),
+		setRules: z.string().default(""),
+		setCommunities: z.string().default(""),
+	})
+})
+export type GuildConfig = z.infer<typeof GuildConfig>
 
 // this also extends common but the ID is a Discord string
-export interface Webhook extends Common {
-	token: string
-	guildId: string
-}
-
-export interface User {
-	discordUserId: string
-	discordUserTag: string
-	/**
-	 * IDs of guilds where the user is has API access
-	 */
-	discordGuildIds: string[]
-	apiAccess: {
-		/**
-		 * ID of the community this access is in
-		 */
-		communityId: string
-		/**
-		 * ID of the user
-		 */
-		discordUserId: string
-		/**
-		 * ID of the guild that this is in
-		 */
-		discordGuildId: string
-		/**
-		 * Whether the user has access to create and remove reports
-		 */
-		reports: boolean
-		/**
-		 * Whether the user has access to modify the community's config
-		 */
-		config: boolean
-		/**
-		 * Whether the user has access to change the community's notification settings
-		 */
-		notifications: boolean
-	}[]
-	/**
-	 * IDs of communities where the user is an owner
-	 */
-	communityOwner: string[]
-}
+export const Webhook = z.object({
+	token: z.string(),
+	guildId: z.string(),
+}).merge(Common)
+export type Webhook = z.infer<typeof Webhook>
