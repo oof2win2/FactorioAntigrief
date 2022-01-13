@@ -6,7 +6,8 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"lint": "npm run eslint",
-		"eslint": "eslint src/ --fix --ext .js,.ts"
+		"eslint": "eslint src/ --fix --ext .js,.ts",
+		"prepare": "npx tsc"
 	},
 	"keywords": [],
 	"author": "",
