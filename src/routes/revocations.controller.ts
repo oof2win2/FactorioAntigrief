@@ -208,7 +208,6 @@ export default class RevocationController {
 			// this is allowed since the rule is GUARANTEED to exist if the report exists
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			rule: <Rule>(<unknown>rule!),
-			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
 			revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
 				(<unknown>revoker)
 			),
@@ -393,7 +392,6 @@ export default class RevocationController {
 				// this is allowed since the rule is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
-				admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
 				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: totalReports.length,
 				totalCommunities: differentCommunities,
@@ -573,7 +571,6 @@ export default class RevocationController {
 				// this is allowed since the rule is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
-				admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
 				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
@@ -757,7 +754,6 @@ export default class RevocationController {
 				// this is allowed since the rule is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
-				admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
 				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: totalReports.length,
 				totalCommunities: differentCommunities,

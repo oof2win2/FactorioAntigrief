@@ -171,7 +171,7 @@ export default class ReportController {
 		reportCreatedMessage(report, {
 			community: <Community>(<unknown>community.toObject()),
 			rule: <Rule>(<unknown>rule.toObject()),
-			admin: <ReportMessageExtraOpts["admin"]>(<unknown>admin),
+			createdBy: <ReportMessageExtraOpts["createdBy"]>(<unknown>admin),
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})

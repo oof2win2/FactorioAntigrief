@@ -163,7 +163,7 @@ export async function reportCreatedMessage(
 			{ name: "Description", value: report.description, inline: false },
 			{
 				name: "Admin",
-				value: `<@${opts.admin.id}> | ${opts.admin.username}#${opts.admin.discriminator}`,
+				value: `<@${opts.createdBy.id}> | ${opts.createdBy.username}#${opts.createdBy.discriminator}`,
 				inline: true,
 			},
 			{
@@ -221,7 +221,7 @@ export async function reportRevokedMessage(
 			},
 			{
 				name: "Admin",
-				value: `<@${opts.admin.id}> | ${opts.admin.username}#${opts.admin.discriminator}`,
+				value: `<@${opts.revokedBy.id}> | ${opts.revokedBy.username}#${opts.revokedBy.discriminator}`,
 				inline: true,
 			},
 			{
@@ -431,7 +431,7 @@ export async function communityCreatedMessage(
 			{ name: "Community name", value: community.name, inline: true },
 			{
 				name: "Contact",
-				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				value: `<@${opts.createdBy.id}> | ${opts.createdBy.username}#${opts.createdBy.discriminator}`,
 				inline: true,
 			}
 		)
@@ -465,7 +465,7 @@ export async function communityRemovedMessage(
 			{ name: "Community name", value: community.name, inline: true },
 			{
 				name: "Contact",
-				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				value: `<@${opts.createdBy.id}> | ${opts.createdBy.username}#${opts.createdBy.discriminator}`,
 				inline: true,
 			}
 		)
@@ -497,7 +497,7 @@ export async function communityUpdatedMessage(
 			{ name: "Community name", value: community.name, inline: true },
 			{
 				name: "Contact",
-				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				value: `<@${opts.createdBy.id}> | ${opts.createdBy.username}#${opts.createdBy.discriminator}`,
 				inline: true,
 			}
 		)
@@ -530,7 +530,7 @@ export async function communitiesMergedMessage(
 			{ name: "Receiving Community name", value: receiving.name, inline: true },
 			{
 				name: "Receiving Community Contact",
-				value: `<@${opts.contact.id}> | ${opts.contact.username}#${opts.contact.discriminator}`,
+				value: `<@${opts.createdBy.id}> | ${opts.createdBy.username}#${opts.createdBy.discriminator}`,
 				inline: true,
 			},
 			{
