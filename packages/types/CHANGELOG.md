@@ -1,3 +1,9 @@
+### [1.5.4] - [2022-01-15]
+
+### Bugfixes
+
+-	Fix issue with `ReportMessageExtraOpts` having wrong `createdBy` type, changed to `APIUser`
+
 ### [1.5.3] - [2022-01-15]
 
 ### Bugfixes
