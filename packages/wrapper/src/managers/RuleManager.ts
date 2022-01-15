@@ -177,7 +177,7 @@ export class RuleManager extends BaseManager<Rule> {
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
 		
 		const parsed = Rule.parse(data)
-		this.removeFromCache(parsed)
+		this.removeFromCache({ id: idDissolving })
 		return parsed
 	}
 }
