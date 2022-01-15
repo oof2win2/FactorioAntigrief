@@ -195,7 +195,7 @@ export default class CommunityController {
 					guildId: z.string(),
 				}),
 
-				tags: [ "community", "master" ],
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -429,6 +429,8 @@ export default class CommunityController {
 					guildId: z.string()
 				}),
 
+				description: "Notify guild config changed",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -474,7 +476,7 @@ export default class CommunityController {
 				}),
 
 				description: "Create a FAGC community",
-				tags: [ "community", "master" ],
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -555,7 +557,7 @@ export default class CommunityController {
 				}),
 
 				description: "Delete a FAGC community",
-				tags: [ "community", "master" ],
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -660,7 +662,7 @@ export default class CommunityController {
 				}),
 
 				description: "Merge community idDissolving into community idReceiving",
-				tags: [ "communities" ],
+				tags: [ "community" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -789,8 +791,8 @@ export default class CommunityController {
 					guildId: z.string(),
 				}),
 
-				description: "Delete a FAGC community",
-				tags: [ "community", "master" ],
+				description: "Notify leaving a guild",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],

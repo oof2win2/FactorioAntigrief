@@ -7,7 +7,9 @@ import { WsClient } from "../utils/info"
 	url: "/ws",
 	options: {
 		websocket: true,
-		schema: {},
+		schema: {
+			hide: true,
+		},
 	},
 })
 export default class WsHandler extends RequestHandler {
