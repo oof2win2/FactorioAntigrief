@@ -9,7 +9,7 @@ import BaseManager from "./managers/BaseManager"
  * @returns String to use for the Authorization header, created from original `reqConfig` or the class
  */
 export const authenticate = <X, T extends Common>(manager: X & BaseManager<T>, reqConfig: RequestConfig): string => {
-	const { apikey } = reqConfig || manager
+	const apikey = reqConfig.apikey || manager.apikey
 	if (!apikey) throw new NoAuthError()
 	return `Token ${apikey}`
 }
@@ -21,7 +21,7 @@ export const authenticate = <X, T extends Common>(manager: X & BaseManager<T>, r
  * @returns String to use for the Authorization header, created from original `reqConfig` or the class
  */
 export const masterAuthenticate = <X, T extends Common>(manager: X & BaseManager<T>, reqConfig: RequestConfig): string => {
-	const { masterapikey } = reqConfig || manager
+	const masterapikey = reqConfig.masterapikey || manager.masterapikey
 	if (!masterapikey) throw new NoAuthError()
 	return `Token ${masterapikey}`
 }
