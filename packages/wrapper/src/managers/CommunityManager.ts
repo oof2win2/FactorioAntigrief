@@ -180,6 +180,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	async create({
 		name,
 		contact,
+		cache = true,
 		reqConfig = {}
 	}: {
 		name: string,
@@ -206,6 +207,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			community: Community,
 			apiKey: z.string(),
 		}).parse(create)
+		if (cache) this.add(parsedCreate.community)
 		return parsedCreate
 	}
 
