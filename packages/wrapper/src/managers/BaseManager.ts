@@ -47,9 +47,9 @@ export default class BaseManager<HoldsWithId extends Common> {
 		}
 		return data
 	}
-	protected removeFromCache(data: HoldsWithId): HoldsWithId | null {
+	protected removeFromCache(data: Pick<HoldsWithId, "id">): Pick<HoldsWithId, "id"> | null {
 		if (!data) return null
-		this.cache.sweep((item) => item.id == data.id)
+		this.cache.delete(data.id)
 		return data
 	}
 
