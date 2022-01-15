@@ -1,3 +1,9 @@
+### [1.5.2] - [2022-01-15]
+
+### Bugfixes
+
+-	Fix issue with `RevocationMessageExtraOpts` not extending from `ReportMessageExtraOpts`
+
 ### [1.5.1] - [2022-01-13]
 
 ### Bugfixes

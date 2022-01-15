@@ -31,7 +31,7 @@ export type ReportCreatedMessage = z.infer<typeof ReportCreatedMessage> & { embe
 
 export const RevocationMessageExtraOpts = z.object({
 	revokedBy: z.object({}).passthrough(), // no way to validate this
-})
+}).merge(ReportMessageExtraOpts)
 export type RevocationMessageExtraOpts = z.infer<typeof RevocationMessageExtraOpts> & { revokedBy: APIUser }
 
 export const RevocationMessage = z.object({
