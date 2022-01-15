@@ -1,4 +1,4 @@
-import fetch from "isomorphic-fetch"
+import "cross-fetch"
 import { ManagerOptions, WrapperOptions, GenericAPIError } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"

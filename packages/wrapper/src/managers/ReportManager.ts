@@ -1,4 +1,4 @@
-import fetch from "isomorphic-fetch"
+import "cross-fetch"
 import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Report, CreateReport } from "fagc-api-types"
 import BaseManager from "./BaseManager"

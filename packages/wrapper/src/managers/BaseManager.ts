@@ -53,6 +53,12 @@ export default class BaseManager<HoldsWithId extends Common> {
 		return data
 	}
 
+	clearCache(): void {
+		this.cache.clear()
+		this.sweepCache.clear()
+		this.fetchingCache.clear()
+	}
+
 	resolveID(id: Common["id"]): HoldsWithId | null {
 		const cached = this.cache.get(id)
 		if (cached) return cached
