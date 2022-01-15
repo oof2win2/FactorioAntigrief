@@ -1,3 +1,16 @@
+## [1.25.0] - [2022-01-15]
+
+### Bugfixes
+
+-	Actually parse the WS messages instead of just logging them
+
+### Changes
+
+-	Validation of WS messages when they are received
+-	Validation for request responses
+-	Remove cookie authentication as it is not used on the API anymore
+-	Change all casings of `ID` to `Id`
+
 ## [1.24.1] - [2022-01-11]
 
 ### Bugfixes
