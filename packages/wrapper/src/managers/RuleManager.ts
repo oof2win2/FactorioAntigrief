@@ -1,11 +1,12 @@
 import fetch from "isomorphic-fetch"
 import { ManagerOptions, WrapperOptions } from "../types/types"
-import { Rule, ApiID } from "fagc-api-types"
+import { Rule } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from "../types"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { masterAuthenticate } from "../utils"
+import { z } from "zod"
 
 export class RuleManager extends BaseManager<Rule> {
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
@@ -20,15 +21,15 @@ export class RuleManager extends BaseManager<Rule> {
 			credentials: "include",
 		}).then((r) => r.json())
 
-		if (cache && allRules[0])
-			return allRules.map((rule: Rule) => this.add(rule))
-
-		return allRules
+		const parsed = z.array(Rule).parse(allRules)
+		if (cache) parsed.map(rule => this.add(rule))
+		return parsed
 	}
 
 	async create({
 		rule,
-		reqConfig = {}
+		cache = true,
+		reqConfig = {},
 	}: {
 		rule: Omit<Rule, "id">,
 	} & FetchRequestTypes): Promise<Rule> {
@@ -42,12 +43,11 @@ export class RuleManager extends BaseManager<Rule> {
 			},
 		}).then((r) => r.json())
 
-		if (data.error)
-			throw new GenericAPIError(`${data.error}: ${data.message}`)
+		if (data.error) throw new GenericAPIError(`${data.error}: ${data.message}`)
 
-		this.add(data)
-
-		return data
+		const parsed = Rule.parse(data)
+		if (cache) this.add(parsed)
+		return parsed
 	}
 
 	async fetchRule({
@@ -55,7 +55,7 @@ export class RuleManager extends BaseManager<Rule> {
 		cache = true,
 		force = false
 	}: {
-		ruleid: ApiID
+		ruleid: string
 	} & FetchRequestTypes): Promise<Rule | null> {
 		if (!force) {
 			const cached =
@@ -76,9 +76,15 @@ export class RuleManager extends BaseManager<Rule> {
 			}
 		).then((r) => r.json())
 
-		if (!fetched || !fetched.id) return null // return null if the fetch is empty
+		const parsed = Rule.nullable().safeParse(fetched)
+		if (!parsed.success || parsed.data === null) {
+			promiseResolve(null)
+			setTimeout(() => this.fetchingCache.delete(ruleid), 0)
+			if (!parsed.success) throw parsed.error
+			return null
+		}
 
-		if (cache) this.add(fetched)
+		if (cache) this.add(parsed.data)
 		promiseResolve(fetched)
 		setTimeout(() => {
 			this.fetchingCache.sweep((data) => typeof data.then === "function")
@@ -113,12 +119,14 @@ export class RuleManager extends BaseManager<Rule> {
 
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
+		
+		const parsed = Rule.parse(data)
 
 		// remove old rule from cache and add new rule
-		this.removeFromCache(data)
-		this.add(data)
+		this.removeFromCache(parsed)
+		this.add(parsed)
 
-		return data
+		return parsed
 	}
 
 	async remove({
@@ -139,12 +147,11 @@ export class RuleManager extends BaseManager<Rule> {
 			}
 		).then((r) => r.json())
 
-		if (data.error)
-			throw new GenericAPIError(`${data.error}: ${data.message}`)
-		if (!data.id) throw data
-		this.removeFromCache(data)
+		if (data.error) throw new GenericAPIError(`${data.error}: ${data.message}`)
+		const parsed = Rule.parse(data)
+		this.removeFromCache(parsed)
 
-		return data
+		return parsed
 	}
 
 	async merge({
@@ -168,9 +175,9 @@ export class RuleManager extends BaseManager<Rule> {
 
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
-		if (!data.id) throw data
-		this.removeFromCache(data)
-
-		return data
+		
+		const parsed = Rule.parse(data)
+		this.removeFromCache(parsed)
+		return parsed
 	}
 }

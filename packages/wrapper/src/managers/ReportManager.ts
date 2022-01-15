@@ -1,6 +1,6 @@
 import fetch from "isomorphic-fetch"
 import { ManagerOptions, WrapperOptions } from "../types/types"
-import { Report, CreateReport, ApiID } from "fagc-api-types"
+import { Report, CreateReport } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import {
 	GenericAPIError,
@@ -8,6 +8,7 @@ import {
 import strictUriEncode from "strict-uri-encode"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate } from "../utils"
+import { z } from "zod"
 
 export default class ReportManager extends BaseManager<Report> {
 	constructor(
@@ -28,11 +29,10 @@ export default class ReportManager extends BaseManager<Report> {
 
 		if (reports.error)
 			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
+		
+		const parsedReports = z.array(Report).parse(reports)
 
-		reports.forEach((report) => {
-			report.reportedTime = new Date(report.reportedTime)
-			if (cache) this.add(report)
-		})
+		if (cache) parsedReports.forEach((report) => this.add(report))
 		return reports
 	}
 
@@ -55,9 +55,9 @@ export default class ReportManager extends BaseManager<Report> {
 
 		if (create.error)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
-		create.reportedTime = new Date(create.reportedTime)
-		if (cache) this.add(create)
-		return create
+		const parsedCreate = Report.parse(create)
+		if (cache) this.add(parsedCreate)
+		return parsedCreate
 	}
 
 	async fetchReport({
@@ -65,7 +65,7 @@ export default class ReportManager extends BaseManager<Report> {
 		cache = true,
 		force = false
 	}: {
-		id: ApiID
+		id: string
 	} & FetchRequestTypes): Promise<Report | null> {
 		if (!force) {
 			const cached = this.cache.get(id) || this.fetchingCache.get(id)
@@ -92,14 +92,18 @@ export default class ReportManager extends BaseManager<Report> {
 		if (!fetched) return null // return null if the fetch is empty
 		if (fetched.error)
 			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
-		fetched.reportedTime = new Date(fetched.reportedTime)
-		if (cache) this.add(fetched)
-		promiseResolve(fetched)
+		const parsed = Report.safeParse(fetched)
+		if (!parsed.success || parsed.data === null) {
+			promiseResolve(null)
+			setTimeout(() => this.fetchingCache.delete(id), 0)
+			if (!parsed.success) throw parsed.error
+			return null
+		}
+		if (cache) this.add(parsed.data)
+		promiseResolve(parsed.data)
 		// remove the data from the fetching cache after 0ms (will run in the next event loop) as it can use the normal cache instead
-		setTimeout(() => {
-			this.fetchingCache.sweep((data) => typeof data.then === "function")
-		}, 0)
-		return fetched
+		setTimeout(() => this.fetchingCache.delete(id), 0)
+		return parsed.data
 	}
 
 	async search({
@@ -125,18 +129,17 @@ export default class ReportManager extends BaseManager<Report> {
 		}).then((c) => c.json())
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
-		
-		data.forEach((report) => {
-			report.reportedTime = new Date(report.reportedTime)
-			if (cache) this.add(report)
-		})
+
+		const parsed = z.array(Report).parse(data)
+
+		if (cache) parsed.forEach((report) => this.add(report))
 		return data
 	}
 	
 	async fetchByRule({
 		ruleid, cache = true
 	}: {
-		ruleid: ApiID
+		ruleid: string
 	} & FetchRequestTypes): Promise<Report[]> {
 		const ruleReports = await fetch(
 			`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`,
@@ -145,11 +148,10 @@ export default class ReportManager extends BaseManager<Report> {
 			}
 		).then((c) => c.json())
 
-		ruleReports.forEach((report) => {
-			report.reportedTime = new Date(report.reportedTime)
-			if (cache) this.add(report)
-		})
-		return ruleReports
+		const parsed = z.array(Report).parse(ruleReports)
+
+		if (cache) parsed.forEach((report) => this.add(report))
+		return parsed
 	}
 
 	async fetchAllName({
@@ -168,18 +170,16 @@ export default class ReportManager extends BaseManager<Report> {
 			throw new GenericAPIError(
 				`${allReports.error}: ${allReports.message}`
 			)
-
-		allReports.forEach((report) => {
-			report.reportedTime = new Date(report.reportedTime)
-			if (cache) this.add(report)
-		})
-		return allReports
+		
+		const parsed = z.array(Report).parse(allReports)
+		if (cache) parsed.forEach((report) => this.add(report))
+		return parsed
 	}
 
 	async fetchByCommunity({
 		communityId, cache = true
 	}: {
-		communityId: ApiID
+		communityId: string
 	} & FetchRequestTypes): Promise<Report[]> {
 		const communityReports = await fetch(
 			`${this.apiurl}/reports/community/${strictUriEncode(communityId)}`,
@@ -191,11 +191,10 @@ export default class ReportManager extends BaseManager<Report> {
 			throw new GenericAPIError(
 				`${communityReports.error}: ${communityReports.message}`
 			)
-		communityReports.forEach((report) => {
-			report.reportedTime = new Date(report.reportedTime)
-			if (cache) this.add(report)
-		})
-		return communityReports
+		
+		const parsed = z.array(Report).parse(communityReports)
+		if (cache) parsed.forEach((report) => this.add(report))
+		return parsed
 	}
 
 	async list({
@@ -224,13 +223,9 @@ export default class ReportManager extends BaseManager<Report> {
 		if (reports.error)
 			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
 		
-		if (cache) {
-			reports.forEach((report) => {
-				report.reportedTime = new Date(report.reportedTime)
-				this.add(report)
-			})
-		}
-		return reports
+		const parsed = z.array(Report).parse(reports)
+		if (cache) parsed.forEach((report) => this.add(report))
+		return parsed
 	}
 
 	async fetchSince({
@@ -247,14 +242,9 @@ export default class ReportManager extends BaseManager<Report> {
 
 		if (reports.error)
 			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
-
-		if (cache) {
-			reports.forEach((report) => {
-				report.reportedTime = new Date(report.reportedTime)
-				report.timestamp = new Date(report.timestamp)
-				this.add(report)
-			})
-		}
-		return reports
+		
+		const parsed = z.array(Report).parse(reports)
+		if (cache) parsed.forEach((report) => this.add(report))
+		return parsed
 	}
 }

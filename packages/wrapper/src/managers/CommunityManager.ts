@@ -2,9 +2,10 @@ import fetch from "isomorphic-fetch"
 import { ManagerOptions, WrapperOptions, GenericAPIError } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import { Community, GuildConfig, ApiID } from "fagc-api-types"
+import { Community, GuildConfig, Report } from "fagc-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate, masterAuthenticate } from "../utils"
+import { z } from "zod"
 
 type SetGuildConfig = Partial<GuildConfig> & Pick<GuildConfig, "guildId">
 type SetCommunityConfig = Partial<Omit<Community, "id"|"guildIds">>
@@ -26,13 +27,13 @@ export default class CommunityManager extends BaseManager<Community> {
 			throw new GenericAPIError(
 				`${allCommunities.error}: ${allCommunities.message}`
 			)
+		const parsedCommunities = z.array(Community).parse(allCommunities)
 
-		if (cache && allCommunities[0]) {
-			return allCommunities.map((community) => {
+		if (cache)
+			parsedCommunities.map((community) => {
 				return this.add(community)
 			})
-		}
-		return allCommunities
+		return parsedCommunities
 	}
 
 	async setCommunityConfig({
@@ -55,7 +56,8 @@ export default class CommunityManager extends BaseManager<Community> {
 		).then((u) => u.json())
 		if (update?.error)
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
-		return update
+		const parsedUpdate = Community.parse(update)
+		return parsedUpdate
 	}
 
 	async getCommunityConfig({
@@ -63,9 +65,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		cache = true,
 		reqConfig = {}
 	}: {
-		communityID: ApiID,
+		communityID: string,
 	} & FetchRequestTypes): Promise<Community | null> {
-		return this.fetchCommunity({ communityID: communityID, cache, reqConfig })
+		return this.fetchCommunity({ communityID, cache, reqConfig })
 	}
 	
 	async fetchCommunity({
@@ -73,7 +75,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		cache = true,
 		force = false
 	}: {
-		communityID: ApiID,
+		communityID: string,
 	} & FetchRequestTypes): Promise<Community | null> {
 		if (!force) {
 			const cached =
@@ -99,14 +101,20 @@ export default class CommunityManager extends BaseManager<Community> {
 		).then((c) => c.json())
 
 		if (!fetched) return null // return null if the fetch is empty
-		if (fetched.error)
-			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
-		if (cache) this.add(fetched)
-		promiseResolve(fetched)
-		setTimeout(() => {
-			this.fetchingCache.sweep((data) => typeof data.then === "function")
-		}, 0)
-		return fetched
+		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
+		
+		const communityParsed = Community.safeParse(fetched)
+		if (!communityParsed.success || communityParsed.data === null) {
+			promiseResolve(null)
+			setTimeout(() => this.fetchingCache.delete(communityID), 0)
+			if (!communityParsed.success) throw communityParsed.error
+			return null
+		}
+		
+		if (cache) this.add(communityParsed.data)
+		promiseResolve(communityParsed.data)
+		setTimeout(() => this.fetchingCache.delete(communityID), 0)
+		return communityParsed.data
 	}
 	
 	async fetchOwnCommunity({
@@ -127,8 +135,10 @@ export default class CommunityManager extends BaseManager<Community> {
 				`${community.error}: ${community.message}`
 			)
 
-		if (cache) this.add(community)
-		return community
+		const parsedCommunity = Community.parse(community)
+
+		if (cache) this.add(parsedCommunity)
+		return parsedCommunity
 	}
 
 	async setGuildConfig({
@@ -146,9 +156,9 @@ export default class CommunityManager extends BaseManager<Community> {
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
-		if (update?.error)
-			throw new GenericAPIError(`${update.error}: ${update.message}`)
-		return update
+		if (update.error) throw new GenericAPIError(`${update.error}: ${update.message}`)
+		const parsedUpdate = GuildConfig.parse(update)
+		return parsedUpdate
 	}
 
 	async fetchGuildConfig({
@@ -161,7 +171,8 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		).then((c) => c.json())
 		if (config?.error) throw new GenericAPIError(`${config.error}: ${config.message}`)
-		return config
+		const parsedConfig = GuildConfig.parse(config)
+		return parsedConfig
 	}
 
 	async create({
@@ -187,9 +198,13 @@ export default class CommunityManager extends BaseManager<Community> {
 				"content-type": "application/json",
 			},
 		}).then((u) => u.json())
-		if (create?.error)
-			throw new GenericAPIError(`${create.error}: ${create.message}`)
-		return create
+		if (create?.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
+		
+		const parsedCreate = z.object({
+			community: Community,
+			apiKey: z.string(),
+		}).parse(create)
+		return parsedCreate
 	}
 
 	async createGuildConfig({
@@ -210,7 +225,8 @@ export default class CommunityManager extends BaseManager<Community> {
 			},
 		}).then((u) => u.json())
 		if (create.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
-		return create
+		const parsedCreate = GuildConfig.parse(create)
+		return parsedCreate
 	}
 
 	async notifyGuildConfig({
@@ -230,8 +246,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				},
 			}
 		).then((u) => u.json())
-		if (create?.error)
-			throw new GenericAPIError(`${create.error}: ${create.message}`)
+		if (create?.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
 	async guildLeave({
@@ -270,9 +285,8 @@ export default class CommunityManager extends BaseManager<Community> {
 				},
 			}
 		).then((u) => u.json())
-		if (remove?.error)
-			throw new GenericAPIError(`${remove.error}: ${remove.message}`)
-		return remove
+		if (remove?.error) throw new GenericAPIError(`${remove.error}: ${remove.message}`)
+		return z.boolean().parse(remove)
 	}
 
 	async merge({
@@ -283,7 +297,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		idReceiving: string
 		idDissolving: string
 		} & FetchRequestTypes): Promise<Community> {
-		const remove = await fetch(
+		const merge = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
 				method: "PATCH",
@@ -293,8 +307,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				},
 			}
 		).then((u) => u.json())
-		if (remove?.error)
-			throw new GenericAPIError(`${remove.error}: ${remove.message}`)
-		return remove
+		if (merge?.error) throw new GenericAPIError(`${merge.error}: ${merge.message}`)
+		return Community.parse(merge)
 	}
 }

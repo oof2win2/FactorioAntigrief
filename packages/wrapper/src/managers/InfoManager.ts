@@ -31,7 +31,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
 		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
-		return add
+		return Webhook.parse(add)
 	}
 	async removeWebhook({
 		webhookid, webhooktoken
@@ -48,7 +48,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 			credentials: "include",
 			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
-		return add
+		return Webhook.nullable().parse(add)
 	}
 
 	async notifyGuildText({
