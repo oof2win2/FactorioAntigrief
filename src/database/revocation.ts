@@ -15,7 +15,7 @@ import { IdType } from "./ids"
 	next()
 })
 export class RevocationClass {
-	@prop({ _id: false })
+	@prop({ _id: false, unique: true })
 		id!: string
 
 	@prop()

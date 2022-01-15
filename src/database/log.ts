@@ -1,6 +1,6 @@
 import { getUserStringFromID } from "../utils/functions-databaseless"
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
-import { IdType } from "./ids"
+import IdModel, { IdType } from "./ids"
 
 
 @modelOptions({
@@ -40,4 +40,16 @@ export class LogClass {
 		endpointAddress!: string
 }
 const LogModel = getModelForClass(LogClass)
+
+const watcher = LogModel.watch()
+
+watcher.on("change", async (change) => {
+	if (change.operationType === "delete") {
+		// delete the ID from the db too
+		IdModel.deleteOne({
+			_id: (change.documentKey as any)._id, // guaranteed to be present when the operation is "delete"
+		}).exec()
+	}
+})
+
 export default LogModel
