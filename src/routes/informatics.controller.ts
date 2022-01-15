@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, POST } from "fastify-decorators"
 import { MessageEmbed, Webhook, WebhookClient } from "discord.js"
-import WebhookModel from "../database/fagc/webhook"
+import WebhookModel from "../database/webhook"
 import { client } from "../utils/discord"
 import { MasterAuthenticate } from "../utils/authentication"
 import { z } from "zod"

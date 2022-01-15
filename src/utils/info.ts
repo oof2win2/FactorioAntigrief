@@ -1,15 +1,15 @@
 import { WebhookClient, MessageEmbed } from "discord.js"
-import WebhookSchema from "../database/fagc/webhook"
+import WebhookSchema from "../database/webhook"
 import WebSocket from "ws"
 import GuildConfigModel, {
 	GuildConfigClass,
-} from "../database/fagc/guildconfig"
-import { RevocationClass } from "../database/fagc/revocation"
+} from "../database/guildconfig"
+import { RevocationClass } from "../database/revocation"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
-import { RuleClass } from "../database/fagc/rule"
-import { CommunityClass } from "../database/fagc/community"
-import { ReportClass } from "../database/fagc/report"
+import { RuleClass } from "../database/rule"
+import { CommunityClass } from "../database/community"
+import { ReportClass } from "../database/report"
 import {
 	CommunityCreatedMessageExtraOpts,
 	ReportMessageExtraOpts,

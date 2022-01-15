@@ -1,4 +1,4 @@
-import { getUserStringFromID } from "../../utils/functions-databaseless"
+import { getUserStringFromID } from "../utils/functions-databaseless"
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 
 

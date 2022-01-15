@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-import { Controller, DELETE, GET, POST } from "fastify-decorators"
-import RevocationModel from "../database/fagc/revocation"
+import { Controller, GET, POST } from "fastify-decorators"
+import RevocationModel from "../database/revocation"
 import { z } from "zod"
 import { Authenticate } from "../utils/authentication"
 import { client, validateDiscordUser } from "../utils/discord"
-import ReportModel from "../database/fagc/report"
-import RuleModel, { RuleClass } from "../database/fagc/rule"
+import ReportModel from "../database/report"
+import RuleModel, { RuleClass } from "../database/rule"
 import { reportRevokedMessage } from "../utils/info"
 import {
 	Community,

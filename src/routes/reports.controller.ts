@@ -1,16 +1,16 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET, POST } from "fastify-decorators"
-import RuleModel from "../database/fagc/rule"
+import RuleModel from "../database/rule"
 import { Authenticate } from "../utils/authentication"
 import { reportCreatedMessage } from "../utils/info"
-import ReportModel from "../database/fagc/report"
+import ReportModel from "../database/report"
 import { validateDiscordUser, client } from "../utils/discord"
 import {
 	Community,
 	Rule,
 	ReportMessageExtraOpts,
 } from "fagc-api-types"
-import GuildConfigModel from "../database/fagc/guildconfig"
+import GuildConfigModel from "../database/guildconfig"
 import { z } from "zod"
 import validator from "validator"
 
