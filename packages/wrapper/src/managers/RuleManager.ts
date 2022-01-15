@@ -94,15 +94,15 @@ export class RuleManager extends BaseManager<Rule> {
 	}
 
 	async modify({
-		id,
+		ruleId,
 		shortdesc, longdesc,
 		reqConfig = {}
 	}: {
-		id: string,
+		ruleId: string,
 		shortdesc?: string, longdesc?: string
 	} & FetchRequestTypes): Promise<Rule | null> {
 		const data = await fetch(
-			`${this.apiurl}/rules/${strictUriEncode(id)}`,
+			`${this.apiurl}/rules/${strictUriEncode(ruleId)}`,
 			{
 				method: "PATCH",
 				credentials: "include",
@@ -130,13 +130,13 @@ export class RuleManager extends BaseManager<Rule> {
 	}
 
 	async remove({
-		id,
+		ruleId,
 		reqConfig = {}
 	}: {
-		id: string,
+		ruleId: string,
 	} & FetchRequestTypes): Promise<Rule | null> {
 		const data = await fetch(
-			`${this.apiurl}/rules/${strictUriEncode(id)}`,
+			`${this.apiurl}/rules/${strictUriEncode(ruleId)}`,
 			{
 				method: "DELETE",
 				credentials: "include",

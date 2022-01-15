@@ -16,16 +16,16 @@ export default class InfoManager extends BaseManager<Webhook> {
 		this.apiurl = options.apiurl
 	}
 	async addWebhook({
-		webhookid, webhooktoken
+		webhookId, webhookToken
 	}: {
-		webhookid: string,
-		webhooktoken: string
+		webhookId: string,
+		webhookToken: string
 	}): Promise<Webhook> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "POST",
 			body: JSON.stringify({
-				id: webhookid,
-				token: webhooktoken,
+				id: webhookId,
+				token: webhookToken,
 			}),
 			credentials: "include",
 			headers: { "content-type": "application/json" },

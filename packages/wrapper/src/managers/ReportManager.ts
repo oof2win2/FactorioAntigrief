@@ -61,14 +61,14 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 
 	async fetchReport({
-		id,
+		reportId,
 		cache = true,
 		force = false
 	}: {
-		id: string
+		reportId: string
 	} & FetchRequestTypes): Promise<Report | null> {
 		if (!force) {
-			const cached = this.cache.get(id) || this.fetchingCache.get(id)
+			const cached = this.cache.get(reportId) || this.fetchingCache.get(reportId)
 			if (cached) return cached
 		}
 
@@ -80,10 +80,10 @@ export default class ReportManager extends BaseManager<Report> {
 				promiseResolve = resolve
 			}
 		)
-		this.fetchingCache.set(id, fetchingPromise)
+		this.fetchingCache.set(reportId, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/reports/${strictUriEncode(id)}`,
+			`${this.apiurl}/reports/${strictUriEncode(reportId)}`,
 			{
 				credentials: "include",
 			}
@@ -93,16 +93,16 @@ export default class ReportManager extends BaseManager<Report> {
 		if (fetched.error)
 			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
 		const parsed = Report.safeParse(fetched)
-		if (!parsed.success || parsed.data === null) {
+		if (!parsed.success || parsed.data === null) { // if the fetch is not successful, return null or throw an error with invalid data
 			promiseResolve(null)
-			setTimeout(() => this.fetchingCache.delete(id), 0)
+			setTimeout(() => this.fetchingCache.delete(reportId), 0)
 			if (!parsed.success) throw parsed.error
 			return null
 		}
 		if (cache) this.add(parsed.data)
 		promiseResolve(parsed.data)
 		// remove the data from the fetching cache after 0ms (will run in the next event loop) as it can use the normal cache instead
-		setTimeout(() => this.fetchingCache.delete(id), 0)
+		setTimeout(() => this.fetchingCache.delete(reportId), 0)
 		return parsed.data
 	}
 
@@ -137,12 +137,12 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 	
 	async fetchByRule({
-		ruleid, cache = true
+		ruleId, cache = true
 	}: {
-		ruleid: string
+		ruleId: string
 	} & FetchRequestTypes): Promise<Report[]> {
 		const ruleReports = await fetch(
-			`${this.apiurl}/reports/rule/${strictUriEncode(ruleid)}`,
+			`${this.apiurl}/reports/rule/${strictUriEncode(ruleId)}`,
 			{
 				credentials: "include",
 			}
@@ -199,21 +199,21 @@ export default class ReportManager extends BaseManager<Report> {
 
 	async list({
 		playername,
-		ruleIDs,
-		communityIDs,
+		ruleIds,
+		communityIds,
 		cache = true
 	}: {
 		playername?: string
-		ruleIDs: string[]
-		communityIDs: string[]
+		ruleIds: string[]
+		communityIds: string[]
 		cache?: boolean
 	}): Promise<Report[]> {
 		const reports = await fetch(`${this.apiurl}/reports/list`, {
 			method: "POST",
 			body: JSON.stringify({
 				playername: playername,
-				ruleIDs: ruleIDs,
-				communityIDs: communityIDs,
+				ruleIds: ruleIds,
+				communityIds: communityIds,
 			}),
 			credentials: "include",
 			headers: {

@@ -81,13 +81,13 @@ declare interface WebSocketHandler {
 class WebSocketHandler extends EventEmitter {
 	private socket: ReconnectingWebSocket
 	private opts: WebSockethandlerOpts
-	private guildIDs: string[]
+	private guildIds: string[]
 	private socketurl: string
 
 	constructor(opts: WebSockethandlerOpts) {
 		super()
 		this.opts = opts
-		this.guildIDs = []
+		this.guildIds = []
 
 		// don't create the websocket if it has not been enabled
 
@@ -111,11 +111,11 @@ class WebSocketHandler extends EventEmitter {
 		}
 		this.socket.onerror = console.error
 		this.socket.onopen = () => {
-			this.guildIDs.map((id) => {
+			this.guildIds.map((id) => {
 				this.socket.send(
 					JSON.stringify({
-						type: "addGuildID",
-						guildID: id,
+						type: "addGuildId",
+						guildId: id,
 					})
 				)
 			})
@@ -194,26 +194,26 @@ class WebSocketHandler extends EventEmitter {
 		}
 	}
 
-	addGuildID(guildID: string): void {
-		if (this.guildIDs.includes(guildID)) return // don't do anything if it already is set
+	addGuildId(guildId: string): void {
+		if (this.guildIds.includes(guildId)) return // don't do anything if it already is set
 		// save guild id to list
-		this.guildIDs.push(guildID)
+		this.guildIds.push(guildId)
 		this.socket?.send(
 			JSON.stringify({
-				type: "addGuildID",
-				guildID: guildID,
+				type: "addGuildId",
+				guildId: guildId,
 			})
 		)
 	}
 
-	removeGuildID(guildID: string): void {
-		if (!this.guildIDs.includes(guildID)) return // don't do anything if it isn't there
+	removeGuildId(guildId: string): void {
+		if (!this.guildIds.includes(guildId)) return // don't do anything if it isn't there
 		// remove the id from local list & then send info to backend
-		this.guildIDs = this.guildIDs.filter(id => id !== guildID)
+		this.guildIds = this.guildIds.filter(id => id !== guildId)
 		this.socket?.send(
 			JSON.stringify({
-				type: "removeGuildID",
-				guildID: guildID,
+				type: "removeGuildId",
+				guildId: guildId,
 			})
 		)
 	}

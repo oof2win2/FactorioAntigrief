@@ -2,7 +2,7 @@ import fetch from "isomorphic-fetch"
 import { ManagerOptions, WrapperOptions, GenericAPIError } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import { Community, GuildConfig, Report } from "fagc-api-types"
+import { Community, GuildConfig } from "fagc-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate, masterAuthenticate } from "../utils"
 import { z } from "zod"
@@ -61,26 +61,26 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	async getCommunityConfig({
-		communityID,
+		communityId,
 		cache = true,
 		reqConfig = {}
 	}: {
-		communityID: string,
+		communityId: string,
 	} & FetchRequestTypes): Promise<Community | null> {
-		return this.fetchCommunity({ communityID, cache, reqConfig })
+		return this.fetchCommunity({ communityId, cache, reqConfig })
 	}
 	
 	async fetchCommunity({
-		communityID,
+		communityId,
 		cache = true,
 		force = false
 	}: {
-		communityID: string,
+		communityId: string,
 	} & FetchRequestTypes): Promise<Community | null> {
 		if (!force) {
 			const cached =
-				this.cache.get(communityID) ||
-				this.fetchingCache.get(communityID)
+				this.cache.get(communityId) ||
+				this.fetchingCache.get(communityId)
 			if (cached) return cached
 		}
 
@@ -91,10 +91,10 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		)
 
-		this.fetchingCache.set(communityID, fetchingPromise)
+		this.fetchingCache.set(communityId, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/communities/${strictUriEncode(communityID)}`,
+			`${this.apiurl}/communities/${strictUriEncode(communityId)}`,
 			{
 				credentials: "include",
 			}
@@ -106,14 +106,14 @@ export default class CommunityManager extends BaseManager<Community> {
 		const communityParsed = Community.safeParse(fetched)
 		if (!communityParsed.success || communityParsed.data === null) {
 			promiseResolve(null)
-			setTimeout(() => this.fetchingCache.delete(communityID), 0)
+			setTimeout(() => this.fetchingCache.delete(communityId), 0)
 			if (!communityParsed.success) throw communityParsed.error
 			return null
 		}
 		
 		if (cache) this.add(communityParsed.data)
 		promiseResolve(communityParsed.data)
-		setTimeout(() => this.fetchingCache.delete(communityID), 0)
+		setTimeout(() => this.fetchingCache.delete(communityId), 0)
 		return communityParsed.data
 	}
 	
@@ -230,14 +230,14 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	async notifyGuildConfig({
-		guildID,
+		guildId,
 		reqConfig = {}
 	}: {
-		guildID: string,
+		guildId: string,
 	} & FetchRequestTypes): Promise<void> {
 		const create = await fetch(
 			`${this.apiurl
-			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildID)}`,
+			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildId)}`,
 			{
 				method: "POST",
 				credentials: "include",
@@ -250,13 +250,13 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	async guildLeave({
-		guildID,
+		guildId,
 		reqConfig = {}
 	}: {
-		guildID: string,
+		guildId: string,
 	} & FetchRequestTypes): Promise<void> {
 		const create = await fetch(
-			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildID)}`,
+			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildId)}`,
 			{
 				method: "POST",
 				credentials: "include",
@@ -270,13 +270,13 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	async remove({
-		communityID,
+		communityId,
 		reqConfig = {}
 	}: {
-		communityID: string
+		communityId: string
 	} & FetchRequestTypes): Promise<boolean> {
 		const remove = await fetch(
-			`${this.apiurl}/communities/${strictUriEncode(communityID)}`,
+			`${this.apiurl}/communities/${strictUriEncode(communityId)}`,
 			{
 				method: "DELETE",
 				credentials: "include",

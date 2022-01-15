@@ -36,14 +36,14 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	}
 
 	async fetchRevocation({
-		id,
+		revocationId,
 		cache = true,
 		reqConfig = {}
 	}: {
-		id: string
+		revocationId: string
 	} & FetchRequestTypes): Promise<Revocation | null> {
 		const revocation = await fetch(
-			`${this.apiurl}/revocations/${id}`,
+			`${this.apiurl}/revocations/${revocationId}`,
 			{
 				credentials: "include",
 				headers: {
