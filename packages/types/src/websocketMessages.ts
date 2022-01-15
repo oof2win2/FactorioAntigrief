@@ -19,7 +19,7 @@ export const ReportMessageExtraOpts = z.object({
 	totalReports: z.number(),
 	totalCommunities: z.number(),
 })
-export type ReportMessageExtraOpts = z.infer<typeof ReportMessageExtraOpts>
+export type ReportMessageExtraOpts = z.infer<typeof ReportMessageExtraOpts> & { createdBy: APIUser }
 
 export const ReportCreatedMessage = z.object({
 	messageType: z.literal("report"),
