@@ -179,7 +179,7 @@ export default class CommunityController {
 		)
 
 		communityUpdatedMessage(community, {
-			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
 			)
 		})
@@ -537,7 +537,7 @@ export default class CommunityController {
 		const contactUser = await client.users.fetch(contact)
 
 		communityCreatedMessage(community, {
-			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
 			),
 		})
@@ -644,7 +644,7 @@ export default class CommunityController {
 
 		const contactUser = await client.users.fetch(community.contact)
 		communityRemovedMessage(community, {
-			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
 			),
 		})
@@ -775,7 +775,7 @@ export default class CommunityController {
 		const contactUser = await validateDiscordUser(receiving.contact)
 
 		communitiesMergedMessage(receiving, dissolving, {
-			contact: <CommunityCreatedMessageExtraOpts["contact"]>(
+			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
 			)
 		})
