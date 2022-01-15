@@ -16,22 +16,22 @@ export default class InfoManager extends BaseManager<Webhook> {
 		this.apiurl = options.apiurl
 	}
 	async addWebhook({
-		webhookid, webhooktoken
+		webhookId, webhookToken
 	}: {
-		webhookid: string,
-		webhooktoken: string
+		webhookId: string,
+		webhookToken: string
 	}): Promise<Webhook> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "POST",
 			body: JSON.stringify({
-				id: webhookid,
-				token: webhooktoken,
+				id: webhookId,
+				token: webhookToken,
 			}),
 			credentials: "include",
 			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
 		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
-		return add
+		return Webhook.parse(add)
 	}
 	async removeWebhook({
 		webhookid, webhooktoken
@@ -48,7 +48,7 @@ export default class InfoManager extends BaseManager<Webhook> {
 			credentials: "include",
 			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
-		return add
+		return Webhook.nullable().parse(add)
 	}
 
 	async notifyGuildText({

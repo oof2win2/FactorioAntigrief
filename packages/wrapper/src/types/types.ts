@@ -7,10 +7,6 @@ export interface RequestConfig {
 	 * FAGC API Master key
 	 */
 	masterapikey?: string
-	/**
-	 * Whether or not you are using cookie authentication
-	 */
-	cookieAuth?: boolean
 }
 export interface ManagerOptions {
 	uncachems?: number // at which time it should be uncached

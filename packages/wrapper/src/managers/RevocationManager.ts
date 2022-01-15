@@ -1,11 +1,12 @@
 import fetch from "isomorphic-fetch"
 import { ManagerOptions, WrapperOptions } from "../types/types"
-import { Revocation, ApiID } from "fagc-api-types"
+import { Revocation } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from ".."
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate } from "../utils"
+import { z } from "zod"
 
 export default class RevocationManager extends BaseManager<Revocation> {	
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
@@ -29,23 +30,20 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		).then((r) => r.json())
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 
-		revocations.forEach((revocation: Revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.add(revocation)
-		})
-		return revocations
+		const parsed = z.array(Revocation).parse(revocations)
+		if (cache) parsed.forEach(revocation => this.add(revocation))
+		return parsed
 	}
 
 	async fetchRevocation({
-		id,
+		revocationId,
 		cache = true,
 		reqConfig = {}
 	}: {
-		id: string
+		revocationId: string
 	} & FetchRequestTypes): Promise<Revocation | null> {
 		const revocation = await fetch(
-			`${this.apiurl}/revocations/${id}`,
+			`${this.apiurl}/revocations/${revocationId}`,
 			{
 				credentials: "include",
 				headers: {
@@ -54,10 +52,9 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			}
 		).then((r) => r.json())
 		if (!revocation) return null
-		revocation.reportedTime = new Date(revocation.reportedTime)
-		revocation.revokedTime = new Date(revocation.revokedTime)
-		if (cache) this.add(revocation)
-		return revocation
+		const parsed = Revocation.parse(revocation)
+		if (cache) this.add(parsed)
+		return parsed
 	}
 
 	async revoke({
@@ -66,7 +63,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		cache = true,
 		reqConfig = {},
 	}: {
-		reportId: ApiID,
+		reportId: string,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation> {
 		const res = await fetch(
@@ -84,10 +81,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			}
 		).then((r) => r.json())
 		if (res.error) throw new GenericAPIError(`${res.error}: ${res.message}`)
-		res.reportedTime = new Date(res.reportedTime)
-		res.revokedTime = new Date(res.revokedTime)
-		if (cache) this.add(res)
-		return res
+
+		const parsed = Revocation.parse(res)
+		if (cache) this.add(parsed)
+		return parsed
 	}
 	
 	async fetchRule({
@@ -95,7 +92,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		cache = true,
 		reqConfig = {}
 	}: {
-		ruleId: ApiID
+		ruleId: string
 	} & FetchRequestTypes): Promise<Revocation[]> {
 		const revocations = await fetch(
 			`${this.apiurl}/revocations/rule/${strictUriEncode(ruleId)}`,
@@ -107,12 +104,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			}
 		).then((r) => r.json())
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
-		revocations.forEach((revocation: Revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.add(revocation)
-		})
-		return revocations
+
+		const parsed = z.array(Revocation).parse(revocations)
+		if (cache) parsed.forEach(revocation => this.add(revocation))
+		return parsed
 	}
 
 	async revokeRule({
@@ -121,7 +116,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		cache = true,
 		reqConfig = {}
 	}: {
-		ruleId: ApiID,
+		ruleId: string,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation[]> {
 		const revocations = await fetch(
@@ -139,12 +134,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			}
 		).then((r) => r.json())
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
-		revocations.forEach((revocation: Revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.add(revocation)
-		})
-		return revocations
+
+		const parsed = z.array(Revocation).parse(revocations)
+		if (cache) parsed.forEach(revocation => this.add(revocation))
+		return parsed
 	}
 
 	async fetchPlayer({
@@ -164,12 +157,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 			}
 		).then((r) => r.json())
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
-		revocations.forEach((revocation: Revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.add(revocation)
-		})
-		return revocations
+		
+		const parsed = z.array(Revocation).parse(revocations)
+		if (cache) parsed.forEach(revocation => this.add(revocation))
+		return parsed
 	}
 
 	async revokePlayer({
@@ -197,12 +188,9 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		).then((r) => r.json())
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 
-		revocations.forEach((revocation: Revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.revokedTime = new Date(revocation.revokedTime)
-			if (cache) this.add(revocation)
-		})
-		return revocations
+		const parsed = z.array(Revocation).parse(revocations)
+		if (cache) parsed.forEach(revocation => this.add(revocation))
+		return parsed
 	}
 
 	async fetchSince({
@@ -223,11 +211,8 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		if (revocations.error)
 			throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 
-		revocations.forEach((revocation) => {
-			revocation.reportedTime = new Date(revocation.reportedTime)
-			revocation.timestamp = new Date(revocation.timestamp)
-			if (cache) this.add(revocation)
-		})
-		return revocations
+		const parsed = z.array(Revocation).parse(revocations)
+		if (cache) parsed.forEach(revocation => this.add(revocation))
+		return parsed
 	}
 }

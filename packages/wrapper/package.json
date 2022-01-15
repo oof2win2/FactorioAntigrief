@@ -6,7 +6,7 @@
 	"scripts": {
 		"lint": "npm run eslint",
 		"eslint": "eslint src/ --fix --ext .js,.ts",
-        "prepare": "npx tsc"
+		"prepare": "npx tsc"
 	},
 	"files": [
 		"dist/"
@@ -30,13 +30,14 @@
 	"dependencies": {
 		"@discordjs/collection": "^0.1.6",
 		"discord-api-types": "^0.23.1",
-		"fagc-api-types": "^1.4.2",
+		"fagc-api-types": "^1.5.1",
 		"isomorphic-fetch": "^3.0.0",
 		"isomorphic-ws": "^4.0.1",
 		"reconnecting-websocket": "^4.4.0",
 		"strict-uri-encode": "^2.0.0",
 		"tslib": "^2.3.1",
-		"ws": "^7.5.0"
+		"ws": "^7.5.0",
+		"zod": "^3.11.6"
 	},
 	"devDependencies": {
 		"@types/isomorphic-fetch": "0.0.35",
