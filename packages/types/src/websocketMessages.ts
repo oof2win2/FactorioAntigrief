@@ -14,7 +14,7 @@ export type BaseWebsocketMessage = z.infer<typeof BaseWebsocketMessage>
 
 export const ReportMessageExtraOpts = z.object({
 	community: Community,
-	admin: z.string(),
+	createdBy: z.object({}).passthrough(), // no way to validate this
 	rule: Rule,
 	totalReports: z.number(),
 	totalCommunities: z.number(),
@@ -31,7 +31,7 @@ export type ReportCreatedMessage = z.infer<typeof ReportCreatedMessage> & { embe
 
 export const RevocationMessageExtraOpts = z.object({
 	revokedBy: z.object({}).passthrough(), // no way to validate this
-}).merge(ReportMessageExtraOpts)
+}).merge(ReportMessageExtraOpts).omit({ createdBy: true })
 export type RevocationMessageExtraOpts = z.infer<typeof RevocationMessageExtraOpts> & { revokedBy: APIUser }
 
 export const RevocationMessage = z.object({

@@ -1,3 +1,9 @@
+### [1.5.3] - [2022-01-15]
+
+### Bugfixes
+
+-	Fix issue with `ReportMessageExtraOpts` having wrong `admin` property, renamed to `createdBy` as well
+
 ### [1.5.2] - [2022-01-15]
 
 ### Bugfixes
