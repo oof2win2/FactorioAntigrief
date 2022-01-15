@@ -4,7 +4,6 @@
 
 -   Added in Master Rules API to add and remove rules with a master API key
 -   `authentication` documents now have a property of being either `public` or `master`, depending on which API they serve. `master` will work for `public` routes too.
--   ESM migration
 
 ## [2.0.0] - [2021/08/12]
 

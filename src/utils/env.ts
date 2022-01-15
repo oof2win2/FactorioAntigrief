@@ -7,6 +7,7 @@ dotenv.config({
 const ENV = cleanEnv(
 	process.env,
 	{
+		NODE_ENV: str({ default: "production", choices: ["development", "production"] }),
 		MONGOURI: url({
 			example:
 				"mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName",
@@ -19,7 +20,7 @@ const ENV = cleanEnv(
 		API_PORT: port({ default: 3000 }),
 		API_HOST: host({ default: "0.0.0.0" }),
 		DISCORD_BOTTOKEN: str({ desc: "Your Discord bot token" }),
-		SENTRY_LINK: str({ desc: "Your sentry.io link" }),
+		SENTRY_LINK: str({ default: "", desc: "Your sentry.io link" }),
 		PROMETHEUS_PORT: port({
 			default: 9110,
 			desc: "Port where Prometheus should run for statistics etc.",

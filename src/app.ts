@@ -1,5 +1,5 @@
 import path from "path"
-import ENV from "./utils/env.js"
+import ENV from "./utils/env"
 import Fastify, { FastifyInstance } from "fastify"
 import fastifyCorsPlugin from "fastify-cors"
 import fastifyRateLimitPlugin from "fastify-rate-limit"
@@ -8,11 +8,11 @@ import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
 import fastifyWebSocket from "fastify-websocket"
 import { DocumentType } from "@typegoose/typegoose"
-import CommunityModel, { CommunityClass } from "./database/fagc/community.js"
+import CommunityModel, { CommunityClass } from "./database/fagc/community"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
-import { OAuth2Client } from "./utils/discord.js"
-import removeIdMiddleware from "./utils/removeId.js"
+import { OAuth2Client } from "./utils/discord"
+import removeIdMiddleware from "./utils/removeId"
 import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
 import * as Sentry from "@sentry/node"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,35 +22,39 @@ import fastifySession from "@mgcrea/fastify-session"
 import { SQLiteStore } from "fastify-session-sqlite-store"
 import fastifySwagger from "fastify-swagger"
 import mongooseToSwagger from "mongoose-to-swagger"
-import ReportModel from "./database/fagc/report.js"
-import RevocationModel from "./database/fagc/revocation.js"
-import RuleModel from "./database/fagc/rule.js"
-import UserModel from "./database/fagc/user.js"
-import WebhookModel from "./database/fagc/webhook.js"
-import GuildConfigModel from "./database/fagc/guildconfig.js"
+import ReportModel from "./database/fagc/report"
+import RevocationModel from "./database/fagc/revocation"
+import RuleModel from "./database/fagc/rule"
+import UserModel from "./database/fagc/user"
+import WebhookModel from "./database/fagc/webhook"
+import GuildConfigModel from "./database/fagc/guildconfig"
 import { z } from "zod"
-import { generateSchema } from "./utils/zodOpenAPI.js"
+import { generateSchema } from "@anatine/zod-openapi"
 
 const fastify: FastifyInstance = Fastify({
 	logger: false,
 })
 
-Sentry.init({
-	dsn: ENV.SENTRY_LINK,
+const hasSentry = Boolean(ENV.SENTRY_LINK);
+if (hasSentry) {
+	Sentry.init({
+		dsn: ENV.SENTRY_LINK,
 
-	// We recommend adjusting this value in production, or using tracesSampler
-	// for finer control
-	tracesSampleRate: 1.0,
-	integrations: [
-		new Sentry.Integrations.Http({ tracing: true }),
-		new Sentry.Integrations.Console(),
-	],
-})
+		// We recommend adjusting this value in production, or using tracesSampler
+		// for finer control
+		tracesSampleRate: 1.0,
+		integrations: [
+			new Sentry.Integrations.Http({ tracing: true }),
+			new Sentry.Integrations.Console(),
+		],
+	})
 
-fastify.addHook("onRequest", (req, res, next) => {
-	const handler = Sentry.Handlers.requestHandler()
-	handler(req.raw, res.raw, next)
-})
+	fastify.addHook("onRequest", (req, res, next) => {
+		const handler = Sentry.Handlers.requestHandler()
+		handler(req.raw, res.raw, next)
+	})
+}
+
 
 const SwaggerDefinitions = {}
 
@@ -159,7 +163,11 @@ fastify.register(fastifySwagger, {
 		},
 	},
 	staticCSP: true,
-	transformStaticCSP: (header) => header,
+	transformStaticCSP: (header) => {
+		if (ENV.NODE_ENV == "development")
+			return header.replace("upgrade-insecure-requests;", "");
+		return header;
+	},
 	exposeRoute: true,
 })
 
@@ -216,7 +224,14 @@ declare module "fastify-request-context" {
 }
 
 // helmet
-fastify.register(fastifyHelmetPlugin)
+fastify.register(fastifyHelmetPlugin, {
+	contentSecurityPolicy: {
+		directives: {
+			...(ENV.NODE_ENV === "development" ? { "upgrade-insecure-requests": null } : {}),
+		},
+	},
+	...(ENV.NODE_ENV === "development" ? { hsts: false, } : {}),
+})
 
 // form body for backwards compat with the express api
 fastify.register(fastifyFormBodyPlugin)
@@ -279,10 +294,11 @@ fastify.setErrorHandler(async (error, request, reply) => {
 			message: Array.isArray(x._errors) && x._errors.length ? x._errors[0] : errorOutput
 		})
 	}
-	
+
 	console.error(error)
 	// Sending error to be logged in Sentry
-	Sentry.captureException(error)
+	if (hasSentry)
+		Sentry.captureException(error)
 	reply.status(500).send({
 		errorCode: 500,
 		error: "Something went wrong",

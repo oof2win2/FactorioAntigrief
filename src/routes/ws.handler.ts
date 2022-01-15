@@ -1,13 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { GET, RequestHandler } from "fastify-decorators"
 import type { WebSocket } from "ws"
-import { WsClient } from "../utils/info.js"
+import { WsClient } from "../utils/info"
 
 @GET({
 	url: "/ws",
 	options: {
 		websocket: true,
-		schema: {},
+		schema: {
+			hide: true,
+		},
 	},
 })
 export default class WsHandler extends RequestHandler {

@@ -4,10 +4,10 @@ import { Controller, DELETE, GET, POST } from "fastify-decorators"
 import UserModel, {
 	ApiAccessModel,
 	UserAuthModel,
-} from "../database/fagc/user.js"
-import { OAUTHSCOPES } from "../consts.js"
-import { Authenticate } from "../utils/authentication.js"
-import GuildConfigModel from "../database/fagc/guildconfig.js"
+} from "../database/fagc/user"
+import { OAUTHSCOPES } from "../consts"
+import { Authenticate } from "../utils/authentication"
+import GuildConfigModel from "../database/fagc/guildconfig"
 
 // currently disabled.
 @Controller({ route: "/users" })

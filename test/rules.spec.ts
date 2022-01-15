@@ -1,5 +1,5 @@
 import RuleModel from "../src/database/fagc/rule"
-import backend from "./prepareTest.js"
+import backend from "./prepareTest"
 
 describe("Rules", () => {
 	it("Should fetch all rules", async () => {

@@ -1,25 +1,25 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 
-import RuleModel from "../database/fagc/rule.js"
-import { Authenticate, MasterAuthenticate } from "../utils/authentication.js"
-import CommunityModel from "../database/fagc/community.js"
-import GuildConfigModel from "../database/fagc/guildconfig.js"
+import RuleModel from "../database/fagc/rule"
+import { Authenticate, MasterAuthenticate } from "../utils/authentication"
+import CommunityModel from "../database/fagc/community"
+import GuildConfigModel from "../database/fagc/guildconfig"
 import {
 	guildConfigChanged,
 	communityCreatedMessage,
 	communityRemovedMessage,
 	communityUpdatedMessage,
 	communitiesMergedMessage,
-} from "../utils/info.js"
+} from "../utils/info"
 import {
 	client,
 	validateDiscordUser,
-} from "../utils/discord.js"
-import ReportModel from "../database/fagc/report.js"
-import RevocationModel from "../database/fagc/revocation.js"
-import WebhookModel from "../database/fagc/webhook.js"
-import AuthModel from "../database/fagc/authentication.js"
+} from "../utils/discord"
+import ReportModel from "../database/fagc/report"
+import RevocationModel from "../database/fagc/revocation"
+import WebhookModel from "../database/fagc/webhook"
+import AuthModel from "../database/fagc/authentication"
 import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
@@ -195,7 +195,7 @@ export default class CommunityController {
 					guildId: z.string(),
 				}),
 
-				tags: [ "community", "master" ],
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -429,6 +429,8 @@ export default class CommunityController {
 					guildId: z.string()
 				}),
 
+				description: "Notify guild config changed",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -474,7 +476,7 @@ export default class CommunityController {
 				}),
 
 				description: "Create a FAGC community",
-				tags: [ "community", "master" ],
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -555,7 +557,7 @@ export default class CommunityController {
 				}),
 
 				description: "Delete a FAGC community",
-				tags: [ "community", "master" ],
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -660,7 +662,7 @@ export default class CommunityController {
 				}),
 
 				description: "Merge community idDissolving into community idReceiving",
-				tags: [ "communities" ],
+				tags: [ "community" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -789,8 +791,8 @@ export default class CommunityController {
 					guildId: z.string(),
 				}),
 
-				description: "Delete a FAGC community",
-				tags: [ "community", "master" ],
+				description: "Notify leaving a guild",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],

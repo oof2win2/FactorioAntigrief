@@ -1,5 +1,5 @@
-import AuthModel from "../database/fagc/authentication.js"
-import CommunitySchema, { CommunityClass } from "../database/fagc/community.js"
+import AuthModel from "../database/fagc/authentication"
+import CommunitySchema, { CommunityClass } from "../database/fagc/community"
 import { BeAnObject, DocumentType } from "@typegoose/typegoose/lib/types"
 
 export async function getCommunity(

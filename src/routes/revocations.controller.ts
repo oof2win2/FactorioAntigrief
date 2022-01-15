@@ -1,12 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, POST } from "fastify-decorators"
-import RevocationModel from "../database/fagc/revocation.js"
+import RevocationModel from "../database/fagc/revocation"
 import { z } from "zod"
-import { Authenticate } from "../utils/authentication.js"
-import { client, validateDiscordUser } from "../utils/discord.js"
-import ReportModel from "../database/fagc/report.js"
-import RuleModel, { RuleClass } from "../database/fagc/rule.js"
-import { reportRevokedMessage } from "../utils/info.js"
+import { Authenticate } from "../utils/authentication"
+import { client, validateDiscordUser } from "../utils/discord"
+import ReportModel from "../database/fagc/report"
+import RuleModel, { RuleClass } from "../database/fagc/rule"
+import { reportRevokedMessage } from "../utils/info"
 import {
 	Community,
 	Rule,
