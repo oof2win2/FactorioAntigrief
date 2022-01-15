@@ -1,13 +1,16 @@
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import { getUserStringFromID } from "../utils/functions-databaseless"
+import { IdType } from "./ids"
 
 @modelOptions({
 	schemaOptions: {
 		collection: "rules",
 	},
 })
-@pre<RuleClass>("save", function (next) {
-	this.id = getUserStringFromID(this._id.toString())
+@pre<RuleClass>("save", async function (next) {
+	const id = await getUserStringFromID(IdType.RULE)
+	this.id = id.id
+	this._id = id._id
 	next()
 })
 export class RuleClass {

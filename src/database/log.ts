@@ -1,5 +1,6 @@
 import { getUserStringFromID } from "../utils/functions-databaseless"
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
+import { IdType } from "./ids"
 
 
 @modelOptions({
@@ -10,8 +11,10 @@ import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 		allowMixed: 0, // allow mixed types
 	},
 })
-@pre<LogClass>("save", function (next) {
-	this.id = getUserStringFromID(this._id.toString())
+@pre<LogClass>("save", async function (next) {
+	const id = await getUserStringFromID(IdType.LOG)
+	this.id = id.id
+	this._id = id._id
 	next()
 })
 export class LogClass {

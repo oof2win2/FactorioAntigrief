@@ -1,17 +1,20 @@
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import { getUserStringFromID } from "../utils/functions-databaseless"
+import { IdType } from "./ids"
 
 @modelOptions({
 	schemaOptions: {
 		collection: "communities",
 	},
 })
-@pre<CommunityClass>("save", function (next) {
-	this.id = getUserStringFromID(this._id.toString())
+@pre<CommunityClass>("save", async function (next) {
+	const id = await getUserStringFromID(IdType.COMMUNITY)
+	this.id = id.id
+	this._id = id._id
 	next()
 })
 export class CommunityClass {
-	@prop({ _id: false })
+	@prop({ _id: false, unique: true })
 		id!: string
 
 	@prop()
