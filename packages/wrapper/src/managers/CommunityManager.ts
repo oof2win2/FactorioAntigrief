@@ -38,6 +38,7 @@ export default class CommunityManager extends BaseManager<Community> {
 
 	async setCommunityConfig({
 		config,
+		cache = true,
 		reqConfig = {}
 	}: {
 		config: SetCommunityConfig,
@@ -57,6 +58,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (update?.error)
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		const parsedUpdate = Community.parse(update)
+		if (cache) this.add(parsedUpdate)
 		return parsedUpdate
 	}
 

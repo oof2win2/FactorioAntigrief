@@ -216,5 +216,13 @@ describe("Rules", () => {
 			expect(wrapper.rules.resolveID(ruleOne.id)).toEqual(ruleOne)
 			expect(wrapper.rules.resolveID(ruleTwo.id)).toBeNull()
 		})
+		it("Should throw an error if an incorrect response is given from the API", async () => {
+			const [ ruleOne, ruleTwo ] = testRules
+			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
+			await expect(wrapper.rules.merge({
+				idReceiving: ruleOne.id,
+				idDissolving: ruleTwo.id,
+			})).rejects.toThrow()
+		})
 	})
 })
