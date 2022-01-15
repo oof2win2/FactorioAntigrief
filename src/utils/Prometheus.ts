@@ -1,12 +1,10 @@
-// Clone from https://github.com/DistroByte/AwF-Bot/blob/master/base/Prometheus.js
-
 import promClient from "prom-client"
 import http from "http"
 import GuildConfigModel, {
 	GuildConfigClass,
-} from "../database/fagc/guildconfig"
-import CommunityModel, { CommunityClass } from "../database/fagc/community"
-import RuleModel from "../database/fagc/rule"
+} from "../database/guildconfig"
+import CommunityModel, { CommunityClass } from "../database/community"
+import RuleModel from "../database/rule"
 import { DocumentType } from "@typegoose/typegoose"
 import ENV from "./env"
 

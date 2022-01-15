@@ -1,10 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 
-import RuleModel from "../database/fagc/rule"
+import RuleModel from "../database/rule"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication"
-import CommunityModel from "../database/fagc/community"
-import GuildConfigModel from "../database/fagc/guildconfig"
+import CommunityModel from "../database/community"
+import GuildConfigModel from "../database/guildconfig"
 import {
 	guildConfigChanged,
 	communityCreatedMessage,
@@ -16,10 +16,10 @@ import {
 	client,
 	validateDiscordUser,
 } from "../utils/discord"
-import ReportModel from "../database/fagc/report"
-import RevocationModel from "../database/fagc/revocation"
-import WebhookModel from "../database/fagc/webhook"
-import AuthModel from "../database/fagc/authentication"
+import ReportModel from "../database/report"
+import RevocationModel from "../database/revocation"
+import WebhookModel from "../database/webhook"
+import AuthModel from "../database/authentication"
 import cryptoRandomString from "crypto-random-string"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"

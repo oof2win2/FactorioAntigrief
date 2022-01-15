@@ -1,12 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
-import RuleModel from "../database/fagc/rule"
-import GuildConfigModel from "../database/fagc/guildconfig"
+import RuleModel from "../database/rule"
+import GuildConfigModel from "../database/guildconfig"
 import { MasterAuthenticate } from "../utils/authentication"
 import { guildConfigChanged, ruleCreatedMessage, ruleRemovedMessage, rulesMergedMessage, ruleUpdatedMessage } from "../utils/info"
 import { z } from "zod"
-import ReportModel from "../database/fagc/report"
-import RevocationModel from "../database/fagc/revocation"
+import ReportModel from "../database/report"
+import RevocationModel from "../database/revocation"
 
 @Controller({ route: "/rules" })
 export default class RuleController {

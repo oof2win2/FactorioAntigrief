@@ -8,7 +8,7 @@ import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
 import fastifyWebSocket from "fastify-websocket"
 import { DocumentType } from "@typegoose/typegoose"
-import CommunityModel, { CommunityClass } from "./database/fagc/community"
+import CommunityModel, { CommunityClass } from "./database/community"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
 import { OAuth2Client } from "./utils/discord"
@@ -22,12 +22,11 @@ import fastifySession from "@mgcrea/fastify-session"
 import { SQLiteStore } from "fastify-session-sqlite-store"
 import fastifySwagger from "fastify-swagger"
 import mongooseToSwagger from "mongoose-to-swagger"
-import ReportModel from "./database/fagc/report"
-import RevocationModel from "./database/fagc/revocation"
-import RuleModel from "./database/fagc/rule"
-import UserModel from "./database/fagc/user"
-import WebhookModel from "./database/fagc/webhook"
-import GuildConfigModel from "./database/fagc/guildconfig"
+import ReportModel from "./database/report"
+import RevocationModel from "./database/revocation"
+import RuleModel from "./database/rule"
+import WebhookModel from "./database/webhook"
+import GuildConfigModel from "./database/guildconfig"
 import { z } from "zod"
 import { generateSchema } from "@anatine/zod-openapi"
 
@@ -35,7 +34,7 @@ const fastify: FastifyInstance = Fastify({
 	logger: false,
 })
 
-const hasSentry = Boolean(ENV.SENTRY_LINK);
+const hasSentry = Boolean(ENV.SENTRY_LINK)
 if (hasSentry) {
 	Sentry.init({
 		dsn: ENV.SENTRY_LINK,
@@ -73,8 +72,6 @@ const RevocationModelSwagger = mongooseToSwagger(
 SwaggerDefinitions[RevocationModelSwagger.title] = RevocationModelSwagger
 const RuleModelSwagger = mongooseToSwagger(RuleModel, swaggerDefOpts)
 SwaggerDefinitions[RuleModelSwagger.title] = RuleModelSwagger
-const UserModelSwagger = mongooseToSwagger(UserModel, swaggerDefOpts)
-SwaggerDefinitions[UserModelSwagger.title] = UserModelSwagger
 const WebhookModelSwagger = mongooseToSwagger(WebhookModel, swaggerDefOpts)
 SwaggerDefinitions[WebhookModelSwagger.title] = WebhookModelSwagger
 
@@ -165,8 +162,8 @@ fastify.register(fastifySwagger, {
 	staticCSP: true,
 	transformStaticCSP: (header) => {
 		if (ENV.NODE_ENV == "development")
-			return header.replace("upgrade-insecure-requests;", "");
-		return header;
+			return header.replace("upgrade-insecure-requests;", "")
+		return header
 	},
 	exposeRoute: true,
 })
