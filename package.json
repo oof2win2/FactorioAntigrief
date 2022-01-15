@@ -9,7 +9,6 @@
 		"dev": "nodemon ./dist/index.ts",
 		"lint": "npm run eslint",
 		"eslint": "eslint src/ --fix --ext .ts",
-		"postinstall": "install-types",
 		"pm2:build": "tsc",
 		"pm2:start": "pm2 start pm2.config.js",
 		"pm2": "npm run pm2:build && npm run pm2:start"
@@ -76,7 +75,6 @@
 		"@types/ws": "^8.2.2",
 		"@typescript-eslint/eslint-plugin": "^5.9.1",
 		"@typescript-eslint/parser": "^5.9.1",
-		"install-types": "^2.0.1",
 		"inversify": "^6.0.1",
 		"jest": "^27.4.7",
 		"jest-mock-extended": "^2.0.4",
