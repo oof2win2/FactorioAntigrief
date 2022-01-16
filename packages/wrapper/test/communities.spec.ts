@@ -230,4 +230,117 @@ describe("Communities", () => {
 			).rejects.toThrow()
 		})
 	})
+
+	describe("createGuildConfig", () => {
+		it("Should be able to set a guild config properly", async () => {
+			const testGuildConfig = createGuildConfig()
+			fetchMock.mockOnce(JSON.stringify(testGuildConfig))
+			const resolvedConfig = await wrapper.communities.createGuildConfig({
+				guildId: testGuildConfig.guildId,
+			})
+
+			expect(resolvedConfig).toEqual(testGuildConfig)
+		})
+		it("Should throw an error if an incorrect response is given from the API", async () => {
+			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
+			await expect(
+				wrapper.communities.createGuildConfig({
+					guildId: "1"
+				})
+			).rejects.toThrow()
+		})
+	})
+
+	describe("notifyGuildConfigChanged", () => {
+		it("Should not throw an error", async () => {
+			const testGuildConfig = createGuildConfig()
+			fetchMock.mockOnce(JSON.stringify({ ok: true }))
+			await expect(
+				wrapper.communities.notifyGuildConfigChanged({
+					guildId: testGuildConfig.guildId,
+				})
+			).resolves.not.toThrow()
+		})
+	})
+
+	describe("guildLeave", () => {
+		it("Should not throw an error", async () => {
+			fetchMock.mockOnce(JSON.stringify({ ok: true }))
+			await expect(
+				wrapper.communities.guildLeave({
+					guildId: "1"
+				})
+			).resolves.not.toThrow()
+		})
+	})
+
+	describe("remove", () => {
+		it("Should remove a community correctly", async () => {
+			const testCommunity = testCommunities[0]
+			fetchMock.mockOnce(JSON.stringify(true))
+			const response = await wrapper.communities.remove({
+				communityId: testCommunity.id,
+			})
+			expect(response).toEqual(true)
+		})
+		it("Should remove a community from cache after it being removed", async () => {
+			const testCommunity = testCommunities[0]
+			// add the community to the cache
+			wrapper.communities.cache.set(testCommunity.id, testCommunity)
+			fetchMock.mockOnce(JSON.stringify(true))
+			await wrapper.communities.remove({
+				communityId: testCommunity.id,
+			})
+			expect(wrapper.communities.cache.size).toEqual(0)
+		})
+		it("Should throw an error if an incorrect response is given from the API", async () => {
+			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
+			await expect(
+				wrapper.communities.remove({
+					communityId: "1"
+				})
+			).rejects.toThrow()
+		})
+	})
+
+	describe("merge", () => {
+		it("Should correctly merge two communities", async () => {
+			const [ testOne, testTwo ] = testCommunities
+			fetchMock.mockOnce(JSON.stringify(testOne))
+			const result = await wrapper.communities.merge({
+				idReceiving: testOne.id,
+				idDissolving: testTwo.id,
+			})
+			expect(result).toEqual(testOne)
+		})
+		it("Should remove the dissolved community from cache but keep the receiving", async () => {
+			const [ testOne, testTwo ] = testCommunities
+
+			// add the communities to cache
+			wrapper.communities.cache.set(testOne.id, testOne)
+			wrapper.communities.cache.set(testTwo.id, testTwo)
+
+			fetchMock.mockOnce(JSON.stringify(testOne))
+			const result = await wrapper.communities.merge({
+				idReceiving: testOne.id,
+				idDissolving: testTwo.id,
+			})
+
+			expect(result).toEqual(testOne)
+
+			// the receiving community should still be in the cache
+			expect(wrapper.communities.resolveID(testOne.id)).toEqual(testOne)
+			// the dissolved community should not be in the cache anymore
+			expect(wrapper.communities.resolveID(testTwo.id)).toBeNull()
+		})
+		it("Should throw an error if an incorrect response is given from the API", async () => {
+			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
+			await expect(
+				wrapper.communities.merge({
+					idReceiving: "1",
+					idDissolving: "2"
+				})
+			).rejects.toThrow()
+		})
+	})
 })
