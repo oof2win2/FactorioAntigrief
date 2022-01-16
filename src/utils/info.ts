@@ -4,15 +4,15 @@ import WebSocket from "ws"
 import GuildConfigModel, {
 	GuildConfigClass,
 } from "../database/guildconfig"
-import { RevocationClass } from "../database/revocation"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import { RuleClass } from "../database/rule"
 import { CommunityClass } from "../database/community"
-import { ReportClass } from "../database/report"
+import { ReportInfoClass } from "../database/reportinfo"
 import {
 	CommunityCreatedMessageExtraOpts,
 	ReportMessageExtraOpts,
+	Revocation,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
 
@@ -134,7 +134,7 @@ export function WebsocketMessage(message: string): void {
 }
 
 export async function reportCreatedMessage(
-	report: DocumentType<ReportClass, BeAnObject>,
+	report: DocumentType<ReportInfoClass, BeAnObject>,
 	opts: ReportMessageExtraOpts
 ): Promise<void> {
 	if (report === null || report.playername === undefined) return
@@ -188,7 +188,7 @@ export async function reportCreatedMessage(
 }
 
 export async function reportRevokedMessage(
-	revocation: DocumentType<RevocationClass, BeAnObject>,
+	revocation: Revocation,
 	opts: RevocationMessageExtraOpts
 ): Promise<void> {
 	if (revocation === null || revocation.playername === undefined) return
@@ -200,9 +200,9 @@ export async function reportRevokedMessage(
 		.setTitle("FAGC - Report Revoked")
 		.setDescription(
 			`${revocation.automated ? "Automated " : ""}Report \`${
-				revocation.reportId
+				revocation.id
 			}\` revoked with \`${revocation.id}\` at <t:${Math.round(
-				revocation.revokedTime.valueOf() / 1000
+				revocation.revokedAt.valueOf() / 1000
 			)}>\n` +
 				`${opts.totalReports} reports in ${opts.totalCommunities} communities`
 		)

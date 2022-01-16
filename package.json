@@ -30,7 +30,7 @@
 		"discord.js": "^13.6.0",
 		"dotenv": "^11.0.0",
 		"envalid": "^7.2.2",
-		"fagc-api-types": "^1.5.4",
+		"fagc-api-types": "^1.6.1",
 		"fastify": "^3.24.0",
 		"fastify-autoload": "^3.10.0",
 		"fastify-cookie": "^5.5.0",

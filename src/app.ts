@@ -21,14 +21,9 @@ import fastifyCookie from "fastify-cookie"
 import fastifySession from "@mgcrea/fastify-session"
 import { SQLiteStore } from "fastify-session-sqlite-store"
 import fastifySwagger from "fastify-swagger"
-import mongooseToSwagger from "mongoose-to-swagger"
-import ReportModel from "./database/report"
-import RevocationModel from "./database/revocation"
-import RuleModel from "./database/rule"
-import WebhookModel from "./database/webhook"
-import GuildConfigModel from "./database/guildconfig"
 import { z } from "zod"
 import { generateSchema } from "@anatine/zod-openapi"
+import * as Types from "fagc-api-types"
 
 const fastify: FastifyInstance = Fastify({
 	logger: false,
@@ -55,39 +50,6 @@ if (hasSentry) {
 }
 
 
-const SwaggerDefinitions = {}
-
-const swaggerDefOpts = {
-	// omitFields: ["_id"],
-	props: [ "id" ],
-}
-const communityModelSwagger = mongooseToSwagger(CommunityModel, swaggerDefOpts)
-SwaggerDefinitions[communityModelSwagger.title] = communityModelSwagger
-const ReportModelSwagger = mongooseToSwagger(ReportModel, swaggerDefOpts)
-SwaggerDefinitions[ReportModelSwagger.title] = ReportModelSwagger
-const RevocationModelSwagger = mongooseToSwagger(
-	RevocationModel,
-	swaggerDefOpts
-)
-SwaggerDefinitions[RevocationModelSwagger.title] = RevocationModelSwagger
-const RuleModelSwagger = mongooseToSwagger(RuleModel, swaggerDefOpts)
-SwaggerDefinitions[RuleModelSwagger.title] = RuleModelSwagger
-const WebhookModelSwagger = mongooseToSwagger(WebhookModel, swaggerDefOpts)
-SwaggerDefinitions[WebhookModelSwagger.title] = WebhookModelSwagger
-
-// add in id because of https://github.com/giddyinc/mongoose-to-swagger/pull/33
-Object.keys(SwaggerDefinitions).map((key) => {
-	SwaggerDefinitions[key].properties = {
-		id: { type: "string" },
-		...SwaggerDefinitions[key].properties,
-	}
-})
-
-const GuildConfigModelSwagger = mongooseToSwagger(
-	GuildConfigModel,
-	swaggerDefOpts
-)
-SwaggerDefinitions[GuildConfigModelSwagger.title] = GuildConfigModelSwagger
 
 // swagger
 fastify.register(fastifySwagger, {
@@ -168,26 +130,29 @@ fastify.register(fastifySwagger, {
 	exposeRoute: true,
 })
 
-Object.keys(SwaggerDefinitions).map((key) => {
-	fastify.addSchema({
-		...SwaggerDefinitions[key],
-		type: "object",
-		$id: SwaggerDefinitions[key].title,
-	})
+fastify.addSchema({
+	$id: "CommunityClass",
+	...generateSchema(Types.Community)
 })
 fastify.addSchema({
-	type: "object",
-	$id: "Profile",
-	properties: {
-		communityId: { type: "string" },
-		playername: { type: "string" },
-		reports: {
-			type: "array",
-			items: {
-				$ref: "ReportClass#",
-			},
-		},
-	},
+	$id: "RuleClass",
+	...generateSchema(Types.Rule)
+})
+fastify.addSchema({
+	$id: "ReportClass",
+	...generateSchema(Types.Report)
+})
+fastify.addSchema({
+	$id: "RevocationClass",
+	...generateSchema(Types.Revocation)
+})
+fastify.addSchema({
+	$id: "GuildConfigClass",
+	...generateSchema(Types.GuildConfig)
+})
+fastify.addSchema({
+	$id: "WebhookClass",
+	...generateSchema(Types.Webhook)
 })
 
 // ws

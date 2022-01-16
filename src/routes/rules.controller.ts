@@ -5,8 +5,7 @@ import GuildConfigModel from "../database/guildconfig"
 import { MasterAuthenticate } from "../utils/authentication"
 import { guildConfigChanged, ruleCreatedMessage, ruleRemovedMessage, rulesMergedMessage, ruleUpdatedMessage } from "../utils/info"
 import { z } from "zod"
-import ReportModel from "../database/report"
-import RevocationModel from "../database/revocation"
+import ReportInfoModel from "../database/reportinfo"
 
 @Controller({ route: "/rules" })
 export default class RuleController {
@@ -226,10 +225,7 @@ export default class RuleController {
 				_id: { $in: affectedGuildConfigs.map(config => config._id) }
 			})
 
-			await RevocationModel.deleteMany({
-				brokenRule: rule.id
-			})
-			await ReportModel.deleteMany({
+			await ReportInfoModel.deleteMany({
 				brokenRule: rule.id
 			})
 
@@ -310,12 +306,7 @@ export default class RuleController {
 		await RuleModel.findOneAndDelete({
 			id: idDissolving
 		})
-		await ReportModel.updateMany({
-			brokenRule: idDissolving
-		}, {
-			brokenRule: idReceiving
-		})
-		await RevocationModel.updateMany({
+		await ReportInfoModel.updateMany({
 			brokenRule: idDissolving
 		}, {
 			brokenRule: idReceiving

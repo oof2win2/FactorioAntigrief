@@ -3,7 +3,7 @@ import { Controller, GET, POST } from "fastify-decorators"
 import RuleModel from "../database/rule"
 import { Authenticate } from "../utils/authentication"
 import { reportCreatedMessage } from "../utils/info"
-import ReportModel from "../database/report"
+import ReportInfoModel from "../database/reportinfo"
 import { validateDiscordUser, client } from "../utils/discord"
 import {
 	Community,
@@ -35,7 +35,7 @@ export default class ReportController {
 		req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const community = await ReportModel.find()
+		const community = await ReportInfoModel.find()
 		return res.send(community)
 	}
 
@@ -149,7 +149,7 @@ export default class ReportController {
 			})
 		
 
-		const report = await ReportModel.create({
+		const report = await ReportInfoModel.create({
 			playername: playername,
 			adminId: adminId,
 			brokenRule: brokenRule,
@@ -160,7 +160,7 @@ export default class ReportController {
 			communityId: community.id,
 		})
 
-		const allReports = await ReportModel.find({
+		const allReports = await ReportInfoModel.find({
 			playername: playername,
 		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
@@ -205,7 +205,7 @@ export default class ReportController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const community = await ReportModel.findOne({ id: id })
+		const community = await ReportInfoModel.findOne({ id: id })
 		return res.send(community)
 	}
 
@@ -245,7 +245,7 @@ export default class ReportController {
 		// the querystring validator already makes sure that there is at least one prop, so we can just use it now
 		// TODO: finish + test this
 		const { playername, communityId, ruleId } = req.query
-		const reports = await ReportModel.find({
+		const reports = await ReportInfoModel.find({
 			playername: playername,
 			communityId: communityId,
 			brokenRule: ruleId,
@@ -282,7 +282,7 @@ export default class ReportController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const reports = await ReportModel.find({ brokenRule: req.params.id })
+		const reports = await ReportInfoModel.find({ brokenRule: req.params.id })
 		return res.status(200).send(reports)
 	}
 
@@ -318,7 +318,7 @@ export default class ReportController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const reports = await ReportModel.find({
+		const reports = await ReportInfoModel.find({
 			playername: req.params.playername,
 		})
 		return res.status(200).send(reports)
@@ -354,7 +354,7 @@ export default class ReportController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const reports = await ReportModel.find({
+		const reports = await ReportInfoModel.find({
 			communityId: req.params.communityId,
 		})
 		return res.status(200).send(reports)
@@ -400,7 +400,7 @@ export default class ReportController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { playername, ruleIDs, communityIDs } = req.body
-		const reports = await ReportModel.find({
+		const reports = await ReportInfoModel.find({
 			playername: playername ?? undefined,
 			brokenRule: {
 				$in: ruleIDs
@@ -451,7 +451,7 @@ export default class ReportController {
 		const date = new Date(timestamp)
 		if (isNaN(date.getDate())) return res.send([])
 
-		const reports = await ReportModel.find({
+		const reports = await ReportInfoModel.find({
 			createdAt: { $gt: date },
 		})
 		return res.send(reports)
