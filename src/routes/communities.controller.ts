@@ -16,8 +16,7 @@ import {
 	client,
 	validateDiscordUser,
 } from "../utils/discord"
-import ReportModel from "../database/report"
-import RevocationModel from "../database/revocation"
+import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
 import AuthModel from "../database/authentication"
 import cryptoRandomString from "crypto-random-string"
@@ -599,10 +598,7 @@ export default class CommunityController {
 			communityId: community.id,
 		})
 
-		await ReportModel.deleteMany({
-			communityId: community.id,
-		})
-		await RevocationModel.deleteMany({
+		await ReportInfoModel.deleteMany({
 			communityId: community.id,
 		})
 		await AuthModel.findOneAndDelete({
@@ -710,12 +706,7 @@ export default class CommunityController {
 		await CommunityModel.findOneAndDelete({
 			id: idDissolving
 		})
-		await ReportModel.updateMany({
-			communityId: idDissolving
-		}, {
-			communityId: idReceiving
-		})
-		await RevocationModel.updateMany({
+		await ReportInfoModel.updateMany({
 			communityId: idDissolving
 		}, {
 			communityId: idReceiving

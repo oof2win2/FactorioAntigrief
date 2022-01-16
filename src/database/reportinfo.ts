@@ -4,28 +4,22 @@ import { IdType } from "./ids"
 
 @modelOptions({
 	schemaOptions: {
-		collection: "revocations",
+		collection: "reports",
 	},
 })
-@pre<RevocationClass>("save", async function (next) {
+@pre<ReportInfoClass>("save", async function (next) {
 	const id = await getUserStringFromID(IdType.REVOCATION)
 	this.id = id.id
 	this._id = id._id
-	this.createdAt = this.createdAt || new Date()
+	this.reportCreatedAt = this.reportCreatedAt || new Date()
 	next()
 })
-export class RevocationClass {
-	@prop({ unique: true })
+export class ReportInfoClass {
+	@prop()
 		id!: string
 
 	@prop()
-		reportId!: string
-
-	@prop()
 		playername!: string
-
-	@prop()
-		adminId!: string
 
 	@prop()
 		communityId!: string
@@ -46,14 +40,19 @@ export class RevocationClass {
 		reportedTime!: Date
 
 	@prop()
-		revokedTime!: Date
+		adminId!: string
 
 	@prop()
-		revokedBy!: string
+		reportCreatedAt!: Date
+
+	// revocation specific stuff. is not there on reports but is on revocations
+	
+	@prop()
+		revokedBy?: string
 
 	@prop()
-		createdAt!: Date
+		revokedAt?: Date
 }
 
-const RevocationModel = getModelForClass(RevocationClass)
-export default RevocationModel
+const ReportInfoModel = getModelForClass(ReportInfoClass)
+export default ReportInfoModel
