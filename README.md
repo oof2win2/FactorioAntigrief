@@ -2,9 +2,9 @@
 
 ## Contents
 
--   [Introduction](#introduction)
-    -   [Installation](#installation)
-    -   [TODO:](#todo)
+- [Introduction](#introduction)
+	- [Installation](#installation)
+	- [TODO:](#todo)
 
 # Introduction
 
@@ -21,6 +21,7 @@ This README is focused solely on the installation instructions and the workings 
 1. Install MongoDB as the database. You can use one of two methods:
     1. Use MongoDB Atlas. This is a completely free service offered by MongoDB. It is however limited to 350MB of storage (you won't realistically reach that quickly) and can be hosted further away than you can host it yourself, which results in higher latency. [Set an instance up here, they offer a free and paid tier](https://www.mongodb.com/basics/mongodb-atlas-tutorial)
     2. Set up your own MongoDB instance locally. This is more tedious as you install the database on your own system. It however has the advantage of generally being lower-latency with regards to the bot and API, as there is a much smaller physical distance separating the two (and also less electronics). [Install according to this guide for free](https://docs.mongodb.com/manual/installation/)
+	- Either of the installations **must** be a replica set so that [change streams](https://docs.mongodb.com/manual/changeStreams/) can be used. By default, this is already set up on Atlas but needs to be done according to [this guide](https://docs.mongodb.com/manual/tutorial/convert-standalone-to-replica-set/).
 2. Set up your `config.js` file according to the [`config.example.js`](config.example.js) file.
 3. Run the program with one of:
     1. `nodemon`
