@@ -290,6 +290,9 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		).then((u) => u.json())
 		if (remove?.error) throw new GenericAPIError(`${remove.error}: ${remove.message}`)
+		this.removeFromCache({
+			id: communityId,
+		})
 		return z.boolean().parse(remove)
 	}
 
@@ -312,6 +315,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		).then((u) => u.json())
 		if (merge?.error) throw new GenericAPIError(`${merge.error}: ${merge.message}`)
+		this.removeFromCache({ id: idDissolving })
 		return Community.parse(merge)
 	}
 }

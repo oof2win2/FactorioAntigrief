@@ -50,6 +50,13 @@ export default class BaseManager<HoldsWithId extends Common> {
 	protected removeFromCache(data: Pick<HoldsWithId, "id">): Pick<HoldsWithId, "id"> | null {
 		if (!data) return null
 		this.cache.delete(data.id)
+		this.sweepCache.delete(data.id)
+		const value = this.fetchingCache.get(data.id)
+		if (value) {
+			value.then(() => {
+				this.cache.delete(data.id)
+			})
+		}
 		return data
 	}
 
