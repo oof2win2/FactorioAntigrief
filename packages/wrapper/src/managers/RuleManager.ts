@@ -1,4 +1,4 @@
-import fetch from "isomorphic-fetch"
+import "cross-fetch"
 import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Rule } from "fagc-api-types"
 import BaseManager from "./BaseManager"
@@ -67,7 +67,7 @@ export class RuleManager extends BaseManager<Rule> {
 			promiseResolve = resolve
 		})
 
-		this.fetchingCache.set(ruleid, fetchingPromise)
+		if (cache) this.fetchingCache.set(ruleid, fetchingPromise)
 
 		const fetched = await fetch(
 			`${this.apiurl}/rules/${strictUriEncode(ruleid)}`,
@@ -87,7 +87,7 @@ export class RuleManager extends BaseManager<Rule> {
 		if (cache) this.add(parsed.data)
 		promiseResolve(fetched)
 		setTimeout(() => {
-			this.fetchingCache.sweep((data) => typeof data.then === "function")
+			this.fetchingCache.delete(ruleid)
 		}, 0)
 		if (fetched.id === ruleid) return fetched
 		return null
@@ -177,7 +177,7 @@ export class RuleManager extends BaseManager<Rule> {
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
 		
 		const parsed = Rule.parse(data)
-		this.removeFromCache(parsed)
+		this.removeFromCache({ id: idDissolving })
 		return parsed
 	}
 }

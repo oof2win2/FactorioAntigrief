@@ -1,4 +1,4 @@
-import fetch from "isomorphic-fetch"
+import "cross-fetch"
 import { ManagerOptions, WrapperOptions, GenericAPIError } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
@@ -38,6 +38,7 @@ export default class CommunityManager extends BaseManager<Community> {
 
 	async setCommunityConfig({
 		config,
+		cache = true,
 		reqConfig = {}
 	}: {
 		config: SetCommunityConfig,
@@ -57,6 +58,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (update?.error)
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		const parsedUpdate = Community.parse(update)
+		if (cache) this.add(parsedUpdate)
 		return parsedUpdate
 	}
 
@@ -178,6 +180,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	async create({
 		name,
 		contact,
+		cache = true,
 		reqConfig = {}
 	}: {
 		name: string,
@@ -204,6 +207,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			community: Community,
 			apiKey: z.string(),
 		}).parse(create)
+		if (cache) this.add(parsedCreate.community)
 		return parsedCreate
 	}
 
@@ -229,7 +233,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		return parsedCreate
 	}
 
-	async notifyGuildConfig({
+	async notifyGuildConfigChanged({
 		guildId,
 		reqConfig = {}
 	}: {
@@ -286,6 +290,9 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		).then((u) => u.json())
 		if (remove?.error) throw new GenericAPIError(`${remove.error}: ${remove.message}`)
+		this.removeFromCache({
+			id: communityId,
+		})
 		return z.boolean().parse(remove)
 	}
 
@@ -308,6 +315,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		).then((u) => u.json())
 		if (merge?.error) throw new GenericAPIError(`${merge.error}: ${merge.message}`)
+		this.removeFromCache({ id: idDissolving })
 		return Community.parse(merge)
 	}
 }
