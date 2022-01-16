@@ -14,7 +14,7 @@ export enum IdType {
 	},
 })
 export class IdClass {
-	@prop({ _id: false, unique: true })
+	@prop({ unique: true })
 		id!: string
 	@prop({ enum: IdType })
 		type!: IdType

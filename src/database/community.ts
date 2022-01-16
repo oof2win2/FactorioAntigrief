@@ -14,7 +14,7 @@ import IdModel, { IdType } from "./ids"
 	next()
 })
 export class CommunityClass {
-	@prop({ _id: false, unique: true })
+	@prop({ unique: true })
 		id!: string
 
 	@prop()

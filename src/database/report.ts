@@ -15,7 +15,7 @@ import IdModel, { IdType } from "./ids"
 	next()
 })
 export class ReportClass {
-	@prop({ _id: false, unique: true })
+	@prop({ unique: true })
 		id!: string
 
 	@prop()

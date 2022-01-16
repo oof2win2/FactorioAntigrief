@@ -14,7 +14,7 @@ import IdModel, { IdType } from "./ids"
 	next()
 })
 export class RuleClass {
-	@prop({ _id: false, unique: true })
+	@prop({ unique: true })
 		id!: string
 
 	@prop()

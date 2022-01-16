@@ -18,7 +18,7 @@ import IdModel, { IdType } from "./ids"
 	next()
 })
 export class LogClass {
-	@prop({ _id: false, type: String })
+	@prop({ type: String })
 		id!: string
 
 	@prop()

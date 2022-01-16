@@ -6,7 +6,7 @@ import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
 	},
 })
 export class WebhookClass {
-	@prop({ _id: false })
+	@prop()
 		id!: string
 
 	@prop()
