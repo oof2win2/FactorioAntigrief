@@ -12,19 +12,19 @@ export const CreateReport = z.object({
 	proof: z.string().default("No proof"),
 	description: z.string().default("No description"),
 	automated: z.boolean().default(false),
-	reportedTime: z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)),
+	reportedTime: z.union([ z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)), z.date() ]),
 	adminId: z.string(),
 })
 export type CreateReport = z.infer<typeof CreateReport>
 
 export const Report = z.object({
 	communityId: z.string(),
-	reportCreatedAt: z.string().transform((x) => new Date(x)),
+	reportCreatedAt: z.union([ z.string().transform((x) => new Date(x)), z.date() ]),
 }).merge(Common).merge(CreateReport.required())
 export type Report = z.infer<typeof Report>
 
 export const Revocation = z.object({
-	revokedAt: z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)),
+	revokedAt: z.union([ z.string().transform((x) => new Date(x)), z.date() ]),
 	revokedBy: z.string(),
 }).merge(Report)
 export type Revocation = z.infer<typeof Revocation>

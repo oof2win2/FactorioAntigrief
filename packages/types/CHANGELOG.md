@@ -1,4 +1,10 @@
-### [1.6.0] - [2022-01-16]
+## [1.6.1] - [X.X.X]
+
+### Bugfixes
+
+-	Allow date input to be either a ISO 8601 date string or a Date object
+
+## [1.6.0] - [2022-01-16]
 
 ### Changes
 
@@ -6,25 +12,25 @@
 -	Renamed `Revocation`.`revokedTime` to `revokedAt` as that is how it is stored in the database
 -	Added `Report`.`reportCreatedAt`
 
-### [1.5.4] - [2022-01-15]
+## [1.5.4] - [2022-01-15]
 
 ### Bugfixes
 
 -	Fix issue with `ReportMessageExtraOpts` having wrong `createdBy` type, changed to `APIUser`
 
-### [1.5.3] - [2022-01-15]
+## [1.5.3] - [2022-01-15]
 
 ### Bugfixes
 
 -	Fix issue with `ReportMessageExtraOpts` having wrong `admin` property, renamed to `createdBy` as well
 
-### [1.5.2] - [2022-01-15]
+## [1.5.2] - [2022-01-15]
 
 ### Bugfixes
 
 -	Fix issue with `RevocationMessageExtraOpts` not extending from `ReportMessageExtraOpts`
 
-### [1.5.1] - [2022-01-13]
+## [1.5.1] - [2022-01-13]
 
 ### Bugfixes
 
