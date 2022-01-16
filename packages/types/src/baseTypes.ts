@@ -19,13 +19,13 @@ export type CreateReport = z.infer<typeof CreateReport>
 
 export const Report = z.object({
 	communityId: z.string(),
+	reportCreatedAt: z.string().transform((x) => new Date(x)),
 }).merge(Common).merge(CreateReport.required())
 export type Report = z.infer<typeof Report>
 
 export const Revocation = z.object({
-	revokedTime: z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)),
+	revokedAt: z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)),
 	revokedBy: z.string(),
-	reportId: z.string(),
 }).merge(Report)
 export type Revocation = z.infer<typeof Revocation>
 

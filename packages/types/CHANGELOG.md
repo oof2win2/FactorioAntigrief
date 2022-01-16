@@ -1,3 +1,11 @@
+### [1.6.0] - [X-X-X]
+
+### Changes
+
+-	Removed `Revocation`.`reportId` as the ID is now the same for a report and it's revocation
+-	Renamed `Revocation`.`revokedTime` to `revokedAt` as that is how it is stored in the database
+-	Added `Report`.`reportCreatedAt`
+
 ### [1.5.4] - [2022-01-15]
 
 ### Bugfixes
