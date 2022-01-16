@@ -233,7 +233,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		return parsedCreate
 	}
 
-	async notifyGuildConfig({
+	async notifyGuildConfigChanged({
 		guildId,
 		reqConfig = {}
 	}: {
