@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
-
 import RuleModel from "../database/rule"
 import { Authenticate, MasterAuthenticate } from "../utils/authentication"
 import CommunityModel from "../database/community"
@@ -22,6 +21,7 @@ import AuthModel from "../database/authentication"
 import * as jose from "jose"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
+import validator from "validator"
 import ENV from "../utils/env"
 
 @Controller({ route: "/communities" })
@@ -419,6 +419,123 @@ export default class CommunityController {
 		const { guildId } = req.params
 		const config = await GuildConfigModel.findOne({ guildId: guildId })
 		return res.send(config)
+	}
+
+	@POST({
+		url: "/apikey/create",
+		options: {
+			schema: {
+				tags: [ "community" ],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": {
+						allOf: [
+							{ nullable: true },
+							{ $ref: "GuildConfigClass#" },
+						],
+					},
+				},
+			}
+		}
+	})
+	@Authenticate
+	async createApiKey(
+		req: FastifyRequest,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const community = req.requestContext.get("community")
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: "Your community was not found",
+			})
+		const auth = await new jose.SignJWT({ cId: community.id })
+			.setIssuedAt()
+			.setProtectedHeader({
+				alg: "HS256"
+			})
+			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
+		return res.send({
+			apiKey: auth
+		})
+	}
+
+	@POST({
+		url: "/apikey/revoke/:timestamp",
+		options: {
+			schema: {
+				params: z.object({
+					timestamp: z.string()
+						.refine(
+							(input) =>
+							// use validator to check if it's a valid timestamp
+								validator.isISO8601(input),
+							"Invalid timestamp"
+						)
+						.transform((input) => new Date(input)),
+				}),
+
+				tags: [ "community" ],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": {
+						allOf: [
+							{ nullable: true },
+							{ $ref: "GuildConfigClass#" },
+						],
+					},
+				},
+			}
+		}
+	})
+	@Authenticate
+	async revokeApiKey(
+		req: FastifyRequest<{
+			Params: {
+				timestamp: Date
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { timestamp } = req.params
+		const community = req.requestContext.get("community")
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: "Your community was not found",
+			})
+		
+		// invalidate the tokens created before the specified timestamp
+		const updated = await CommunityModel.findOneAndUpdate({ id: community.id }, {
+			tokenInvalidBefore: timestamp
+		}).exec()
+		if (!updated)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: "Your community was not found",
+			})
+		
+		// create a new api token for the community to use just in case
+		const auth = await new jose.SignJWT({ cId: community.id })
+			.setIssuedAt()
+			.setProtectedHeader({
+				alg: "HS256"
+			})
+			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
+		return res.send({
+			apiKey: auth
+		})
 	}
 
 	@POST({
