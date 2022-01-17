@@ -12,9 +12,11 @@ import IdModel, { IdType } from "./ids"
 	},
 })
 @pre<LogClass>("save", async function (next) {
-	const id = await getUserStringFromID(IdType.LOG)
-	this.id = id.id
-	this._id = id._id
+	if (!this.id || !this._id) {
+		const id = await getUserStringFromID(IdType.COMMUNITY)
+		this.id = id.id
+		this._id = id._id
+	}
 	next()
 })
 export class LogClass {

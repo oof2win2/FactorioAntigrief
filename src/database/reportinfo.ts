@@ -8,9 +8,11 @@ import { IdType } from "./ids"
 	},
 })
 @pre<ReportInfoClass>("save", async function (next) {
-	const id = await getUserStringFromID(IdType.REVOCATION)
-	this.id = id.id
-	this._id = id._id
+	if (!this.id || !this._id) {
+		const id = await getUserStringFromID(IdType.COMMUNITY)
+		this.id = id.id
+		this._id = id._id
+	}
 	this.reportCreatedAt = this.reportCreatedAt || new Date()
 	next()
 })
