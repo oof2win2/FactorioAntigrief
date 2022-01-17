@@ -19,9 +19,10 @@ import {
 import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
 import AuthModel from "../database/authentication"
-import cryptoRandomString from "crypto-random-string"
+import * as jose from "jose"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
+import ENV from "../utils/env"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -528,10 +529,12 @@ export default class CommunityController {
 			guildIds: []
 		})
 
-		const auth = await AuthModel.create({
-			communityId: community.id,
-			api_key: cryptoRandomString({ length: 64 }),
-		})
+		const auth = await new jose.SignJWT({ cId: community.id })
+			.setIssuedAt()
+			.setProtectedHeader({
+				alg: "HS256"
+			})
+			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
 
 		const contactUser = await client.users.fetch(contact)
 
@@ -543,7 +546,7 @@ export default class CommunityController {
 
 		return res.send({
 			community: community,
-			apiKey: auth.api_key,
+			apiKey: auth,
 		})
 	}
 

@@ -25,6 +25,7 @@ const ENV = cleanEnv(
 			default: 9110,
 			desc: "Port where Prometheus should run for statistics etc.",
 		}),
+		JWT_SECRET: str({ desc: "Secret for signing JWTs" }),
 	},
 	{}
 )
