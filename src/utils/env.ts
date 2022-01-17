@@ -7,7 +7,7 @@ dotenv.config({
 const ENV = cleanEnv(
 	process.env,
 	{
-		NODE_ENV: str({ default: "production", choices: ["development", "production"] }),
+		NODE_ENV: str({ default: "production", choices: [ "development", "production" ] }),
 		MONGOURI: url({
 			example:
 				"mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName",
@@ -25,15 +25,6 @@ const ENV = cleanEnv(
 			default: 9110,
 			desc: "Port where Prometheus should run for statistics etc.",
 		}),
-		APPID: str({ desc: "Your Discord application ID" }),
-		APPSECRET: str({ desc: "Your Discord application secret" }),
-		APPREDIRECTURI: url({ desc: "Your Discord redirect URI" }),
-		SESSIONSECRET: str({ desc: "Cookie session secret" }),
-		SESSION_TTL: num({
-			desc: "Fastify cookie session TTL. Default is 1 year",
-			default: 31536000,
-		}), // default to a year
-		COOKIENAME: str({ desc: "Cookie name", default: "sid" }),
 	},
 	{}
 )

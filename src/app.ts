@@ -8,18 +8,13 @@ import fastifyHelmetPlugin from "fastify-helmet"
 import { bootstrap } from "fastify-decorators"
 import fastifyWebSocket from "fastify-websocket"
 import { DocumentType } from "@typegoose/typegoose"
-import CommunityModel, { CommunityClass } from "./database/community"
+import { CommunityClass } from "./database/community"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
-import { OAuth2Client } from "./utils/discord"
 import removeIdMiddleware from "./utils/removeId"
-import { SODIUM_SECRETBOX } from "@mgcrea/fastify-session-sodium-crypto"
 import * as Sentry from "@sentry/node"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from "@sentry/tracing"
-import fastifyCookie from "fastify-cookie"
-import fastifySession from "@mgcrea/fastify-session"
-import { SQLiteStore } from "fastify-session-sqlite-store"
 import fastifySwagger from "fastify-swagger"
 import { z } from "zod"
 import { generateSchema } from "@anatine/zod-openapi"
@@ -174,14 +169,12 @@ fastify.register(fastifyRateLimitPlugin, {
 fastify.register(fastifyRequestContextPlugin, {
 	hook: "preValidation",
 	defaultStoreValues: {
-		oauthclient: OAuth2Client,
 	},
 })
 // typed context
 declare module "fastify-request-context" {
 	interface RequestContextData {
 		community?: DocumentType<CommunityClass, BeAnObject>
-		oauthclient: typeof OAuth2Client
 	}
 }
 
@@ -200,28 +193,6 @@ fastify.register(fastifyFormBodyPlugin)
 
 // middlware to remove garbage from responses
 fastify.addHook("onSend", removeIdMiddleware)
-
-// yummy snackies
-fastify.register(fastifyCookie)
-fastify.register(fastifySession, {
-	store: new SQLiteStore({
-		ttl: ENV.SESSION_TTL,
-		filename: ENV.SESSION_DBPATH.endsWith(".sqlite")
-			? ENV.SESSION_DBPATH
-			: ENV.SESSION_DBPATH + ".sqlite",
-	}),
-	crypto: SODIUM_SECRETBOX,
-	secret: ENV.SESSIONSECRET,
-	cookie: { maxAge: ENV.SESSION_TTL },
-})
-
-// typed session
-declare module "@mgcrea/fastify-session" {
-	interface SessionData {
-		userId?: string
-	}
-}
-
 
 fastify.setValidatorCompiler(({ schema }: {
 	schema: z.ZodAny
