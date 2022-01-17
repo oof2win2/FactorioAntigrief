@@ -454,7 +454,7 @@ export default class CommunityController {
 				error: "Not found",
 				message: "Your community was not found",
 			})
-		const auth = await new jose.SignJWT({ cId: community.id })
+		const auth = await new jose.SignJWT({ cId: community.id, cType: "private" })
 			.setIssuedAt()
 			.setProtectedHeader({
 				alg: "HS256"
@@ -527,7 +527,7 @@ export default class CommunityController {
 			})
 		
 		// create a new api token for the community to use just in case
-		const auth = await new jose.SignJWT({ cId: community.id })
+		const auth = await new jose.SignJWT({ cId: community.id, cType: "private" })
 			.setIssuedAt()
 			.setProtectedHeader({
 				alg: "HS256"
@@ -646,7 +646,7 @@ export default class CommunityController {
 			guildIds: []
 		})
 
-		const auth = await new jose.SignJWT({ cId: community.id })
+		const auth = await new jose.SignJWT({ cId: community.id, cType: "private" })
 			.setIssuedAt()
 			.setProtectedHeader({
 				alg: "HS256"

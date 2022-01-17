@@ -10,7 +10,7 @@ export const apikey = z.object({
 	cType: z.enum([ "master", "private" ]), // the type of API key, master api or only private
 	cId: z.string(),
 	iat: z.union([
-		z.number().transform((x) => new Date(x)),
+		z.number().transform((x) => new Date(x * 1000)),
 		z.date(),
 	])
 		.refine((x) => x.valueOf() < Date.now() + 1000) // must be in the past
@@ -42,35 +42,9 @@ export const Authenticate = <
 				error: "Unauthorized",
 				message: "Your API key was invalid",
 			})
-		// token auth
-		if (auth.startsWith("Token ")) {
+		// token (JWT)
+		else if (auth.startsWith("Token ")) {
 			const token = auth.slice("Token ".length)
-			const authData = await AuthModel.findOne({ api_key: token })
-			if (!authData)
-				return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key was invalid",
-				})
-			const community = await CommunityModel.findOne({
-				id: authData?.communityId,
-			})
-			// this shouldnt happen but ts validation
-			if (!community)
-				return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key was invalid",
-				})
-
-			req.requestContext.set("community", community)
-
-			// run the rest of the route handler
-			return originalRoute.apply(this, args)
-		}
-		// bearer auth (currently only JWT)
-		else if (auth.startsWith("Bearer ")) {
-			const token = auth.slice("Bearer ".length)
 			const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
 			const parsedData = apikey.safeParse(rawData.payload)
 			if (!parsedData.success) return res.status(401).send({
