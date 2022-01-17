@@ -22,7 +22,7 @@
 		"@mgcrea/fastify-session-sodium-crypto": "^0.8.3",
 		"@sentry/node": "^6.15.0",
 		"@sentry/tracing": "^6.13.3",
-		"@typegoose/typegoose": "^9.2.0",
+		"@typegoose/typegoose": "^9.5.0",
 		"@types/node": "^17.0.8",
 		"crypto-random-string": "^3.3.1",
 		"debug": "~4.3.3",
