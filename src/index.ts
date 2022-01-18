@@ -30,9 +30,7 @@ const start = async () => {
 			})
 			const apikey = await createApikey(community, "master")
 			try {
-				const file = await fs.open("./masterapikey.txt", "w", 0o600)
-				await file.write(apikey)
-				await file.close()
+				await fs.writeFile("./masterapikey.txt", apikey, { flag: "w", mode: process.platform === "win32" ? undefined : 0o600 })
 				console.log(`Created first community ${community.id} with apikey written to ./masterapikey.txt, which has master API access. Be careful with sharing it.`)
 			} catch (e) {
 				console.log(`Failed to write master apikey for community ${community.id} to ./masterapikey.txt. It is: ||${apikey}|| (remove ||). Be careful with sharing it.`)
