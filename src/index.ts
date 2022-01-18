@@ -1,20 +1,12 @@
-/**
- * @file Index file, opening file for the bot. The bot logs in here, loads the commands, events and handlers.
- */
-const mongoose = require("mongoose")
-const util = require("util")
-const fs = require("fs")
-const readdir = util.promisify(fs.readdir)
-const config = require("../config")
-const ENV = require("./utils/env")
+import fs from "fs/promises"
+import ENV from "./utils/env"
+import Sentry from "@sentry/node"
+// eslint-disable-next-line no-unused-vars
+import Tracing from "@sentry/tracing"
+import { CaptureConsole } from "@sentry/integrations"
+import FAGCBot from "./base/fagcbot"
 
 process.chdir(__dirname)
-
-// Sentry.io logging
-const Sentry = require("@sentry/node")
-// eslint-disable-next-line no-unused-vars
-const Tracing = require("@sentry/tracing")
-const { CaptureConsole } = require("@sentry/integrations")
 Sentry.init({
 	dsn: ENV.SENTRY_LINK,
 	integrations: [
@@ -30,27 +22,14 @@ Sentry.init({
 	tracesSampleRate: 1.0,
 })
 
-require("./utils/extenders")
-// This enables FAGCBot to access the extenders in any part of the codebase
-
-mongoose
-	.connect(ENV.MONGOURI, config.dbOptions)
-	.then(() => {
-		client.logger.log("Database connected", "log")
-	})
-	.catch((err) =>
-		client.logger.log("Error connecting to database. Error:" + err, "error")
-	)
-
-const FAGCBot = require("./base/fagcbot")
 const client = new FAGCBot()
 
 const init = async () => {
 	// Loads commands
-	const dirs = await readdir("./commands/")
+	const dirs = await fs.readdir("./commands/")
 	// Reads the commands directory
 	dirs.forEach(async (dir) => {
-		const cmds = await readdir(`./commands/${dir}/`)
+		const cmds = await fs.readdir(`./commands/${dir}/`)
 		// gets every dir inside commands
 		cmds.filter((cmd) => cmd.split(".").pop() === "js").forEach((cmd) => {
 			const res = client.loadCommand(`./commands/${dir}`, cmd)
@@ -62,10 +41,10 @@ const init = async () => {
 	})
 
 	// Loads events
-	const evtDirs = await readdir("./events/")
+	const evtDirs = await fs.readdir("./events/")
 	// reads the events dir
 	evtDirs.forEach(async (dir) => {
-		const evts = await readdir(`./events/${dir}/`)
+		const evts = await fs.readdir(`./events/${dir}/`)
 		// gets every dir inside events
 		evts.forEach((evt) => {
 			// splits the event and gets first part. events are in the format "eventName.js"
