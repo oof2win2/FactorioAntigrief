@@ -14,6 +14,7 @@ export const createCommunity = (): Community => {
 		name: faker.random.word(),
 		contact: faker.datatype.number().toString(),
 		guildIds: Array(faker.datatype.number(5)).fill(0).map(() => faker.datatype.number().toString()),
+		tokenInvalidBefore: faker.date.past(),
 	}
 }
 export const createGuildConfig = (): GuildConfig => {
