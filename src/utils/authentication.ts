@@ -39,7 +39,6 @@ export const createApikey = async (cId: string | Community, audience: "master" |
 		.setSubject(community.id) // subject, who is it issued to
 		.setAudience(audience) // audience, what is it for
 		.sign(Buffer.from(ENV.JWT_SECRET, "utf8")) // sign the token itself and get an encoded string back
-	console.log(apikey)
 	return apikey
 }
 
@@ -69,36 +68,44 @@ export const Authenticate = <
 			})
 		// token (JWT)
 		else if (auth.startsWith("Bearer ")) {
-			const token = auth.slice("Bearer ".length)
-			const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
-			const parsedData = apikey.safeParse(rawData.payload)
-			if (!parsedData.success) return res.status(401).send({
-				statusCode: 401,
-				error: "Unauthorized",
-				message: "Your API key is invalid",
-			})
-			const community = await CommunityModel.findOne({
-				id: parsedData.data.sub,
-			})
-			if (!community)
+			try {
+				const token = auth.slice("Bearer ".length)
+				const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
+				const parsedData = apikey.safeParse(rawData.payload)
+				if (!parsedData.success) return res.status(401).send({
+					statusCode: 401,
+					error: "Unauthorized",
+					message: "Your API key is invalid",
+				})
+				const community = await CommunityModel.findOne({
+					id: parsedData.data.sub,
+				})
+				if (!community)
+					return res.status(401).send({
+						statusCode: 401,
+						error: "Unauthorized",
+						message: "Your API key is invalid",
+					})
+				
+				// if the community's tokens are invalid after the token was issued, the token is invalid
+				if (community.tokenInvalidBefore.valueOf() > parsedData.data.iat.valueOf())
+					return res.status(401).send({
+						statusCode: 401,
+						error: "Unauthorized",
+						message: "Your API key is invalid",
+					})
+
+				req.requestContext.set("community", community)
+
+				// run the rest of the route handler
+				return originalRoute.apply(this, args)
+			} catch (e) {
 				return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
 					message: "Your API key is invalid",
 				})
-			
-			// if the community's tokens are invalid after the token was issued, the token is invalid
-			if (community.tokenInvalidBefore.valueOf() > parsedData.data.iat.valueOf())
-				return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key is invalid",
-				})
-
-			req.requestContext.set("community", community)
-
-			// run the rest of the route handler
-			return originalRoute.apply(this, args)
+			}
 		}
 		// if it is something else then it's invalid
 		return res.status(401).send({
@@ -135,43 +142,51 @@ export const MasterAuthenticate = <
 			})
 		// token (JWT)
 		else if (auth.startsWith("Bearer ")) {
-			const token = auth.slice("Bearer ".length)
-			const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
-			const parsedData = apikey.safeParse(rawData.payload)
-			if (!parsedData.success) return res.status(401).send({
-				statusCode: 401,
-				error: "Unauthorized",
-				message: "Your API key is invalid",
-			})
-			if (parsedData.data.aud !== "master")
-				return res.status(401).send({
+			try {
+				const token = auth.slice("Bearer ".length)
+				const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
+				const parsedData = apikey.safeParse(rawData.payload)
+				if (!parsedData.success) return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
 					message: "Your API key is invalid",
 				})
+				if (parsedData.data.aud !== "master")
+					return res.status(401).send({
+						statusCode: 401,
+						error: "Unauthorized",
+						message: "Your API key is invalid",
+					})
 
-			const community = await CommunityModel.findOne({
-				id: parsedData.data.sub,
-			})
-			if (!community)
-				return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key is invalid",
+				const community = await CommunityModel.findOne({
+					id: parsedData.data.sub,
 				})
+				if (!community)
+					return res.status(401).send({
+						statusCode: 401,
+						error: "Unauthorized",
+						message: "Your API key is invalid",
+					})
 			
-			// if the community's tokens are invalid after the token was issued, the token is invalid
-			if (community.tokenInvalidBefore.valueOf() > parsedData.data.iat.valueOf())
+				// if the community's tokens are invalid after the token was issued, the token is invalid
+				if (community.tokenInvalidBefore.valueOf() > parsedData.data.iat.valueOf())
+					return res.status(401).send({
+						statusCode: 401,
+						error: "Unauthorized",
+						message: "Your API key is invalid",
+					})
+
+				req.requestContext.set("community", community)
+
+				// run the rest of the route handler
+				return originalRoute.apply(this, args)
+			} catch (e) {
 				return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
 					message: "Your API key is invalid",
 				})
-
-			req.requestContext.set("community", community)
-
-			// run the rest of the route handler
-			return originalRoute.apply(this, args)
+			}
 		}
 		// if it is something else then it's invalid
 		return res.status(401).send({
