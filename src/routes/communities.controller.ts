@@ -433,10 +433,11 @@ export default class CommunityController {
 				],
 				response: {
 					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "GuildConfigClass#" },
-						],
+						properties: {
+							apiKey: {
+								type: "string",
+							}
+						}
 					},
 				},
 			}
@@ -477,6 +478,12 @@ export default class CommunityController {
 								validator.isISO8601(input),
 							"Invalid timestamp"
 						)
+						.refine(
+							(input) =>
+								// check that the date is not in the future
+								Date.now() > new Date(input).valueOf(),
+							"Timestamp is in the future"
+						)
 						.transform((input) => new Date(input)),
 				}),
 
@@ -488,10 +495,11 @@ export default class CommunityController {
 				],
 				response: {
 					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "GuildConfigClass#" },
-						],
+						properties: {
+							apiKey: {
+								type: "string",
+							}
+						}
 					},
 				},
 			}
@@ -537,6 +545,145 @@ export default class CommunityController {
 			apiKey: auth
 		})
 	}
+
+	@POST({
+		url: "/apikey/create/:communityId",
+		options: {
+			schema: {
+				params: z.object({
+					communityId: z.string()
+				}),
+
+				querystring: z.object({
+					type: z.enum([ "private", "master" ]).default("private")
+				}),
+
+				tags: [ "master" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						properties: {
+							apiKey: {
+								type: "string",
+							}
+						}
+					},
+				},
+			}
+		}
+	})
+	@MasterAuthenticate
+	async masterCreateApikey(
+		req: FastifyRequest<{
+			Params: {
+				communityId: string
+			}
+			Querystring: {
+				type: "private" | "master"
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { communityId } = req.params
+
+		const community = await CommunityModel.findOne({ id: communityId }).exec()
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: `Community with the ID ${communityId} was not found`,
+			})
+		
+		const auth = await new jose.SignJWT({ cId: communityId, cType: req.query.type })
+			.setIssuedAt()
+			.setProtectedHeader({
+				alg: "HS256"
+			})
+			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
+		return res.send({
+			apiKey: auth
+		})
+	}
+
+	@POST({
+		url: "/apikey/revoke/:timestamp/:communityId",
+		options: {
+			schema: {
+				params: z.object({
+					timestamp: z.string()
+						.refine(
+							(input) =>
+							// use validator to check if it's a valid timestamp
+								validator.isISO8601(input),
+							"Invalid timestamp"
+						)
+						.refine(
+							(input) =>
+								// check that the date is not in the future
+								Date.now() > new Date(input).valueOf(),
+							"Timestamp is in the future"
+						)
+						.transform((input) => new Date(input)),
+					communityId: z.string(),
+				}),
+
+				tags: [ "master" ],
+				security: [
+					{
+						masterAuthorization: [],
+					},
+				],
+				response: {
+					"200": {
+						properties: {
+							apiKey: {
+								type: "string",
+							}
+						}
+					},
+				},
+			}
+		}
+	})
+	@MasterAuthenticate
+	async masterRevokeApiKey(
+		req: FastifyRequest<{
+			Params: {
+				timestamp: Date
+				communityId: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { timestamp, communityId } = req.params
+		const community = await CommunityModel.findOne({ id: communityId }).exec()
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: `Community with the ID ${communityId} was not found`,
+			})
+		
+		// invalidate the tokens created before the specified timestamp
+		const updated = await CommunityModel.findOneAndUpdate({ id: community.id }, {
+			tokenInvalidBefore: timestamp
+		}).exec()
+		if (!updated)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: `Community with the ID ${communityId} was not found`,
+			})
+		
+		return res.send({
+			status: "ok"
+		})
+	}
+	
 
 	@POST({
 		url: "/notifyGuildConfigChanged/:guildId",
