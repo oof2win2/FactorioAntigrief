@@ -3,6 +3,7 @@
 ### Changes
 
 -	Add the `Community`.`tokenInvalidBefore` field to represent the date before which the community's tokens are invalid
+-	Put the date type union type in one place so it can be easily changed
 
 ## [1.6.1] - [2022-01-16]
 

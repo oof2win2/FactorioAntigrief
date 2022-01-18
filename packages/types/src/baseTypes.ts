@@ -5,6 +5,10 @@ export const Common = z.object({
 })
 export type Common = z.infer<typeof Common>
 
+// date types, used privately here
+const DateType = z.union([ z.string().transform((x) => new Date(x)), z.date() ])
+const DateTypeDefault = z.union([ z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)), z.date() ])
+
 // This exists so that creating a report doesn't need an ID and some stuff is optional
 export const CreateReport = z.object({
 	playername: z.string(),
@@ -12,19 +16,19 @@ export const CreateReport = z.object({
 	proof: z.string().default("No proof"),
 	description: z.string().default("No description"),
 	automated: z.boolean().default(false),
-	reportedTime: z.union([ z.string().default(() => new Date().toISOString()).transform((x) => new Date(x)), z.date() ]),
+	reportedTime: DateTypeDefault,
 	adminId: z.string(),
 })
 export type CreateReport = z.infer<typeof CreateReport>
 
 export const Report = z.object({
 	communityId: z.string(),
-	reportCreatedAt: z.union([ z.string().transform((x) => new Date(x)), z.date() ]),
+	reportCreatedAt: DateType,
 }).merge(Common).merge(CreateReport.required())
 export type Report = z.infer<typeof Report>
 
 export const Revocation = z.object({
-	revokedAt: z.union([ z.string().transform((x) => new Date(x)), z.date() ]),
+	revokedAt: DateType,
 	revokedBy: z.string(),
 }).merge(Report)
 export type Revocation = z.infer<typeof Revocation>
