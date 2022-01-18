@@ -4,10 +4,21 @@ import CommunityModel from "../database/community"
 import { z } from "zod"
 import * as jose from "jose"
 import ENV from "./env"
+import { Community } from "fagc-api-types"
 
 export const apikey = z.object({
-	realm: z.enum([ "master", "private" ]), // the type of API key, master api or only private
-	cId: z.string(),
+	/**
+	 * aud | Audience - type of API key, master or private
+	 * @enum {string} "master" | "private"
+	 */
+	aud: z.enum([ "master", "private" ]), // the type of API key, master api or only private
+	/**
+	 * sub | Subject - the community ID
+	 */
+	sub: z.string(),
+	/**
+	 * iat | Issued At - the time the token was issued
+	 */
 	iat: z.union([
 		z.number().transform((x) => new Date(x * 1000)),
 		z.date(),
@@ -16,6 +27,21 @@ export const apikey = z.object({
 	,
 })
 export type apikey = z.infer<typeof apikey>
+
+export const createApikey = async (cId: string | Community, audience: "master" | "private" = "private") => {
+	const community = typeof cId === "string" ? await CommunityModel.findById(cId) : cId
+	if (!community) throw new Error("Community not found")
+	const apikey = await new jose.SignJWT({})
+		.setIssuedAt() // for validating when the token was issued
+		.setProtectedHeader({ // encoding method
+			alg: "HS256"
+		})
+		.setSubject(community.id) // subject, who is it issued to
+		.setAudience(audience) // audience, what is it for
+		.sign(Buffer.from(ENV.JWT_SECRET, "utf8")) // sign the token itself and get an encoded string back
+	console.log(apikey)
+	return apikey
+}
 
 export const Authenticate = <
 	T extends RouteGenericInterface = RouteGenericInterface
@@ -52,7 +78,7 @@ export const Authenticate = <
 				message: "Your API key is invalid",
 			})
 			const community = await CommunityModel.findOne({
-				id: parsedData.data.cId,
+				id: parsedData.data.sub,
 			})
 			if (!community)
 				return res.status(401).send({
@@ -117,7 +143,7 @@ export const MasterAuthenticate = <
 				error: "Unauthorized",
 				message: "Your API key is invalid",
 			})
-			if (parsedData.data.realm !== "master")
+			if (parsedData.data.aud !== "master")
 				return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
@@ -125,7 +151,7 @@ export const MasterAuthenticate = <
 				})
 
 			const community = await CommunityModel.findOne({
-				id: parsedData.data.cId,
+				id: parsedData.data.sub,
 			})
 			if (!community)
 				return res.status(401).send({

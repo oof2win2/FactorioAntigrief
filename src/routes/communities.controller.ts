@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 import RuleModel from "../database/rule"
-import { Authenticate, MasterAuthenticate } from "../utils/authentication"
+import { Authenticate, createApikey, MasterAuthenticate } from "../utils/authentication"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import {
@@ -17,7 +17,6 @@ import {
 } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
-import * as jose from "jose"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
 import validator from "validator"
@@ -454,12 +453,7 @@ export default class CommunityController {
 				error: "Not found",
 				message: "Your community was not found",
 			})
-		const auth = await new jose.SignJWT({ cId: community.id, realm: "private" })
-			.setIssuedAt()
-			.setProtectedHeader({
-				alg: "HS256"
-			})
-			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
+		const auth = await createApikey(community, "private")
 		return res.send({
 			apiKey: auth
 		})
@@ -534,12 +528,7 @@ export default class CommunityController {
 			})
 		
 		// create a new api token for the community to use just in case
-		const auth = await new jose.SignJWT({ cId: community.id, realm: "private" })
-			.setIssuedAt()
-			.setProtectedHeader({
-				alg: "HS256"
-			})
-			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
+		const auth = await createApikey(community, "private")
 		return res.send({
 			apiKey: auth
 		})
@@ -597,12 +586,7 @@ export default class CommunityController {
 				message: `Community with the ID ${communityId} was not found`,
 			})
 		
-		const auth = await new jose.SignJWT({ cId: communityId, realm: req.query.type })
-			.setIssuedAt()
-			.setProtectedHeader({
-				alg: "HS256"
-			})
-			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
+		const auth = createApikey(community, req.query.type)
 		return res.send({
 			apiKey: auth
 		})
@@ -792,12 +776,7 @@ export default class CommunityController {
 			guildIds: []
 		})
 
-		const auth = await new jose.SignJWT({ cId: community.id, realm: "private" })
-			.setIssuedAt()
-			.setProtectedHeader({
-				alg: "HS256"
-			})
-			.sign(Buffer.from(ENV.JWT_SECRET, "utf8"))
+		const auth = await createApikey(community, "private")
 
 		const contactUser = await client.users.fetch(contact)
 

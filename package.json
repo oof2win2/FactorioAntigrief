@@ -28,7 +28,7 @@
 		"discord.js": "^13.6.0",
 		"dotenv": "^14.1.0",
 		"envalid": "^7.2.2",
-		"fagc-api-types": "^1.6.1",
+		"fagc-api-types": "^1.7.0",
 		"fastify": "^3.24.0",
 		"fastify-autoload": "^3.10.0",
 		"fastify-cors": "^6.0.2",
