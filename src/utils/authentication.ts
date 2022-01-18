@@ -42,8 +42,8 @@ export const Authenticate = <
 				message: "Your API key is invalid",
 			})
 		// token (JWT)
-		else if (auth.startsWith("Token ")) {
-			const token = auth.slice("Token ".length)
+		else if (auth.startsWith("Bearer ")) {
+			const token = auth.slice("Bearer ".length)
 			const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
 			const parsedData = apikey.safeParse(rawData.payload)
 			if (!parsedData.success) return res.status(401).send({
@@ -108,8 +108,8 @@ export const MasterAuthenticate = <
 				message: "Your Master API key is invalid",
 			})
 		// token (JWT)
-		else if (auth.startsWith("Token ")) {
-			const token = auth.slice("Token ".length)
+		else if (auth.startsWith("Bearer ")) {
+			const token = auth.slice("Bearer ".length)
 			const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
 			const parsedData = apikey.safeParse(rawData.payload)
 			if (!parsedData.success) return res.status(401).send({
