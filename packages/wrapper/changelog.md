@@ -1,3 +1,10 @@
+## [1.26.0] - [2022-01-18]
+
+### Changes
+
+-	Bump `fagc-api-types` from 1.5.1 to 1.7.0
+-	Add methods to work with API keys
+
 ## [1.25.0] - [2022-01-15]
 
 ### Bugfixes
