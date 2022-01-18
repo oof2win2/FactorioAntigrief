@@ -1,3 +1,9 @@
+## [1.7.0] - [2022-01-16]
+
+### Changes
+
+-	Add the `Community`.`tokenInvalidBefore` field to represent the date before which the community's tokens are invalid
+
 ## [1.6.1] - [2022-01-16]
 
 ### Bugfixes

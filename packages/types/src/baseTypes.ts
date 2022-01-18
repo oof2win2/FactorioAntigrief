@@ -33,6 +33,7 @@ export const Community = z.object({
 	name: z.string(),
 	contact: z.string(),
 	guildIds: z.array(z.string()),
+	tokenInvalidBefore: DateType,
 }).merge(Common)
 export type Community = z.infer<typeof Community>
 
