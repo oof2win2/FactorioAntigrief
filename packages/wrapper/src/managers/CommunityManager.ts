@@ -177,6 +177,96 @@ export default class CommunityManager extends BaseManager<Community> {
 		return parsedConfig
 	}
 
+	/**
+	 * Create a new API key for your community
+	 */
+	async createApikey({
+		reqConfig = {}
+	}: FetchRequestTypes): Promise<string> {
+		const key = await fetch(`${this.apiurl}/apikeys`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				authorization: authenticate(this, reqConfig),
+			},
+		}).then((k) => k.json())
+		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
+		const parsed = z.string().parse(key.apiKey)
+		return parsed
+	}
+	
+	/**
+	 * Revoke API keys created until a specific timestamp
+	 * @returns New API key in case you revoke all of your keys by accident
+	 */
+	async revokeApikeys({
+		invalidateUntil,
+		reqConfig = {}
+	}: {
+		invalidateUntil: Date
+	} & FetchRequestTypes): Promise<string> {
+		const key = await fetch(`${this.apiurl}/apikey/revoke/${strictUriEncode(invalidateUntil.toISOString())}`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				authorization: authenticate(this, reqConfig),
+			},
+		}).then((k) => k.json())
+		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
+		const parsed = z.string().parse(key.apiKey)
+		return parsed
+	}
+
+	/**
+	 * Create an API key for a community with the use of the master API
+	 */
+	async masterCreateKey({
+		communityId,
+		keyType = "private",
+		reqConfig = {}
+	}: {
+		communityId: string,
+		keyType: "master" | "private"
+	} & FetchRequestTypes): Promise<string> {
+		const params = new URLSearchParams({
+			type: keyType
+		})
+		const key = await fetch(`${this.apiurl}/communities/apikey/create/${strictUriEncode(communityId)}?${params.toString()}`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				authorization: masterAuthenticate(this, reqConfig),
+			},
+		}).then((k) => k.json())
+		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
+		const parsed = z.string().parse(key.apiKey)
+		return parsed
+	}
+
+	/**
+	 * Revoke API keys created until a specific timestamp with the use of the master API
+	 * @returns New API key in case you revoke all of the keys by accident
+	 */
+	async masterRevokeKeys({
+		communityId,
+		invalidateUntil,
+		reqConfig = {}
+	}: {
+		communityId: string
+		invalidateUntil: Date,
+	} & FetchRequestTypes): Promise<string> {
+		const key = await fetch(`${this.apiurl}/communities/apikey/revoke/${invalidateUntil.toISOString()}/${strictUriEncode(communityId)}`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				authorization: masterAuthenticate(this, reqConfig),
+			},
+		}).then((k) => k.json())
+		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
+		const parsed = z.string().parse(key.apiKey)
+		return parsed
+	}
+
 	async create({
 		name,
 		contact,
