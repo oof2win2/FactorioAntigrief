@@ -1,32 +1,37 @@
-const { Client, Collection } = require("discord.js")
-const path = require("path")
-const { FAGCWrapper } = require("fagc-api-wrapper")
-const ConfigModel = require("../database/schemas/config")
-const ENV = require("../utils/env")
+import { Client, ClientOptions, Collection } from "discord.js"
+import path from "path"
+import { FAGCWrapper } from "fagc-api-wrapper"
+import ENV from "../utils/env"
+import CONFIG from "./config"
+import { Command } from "./Command"
+import {GuildConfig} from "fagc-api-types"
 
-class FAGCBot extends Client {
-	constructor(options) {
+export default class FAGCBot extends Client {
+	config: typeof CONFIG
+	emotes: typeof CONFIG["emotes"]
+	RateLimit: Collection<string, number>
+	fagc: FAGCWrapper
+	commands: Collection<string, Command<any>>
+	aliases: Collection<string, string>
+
+	constructor(options: ClientOptions) {
 		super(options)
 
-		this.config = require("../../config")
-		this.env = ENV
+		this.config = CONFIG
 		this.emotes = this.config.emotes
 
 		// setup rate limit
 		this.RateLimit = new Collection()
 
 		this.fagc = new FAGCWrapper({
-			apiurl: this.env.APIURL,
+			apiurl: ENV.APIURL,
 			enableWebSocket: false,
 			socketurl: "",
-			masterapikey: this.env.MASTERAPIKEY,
+			masterapikey: ENV.MASTERAPIKEY,
 		})
 
 		this.commands = new Collection()
 		this.aliases = new Collection()
-		// ["commands", "aliases"].forEach(x => this[x] = new Collection());
-		// ["command", "event"].forEach((x) => require(`../handlers/${x}`)(this));
-		this.logger = require("../utils/logger")
 	}
 	/**
 	 * Check if a user has sent a command in the past X milliseconds
@@ -34,7 +39,7 @@ class FAGCBot extends Client {
 	 * @param {Number} time - Time in ms to check
 	 * @returns {Boolean} True if the user has sent a command, false if they haven't
 	 */
-	checkTimeout(uid, time) {
+	checkTimeout(uid: string, time: number): boolean {
 		const lastTime = this.RateLimit.get(uid)
 		if (!lastTime) return false
 		if (lastTime < Date.now() - time) return false
@@ -64,7 +69,7 @@ class FAGCBot extends Client {
 		if (this.commands.has(commandName)) {
 			command = this.commands.get(commandName)
 		} else if (this.aliases.has(commandName)) {
-			command = this.commands.get(this.aliases.get(commandName))
+			command = this.commands.get(this.aliases.get(commandName) ?? "")
 		}
 		if (!command) {
 			return `The command \`${commandName}\` doesn't seem to exist, nor is it an alias. Try again!`
@@ -87,7 +92,7 @@ class FAGCBot extends Client {
 			.sort((a, b) => config.ruleFilters.indexOf(a.id) - config.ruleFilters.indexOf(b.id))
 		return filteredRules
 	}
-	async saveGuildConfig(config) {
+	async saveGuildConfig(config: Partial<GuildConfig> & Pick<GuildConfig, "guildId"> & {apikey?: string}) {
 		if (config.apikey) {
 			return this.fagc.communities.setGuildConfig({
 				config: config,
@@ -96,15 +101,15 @@ class FAGCBot extends Client {
 				}
 			})
 		}
-		const newConfig = await ConfigModel.findOneAndUpdate(
-			{ guildId: config.guildId },
-			config,
-			{ upsert: true, new: true }
-		)
-		await this.fagc.communities.notifyGuildConfig({
-			guildID: config.guildID
-		})
-		return newConfig
+		// TODO: implement https://github.com/FactorioAntigrief/fagc-backend/issues/304 first, then saving configs without api keys can work
+		// const newConfig = await ConfigModel.findOneAndUpdate(
+		// 	{ guildId: config.guildId },
+		// 	config,
+		// 	{ upsert: true, new: true }
+		// )
+		// await this.fagc.communities.notifyGuildConfig({
+		// 	guildID: config.guildID
+		// })
+		// return newConfig
 	}
 }
-module.exports = FAGCBot

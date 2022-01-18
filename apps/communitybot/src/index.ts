@@ -5,6 +5,7 @@ import Sentry from "@sentry/node"
 import Tracing from "@sentry/tracing"
 import { CaptureConsole } from "@sentry/integrations"
 import FAGCBot from "./base/fagcbot"
+import { Intents } from "discord.js"
 
 process.chdir(__dirname)
 Sentry.init({
@@ -22,7 +23,10 @@ Sentry.init({
 	tracesSampleRate: 1.0,
 })
 
-const client = new FAGCBot()
+const client = new FAGCBot({
+	// maybe fix these intents later?
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_WEBHOOKS]
+})
 
 const init = async () => {
 	// Loads commands
@@ -34,7 +38,7 @@ const init = async () => {
 		cmds.filter((cmd) => cmd.split(".").pop() === "js").forEach((cmd) => {
 			const res = client.loadCommand(`./commands/${dir}`, cmd)
 			// loads each command
-			if (res) client.logger.log(res, "error")
+			if (res) console.error(res)
 			// if there's an error, log it
 			// else client.logger.log(`Command ${cmd} loaded`, "debug")
 		})
