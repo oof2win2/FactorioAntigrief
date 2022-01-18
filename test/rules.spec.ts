@@ -1,9 +1,12 @@
-import RuleModel from "../src/database/fagc/rule"
+import RuleModel from "../src/database/rule"
 import backend from "./prepareTest"
+import * as mockingoose from "mockingoose"
+import { createRules } from "./utils"
 
-describe("Rules", () => {
-	it("Should fetch all rules", async () => {
-		const fetchedData = await RuleModel.find({})
+describe("GET /rules/", () => {
+	it("Should fetch all rules and return them correctly", async () => {
+		const fetchedData = createRules(10)
+		mockingoose(RuleModel).toReturn(fetchedData, "find")
 		const response = await backend.inject({
 			path: "/rules",
 			method: "GET"
@@ -13,10 +16,7 @@ describe("Rules", () => {
 		expect(backendData.length).toBe(fetchedData.length)
 		fetchedData.map((fetchedRule, i) => {
 			const backendRule = backendData[i]
-			expect(backendRule).not.toBeNull()
-			expect(backendRule.id).toBe(fetchedRule.id)
-			expect(backendRule.shortdesc).toBe(fetchedRule.shortdesc)
-			expect(backendRule.longdesc).toBe(fetchedRule.longdesc)
+			expect(backendRule).toEqual(fetchedRule)
 		})
 	})
 })

@@ -20,7 +20,6 @@ import WebhookModel from "../database/webhook"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
 import validator from "validator"
-import ENV from "../utils/env"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
