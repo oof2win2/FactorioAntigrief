@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-import { cleanEnv, str, port, host, url, num } from "envalid"
+import { cleanEnv, str, port, host, url } from "envalid"
 dotenv.config({
 	path: "./.env",
 })
@@ -7,7 +7,7 @@ dotenv.config({
 const ENV = cleanEnv(
 	process.env,
 	{
-		NODE_ENV: str({ default: "production", choices: [ "development", "production" ] }),
+		NODE_ENV: str({ default: "production", choices: [ "development", "production", "test" ] }),
 		MONGOURI: url({
 			example:
 				"mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName",
@@ -25,6 +25,8 @@ const ENV = cleanEnv(
 			default: 9110,
 			desc: "Port where Prometheus should run for statistics etc.",
 		}),
+		JWT_SECRET: str({ desc: "Secret for signing JWTs" }),
+		CLIENTID: str({ desc: "Client ID for Discord, contact for the first community" }),
 	},
 	{}
 )

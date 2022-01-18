@@ -27,6 +27,9 @@ export class CommunityClass {
 
 	@prop({ type: [ String ] })
 		guildIds!: string[]
+	
+	@prop({ type: Date, default: new Date(0) })
+		tokenInvalidBefore!: Date
 }
 
 const CommunityModel = getModelForClass(CommunityClass)

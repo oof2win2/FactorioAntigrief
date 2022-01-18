@@ -3,6 +3,7 @@
 config.ts
 dist/
 *.code-workspace
+masterapikey.txt
 
 # Logs
 logs
