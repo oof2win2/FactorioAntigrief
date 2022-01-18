@@ -17,7 +17,6 @@ import {
 } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
-import AuthModel from "../database/authentication"
 import * as jose from "jose"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
@@ -455,7 +454,7 @@ export default class CommunityController {
 				error: "Not found",
 				message: "Your community was not found",
 			})
-		const auth = await new jose.SignJWT({ cId: community.id, cType: "private" })
+		const auth = await new jose.SignJWT({ cId: community.id, realm: "private" })
 			.setIssuedAt()
 			.setProtectedHeader({
 				alg: "HS256"
@@ -535,7 +534,7 @@ export default class CommunityController {
 			})
 		
 		// create a new api token for the community to use just in case
-		const auth = await new jose.SignJWT({ cId: community.id, cType: "private" })
+		const auth = await new jose.SignJWT({ cId: community.id, realm: "private" })
 			.setIssuedAt()
 			.setProtectedHeader({
 				alg: "HS256"
@@ -598,7 +597,7 @@ export default class CommunityController {
 				message: `Community with the ID ${communityId} was not found`,
 			})
 		
-		const auth = await new jose.SignJWT({ cId: communityId, cType: req.query.type })
+		const auth = await new jose.SignJWT({ cId: communityId, realm: req.query.type })
 			.setIssuedAt()
 			.setProtectedHeader({
 				alg: "HS256"
@@ -793,7 +792,7 @@ export default class CommunityController {
 			guildIds: []
 		})
 
-		const auth = await new jose.SignJWT({ cId: community.id, cType: "private" })
+		const auth = await new jose.SignJWT({ cId: community.id, realm: "private" })
 			.setIssuedAt()
 			.setProtectedHeader({
 				alg: "HS256"
@@ -868,9 +867,7 @@ export default class CommunityController {
 		await ReportInfoModel.deleteMany({
 			communityId: community.id,
 		})
-		await AuthModel.findOneAndDelete({
-			communityId: community.id,
-		})
+
 		if (guildConfigs) {
 			await WebhookModel.deleteMany({
 				guildId: { $in: guildConfigs.map(config => config.guildId) },
@@ -1006,9 +1003,6 @@ export default class CommunityController {
 		}, {
 			communityId: idReceiving,
 			apikey: guildConfigs.find(c => c.communityId === idReceiving)?.apikey || undefined,
-		})
-		await AuthModel.deleteMany({
-			communityId: idDissolving
 		})
 
 		const affectedConfigs = await GuildConfigModel.find({

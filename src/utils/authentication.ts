@@ -1,13 +1,12 @@
 import { FastifyRequest, FastifyReply } from "fastify"
 import { RouteGenericInterface } from "fastify/types/route"
-import AuthModel from "../database/authentication"
 import CommunityModel from "../database/community"
 import { z } from "zod"
 import * as jose from "jose"
 import ENV from "./env"
 
 export const apikey = z.object({
-	cType: z.enum([ "master", "private" ]), // the type of API key, master api or only private
+	realm: z.enum([ "master", "private" ]), // the type of API key, master api or only private
 	cId: z.string(),
 	iat: z.union([
 		z.number().transform((x) => new Date(x * 1000)),
@@ -40,7 +39,7 @@ export const Authenticate = <
 			return res.status(401).send({
 				statusCode: 401,
 				error: "Unauthorized",
-				message: "Your API key was invalid",
+				message: "Your API key is invalid",
 			})
 		// token (JWT)
 		else if (auth.startsWith("Token ")) {
@@ -50,7 +49,7 @@ export const Authenticate = <
 			if (!parsedData.success) return res.status(401).send({
 				statusCode: 401,
 				error: "Unauthorized",
-				message: "Your API key was invalid",
+				message: "Your API key is invalid",
 			})
 			const community = await CommunityModel.findOne({
 				id: parsedData.data.cId,
@@ -59,7 +58,7 @@ export const Authenticate = <
 				return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
-					message: "Your API key was invalid",
+					message: "Your API key is invalid",
 				})
 			
 			// if the community's tokens are invalid after the token was issued, the token is invalid
@@ -67,7 +66,7 @@ export const Authenticate = <
 				return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
-					message: "Your API key was invalid",
+					message: "Your API key is invalid",
 				})
 
 			req.requestContext.set("community", community)
@@ -79,7 +78,7 @@ export const Authenticate = <
 		return res.status(401).send({
 			statusCode: 401,
 			error: "Unauthorized",
-			message: "Your API key was invalid",
+			message: "Your API key is invalid",
 		})
 	}
 	return descriptor
@@ -106,39 +105,53 @@ export const MasterAuthenticate = <
 			return res.status(401).send({
 				statusCode: 401,
 				error: "Unauthorized",
-				message: "Your Master API key was invalid",
+				message: "Your Master API key is invalid",
 			})
-		if (auth.startsWith("Token ")) {
+		// token (JWT)
+		else if (auth.startsWith("Token ")) {
 			const token = auth.slice("Token ".length)
-			const authData = await AuthModel.findOne({
-				api_key: token,
-				api_key_type: "master",
+			const rawData = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
+			const parsedData = apikey.safeParse(rawData.payload)
+			if (!parsedData.success) return res.status(401).send({
+				statusCode: 401,
+				error: "Unauthorized",
+				message: "Your API key is invalid",
 			})
-			if (!authData)
+			if (parsedData.data.realm !== "master")
 				return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
-					message: "Your API key was invalid",
+					message: "Your API key is invalid",
 				})
+
 			const community = await CommunityModel.findOne({
-				id: authData?.communityId,
+				id: parsedData.data.cId,
 			})
 			if (!community)
 				return res.status(401).send({
 					statusCode: 401,
 					error: "Unauthorized",
-					message: "Your Master API key was invalid",
+					message: "Your API key is invalid",
 				})
+			
+			// if the community's tokens are invalid after the token was issued, the token is invalid
+			if (community.tokenInvalidBefore.valueOf() > parsedData.data.iat.valueOf())
+				return res.status(401).send({
+					statusCode: 401,
+					error: "Unauthorized",
+					message: "Your API key is invalid",
+				})
+
 			req.requestContext.set("community", community)
+
+			// run the rest of the route handler
 			return originalRoute.apply(this, args)
 		}
-		// else if (auth.startsWith("Bearer ")) {
-		// 	// Bearer auth from users or something
-		// }
+		// if it is something else then it's invalid
 		return res.status(401).send({
 			statusCode: 401,
 			error: "Unauthorized",
-			message: "Your Master API key was invalid",
+			message: "Your Master API key is invalid",
 		})
 	}
 	return descriptor
