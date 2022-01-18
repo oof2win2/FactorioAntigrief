@@ -1,10 +1,10 @@
-const { bgBlue, black, green } = require("chalk")
-const dateformat = require("dateformat")
+import { bgBlue, black, green } from "chalk"
+import dateformat from "dateformat"
 
 // makes logs look pretty and uniform
 
-module.exports = class Logger {
-	static log(content, type = "log") {
+export default class Logger {
+	static log(content: any, type = "log") {
 		const date = `[${dateformat(Date.now(), "yyyy-mm-dd hh:MM:ss.l")}]`
 		switch (type) {
 		case "log":

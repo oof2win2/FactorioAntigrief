@@ -1,5 +1,5 @@
-const dotenv = require("dotenv")
-const { cleanEnv, str, url } = require("envalid")
+import dotenv from "dotenv"
+import { cleanEnv, str, url } from "envalid"
 dotenv.config({
 	path: "./.env",
 })
@@ -16,4 +16,4 @@ const ENV = cleanEnv(process.env, {
 	BOTPREFIX: str({ desc: "Discord bot prefix" }),
 })
 
-module.exports = ENV
+export default ENV
