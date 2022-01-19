@@ -3,12 +3,11 @@ import { Command } from "../../base/Command";
 const Ping: Command = {
 	name: "ping",
 	description: "Shows ping to related services",
-	usage: "ping",
+	usage: "",
 	aliases: [],
 	examples: [],
 	category: "basic",
-	requiresRoles: true,
-	requiredPermissions: ["reports"],
+	requiresRoles: false,
 	run: async ({message, client}) => {
 		const msg = await message.channel.send("Pinging...")
 		const ping = msg.createdTimestamp - message.createdTimestamp

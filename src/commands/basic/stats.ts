@@ -4,7 +4,7 @@ import { Command } from "../../base/Command"
 const stats: Command = {
 	name: "stats",
 	description: "Shows stats about the bot",
-	usage: "stats",
+	usage: "",
 	aliases: [],
 	examples: [],
 	category: "basic",
