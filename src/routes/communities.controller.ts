@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 import RuleModel from "../database/rule"
-import { Authenticate, createApikey, MasterAuthenticate } from "../utils/authentication"
+import { Authenticate, createApikey, MasterAuthenticate, OptionalAuthenticate } from "../utils/authentication"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import {
@@ -336,7 +336,6 @@ export default class CommunityController {
 		}
 
 		const guildConfig = await GuildConfigModel.findOne({
-			communityId: community.id,
 			guildId: guildId,
 		})
 
@@ -345,6 +344,16 @@ export default class CommunityController {
 				errorCode: 400,
 				error: "Not Found",
 				message: "Community config was not found",
+			})
+		
+		const authType = req.requestContext.get("authType")
+	
+		// if it's not the master api key and the community IDs are not the same, then return an error
+		if (authType !== "master" && guildConfig.communityId !== community.id)
+			return res.status(403).send({
+				errorCode: 403,
+				error: "Forbidden",
+				message: "You are not allowed to edit this guild's config",
 			})
 
 		if (ruleFilters) guildConfig.ruleFilters = ruleFilters
@@ -398,13 +407,24 @@ export default class CommunityController {
 					"200": {
 						allOf: [
 							{ nullable: true },
-							{ $ref: "GuildConfigClass#" },
+							{
+								// this is to merge two schemas and add other props
+								allOf: [
+									{ $ref: "GuildConfigClass#" },
+									{ properties: {
+										apiKey: {
+											allOf: [ { nullable: true }, { type: "string" } ],
+										}
+									} }
+								]
+							},
 						],
 					},
 				},
 			},
 		},
 	})
+	@OptionalAuthenticate
 	async getGuildConfig(
 		req: FastifyRequest<{
 			Params: {
@@ -415,7 +435,12 @@ export default class CommunityController {
 	): Promise<FastifyReply> {
 		const { guildId } = req.params
 		const config = await GuildConfigModel.findOne({ guildId: guildId })
-		return res.send(config)
+		const response = {
+			...config?.toObject(),
+			apiKey: req.requestContext.get("authType") === "master" ? config?.apikey : null,
+		}
+
+		return res.send(response)
 	}
 
 	@POST({
