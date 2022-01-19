@@ -7,7 +7,8 @@ const Ping: Command = {
 	aliases: [],
 	examples: [],
 	category: "basic",
-	requiredsGuildConfig: false,
+	requiresRoles: true,
+	requiredPermissions: ["reports"],
 	run: async ({message, client}) => {
 		const msg = await message.channel.send("Pinging...")
 		const ping = msg.createdTimestamp - message.createdTimestamp
