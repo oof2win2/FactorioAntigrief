@@ -58,7 +58,8 @@ export const GuildConfig = z.object({
 		setConfig: z.string().default(""),
 		setRules: z.string().default(""),
 		setCommunities: z.string().default(""),
-	})
+	}),
+	apiKey: z.string().nullable(),
 })
 export type GuildConfig = z.infer<typeof GuildConfig>
 
