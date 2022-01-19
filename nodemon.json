@@ -1,10 +1,18 @@
 {
 	"restartable": "rs",
-	"ignore": [".git", "node_modules/**/node_modules", ".vscode", ".git"],
-	"watch": ["src/", "config.js"],
+	"ignore": [
+		".git",
+		"node_modules/**/node_modules",
+		".vscode",
+		".git"
+	],
+	"watch": [
+		"dist/"
+	],
 	"env": {
 		"NODE_ENV": "development"
 	},
 	"ext": "js,mjs,json",
-	"cwd": "./src/"
+	"cwd": "./src/",
+	"delay": 100
 }

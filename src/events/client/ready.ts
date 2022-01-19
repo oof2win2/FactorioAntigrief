@@ -1,6 +1,10 @@
-module.exports = async (client) => {
-	client.logger.log(
-		`${client.user.username} is online: ${new Date()
+import FAGCBot from "../../base/fagcbot";
+import ENV from "../../utils/env";
+import Logger from "../../utils/logger";
+
+export default (client: FAGCBot) => {
+	Logger.log(
+		`${client.user?.username} is online: ${new Date()
 			.toString()
 			.slice(4, 24)}`
 	)
@@ -12,8 +16,8 @@ module.exports = async (client) => {
 		i = 0
 	setInterval(
 		() =>
-			client.user.setActivity(
-				`${client.env.BOTPREFIX}help | ${
+			client.user?.setActivity(
+				`${ENV.BOTPREFIX}help | ${
 					activities[i++ % activities.length]
 				}`,
 				{ type: "WATCHING" }
