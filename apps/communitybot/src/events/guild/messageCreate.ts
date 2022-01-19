@@ -109,25 +109,26 @@ export default async (client: FAGCBot, message: Message) => {
 	if (!command) return message.reply("Invalid command!")
 
 	// TODO: add user to rate limit
+
+	// fetch the guild config for the guild, or create one if it doesn't exist yet
+	const guildConfig =
+		await client.fagc.communities.fetchGuildConfig({ guildId: guild.id }) ||
+		await client.fagc.communities.createGuildConfig({ guildId: guild.id })
 	
 	// if command doesnt require guild config (like help, ping etc), it can be ran
-	if (!command.requiredsGuildConfig) {
+	if (!command.requiresRoles) {
 		try {
 			return await command.run({
 				message,
 				args,
 				client,
+				guildConfig
 			})
 		} catch (e) {
 			message.reply("Something went wrong... Please try again later!")
 			throw e
 		}
 	}
-
-	// fetch the guild config for the guild, or create one if it doesn't exist yet
-	const guildConfig =
-		await client.fagc.communities.fetchGuildConfig({ guildId: guild.id }) ||
-		await client.fagc.communities.createGuildConfig({ guildId: guild.id })
 
 	// if any of the roles are not present on the guild config, they must be filled first
 	if (command.name !== "setpermissions" && (
@@ -139,7 +140,7 @@ export default async (client: FAGCBot, message: Message) => {
 	)) return message.reply("You need to run the setup command and set all roles before you can run any other commands!")
 
 	// check which roles the user doesnt have
-	const doesntHaveRoles = command.requiredGuildConfigPermissions
+	const doesntHaveRoles = command.requiredPermissions
 		.filter((permname) => {
 			const roleid = guildConfig.roles[permname] // get the role which has this perm
 			return !message.member?.roles.cache.has(roleid) // if the user does not have the role, return true to keep it in the array
