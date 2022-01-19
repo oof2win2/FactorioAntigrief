@@ -35,7 +35,8 @@
 		"@types/node-fetch": "^2.5.8",
 		"@types/validator": "^13.7.0",
 		"eslint": "^7.26.0",
-		"nodemon": "^2.0.7"
+		"nodemon": "^2.0.7",
+		"ts-cleaner": "^1.0.5"
 	},
 	"author": "Cooldude2606",
 	"license": "UNLICENSED"

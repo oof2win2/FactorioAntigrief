@@ -1,11 +1,12 @@
 import fs from "fs/promises"
 import ENV from "./utils/env"
-import Sentry from "@sentry/node"
+import * as Sentry from "@sentry/node"
 // eslint-disable-next-line no-unused-vars
-import Tracing from "@sentry/tracing"
+import * as Tracing from "@sentry/tracing"
 import { CaptureConsole } from "@sentry/integrations"
 import FAGCBot from "./base/fagcbot"
 import { Intents } from "discord.js"
+import { Command } from "./base/Command"
 
 process.chdir(__dirname)
 Sentry.init({
@@ -30,18 +31,23 @@ const client = new FAGCBot({
 
 const init = async () => {
 	// Loads commands
-	const dirs = await fs.readdir("./commands/")
-	// Reads the commands directory
-	dirs.forEach(async (dir) => {
-		const cmds = await fs.readdir(`./commands/${dir}/`)
-		// gets every dir inside commands
-		cmds.filter((cmd) => cmd.split(".").pop() === "js").forEach((cmd) => {
-			const res = client.loadCommand(`./commands/${dir}`, cmd)
-			// loads each command
-			if (res) console.error(res)
-			// if there's an error, log it
-			// else client.logger.log(`Command ${cmd} loaded`, "debug")
-		})
+	const commandDirs = await fs.readdir("./commands/")
+	// reads the commands dir
+	commandDirs.forEach(async (dir) => {
+		const evts = await fs.readdir(`./commands/${dir}/`)
+		// gets every dir inside events
+		evts
+			.filter((evt) => evt.endsWith(".js"))
+			.forEach(async (evt) => {
+				// splits the command and gets first part. commands are in the format "commandName.js"
+				const evtName = evt.split(".")[0]
+				const command = await import(`./commands/${dir}/${evt}`).then(x => x.default) as Command
+				
+				// adds command to client
+				client.commands.set(command.name, command)
+				// adds aliases to the command
+				command.aliases.forEach((alias) => client.commands.set(alias, command))
+			})
 	})
 
 	// Loads events
@@ -50,14 +56,15 @@ const init = async () => {
 	evtDirs.forEach(async (dir) => {
 		const evts = await fs.readdir(`./events/${dir}/`)
 		// gets every dir inside events
-		evts.forEach((evt) => {
-			// splits the event and gets first part. events are in the format "eventName.js"
-			const evtName = evt.split(".")[0]
-			const event = require(`./events/${dir}/${evt}`)
-			// binds client to the event
-			client.on(evtName, (...args) => event(client, ...args))
-			delete require.cache[require.resolve(`./events/${dir}/${evt}`)]
-		})
+		evts
+			.filter((evt) => evt.endsWith(".js"))
+			.forEach(async (evt) => {
+				// splits the event and gets first part. events are in the format "eventName.js"
+				const evtName = evt.split(".")[0]
+				const event = await import(`./events/${dir}/${evt}`).then(x => x.default)
+				// binds client to the event
+				client.on(evtName, (...args) => event(client, ...args))
+			})
 	})
 
 	// log in to discord

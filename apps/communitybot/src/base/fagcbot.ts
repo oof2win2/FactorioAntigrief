@@ -9,10 +9,11 @@ import {GuildConfig} from "fagc-api-types"
 export default class FAGCBot extends Client {
 	config: typeof CONFIG
 	emotes: typeof CONFIG["emotes"]
+	env = ENV
 	RateLimit: Collection<string, number>
 	fagc: FAGCWrapper
-	commands: Collection<string, Command<any>>
-	aliases: Collection<string, string>
+	commands: Map<string, Command>
+	aliases: Map<string, string>
 
 	constructor(options: ClientOptions) {
 		super(options)
@@ -30,8 +31,8 @@ export default class FAGCBot extends Client {
 			masterapikey: ENV.MASTERAPIKEY,
 		})
 
-		this.commands = new Collection()
-		this.aliases = new Collection()
+		this.commands = new Map()
+		this.aliases = new Map()
 	}
 	/**
 	 * Check if a user has sent a command in the past X milliseconds

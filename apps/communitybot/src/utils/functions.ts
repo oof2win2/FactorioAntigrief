@@ -1,4 +1,4 @@
-import { MessageEmbed, EmbedField, Message, MessageEmbedOptions, CollectorFilter, User, Guild } from "discord.js"
+import { MessageEmbed, EmbedField, Message, MessageEmbedOptions, MessageOptions, Guild, MessagePayload } from "discord.js"
 import FAGCBot from "../base/fagcbot"
 
 export async function createPagedEmbed(
@@ -79,8 +79,27 @@ export async function createPagedEmbed(
 	})
 }
 
-export async function joinGuild(guild: Guild, client: FAGCBot) {
-	const guildOwner = await guild.fetchOwner()
+export async function sendToGuild(guild: Guild, options: string | MessagePayload | MessageOptions) {
+	const guildOwner = await guild!.fetchOwner()
+
+	const owner = () => {
+		guildOwner.send(options)
+			.catch(() => console.log(`Could not send embed for guild ID ${guild.id}`))
+	}
+
+	const systemChannel = () => {
+		if (guild.systemChannel) guild.systemChannel.send(options).catch(() => owner())
+		else owner()
+	}
+
+	const publicUpdates = () => {
+		if (guild.publicUpdatesChannel) guild.publicUpdatesChannel.send(options).catch(() => systemChannel())
+		else systemChannel()
+	}
+	publicUpdates()
+}
+
+export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 	// create initial config only if it doesn't exist yet
 	client.fagc.communities.fetchGuildConfig({
 		guildId: guild.id,
@@ -94,7 +113,9 @@ export async function joinGuild(guild: Guild, client: FAGCBot) {
 	let embed = new MessageEmbed()
 		.setTitle("Welcome to FAGC")
 		.setColor(client.config.embeds.color)
-		.setFooter(client.config.embeds.footer)
+		.setFooter({
+			text: client.config.embeds.footer
+		})
 		.setTimestamp()
 	embed.addFields(
 		{ name: "FAGC Invite", value: client.config.fagcInvite },
@@ -111,25 +132,7 @@ export async function joinGuild(guild: Guild, client: FAGCBot) {
 		}
 	)
 
-	const owner = () => {
-		guildOwner.send({
-			embeds: [embed]
-		})
-			.catch(() => console.log(`Could not send embed for guild ID ${guild.id}`))
-	}
-
-	const systemChannel = () => {
-		if (guild.systemChannel) guild.systemChannel.send({
-			embeds: [embed]
-		}).catch(() => owner())
-		else owner()
-	}
-
-	const publicUpdates = () => {
-		if (guild.publicUpdatesChannel) guild.publicUpdatesChannel.send({
-			embeds: [embed]
-		}).catch(() => systemChannel())
-		else systemChannel()
-	}
-	publicUpdates()
+	sendToGuild(guild, {
+		embeds: [embed]
+	})
 }
