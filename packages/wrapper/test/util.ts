@@ -28,6 +28,7 @@ export const createGuildConfig = (): GuildConfig => {
 			webhooks: faker.datatype.string(),
 			reports: faker.datatype.string(),
 			setConfig: faker.datatype.string(),
-		}
+		},
+		apiKey: faker.datatype.boolean() ? faker.internet.password() : null,
 	}
 }

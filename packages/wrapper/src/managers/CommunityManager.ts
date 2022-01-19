@@ -163,13 +163,51 @@ export default class CommunityManager extends BaseManager<Community> {
 		return parsedUpdate
 	}
 
+	async setGuildConfigMaster({
+		config,
+		reqConfig = {}
+	}: {
+		config: SetGuildConfig,
+	} & FetchRequestTypes): Promise<GuildConfig> {
+		const update = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
+			method: "PATCH",
+			body: JSON.stringify(config),
+			credentials: "include",
+			headers: {
+				authorization: masterAuthenticate(this, reqConfig),
+				"content-type": "application/json",
+			},
+		}).then((u) => u.json())
+		if (update.error) throw new GenericAPIError(`${update.error}: ${update.message}`)
+		const parsedUpdate = GuildConfig.parse(update)
+		return parsedUpdate
+	}
+
 	async fetchGuildConfig({
-		guildId
+		guildId,
 	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
 		const config = await fetch(
 			`${this.apiurl}/communities/guilds/${strictUriEncode(guildId)}`,
 			{
 				credentials: "include",
+			}
+		).then((c) => c.json())
+		if (config?.error) throw new GenericAPIError(`${config.error}: ${config.message}`)
+		const parsedConfig = GuildConfig.parse(config)
+		return parsedConfig
+	}
+
+	async fetchGuildConfigMaster({
+		guildId,
+		reqConfig = {}
+	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
+		const config = await fetch(
+			`${this.apiurl}/communities/guilds/${strictUriEncode(guildId)}`,
+			{
+				credentials: "include",
+				headers: {
+					authentication: masterAuthenticate(this, reqConfig),
+				}
 			}
 		).then((c) => c.json())
 		if (config?.error) throw new GenericAPIError(`${config.error}: ${config.message}`)

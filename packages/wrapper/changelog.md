@@ -1,3 +1,10 @@
+## [1.27.0] - [X-X-X]
+
+### Changes
+
+-	Add `CommunityWrapper`.`setGuildConfigMaster` to set guild config with master API key
+-	Add `CommunityWrapper`.`fetchGuildConfigMaster` to fetch guild config with master API key
+
 ## [1.26.0] - [2022-01-18]
 
 ### Changes
