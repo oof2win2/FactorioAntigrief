@@ -1,4 +1,4 @@
-import "cross-fetch"
+import "cross-fetch/polyfill"
 import { ManagerOptions, WrapperOptions, GenericAPIError } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"

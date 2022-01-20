@@ -1,3 +1,9 @@
+## [1.27.1] - [2022-01-20]
+
+### Bugfixes
+
+-	Make `cross-fetch` actually implement fetch, as it didn't work before (but still passed tests)
+
 ## [1.27.0] - [2022-01-20]
 
 ### Changes

@@ -1,4 +1,4 @@
-import "cross-fetch"
+import "cross-fetch/polyfill"
 import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Revocation } from "fagc-api-types"
 import BaseManager from "./BaseManager"
