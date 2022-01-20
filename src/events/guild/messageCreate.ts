@@ -96,8 +96,7 @@ import { afterJoinGuild, sendToGuild } from "../../utils/functions"
 
 export default async (client: FAGCBot, message: Message) => {
 	if (message.author.bot) return
-	const guild = message.guild
-	if (!guild) return
+	if (!message.inGuild()) return
 	const prefix = client.env.BOTPREFIX
 	if (!message.content.startsWith(prefix)) return
 
@@ -112,8 +111,8 @@ export default async (client: FAGCBot, message: Message) => {
 
 	// fetch the guild config for the guild, or create one if it doesn't exist yet
 	const guildConfig =
-		await client.fagc.communities.fetchGuildConfigMaster({ guildId: guild.id }) ||
-		await client.fagc.communities.createGuildConfig({ guildId: guild.id })
+		await client.fagc.communities.fetchGuildConfigMaster({ guildId: message.guild.id }) ||
+		await client.fagc.communities.createGuildConfig({ guildId: message.guild.id })
 	
 	// if command doesnt require guild config (like help, ping etc), it can be ran
 	if (!command.requiresRoles) {
@@ -146,11 +145,11 @@ export default async (client: FAGCBot, message: Message) => {
 			return !message.member?.roles.cache.has(roleid) // if the user does not have the role, return true to keep it in the array
 		})
 	// if the user doesnt have any of the roles and is not the guild owner, return
-	if (doesntHaveRoles.length > 0 && guild.ownerId !== message.author.id) {
+	if (doesntHaveRoles.length > 0 && message.guild.ownerId !== message.author.id) {
 		const nonexistentRoles: string[] = []
 		const roles = doesntHaveRoles
 			.map(permname => [permname, guildConfig.roles[permname]]) // get the role ID of the
-			.map((permname): [string, string | undefined] => [permname[0], guild.roles.cache.get(permname[1])?.name])
+			.map((permname): [string, string | undefined] => [permname[0], message.guild.roles.cache.get(permname[1])?.name])
 			.filter((role: [string, string | undefined], i) => {
 				if (!role[1]) {
 					// notify the guild owner if the role is not found
@@ -161,7 +160,7 @@ export default async (client: FAGCBot, message: Message) => {
 			})
 			// get the names of the roles and make sure they are valid roles
 			.map((x) => x[1]).filter((x): x is string => Boolean(x))
-		if (nonexistentRoles.length) sendToGuild(guild, `The following roles are not set on the guild config: \`${nonexistentRoles.join("`, `")}\``)
+		if (nonexistentRoles.length) sendToGuild(message.guild, `The following roles are not set on the guild config: \`${nonexistentRoles.join("`, `")}\``)
 		return message.reply(`You need the following roles to execute this command: \`${roles.join("\`, \`")}\``)
 	}
 

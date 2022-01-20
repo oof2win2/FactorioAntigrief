@@ -1,9 +1,12 @@
 const config = {
 	emotes: {
+		warn: ":warning:",
+		success: "<:success:841385407790317588>"
 	},
 	embeds: {
 		color: "#0099ff",
-		footer: "hi there"
+		footer: "FAGC Team",
+		author: "FAGC Infobot"
 	},
 	fagcInvite: "DISCORD FAGC INVITE",
 } as const
