@@ -11,7 +11,7 @@ import BaseManager from "./managers/BaseManager"
 export const authenticate = <X, T extends Common>(manager: X & BaseManager<T>, reqConfig: RequestConfig): string => {
 	const apikey = reqConfig.apikey || manager.apikey
 	if (!apikey) throw new NoAuthError()
-	return `Token ${apikey}`
+	return `Bearer ${apikey}`
 }
 
 /**
@@ -22,7 +22,7 @@ export const authenticate = <X, T extends Common>(manager: X & BaseManager<T>, r
 export const optionalAuthenticate = <X, T extends Common>(manager: X & BaseManager<T>, reqConfig: RequestConfig): string | null => {
 	const apikey = reqConfig.apikey || manager.apikey
 	if (!apikey) return null
-	return `Token ${apikey}`
+	return `Bearer ${apikey}`
 }
 
 /**
@@ -34,7 +34,7 @@ export const optionalAuthenticate = <X, T extends Common>(manager: X & BaseManag
 export const masterAuthenticate = <X, T extends Common>(manager: X & BaseManager<T>, reqConfig: RequestConfig): string => {
 	const masterapikey = reqConfig.masterapikey || manager.masterapikey
 	if (!masterapikey) throw new NoAuthError()
-	return `Token ${masterapikey}`
+	return `Bearer ${masterapikey}`
 }
 
 /**
@@ -46,5 +46,5 @@ export const masterAuthenticate = <X, T extends Common>(manager: X & BaseManager
 export const optionalMasterAuthenticate = <X, T extends Common>(manager: X & BaseManager<T>, reqConfig: RequestConfig): string | null => {
 	const masterapikey = reqConfig.masterapikey || manager.masterapikey
 	if (!masterapikey) return null
-	return `Token ${masterapikey}`
+	return `Bearer ${masterapikey}`
 }

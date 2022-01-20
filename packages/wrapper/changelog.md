@@ -1,3 +1,10 @@
+## [1.27.2] - [X-X-X]
+
+### Bugfixes
+
+-	Fix authorization header in `CommunityManager`.`fetchGuildConfigMaster`
+-	Change `Token` to `Bearer` in auth utils according to backend
+
 ## [1.27.1] - [2022-01-20]
 
 ### Bugfixes

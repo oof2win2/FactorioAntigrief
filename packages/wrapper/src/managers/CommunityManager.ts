@@ -206,7 +206,7 @@ export default class CommunityManager extends BaseManager<Community> {
 			{
 				credentials: "include",
 				headers: {
-					authentication: masterAuthenticate(this, reqConfig),
+					authorization: masterAuthenticate(this, reqConfig),
 				}
 			}
 		).then((c) => c.json())
