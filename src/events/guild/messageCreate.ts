@@ -112,7 +112,7 @@ export default async (client: FAGCBot, message: Message) => {
 
 	// fetch the guild config for the guild, or create one if it doesn't exist yet
 	const guildConfig =
-		await client.fagc.communities.fetchGuildConfig({ guildId: guild.id }) ||
+		await client.fagc.communities.fetchGuildConfigMaster({ guildId: guild.id }) ||
 		await client.fagc.communities.createGuildConfig({ guildId: guild.id })
 	
 	// if command doesnt require guild config (like help, ping etc), it can be ran
