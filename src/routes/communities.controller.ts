@@ -250,6 +250,7 @@ export default class CommunityController {
 						setConfig: z.string().optional(),
 						setRules: z.string().optional(),
 						setCommunities: z.string().optional(),
+						apiKey: z.string().optional(),
 					}).optional()
 				}),
 
@@ -286,12 +287,49 @@ export default class CommunityController {
 					setRules?: string
 					setCommunities?: string
 				}
+				apiKey?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { ruleFilters, trustedCommunities, roles } = req.body
+		const { ruleFilters, trustedCommunities, roles, apiKey } = req.body
 		const { guildId } = req.params
+
+		// check if the community exists
+		const community = req.requestContext.get("community")
+		if (!community)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Not Found",
+				message: "Community config was not found",
+			})
+		// check if guild exists
+		if (!client.guilds.resolve(guildId)) {
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Not Found",
+				message: "Guild was not found",
+			})
+		}
+
+		// check if the api key is accessing a community it doesn't have access to
+		const guildConfig = await GuildConfigModel.findOne({
+			guildId: guildId,
+		})
+		if (!guildConfig)
+			return res.status(400).send({
+				errorCode: 400,
+				error: "Not Found",
+				message: "Community config was not found",
+			})
+		const authType = req.requestContext.get("authType")
+		// if it's not the master api key and the community IDs are not the same, then return an error
+		if (authType !== "master" && guildConfig.communityId !== community.id)
+			return res.status(403).send({
+				errorCode: 403,
+				error: "Forbidden",
+				message: "You are not allowed to edit this guild's config",
+			})
 
 		// query database if rules and communities actually exist
 		if (ruleFilters) {
@@ -318,44 +356,7 @@ export default class CommunityController {
 		}
 
 		// check other stuff
-
-		const community = req.requestContext.get("community")
-		if (!community)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Not Found",
-				message: "Community config was not found",
-			})
-		// check if guild exists
-		if (!client.guilds.resolve(guildId)) {
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Not Found",
-				message: "Guild was not found",
-			})
-		}
-
-		const guildConfig = await GuildConfigModel.findOne({
-			guildId: guildId,
-		})
-
-		if (!guildConfig)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Not Found",
-				message: "Community config was not found",
-			})
-		
-		const authType = req.requestContext.get("authType")
-	
-		// if it's not the master api key and the community IDs are not the same, then return an error
-		if (authType !== "master" && guildConfig.communityId !== community.id)
-			return res.status(403).send({
-				errorCode: 403,
-				error: "Forbidden",
-				message: "You are not allowed to edit this guild's config",
-			})
-
+		if (apiKey) guildConfig.apikey = apiKey
 		if (ruleFilters) guildConfig.ruleFilters = ruleFilters
 		if (trustedCommunities)
 			guildConfig.trustedCommunities = trustedCommunities
