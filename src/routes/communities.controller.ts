@@ -392,7 +392,7 @@ export default class CommunityController {
 
 		guildConfigChanged(guildConfig)
 		return res.status(200).send({
-			...guildConfig,
+			...guildConfig.toObject(),
 			apiKey: req.requestContext.get("authType") === "master" ? guildConfig?.apikey : null,
 		})
 	}
