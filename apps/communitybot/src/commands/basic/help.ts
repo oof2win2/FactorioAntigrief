@@ -24,7 +24,7 @@ const Help: Command = {
 				.setDescription(`● To get help on a specific command type\`${client.env.BOTPREFIX}help <command>\`!`)
 				.setColor(client.config.embeds.color)
 				.setFooter({text: client.config.embeds.footer})
-				.setAuthor({name: "FAGC Team"})
+				.setAuthor({name: client.config.embeds.author})
 			
 			categories.forEach((value, key) => {
 				embed.addField(`${key} - (${value.length})`, `\`${value.join("\`, \`")}\``)

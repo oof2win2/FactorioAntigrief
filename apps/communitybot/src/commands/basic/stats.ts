@@ -27,10 +27,8 @@ const stats: Command = {
 			.addField("User count", users.toString(), true)
 			.addField("Channel count", channels.toString(), true)
 			.setTimestamp()
-			.setFooter({
-				text: client.config.embeds.footer,
-				iconURL: client.user?.avatarURL() || "",
-			})
+			.setFooter({text: client.config.embeds.footer})
+			.setAuthor({name: client.config.embeds.author})
 		return message.channel.send({
 			embeds: [embed],
 		})

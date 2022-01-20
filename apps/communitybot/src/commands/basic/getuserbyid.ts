@@ -19,7 +19,7 @@ const GetUserById: Command = {
 				.setColor(client.config.embeds.color)
 				.setFooter({text: client.config.embeds.footer})
 				.setTimestamp()
-				.setAuthor({name: "FAGC Community"})
+				.setAuthor({name: client.config.embeds.author})
 				.setImage(user.avatarURL() || "")
 				.addFields([
 					{ name: "User's ID", value: user.id, inline: true },

@@ -4,7 +4,7 @@ import {GuildConfig} from "fagc-api-types"
 
 type CommandRunOpts = {
 	client: FAGCBot
-	message: Message
+	message: Message<true> & Message<boolean>
 	args: string[]
 	guildConfig: GuildConfig
 }
