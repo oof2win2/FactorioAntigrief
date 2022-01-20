@@ -390,9 +390,11 @@ export default class CommunityController {
 			guildConfig.toObject()
 		)
 
-		guildConfig.set("apikey", null)
 		guildConfigChanged(guildConfig)
-		return res.status(200).send(guildConfig)
+		return res.status(200).send({
+			...guildConfig,
+			apiKey: req.requestContext.get("authType") === "master" ? guildConfig?.apikey : null,
+		})
 	}
 
 	@GET({
@@ -436,6 +438,7 @@ export default class CommunityController {
 	): Promise<FastifyReply> {
 		const { guildId } = req.params
 		const config = await GuildConfigModel.findOne({ guildId: guildId })
+		if (!config) return res.send(null)
 		const response = {
 			...config?.toObject(),
 			apiKey: req.requestContext.get("authType") === "master" ? config?.apikey : null,
