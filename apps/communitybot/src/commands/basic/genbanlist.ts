@@ -74,8 +74,8 @@ const Genbanlist: Command = {
 		message.reply("Processing banlist. Please wait")
 		
 		const reports = await client.fagc.reports.list({
-			communityIDs: guildConfig.trustedCommunities,
-			ruleIDs: guildConfig.ruleFilters,
+			communityIds: guildConfig.trustedCommunities,
+			ruleIds: guildConfig.ruleFilters,
 		})
 		const toBanWith: Map<string, Report> = new Map()
 		reports.forEach((report) => {
@@ -93,7 +93,7 @@ const Genbanlist: Command = {
 			Buffer.from(JSON.stringify(banlist, null, 4)),
 			"banlist.json"
 		)
-		await message.reply({
+		return await message.reply({
 			content: "Banlist attatched",
 			files: [ file ],
 		})

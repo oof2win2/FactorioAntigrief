@@ -5,6 +5,6 @@ import Logger from "../../utils/logger"
 export default async (client: FAGCBot, guild: Guild) => {
 	Logger.log(`${client.user?.username} left guild ${guild.name}`)
 	client.fagc.communities.guildLeave({
-		guildID: guild.id,
+		guildId: guild.id,
 	})
 }
