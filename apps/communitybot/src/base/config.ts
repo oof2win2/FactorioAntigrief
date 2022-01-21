@@ -1,7 +1,8 @@
 const config = {
 	emotes: {
 		warn: ":warning:",
-		success: "<:success:841385407790317588>"
+		success: "<:success:841385407790317588>",
+		type: ":keyboard:",
 	},
 	embeds: {
 		color: "#0099ff",
