@@ -358,8 +358,11 @@ export default class CommunityController {
 		// check other stuff
 		if (apiKey) guildConfig.apikey = apiKey
 		if (ruleFilters) guildConfig.ruleFilters = ruleFilters
+		// explicitly add ID of community to trusted communities, as you need to trust yourself
+		const communityIds = new Set(trustedCommunities)
+		if (guildConfig.communityId) communityIds.add(guildConfig.communityId)
 		if (trustedCommunities)
-			guildConfig.trustedCommunities = trustedCommunities
+			guildConfig.trustedCommunities = [ ...communityIds ]
 
 		const findRole = (id: string) => {
 			const guildRoles = client.guilds.cache
