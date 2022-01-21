@@ -21,12 +21,12 @@ const Setapikey: Command = {
 			reqConfig: {
 				apikey: key
 			}
-		})
-		if (!community) return message.reply("That API key is not associated with a community")
+		}).catch(() => null)
+		if (!community) return message.channel.send("That API key is not associated with a community")
 		if (community.contact !== message.author.id) {
 			const contact = await client.users.fetch(community.contact).catch(() => null)
 			if (contact) contact.send(`User ${message.author.tag} has attempted to use your API key in ${message.guild.name}`)
-			return message.reply("That API key is not associated with your Discord user ID")
+			return message.channel.send("That API key is not associated with your Discord user ID")
 		}
 
 		await client.fagc.communities.setGuildConfigMaster({
