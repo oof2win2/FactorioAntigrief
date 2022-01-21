@@ -17,6 +17,7 @@ type BaseCommand = {
 	examples: string[],
 	category: string,
 	requiresRoles: boolean
+	requiresApikey: boolean
 }
 
 type CommandWithoutGuildConfig = BaseCommand & {

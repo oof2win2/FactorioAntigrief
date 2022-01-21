@@ -9,6 +9,7 @@ const Help: Command = {
 	usage: "[command]",
 	examples: ["help", "help ping"],
 	requiresRoles: false,
+	requiresApikey: false,
 	run: ({message, client, args, guildConfig}) => {
 		if (!args.length) { // no specific command to help with
 			const categories: Map<string, string[]> = new Map()

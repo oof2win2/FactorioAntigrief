@@ -9,6 +9,7 @@ const Setapikey: Command = {
 	category: "config",
 	requiresRoles: true,
 	requiredPermissions: ["setConfig"],
+	requiresApikey: false,
 	run: async ({client, message, args}) => {
 		const key = args.shift()
 		if (!key) return message.channel.send("You must provide your API key as a parameter")

@@ -11,6 +11,7 @@ const SetPermissions: Command = {
 	category: "config",
 	requiresRoles: true,
 	requiredPermissions: ["setConfig"],
+	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		const permStrings = ["reports", "webhooks", "setConfig", "setRules", "setCommunities"]
 

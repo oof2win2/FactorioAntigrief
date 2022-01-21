@@ -9,6 +9,7 @@ const GetUserById: Command = {
 	usage: "[user]",
 	examples: ["getuserbyid 429696038266208258"],
 	requiresRoles: false,
+	requiresApikey: false,
 	run: async ({message, client, args}) => {
 		const uid = args.shift()
 		if (!uid) return message.reply("No user ID provided")

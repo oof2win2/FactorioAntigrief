@@ -9,6 +9,7 @@ const ViewConfig: Command = {
 	usage: "",
 	category: "config",
 	requiresRoles: false,
+	requiresApikey: false,
 	run: async({client,message,guildConfig}) => {
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Config")
