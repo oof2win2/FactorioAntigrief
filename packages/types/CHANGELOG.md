@@ -1,3 +1,9 @@
+## [1.8.1] - [2022-01-20]
+
+### Bugfixes
+
+-	 Change `GuildConfig`.`apiKey` field for master API use
+
 ## [1.8.0] - [2022-01-20]
 
 ### Changes
