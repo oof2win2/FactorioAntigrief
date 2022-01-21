@@ -114,6 +114,10 @@ export default async (client: FAGCBot, message: Message) => {
 		await client.fagc.communities.fetchGuildConfigMaster({ guildId: message.guild.id }) ||
 		await client.fagc.communities.createGuildConfig({ guildId: message.guild.id })
 	
+	// check if the command requires api key
+	if (command.requiresApikey && !guildConfig.apiKey)
+		return message.channel.send(`${client.config.emotes.warn} API key must be set for use of this command`)
+	
 	// if command doesnt require guild config (like help, ping etc), it can be ran
 	if (!command.requiresRoles) {
 		try {

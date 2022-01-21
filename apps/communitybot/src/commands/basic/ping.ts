@@ -8,6 +8,7 @@ const Ping: Command = {
 	examples: [],
 	category: "basic",
 	requiresRoles: false,
+	requiresApikey: false,
 	run: async ({message, client}) => {
 		const msg = await message.channel.send("Pinging...")
 		const ping = msg.createdTimestamp - message.createdTimestamp
