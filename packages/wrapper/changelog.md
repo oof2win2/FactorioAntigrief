@@ -1,3 +1,9 @@
+## [1.27.3] - [X-X-X]
+
+### Bugfixes
+
+-	Update `fagc-api-types` to have a correct typing for `GuildConfig`.`apiKey`
+
 ## [1.27.2] - [2022-01-20]
 
 ### Bugfixes
