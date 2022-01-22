@@ -29,14 +29,19 @@ const Rules: Command = {
 			.setDescription("Filtered FAGC Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)")
 		// create the fields
 		const fields = filteredRules
+			// sort IDs by ascending
+			.sort((a, b) => {
+				if (guildConfig.ruleFilters.indexOf(a.id) > guildConfig.ruleFilters.indexOf(b.id)) return 1
+				if (guildConfig.ruleFilters.indexOf(a.id) < guildConfig.ruleFilters.indexOf(b.id)) return -1
+				return 0
+			})
 			.map((rule) => {
 				return {
 					name: `${guildConfig.ruleFilters.indexOf(rule.id)+1}) ${rule.shortdesc} (\`${rule.id}\`)`,
 					value: rule.longdesc,
 					inline: false
 				}
-			}
-		)
+			})
 		// create the embed
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	}
