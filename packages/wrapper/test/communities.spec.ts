@@ -3,6 +3,7 @@ enableFetchMocks()
 import { FAGCWrapper } from "../src/index"
 import { createCommunity, createGuildConfig,  } from "./util"
 import faker from "faker"
+import util from "util"
 
 const wrapper = new FAGCWrapper({
 	masterapikey: "x",
@@ -124,6 +125,24 @@ describe("Communities", () => {
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
 			expect(wrapper.communities.resolveID(testCommunity.id)).toEqual(testCommunity)
+		})
+		it("Fetching cache should work with communities returned", async () => {
+			const testCommunity = testCommunities[0]
+			fetchMock.mockResponse(JSON.stringify(testCommunity))
+		
+			const communityOneProm = wrapper.communities.fetchCommunity({ communityId: testCommunity.id })
+			const communityTwoProm = wrapper.communities.fetchCommunity({ communityId: testCommunity.id })
+			await communityOneProm
+			expect(util.inspect(communityTwoProm).includes("<pending>")).toBe(false)
+		})
+		it("Fetching cache should work with no communities returned", async () => {
+			fetchMock.mockResponse(JSON.stringify(null))
+		
+			const communityOneProm = wrapper.communities.fetchCommunity({ communityId: "1" })
+			const communityTwoProm = wrapper.communities.fetchCommunity({ communityId: "1" })
+			await communityOneProm
+			// communityTwoProm should NOT be pending
+			expect(util.inspect(communityTwoProm).includes("<pending>")).toBe(false)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))

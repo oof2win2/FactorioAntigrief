@@ -102,8 +102,16 @@ export default class CommunityManager extends BaseManager<Community> {
 			}
 		).then((c) => c.json())
 
-		if (!fetched) return null // return null if the fetch is empty
-		if (fetched.error) throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
+		if (!fetched) {
+			promiseResolve(null)
+			setTimeout(() => this.fetchingCache.delete(communityId), 0)
+			return null // return null if the fetch is empty
+		}
+		if (fetched.error) {
+			promiseResolve(null)
+			setTimeout(() => this.fetchingCache.delete(communityId), 0)
+			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
+		}
 		
 		const communityParsed = Community.safeParse(fetched)
 		if (!communityParsed.success || communityParsed.data === null) {

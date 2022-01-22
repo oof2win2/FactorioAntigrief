@@ -89,9 +89,16 @@ export default class ReportManager extends BaseManager<Report> {
 			}
 		).then((c) => c.json())
 
-		if (!fetched) return null // return null if the fetch is empty
-		if (fetched.error)
+		if (!fetched) {
+			promiseResolve(null)
+			setTimeout(() => this.fetchingCache.delete(reportId), 0)
+			return null // return null if the fetch is empty
+		}
+		if (fetched.error) {
+			promiseResolve(null)
+			setTimeout(() => this.fetchingCache.delete(reportId), 0)
 			throw new GenericAPIError(`${fetched.error}: ${fetched.message}`)
+		}
 		const parsed = Report.safeParse(fetched)
 		if (!parsed.success || parsed.data === null) { // if the fetch is not successful, return null or throw an error with invalid data
 			promiseResolve(null)
