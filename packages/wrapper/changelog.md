@@ -1,3 +1,9 @@
+## [1.27.4] - [2022-01-22]
+
+### Bugfixes
+
+-	Fix fetching cache sometimes not resolving
+
 ## [1.27.3] - [2022-01-21]
 
 ### Bugfixes
