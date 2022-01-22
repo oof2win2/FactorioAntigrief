@@ -1,3 +1,9 @@
+## [1.27.5] - [X-X-X]
+
+### Bugfixes
+
+-	Fix returning raw responses that haven't been parsed yet
+
 ## [1.27.4] - [2022-01-22]
 
 ### Bugfixes

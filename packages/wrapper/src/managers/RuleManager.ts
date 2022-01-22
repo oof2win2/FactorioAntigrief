@@ -89,8 +89,7 @@ export class RuleManager extends BaseManager<Rule> {
 		setTimeout(() => {
 			this.fetchingCache.delete(ruleid)
 		}, 0)
-		if (fetched.id === ruleid) return fetched
-		return null
+		return parsed.data
 	}
 
 	async modify({

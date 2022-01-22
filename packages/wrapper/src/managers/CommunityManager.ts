@@ -237,8 +237,10 @@ export default class CommunityManager extends BaseManager<Community> {
 			},
 		}).then((k) => k.json())
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
-		const parsed = z.string().parse(key.apiKey)
-		return parsed
+		const parsed = z.object({
+			apiKey: z.string(),
+		}).parse(key)
+		return parsed.apiKey
 	}
 	
 	/**
@@ -259,8 +261,10 @@ export default class CommunityManager extends BaseManager<Community> {
 			},
 		}).then((k) => k.json())
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
-		const parsed = z.string().parse(key.apiKey)
-		return parsed
+		const parsed = z.object({
+			apiKey: z.string(),
+		}).parse(key)
+		return parsed.apiKey
 	}
 
 	/**
@@ -285,8 +289,10 @@ export default class CommunityManager extends BaseManager<Community> {
 			},
 		}).then((k) => k.json())
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
-		const parsed = z.string().parse(key.apiKey)
-		return parsed
+		const parsed = z.object({
+			apiKey: z.string(),
+		}).parse(key)
+		return parsed.apiKey
 	}
 
 	/**
@@ -309,8 +315,10 @@ export default class CommunityManager extends BaseManager<Community> {
 			},
 		}).then((k) => k.json())
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
-		const parsed = z.string().parse(key.apiKey)
-		return parsed
+		const parsed = z.object({
+			apiKey: z.string(),
+		}).parse(key)
+		return parsed.apiKey
 	}
 
 	async create({

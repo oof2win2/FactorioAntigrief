@@ -140,7 +140,7 @@ export default class ReportManager extends BaseManager<Report> {
 		const parsed = z.array(Report).parse(data)
 
 		if (cache) parsed.forEach((report) => this.add(report))
-		return data
+		return parsed
 	}
 	
 	async fetchByRule({
