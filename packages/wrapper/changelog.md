@@ -1,3 +1,9 @@
+## [1.27.6] - [X-X-X]
+
+### Bugfixes
+
+-	Fix headers not being correct in some cases
+
 ## [1.27.5] - [2022-01-22]
 
 ### Bugfixes

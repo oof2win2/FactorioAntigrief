@@ -75,7 +75,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 				}),
 				credentials: "include",
 				headers: {
-					"content-cype": "application/json",
+					"content-type": "application/json",
 					"authorization": authenticate(this, reqConfig),
 				},
 			}
