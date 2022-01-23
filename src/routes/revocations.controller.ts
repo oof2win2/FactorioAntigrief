@@ -313,7 +313,7 @@ export default class RevocationController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { adminId } = req.body
-		const { id: ruleID } = req.params
+		const { id: ruleId } = req.params
 
 		const community = req.requestContext.get("community")
 		if (!community)
@@ -331,7 +331,7 @@ export default class RevocationController {
 				message: "adminId must be a valid Discord user",
 			})
 		
-		const rule = await RuleModel.findOne({ id: ruleID })
+		const rule = await RuleModel.findOne({ id: ruleId })
 		if (!rule)
 			return res.status(400).send({
 				errorCode: 400,
@@ -341,7 +341,7 @@ export default class RevocationController {
 
 		await ReportInfoModel.updateMany({
 			communityId: community.id,
-			brokenRule: ruleID,
+			brokenRule: ruleId,
 			revokedAt: { $eq: null },
 		}, {
 			revokedAt: new Date(),
@@ -350,7 +350,7 @@ export default class RevocationController {
 
 		const rawRevocations = await ReportInfoModel.find({
 			communityId: community.id,
-			brokenRule: ruleID,
+			brokenRule: ruleId,
 			revokedAt: { $ne: null },
 		})
 		const revocations = z.array(Revocation).parse(rawRevocations)

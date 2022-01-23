@@ -1081,7 +1081,7 @@ export default class CommunityController {
 			guildId: guildId,
 		})
 		const communityConfig = await CommunityModel.findOne({
-			guildIDs: [ guildId ],
+			guildIds: [ guildId ],
 		})
 		if (communityConfig) {
 			communityConfig.guildIds = communityConfig.guildIds.filter(

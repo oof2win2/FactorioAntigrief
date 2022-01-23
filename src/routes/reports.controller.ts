@@ -366,10 +366,10 @@ export default class ReportController {
 			schema: {
 				body: z.object({
 					playername: z.string().nullish(),
-					ruleIDs: z.array(z.string())
+					ruleIds: z.array(z.string())
 						.max(100, "Exceeded maximum length of 100")
 						.transform(arr => arr.map(str => str.toLowerCase())),
-					communityIDs: z.array(z.string())
+					communityIds: z.array(z.string())
 						.max(100, "Exceeded maximum length of 100")
 						.transform(arr => arr.map(str => str.toLowerCase())),
 
@@ -393,20 +393,20 @@ export default class ReportController {
 		req: FastifyRequest<{
 			Body: {
 				playername?: string | null
-				ruleIDs: string[]
-				communityIDs: string[]
+				ruleIds: string[]
+				communityIds: string[]
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { playername, ruleIDs, communityIDs } = req.body
+		const { playername, ruleIds, communityIds } = req.body
 		const reports = await ReportInfoModel.find({
 			playername: playername ?? undefined,
 			brokenRule: {
-				$in: ruleIDs
+				$in: ruleIds
 			},
 			communityId: {
-				$in: communityIDs
+				$in: communityIds
 			}
 		})
 		return res.send(reports)
