@@ -1,5 +1,5 @@
-import { MessageEmbed } from "discord.js";
-import { Command } from "../../base/Command";
+import { MessageEmbed } from "discord.js"
+import { Command } from "../../base/Command"
 
 const ViewConfig: Command = {
 	name: "viewconfig",
@@ -10,14 +10,18 @@ const ViewConfig: Command = {
 	category: "config",
 	requiresRoles: false,
 	requiresApikey: false,
-	run: async({client,message,guildConfig}) => {
+	run: async ({ client, message, guildConfig }) => {
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Config")
-			.setAuthor({name: "FAGC Team"})
+			.setAuthor({ name: "FAGC Team" })
 			.setTimestamp()
 			.setDescription("Your FAGC Configuration")
-		const community = guildConfig.communityId  ? await client.fagc.communities.fetchCommunity({ communityId: guildConfig.communityId }) : null
-		
+		const community = guildConfig.communityId
+			? await client.fagc.communities.fetchCommunity({
+					communityId: guildConfig.communityId,
+			  })
+			: null
+
 		embed.addFields(
 			{
 				name: "Community name",
@@ -70,12 +74,12 @@ const ViewConfig: Command = {
 					? `<@&${guildConfig.roles.setCommunities}> | ${guildConfig.roles.setCommunities}`
 					: "No role",
 				inline: true,
-			}
+			},
 		)
 
 		return message.channel.send({
-			embeds: [embed]
+			embeds: [embed],
 		})
-	}
+	},
 }
 export default ViewConfig
