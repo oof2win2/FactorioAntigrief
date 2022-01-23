@@ -80,10 +80,10 @@ export class WsClient {
 	}
 
 	async handleMessage(message: { type: string, [index: string]: unknown }) {
-		if (typeof message.type === "string" && typeof message.guildID === "string") {
+		if (typeof message.type === "string" && typeof message.guildId === "string") {
 			if (message.type === "addGuildID") {
 				const guildConfig = await GuildConfigModel.findOne({
-					guildId: message.guildID,
+					guildId: message.guildId,
 				}).then((c) => c?.toObject())
 				if (guildConfig) {
 					this.ws.send(
@@ -100,11 +100,11 @@ export class WsClient {
 						// limit to 25 guilds per webhook
 						if (existing.length < 25) {
 							// only add if it's not already in the list
-							if (!existing.includes(message.guildID)) existing.push(message.guildID)
+							if (!existing.includes(message.guildId)) existing.push(message.guildId)
 						}
 						WebhookGuildIDs.set(this.ws, existing)
 					} else {
-						WebhookGuildIDs.set(this.ws, [ message.guildID ])
+						WebhookGuildIDs.set(this.ws, [ message.guildId ])
 					}
 				}
 			}

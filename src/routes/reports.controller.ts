@@ -46,7 +46,7 @@ export default class ReportController {
 				body: z.object({
 					adminId: z.string(),
 					playername: z.string(),
-					brokenRule: z.string().transform(str => str.toLowerCase()),
+					brokenRule: z.string(),
 					automated: z.boolean().nullish().default(false),
 					reportedTime: z.string().default(new Date().toISOString()).refine((input) => validator.isISO8601(input), "reportedTime must be a valid ISO8601 date"),
 					description: z.string().default("No description"),
@@ -183,7 +183,7 @@ export default class ReportController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string().transform(str => str.toLowerCase()),
+					id: z.string(),
 				}),
 
 				description: "Fetch a report by it's ID",
@@ -258,7 +258,7 @@ export default class ReportController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string().transform(str => str.toLowerCase())
+					id: z.string()
 				}),
 
 				description: "Fetch a report by it's broken rule ID",
@@ -329,7 +329,7 @@ export default class ReportController {
 		options: {
 			schema: {
 				params: z.object({
-					communityId: z.string().transform(x => x.toLowerCase()),
+					communityId: z.string(),
 				}),
 
 				description:
@@ -366,12 +366,10 @@ export default class ReportController {
 			schema: {
 				body: z.object({
 					playername: z.string().nullish(),
-					ruleIDs: z.array(z.string())
-						.max(100, "Exceeded maximum length of 100")
-						.transform(arr => arr.map(str => str.toLowerCase())),
-					communityIDs: z.array(z.string())
-						.max(100, "Exceeded maximum length of 100")
-						.transform(arr => arr.map(str => str.toLowerCase())),
+					ruleIds: z.array(z.string())
+						.max(100, "Exceeded maximum length of 100"),
+					communityIds: z.array(z.string())
+						.max(100, "Exceeded maximum length of 100"),
 
 				}),
 
@@ -393,20 +391,20 @@ export default class ReportController {
 		req: FastifyRequest<{
 			Body: {
 				playername?: string | null
-				ruleIDs: string[]
-				communityIDs: string[]
+				ruleIds: string[]
+				communityIds: string[]
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { playername, ruleIDs, communityIDs } = req.body
+		const { playername, ruleIds, communityIds } = req.body
 		const reports = await ReportInfoModel.find({
 			playername: playername ?? undefined,
 			brokenRule: {
-				$in: ruleIDs
+				$in: ruleIds
 			},
 			communityId: {
-				$in: communityIDs
+				$in: communityIds
 			}
 		})
 		return res.send(reports)
