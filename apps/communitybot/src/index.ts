@@ -38,10 +38,12 @@ const init = async () => {
 		// gets every dir inside events
 		evts
 			.filter((evt) => evt.endsWith(".js"))
-			.forEach(async (evt) => {
+			.forEach(async (cmd) => {
 				// splits the command and gets first part. commands are in the format "commandName.js"
-				const evtName = evt.split(".")[0]
-				const command = await import(`./commands/${dir}/${evt}`).then(x => x.default) as Command
+				const cmdName = cmd.split(".")[0]
+				const command = await import(`./commands/${dir}/${cmd}`).then(x => x.default) as Command
+
+				if (!command) return console.log(`./commands/${dir}/${cmd} is not a command`)
 				
 				// adds command to client
 				client.commands.set(command.name, command)
