@@ -14,6 +14,8 @@ const CreateReport: Command = {
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
 	run: async ({client, message, args, guildConfig}) => {
+		if (!guildConfig.ruleFilters.length) return message.channel.send(`${client.emotes.warn} No rules are filtered`)
+		
 		const playername = args.shift() ||
 			await getMessageResponse(
 				message,
@@ -22,7 +24,7 @@ const CreateReport: Command = {
 		if (!playername) return message.channel.send("Player name not specified")
 
 		// send a message with the community's filtered rules to pick from
-		const embed = new MessageEmbed()
+		const ruleEmbed = new MessageEmbed()
 			.setTitle("FAGC Reports")
 			.setColor("RED")
 			.setTimestamp()
@@ -46,7 +48,7 @@ const CreateReport: Command = {
 						inline: false
 					}
 				})
-		createPagedEmbed(fields, embed, message)
+		createPagedEmbed(fields, ruleEmbed, message)
 
 		const rules = await getMessageResponse(
 			message,
