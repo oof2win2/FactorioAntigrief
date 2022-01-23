@@ -39,7 +39,7 @@ export default class RuleController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string().transform(x => x.toLowerCase()),
+					id: z.string(),
 				}).required(),
 
 				description: "Fetch a rule by ID",
@@ -175,7 +175,7 @@ export default class RuleController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string().transform(x => x.toLowerCase()),
+					id: z.string(),
 				}),
 
 				description: "Remove a rule",
@@ -253,8 +253,8 @@ export default class RuleController {
 		options: {
 			schema: {
 				params: z.object({
-					idReceiving: z.string().transform(x => x.toLowerCase()),
-					idDissolving: z.string().transform(x => x.toLowerCase()),
+					idReceiving: z.string(),
+					idDissolving: z.string(),
 				}),
 
 				description: "Merge rule idTwo into rule idReceiving",

@@ -52,7 +52,7 @@ export default class CommunityController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string().transform(x => x.toLowerCase()),
+					id: z.string(),
 				}),
 
 				tags: [ "community" ],
@@ -242,8 +242,8 @@ export default class CommunityController {
 					guildId: z.string()
 				}),
 				body: z.object({
-					ruleFilters: z.array(z.string()).optional().transform(x => x ? x.map(y => y.toLowerCase()) : x),
-					trustedCommunities: z.array(z.string()).optional().transform(x => x ? x.map(y => y.toLowerCase()) : x),
+					ruleFilters: z.array(z.string()).optional(),
+					trustedCommunities: z.array(z.string()).optional(),
 					roles: z.object({
 						reports: z.string().optional(),
 						webhooks: z.string().optional(),
@@ -828,7 +828,7 @@ export default class CommunityController {
 		options: {
 			schema: {
 				params: z.object({
-					communityId: z.string().transform(x => x.toLowerCase()),
+					communityId: z.string(),
 				}),
 
 				description: "Delete a FAGC community",
@@ -927,8 +927,8 @@ export default class CommunityController {
 		options: {
 			schema: {
 				params: z.object({
-					idReceiving: z.string().transform(x => x.toLowerCase()),
-					idDissolving: z.string().transform(x => x.toLowerCase()),
+					idReceiving: z.string(),
+					idDissolving: z.string(),
 				}),
 
 				description: "Merge community idDissolving into community idReceiving",
