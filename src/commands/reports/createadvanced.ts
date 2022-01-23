@@ -2,6 +2,7 @@ import { EmbedField, MessageEmbed } from "discord.js";
 import { Command } from "../../base/Command";
 import { createPagedEmbed } from "../../utils/functions";
 import { getConfirmationMessage, getMessageResponse } from "../../utils/responseGetter";
+import validator from "validator";
 
 const CreateAdvanced: Command = {
 	name: "createadvanced",
@@ -99,6 +100,11 @@ const CreateAdvanced: Command = {
 				`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`
 			).then(x => x?.content)
 		if (!proof || proof.toLowerCase() === "none") proof = undefined
+		if (proof && proof !== "No proof") {
+			// check if each link is a valid URL
+			const areAllURLs = proof.split(" ").map((link) => validator.isURL(link)).reduce((a, b) => a && b)
+			if (!areAllURLs) return message.channel.send(`${client.config.emotes.warn} Invalid proof link(s)`)
+		}
 
 		// send an embed to display the report that will be created
 		const checkEmbed = new MessageEmbed()
