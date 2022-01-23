@@ -10,8 +10,8 @@ const RemoveRules: Command = {
 	description: "Removes a rule filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 	usage: "[...ids]",
 	examples: [
-		"{{p}}removerule XuciBx7",
-		"{{p}}removerule XuciBx7 XuciBx9 XuciBx/",
+		"removerule XuciBx7",
+		"removerule XuciBx7 XuciBx9 XuciBx/",
 	],
 	category: "rules",
 	requiresRoles: true,
