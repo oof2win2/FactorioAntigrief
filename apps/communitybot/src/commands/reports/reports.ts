@@ -142,7 +142,8 @@ const GetReports: Command = {
 						`By: <@${report.adminId}> | ${admin?.tag}\nCommunity ID: ${report.communityId}\n` +
 						`Broken rule: ${report.brokenRule}\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
-						`Reported time: <t:${Math.round(report.reportedTime.valueOf() / 1000)}>`,
+						`Reported at: <t:${Math.round(report.reportedTime.valueOf() / 1000)}>\n` +
+						`Report created at: <t:${Math.round(report.reportCreatedAt.valueOf() / 1000)}>`,
 					inline: true,
 				}
 			})
