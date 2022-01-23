@@ -1,5 +1,5 @@
-import { MessageEmbed } from "discord.js";
-import { Command } from "../../base/Command";
+import { MessageEmbed } from "discord.js"
+import { Command } from "../../base/Command"
 
 const Help: Command = {
 	name: "help",
@@ -10,28 +10,34 @@ const Help: Command = {
 	examples: ["help", "help ping"],
 	requiresRoles: false,
 	requiresApikey: false,
-	run: ({message, client, args, guildConfig}) => {
-		if (!args.length) { // no specific command to help with
+	run: ({ message, client, args, guildConfig }) => {
+		if (!args.length) {
+			// no specific command to help with
 			const categories: Map<string, string[]> = new Map()
 			client.commands.forEach((command) => {
 				if (!categories.has(command.category)) {
 					categories.set(command.category, [command.name])
 				} else {
-					const existing = categories.get(command.category)!
-					if (!existing.includes(command.name)) existing.push(command.name)
+					const existing = categories.get(command.category)
+					if (!existing?.includes(command.name)) existing?.push(command.name)
 				}
 			})
 			const embed = new MessageEmbed()
-				.setDescription(`● To get help on a specific command type\`${client.env.BOTPREFIX}help <command>\`!`)
+				.setDescription(
+					`● To get help on a specific command type\`${client.env.BOTPREFIX}help <command>\`!`,
+				)
 				.setColor(client.config.embeds.color)
-				.setFooter({text: client.config.embeds.footer})
-				.setAuthor({name: client.config.embeds.author})
-			
+				.setFooter({ text: client.config.embeds.footer })
+				.setAuthor({ name: client.config.embeds.author })
+
 			categories.forEach((value, key) => {
-				embed.addField(`${key} - (${value.length})`, `\`${value.join("\`, \`")}\``)
+				embed.addField(
+					`${key} - (${value.length})`,
+					`\`${value.join("`, `")}\``,
+				)
 			})
 			return message.channel.send({
-				embeds: [embed]
+				embeds: [embed],
 			})
 		}
 		const command = client.commands.get(args[0])
@@ -43,25 +49,44 @@ const Help: Command = {
 		const needToSetRoles: string[] = []
 
 		if (command.requiresRoles && guildConfig) {
-			command.requiredPermissions
-				.forEach((permname) => {
-					const roleid = guildConfig.roles[permname] // get the role which has this perm
-					if (!roleid) needToSetRoles.push(permname) // if there is no role, it needs to be set
-					requiredRoles.push(message.guild?.roles.cache.get(roleid)?.name ?? "Unknown role") // add the role name to the list
-				})
+			command.requiredPermissions.forEach((permname) => {
+				const roleid = guildConfig.roles[permname] // get the role which has this perm
+				if (!roleid) needToSetRoles.push(permname) // if there is no role, it needs to be set
+				requiredRoles.push(
+					message.guild?.roles.cache.get(roleid)?.name ?? "Unknown role",
+				) // add the role name to the list
+			})
 		}
 
 		const embed = new MessageEmbed()
 			.setTitle(command.name)
 			.setDescription(command.description)
-			.addField("Usage", `\`${client.env.BOTPREFIX}${command.name} ${command.usage}\``)
-			.addField("Examples", `\`\`\`\n${command.examples.map(x => `${client.env.BOTPREFIX}${x}`).join("\n")}\`\`\``)
+			.addField(
+				"Usage",
+				`\`${client.env.BOTPREFIX}${command.name} ${command.usage}\``,
+			)
+			.addField(
+				"Examples",
+				`\`\`\`\n${command.examples
+					.map((x) => `${client.env.BOTPREFIX}${x}`)
+					.join("\n")}\`\`\``,
+			)
 			.addField("Category", `${command.category}`)
-			.addField("Aliases", `${command.aliases.length > 0 ? command.aliases.join(", ") : "No aliases"}`)
-			.addField("Roles required", requiredRoles.length ? `\`${requiredRoles.join("`, `")}\`` : "No specific permission is required to execute this command")
+			.addField(
+				"Aliases",
+				`${
+					command.aliases.length > 0 ? command.aliases.join(", ") : "No aliases"
+				}`,
+			)
+			.addField(
+				"Roles required",
+				requiredRoles.length
+					? `\`${requiredRoles.join("`, `")}\``
+					: "No specific permission is required to execute this command",
+			)
 		return message.channel.send({
-			embeds: [embed]
+			embeds: [embed],
 		})
-	}
+	},
 }
 export default Help

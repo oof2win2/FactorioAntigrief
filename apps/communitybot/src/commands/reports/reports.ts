@@ -3,10 +3,10 @@
 // const { createPagedEmbed } = require("../../utils/functions")
 // const { getMessageResponse } = require("../../utils/responseGetter")
 
-import { EmbedField, MessageEmbed } from "discord.js";
-import { Command } from "../../base/Command";
-import { createPagedEmbed } from "../../utils/functions";
-import { getMessageResponse } from "../../utils/responseGetter";
+import { EmbedField, MessageEmbed } from "discord.js"
+import { Command } from "../../base/Command"
+import { createPagedEmbed } from "../../utils/functions"
+import { getMessageResponse } from "../../utils/responseGetter"
 
 // class GetReports extends Command {
 // 	constructor(client) {
@@ -33,7 +33,7 @@ import { getMessageResponse } from "../../utils/responseGetter";
 // 				.then((r) => r?.content?.split(" "))
 // 		const playername = args.shift()
 // 		if (!playername) return message.channel.send(`${this.client.emotes.warn} No player name was provided`)
-		
+
 // 		if (!config.trustedCommunities)
 // 			return message.reply("No filtered communities set")
 // 		if (!config.ruleFilters) return message.reply("No filtered rules set")
@@ -100,32 +100,38 @@ import { getMessageResponse } from "../../utils/responseGetter";
 // }
 // module.exports = GetReports
 
-
 const GetReports: Command = {
 	name: "reports",
-	description: "Gets reports of a player from only trusted communities and filtered rules",
-	aliases: [ "check", "viewreports", "viewfilteredreports" ],
+	description:
+		"Gets reports of a player from only trusted communities and filtered rules",
+	aliases: ["check", "viewreports", "viewfilteredreports"],
 	category: "reports",
 	usage: "[playername]",
-	examples: [ "reports Potato" ],
+	examples: ["reports Potato"],
 	requiresRoles: false,
 	requiresApikey: false,
-	async run({client, message, args, guildConfig}) {
-		if (!guildConfig.trustedCommunities) return message.reply("No filtered communities set")
+	async run({ client, message, args, guildConfig }) {
+		if (!guildConfig.trustedCommunities)
+			return message.reply("No filtered communities set")
 		if (!guildConfig.ruleFilters) return message.reply("No filtered rules set")
 
 		if (!args[0])
-			args = await getMessageResponse(message, `${client.emotes.type} Provide a player name to get reports of`)
-				.then((r) => r?.content?.split(" ") || [])
+			args = await getMessageResponse(
+				message,
+				`${client.emotes.type} Provide a player name to get reports of`,
+			).then((r) => r?.content?.split(" ") || [])
 		const playername = args.shift()
-		if (!playername) return message.channel.send(`${client.emotes.warn} No player name was provided`)
+		if (!playername)
+			return message.channel.send(
+				`${client.emotes.warn} No player name was provided`,
+			)
 
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
 			.setColor("GREEN")
 			.setTimestamp()
-			.setAuthor({name: client.config.embeds.author})
-			.setFooter({text: client.config.embeds.footer})
+			.setAuthor({ name: client.config.embeds.author })
+			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(`FAGC Reports of player \`${playername}\``)
 
 		const reports = await client.fagc.reports.list({
@@ -142,13 +148,17 @@ const GetReports: Command = {
 						`By: <@${report.adminId}> | ${admin?.tag}\nCommunity ID: ${report.communityId}\n` +
 						`Broken rule: ${report.brokenRule}\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
-						`Reported at: <t:${Math.round(report.reportedTime.valueOf() / 1000)}>\n` +
-						`Report created at: <t:${Math.round(report.reportCreatedAt.valueOf() / 1000)}>`,
+						`Reported at: <t:${Math.round(
+							report.reportedTime.valueOf() / 1000,
+						)}>\n` +
+						`Report created at: <t:${Math.round(
+							report.reportCreatedAt.valueOf() / 1000,
+						)}>`,
 					inline: true,
 				}
-			})
+			}),
 		)
 		createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
-	}
+	},
 }
 export default GetReports

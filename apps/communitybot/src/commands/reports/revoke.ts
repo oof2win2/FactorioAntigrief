@@ -4,9 +4,12 @@
 // const { getConfirmationMessage, getMessageResponse } = require("../../utils/responseGetter")
 // const { AuthenticationError } = require("fagc-api-wrapper")
 
-import { MessageEmbed } from "discord.js";
-import { Command } from "../../base/Command";
-import { getConfirmationMessage, getMessageResponse } from "../../utils/responseGetter";
+import { MessageEmbed } from "discord.js"
+import { Command } from "../../base/Command"
+import {
+	getConfirmationMessage,
+	getMessageResponse,
+} from "../../utils/responseGetter"
 
 // class Revoke extends Command {
 // 	constructor(client) {
@@ -92,63 +95,92 @@ import { getConfirmationMessage, getMessageResponse } from "../../utils/response
 // }
 // module.exports = Revoke
 
-
 const RevokeReport: Command = {
 	name: "revoke",
 	description: "Revokes a player's report with the report ID",
-	aliases: [ "revokeid" ],
+	aliases: ["revokeid"],
 	category: "reports",
 	usage: "[reportid]",
-	examples: [ "revoke p1UgG0G" ],
+	examples: ["revoke p1UgG0G"],
 	requiresRoles: true,
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
 	async run({ message, args, guildConfig, client }) {
-		if (!guildConfig.apiKey) return message.reply(`${client.emotes.warn} No API key set`)
-		const id = args.shift() || await getMessageResponse(message, `${client.emotes.type} Provide a report ID to revoke`).then((x) => x?.content?.split(" ")[0])
-		if (!id) return message.channel.send(`${client.emotes.warn} No report ID was provided`)
+		if (!guildConfig.apiKey)
+			return message.reply(`${client.emotes.warn} No API key set`)
+		const id =
+			args.shift() ||
+			(await getMessageResponse(
+				message,
+				`${client.emotes.type} Provide a report ID to revoke`,
+			).then((x) => x?.content?.split(" ")[0]))
+		if (!id)
+			return message.channel.send(
+				`${client.emotes.warn} No report ID was provided`,
+			)
 
 		const report = await client.fagc.reports.fetchReport({ reportId: id })
-		if (!report) return message.channel.send(`${client.emotes.warn} Report with ID \`${id}\` doesn't exist`)
+		if (!report)
+			return message.channel.send(
+				`${client.emotes.warn} Report with ID \`${id}\` doesn't exist`,
+			)
 
-		if (report.communityId !== guildConfig.communityId) return message.channel.send(`You are trying to revoke a report of community \`${report.communityId}\`, but you are from community \`${guildConfig.communityId}\``)
+		if (report.communityId !== guildConfig.communityId)
+			return message.channel.send(
+				`You are trying to revoke a report of community \`${report.communityId}\`, but you are from community \`${guildConfig.communityId}\``,
+			)
 
 		const adminUser = await client.users.fetch(report.adminId).catch(() => null)
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Report Revocation")
 			.setColor("GREEN")
 			.setTimestamp()
-			.setAuthor({name: client.config.embeds.author})
-			.setFooter({text: client.config.embeds.footer})
-			.setDescription(`FAGC Report \`${report.id}\` of player \`${report.playername}\``)
+			.setAuthor({ name: client.config.embeds.author })
+			.setFooter({ text: client.config.embeds.footer })
+			.setDescription(
+				`FAGC Report \`${report.id}\` of player \`${report.playername}\``,
+			)
 			.addFields([
-				{ name: "Admin", value: `<@${report.adminId}> | ${adminUser?.tag ?? "Unknown"}` },
+				{
+					name: "Admin",
+					value: `<@${report.adminId}> | ${adminUser?.tag ?? "Unknown"}`,
+				},
 				{ name: "Broken rule ID", value: report.brokenRule },
 				{ name: "Description", value: report.description },
 				{ name: "Proof", value: report.proof },
 				{ name: "Automated", value: report.automated ? "True" : "False" },
-				{name: "Reported At", value: `<t:${Math.round(report.reportedTime.valueOf() / 1000)}>`},
-				{name: "Report Created At", value: `<t:${Math.round(report.reportCreatedAt.valueOf() / 1000)}>`}
+				{
+					name: "Reported At",
+					value: `<t:${Math.round(report.reportedTime.valueOf() / 1000)}>`,
+				},
+				{
+					name: "Report Created At",
+					value: `<t:${Math.round(report.reportCreatedAt.valueOf() / 1000)}>`,
+				},
 			])
 		message.channel.send({
-			embeds: [embed]
+			embeds: [embed],
 		})
-		const confirm = await getConfirmationMessage(message, "Are you sure you want to revoke this report?")
+		const confirm = await getConfirmationMessage(
+			message,
+			"Are you sure you want to revoke this report?",
+		)
 		if (!confirm) return message.channel.send("Report revocation cancelled")
 
+		// eslint-disable-next-line no-useless-catch
 		try {
-			const response = await client.fagc.revocations.revoke({
+			await client.fagc.revocations.revoke({
 				reportId: id,
 				adminId: message.author.id,
-				reqConfig: { apikey: guildConfig.apiKey }
+				reqConfig: { apikey: guildConfig.apiKey },
 			})
 
 			return message.channel.send("Report revoked!")
 		} catch (e) {
-			message.channel.send("Error revoking report. Please check logs.")
+			// message.channel.send("Error revoking report. Please check logs.")
 			throw e
 		}
-	}
+	},
 }
 
 export default RevokeReport

@@ -1,16 +1,16 @@
-import { MessageEmbed } from "discord.js";
-import { Command } from "../../base/Command";
+import { MessageEmbed } from "discord.js"
+import { Command } from "../../base/Command"
 
 const GetUserById: Command = {
 	name: "getuserbyid",
 	description: "Gets a Discord user by their ID",
-	aliases: [ "getuser", "viewuserbyid", "viewuser" ],
+	aliases: ["getuser", "viewuserbyid", "viewuser"],
 	category: "basic",
 	usage: "[user]",
 	examples: ["getuserbyid 429696038266208258"],
 	requiresRoles: false,
 	requiresApikey: false,
-	run: async ({message, client, args}) => {
+	run: async ({ message, client, args }) => {
 		const uid = args.shift()
 		if (!uid) return message.reply("No user ID provided")
 		try {
@@ -18,22 +18,25 @@ const GetUserById: Command = {
 			const embed = new MessageEmbed()
 				.setTitle("FAGC User Info")
 				.setColor(client.config.embeds.color)
-				.setFooter({text: client.config.embeds.footer})
+				.setFooter({ text: client.config.embeds.footer })
 				.setTimestamp()
-				.setAuthor({name: client.config.embeds.author})
+				.setAuthor({ name: client.config.embeds.author })
 				.setImage(user.avatarURL() || "")
 				.addFields([
 					{ name: "User's ID", value: user.id, inline: true },
 					{ name: "User's tag", value: user.tag, inline: true },
-					{ name: "User created at", value: `<t:${Math.round(user.createdAt.valueOf() / 1000)}>`, inline: true },
+					{
+						name: "User created at",
+						value: `<t:${Math.round(user.createdAt.valueOf() / 1000)}>`,
+						inline: true,
+					},
 				])
 			message.reply({
 				embeds: [embed],
 			})
-
 		} catch {
 			return message.reply(`User with the ID ${uid} could not be found`)
 		}
-	}
+	},
 }
 export default GetUserById

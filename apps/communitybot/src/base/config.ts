@@ -7,7 +7,7 @@ const config = {
 	embeds: {
 		color: "#0099ff",
 		footer: "FAGC Team",
-		author: "FAGC Infobot"
+		author: "FAGC Infobot",
 	},
 	fagcInvite: "DISCORD FAGC INVITE",
 } as const

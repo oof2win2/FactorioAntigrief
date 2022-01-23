@@ -1,6 +1,6 @@
-import { Message } from "discord.js";
-import FAGCBot from "./fagcbot";
-import {GuildConfig} from "fagc-api-types"
+import { Message } from "discord.js"
+import FAGCBot from "./fagcbot"
+import { GuildConfig } from "fagc-api-types"
 
 type CommandRunOpts = {
 	client: FAGCBot
@@ -10,12 +10,12 @@ type CommandRunOpts = {
 }
 
 type BaseCommand = {
-	name: string,
-	description: string,
-	usage: string,
-	aliases: string[],
-	examples: string[],
-	category: string,
+	name: string
+	description: string
+	usage: string
+	aliases: string[]
+	examples: string[]
+	category: string
 	requiresRoles: boolean
 	requiresApikey: boolean
 }

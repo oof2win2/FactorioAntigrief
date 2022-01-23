@@ -1,7 +1,7 @@
 import fs from "fs/promises"
 import ENV from "./utils/env"
 import * as Sentry from "@sentry/node"
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from "@sentry/tracing"
 import { CaptureConsole } from "@sentry/integrations"
 import FAGCBot from "./base/fagcbot"
@@ -14,7 +14,7 @@ Sentry.init({
 	integrations: [
 		new CaptureConsole({
 			// capture stuff on console.error
-			levels: [ "error" ],
+			levels: ["error"],
 		}),
 	],
 
@@ -26,7 +26,12 @@ Sentry.init({
 
 const client = new FAGCBot({
 	// maybe fix these intents later?
-	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_WEBHOOKS]
+	intents: [
+		Intents.FLAGS.GUILDS,
+		Intents.FLAGS.GUILD_MESSAGES,
+		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+		Intents.FLAGS.GUILD_WEBHOOKS,
+	],
 })
 
 const init = async () => {
@@ -40,11 +45,13 @@ const init = async () => {
 			.filter((evt) => evt.endsWith(".js"))
 			.forEach(async (cmd) => {
 				// splits the command and gets first part. commands are in the format "commandName.js"
-				const cmdName = cmd.split(".")[0]
-				const command = await import(`./commands/${dir}/${cmd}`).then(x => x.default) as Command
+				const command = (await import(`./commands/${dir}/${cmd}`).then(
+					(x) => x.default,
+				)) as Command
 
-				if (!command) return console.log(`./commands/${dir}/${cmd} is not a command`)
-				
+				if (!command)
+					return console.log(`./commands/${dir}/${cmd} is not a command`)
+
 				// adds command to client
 				client.commands.set(command.name, command)
 				// adds aliases to the command
@@ -63,7 +70,9 @@ const init = async () => {
 			.forEach(async (evt) => {
 				// splits the event and gets first part. events are in the format "eventName.js"
 				const evtName = evt.split(".")[0]
-				const event = await import(`./events/${dir}/${evt}`).then(x => x.default)
+				const event = await import(`./events/${dir}/${evt}`).then(
+					(x) => x.default,
+				)
 				// binds client to the event
 				client.on(evtName, (...args) => event(client, ...args))
 			})
