@@ -2,6 +2,7 @@ import { EmbedField, MessageEmbed } from "discord.js";
 import { Command } from "../../base/Command";
 import { createPagedEmbed } from "../../utils/functions";
 import { getConfirmationMessage, getMessageResponse } from "../../utils/responseGetter";
+import validator from "validator"
 
 const CreateReport: Command = {
 	name: "createreport",
@@ -15,7 +16,7 @@ const CreateReport: Command = {
 	requiresApikey: true,
 	run: async ({client, message, args, guildConfig}) => {
 		if (!guildConfig.ruleFilters.length) return message.channel.send(`${client.emotes.warn} No rules are filtered`)
-		
+
 		const playername = args.shift() ||
 			await getMessageResponse(
 				message,
@@ -95,7 +96,12 @@ const CreateReport: Command = {
 				message,
 				`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`
 			).then(x => x?.content)
-		if (!proof || proof.toLowerCase() === "none") proof = undefined
+		if (!proof || proof.toLowerCase() === "none") proof = "No proof"
+		if (proof !== "No proof") {
+			// check if each link is a valid URL
+			const areAllURLs = proof.split(" ").map((link) => validator.isURL(link)).reduce((a, b) => a && b)
+			if (!areAllURLs) return message.channel.send(`${client.config.emotes.warn} Invalid proof link(s)`)
+		}
 
 		const timestamp = Date.now()
 

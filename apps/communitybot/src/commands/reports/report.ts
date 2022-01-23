@@ -90,12 +90,12 @@ const FetchReport: Command = {
 		
 		const creator = await client.users.fetch(report.adminId).catch(() => null)
 		embed.addFields([
-			{ name: "Admin", value: `<@${creator?.id}> | ${creator?.tag}` },
-			{ name: "Broken rule ID", value: report.brokenRule },
-			{name: "Community ID", value: report.communityId},
-			{ name: "Proof", value: report.proof },
-			{ name: "Description", value: report.description },
-			{ name: "Automated", value: report.automated ? "Yes" : "No" },
+			{ name: "Admin", value: `<@${creator?.id}> | ${creator?.tag}` , inline: true},
+			{ name: "Broken rule ID", value: report.brokenRule , inline: true},
+			{name: "Community ID", value: report.communityId, inline: true},
+			{ name: "Automated", value: report.automated ? "Yes" : "No" , inline: true},
+			{ name: "Description", value: report.description , inline: false},
+			{ name: "Proof", value: report.proof , inline: false},
 		])
 		return message.channel.send({
 			embeds: [embed],
