@@ -96,6 +96,8 @@ const FetchReport: Command = {
 			{ name: "Automated", value: report.automated ? "Yes" : "No" , inline: true},
 			{ name: "Description", value: report.description , inline: false},
 			{ name: "Proof", value: report.proof , inline: false},
+			{name: "Reported At", value: `<t:${Math.round(report.reportedTime.valueOf() / 1000)}>`},
+			{name: "Report Created At", value: `<t:${Math.round(report.reportCreatedAt.valueOf() / 1000)}>`}
 		])
 		return message.channel.send({
 			embeds: [embed],
