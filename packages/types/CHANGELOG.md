@@ -1,10 +1,10 @@
-## UNRELEASED
+## [1.9.0] - [2022-01-24]
 
 ### Changes
 
 -   Renamed report rules to categories.
 
-## [1.8.1] - [2022-01-2021]
+## [1.8.1] - [2022-01-21]
 
 ### Bugfixes
 
