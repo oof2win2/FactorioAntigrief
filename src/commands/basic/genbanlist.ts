@@ -13,7 +13,6 @@ const Genbanlist: Command = {
 	requiredPermissions: ["reports"],
 	requiresApikey: false,
 	run: async ({ message, client, guildConfig }) => {
-		console.log(guildConfig)
 		if (!guildConfig.ruleFilters.length)
 			return message.reply("Set rule filters first")
 		if (!guildConfig.trustedCommunities.length)
@@ -25,17 +24,13 @@ const Genbanlist: Command = {
 			communityIds: guildConfig.trustedCommunities,
 			ruleIds: guildConfig.ruleFilters,
 		})
-		const toBanWith: Map<string, Report> = new Map()
-		reports.forEach((report) => {
-			if (toBanWith.has(report.playername)) return // already on banlist
-			toBanWith.set(report.playername, report)
-		})
-		const banlist = Array.from(toBanWith.values()).map((report) => {
+		const toBanWith = new Set(reports.map(r => r.playername))
+		const banlist = [...toBanWith].map((playername) => {
 			return {
-				username: report.playername,
+				username: playername,
 				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${
-					client.env.APIURL
-				}/reports/${encodeURIComponent(report.id)}`,
+					client.fagc.apiurl
+				}/reports/search?playername=${encodeURIComponent(playername)}`,
 			}
 		})
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab
