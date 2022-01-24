@@ -4,11 +4,11 @@ import { z } from "zod"
 import { Authenticate } from "../utils/authentication"
 import { client, validateDiscordUser } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
-import RuleModel, { RuleClass } from "../database/rule"
+import CategoryModel, { CategoryClass } from "../database/category"
 import { reportRevokedMessage } from "../utils/info"
 import {
 	Community,
-	Rule,
+	Category,
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 	Revocation,
@@ -182,7 +182,7 @@ export default class RevocationController {
 			})
 		const revoker = await client.users.fetch(req.body.adminId)
 		const admin = await client.users.fetch(report.adminId)
-		const rule = await RuleModel.findOne({ id: report.brokenRule })
+		const category = await CategoryModel.findOne({ id: report.categoryId })
 
 		const revocation = await ReportInfoModel.findOneAndUpdate({
 			id: report.id
@@ -207,9 +207,9 @@ export default class RevocationController {
 
 		reportRevokedMessage(Revocation.parse(revocation), {
 			community: <Community>(<unknown>community),
-			// this is allowed since the rule is GUARANTEED to exist if the report exists
+			// this is allowed since the category is GUARANTEED to exist if the report exists
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			rule: <Rule>(<unknown>rule!),
+			category: <Category>(<unknown>category!),
 			revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
 				(<unknown>revoker)
 			),
@@ -220,14 +220,14 @@ export default class RevocationController {
 	}
 
 	@GET({
-		url: "/rule/:id",
+		url: "/category/:id",
 		options: {
 			schema: {
 				params: z.object({
 					id: z.string(),
 				}),
 
-				description: "Fetch all revocations of a rule in your community",
+				description: "Fetch all revocations of a category in your community",
 				tags: [ "revocations" ],
 				security: [
 					{
@@ -246,7 +246,7 @@ export default class RevocationController {
 		},
 	})
 	@Authenticate
-	async fetchRule(
+	async fetchCategory(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -263,7 +263,7 @@ export default class RevocationController {
 		})
 
 		const revocations = await ReportInfoModel.find({
-			brokenRuleId: id,
+			categoryIdId: id,
 			communityId: community.id,
 			revokedAt: { $ne: null },
 		})
@@ -272,7 +272,7 @@ export default class RevocationController {
 	}
 
 	@POST({
-		url: "/rule/:id",
+		url: "/category/:id",
 		options: {
 			schema: {
 				params: z.object({
@@ -282,7 +282,7 @@ export default class RevocationController {
 					adminId: z.string(),
 				}),
 
-				description: "Revoke all reports of a rule in your community",
+				description: "Revoke all reports of a category in your community",
 				tags: [ "revocations" ],
 				security: [
 					{
@@ -301,7 +301,7 @@ export default class RevocationController {
 		},
 	})
 	@Authenticate
-	async revokeRule(
+	async revokeCategory(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -313,7 +313,7 @@ export default class RevocationController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { adminId } = req.body
-		const { id: ruleId } = req.params
+		const { id: categoryId } = req.params
 
 		const community = req.requestContext.get("community")
 		if (!community)
@@ -331,8 +331,8 @@ export default class RevocationController {
 				message: "adminId must be a valid Discord user",
 			})
 		
-		const rule = await RuleModel.findOne({ id: ruleId })
-		if (!rule)
+		const category = await CategoryModel.findOne({ id: categoryId })
+		if (!category)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
@@ -341,7 +341,7 @@ export default class RevocationController {
 
 		await ReportInfoModel.updateMany({
 			communityId: community.id,
-			brokenRule: ruleId,
+			categoryId: categoryId,
 			revokedAt: { $eq: null },
 		}, {
 			revokedAt: new Date(),
@@ -350,22 +350,22 @@ export default class RevocationController {
 
 		const rawRevocations = await ReportInfoModel.find({
 			communityId: community.id,
-			brokenRule: ruleId,
+			categoryId: categoryId,
 			revokedAt: { $ne: null },
 		})
 		const revocations = z.array(Revocation).parse(rawRevocations)
 
-		const RuleMap: Map<string, DocumentType<RuleClass, BeAnObject> | null> =
+		const CategoryMap: Map<string, DocumentType<CategoryClass, BeAnObject> | null> =
 			new Map()
 
 		await Promise.all(
 			revocations.map(async (revocation) => {
-				if (RuleMap.get(revocation.brokenRule)) return
+				if (CategoryMap.get(revocation.categoryId)) return
 
-				RuleMap.set(
-					revocation.brokenRule,
-					await RuleModel.findOne({
-						id: revocation.brokenRule,
+				CategoryMap.set(
+					revocation.categoryId,
+					await CategoryModel.findOne({
+						id: revocation.categoryId,
 					}).exec()
 				)
 			})
@@ -382,9 +382,9 @@ export default class RevocationController {
 				community: <ReportMessageExtraOpts["community"]>(
 					(<unknown>community.toObject())
 				),
-				// this is allowed since the rule is GUARANTEED to exist if the report exists
+				// this is allowed since the category is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
+				category: <ReportMessageExtraOpts["category"]><unknown>CategoryMap.get(revocation.categoryId)!,
 				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: totalReports.length,
 				totalCommunities: differentCommunities,
@@ -527,17 +527,17 @@ export default class RevocationController {
 		})
 		const revocations = z.array(Revocation).parse(rawRevocations)
 
-		const RuleMap: Map<string, DocumentType<RuleClass, BeAnObject> | null> =
+		const CategoryMap: Map<string, DocumentType<CategoryClass, BeAnObject> | null> =
 			new Map()
 
 		await Promise.all(
 			revocations.map(async (revocation) => {
-				if (RuleMap.get(revocation.brokenRule)) return
+				if (CategoryMap.get(revocation.categoryId)) return
 
-				RuleMap.set(
-					revocation.brokenRule,
-					await RuleModel.findOne({
-						id: revocation.brokenRule,
+				CategoryMap.set(
+					revocation.categoryId,
+					await CategoryModel.findOne({
+						id: revocation.categoryId,
 					}).exec()
 				)
 			})
@@ -557,9 +557,9 @@ export default class RevocationController {
 				community: <ReportMessageExtraOpts["community"]>(
 					(<unknown>community.toObject())
 				),
-				// this is allowed since the rule is GUARANTEED to exist if the report exists
+				// this is allowed since the category is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
+				category: <ReportMessageExtraOpts["category"]><unknown>CategoryMap.get(revocation.categoryId)!,
 				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
@@ -700,17 +700,17 @@ export default class RevocationController {
 		})
 		const revocations = z.array(Revocation).parse(rawRevocations)
 		
-		const RuleMap: Map<string, DocumentType<RuleClass, BeAnObject> | null> =
+		const CategoryMap: Map<string, DocumentType<CategoryClass, BeAnObject> | null> =
 			new Map()
 
 		await Promise.all(
 			revocations.map(async (revocation) => {
-				if (RuleMap.get(revocation.brokenRule)) return
+				if (CategoryMap.get(revocation.categoryId)) return
 
-				RuleMap.set(
-					revocation.brokenRule,
-					await RuleModel.findOne({
-						id: revocation.brokenRule,
+				CategoryMap.set(
+					revocation.categoryId,
+					await CategoryModel.findOne({
+						id: revocation.categoryId,
 					}).exec()
 				)
 			})
@@ -727,9 +727,9 @@ export default class RevocationController {
 				community: <ReportMessageExtraOpts["community"]>(
 					(<unknown>community.toObject())
 				),
-				// this is allowed since the rule is GUARANTEED to exist if the report exists
+				// this is allowed since the category is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				rule: <ReportMessageExtraOpts["rule"]><unknown>RuleMap.get(revocation.brokenRule)!,
+				category: <ReportMessageExtraOpts["category"]><unknown>CategoryMap.get(revocation.categoryId)!,
 				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
 				totalReports: totalReports.length,
 				totalCommunities: differentCommunities,

@@ -1,37 +1,37 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
-import RuleModel from "../database/rule"
+import CategoryModel from "../database/category"
 import GuildConfigModel from "../database/guildconfig"
 import { MasterAuthenticate } from "../utils/authentication"
-import { guildConfigChanged, ruleCreatedMessage, ruleRemovedMessage, rulesMergedMessage, ruleUpdatedMessage } from "../utils/info"
+import { guildConfigChanged, categoryCreatedMessage, categoryRemovedMessage, categoriesMergedMessage, categoryUpdatedMessage } from "../utils/info"
 import { z } from "zod"
 import ReportInfoModel from "../database/reportinfo"
 
-@Controller({ route: "/rules" })
-export default class RuleController {
+@Controller({ route: "/categories" })
+export default class CategoryController {
 	@GET({
 		url: "/",
 		options: {
 			schema: {
-				description: "Fetch all rules",
-				tags: [ "rules" ],
+				description: "Fetch all categories",
+				tags: [ "categories" ],
 				response: {
 					"200": {
 						type: "array",
 						items: {
-							$ref: "RuleClass#",
+							$ref: "CategoryClass#",
 						},
 					},
 				},
 			},
 		},
 	})
-	async getAllRules(
+	async getAllCategories(
 		_req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const rules = await RuleModel.find({})
-		return res.send(rules)
+		const categories = await CategoryModel.find({})
+		return res.send(categories)
 	}
 
 	@GET({
@@ -42,17 +42,17 @@ export default class RuleController {
 					id: z.string(),
 				}).required(),
 
-				description: "Fetch a rule by ID",
-				tags: [ "rules" ],
+				description: "Fetch a category by ID",
+				tags: [ "categories" ],
 				response: {
 					"200": {
-						allOf: [ { nullable: true }, { $ref: "RuleClass#" } ],
+						allOf: [ { nullable: true }, { $ref: "CategoryClass#" } ],
 					},
 				},
 			},
 		},
 	})
-	async getRule(
+	async getCategory(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -61,8 +61,8 @@ export default class RuleController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const rule = await RuleModel.findOne({ id: id })
-		return res.send(rule)
+		const category = await CategoryModel.findOne({ id: id })
+		return res.send(category)
 	}
 
 	@POST({
@@ -74,8 +74,8 @@ export default class RuleController {
 					longdesc: z.string()
 				}).required(),
 
-				description: "Create a rule",
-				tags: [ "rules" ],
+				description: "Create a category",
+				tags: [ "categories" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -83,7 +83,7 @@ export default class RuleController {
 				],
 				response: {
 					"200": {
-						$ref: "RuleClass#",
+						$ref: "CategoryClass#",
 					},
 				},
 			},
@@ -100,12 +100,12 @@ export default class RuleController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { shortdesc, longdesc } = req.body
-		const rule = await RuleModel.create({
+		const category = await CategoryModel.create({
 			shortdesc: shortdesc,
 			longdesc: longdesc,
 		})
-		ruleCreatedMessage(rule)
-		return res.send(rule)
+		categoryCreatedMessage(category)
+		return res.send(category)
 	}
 
 	@PATCH({
@@ -120,8 +120,8 @@ export default class RuleController {
 					longdesc: z.string().optional(),
 				}).optional(),
 
-				description: "Update a rule",
-				tags: [ "rules" ],
+				description: "Update a category",
+				tags: [ "categories" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -129,7 +129,7 @@ export default class RuleController {
 				],
 				response: {
 					"200": {
-						$ref: "RuleClass#",
+						$ref: "CategoryClass#",
 					},
 				},
 			},
@@ -152,22 +152,22 @@ export default class RuleController {
 		const { id } = req.params
 
 		if (!shortdesc && !longdesc) {
-			return res.send(await RuleModel.findOne({ id: id }))
+			return res.send(await CategoryModel.findOne({ id: id }))
 		}
-		const oldRule = await RuleModel.findOne({ id: id })
+		const oldCategory = await CategoryModel.findOne({ id: id })
 
-		if (!oldRule) return res.send(null)
-		const newRule = await RuleModel.findOneAndUpdate({
+		if (!oldCategory) return res.send(null)
+		const newCategory = await CategoryModel.findOneAndUpdate({
 			id: id
 		}, {
 			...Boolean(shortdesc) && { shortdesc: shortdesc },
 			...Boolean(longdesc) && { longdesc: longdesc }
 		}, { new: true })
-		if (!newRule) return res.send(null)
+		if (!newCategory) return res.send(null)
 
-		ruleUpdatedMessage(oldRule, newRule)
+		categoryUpdatedMessage(oldCategory, newCategory)
 
-		return res.send(newRule)
+		return res.send(newCategory)
 	}
 
 	@DELETE({
@@ -178,8 +178,8 @@ export default class RuleController {
 					id: z.string(),
 				}),
 
-				description: "Remove a rule",
-				tags: [ "rules" ],
+				description: "Remove a category",
+				tags: [ "categories" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -187,7 +187,7 @@ export default class RuleController {
 				],
 				response: {
 					"200": {
-						$ref: "RuleClass#",
+						$ref: "CategoryClass#",
 					},
 				},
 			},
@@ -203,22 +203,22 @@ export default class RuleController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const rule = await RuleModel.findOneAndRemove({
+		const category = await CategoryModel.findOneAndRemove({
 			id: id,
 		})
 
-		if (rule) {
-			ruleRemovedMessage(rule)
-			// store the IDs of the affected guilds - ones which have the rule filtered
+		if (category) {
+			categoryRemovedMessage(category)
+			// store the IDs of the affected guilds - ones which have the category filtered
 			const affectedGuildConfigs = await GuildConfigModel.find({
-				ruleFilters: [ rule.id ]
+				categoryFilters: [ category.id ]
 			})
 			
-			// remove the rule ID from any guild configs which may have it
+			// remove the category ID from any guild configs which may have it
 			await GuildConfigModel.updateMany({
 				_id: { $in: affectedGuildConfigs.map(config => config._id) }
 			}, {
-				$pull: { ruleFilters: rule.id }
+				$pull: { categoryFilters: category.id }
 			})
 
 			const newGuildConfigs = await GuildConfigModel.find({
@@ -226,7 +226,7 @@ export default class RuleController {
 			})
 
 			await ReportInfoModel.deleteMany({
-				brokenRule: rule.id
+				categoryId: category.id
 			})
 
 			// tell guilds about it after the revocations + reports have been removed
@@ -245,7 +245,7 @@ export default class RuleController {
 			}
 			sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 		}
-		return res.send(rule)
+		return res.send(category)
 	}
 
 	@PATCH({
@@ -257,8 +257,8 @@ export default class RuleController {
 					idDissolving: z.string(),
 				}),
 
-				description: "Merge rule idTwo into rule idReceiving",
-				tags: [ "rules" ],
+				description: "Merge category idTwo into category idReceiving",
+				tags: [ "categories" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -266,14 +266,14 @@ export default class RuleController {
 				],
 				response: {
 					"200": {
-						$ref: "RuleClass#",
+						$ref: "CategoryClass#",
 					},
 				},
 			},
 		},
 	})
 	@MasterAuthenticate
-	async mergeRules(
+	async mergeCategories(
 		req: FastifyRequest<{
 			Params: {
 				idReceiving: string
@@ -283,48 +283,48 @@ export default class RuleController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { idReceiving, idDissolving } = req.params
-		const receiving = await RuleModel.findOne({
+		const receiving = await CategoryModel.findOne({
 			id: idReceiving
 		})
 		if (!receiving)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
-				message: "idOne must be a valid rule ID",
+				message: "idOne must be a valid category ID",
 			})
-		const dissolving = await RuleModel.findOne({
+		const dissolving = await CategoryModel.findOne({
 			id: idDissolving
 		})
 		if (!dissolving)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
-				message: "idTwo must be a valid rule ID",
+				message: "idTwo must be a valid category ID",
 			})
 
 
-		await RuleModel.findOneAndDelete({
+		await CategoryModel.findOneAndDelete({
 			id: idDissolving
 		})
 		await ReportInfoModel.updateMany({
-			brokenRule: idDissolving
+			categoryId: idDissolving
 		}, {
-			brokenRule: idReceiving
+			categoryId: idReceiving
 		})
 		
 		await GuildConfigModel.updateMany({
-			ruleFilters: idDissolving
+			categoryFilters: idDissolving
 		}, {
-			$addToSet: { ruleFilters: idReceiving }
+			$addToSet: { categoryFilters: idReceiving }
 		})
 		await GuildConfigModel.updateMany({
-			ruleFilters: idDissolving,
+			categoryFilters: idDissolving,
 		}, {
-			$pull: { ruleFilters: idDissolving },
+			$pull: { categoryFilters: idDissolving },
 		})
 
 		const affectedConfigs = await GuildConfigModel.find({
-			ruleFilters: idReceiving
+			categoryFilters: idReceiving
 		})
 
 		const sendGuildConfigInfo = async () => {
@@ -342,7 +342,7 @@ export default class RuleController {
 		}
 		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 
-		rulesMergedMessage(receiving, dissolving)
+		categoriesMergedMessage(receiving, dissolving)
 
 		return res.send(receiving)
 	}

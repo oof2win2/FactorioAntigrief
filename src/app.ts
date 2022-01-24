@@ -76,7 +76,7 @@ fastify.register(fastifySwagger, {
 		// produces: ["application/json"],
 		tags: [
 			{ name: "community", description: "Community related end-points" },
-			{ name: "rules", description: "Rule related end-points" },
+			{ name: "categories", description: "Category related end-points" },
 			{ name: "reports", description: "Report related end-points" },
 			{ name: "profiles", description: "Profile related end-points" },
 			{
@@ -130,8 +130,8 @@ fastify.addSchema({
 	...generateSchema(Types.Community)
 })
 fastify.addSchema({
-	$id: "RuleClass",
-	...generateSchema(Types.Rule)
+	$id: "CategoryClass",
+	...generateSchema(Types.Category)
 })
 fastify.addSchema({
 	$id: "ReportClass",

@@ -4,7 +4,7 @@ import GuildConfigModel, {
 	GuildConfigClass,
 } from "../database/guildconfig"
 import CommunityModel, { CommunityClass } from "../database/community"
-import RuleModel from "../database/rule"
+import CategoryModel from "../database/category"
 import { DocumentType } from "@typegoose/typegoose"
 import ENV from "./env"
 
@@ -18,14 +18,14 @@ const communityGauge = new promClient.Gauge({
 	help: "Amount of communities that trust this community",
 	labelNames: [ "id", "name", "contact" ],
 })
-const ruleGauge = new promClient.Gauge({
-	name: "rule_trust_count",
-	help: "Amount of communities that trust this rule",
+const categoryGauge = new promClient.Gauge({
+	name: "category_trust_count",
+	help: "Amount of communities that trust this category",
 	labelNames: [ "id", "shortdesc" ],
 })
 
 register.registerMetric(communityGauge)
-register.registerMetric(ruleGauge)
+register.registerMetric(categoryGauge)
 
 // Format community trust from config
 const trustedCommunities = async (
@@ -66,39 +66,39 @@ const trustedCommunities = async (
 	})
 	return await Promise.all(results)
 }
-// Format rule trust from config
-const trustedRules = async (
+// Format category trust from config
+const trustedCategories = async (
 	communities: Omit<DocumentType<GuildConfigClass>, "apikey">[]
 ) => {
 	const rawResults: { id: string; count: number }[] = []
-	const CachedRules = new Map()
-	const getOrFetchRule = async (ruleid) => {
-		const cachedRule = CachedRules.get(ruleid)
-		if (cachedRule) return cachedRule
-		const rule = CachedRules.set(
-			ruleid,
-			RuleModel.findOne({ id: ruleid })
-		).get(ruleid)
-		return rule
+	const CachedCategories = new Map()
+	const getOrFetchCategory = async (categoryId) => {
+		const cachedCategory = CachedCategories.get(categoryId)
+		if (cachedCategory) return cachedCategory
+		const category = CachedCategories.set(
+			categoryId,
+			CategoryModel.findOne({ id: categoryId })
+		).get(categoryId)
+		return category
 	}
 	communities.forEach((community) => {
-		community.ruleFilters?.forEach((ruleID) => {
+		community.categoryFilters?.forEach((categoryId) => {
 			let found = false
 			rawResults.forEach((trusted) => {
-				if (trusted.id === ruleID) {
+				if (trusted.id === categoryId) {
 					trusted.count++
 					found = true
 				}
 			})
 			if (!found) {
-				rawResults.push({ id: ruleID, count: 1 })
+				rawResults.push({ id: categoryId, count: 1 })
 			}
 		})
 	})
-	const results = rawResults.map(async (rule) => {
+	const results = rawResults.map(async (category) => {
 		return {
-			rule: await getOrFetchRule(rule.id),
-			count: rule.count,
+			category: await getOrFetchCategory(category.id),
+			count: category.count,
 		}
 	})
 	return await Promise.all(results)
@@ -114,14 +114,14 @@ const collectStatistics = async () => {
 				return CommunityConfig
 			})
 		)
-	const rules = await trustedRules(communitySettings)
+	const categories = await trustedCategories(communitySettings)
 	const communities = await trustedCommunities(communitySettings)
 
-	rules.forEach((rule) => {
-		if (rule.rule)
-			ruleGauge.set(
-				{ id: rule.rule.id, shortdesc: rule.rule.shortdesc },
-				rule.count
+	categories.forEach((category) => {
+		if (category.category)
+			categoryGauge.set(
+				{ id: category.category.id, shortdesc: category.category.shortdesc },
+				category.count
 			)
 	})
 	communities.forEach((community) => {

@@ -1,13 +1,13 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, GET, POST } from "fastify-decorators"
-import RuleModel from "../database/rule"
+import CategoryModel from "../database/category"
 import { Authenticate } from "../utils/authentication"
 import { reportCreatedMessage } from "../utils/info"
 import ReportInfoModel from "../database/reportinfo"
 import { validateDiscordUser, client } from "../utils/discord"
 import {
 	Community,
-	Rule,
+	Category,
 	ReportMessageExtraOpts,
 } from "fagc-api-types"
 import GuildConfigModel from "../database/guildconfig"
@@ -46,7 +46,7 @@ export default class ReportController {
 				body: z.object({
 					adminId: z.string(),
 					playername: z.string(),
-					brokenRule: z.string(),
+					categoryId: z.string(),
 					automated: z.boolean().nullish().default(false),
 					reportedTime: z.string().default(new Date().toISOString()).refine((input) => validator.isISO8601(input), "reportedTime must be a valid ISO8601 date"),
 					description: z.string().default("No description"),
@@ -80,7 +80,7 @@ export default class ReportController {
 			Body: {
 				adminId: string
 				playername: string
-				brokenRule: string
+				categoryId: string
 				automated: boolean
 				reportedTime: string
 				description: string
@@ -92,7 +92,7 @@ export default class ReportController {
 		const {
 			adminId,
 			playername,
-			brokenRule,
+			categoryId,
 			automated,
 			reportedTime,
 			description,
@@ -107,12 +107,12 @@ export default class ReportController {
 				message: "Your community could not be found",
 			})
 
-		const rule = await RuleModel.findOne({ id: brokenRule })
-		if (!rule)
+		const category = await CategoryModel.findOne({ id: categoryId })
+		if (!category)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
-				message: "brokenRule must be a valid ID",
+				message: "categoryId must be a valid ID",
 			})
 
 		const isDiscordUser = await validateDiscordUser(adminId)
@@ -124,7 +124,7 @@ export default class ReportController {
 			})
 		const admin = await client.users.fetch(adminId)
 
-		// check whether any one of the community configs allows for this rule, if not, then don't accept the report
+		// check whether any one of the community configs allows for this category, if not, then don't accept the report
 		const communityConfigs = await GuildConfigModel.find({
 			communityId: community.id,
 		})
@@ -134,25 +134,25 @@ export default class ReportController {
 				error: "Bad Request",
 				message: "Your community does not have a community config",
 			})
-		const foundRuleFilter = communityConfigs.find((config) => {
+		const foundCategoryFilter = communityConfigs.find((config) => {
 			return (
-				config.ruleFilters?.length &&
-				config.ruleFilters.indexOf(rule.id) !== -1
+				config.categoryFilters?.length &&
+				config.categoryFilters.indexOf(category.id) !== -1
 			)
 		})
-		if (!foundRuleFilter)
+		if (!foundCategoryFilter)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
 				message:
-					"Your community does not filter for the specified rule",
+					"Your community does not filter for the specified category",
 			})
 		
 
 		const report = await ReportInfoModel.create({
 			playername: playername,
 			adminId: adminId,
-			brokenRule: brokenRule,
+			categoryId: categoryId,
 			automated: automated,
 			reportedTime: reportedTime,
 			description: description,
@@ -170,7 +170,7 @@ export default class ReportController {
 
 		reportCreatedMessage(report, {
 			community: <Community>(<unknown>community.toObject()),
-			rule: <Rule>(<unknown>rule.toObject()),
+			category: <Category>(<unknown>category.toObject()),
 			createdBy: <ReportMessageExtraOpts["createdBy"]>(<unknown>admin),
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
@@ -216,10 +216,10 @@ export default class ReportController {
 				querystring: z.object({
 					playername: z.string(),
 					communityId: z.string(),
-					ruleId: z.string(),
-				}).partial().refine((x) => x.playername || x.communityId || x.ruleId, "At least one query param must be specified"),
+					categoryId: z.string(),
+				}).partial().refine((x) => x.playername || x.communityId || x.categoryId, "At least one query param must be specified"),
 
-				description: "Search for reports using their playername, communityId or ruleId",
+				description: "Search for reports using their playername, communityId or categoryId",
 				tags: [ "reports" ],
 				response: {
 					"200": {
@@ -237,31 +237,31 @@ export default class ReportController {
 			Querystring: {
 				playername?: string
 				communityId?: string
-				ruleId?: string
+				categoryId?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		// the querystring validator already makes sure that there is at least one prop, so we can just use it now
 		// TODO: finish + test this
-		const { playername, communityId, ruleId } = req.query
+		const { playername, communityId, categoryId } = req.query
 		const reports = await ReportInfoModel.find({
 			playername: playername,
 			communityId: communityId,
-			brokenRule: ruleId,
+			categoryId: categoryId,
 		})
 		return res.send(reports)
 	}
 
 	@GET({
-		url: "/rule/:id",
+		url: "/category/:id",
 		options: {
 			schema: {
 				params: z.object({
 					id: z.string()
 				}),
 
-				description: "Fetch a report by it's broken rule ID",
+				description: "Fetch a report by it's broken category ID",
 				tags: [ "reports" ],
 				response: {
 					"200": {
@@ -274,7 +274,7 @@ export default class ReportController {
 			},
 		},
 	})
-	async getByRule(
+	async getByCategory(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -282,7 +282,7 @@ export default class ReportController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const reports = await ReportInfoModel.find({ brokenRule: req.params.id })
+		const reports = await ReportInfoModel.find({ categoryId: req.params.id })
 		return res.status(200).send(reports)
 	}
 
@@ -366,7 +366,7 @@ export default class ReportController {
 			schema: {
 				body: z.object({
 					playername: z.string().nullish(),
-					ruleIds: z.array(z.string())
+					categoryIds: z.array(z.string())
 						.max(100, "Exceeded maximum length of 100"),
 					communityIds: z.array(z.string())
 						.max(100, "Exceeded maximum length of 100"),
@@ -374,7 +374,7 @@ export default class ReportController {
 				}),
 
 				description:
-					"Fetch reports by their community IDs and rule IDs",
+					"Fetch reports by their community IDs and category IDs",
 				tags: [ "reports" ],
 				response: {
 					"200": {
@@ -391,17 +391,17 @@ export default class ReportController {
 		req: FastifyRequest<{
 			Body: {
 				playername?: string | null
-				ruleIds: string[]
+				categoryIds: string[]
 				communityIds: string[]
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { playername, ruleIds, communityIds } = req.body
+		const { playername, categoryIds, communityIds } = req.body
 		const reports = await ReportInfoModel.find({
 			playername: playername ?? undefined,
-			brokenRule: {
-				$in: ruleIds
+			categoryId: {
+				$in: categoryIds
 			},
 			communityId: {
 				$in: communityIds

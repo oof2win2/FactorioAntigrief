@@ -1,4 +1,4 @@
-import { Community, Rule } from "fagc-api-types"
+import { Community, Category } from "fagc-api-types"
 import * as faker from "faker"
 
 export const createCommunity = (): Community => {
@@ -14,13 +14,13 @@ export const createCommunities = (count: number): Community[] => {
 	return Array(count).fill(0).map(() => createCommunity())
 }
 
-export const createRule = (): Rule => {
+export const createCategory = (): Category => {
 	return {
 		id: faker.datatype.uuid(),
 		shortdesc: faker.lorem.word(),
 		longdesc: faker.lorem.sentence(),
 	}
 }
-export const createRules = (count: number): Rule[] => {
-	return Array(count).fill(0).map(() => createRule())
+export const createCategories = (count: number): Category[] => {
+	return Array(count).fill(0).map(() => createCategory())
 }

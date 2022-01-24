@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
-import RuleModel from "../database/rule"
+import CategoryModel from "../database/category"
 import { Authenticate, createApikey, MasterAuthenticate, OptionalAuthenticate } from "../utils/authentication"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
@@ -242,13 +242,13 @@ export default class CommunityController {
 					guildId: z.string()
 				}),
 				body: z.object({
-					ruleFilters: z.array(z.string()).optional(),
+					categoryFilters: z.array(z.string()).optional(),
 					trustedCommunities: z.array(z.string()).optional(),
 					roles: z.object({
 						reports: z.string().optional(),
 						webhooks: z.string().optional(),
 						setConfig: z.string().optional(),
-						setRules: z.string().optional(),
+						setCategories: z.string().optional(),
 						setCommunities: z.string().optional(),
 						apiKey: z.string().optional(),
 					}).optional()
@@ -278,13 +278,13 @@ export default class CommunityController {
 				guildId: string
 			}
 			Body: {
-				ruleFilters?: string[]
+				categoryFilters?: string[]
 				trustedCommunities?: string[]
 				roles?: {
 					reports?: string
 					webhooks?: string
 					setConfig?: string
-					setRules?: string
+					setCategories?: string
 					setCommunities?: string
 				}
 				apiKey?: string
@@ -292,7 +292,7 @@ export default class CommunityController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { ruleFilters, trustedCommunities, roles, apiKey } = req.body
+		const { categoryFilters, trustedCommunities, roles, apiKey } = req.body
 		const { guildId } = req.params
 
 		// check if the community exists
@@ -331,16 +331,16 @@ export default class CommunityController {
 				message: "You are not allowed to edit this guild's config",
 			})
 
-		// query database if rules and communities actually exist
-		if (ruleFilters) {
-			const rulesExist = await RuleModel.find({
-				id: { $in: ruleFilters },
+		// query database if categories and communities actually exist
+		if (categoryFilters) {
+			const categoriesExist = await CategoryModel.find({
+				id: { $in: categoryFilters },
 			})
-			if (rulesExist.length !== ruleFilters.length)
+			if (categoriesExist.length !== categoryFilters.length)
 				return res.status(400).send({
 					errorCode: 400,
 					error: "Bad Request",
-					message: `ruleFilters must be array of IDs of rules, got ${ruleFilters.toString()}, some of which are not real rule IDs`,
+					message: `categoryFilters must be array of IDs of categories, got ${categoryFilters.toString()}, some of which are not real category IDs`,
 				})
 		}
 		if (trustedCommunities) {
@@ -357,7 +357,7 @@ export default class CommunityController {
 
 		// check other stuff
 		if (apiKey) guildConfig.apikey = apiKey
-		if (ruleFilters) guildConfig.ruleFilters = ruleFilters
+		if (categoryFilters) guildConfig.categoryFilters = categoryFilters
 		// explicitly add ID of community to trusted communities, as you need to trust yourself
 		const communityIds = new Set(trustedCommunities)
 		if (guildConfig.communityId) communityIds.add(guildConfig.communityId)
@@ -376,7 +376,7 @@ export default class CommunityController {
 				reports: "",
 				webhooks: "",
 				setConfig: "",
-				setRules: "",
+				setCategories: "",
 				setCommunities: "",
 			}
 		if (roles) {
