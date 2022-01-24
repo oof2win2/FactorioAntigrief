@@ -80,26 +80,19 @@ const SetPermissions: Command = {
 			if (!confirmation)
 				return message.channel.send("Role configuration cancelled")
 
-			try {
-				await client.saveGuildConfig({
-					...guildConfig,
-					roles: {
-						setRules: permissions.setRules?.id || "",
-						setCommunities: permissions.setCommunities?.id || "",
-						setConfig: permissions.setConfig?.id || "",
-						reports: permissions.reports?.id || "",
-						webhooks: permissions.webhooks?.id || "",
-					},
-				})
-				return message.channel.send(
-					`${client.emotes.success} Successfully set all permissions!`,
-				)
-			} catch (e) {
-				message.channel.send(
-					`${client.emotes.warn} An error occured. Please try again later`,
-				)
-				throw e
-			}
+			await client.saveGuildConfig({
+				...guildConfig,
+				roles: {
+					setRules: permissions.setRules?.id || "",
+					setCommunities: permissions.setCommunities?.id || "",
+					setConfig: permissions.setConfig?.id || "",
+					reports: permissions.reports?.id || "",
+					webhooks: permissions.webhooks?.id || "",
+				},
+			})
+			return message.channel.send(
+				`${client.emotes.success} Successfully set all permissions!`,
+			)
 		}
 
 		// the role type has been provided, so setting only one role
@@ -138,25 +131,18 @@ const SetPermissions: Command = {
 		if (!confirmation)
 			return message.channel.send("Role configuration cancelled")
 
-		try {
-			await client.saveGuildConfig({
-				guildId: message.guild.id,
-				// this works but just needs to have the right types, maybe a SetGuilConfig type from fagc-api-types
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				roles: {
-					[permType]: role.id,
-				},
-			})
-			return message.channel.send(
-				`${client.emotes.success} Successfully set the ${permType} permission to ${role.name}!`,
-			)
-		} catch (e) {
-			message.channel.send(
-				`${client.emotes.warn} An error occured. Please try again later`,
-			)
-			throw e
-		}
+		await client.saveGuildConfig({
+			guildId: message.guild.id,
+			// this works but just needs to have the right types, maybe a SetGuilConfig type from fagc-api-types
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			roles: {
+				[permType]: role.id,
+			},
+		})
+		return message.channel.send(
+			`${client.emotes.success} Successfully set the ${permType} permission to ${role.name}!`,
+		)
 	},
 }
 
