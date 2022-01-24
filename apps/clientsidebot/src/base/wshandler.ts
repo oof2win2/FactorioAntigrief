@@ -154,7 +154,7 @@ const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], r
 	// remove the report record
 	await client.db.fagcBan.delete({
 		where: {
-			id: revocation.reportId
+			id: revocation.id
 		},
 	}).catch(() => null)
 
@@ -183,7 +183,7 @@ const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], r
 	// if there is another FAGC report that conforms to the categories + communities, perform desired actions with it
 	if (otherBan) {
 		// there are other reports that the player is still banned for
-		const report = await client.fagc.reports.fetchReport({ reportid: otherBan.id })
+		const report = await client.fagc.reports.fetchReport({ reportId: otherBan.id })
 		if (!report) return
 		// unban in guilds that its supposed to
 		guildConfigs.map((guildConfig) => {
@@ -228,9 +228,9 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	const newConfig = event.config as typeof event.config & Pick<Required<typeof event.config>, "categoryFilters" | "trustedCommunities">
 	// run both at once and then wait for both to finish so no extra time is spent waiting around
 	const [ newReports, currentReports, whitelistRecords, privatebanRecords ] = await Promise.all([
-		client.fagc.reports.listFiltered({
-			categoryIDs: newConfig.categoryFilters,
-			communityIDs: newConfig.trustedCommunities
+		client.fagc.reports.list({
+			categoryIds: newConfig.categoryFilters,
+			communityIds: newConfig.trustedCommunities
 		}),
 		client.db.fagcBan.findMany(),
 		client.db.whitelist.findMany(),
