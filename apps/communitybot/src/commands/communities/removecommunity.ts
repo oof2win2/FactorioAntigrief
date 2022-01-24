@@ -12,8 +12,8 @@ const RemoveCommunity: Command = {
 	aliases: ["removecommunities"],
 	usage: "[...ids]",
 	examples: [
-		"{{p}}removecommunity XuciBx7",
-		"{{p}}removecommunity XuciBx7 XuciBx9 XuciBx/",
+		"removecommunity XuciBx7",
+		"removecommunity XuciBx7 XuciBx9 XuciBx/",
 	],
 	category: "communities",
 	requiresRoles: true,
@@ -57,7 +57,7 @@ const RemoveCommunity: Command = {
 			createPagedEmbed(communityFields, embed, message, { maxPageCount: 10 })
 			const newIDsMessage = await getMessageResponse(
 				message,
-				":keyboard: No communities provided. Please provide IDs in a single message, separated with spaces:",
+				`${client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces`,
 			)
 			if (!newIDsMessage || !newIDsMessage.content)
 				return message.channel.send("No IDs were provided")

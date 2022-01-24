@@ -29,7 +29,7 @@ const SetName: Command = {
 
 		await client.fagc.communities.setCommunityConfig({
 			config: {
-				name,
+				name: name,
 			},
 			reqConfig: {
 				apikey: guildConfig.apiKey,

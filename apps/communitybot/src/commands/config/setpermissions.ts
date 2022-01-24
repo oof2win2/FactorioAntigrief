@@ -3,7 +3,8 @@ import {
 	getConfirmationMessage,
 	getMessageResponse,
 } from "../../utils/responseGetter"
-import { MessageEmbed } from "discord.js"
+import { MessageEmbed, Role } from "discord.js"
+import { GuildConfig } from "fagc-api-types"
 
 const SetPermissions: Command = {
 	name: "setpermissions",
@@ -29,88 +30,36 @@ const SetPermissions: Command = {
 		]
 
 		if (!args[0]) {
+			const permTypes = Object.keys(GuildConfig._def.shape().roles._def.shape())
+			const permissions: Record<keyof GuildConfig["roles"], Role | undefined> = {
+				reports: undefined,
+				webhooks: undefined,
+				setConfig: undefined,
+				setRules: undefined,
+				setCommunities: undefined,
+			}
+
 			// set all perms at once
 			message.channel.send("Process of setting roles has started.")
 
-			const reportsMessage = await getMessageResponse(
-				message,
-				"Type in the ID or ping the role for the reports permission",
-			)
-			const reportsRole =
-				reportsMessage?.mentions.roles.first() ||
-				message.guild.roles.cache.get(
-					reportsMessage?.content?.split(" ")[0] || "",
+			for (const permType of permTypes) {
+				const permMessage = await getMessageResponse(
+					message,
+					`Type in the ID or ping the role for the ${permStrings[permTypes.indexOf(permType)]} permission`,
 				)
-			if (!reportsRole)
-				return message.channel.send(
+				if (!permMessage) return message.channel.send(`${client.emotes.warn} No permission was sent`)
+				const permRole = permMessage?.mentions.roles.first() ||
+					message.guild.roles.cache.get(
+						permMessage.content?.split(" ")[0] || "",
+					)
+				if (!permRole)  message.channel.send(
 					`${client.emotes.warn} \`${
-						reportsMessage?.content?.split(" ")[0]
+						permMessage.content?.split(" ")[0]
 					}\` is not a valid role`,
 				)
+				permissions[permType] = permRole
 
-			const webhooksMessage = await getMessageResponse(
-				message,
-				"Type in the ID or ping the role for the webhooks permission",
-			)
-			const webhooksRole =
-				webhooksMessage?.mentions.roles.first() ||
-				message.guild.roles.cache.get(
-					webhooksMessage?.content?.split(" ")[0] || "",
-				)
-			if (!webhooksRole)
-				return message.channel.send(
-					`${client.emotes.warn} \`${
-						webhooksMessage?.content?.split(" ")[0]
-					}\` is not a valid role`,
-				)
-
-			const setConfigMessage = await getMessageResponse(
-				message,
-				"Type in the ID or ping the role for the setConfig permission",
-			)
-			const setConfigRole =
-				setConfigMessage?.mentions.roles.first() ||
-				message.guild.roles.cache.get(
-					setConfigMessage?.content?.split(" ")[0] || "",
-				)
-			if (!setConfigRole)
-				return message.channel.send(
-					`${client.emotes.warn} \`${
-						setConfigMessage?.content?.split(" ")[0]
-					}\` is not a valid role`,
-				)
-
-			const setRulesMessage = await getMessageResponse(
-				message,
-				"Type in the ID or ping the role for the setRules permission",
-			)
-			const setRulesRole =
-				setRulesMessage?.mentions.roles.first() ||
-				message.guild.roles.cache.get(
-					setRulesMessage?.content?.split(" ")[0] || "",
-				)
-			if (!setRulesRole)
-				return message.channel.send(
-					`${client.emotes.warn} \`${
-						setRulesMessage?.content?.split(" ")[0]
-					}\` is not a valid role`,
-				)
-
-			const setCommunitiesMessage = await getMessageResponse(
-				message,
-				"Type in the ID or ping the role for the setCommunities permission",
-			)
-			const setCommunitiesRole =
-				setCommunitiesMessage?.mentions.roles.first() ||
-				message.guild.roles.cache.get(
-					setCommunitiesMessage?.content?.split(" ")[0] || "",
-				)
-			if (!setCommunitiesRole)
-				return message.channel.send(
-					`${client.emotes.warn} \`${
-						setCommunitiesMessage?.content?.split(" ")[0]
-					}\` is not a valid role`,
-				)
+			}
 
 			const embed = new MessageEmbed()
 				.setTitle("FAGC Role Config")
@@ -119,13 +68,13 @@ const SetPermissions: Command = {
 				.setTimestamp()
 				.setDescription("Your FAGC Role Configuration")
 				.addFields([
-					{ name: "Reports Management", value: `<@&${reportsRole.id}>` },
-					{ name: "Webhook Management", value: `<@&${webhooksRole.id}>` },
-					{ name: "Config Management", value: `<@&${setConfigRole.id}>` },
-					{ name: "Rule Management", value: `<@&${setRulesRole.id}>` },
+					{ name: "Reports Management", value: `<@&${permissions.reports?.id}>` },
+					{ name: "Webhook Management", value: `<@&${permissions.webhooks?.id}>` },
+					{ name: "Config Management", value: `<@&${permissions.setConfig?.id}>` },
+					{ name: "Rule Management", value: `<@&${permissions.setRules?.id}>` },
 					{
 						name: "Communities Management",
-						value: `<@&${setCommunitiesRole.id}>`,
+						value: `<@&${permissions.setCommunities?.id}>`,
 					},
 				])
 			message.channel.send({
@@ -142,11 +91,11 @@ const SetPermissions: Command = {
 				await client.saveGuildConfig({
 					...guildConfig,
 					roles: {
-						reports: reportsRole.id,
-						webhooks: webhooksRole.id,
-						setConfig: setConfigRole.id,
-						setRules: setRulesRole.id,
-						setCommunities: setCommunitiesRole.id,
+						setRules: permissions.setRules?.id || "",
+						setCommunities: permissions.setCommunities?.id || "",
+						setConfig: permissions.setConfig?.id || "",
+						reports: permissions.reports?.id || "",
+						webhooks: permissions.webhooks?.id || "",
 					},
 				})
 				return message.channel.send(
@@ -158,94 +107,62 @@ const SetPermissions: Command = {
 				)
 				throw e
 			}
-		} else if (!args[1]) {
-			// has perm type, but not role ID
-			const permType = args[0]
-			if (!permStrings.includes(permType))
-				return message.reply(
-					`${client.emotes.warn} \`${permType}\` is not a valid permission type`,
-				)
+		}
 
+		// the role type has been provided, so setting only one role
+		const permType = args[0]
+		if (!permStrings.includes(permType))
+			return message.reply(
+				`${client.emotes.warn} \`${permType}\` is not a valid permission type`,
+			)
+		
+		let role: Role
+		if (!args[1]) {
+			// id wasnt provided so need to ask
 			const roleMessage = await getMessageResponse(
 				message,
 				"Type in the ID or ping the role for the permission",
 			)
-			const role =
+			const tmpRole =
 				roleMessage?.mentions.roles.first() ||
 				message.guild.roles.cache.get(roleMessage?.content?.split(" ")[0] || "")
-			if (!role)
+			if (!tmpRole)
 				return message.channel.send(
 					`${client.emotes.warn} \`${
 						roleMessage?.content?.split(" ")[0]
 					}\` is not a valid role`,
 				)
-
-			const confirmation = await getConfirmationMessage(
-				message,
-				`Are you sure you want to set the ${permType} permission to ${role.name}?`,
-			)
-			if (!confirmation)
-				return message.channel.send("Role configuration cancelled")
-
-			try {
-				await client.saveGuildConfig({
-					guildId: message.guild.id,
-					// this works but just needs to have the right types, maybe a SetGuilConfig type from fagc-api-types
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					roles: {
-						[permType]: role.id,
-					},
-				})
-				return message.channel.send(
-					`${client.emotes.success} Successfully set the ${permType} permission to ${role.name}!`,
-				)
-			} catch (e) {
-				message.channel.send(
-					`${client.emotes.warn} An error occured. Please try again later`,
-				)
-				throw e
-			}
+			role = tmpRole
 		} else {
-			// has both perm type and role ID
-			const permType = args[0]
-			if (!permStrings.includes(permType))
-				return message.reply(
-					`${client.emotes.warn} \`${permType}\` is not a valid permission type`,
-				)
-			const role =
-				message.mentions.roles.first() || message.guild.roles.cache.get(args[1])
-			if (!role)
-				return message.channel.send(
-					`${client.emotes.warn} \`${args[1]}\` is not a valid role`,
-				)
+			const tmpRole =  message.mentions.roles.first() || message.guild.roles.cache.get(args[1])
+			if (!tmpRole) return message.channel.send(`${client.emotes.warn} \`${args[1]}\` is not a valid role`)
+			role = tmpRole
+		}
+		const confirmation = await getConfirmationMessage(
+			message,
+			`Are you sure you want to set the ${permType} permission to ${role.name}?`,
+		)
+		if (!confirmation)
+			return message.channel.send("Role configuration cancelled")
 
-			const confirmation = await getConfirmationMessage(
-				message,
-				`Are you sure you want to set the ${permType} permission to ${role.name}?`,
+		try {
+			await client.saveGuildConfig({
+				guildId: message.guild.id,
+				// this works but just needs to have the right types, maybe a SetGuilConfig type from fagc-api-types
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				roles: {
+					[permType]: role.id,
+				},
+			})
+			return message.channel.send(
+				`${client.emotes.success} Successfully set the ${permType} permission to ${role.name}!`,
 			)
-			if (!confirmation)
-				return message.channel.send("Role configuration cancelled")
-
-			try {
-				await client.saveGuildConfig({
-					...guildConfig,
-					// this works but just needs to have the right types, maybe a SetGuilConfig type from fagc-api-types
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					roles: {
-						[permType]: role.id,
-					},
-				})
-				return message.channel.send(
-					`${client.emotes.success} Successfully set the ${permType} permission to ${role.name}!`,
-				)
-			} catch (e) {
-				message.channel.send(
-					`${client.emotes.warn} An error occured. Please try again later`,
-				)
-				throw e
-			}
+		} catch (e) {
+			message.channel.send(
+				`${client.emotes.warn} An error occured. Please try again later`,
+			)
+			throw e
 		}
 	},
 }

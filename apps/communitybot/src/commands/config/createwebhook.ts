@@ -15,9 +15,9 @@ const CreateWebhook: Command = {
 	run: async ({ client, message }) => {
 		const channel = message.mentions.channels.first() || message.channel
 		if (!channel.isText())
-			return message.channel.send("Please specify a text channel")
+			return message.channel.send(`${client.emotes.warn} Please specify a text channel`)
 		if (channel.type === "DM")
-			return message.channel.send("Please specify a text channel")
+			return message.channel.send(`${client.emotes.warn} You can't create webhooks in DMs`)
 		if (channel.isThread())
 			return message.channel.send(
 				`${client.emotes.warn} You can't create a webhook in a thread`,
