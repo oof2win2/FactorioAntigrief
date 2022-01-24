@@ -32,7 +32,7 @@
 		"@discordjs/collection": "^0.1.6",
 		"cross-fetch": "^3.1.4",
 		"discord-api-types": "^0.23.1",
-		"fagc-api-types": "^1.8.1",
+		"fagc-api-types": "^1.9.0",
 		"faker": "^5.5.3",
 		"isomorphic-ws": "^4.0.1",
 		"jest-fetch-mock": "^3.0.3",

@@ -87,15 +87,15 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return parsed
 	}
 	
-	async fetchRule({
-		ruleId,
+	async fetchCategory({
+		categoryId,
 		cache = true,
 		reqConfig = {}
 	}: {
-		ruleId: string
+		categoryId: string
 	} & FetchRequestTypes): Promise<Revocation[]> {
 		const revocations = await fetch(
-			`${this.apiurl}/revocations/rule/${strictUriEncode(ruleId)}`,
+			`${this.apiurl}/revocations/category/${strictUriEncode(categoryId)}`,
 			{
 				credentials: "include",
 				headers: {
@@ -110,17 +110,17 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		return parsed
 	}
 
-	async revokeRule({
-		ruleId,
+	async revokeCategory({
+		categoryId,
 		adminId,
 		cache = true,
 		reqConfig = {}
 	}: {
-		ruleId: string,
+		categoryId: string,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation[]> {
 		const revocations = await fetch(
-			`${this.apiurl}/revocations/rule/${strictUriEncode(ruleId)}`,
+			`${this.apiurl}/revocations/category/${strictUriEncode(categoryId)}`,
 			{
 				method: "POST",
 				body: JSON.stringify({

@@ -5,13 +5,13 @@ import {
 	CommunityCreatedMessage,
 	ReportCreatedMessage,
 	RevocationMessage,
-	RuleCreatedMessage,
-	RuleRemovedMessage,
+	CategoryCreatedMessage,
+	CategoryRemovedMessage,
 	CommunityRemovedMessage,
 	CommunityUpdatedMessage,
 	CommunitiesMergedMessage,
-	RuleUpdatedMessage,
-	RulesMergedMessage,
+	CategoryUpdatedMessage,
+	CategoriesMergedMessage,
 	GuildConfigChangedMessage,
 	BaseWebsocketMessage,
 } from "fagc-api-types"
@@ -25,10 +25,10 @@ export type WebSocketMessageType =
 	| "guildConfigChanged"
 	| "report"
 	| "revocation"
-	| "ruleCreated"
-	| "ruleRemoved"
-	| "ruleUpdated"
-	| "rulesMerged"
+	| "categoryCreated"
+	| "categoryRemoved"
+	| "categoryUpdated"
+	| "categoriesMerged"
 	| "communityCreated"
 	| "communityRemoved"
 	| "communityUpdated"
@@ -46,10 +46,10 @@ export declare interface WebSocketEvents {
 	guildConfigChanged: (message: GuildConfigChangedMessage) => void
 	report: (message: ReportCreatedMessage) => void
 	revocation: (message: RevocationMessage) => void
-	ruleCreated: (message: RuleCreatedMessage) => void
-	ruleRemoved: (message: RuleRemovedMessage) => void
-	ruleUpdated: (message: RuleUpdatedMessage) => void
-	rulesMerged: (message: RulesMergedMessage) => void
+	categoryCreated: (message: CategoryCreatedMessage) => void
+	categoryRemoved: (message: CategoryRemovedMessage) => void
+	categoryUpdated: (message: CategoryUpdatedMessage) => void
+	categoriesMerged: (message: CategoriesMergedMessage) => void
 	communityCreated: (message: CommunityCreatedMessage) => void
 	communityRemoved: (message: CommunityRemovedMessage) => void
 	communityUpdated: (message: CommunityUpdatedMessage) => void
@@ -143,28 +143,28 @@ class WebSocketHandler extends EventEmitter {
 				this.emit("revocation", parsed.data as RevocationMessage)
 			break
 		}
-		case "ruleCreated": {
-			const parsed = RuleCreatedMessage.safeParse(message)
+		case "categoryCreated": {
+			const parsed = CategoryCreatedMessage.safeParse(message)
 			if (parsed.success)
-				this.emit("ruleCreated", parsed.data as RuleCreatedMessage)
+				this.emit("categoryCreated", parsed.data as CategoryCreatedMessage)
 			break
 		}
-		case "ruleUpdated": {
-			const parsed = RuleUpdatedMessage.safeParse(message)
+		case "categoryUpdated": {
+			const parsed = CategoryUpdatedMessage.safeParse(message)
 			if (parsed.success)
-				this.emit("ruleUpdated", parsed.data as RuleUpdatedMessage)
+				this.emit("categoryUpdated", parsed.data as CategoryUpdatedMessage)
 			break
 		}
-		case "ruleRemoved": {
-			const parsed = RuleRemovedMessage.safeParse(message)
+		case "categoryRemoved": {
+			const parsed = CategoryRemovedMessage.safeParse(message)
 			if (parsed.success)
-				this.emit("ruleRemoved", parsed.data as RuleRemovedMessage)
+				this.emit("categoryRemoved", parsed.data as CategoryRemovedMessage)
 			break
 		}
-		case "rulesMerged": {
-			const parsed = RulesMergedMessage.safeParse(message)
+		case "categoriesMerged": {
+			const parsed = CategoriesMergedMessage.safeParse(message)
 			if (parsed.success)
-				this.emit("rulesMerged",parsed.data as RulesMergedMessage)
+				this.emit("categoriesMerged",parsed.data as CategoriesMergedMessage)
 			break
 		}
 		case "communityCreated": {
