@@ -1,11 +1,11 @@
 import { APIEmbed, APIUser } from "discord-api-types"
 import { z } from "zod"
-import { Community, GuildConfig, Report, Revocation, Rule } from "./baseTypes"
+import { Category, Community, GuildConfig, Report, Revocation } from "./baseTypes"
 
 export const BaseWebsocketMessage = z.object({
 	messageType: z.enum([
 		"report", "revocation",
-		"ruleCreated", "ruleRemoved", "ruleUpdated", "rulesMerged",
+		"categoryCreated", "categoryRemoved", "categoryUpdated", "categoriesMerged",
 		"communityCreated", "communityRemoved", "communityUpdated", "communitiesMerged",
 		"guildConfigChanged",
 		"announcement" ]),
@@ -15,7 +15,7 @@ export type BaseWebsocketMessage = z.infer<typeof BaseWebsocketMessage>
 export const ReportMessageExtraOpts = z.object({
 	community: Community,
 	createdBy: z.object({}).passthrough(), // no way to validate this
-	rule: Rule,
+	category: Category,
 	totalReports: z.number(),
 	totalCommunities: z.number(),
 })
@@ -42,33 +42,33 @@ export const RevocationMessage = z.object({
 }).merge(BaseWebsocketMessage)
 export type RevocationMessage = z.infer<typeof RevocationMessage> & { embed: APIEmbed }
 
-export const RuleCreatedMessage = z.object({
-	messageType: z.literal("ruleCreated"),
+export const CategoryCreatedMessage = z.object({
+	messageType: z.literal("categoryCreated"),
 	embed: z.object({}).passthrough(), // no way to validate this
-	rule: Rule,
+	category: Category,
 }).merge(BaseWebsocketMessage)
-export type RuleCreatedMessage = z.infer<typeof RuleCreatedMessage> & { embed: APIEmbed }
+export type CategoryCreatedMessage = z.infer<typeof CategoryCreatedMessage> & { embed: APIEmbed }
 
-export const RuleRemovedMessage = z.object({
-	messageType: z.literal("ruleRemoved"),
+export const CategoryRemovedMessage = z.object({
+	messageType: z.literal("categoryRemoved"),
 	embed: z.object({}).passthrough(), // no way to validate this
-	rule: Rule,
+	category: Category,
 }).merge(BaseWebsocketMessage)
-export type RuleRemovedMessage = z.infer<typeof RuleRemovedMessage> & { embed: APIEmbed }
+export type CategoryRemovedMessage = z.infer<typeof CategoryRemovedMessage> & { embed: APIEmbed }
 
-export const RuleUpdatedMessage = z.object({
-	messageType: z.literal("ruleUpdated"),
+export const CategoryUpdatedMessage = z.object({
+	messageType: z.literal("categoryUpdated"),
 	embed: z.object({}).passthrough(), // no way to validate this
-	rule: Rule,
+	category: Category,
 }).merge(BaseWebsocketMessage)
-export type RuleUpdatedMessage = z.infer<typeof RuleUpdatedMessage> & { embed: APIEmbed }
+export type CategoryUpdatedMessage = z.infer<typeof CategoryUpdatedMessage> & { embed: APIEmbed }
 
-export const RulesMergedMessage = z.object({
-	messageType: z.literal("rulesMerged"),
+export const CategoriesMergedMessage = z.object({
+	messageType: z.literal("categoriesMerged"),
 	embed: z.object({}).passthrough(), // no way to validate this
-	rules: Rule,
+	categories: Category,
 }).merge(BaseWebsocketMessage)
-export type RulesMergedMessage = z.infer<typeof RulesMergedMessage> & { embed: APIEmbed }
+export type CategoriesMergedMessage = z.infer<typeof CategoriesMergedMessage> & { embed: APIEmbed }
 
 export const CommunityCreatedMessageExtraOpts = z.object({
 	createdBy: z.object({}).passthrough(), // no way to validate this

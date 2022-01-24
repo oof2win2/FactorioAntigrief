@@ -12,7 +12,7 @@ const DateTypeDefault = z.union([ z.string().default(() => new Date().toISOStrin
 // This exists so that creating a report doesn't need an ID and some stuff is optional
 export const CreateReport = z.object({
 	playername: z.string(),
-	brokenRule: z.string(),
+	categoryId: z.string(),
 	proof: z.string().default("No proof"),
 	description: z.string().default("No description"),
 	automated: z.boolean().default(false),
@@ -41,22 +41,22 @@ export const Community = z.object({
 }).merge(Common)
 export type Community = z.infer<typeof Community>
 
-export const Rule = z.object({
+export const Category = z.object({
 	shortdesc: z.string(),
 	longdesc: z.string(),
 }).merge(Common)
-export type Rule = z.infer<typeof Rule>
+export type Category = z.infer<typeof Category>
 
 export const GuildConfig = z.object({
 	guildId: z.string(),
 	communityId: z.string().optional(),
 	trustedCommunities: z.array(z.string()).default([]),
-	ruleFilters: z.array(z.string()).default([]),
+	categoryFilters: z.array(z.string()).default([]),
 	roles: z.object({
 		reports: z.string().default(""),
 		webhooks: z.string().default(""),
 		setConfig: z.string().default(""),
-		setRules: z.string().default(""),
+		setCategories: z.string().default(""),
 		setCommunities: z.string().default(""),
 	}),
 	apiKey: z.string().nullable().optional(),
