@@ -42,19 +42,7 @@ const CreateReport: Command = {
 			// make sure the rule is filtered
 			.filter((rule) => guildConfig.ruleFilters.includes(rule.id))
 			// sort the rules by their index
-			.sort((a, b) => {
-				if (
-					guildConfig.ruleFilters.indexOf(a.id) >
-					guildConfig.ruleFilters.indexOf(b.id)
-				)
-					return 1
-				if (
-					guildConfig.ruleFilters.indexOf(a.id) <
-					guildConfig.ruleFilters.indexOf(b.id)
-				)
-					return -1
-				return 0
-			})
+			.sort((a, b) => guildConfig.ruleFilters.indexOf(a.id) - guildConfig.ruleFilters.indexOf(b.id))
 			.map((rule) => {
 				return {
 					name: `${guildConfig.ruleFilters.indexOf(rule.id) + 1}) ${

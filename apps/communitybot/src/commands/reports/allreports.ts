@@ -31,7 +31,6 @@ const AllReports: Command = {
 			return message.channel.send(
 				`Player \`${playername}\` doesn't have any reports`,
 			)
-		console.log(reports.length)
 		const embed = new MessageEmbed()
 			.setTitle("FAGC Reports")
 			.setColor("ORANGE")

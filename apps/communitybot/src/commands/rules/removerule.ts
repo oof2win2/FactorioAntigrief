@@ -32,19 +32,7 @@ const RemoveRules: Command = {
 			const ruleFields = allRules
 				// make sure the rules are filtered
 				.filter((rule) => guildConfig.ruleFilters.includes(rule.id))
-				.sort((a, b) => {
-					if (
-						guildConfig.ruleFilters.indexOf(a.id) >
-						guildConfig.ruleFilters.indexOf(b.id)
-					)
-						return 1
-					if (
-						guildConfig.ruleFilters.indexOf(a.id) <
-						guildConfig.ruleFilters.indexOf(b.id)
-					)
-						return -1
-					return 0
-				})
+				.sort((a, b) => guildConfig.ruleFilters.indexOf(a.id) - guildConfig.ruleFilters.indexOf(b.id))
 				.map((rule) => {
 					return {
 						name: `${guildConfig.ruleFilters.indexOf(rule.id) + 1}) ${
@@ -72,7 +60,7 @@ const RemoveRules: Command = {
 					? client.fagc.rules.resolveID(ruleid)
 					: // if it is an index in filtered rules, it needs to be resolved
 					  client.fagc.rules.resolveID(
-							guildConfig.ruleFilters[Number(ruleid) - 1],
+						guildConfig.ruleFilters[Number(ruleid) - 1],
 					  ),
 			)
 			.filter((r): r is Rule => Boolean(r))

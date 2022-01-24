@@ -34,19 +34,7 @@ const Rules: Command = {
 		// create the fields
 		const fields = filteredRules
 			// sort IDs by ascending
-			.sort((a, b) => {
-				if (
-					guildConfig.ruleFilters.indexOf(a.id) >
-					guildConfig.ruleFilters.indexOf(b.id)
-				)
-					return 1
-				if (
-					guildConfig.ruleFilters.indexOf(a.id) <
-					guildConfig.ruleFilters.indexOf(b.id)
-				)
-					return -1
-				return 0
-			})
+			.sort((a, b) => guildConfig.ruleFilters.indexOf(a.id) - guildConfig.ruleFilters.indexOf(b.id))
 			.map((rule) => {
 				return {
 					name: `${guildConfig.ruleFilters.indexOf(rule.id) + 1}) ${
