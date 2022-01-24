@@ -98,11 +98,10 @@ const FetchReport: Command = {
 			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(`FAGC Report with ID \`${reportID}\``)
 
-		const creator = await client.users.fetch(report.adminId).catch(() => null)
 		embed.addFields([
 			{
 				name: "Admin",
-				value: `<@${creator?.id}> | ${creator?.tag}`,
+				value: await client.safeGetContactString(report.adminId),
 				inline: true,
 			},
 			{ name: "Broken rule ID", value: report.brokenRule, inline: true },

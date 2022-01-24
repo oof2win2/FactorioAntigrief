@@ -37,10 +37,9 @@ const Community: Command = {
 			.setAuthor({ name: client.config.embeds.author })
 			.setFooter({ text: client.config.embeds.footer })
 
-		const user = await client.users.fetch(community.contact).catch(() => null)
 		embed.addFields({
 			name: `${community.name} | \`${community.id}\``,
-			value: `Contact: <@${user?.id}> | ${user?.tag}`,
+			value: await client.safeGetContactString(community.contact),
 		})
 		return message.channel.send({
 			embeds: [embed],

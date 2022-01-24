@@ -41,7 +41,6 @@ const AllReports: Command = {
 			.setDescription(`FAGC Reports of player \`${playername}\``)
 		const fields = await Promise.all(
 			reports.map(async (report) => {
-				const admin = await client.users.fetch(report.adminId).catch(() => null)
 				const rule = await client.fagc.rules.fetchRule({
 					ruleid: report.brokenRule,
 				})
@@ -51,7 +50,7 @@ const AllReports: Command = {
 				return {
 					name: report.id,
 					value:
-						`By: <@${admin?.id}> | ${admin?.tag}\nCommunity ID: ${community?.name} (${community?.id})\n` +
+						`By: ${await client.safeGetContactString(report.adminId)}\nCommunity ID: ${community?.name} (${community?.id})\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
 						`Broken rule: ${rule?.shortdesc} (${rule?.id})\nProof: ${report.proof}\n` +
 						`Violated time: <t:${Math.floor(
