@@ -52,7 +52,7 @@ export default class FAGCBot extends Client {
 	}
 
 	async refreshCommandPerms() {
-		// TODO: save rules to db when pushing to discord
+		// TODO: save categories to db when pushing to discord
 		const commands = await this.db.command.findMany()
 		const roleID = ENV.ACCESSROLEID
 		this.guilds.cache.get(ENV.TESTGUILDID)?.commands.permissions.set({

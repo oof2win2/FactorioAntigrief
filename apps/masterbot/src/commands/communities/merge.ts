@@ -3,7 +3,7 @@ import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
-const EditRule: SubCommand = {
+const EditCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("merge")
 		.setDescription("Merge the dissolving community into the receiving community")
@@ -24,12 +24,12 @@ const EditRule: SubCommand = {
 		const idReceiving = interaction.options.getString("receiving", true)
 		const idDissolving = interaction.options.getString("dissolving", true)
 		
-		const receiving = await client.FAGC.communities.fetchCommunity({communityID: idReceiving})
+		const receiving = await client.FAGC.communities.fetchCommunity({communityId: idReceiving})
 		if (!receiving) return interaction.reply({
 			content: `Community with the ID \`${idReceiving}\` does not exist`,
 			ephemeral: true
 		})
-		const dissolving = await client.FAGC.communities.fetchCommunity({communityID: idDissolving})
+		const dissolving = await client.FAGC.communities.fetchCommunity({communityId: idDissolving})
 		if (!dissolving) return interaction.reply({
 			content: `Community with the ID \`${idDissolving}\` does not exist`,
 			ephemeral: true
@@ -43,4 +43,4 @@ const EditRule: SubCommand = {
 	}
 }
 
-export default EditRule
+export default EditCategory

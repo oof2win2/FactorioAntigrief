@@ -3,14 +3,14 @@ import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
-const CreateRule: SubCommand = {
+const CreateCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
-		.setDescription("Remove a FAGC rule")
+		.setDescription("Remove a FAGC category")
 		.addStringOption(option =>
 			option
 				.setName("id")
-				.setDescription("Rule ID")
+				.setDescription("Category ID")
 				.setRequired(true)
 		)
 	,
@@ -18,15 +18,15 @@ const CreateRule: SubCommand = {
 		const user = interaction.user
 
 		const id = interaction.options.getString("id")
-		if (!id) return interaction.reply("Rule id not provided")
+		if (!id) return interaction.reply("Category id not provided")
 
-		const rule = await client.FAGC.rules.remove({
-			id: id
+		const category = await client.FAGC.categories.remove({
+			categoryId: id
 		})
 
-		if (!rule) return interaction.reply(`Rule with ID \`${id}\` does not exist`)
-		return interaction.reply(`Rule ${rule.shortdesc} (\`${rule.id}\`) was removed`)
+		if (!category) return interaction.reply(`Category with ID \`${id}\` does not exist`)
+		return interaction.reply(`Category ${category.shortdesc} (\`${category.id}\`) was removed`)
 	}
 }
 
-export default CreateRule
+export default CreateCategory

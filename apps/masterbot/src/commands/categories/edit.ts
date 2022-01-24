@@ -3,26 +3,26 @@ import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
-const EditRule: SubCommand = {
+const EditCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("edit")
-		.setDescription("Edit a FAGC rule")
+		.setDescription("Edit a FAGC category")
 		.addStringOption(option =>
 			option
 				.setName("id")
-				.setDescription("ID of rule to edit")
+				.setDescription("ID of category to edit")
 				.setRequired(true)
 		)
 		.addStringOption(option =>
 			option
 				.setName("shortdesc")
-				.setDescription("Short rule description")
+				.setDescription("Short category description")
 				.setRequired(false)
 		)
 		.addStringOption(option =>
 			option
 				.setName("longdesc")
-				.setDescription("Long rule description")
+				.setDescription("Long category description")
 				.setRequired(false)
 		)
 	,
@@ -37,19 +37,19 @@ const EditRule: SubCommand = {
 			ephemeral: true
 		})
 
-		const rule = await client.FAGC.rules.modify({
-			id: id,
+		const category = await client.FAGC.categories.modify({
+			categoryId: id,
 			shortdesc: shortdesc ?? undefined,
 			longdesc: longdesc ?? undefined,
 		})
 		
-		if (!rule) return interaction.reply({
-			content: `Rule with ID ${id} does not exist, no action was performed`,
+		if (!category) return interaction.reply({
+			content: `Category with ID ${id} does not exist, no action was performed`,
 			ephemeral: true
 		})
 
-		return interaction.reply(`Rule \`${rule.id}\` was edited. Changes may take a ~5 minutes to take effect. ${rule.shortdesc}: ${rule.longdesc}`)
+		return interaction.reply(`Category \`${category.id}\` was edited. Changes may take a ~5 minutes to take effect. ${category.shortdesc}: ${category.longdesc}`)
 	}
 }
 
-export default EditRule
+export default EditCategory
