@@ -96,8 +96,8 @@ export default class FAGCBot extends Client {
 		// parsing WS notifications
 		this.fagc.websocket.on("communityCreated", (event) => wshandler.communityCreated({ event, client: this }))
 		this.fagc.websocket.on("communityRemoved", (event) => wshandler.communityRemoved({ event, client: this }))
-		this.fagc.websocket.on("ruleCreated", (event) => wshandler.ruleCreated({ event, client: this }))
-		this.fagc.websocket.on("ruleRemoved", (event) => wshandler.ruleRemoved({ event, client: this }))
+		this.fagc.websocket.on("categoryCreated", (event) => wshandler.categoryCreated({ event, client: this }))
+		this.fagc.websocket.on("categoryRemoved", (event) => wshandler.categoryRemoved({ event, client: this }))
 		this.fagc.websocket.on("report", (event) => wshandler.report({ event, client: this }))
 		this.fagc.websocket.on("revocation", (event) => wshandler.revocation({ event, client: this }))
 		this.fagc.websocket.on("guildConfigChanged", (event) => wshandler.guildConfigChanged({ event, client: this }))
@@ -180,7 +180,7 @@ export default class FAGCBot extends Client {
 		const command = rawBanMessage
 			.replaceAll("{ADMINID}", report.adminId)
 			.replaceAll("{AUTOMATED}", report.automated ? "true" : "false")
-			.replaceAll("{BROKENRULE}", report.brokenRule)
+			.replaceAll("{CATEGORYID}", report.categoryId)
 			.replaceAll("{COMMUNITYID}", report.communityId)
 			.replaceAll("{REPORTID}", report.id)
 			.replaceAll("{DESCRIPTION}", report.description)
@@ -218,7 +218,7 @@ export default class FAGCBot extends Client {
 		const command = rawUnbanMessage
 			.replace("{ADMINID}", revocation.adminId)
 			.replace("{AUTOMATED}", revocation.automated ? "true" : "false")
-			.replace("{BROKENRULE}", revocation.brokenRule)
+			.replace("{CATEGORYID}", revocation.categoryId)
 			.replace("{COMMUNITYID}", revocation.communityId)
 			.replace("{REPORTID}", revocation.id)
 			.replace("{DESCRIPTION}", revocation.description)
