@@ -59,20 +59,14 @@ const RevokeAllName: Command = {
 		)
 		if (!confirm) return message.channel.send("Report revocation cancelled")
 
-		// eslint-disable-next-line no-useless-catch
-		try {
-			await client.fagc.revocations.revokePlayer({
-				playername: playername,
-				adminId: message.author.id,
-				reqConfig: {
-					apikey: guildConfig.apiKey,
-				},
-			})
-			return message.channel.send("Reports revoked!")
-		} catch (error) {
-			// TODO: check if error is wrong api key
-			throw error
-		}
+		await client.fagc.revocations.revokePlayer({
+			playername: playername,
+			adminId: message.author.id,
+			reqConfig: {
+				apikey: guildConfig.apiKey,
+			},
+		})
+		return message.channel.send("Reports revoked!")
 	},
 }
 

@@ -63,19 +63,13 @@ const RevokeReport: Command = {
 		)
 		if (!confirm) return message.channel.send("Report revocation cancelled")
 
-		// eslint-disable-next-line no-useless-catch
-		try {
-			await client.fagc.revocations.revoke({
-				reportId: id,
-				adminId: message.author.id,
-				reqConfig: { apikey: guildConfig.apiKey },
-			})
+		await client.fagc.revocations.revoke({
+			reportId: id,
+			adminId: message.author.id,
+			reqConfig: { apikey: guildConfig.apiKey },
+		})
 
-			return message.channel.send("Report revoked!")
-		} catch (e) {
-			// message.channel.send("Error revoking report. Please check logs.")
-			throw e
-		}
+		return message.channel.send("Report revoked!")
 	},
 }
 
