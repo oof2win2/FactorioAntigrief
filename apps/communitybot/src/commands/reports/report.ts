@@ -32,7 +32,7 @@ const FetchReport: Command = {
 				value: await client.safeGetContactString(report.adminId),
 				inline: true,
 			},
-			{ name: "Broken category ID", value: report.categoryId, inline: true },
+			{ name: "Category ID", value: report.categoryId, inline: true },
 			{ name: "Community ID", value: report.communityId, inline: true },
 			{
 				name: "Automated",

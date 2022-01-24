@@ -44,12 +44,12 @@ const CreateReport: Command = {
 
 		const categories = await client.getMessageResponse(
 			message,
-			`${client.emotes.type} Type in the category(s) broken by the player, separated with spaces`,
+			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`,
 		)
-		if (!categories) return message.channel.send("Category(s) not specified")
+		if (!categories) return message.channel.send("No categories specified")
 		const categoryIds = categories.content.split(" ")
 		if (categoryIds.length === 1 && categoryIds[0] === "none") {
-			return message.channel.send("Category(s) not specified")
+			return message.channel.send("No categories specified")
 		}
 		// check for validity of categories, sort into valid and invalid IDs
 		const invalidCategoryIds: string[] = []
@@ -74,7 +74,7 @@ const CreateReport: Command = {
 		})
 		if (invalidCategoryIds.length)
 			return message.channel.send(
-				`Invalid category(s): \`${invalidCategoryIds.join("`, `")}\``,
+				`Invalid categories: \`${invalidCategoryIds.join("`, `")}\``,
 			)
 
 		let desc =
@@ -107,11 +107,11 @@ const CreateReport: Command = {
 		// send an embed to display the report that will be created
 		const checkEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Category(s):** ${validCategoryIds.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
+			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Categories:** ${validCategoryIds.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
 			.addFields([
 				{ name: "Player", value: playername, inline: true },
 				{
-					name: "Category(s)",
+					name: "Categoryies",
 					value: validCategoryIds
 						.map(
 							(id) =>

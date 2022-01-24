@@ -20,9 +20,8 @@ FAGC (Factorio Anti-Grief Community) is a community of people who try to work ag
 [⬆️ Head back up](#contents)
 
 - Community: A community is a group of people that play Factorio together and use this API in a way to prevent griefing on their servers
-- Rule: A single item that describes something that must be followed; rules are categorized by which aspect of gameplay/user interaction it governs.
-- Report: A single instance of a single rule which has been broken (or upheld). Can be revoked and then the report turns into a revocation (as it has been revoked)
-- Profile: A collection of reports. Profiles are specific to a single player at a single community. If a profile is revoked, all reports in the community of said player are revoked.
+- Report: A single instance of unwanted behaviour of a player that has been reported. Can be revoked which turns the report into a revocation
+- Category: A grouping of unwanted behavour a report falls into. Reports are categorized by which aspect of gameplay/user interaction falls under.
 - Revocation: A single instance of a report that has been revoked, i.e. it was found out that the report was false. Revocations can never be turned back to reports
 
 ### Data Types
@@ -43,8 +42,8 @@ All `id` properties are generated automatically by the API and cannot be set by 
   - `adminId` - Discord UserID of the administrator that created this report
   - `proof` - Proof of the report
   - `description` - Description of the report
-  - `automated` - Whether the rule is automated or not
-  - `brokenRule` - The ID of the rule that has been broken
+  - `automated` - Whether the report was automatically generated in response to a player action
+  - `categoryId` - The ID of the category the report falls under
   - `communityId` - The ID of the community that has created this report. Is set automatically by the API
   - `violatedAt` - The time at which the report was created
 - **Profile**
@@ -57,16 +56,16 @@ All `id` properties are generated automatically by the API and cannot be set by 
   - `adminId` - Discord UserID of the administrator that created this report
   - `proof` - Proof of the report
   - `description` - Description of the report
-  - `automated` - Whether the rule is automated or not
-  - `brokenRule` - The ID of the rule that has been broken
+  - `automated` - Whether the report was automatically generated in response to a player action
+  - `categoryId` - The ID of the category the report falls under
   - `communityId` - The ID of the community that has created this report. Is set automatically by the API
   - `violatedAt` - The time at which the report was created
   - `revokedAt` - The time at which the report has been revoked
   - `revokedBy` - The Discord UserID of who revoked the report
-- **Rule**
-  - `id` - The ID of the rule. Used to tell the API which rules were broken with a report. Can also be used to fetch said rule
-  - `shortdesc` - A short description/tagline of the rule
-  - `longdesc` - A long, verbose definition of the rule
+- **Category**
+  - `id` - The ID of the category. Used to tell the API which category a report is filed under. Can also be used to fetch said category
+  - `shortdesc` - A short description/tagline of the category
+  - `longdesc` - A long, verbose definition of the category
 
 ## Installation
 
