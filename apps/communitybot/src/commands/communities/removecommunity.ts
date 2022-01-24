@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -31,12 +30,8 @@ const RemoveCommunity: Command = {
 
 		// if no args are provided, show the current list of trusted communities and ask for args again
 		if (!args.length) {
-			const embed = new MessageEmbed()
+			const embed = client.createBaseEmbed()
 				.setTitle("FAGC Communities")
-				.setColor("GREEN")
-				.setTimestamp()
-				.setAuthor({ name: client.config.embeds.author })
-				.setFooter({ text: client.config.embeds.footer })
 				.setDescription(
 					"Remove Filtered Communities. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 				)

@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const ViewConfig: Command = {
@@ -11,10 +10,8 @@ const ViewConfig: Command = {
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message, guildConfig }) => {
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Config")
-			.setAuthor({ name: "FAGC Team" })
-			.setTimestamp()
 			.setDescription("Your FAGC Configuration")
 		const community = guildConfig.communityId
 			? await client.fagc.communities.fetchCommunity({

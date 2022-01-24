@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -14,12 +13,8 @@ const GetAllCommunities: Command = {
 	run: async ({ client, message }) => {
 		const communities = await client.fagc.communities.fetchAll({})
 
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Communities")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription("All FAGC Communities")
 
 		const fields = await Promise.all(

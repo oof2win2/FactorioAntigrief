@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -24,12 +23,8 @@ const AllReports: Command = {
 			return message.channel.send(
 				`Player \`${playername}\` doesn't have any reports`,
 			)
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			.setColor("ORANGE")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(`FAGC Reports of player \`${playername}\``)
 		const fields = await Promise.all(
 			reports.map(async (report) => {

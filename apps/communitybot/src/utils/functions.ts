@@ -65,25 +65,25 @@ export async function createPagedEmbed(
 
 	reactionCollector.on("collect", (reaction) => {
 		switch (reaction.emoji.name) {
-			case "⬅️": {
-				page--
-				removeReaction("⬅️") // remove the user's reaction no matter what
-				if (page <= -1) page = 0
-				else setData()
-				break
-			}
-			case "➡️": {
-				page++
-				removeReaction("➡️") // remove the user's reaction no matter what
-				if (page > maxPages) page = maxPages
-				else setData()
-				break
-			}
-			case "🗑️": {
-				reactionCollector.stop()
-				embedMsg.delete()
-				message.delete()
-			}
+		case "⬅️": {
+			page--
+			removeReaction("⬅️") // remove the user's reaction no matter what
+			if (page <= -1) page = 0
+			else setData()
+			break
+		}
+		case "➡️": {
+			page++
+			removeReaction("➡️") // remove the user's reaction no matter what
+			if (page > maxPages) page = maxPages
+			else setData()
+			break
+		}
+		case "🗑️": {
+			reactionCollector.stop()
+			embedMsg.delete()
+			message.delete()
+		}
 		}
 	})
 }
@@ -127,13 +127,8 @@ export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 				guildId: guild.id,
 			})
 		})
-	const embed = new MessageEmbed()
+	const embed = client.createBaseEmbed()
 		.setTitle("Welcome to FAGC")
-		.setColor(client.config.embeds.color)
-		.setFooter({
-			text: client.config.embeds.footer,
-		})
-		.setTimestamp()
 	embed.addFields(
 		{ name: "FAGC Invite", value: client.config.fagcInvite },
 		{

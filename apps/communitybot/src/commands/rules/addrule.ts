@@ -1,4 +1,4 @@
-import { EmbedField, MessageEmbed } from "discord.js"
+import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import { Rule } from "fagc-api-types"
@@ -18,12 +18,8 @@ const AddRule: Command = {
 		// if they haven't provided any IDs, we'll show them all the rules and ask for IDs
 		const allRules = await client.fagc.rules.fetchAll({})
 		if (!args[0]) {
-			const embed = new MessageEmbed()
+			const embed = client.createBaseEmbed()
 				.setTitle("FAGC Rules")
-				.setColor("GREEN")
-				.setTimestamp()
-				.setAuthor({ name: client.config.embeds.author })
-				.setFooter({ text: client.config.embeds.footer })
 				.setDescription("All FAGC Rules")
 			const fields: EmbedField[] = []
 			for (let i = 0; i < allRules.length; i += 2) {
@@ -57,12 +53,8 @@ const AddRule: Command = {
 			return message.channel.send("No valid or non-duplicate rules to be added")
 
 		// send the new rules as an embed
-		const newRuleEmbed = new MessageEmbed()
+		const newRuleEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Rules")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription("New Rules")
 		const newRuleFields = newRules.map((rule) => {
 			return {

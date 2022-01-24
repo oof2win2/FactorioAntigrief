@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const stats: Command = {
@@ -18,8 +17,7 @@ const stats: Command = {
 		const users = client.users.cache.size // get amount of users the bot is in
 		const channels = client.channels.cache.size // get amount of channels the bot is in
 
-		const embed = new MessageEmbed()
-			.setColor("#0099ff")
+		const embed = client.createBaseEmbed()
 			.setTitle("Stats")
 			.addField("Memory usage", `${memUsage.toFixed(2)} MB`, true)
 			.addField("Uptime", `${uptime.toFixed(2)} seconds`, true)
@@ -27,9 +25,6 @@ const stats: Command = {
 			.addField("Guild count", guilds.toString(), true)
 			.addField("User count", users.toString(), true)
 			.addField("Channel count", channels.toString(), true)
-			.setTimestamp()
-			.setFooter({ text: client.config.embeds.footer })
-			.setAuthor({ name: client.config.embeds.author })
 		return message.channel.send({
 			embeds: [embed],
 		})

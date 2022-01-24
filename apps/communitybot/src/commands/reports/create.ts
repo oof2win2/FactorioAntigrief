@@ -1,4 +1,4 @@
-import { EmbedField, MessageEmbed } from "discord.js"
+import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
@@ -21,12 +21,8 @@ const CreateReport: Command = {
 		if (!playername) return message.channel.send("Player name not specified")
 
 		// send a message with the community's filtered rules to pick from
-		const ruleEmbed = new MessageEmbed()
+		const ruleEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			.setColor("RED")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription("Your community's filtered rules")
 		const allRules = await client.fagc.rules.fetchAll({})
 		const fields: EmbedField[] = allRules
@@ -108,12 +104,8 @@ const CreateReport: Command = {
 		const timestamp = Date.now()
 
 		// send an embed to display the report that will be created
-		const checkEmbed = new MessageEmbed()
+		const checkEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			.setColor("RED")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Rule(s):** ${validRuleIDs.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
 			.addFields([
 				{ name: "Player", value: playername, inline: true },

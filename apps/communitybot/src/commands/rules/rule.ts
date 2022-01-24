@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const Rule: Command = {
@@ -28,11 +27,8 @@ const Rule: Command = {
 				`${client.emotes.warn} No rule with ID of \`${ruleID}\` exists`,
 			)
 
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Rules")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor("FAGC Community")
 			.setDescription(`FAGC Rule with ID \`${rule.id}\``)
 		embed.addField(rule.shortdesc, rule.longdesc)
 

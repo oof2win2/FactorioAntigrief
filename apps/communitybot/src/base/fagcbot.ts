@@ -1,4 +1,4 @@
-import { Client, ClientOptions, Collection, Message } from "discord.js"
+import { Client, ClientOptions, Collection, Message, MessageEmbed } from "discord.js"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
@@ -126,5 +126,13 @@ export default class FAGCBot extends Client {
 		const newMessage = await this.getMessageResponse(message, content)
 		if (!newMessage) return null
 		return newMessage.content.split(" ")[0]
+	}
+
+	createBaseEmbed() {
+		return new MessageEmbed()
+			.setColor(this.config.embeds.color)
+			.setTimestamp()
+			.setAuthor({ name: this.config.embeds.author })
+			.setFooter({ text: this.config.embeds.footer })
 	}
 }
