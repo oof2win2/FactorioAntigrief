@@ -1,10 +1,6 @@
 import { EmbedField, MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import {
-	getConfirmationMessage,
-	getMessageResponse,
-} from "../../utils/responseGetter"
 import validator from "validator"
 
 const CreateReport: Command = {
@@ -21,12 +17,7 @@ const CreateReport: Command = {
 		if (!guildConfig.ruleFilters.length)
 			return message.channel.send(`${client.emotes.warn} No rules are filtered`)
 
-		const playername =
-			args.shift() ||
-			(await getMessageResponse(
-				message,
-				`${client.emotes.type} Type in the player name`,
-			).then((m) => m?.content.split(" ").shift()))
+		const playername = await client.argsOrInput(args, message, `${client.emotes.type} Type in the player name`)
 		if (!playername) return message.channel.send("Player name not specified")
 
 		// send a message with the community's filtered rules to pick from
@@ -54,9 +45,9 @@ const CreateReport: Command = {
 			})
 		createPagedEmbed(fields, ruleEmbed, message)
 
-		const rules = await getMessageResponse(
+		const rules = await client.getMessageResponse(
 			message,
-			`${client.emotes.type} Type in the rule(s) broken by the player, separated with spaces, or \`none\` if there is no rule`,
+			`${client.emotes.type} Type in the rule(s) broken by the player, separated with spaces`,
 		)
 		if (!rules) return message.channel.send("Rule(s) not specified")
 		const ruleIds = rules.content.split(" ")
@@ -77,8 +68,7 @@ const CreateReport: Command = {
 				if (i < 0 || i > guildConfig.ruleFilters.length) {
 					return invalidRuleIds.push(ruleId)
 				}
-				const found = guildConfig.ruleFilters[i - 1]
-				id = found
+				id = guildConfig.ruleFilters[i - 1]
 			}
 			// all rules are fetched above so they are cached
 			const rule = client.fagc.rules.resolveID(id)
@@ -92,13 +82,13 @@ const CreateReport: Command = {
 
 		let desc =
 			args.join(" ") ||
-			(await getMessageResponse(
+			(await client.getMessageResponse(
 				message,
 				`${client.emotes.type} Type in description of the report or \`none\` if you don't want to set one`,
 			).then((m) => m?.content))
 		if (!desc || desc.toLowerCase() === "none") desc = undefined
 
-		let proof = await getMessageResponse(
+		let proof = await client.getMessageResponse(
 			message,
 			`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`,
 		).then((x) => x?.content)
@@ -148,7 +138,7 @@ const CreateReport: Command = {
 		message.channel.send({
 			embeds: [checkEmbed],
 		})
-		const confirmationMessage = await getConfirmationMessage(
+		const confirmationMessage = await client.getConfirmationMessage(
 			message,
 			"Are you sure you want to create these reports?",
 		)

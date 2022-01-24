@@ -1,5 +1,4 @@
 import { Command } from "../../base/Command"
-import { getConfirmationMessage } from "../../utils/responseGetter"
 
 const CreateWebhook: Command = {
 	name: "createwebhook",
@@ -23,7 +22,7 @@ const CreateWebhook: Command = {
 				`${client.emotes.warn} You can't create a webhook in a thread`,
 			)
 
-		const confirmation = await getConfirmationMessage(
+		const confirmation = await client.getConfirmationMessage(
 			message,
 			`Are you sure you want to create a webhook in <#${channel.id}>?`,
 		)

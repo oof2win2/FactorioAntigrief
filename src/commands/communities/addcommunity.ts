@@ -1,10 +1,6 @@
 import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import {
-	getConfirmationMessage,
-	getMessageResponse,
-} from "../../utils/responseGetter"
 
 const AddCommunity: Command = {
 	name: "addcommunity",
@@ -40,7 +36,7 @@ const AddCommunity: Command = {
 					}),
 			)
 			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
-			const newIDsMessage = await getMessageResponse(
+			const newIDsMessage = await client.getMessageResponse(
 				message,
 				`${client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces:`,
 			)
@@ -77,7 +73,7 @@ const AddCommunity: Command = {
 			}),
 		)
 		createPagedEmbed(fields, confirmationEmbed, message, { maxPageCount: 10 })
-		const confirm = await getConfirmationMessage(
+		const confirm = await client.getConfirmationMessage(
 			message,
 			"Are you sure you want to add these communities to your communities filters?",
 		)

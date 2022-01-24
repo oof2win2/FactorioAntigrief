@@ -1,5 +1,4 @@
 import { Command } from "../../base/Command"
-import { getConfirmationMessage } from "../../utils/responseGetter"
 
 const SetName: Command = {
 	name: "setname",
@@ -19,7 +18,7 @@ const SetName: Command = {
 		const name = args.join(" ")
 		if (!name)
 			return message.channel.send(`${client.emotes.warn} No name provided`)
-		const confirmation = await getConfirmationMessage(
+		const confirmation = await client.getConfirmationMessage(
 			message,
 			`Are you sure you want to set your community's name to ${name}?`,
 			120000,

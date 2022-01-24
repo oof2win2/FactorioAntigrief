@@ -1,10 +1,6 @@
 import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import {
-	getConfirmationMessage,
-	getMessageResponse,
-} from "../../utils/responseGetter"
 
 const RemoveCommunity: Command = {
 	name: "removecommunity",
@@ -55,7 +51,7 @@ const RemoveCommunity: Command = {
 				}),
 			)
 			createPagedEmbed(communityFields, embed, message, { maxPageCount: 10 })
-			const newIDsMessage = await getMessageResponse(
+			const newIDsMessage = await client.getMessageResponse(
 				message,
 				`${client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces`,
 			)
@@ -65,7 +61,7 @@ const RemoveCommunity: Command = {
 		}
 
 		// ask user if they really want to remove these communities from their filters
-		const confirm = await getConfirmationMessage(
+		const confirm = await client.getConfirmationMessage(
 			message,
 			"Are you sure you want to remove these communities from your community filters?",
 		)

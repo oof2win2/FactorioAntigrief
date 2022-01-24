@@ -1,6 +1,5 @@
 import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
-import { getMessageResponse } from "../../utils/responseGetter"
 
 const Community: Command = {
 	name: "community",
@@ -12,12 +11,7 @@ const Community: Command = {
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message, args }) => {
-		if (!args[0])
-			args[0] = await getMessageResponse(
-				message,
-				`${client.emotes.type} Provide a community ID to fetch`,
-			).then((r) => r?.content?.split(" ")[0] || "")
-		const communityId = args.shift()
+		const communityId = await client.argsOrInput(args, message, `${client.emotes.type} Provide a community ID to fetch`)
 		if (!communityId)
 			return message.channel.send(
 				`${client.emotes.warn} No community ID was provided`,

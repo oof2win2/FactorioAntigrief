@@ -1,10 +1,6 @@
 import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import {
-	getConfirmationMessage,
-	getMessageResponse,
-} from "../../utils/responseGetter"
 import { Rule } from "fagc-api-types"
 
 const RemoveRules: Command = {
@@ -43,7 +39,7 @@ const RemoveRules: Command = {
 					}
 				})
 			createPagedEmbed(ruleFields, embed, message, { maxPageCount: 5 })
-			const newIDsMessage = await getMessageResponse(
+			const newIDsMessage = await client.getMessageResponse(
 				message,
 				`${client.emotes.type} No rules provided. Please provide IDs`,
 			)
@@ -89,7 +85,7 @@ const RemoveRules: Command = {
 		})
 		createPagedEmbed(ruleFields, embed, message, { maxPageCount: 5 })
 
-		const confirm = await getConfirmationMessage(
+		const confirm = await client.getConfirmationMessage(
 			message,
 			"Are you sure you want to remove these rules from your rule filters?",
 		)

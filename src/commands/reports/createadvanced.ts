@@ -1,10 +1,6 @@
 import { EmbedField, MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import {
-	getConfirmationMessage,
-	getMessageResponse,
-} from "../../utils/responseGetter"
 import validator from "validator"
 
 const CreateAdvanced: Command = {
@@ -21,18 +17,13 @@ const CreateAdvanced: Command = {
 	async run({ client, message, args, guildConfig }) {
 		if (!guildConfig.ruleFilters.length)
 			return message.channel.send(`${client.emotes.warn} No rules are filtered`)
-		const playername =
-			args.shift() ||
-			(await getMessageResponse(
-				message,
-				`${client.emotes.type} Type in the player name`,
-			).then((x) => x?.content))
+		const playername = await client.argsOrInput(args, message, `${client.emotes.type} Type in the player name`)
 		if (!playername)
 			return message.channel.send(
 				`${client.emotes.warn} No player name was provided`,
 			)
 
-		const adminUserMessage = await getMessageResponse(
+		const adminUserMessage = await client.getMessageResponse(
 			message,
 			`${client.emotes.type} Type in the admin user (ping or ID) who banned the player`,
 		)
@@ -50,14 +41,14 @@ const CreateAdvanced: Command = {
 
 		let description =
 			args.join(" ") ||
-			(await getMessageResponse(
+			(await client.getMessageResponse(
 				message,
 				`${client.emotes.type} Type in the description of the report, or "none" if no description`,
 			).then((x) => x?.content))
 		if (!description || description.toLowerCase() === "none")
 			description = "No description"
 
-		const timestampMessage = await getMessageResponse(
+		const timestampMessage = await client.getMessageResponse(
 			message,
 			`${client.emotes.type} Type in the ISO8601 timestamp of when the player was reported (or "now" if current time). Use <https://www.timestamp-converter.com/> to find the timestamp`,
 		).then((x) => x?.content)
@@ -96,7 +87,7 @@ const CreateAdvanced: Command = {
 			})
 		createPagedEmbed(fields, ruleEmbed, message)
 
-		const rules = await getMessageResponse(
+		const rules = await client.getMessageResponse(
 			message,
 			`${client.emotes.type} Type in the rule(s) broken by the player, separated with spaces`,
 		)
@@ -132,7 +123,7 @@ const CreateAdvanced: Command = {
 				`Invalid rule(s): \`${invalidRuleIds.join("`, `")}\``,
 			)
 
-		let proof = await getMessageResponse(
+		let proof = await client.getMessageResponse(
 			message,
 			`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`,
 		).then((x) => x?.content)
@@ -184,7 +175,7 @@ const CreateAdvanced: Command = {
 		message.channel.send({
 			embeds: [checkEmbed],
 		})
-		const confirmationMessage = await getConfirmationMessage(
+		const confirmationMessage = await client.getConfirmationMessage(
 			message,
 			"Are you sure you want to create these reports?",
 		)
