@@ -14,12 +14,13 @@ const DeleteWebhook: Command = {
 	run: async ({ client, message }) => {
 		const channel = message.mentions.channels.first() || message.channel
 		if (!channel.isText())
-			return message.channel.send("Please specify a text channel")
+			return message.channel.send(`${client.emotes.warn} Please specify a text channel`)
 		if (channel.type === "DM")
-			return message.channel.send("Please specify a text channel")
+			return message.channel.send(`${client.emotes.warn} You can't create webhooks in DMs`)
 		if (channel.isThread())
 			return message.channel.send("You cannot have a webhook in a thread")
-
+			
+		const statusMessage = await message.channel.send("Attempting to remove webhooks")
 		const webhooks = await channel.fetchWebhooks()
 		webhooks
 			// TODO: change when https://github.com/discordjs/discord.js/pull/7317 is merged
@@ -28,15 +29,15 @@ const DeleteWebhook: Command = {
 			.filter((webhook): webhook is typeof webhook & { token: string } =>
 				Boolean(webhook.token),
 			)
-			.map((webhook) => {
+			.map(async (webhook) => {
 				// there should be only one removeWebhook call, as guilds are limited to 1 webhook / guild
-				client.fagc.info.removeWebhook({
+				await client.fagc.info.removeWebhook({
 					webhookid: webhook.id,
 					webhooktoken: webhook.token,
 				})
+				statusMessage.edit(`Removed webhook from <#${channel.id}>`)
 				webhook.delete()
 			})
-		return message.channel.send("Attempted at removing webhooks")
 	},
 }
 export default DeleteWebhook
