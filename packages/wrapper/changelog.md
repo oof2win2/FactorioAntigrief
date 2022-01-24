@@ -1,3 +1,9 @@
+## UNRELEASED
+
+### Changes
+
+-	Renamed report rules to categories
+
 ## [1.27.6] - [2022-01-23]
 
 ### Bugfixes

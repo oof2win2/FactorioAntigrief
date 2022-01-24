@@ -115,20 +115,20 @@ export default class ReportManager extends BaseManager<Report> {
 
 	async search({
 		playername,
-		ruleId,
+		categoryId,
 		communityId,
 		cache = true,
 	}: {
 		playername?: string,
-		ruleId?: string,
+		categoryId?: string,
 		communityId?: string,
 	} & FetchRequestTypes):	 Promise<Report[]> {
-		if (!playername && !ruleId && !communityId)
+		if (!playername && !categoryId && !communityId)
 			throw new Error("At least one of the search parameters must be set")
 		
 		const params = new URLSearchParams()
 		if (playername) params.append("playername", playername)
-		if (ruleId) params.append("ruleId", ruleId)
+		if (categoryId) params.append("categoryId", categoryId)
 		if (communityId) params.append("communityId", communityId)
 
 		const data = await fetch(`${this.apiurl}/reports/search?${params.toString()}`, {
@@ -143,19 +143,19 @@ export default class ReportManager extends BaseManager<Report> {
 		return parsed
 	}
 	
-	async fetchByRule({
-		ruleId, cache = true
+	async fetchByCategory({
+		categoryId, cache = true
 	}: {
-		ruleId: string
+		categoryId: string
 	} & FetchRequestTypes): Promise<Report[]> {
-		const ruleReports = await fetch(
-			`${this.apiurl}/reports/rule/${strictUriEncode(ruleId)}`,
+		const categoryReports = await fetch(
+			`${this.apiurl}/reports/category/${strictUriEncode(categoryId)}`,
 			{
 				credentials: "include",
 			}
 		).then((c) => c.json())
 
-		const parsed = z.array(Report).parse(ruleReports)
+		const parsed = z.array(Report).parse(categoryReports)
 
 		if (cache) parsed.forEach((report) => this.add(report))
 		return parsed
@@ -206,12 +206,12 @@ export default class ReportManager extends BaseManager<Report> {
 
 	async list({
 		playername,
-		ruleIds,
+		categoryIds,
 		communityIds,
 		cache = true
 	}: {
 		playername?: string
-		ruleIds: string[]
+		categoryIds: string[]
 		communityIds: string[]
 		cache?: boolean
 	}): Promise<Report[]> {
@@ -219,7 +219,7 @@ export default class ReportManager extends BaseManager<Report> {
 			method: "POST",
 			body: JSON.stringify({
 				playername: playername,
-				ruleIds: ruleIds,
+				categoryIds: categoryIds,
 				communityIds: communityIds,
 			}),
 			credentials: "include",

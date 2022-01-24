@@ -1,6 +1,6 @@
 import "cross-fetch/polyfill"
 import { ManagerOptions, WrapperOptions } from "../types/types"
-import { Rule } from "fagc-api-types"
+import { Category } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { GenericAPIError } from "../types"
@@ -8,7 +8,7 @@ import { FetchRequestTypes } from "../types/privatetypes"
 import { masterAuthenticate } from "../utils"
 import { z } from "zod"
 
-export class RuleManager extends BaseManager<Rule> {
+export class CategoryManager extends BaseManager<Category> {
 	constructor(options: WrapperOptions, managerOptions: ManagerOptions = {}) {
 		super(managerOptions)
 		this.apiurl = options.apiurl
@@ -16,26 +16,26 @@ export class RuleManager extends BaseManager<Rule> {
 		if (options.masterapikey) this.masterapikey = options.masterapikey
 	}
 	
-	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Rule[]> {
-		const allRules = await fetch(`${this.apiurl}/rules`, {
+	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Category[]> {
+		const allCategories = await fetch(`${this.apiurl}/categories`, {
 			credentials: "include",
 		}).then((r) => r.json())
 
-		const parsed = z.array(Rule).parse(allRules)
-		if (cache) parsed.map(rule => this.add(rule))
+		const parsed = z.array(Category).parse(allCategories)
+		if (cache) parsed.map(category => this.add(category))
 		return parsed
 	}
 
 	async create({
-		rule,
+		category,
 		cache = true,
 		reqConfig = {},
 	}: {
-		rule: Omit<Rule, "id">,
-	} & FetchRequestTypes): Promise<Rule> {
-		const data = await fetch(`${this.apiurl}/rules`, {
+		category: Omit<Category, "id">,
+	} & FetchRequestTypes): Promise<Category> {
+		const data = await fetch(`${this.apiurl}/categories`, {
 			method: "POST",
-			body: JSON.stringify(rule),
+			body: JSON.stringify(category),
 			credentials: "include",
 			headers: {
 				authorization: masterAuthenticate(this, reqConfig),
@@ -45,41 +45,41 @@ export class RuleManager extends BaseManager<Rule> {
 
 		if (data.error) throw new GenericAPIError(`${data.error}: ${data.message}`)
 
-		const parsed = Rule.parse(data)
+		const parsed = Category.parse(data)
 		if (cache) this.add(parsed)
 		return parsed
 	}
 
-	async fetchRule({
-		ruleid,
+	async fetchCategory({
+		categoryid,
 		cache = true,
 		force = false
 	}: {
-		ruleid: string
-	} & FetchRequestTypes): Promise<Rule | null> {
+		categoryid: string
+	} & FetchRequestTypes): Promise<Category | null> {
 		if (!force) {
 			const cached =
-				this.cache.get(ruleid) || this.fetchingCache.get(ruleid)
+				this.cache.get(categoryid) || this.fetchingCache.get(categoryid)
 			if (cached) return cached
 		}
-		let promiseResolve!: (value: Rule | PromiseLike<Rule | null> | null) => void
-		const fetchingPromise: Promise<Rule | null> = new Promise((resolve) => {
+		let promiseResolve!: (value: Category | PromiseLike<Category | null> | null) => void
+		const fetchingPromise: Promise<Category | null> = new Promise((resolve) => {
 			promiseResolve = resolve
 		})
 
-		if (cache) this.fetchingCache.set(ruleid, fetchingPromise)
+		if (cache) this.fetchingCache.set(categoryid, fetchingPromise)
 
 		const fetched = await fetch(
-			`${this.apiurl}/rules/${strictUriEncode(ruleid)}`,
+			`${this.apiurl}/categories/${strictUriEncode(categoryid)}`,
 			{
 				credentials: "include",
 			}
 		).then((r) => r.json())
 
-		const parsed = Rule.nullable().safeParse(fetched)
+		const parsed = Category.nullable().safeParse(fetched)
 		if (!parsed.success || parsed.data === null) {
 			promiseResolve(null)
-			setTimeout(() => this.fetchingCache.delete(ruleid), 0)
+			setTimeout(() => this.fetchingCache.delete(categoryid), 0)
 			if (!parsed.success) throw parsed.error
 			return null
 		}
@@ -87,21 +87,21 @@ export class RuleManager extends BaseManager<Rule> {
 		if (cache) this.add(parsed.data)
 		promiseResolve(fetched)
 		setTimeout(() => {
-			this.fetchingCache.delete(ruleid)
+			this.fetchingCache.delete(categoryid)
 		}, 0)
 		return parsed.data
 	}
 
 	async modify({
-		ruleId,
+		categoryId,
 		shortdesc, longdesc,
 		reqConfig = {}
 	}: {
-		ruleId: string,
+		categoryId: string,
 		shortdesc?: string, longdesc?: string
-	} & FetchRequestTypes): Promise<Rule | null> {
+	} & FetchRequestTypes): Promise<Category | null> {
 		const data = await fetch(
-			`${this.apiurl}/rules/${strictUriEncode(ruleId)}`,
+			`${this.apiurl}/categories/${strictUriEncode(categoryId)}`,
 			{
 				method: "PATCH",
 				credentials: "include",
@@ -119,9 +119,9 @@ export class RuleManager extends BaseManager<Rule> {
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
 		
-		const parsed = Rule.parse(data)
+		const parsed = Category.parse(data)
 
-		// remove old rule from cache and add new rule
+		// remove old category from cache and add new category
 		this.removeFromCache(parsed)
 		this.add(parsed)
 
@@ -129,13 +129,13 @@ export class RuleManager extends BaseManager<Rule> {
 	}
 
 	async remove({
-		ruleId,
+		categoryId,
 		reqConfig = {}
 	}: {
-		ruleId: string,
-	} & FetchRequestTypes): Promise<Rule | null> {
+		categoryId: string,
+	} & FetchRequestTypes): Promise<Category | null> {
 		const data = await fetch(
-			`${this.apiurl}/rules/${strictUriEncode(ruleId)}`,
+			`${this.apiurl}/categories/${strictUriEncode(categoryId)}`,
 			{
 				method: "DELETE",
 				credentials: "include",
@@ -147,7 +147,7 @@ export class RuleManager extends BaseManager<Rule> {
 		).then((r) => r.json())
 
 		if (data.error) throw new GenericAPIError(`${data.error}: ${data.message}`)
-		const parsed = Rule.parse(data)
+		const parsed = Category.parse(data)
 		this.removeFromCache(parsed)
 
 		return parsed
@@ -160,9 +160,9 @@ export class RuleManager extends BaseManager<Rule> {
 	}: {
 		idReceiving: string
 		idDissolving: string
-		} & FetchRequestTypes): Promise<Rule> {
+		} & FetchRequestTypes): Promise<Category> {
 		const data = await fetch(
-			`${this.apiurl}/rules/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
+			`${this.apiurl}/categories/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
 				method: "PATCH",
 				credentials: "include",
@@ -175,7 +175,7 @@ export class RuleManager extends BaseManager<Rule> {
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
 		
-		const parsed = Rule.parse(data)
+		const parsed = Category.parse(data)
 		this.removeFromCache({ id: idDissolving })
 		return parsed
 	}

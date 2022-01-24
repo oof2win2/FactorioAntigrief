@@ -1,7 +1,7 @@
-import { Community, GuildConfig, Rule } from "fagc-api-types"
+import { Community, GuildConfig, Category } from "fagc-api-types"
 import faker from "faker"
 
-export const createRule = (): Rule => {
+export const createCategory = (): Category => {
 	return {
 		id: faker.datatype.uuid(),
 		shortdesc: faker.random.word(),
@@ -20,11 +20,11 @@ export const createCommunity = (): Community => {
 export const createGuildConfig = (): GuildConfig => {
 	return {
 		guildId: faker.datatype.number().toString(),
-		ruleFilters: Array(faker.datatype.number(5)).fill((() => faker.datatype.string(6))()), // the bracket mess is to create strings
+		categoryFilters: Array(faker.datatype.number(5)).fill((() => faker.datatype.string(6))()), // the bracket mess is to create strings
 		trustedCommunities: Array(faker.datatype.number(5)).fill((() => faker.datatype.string(6))()),
 		roles: {
 			setCommunities: faker.datatype.string(),
-			setRules: faker.datatype.string(),
+			setCategories: faker.datatype.string(),
 			webhooks: faker.datatype.string(),
 			reports: faker.datatype.string(),
 			setConfig: faker.datatype.string(),
