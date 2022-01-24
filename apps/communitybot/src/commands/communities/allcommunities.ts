@@ -22,20 +22,15 @@ const GetAllCommunities: Command = {
 			.setFooter({ text: client.config.embeds.footer })
 			.setDescription("All FAGC Communities")
 
-		await Promise.all(
+		const fields = await Promise.all(
 			communities.map(async (community) => {
-				await client.users.fetch(community.contact)
-			}),
+				return {
+					name: `${community.name} | \`${community.id}\``,
+					value: await client.safeGetContactString(community.contact),
+					inline: false,
+				}
+			})
 		)
-
-		const fields = communities.map((community) => {
-			const user = client.users.cache.get(community.contact)
-			return {
-				name: `${community.name} | \`${community.id}\``,
-				value: `Contact: <@${user?.id}> | ${user?.tag}`,
-				inline: false,
-			}
-		})
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	},
 }

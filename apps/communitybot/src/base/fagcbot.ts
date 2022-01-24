@@ -76,4 +76,9 @@ export default class FAGCBot extends Client {
 			})
 		}
 	}
+	async safeGetContactString(userId: string): Promise<string> {
+		const user = await this.users.fetch(userId).catch(() => null)
+		if (!user) return `User ${userId} not found`
+		return `<@${user.id}> | ${user.tag}`
+	}
 }

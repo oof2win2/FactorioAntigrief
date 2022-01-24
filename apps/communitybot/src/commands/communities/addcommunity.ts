@@ -32,12 +32,9 @@ const AddCommunity: Command = {
 				allCommunities
 					.filter((r) => !guildConfig.trustedCommunities.includes(r.id))
 					.map(async (community) => {
-						const user = await client.users
-							.fetch(community.contact)
-							.catch(() => null)
 						return {
 							name: `${community.name} | \`${community.id}\``,
-							value: `Contact: <@${user?.id}> | ${user?.tag}`,
+							value: await client.safeGetContactString(community.contact),
 							inline: false,
 						}
 					}),
@@ -72,12 +69,9 @@ const AddCommunity: Command = {
 			communitiesToAdd.map(async (id) => {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				const community = allCommunities.find((c) => c.id === id)!
-				const user = await client.users
-					.fetch(community.contact)
-					.catch(() => null)
 				return {
 					name: `${community.name} | \`${community.id}\``,
-					value: `Contact: <@${user?.id}> | ${user?.tag}`,
+					value: await client.safeGetContactString(community.contact),
 					inline: false,
 				}
 			}),
