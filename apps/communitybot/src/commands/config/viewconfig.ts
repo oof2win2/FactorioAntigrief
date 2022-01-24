@@ -18,7 +18,7 @@ const ViewConfig: Command = {
 			.setDescription("Your FAGC Configuration")
 		const community = guildConfig.communityId
 			? await client.fagc.communities.fetchCommunity({
-					communityId: guildConfig.communityId,
+				communityId: guildConfig.communityId,
 			  })
 			: null
 

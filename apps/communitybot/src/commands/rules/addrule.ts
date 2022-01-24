@@ -1,10 +1,6 @@
 import { EmbedField, MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import {
-	getConfirmationMessage,
-	getMessageResponse,
-} from "../../utils/responseGetter"
 import { Rule } from "fagc-api-types"
 
 const AddRule: Command = {
@@ -40,7 +36,7 @@ const AddRule: Command = {
 				})
 			}
 			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
-			const newIDsMessage = await getMessageResponse(
+			const newIDsMessage = await client.getMessageResponse(
 				message,
 				`${client.emotes.type} No rules provided. Please provide IDs`,
 			)
@@ -78,7 +74,7 @@ const AddRule: Command = {
 		createPagedEmbed(newRuleFields, newRuleEmbed, message, { maxPageCount: 10 })
 
 		// ask for confirmation if they want it like this
-		const confirm = await getConfirmationMessage(
+		const confirm = await client.getConfirmationMessage(
 			message,
 			"Are you sure you want to add these rules to your rule filters?",
 		)

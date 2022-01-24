@@ -1,4 +1,4 @@
-import { Client, ClientOptions, Collection } from "discord.js"
+import { Client, ClientOptions, Collection, Message } from "discord.js"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
@@ -80,5 +80,51 @@ export default class FAGCBot extends Client {
 		const user = await this.users.fetch(userId).catch(() => null)
 		if (!user) return `User ${userId} not found`
 		return `<@${user.id}> | ${user.tag}`
+	}
+
+	async getConfirmationMessage(
+		message: Message,
+		content: string,
+		timeout = 120000,
+	): Promise<boolean> {
+		const confirm = await message.channel.send(content)
+		confirm.react("✅")
+		confirm.react("❌")
+		const reactions = await confirm.awaitReactions({
+			filter: (r, u) => u.id === message.author.id,
+			max: 1,
+			time: timeout,
+			errors: [],
+		})
+		const reaction = reactions.first()
+		if (!reaction) return false
+		if (reaction.emoji.name === "❌") return false
+		return true
+	}
+
+	async getMessageResponse(
+		message: Message,
+		content: string,
+		timeout = 30000,
+	): Promise<Message | null> {
+		const msg = await message.channel.send(content)
+		return (
+			(
+				await msg.channel.awaitMessages({
+					filter: (m) => m.author.id === message.author.id,
+					max: 1,
+					time: timeout,
+				})
+			).first() || null
+		)
+	}
+
+	async argsOrInput(args: string[], message: Message, content: string): Promise<string | null> {
+		const arg = args.shift()
+		if (arg) return arg
+
+		const newMessage = await this.getMessageResponse(message, content)
+		if (!newMessage) return null
+		return newMessage.content.split(" ")[0]
 	}
 }

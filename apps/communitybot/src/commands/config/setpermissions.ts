@@ -1,8 +1,4 @@
 import { Command } from "../../base/Command"
-import {
-	getConfirmationMessage,
-	getMessageResponse,
-} from "../../utils/responseGetter"
 import { MessageEmbed, Role } from "discord.js"
 import { GuildConfig } from "fagc-api-types"
 
@@ -43,7 +39,7 @@ const SetPermissions: Command = {
 			message.channel.send("Process of setting roles has started.")
 
 			for (const permType of permTypes) {
-				const permMessage = await getMessageResponse(
+				const permMessage = await client.getMessageResponse(
 					message,
 					`Type in the ID or ping the role for the ${permStrings[permTypes.indexOf(permType)]} permission`,
 				)
@@ -80,7 +76,7 @@ const SetPermissions: Command = {
 			message.channel.send({
 				embeds: [embed],
 			})
-			const confirmation = await getConfirmationMessage(
+			const confirmation = await client.getConfirmationMessage(
 				message,
 				"Are you sure you want these settings applied?",
 			)
@@ -119,7 +115,7 @@ const SetPermissions: Command = {
 		let role: Role
 		if (!args[1]) {
 			// id wasnt provided so need to ask
-			const roleMessage = await getMessageResponse(
+			const roleMessage = await client.getMessageResponse(
 				message,
 				"Type in the ID or ping the role for the permission",
 			)
@@ -138,7 +134,7 @@ const SetPermissions: Command = {
 			if (!tmpRole) return message.channel.send(`${client.emotes.warn} \`${args[1]}\` is not a valid role`)
 			role = tmpRole
 		}
-		const confirmation = await getConfirmationMessage(
+		const confirmation = await client.getConfirmationMessage(
 			message,
 			`Are you sure you want to set the ${permType} permission to ${role.name}?`,
 		)

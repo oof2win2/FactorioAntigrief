@@ -1,7 +1,6 @@
 import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import { getMessageResponse } from "../../utils/responseGetter"
 
 const AllReports: Command = {
 	name: "allreports",
@@ -14,13 +13,7 @@ const AllReports: Command = {
 	requiresApikey: false,
 	run: async ({ client, message, args }) => {
 		// if a playername is not provided as an arg, prompt the user to provide one
-		if (!args[0])
-			args = await getMessageResponse(
-				message,
-				`${client.emotes.type} Provide a player name to get reports of`,
-			).then((x) => x?.content?.split(" ") || [])
-
-		const playername = args.shift()
+		const playername = await client.argsOrInput(args, message, `${client.emotes.type} Provide a player name to get reports of`)
 		if (!playername)
 			return message.channel.send(
 				`${client.emotes.warn} No player name was provided`,
