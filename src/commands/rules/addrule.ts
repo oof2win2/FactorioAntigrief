@@ -24,10 +24,11 @@ const AddRule: Command = {
 			const fields: EmbedField[] = []
 			for (let i = 0; i < allRules.length; i += 2) {
 				fields.push({
-					value: `**${allRules[i].shortdesc}** (\`${allRules[i].id}\`)`,
-					name:
-						allRules[i + 1] &&
-						`${allRules[i + 1].shortdesc} (\`${allRules[i + 1].id}\`)`,
+					name: `${allRules[i].shortdesc} (\`${allRules[i].id}\`)`,
+					// this is done so that two rules are per field to take up less space
+					value: allRules[i + 1]
+						? `**${allRules[i + 1].shortdesc}** (\`${allRules[i + 1].id}\`)`
+						: "\u200b",
 					inline: false,
 				})
 			}
