@@ -3,7 +3,7 @@ import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
-const EditRule: SubCommand = {
+const EditCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("merge")
 		.setDescription("Merge the dissolving community into the receiving community")
@@ -43,4 +43,4 @@ const EditRule: SubCommand = {
 	}
 }
 
-export default EditRule
+export default EditCategory

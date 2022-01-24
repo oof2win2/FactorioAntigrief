@@ -3,20 +3,20 @@ import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
 import FAGCBot from "../../utils/FAGCBot.js"
 
-const EditRule: SubCommand = {
+const EditCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("merge")
-		.setDescription("Merge the dissolving rule into the receiving rule")
+		.setDescription("Merge the dissolving category into the receiving category")
 		.addStringOption(option =>
 			option
 				.setName("receiving")
-				.setDescription("ID of rule that will be receiving")
+				.setDescription("ID of category that will be receiving")
 				.setRequired(true)
 		)
 		.addStringOption(option =>
 			option
 				.setName("dissolving")
-				.setDescription("ID of the rule that will be dissolved")
+				.setDescription("ID of the category that will be dissolved")
 				.setRequired(true)
 		)
 	,
@@ -24,23 +24,23 @@ const EditRule: SubCommand = {
 		const idReceiving = interaction.options.getString("receiving", true)
 		const idDissolving = interaction.options.getString("dissolving", true)
 		
-		const receiving = await client.FAGC.rules.fetchRule({ruleid: idReceiving})
+		const receiving = await client.FAGC.categories.fetchCategory({categoryid: idReceiving})
 		if (!receiving) return interaction.reply({
-			content: `Rule ID \`${idReceiving}\` does not exist`,
+			content: `Category ID \`${idReceiving}\` does not exist`,
 			ephemeral: true
 		})
-		const dissolving = await client.FAGC.rules.fetchRule({ruleid: idDissolving})
+		const dissolving = await client.FAGC.categories.fetchCategory({categoryid: idDissolving})
 		if (!dissolving) return interaction.reply({
-			content: `Rule ID \`${idDissolving}\` does not exist`,
+			content: `Category ID \`${idDissolving}\` does not exist`,
 			ephemeral: true
 		})
 
-		const merged = await client.FAGC.rules.merge({
+		const merged = await client.FAGC.categories.merge({
 			idReceiving: idReceiving,
 			idDissolving: idDissolving,
 		})
-		return interaction.reply(`Successfully merged rule \`${idDissolving}\` into \`${idReceiving}\``)
+		return interaction.reply(`Successfully merged category \`${idDissolving}\` into \`${idReceiving}\``)
 	}
 }
 
-export default EditRule
+export default EditCategory
