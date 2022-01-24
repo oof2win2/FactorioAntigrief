@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const GetUserById: Command = {
@@ -15,12 +14,7 @@ const GetUserById: Command = {
 		if (!uid) return message.reply("No user ID provided")
 		try {
 			const user = await client.users.fetch(uid)
-			const embed = new MessageEmbed()
-				.setTitle("FAGC User Info")
-				.setColor(client.config.embeds.color)
-				.setFooter({ text: client.config.embeds.footer })
-				.setTimestamp()
-				.setAuthor({ name: client.config.embeds.author })
+			const embed = client.createBaseEmbed()
 				.setImage(user.avatarURL() || "")
 				.addFields([
 					{ name: "User's ID", value: user.id, inline: true },

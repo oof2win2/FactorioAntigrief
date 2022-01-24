@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const Community: Command = {
@@ -24,12 +23,8 @@ const Community: Command = {
 				`${client.emotes.warn} Community with the ID \`${communityId}\` does not exist!`,
 			)
 
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Communities")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 
 		embed.addFields({
 			name: `${community.name} | \`${community.id}\``,

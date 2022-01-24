@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const RevokeReport: Command = {
@@ -32,12 +31,8 @@ const RevokeReport: Command = {
 			)
 
 		const adminUser = await client.users.fetch(report.adminId).catch(() => null)
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Report Revocation")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(
 				`FAGC Report \`${report.id}\` of player \`${report.playername}\``,
 			)

@@ -1,4 +1,4 @@
-import { EmbedField, MessageEmbed } from "discord.js"
+import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -15,12 +15,8 @@ const AllRules: Command = {
 		// fetch rules from backend
 		const rules = await client.fagc.rules.fetchAll({})
 		// create a nice embed to display the rules
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Rules")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription("All FAGC Rules")
 		// create the fields for the embed
 		const fields: EmbedField[] = []

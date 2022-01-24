@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const FetchReport: Command = {
@@ -23,12 +22,8 @@ const FetchReport: Command = {
 				`${client.emotes.warn} Report with ID \`${reportID}\` doesn't exist`,
 			)
 
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Report")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(`FAGC Report with ID \`${reportID}\``)
 
 		embed.addFields([

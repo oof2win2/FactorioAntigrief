@@ -1,5 +1,5 @@
 import { Command } from "../../base/Command"
-import { MessageEmbed, Role } from "discord.js"
+import { Role } from "discord.js"
 import { GuildConfig } from "fagc-api-types"
 
 const SetPermissions: Command = {
@@ -57,11 +57,8 @@ const SetPermissions: Command = {
 
 			}
 
-			const embed = new MessageEmbed()
+			const embed = client.createBaseEmbed()
 				.setTitle("FAGC Role Config")
-				.setAuthor({ name: client.config.embeds.author })
-				.setFooter({ text: client.config.embeds.footer })
-				.setTimestamp()
 				.setDescription("Your FAGC Role Configuration")
 				.addFields([
 					{ name: "Reports Management", value: `<@&${permissions.reports?.id}>` },

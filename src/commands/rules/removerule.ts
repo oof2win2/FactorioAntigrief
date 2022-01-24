@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import { Rule } from "fagc-api-types"
@@ -18,12 +17,8 @@ const RemoveRules: Command = {
 		// if no args provided, ask for rule ids to remove from filters
 		const allRules = await client.fagc.rules.fetchAll({})
 		if (!args[0]) {
-			const embed = new MessageEmbed()
+			const embed = client.createBaseEmbed()
 				.setTitle("FAGC Rules")
-				.setColor("GREEN")
-				.setTimestamp()
-				.setAuthor({ name: client.config.embeds.author })
-				.setFooter({ text: client.config.embeds.footer })
 				.setDescription("All FAGC Rules")
 			const ruleFields = allRules
 				// make sure the rules are filtered
@@ -67,12 +62,8 @@ const RemoveRules: Command = {
 			return message.channel.send("No valid rules to be removed")
 
 		// otherwise, send a paged embed with the rules to be removed and ask for confirmation
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Rules")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(
 				"Remove Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			)

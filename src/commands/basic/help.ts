@@ -1,4 +1,3 @@
-import { MessageEmbed } from "discord.js"
 import { Command } from "../../base/Command"
 
 const Help: Command = {
@@ -22,13 +21,10 @@ const Help: Command = {
 					if (!existing.includes(command.name)) existing.push(command.name)
 				}
 			})
-			const embed = new MessageEmbed()
+			const embed = client.createBaseEmbed()
 				.setDescription(
 					`● To get help on a specific command type\`${client.env.BOTPREFIX}help <command>\`!`,
 				)
-				.setColor(client.config.embeds.color)
-				.setFooter({ text: client.config.embeds.footer })
-				.setAuthor({ name: client.config.embeds.author })
 
 			categories.forEach((value, key) => {
 				embed.addField(
@@ -58,7 +54,7 @@ const Help: Command = {
 			})
 		}
 
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle(command.name)
 			.setDescription(command.description)
 			.addField(

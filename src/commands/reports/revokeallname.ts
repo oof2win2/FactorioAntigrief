@@ -1,4 +1,4 @@
-import { EmbedField, MessageEmbed } from "discord.js"
+import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -30,12 +30,8 @@ const RevokeAllName: Command = {
 		})
 		if (!reports.length) return message.channel.send(`${client.emotes.warn} No reports found for player ${playername} in your community`)
 
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Report Revocation")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(`FAGC Reports of player \`${playername}\``)
 		const fields: EmbedField[] = await Promise.all(
 			reports.map(async (report) => {

@@ -1,4 +1,4 @@
-import { EmbedField, MessageEmbed } from "discord.js"
+import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -23,12 +23,8 @@ const GetReports: Command = {
 				`${client.emotes.warn} No player name was provided`,
 			)
 
-		const embed = new MessageEmbed()
+		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			.setColor("GREEN")
-			.setTimestamp()
-			.setAuthor({ name: client.config.embeds.author })
-			.setFooter({ text: client.config.embeds.footer })
 			.setDescription(`FAGC Reports of player \`${playername}\``)
 
 		const reports = await client.fagc.reports.list({
