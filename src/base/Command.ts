@@ -2,11 +2,12 @@ import { Message } from "discord.js"
 import FAGCBot from "./fagcbot"
 import { GuildConfig } from "fagc-api-types"
 
-type CommandRunOpts = {
+type CommandRunOpts<ApiKey extends boolean> = {
 	client: FAGCBot
 	message: Message<true> & Message<boolean>
 	args: string[]
-	guildConfig: GuildConfig
+	// if ApiKey is true, the guildConfig will have an api key GUARANTEED. if it isn't true, it won't be guaranteed
+	guildConfig: ApiKey extends true ? GuildConfig & { apiKey: string } : GuildConfig
 }
 
 type BaseCommand = {
@@ -18,17 +19,21 @@ type BaseCommand = {
 	category: string
 	requiresRoles: boolean
 	requiresApikey: boolean
-}
+	run: (args: CommandRunOpts<false>) => unknown
+} & ({
+	requiresApikey: true
+	run: (args: CommandRunOpts<true>) => unknown
+} | {
+	requiresApikey: false
+})
 
 type CommandWithoutGuildConfig = BaseCommand & {
 	requiresRoles: false
-	run: (args: CommandRunOpts) => unknown
 }
 
 type CommandWithGuildConfig = BaseCommand & {
 	requiresRoles: true
 	requiredPermissions: (keyof GuildConfig["roles"])[]
-	run: (args: CommandRunOpts) => unknown
 }
 
 export type Command = CommandWithoutGuildConfig | CommandWithGuildConfig
