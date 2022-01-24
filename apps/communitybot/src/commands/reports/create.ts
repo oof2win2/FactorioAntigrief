@@ -151,7 +151,7 @@ const CreateReport: Command = {
 						automated: false,
 					},
 					reqConfig: {
-						apikey: guildConfig.apiKey || "",
+						apikey: guildConfig.apiKey,
 					},
 				})
 			}),
