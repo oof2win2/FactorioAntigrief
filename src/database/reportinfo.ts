@@ -27,7 +27,7 @@ export class ReportInfoClass {
 		communityId!: string
 
 	@prop()
-		brokenRule!: string
+		categoryId!: string
 
 	@prop()
 		proof!: string

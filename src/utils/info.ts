@@ -6,7 +6,7 @@ import GuildConfigModel, {
 } from "../database/guildconfig"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
-import { RuleClass } from "../database/rule"
+import { CategoryClass } from "../database/category"
 import { CommunityClass } from "../database/community"
 import { ReportInfoClass } from "../database/reportinfo"
 import {
@@ -156,8 +156,8 @@ export async function reportCreatedMessage(
 		.addFields(
 			{ name: "Playername", value: report.playername, inline: true },
 			{
-				name: "Broken Rule",
-				value: `${opts.rule.shortdesc} (\`${opts.rule.id}\`)`,
+				name: "Category",
+				value: `${opts.category.shortdesc} (\`${opts.category.id}\`)`,
 				inline: true,
 			},
 			{ name: "Description", value: report.description, inline: false },
@@ -210,8 +210,8 @@ export async function reportRevokedMessage(
 		.addFields([
 			{ name: "Playername", value: revocation.playername, inline: true },
 			{
-				name: "Broken Rule",
-				value: `${opts.rule.shortdesc} (\`${opts.rule.id}\`)`,
+				name: "Category",
+				value: `${opts.category.shortdesc} (\`${opts.category.id}\`)`,
 				inline: true,
 			},
 			{
@@ -250,162 +250,162 @@ export async function reportRevokedMessage(
 	)
 }
 
-export async function ruleCreatedMessage(
-	rule: DocumentType<RuleClass, BeAnObject>
+export async function categoryCreatedMessage(
+	category: DocumentType<CategoryClass, BeAnObject>
 ): Promise<void> {
 	if (
-		rule === null ||
-		rule.shortdesc === undefined ||
-		rule.longdesc === undefined
+		category === null ||
+		category.shortdesc === undefined ||
+		category.longdesc === undefined
 	)
 		return
 
-	// set the sent object's messageType to ruleCreated
-	// WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), { messageType: "ruleCreated" })))
+	// set the sent object's messageType to categoryCreated
+	// WebsocketMessage(JSON.stringify(Object.assign({}, category.toObject(), { messageType: "categoryCreated" })))
 
-	const ruleEmbed = new MessageEmbed()
-		.setTitle("FAGC - Rule Created")
+	const categoryEmbed = new MessageEmbed()
+		.setTitle("FAGC - Category Created")
 		.setColor("#6f4fe3")
 		.addFields(
-			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
+			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
 			{
-				name: "Rule short description",
-				value: rule.shortdesc,
+				name: "Category short description",
+				value: category.shortdesc,
 				inline: true,
 			},
 			{
-				name: "Rule long description",
-				value: rule.longdesc,
+				name: "Category long description",
+				value: category.longdesc,
 				inline: true,
 			}
 		)
-	WebhookMessage(ruleEmbed)
+	WebhookMessage(categoryEmbed)
 
 	WebsocketMessage(
 		JSON.stringify({
-			messageType: "ruleCreated",
-			embed: ruleEmbed,
-			rule: rule,
+			messageType: "categoryCreated",
+			embed: categoryEmbed,
+			category: category,
 		})
 	)
 }
 
-export async function ruleRemovedMessage(
-	rule: DocumentType<RuleClass, BeAnObject>
+export async function categoryRemovedMessage(
+	category: DocumentType<CategoryClass, BeAnObject>
 ): Promise<void> {
 	if (
-		rule === null ||
-		rule.shortdesc === undefined ||
-		rule.longdesc === undefined
+		category === null ||
+		category.shortdesc === undefined ||
+		category.longdesc === undefined
 	)
 		return
-	// set the sent object's messageType to ruleRemoved
-	// WebsocketMessage(JSON.stringify(Object.assign({}, rule.toObject(), { messageType: "ruleRemoved" })))
+	// set the sent object's messageType to categoryRemoved
+	// WebsocketMessage(JSON.stringify(Object.assign({}, category.toObject(), { messageType: "categoryRemoved" })))
 
-	const ruleEmbed = new MessageEmbed()
-		.setTitle("FAGC - Rule Removed")
+	const categoryEmbed = new MessageEmbed()
+		.setTitle("FAGC - Category Removed")
 		.setColor("#6f4fe3")
 		.addFields(
-			{ name: "Rule ID", value: `\`${rule.id}\``, inline: true },
+			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
 			{
-				name: "Rule short description",
-				value: rule.shortdesc,
+				name: "Category short description",
+				value: category.shortdesc,
 				inline: true,
 			},
 			{
-				name: "Rule long description",
-				value: rule.longdesc,
+				name: "Category long description",
+				value: category.longdesc,
 				inline: true,
 			}
 		)
-	WebhookMessage(ruleEmbed)
+	WebhookMessage(categoryEmbed)
 
 	WebsocketMessage(
 		JSON.stringify({
-			messageType: "ruleRemoved",
-			embed: ruleEmbed,
-			rule: rule,
+			messageType: "categoryRemoved",
+			embed: categoryEmbed,
+			category: category,
 		})
 	)
 }
 
-export async function ruleUpdatedMessage(
-	oldRule: DocumentType<RuleClass, BeAnObject>,
-	newRule: DocumentType<RuleClass, BeAnObject>
+export async function categoryUpdatedMessage(
+	oldCategory: DocumentType<CategoryClass, BeAnObject>,
+	newCategory: DocumentType<CategoryClass, BeAnObject>
 ): Promise<void> {
-	const ruleEmbed = new MessageEmbed()
-		.setTitle("FAGC - Rule Updated")
+	const categoryEmbed = new MessageEmbed()
+		.setTitle("FAGC - Category Updated")
 		.setColor("#6f4fe3")
 		.addFields(
-			{ name: "Rule ID", value: `\`${newRule.id}\``, inline: true },
+			{ name: "Category ID", value: `\`${newCategory.id}\``, inline: true },
 			{
-				name: "Old Rule short description",
-				value: oldRule.shortdesc,
+				name: "Old Category short description",
+				value: oldCategory.shortdesc,
 				inline: true,
 			},
 			{
-				name: "New Rule short description",
-				value: newRule.shortdesc,
+				name: "New Category short description",
+				value: newCategory.shortdesc,
 				inline: true,
 			},
 			{
-				name: "Old Rule long description",
-				value: oldRule.longdesc,
+				name: "Old Category long description",
+				value: oldCategory.longdesc,
 				inline: true,
 			},
 			{
-				name: "New Rule long description",
-				value: newRule.longdesc,
+				name: "New Category long description",
+				value: newCategory.longdesc,
 				inline: true,
 			}
 		)
-	WebhookMessage(ruleEmbed)
+	WebhookMessage(categoryEmbed)
 
 	WebsocketMessage(
 		JSON.stringify({
-			messageType: "ruleUpdated",
-			embed: ruleEmbed,
-			oldRule: oldRule,
-			newRule: newRule
+			messageType: "categoryUpdated",
+			embed: categoryEmbed,
+			oldCategory: oldCategory,
+			newCategory: newCategory
 		})
 	)
 }
-export async function rulesMergedMessage(
-	receiving: DocumentType<RuleClass, BeAnObject>,
-	dissolving: DocumentType<RuleClass, BeAnObject>
+export async function categoriesMergedMessage(
+	receiving: DocumentType<CategoryClass, BeAnObject>,
+	dissolving: DocumentType<CategoryClass, BeAnObject>
 ): Promise<void> {
-	const ruleEmbed = new MessageEmbed()
-		.setTitle("FAGC - Rules merged")
+	const categoryEmbed = new MessageEmbed()
+		.setTitle("FAGC - Categories merged")
 		.setColor("#6f4fe3")
 		.addFields(
-			{ name: "Receiving Rule ID", value: `\`${dissolving.id}\``, inline: true },
+			{ name: "Receiving Category ID", value: `\`${dissolving.id}\``, inline: true },
 			{
-				name: "Dissolving Rule short description",
+				name: "Dissolving Category short description",
 				value: receiving.shortdesc,
 				inline: true,
 			},
 			{
-				name: "Receiving Rule short description",
+				name: "Receiving Category short description",
 				value: dissolving.shortdesc,
 				inline: true,
 			},
 			{
-				name: "Dissolving Rule long description",
+				name: "Dissolving Category long description",
 				value: receiving.longdesc,
 				inline: true,
 			},
 			{
-				name: "Receiving Rule long description",
+				name: "Receiving Category long description",
 				value: dissolving.longdesc,
 				inline: true,
 			}
 		)
-	WebhookMessage(ruleEmbed)
+	WebhookMessage(categoryEmbed)
 
 	WebsocketMessage(
 		JSON.stringify({
-			messageType: "rulesMerged",
-			embed: ruleEmbed,
+			messageType: "categoriesMerged",
+			embed: categoryEmbed,
 			receiving: receiving,
 			dissolving: dissolving
 		})

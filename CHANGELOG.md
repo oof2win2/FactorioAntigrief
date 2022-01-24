@@ -1,5 +1,9 @@
 ## UNRELEASED
 
+### Changes
+
+-   Renamed report rules to categories
+
 ### Additions
 
 -   Added in Master Rules API to add and remove rules with a master API key

@@ -2,7 +2,7 @@ import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
 
 export enum IdType {
 	COMMUNITY = "community",
-	RULE = "rule",
+	CATEGORY = "category",
 	REPORT = "report",
 	REVOCATION = "revocation",
 	LOG = "log",

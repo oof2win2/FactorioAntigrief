@@ -11,7 +11,7 @@ class Roles {
 	reports!: string
 	webhooks!: string
 	setConfig!: string
-	setRules!: string
+	setCategories!: string
 	setCommunities!: string
 }
 
@@ -36,14 +36,14 @@ export class GuildConfigClass {
 				reports: String,
 				webhooks: String,
 				setConfig: String,
-				setRules: String,
+				setCategories: String,
 				setCommunities: String,
 			}),
 		default: {
 			reports: "",
 			webhooks: "",
 			setConfig: "",
-			setRules: "",
+			setCategories: "",
 			setCommunities: "",
 		}
 	})
@@ -53,7 +53,7 @@ export class GuildConfigClass {
 		trustedCommunities!: string[]
 
 	@prop({ type: [ String ], default: [] })
-		ruleFilters!: string[]
+		categoryFilters!: string[]
 }
 
 const GuildConfigModel = getModelForClass(GuildConfigClass)

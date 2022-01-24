@@ -4,10 +4,10 @@ import IdModel, { IdType } from "./ids"
 
 @modelOptions({
 	schemaOptions: {
-		collection: "rules",
+		collection: "categories",
 	},
 })
-@pre<RuleClass>("save", async function (next) {
+@pre<CategoryClass>("save", async function (next) {
 	if (!this.id || !this._id) {
 		const id = await getUserStringFromID(IdType.COMMUNITY)
 		this.id = id.id
@@ -15,7 +15,7 @@ import IdModel, { IdType } from "./ids"
 	}
 	next()
 })
-export class RuleClass {
+export class CategoryClass {
 	@prop({ unique: true })
 		id!: string
 
@@ -26,9 +26,9 @@ export class RuleClass {
 		longdesc!: string
 }
 
-const RuleModel = getModelForClass(RuleClass)
+const CategoryModel = getModelForClass(CategoryClass)
 
-const watcher = RuleModel.watch()
+const watcher = CategoryModel.watch()
 watcher.on("change", async (change) => {
 	if (change.operationType === "delete") {
 		// delete the ID from the db too
@@ -38,4 +38,4 @@ watcher.on("change", async (change) => {
 	}
 })
 
-export default RuleModel
+export default CategoryModel
