@@ -15,11 +15,11 @@ const Help: Command = {
 			// no specific command to help with
 			const categories: Map<string, string[]> = new Map()
 			client.commands.forEach((command) => {
-				if (!categories.has(command.category)) {
+				const existing = categories.get(command.category)
+				if (!existing) {
 					categories.set(command.category, [command.name])
 				} else {
-					const existing = categories.get(command.category)
-					if (!existing?.includes(command.name)) existing?.push(command.name)
+					if (!existing.includes(command.name)) existing.push(command.name)
 				}
 			})
 			const embed = new MessageEmbed()
@@ -53,7 +53,7 @@ const Help: Command = {
 				const roleid = guildConfig.roles[permname] // get the role which has this perm
 				if (!roleid) needToSetRoles.push(permname) // if there is no role, it needs to be set
 				requiredRoles.push(
-					message.guild?.roles.cache.get(roleid)?.name ?? "Unknown role",
+					message.guild.roles.cache.get(roleid)?.name ?? "Unknown role",
 				) // add the role name to the list
 			})
 		}
@@ -69,7 +69,7 @@ const Help: Command = {
 				"Examples",
 				`\`\`\`\n${command.examples
 					.map((x) => `${client.env.BOTPREFIX}${x}`)
-					.join("\n")}\`\`\``,
+					.join("\n")}\`\`\`` || "No examples",
 			)
 			.addField("Category", `${command.category}`)
 			.addField(
