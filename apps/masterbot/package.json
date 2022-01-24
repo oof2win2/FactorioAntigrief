@@ -40,6 +40,8 @@
 		"typescript": "^4.3.5"
 	},
 	"devDependencies": {
+		"@types/eslint": "^8.4.1",
+		"@types/nodemon": "^1.19.1",
 		"prisma": "^3.7.0"
 	}
 }

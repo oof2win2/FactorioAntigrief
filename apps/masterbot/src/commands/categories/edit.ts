@@ -38,7 +38,7 @@ const EditCategory: SubCommand = {
 		})
 
 		const category = await client.FAGC.categories.modify({
-			id: id,
+			categoryId: id,
 			shortdesc: shortdesc ?? undefined,
 			longdesc: longdesc ?? undefined,
 		})

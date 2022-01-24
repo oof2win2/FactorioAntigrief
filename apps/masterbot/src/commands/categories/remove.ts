@@ -21,7 +21,7 @@ const CreateCategory: SubCommand = {
 		if (!id) return interaction.reply("Category id not provided")
 
 		const category = await client.FAGC.categories.remove({
-			id: id
+			categoryId: id
 		})
 
 		if (!category) return interaction.reply(`Category with ID \`${id}\` does not exist`)

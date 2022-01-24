@@ -20,7 +20,7 @@ const CreateCommunity: SubCommand = {
 		const id = interaction.options.getString("id")!
 		try {
 			const community = await client.FAGC.communities.remove({
-				communityID: id
+				communityId: id
 			})
 			if (community) {
 				return interaction.reply(`Community with ID \`${id}\` has been removed`)
