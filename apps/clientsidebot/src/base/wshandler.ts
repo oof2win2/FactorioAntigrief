@@ -33,7 +33,7 @@ export const communityRemoved = ({ client, event }: HandlerOpts<"communityRemove
 	
 }
 
-export const ruleCreated = ({ client, event }: HandlerOpts<"ruleCreated">) => {
+export const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 
 	client.infochannels.forEach((guildChannels) => {
@@ -45,7 +45,7 @@ export const ruleCreated = ({ client, event }: HandlerOpts<"ruleCreated">) => {
 	})
 }
 
-export const ruleRemoved = async ({ client, event }: HandlerOpts<"ruleRemoved">) => {
+export const categoryRemoved = async ({ client, event }: HandlerOpts<"categoryRemoved">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 
 	client.infochannels.forEach((guildChannels) => {
@@ -68,7 +68,7 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 		if (!guildConfig) return
 		const infochannels = client.infochannels.get(guild.id)
 		if (
-			guildConfig.ruleFilters?.includes(event.report.brokenRule) &&
+			guildConfig.categoryFilters?.includes(event.report.categoryId) &&
 			guildConfig.trustedCommunities?.includes(event.report.communityId)
 		) {
 			if (infochannels) {
@@ -89,7 +89,7 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 
 }
 /**
- * @param guildConfigs array of guild configs that are affected by the revocation, i.e. it matches their community and rule filters
+ * @param guildConfigs array of guild configs that are affected by the revocation, i.e. it matches their community and category filters
  */
 const reportHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], report: Report) => {
 	const isWhitelisted = await client.db.whitelist.findFirst({
@@ -104,7 +104,7 @@ const reportHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], repor
 		data: {
 			id: report.id,
 			playername: report.playername,
-			brokenRule: report.brokenRule,
+			categoryId: report.categoryId,
 			communityID: report.communityId,
 		}
 	})
@@ -128,7 +128,7 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 		if (!guildConfig) return
 		const infochannels = client.infochannels.get(guild.id)
 		if (
-			guildConfig.ruleFilters?.includes(event.revocation.brokenRule) &&
+			guildConfig.categoryFilters?.includes(event.revocation.categoryId) &&
 			guildConfig.trustedCommunities?.includes(event.revocation.communityId)
 		) {
 			if (infochannels) {
@@ -148,13 +148,13 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 	revocationHandler(client, guildConfigs, event.revocation)
 }
 /**
- * @param guildConfigs array of guild configs that are affected by the revocation, i.e. it matches their community and rule filters
+ * @param guildConfigs array of guild configs that are affected by the revocation, i.e. it matches their community and category filters
  */
 const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], revocation: Revocation) => {
 	// remove the report record
 	await client.db.fagcBan.delete({
 		where: {
-			id: revocation.reportId
+			id: revocation.id
 		},
 	}).catch(() => null)
 
@@ -180,10 +180,10 @@ const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], r
 		})
 	)
 
-	// if there is another FAGC report that conforms to the rules + communities, perform desired actions with it
+	// if there is another FAGC report that conforms to the categories + communities, perform desired actions with it
 	if (otherBan) {
 		// there are other reports that the player is still banned for
-		const report = await client.fagc.reports.fetchReport({ reportid: otherBan.id })
+		const report = await client.fagc.reports.fetchReport({ reportId: otherBan.id })
 		if (!report) return
 		// unban in guilds that its supposed to
 		guildConfigs.map((guildConfig) => {
@@ -198,8 +198,8 @@ const revocationHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], r
 export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildConfigChanged">) => {
 	client.guildConfigs.set(event.config.guildId, event.config) // set the new config
 
-	// unban everyone if no filtered rules or communities on the new config
-	if (!event.config.ruleFilters?.length || !event.config.trustedCommunities?.length) {
+	// unban everyone if no filtered categories or communities on the new config
+	if (!event.config.categoryFilters?.length || !event.config.trustedCommunities?.length) {
 		const currentReports = await client.db.fagcBan.findMany()
 		const playernames: Set<string> = new Set()
 		currentReports.map((record) => playernames.add(record.playername))
@@ -225,12 +225,12 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 		}
 		return
 	}
-	const newConfig = event.config as typeof event.config & Pick<Required<typeof event.config>, "ruleFilters" | "trustedCommunities">
+	const newConfig = event.config as typeof event.config & Pick<Required<typeof event.config>, "categoryFilters" | "trustedCommunities">
 	// run both at once and then wait for both to finish so no extra time is spent waiting around
 	const [ newReports, currentReports, whitelistRecords, privatebanRecords ] = await Promise.all([
-		client.fagc.reports.listFiltered({
-			ruleIDs: newConfig.ruleFilters,
-			communityIDs: newConfig.trustedCommunities
+		client.fagc.reports.list({
+			categoryIds: newConfig.categoryFilters,
+			communityIds: newConfig.trustedCommunities
 		}),
 		client.db.fagcBan.findMany(),
 		client.db.whitelist.findMany(),
@@ -242,8 +242,8 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	// array of report IDs that can be removed
 	const toRemoveIDs = currentReports
 		.map((record) => {
-			// check whether the record is no longer in rules that should be forgiven
-			if (!newConfig.ruleFilters.includes(record.brokenRule)) {
+			// check whether the record is no longer in categories that should be forgiven
+			if (!newConfig.categoryFilters.includes(record.categoryId)) {
 				playersToUnban.add(record.playername)
 				return record.id
 			}
@@ -322,7 +322,7 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	// create the records of the reports in the db
 
 	const newRecords = toBanReports
-		.map((report) => `('${report.id}', '${report.playername}', '${report.brokenRule}', '${report.communityId}')`)
+		.map((report) => `('${report.id}', '${report.playername}', '${report.categoryId}', '${report.communityId}')`)
 	// split newRecords into arrays of 500 and join them with a comma
 	const newRecordChunks = Array.from(newRecords).reduce<string[][]>((acc, record) => {
 		const last = acc[acc.length - 1]
@@ -334,7 +334,7 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	}, [])
 	// iterate over the chunks with a for loop and insert the records into the db
 	for (const records of newRecordChunks) {
-		await client.db.$executeRawUnsafe(`INSERT OR IGNORE INTO \`main\`.\`fagcban\` (id, playername, brokenRule, communityID) VALUES ${records.join(",")};`)
+		await client.db.$executeRawUnsafe(`INSERT OR IGNORE INTO \`main\`.\`fagcban\` (id, playername, categoryId, communityID) VALUES ${records.join(",")};`)
 		// wait for 50ms to allow other queries to run
 		await new Promise((resolve) => setTimeout(resolve, 50))
 	}

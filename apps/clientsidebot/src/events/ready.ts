@@ -5,7 +5,7 @@ export default function handler(client: FAGCBot) {
 
 	client.guilds.cache.map((guild => {
 		// send info to backend about guilds, get configs through WS
-		client.fagc.websocket.addGuildID(guild.id)
+		client.fagc.websocket.addGuildId(guild.id)
 
 		// create bot configs if they dont exist
 		const config = client.getBotConfig(guild.id)

@@ -38,7 +38,7 @@ const Setapikey: SubCommand = {
 				ephemeral: true
 			})
 		}
-		client.fagc.setapikey({
+		client.fagc.setdata({
 			apikey: apikey.data
 		})
 		await client.setBotConfig({

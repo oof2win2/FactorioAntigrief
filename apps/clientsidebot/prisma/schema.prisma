@@ -47,6 +47,6 @@ model Whitelist {
 model FagcBan {
   id          String @id
   playername  String
-  brokenRule  String
+  categoryId  String
   communityID String
 }
