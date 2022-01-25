@@ -1,9 +1,8 @@
 import "cross-fetch/polyfill"
-import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Category } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import { GenericAPIError } from "../types"
+import { GenericAPIError, AuthError, ManagerOptions, WrapperOptions } from "../types"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { masterAuthenticate } from "../utils"
 import { z } from "zod"
@@ -17,9 +16,10 @@ export class CategoryManager extends BaseManager<Category> {
 	}
 	
 	async fetchAll({ cache = true }: FetchRequestTypes): Promise<Category[]> {
-		const allCategories = await fetch(`${this.apiurl}/categories`, {
+		const req = await fetch(`${this.apiurl}/categories`, {
 			credentials: "include",
-		}).then((r) => r.json())
+		})
+		const allCategories = await req.json()
 
 		const parsed = z.array(Category).parse(allCategories)
 		if (cache) parsed.map(category => this.add(category))
@@ -33,7 +33,7 @@ export class CategoryManager extends BaseManager<Category> {
 	}: {
 		category: Omit<Category, "id">,
 	} & FetchRequestTypes): Promise<Category> {
-		const data = await fetch(`${this.apiurl}/categories`, {
+		const req = await fetch(`${this.apiurl}/categories`, {
 			method: "POST",
 			body: JSON.stringify(category),
 			credentials: "include",
@@ -41,7 +41,9 @@ export class CategoryManager extends BaseManager<Category> {
 				authorization: masterAuthenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
-		}).then((r) => r.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const data = await req.json()
 
 		if (data.error) throw new GenericAPIError(`${data.error}: ${data.message}`)
 
@@ -69,12 +71,13 @@ export class CategoryManager extends BaseManager<Category> {
 
 		if (cache) this.fetchingCache.set(categoryid, fetchingPromise)
 
-		const fetched = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/categories/${strictUriEncode(categoryid)}`,
 			{
 				credentials: "include",
 			}
-		).then((r) => r.json())
+		)
+		const fetched = await req.json()
 
 		const parsed = Category.nullable().safeParse(fetched)
 		if (!parsed.success || parsed.data === null) {
@@ -100,7 +103,7 @@ export class CategoryManager extends BaseManager<Category> {
 		categoryId: string,
 		shortdesc?: string, longdesc?: string
 	} & FetchRequestTypes): Promise<Category | null> {
-		const data = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/categories/${strictUriEncode(categoryId)}`,
 			{
 				method: "PATCH",
@@ -114,7 +117,9 @@ export class CategoryManager extends BaseManager<Category> {
 					"content-type": "application/json",
 				},
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const data = await req.json()
 
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)
@@ -134,7 +139,7 @@ export class CategoryManager extends BaseManager<Category> {
 	}: {
 		categoryId: string,
 	} & FetchRequestTypes): Promise<Category | null> {
-		const data = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/categories/${strictUriEncode(categoryId)}`,
 			{
 				method: "DELETE",
@@ -144,7 +149,9 @@ export class CategoryManager extends BaseManager<Category> {
 					"content-type": "application/json",
 				},
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const data = await req.json()
 
 		if (data.error) throw new GenericAPIError(`${data.error}: ${data.message}`)
 		const parsed = Category.parse(data)
@@ -161,7 +168,7 @@ export class CategoryManager extends BaseManager<Category> {
 		idReceiving: string
 		idDissolving: string
 		} & FetchRequestTypes): Promise<Category> {
-		const data = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/categories/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
 				method: "PATCH",
@@ -170,7 +177,9 @@ export class CategoryManager extends BaseManager<Category> {
 					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const data = await req.json()
 
 		if (data.error)
 			throw new GenericAPIError(`${data.error}: ${data.message}`)

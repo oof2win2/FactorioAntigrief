@@ -1,5 +1,5 @@
 import "cross-fetch/polyfill"
-import { ManagerOptions, WrapperOptions, GenericAPIError } from "../types"
+import { ManagerOptions, WrapperOptions, GenericAPIError, AuthError } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { Community, GuildConfig } from "fagc-api-types"
@@ -43,7 +43,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		config: SetCommunityConfig,
 	} & FetchRequestTypes): Promise<Community> {
-		const update = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/communities`,
 			{
 				method: "PATCH",
@@ -54,7 +54,10 @@ export default class CommunityManager extends BaseManager<Community> {
 					"content-type": "application/json",
 				},
 			}
-		).then((u) => u.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const update = await req.json()
+
 		if (update?.error)
 			throw new GenericAPIError(`${update.error}: ${update.message}`)
 		const parsedUpdate = Community.parse(update)
@@ -131,12 +134,15 @@ export default class CommunityManager extends BaseManager<Community> {
 		cache = true,
 		reqConfig = {}
 	}: FetchRequestTypes): Promise<Community | null> {
-		const community = await fetch(`${this.apiurl}/communities/own`, {
+		const req = await fetch(`${this.apiurl}/communities/own`, {
 			credentials: "include",
 			headers: {
 				authorization: authenticate(this, reqConfig),
 			},
-		}).then((c) => c.json())
+		})
+
+		if (req.status === 401) throw new AuthError()
+		const community = await req.json()
 
 		if (!community) return null
 
@@ -157,7 +163,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		config: SetGuildConfig,
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		const update = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
+		const req = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
 			method: "PATCH",
 			body: JSON.stringify(config),
 			credentials: "include",
@@ -165,7 +171,10 @@ export default class CommunityManager extends BaseManager<Community> {
 				authorization: authenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
-		}).then((u) => u.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const update = await req.json()
+
 		if (update.error) throw new GenericAPIError(`${update.error}: ${update.message}`)
 		const parsedUpdate = GuildConfig.parse(update)
 		return parsedUpdate
@@ -177,7 +186,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		config: SetGuildConfig,
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		const update = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
+		const req = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
 			method: "PATCH",
 			body: JSON.stringify(config),
 			credentials: "include",
@@ -185,7 +194,10 @@ export default class CommunityManager extends BaseManager<Community> {
 				authorization: masterAuthenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
-		}).then((u) => u.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const update = await req.json()
+
 		if (update.error) throw new GenericAPIError(`${update.error}: ${update.message}`)
 		const parsedUpdate = GuildConfig.parse(update)
 		return parsedUpdate
@@ -209,7 +221,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		guildId,
 		reqConfig = {}
 	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
-		const config = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/communities/guilds/${strictUriEncode(guildId)}`,
 			{
 				credentials: "include",
@@ -217,7 +229,10 @@ export default class CommunityManager extends BaseManager<Community> {
 					authorization: masterAuthenticate(this, reqConfig),
 				}
 			}
-		).then((c) => c.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const config = await req.json()
+
 		if (config?.error) throw new GenericAPIError(`${config.error}: ${config.message}`)
 		const parsedConfig = GuildConfig.parse(config)
 		return parsedConfig
@@ -229,13 +244,16 @@ export default class CommunityManager extends BaseManager<Community> {
 	async createApikey({
 		reqConfig = {}
 	}: FetchRequestTypes): Promise<string> {
-		const key = await fetch(`${this.apiurl}/apikeys`, {
+		const req = await fetch(`${this.apiurl}/apikeys`, {
 			method: "POST",
 			credentials: "include",
 			headers: {
 				authorization: authenticate(this, reqConfig),
 			},
-		}).then((k) => k.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const key = await req.json()
+
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
 			apiKey: z.string(),
@@ -253,13 +271,16 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		invalidateUntil: Date
 	} & FetchRequestTypes): Promise<string> {
-		const key = await fetch(`${this.apiurl}/apikey/revoke/${strictUriEncode(invalidateUntil.toISOString())}`, {
+		const req = await fetch(`${this.apiurl}/apikey/revoke/${strictUriEncode(invalidateUntil.toISOString())}`, {
 			method: "POST",
 			credentials: "include",
 			headers: {
 				authorization: authenticate(this, reqConfig),
 			},
-		}).then((k) => k.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const key = await req.json()
+
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
 			apiKey: z.string(),
@@ -281,13 +302,16 @@ export default class CommunityManager extends BaseManager<Community> {
 		const params = new URLSearchParams({
 			type: keyType
 		})
-		const key = await fetch(`${this.apiurl}/communities/apikey/create/${strictUriEncode(communityId)}?${params.toString()}`, {
+		const req = await fetch(`${this.apiurl}/communities/apikey/create/${strictUriEncode(communityId)}?${params.toString()}`, {
 			method: "POST",
 			credentials: "include",
 			headers: {
 				authorization: masterAuthenticate(this, reqConfig),
 			},
-		}).then((k) => k.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const key = await req.json()
+
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
 			apiKey: z.string(),
@@ -307,13 +331,16 @@ export default class CommunityManager extends BaseManager<Community> {
 		communityId: string
 		invalidateUntil: Date,
 	} & FetchRequestTypes): Promise<string> {
-		const key = await fetch(`${this.apiurl}/communities/apikey/revoke/${invalidateUntil.toISOString()}/${strictUriEncode(communityId)}`, {
+		const req = await fetch(`${this.apiurl}/communities/apikey/revoke/${invalidateUntil.toISOString()}/${strictUriEncode(communityId)}`, {
 			method: "POST",
 			credentials: "include",
 			headers: {
 				authorization: masterAuthenticate(this, reqConfig),
 			},
-		}).then((k) => k.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const key = await req.json()
+
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
 			apiKey: z.string(),
@@ -333,7 +360,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		community: Community
 		apiKey: string
 	}> {
-		const create = await fetch(`${this.apiurl}/communities`, {
+		const req = await fetch(`${this.apiurl}/communities`, {
 			method: "POST",
 			body: JSON.stringify({
 				name: name,
@@ -344,7 +371,10 @@ export default class CommunityManager extends BaseManager<Community> {
 				authorization: masterAuthenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
-		}).then((u) => u.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const create = await req.json()
+
 		if (create?.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
 		
 		const parsedCreate = z.object({
@@ -361,7 +391,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		guildId: string
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		const create = await fetch(`${this.apiurl}/communities/guilds`, {
+		const req = await fetch(`${this.apiurl}/communities/guilds`, {
 			method: "POST",
 			body: JSON.stringify({
 				guildId: guildId,
@@ -371,7 +401,10 @@ export default class CommunityManager extends BaseManager<Community> {
 				authorization: masterAuthenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
-		}).then((u) => u.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const create = await req.json()
+
 		if (create.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
 		const parsedCreate = GuildConfig.parse(create)
 		return parsedCreate
@@ -383,7 +416,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		guildId: string,
 	} & FetchRequestTypes): Promise<void> {
-		const create = await fetch(
+		const req = await fetch(
 			`${this.apiurl
 			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildId)}`,
 			{
@@ -393,7 +426,10 @@ export default class CommunityManager extends BaseManager<Community> {
 					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
-		).then((u) => u.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const create = await req.json()
+
 		if (create?.error) throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
 
@@ -403,7 +439,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		guildId: string,
 	} & FetchRequestTypes): Promise<void> {
-		const create = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildId)}`,
 			{
 				method: "POST",
@@ -412,7 +448,10 @@ export default class CommunityManager extends BaseManager<Community> {
 					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
-		).then((u) => u.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const create = await req.json()
+
 		if (create?.error)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)
 	}
@@ -423,7 +462,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		communityId: string
 	} & FetchRequestTypes): Promise<boolean> {
-		const remove = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(communityId)}`,
 			{
 				method: "DELETE",
@@ -432,7 +471,10 @@ export default class CommunityManager extends BaseManager<Community> {
 					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
-		).then((u) => u.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const remove = await req.json()
+
 		if (remove?.error) throw new GenericAPIError(`${remove.error}: ${remove.message}`)
 		this.removeFromCache({
 			id: communityId,
@@ -448,7 +490,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		idReceiving: string
 		idDissolving: string
 		} & FetchRequestTypes): Promise<Community> {
-		const merge = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(idReceiving)}/merge/${strictUriEncode(idDissolving)}`,
 			{
 				method: "PATCH",
@@ -457,7 +499,10 @@ export default class CommunityManager extends BaseManager<Community> {
 					authorization: masterAuthenticate(this, reqConfig),
 				},
 			}
-		).then((u) => u.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const merge = await req.json()
+
 		if (merge?.error) throw new GenericAPIError(`${merge.error}: ${merge.message}`)
 		this.removeFromCache({ id: idDissolving })
 		return Community.parse(merge)

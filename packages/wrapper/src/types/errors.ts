@@ -1,13 +1,15 @@
-export class NoAuthError extends Error {
-	constructor() {
-		super(
-			"No API key has been set and information about a cookie has not been provided"
-		)
-	}
+export enum AuthErrorType {
+	CLIENT = "No API key has been set",
+	BACKEND = "API key not recognized by backend",
 }
-export class NoMasterApikeyError extends Error {
-	constructor() {
-		super("No Master API key has been set")
+
+export class AuthError extends Error {
+	type: "CLIENT" | "BACKEND"
+	// only place where they are client are the authentication functions, which is why it defaults to backend
+	constructor(x: AuthErrorType = AuthErrorType.BACKEND) {
+		super(x)
+		// for easier debugging/logging where the error happened
+		this.type = x === AuthErrorType.CLIENT ? "CLIENT" : "BACKEND"
 	}
 }
 

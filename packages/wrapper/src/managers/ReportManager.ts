@@ -1,10 +1,7 @@
 import "cross-fetch/polyfill"
-import { ManagerOptions, WrapperOptions } from "../types/types"
+import { ManagerOptions, WrapperOptions, GenericAPIError, AuthError } from "../types"
 import { Report, CreateReport } from "fagc-api-types"
 import BaseManager from "./BaseManager"
-import {
-	GenericAPIError,
-} from "../types/errors"
 import strictUriEncode from "strict-uri-encode"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate } from "../utils"
@@ -43,7 +40,7 @@ export default class ReportManager extends BaseManager<Report> {
 	}: {
 		report: CreateReport
 	} & FetchRequestTypes): Promise<Report> {
-		const create = await fetch(`${this.apiurl}/reports`, {
+		const req = await fetch(`${this.apiurl}/reports`, {
 			method: "POST",
 			body: JSON.stringify(report),
 			credentials: "include",
@@ -51,7 +48,9 @@ export default class ReportManager extends BaseManager<Report> {
 				authorization: authenticate(this, reqConfig),
 				"content-type": "application/json",
 			},
-		}).then((u) => u.json())
+		})
+		if (req.status === 401) throw new AuthError()
+		const create = await req.json()
 
 		if (create.error)
 			throw new GenericAPIError(`${create.error}: ${create.message}`)

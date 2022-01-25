@@ -3,7 +3,7 @@ import { ManagerOptions, WrapperOptions } from "../types/types"
 import { Revocation } from "fagc-api-types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import { GenericAPIError } from ".."
+import { AuthError, GenericAPIError } from ".."
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate } from "../utils"
 import { z } from "zod"
@@ -19,7 +19,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		cache = true,
 		reqConfig = {}
 	}: FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/revocations`,
 			{
 				credentials: "include",
@@ -27,7 +27,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 					authorization: authenticate(this, reqConfig),
 				},
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocations = await req.json()
+
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 
 		const parsed = z.array(Revocation).parse(revocations)
@@ -42,7 +45,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	}: {
 		revocationId: string
 	} & FetchRequestTypes): Promise<Revocation | null> {
-		const revocation = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/revocations/${revocationId}`,
 			{
 				credentials: "include",
@@ -50,7 +53,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 					authorization: authenticate(this, reqConfig),
 				},
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocation = await req.json()
+
 		if (!revocation) return null
 		const parsed = Revocation.parse(revocation)
 		if (cache) this.add(parsed)
@@ -66,7 +72,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		reportId: string,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation> {
-		const res = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/revocations/${strictUriEncode(reportId)}`,
 			{
 				method: "POST",
@@ -79,10 +85,13 @@ export default class RevocationManager extends BaseManager<Revocation> {
 					"authorization": authenticate(this, reqConfig),
 				},
 			}
-		).then((r) => r.json())
-		if (res.error) throw new GenericAPIError(`${res.error}: ${res.message}`)
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocation = await req.json()
 
-		const parsed = Revocation.parse(res)
+		if (revocation.error) throw new GenericAPIError(`${revocation.error}: ${revocation.message}`)
+
+		const parsed = Revocation.parse(revocation)
 		if (cache) this.add(parsed)
 		return parsed
 	}
@@ -94,7 +103,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	}: {
 		categoryId: string
 	} & FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/revocations/category/${strictUriEncode(categoryId)}`,
 			{
 				credentials: "include",
@@ -102,7 +111,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 					authorization: authenticate(this, reqConfig),
 				},
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocations = await req.json()
+
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 
 		const parsed = z.array(Revocation).parse(revocations)
@@ -119,7 +131,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		categoryId: string,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/revocations/category/${strictUriEncode(categoryId)}`,
 			{
 				method: "POST",
@@ -132,7 +144,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 					"content-type": "application/json",
 				}
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocations = await req.json()
+
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 
 		const parsed = z.array(Revocation).parse(revocations)
@@ -147,7 +162,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	}: {
 		playername: string
 	} & FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
 			{
 				credentials: "include",
@@ -155,7 +170,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 					authorization: authenticate(this, reqConfig),
 				},
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocations = await req.json()
+
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 		
 		const parsed = z.array(Revocation).parse(revocations)
@@ -172,7 +190,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		playername: string,
 		adminId: string,
 	} & FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
+		const req = await fetch(
 			`${this.apiurl}/revocations/player/${strictUriEncode(playername)}`,
 			{
 				method: "POST",
@@ -185,7 +203,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 					"content-type": "application/json",
 				}
 			}
-		).then((r) => r.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocations = await req.json()
+
 		if (revocations.error) throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
 
 		const parsed = z.array(Revocation).parse(revocations)
@@ -199,14 +220,16 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	}: {
 		timestamp: Date,
 	} & FetchRequestTypes): Promise<Revocation[]> {
-		const revocations = await fetch(
+		const req = await fetch(
 			`${
 				this.apiurl
 			}/revocations/since/${timestamp.toISOString()}`,
 			{
 				credentials: "include",
 			}
-		).then((c) => c.json())
+		)
+		if (req.status === 401) throw new AuthError()
+		const revocations = await req.json()
 
 		if (revocations.error)
 			throw new GenericAPIError(`${revocations.error}: ${revocations.message}`)
