@@ -1,3 +1,4 @@
+import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 
 const SetName: Command = {
@@ -26,17 +27,24 @@ const SetName: Command = {
 		if (!confirmation)
 			return message.channel.send(`${client.emotes.warn} Cancelled`)
 
-		await client.fagc.communities.setCommunityConfig({
-			config: {
-				name: name,
-			},
-			reqConfig: {
-				apikey: guildConfig.apiKey,
-			},
-		})
-		return message.channel.send(
-			`Community name set to ${name} successfully. Changes may take a few minutes to take effect`,
-		)
+		try {
+			await client.fagc.communities.setCommunityConfig({
+				config: {
+					name: name,
+				},
+				reqConfig: {
+					apikey: guildConfig.apiKey,
+				},
+			})
+			return message.channel.send(
+				`Community name set to ${name} successfully. Changes may take a few minutes to take effect`,
+			)
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 export default SetName

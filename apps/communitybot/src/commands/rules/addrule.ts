@@ -2,6 +2,7 @@ import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import { Category } from "fagc-api-types"
+import { AuthError } from "fagc-api-wrapper"
 
 const AddCategory: Command = {
 	name: "addcategory",
@@ -79,15 +80,22 @@ const AddCategory: Command = {
 			...newCategories.map((r) => r.id),
 		])
 
+		try {
 		// save the config
-		await client.saveGuildConfig({
-			guildId: message.guild.id,
-			categoryFilters: [...newCategoryIds],
-			apikey: guildConfig.apiKey ?? undefined,
-		})
+			await client.saveGuildConfig({
+				guildId: message.guild.id,
+				categoryFilters: [...newCategoryIds],
+				apikey: guildConfig.apiKey ?? undefined,
+			})
 
-		// send a success message
-		return message.channel.send("Successfully added filtered categories")
+			// send a success message
+			return message.channel.send("Successfully added filtered categories")
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 export default AddCategory

@@ -1,3 +1,4 @@
+import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -66,8 +67,15 @@ const RemoveCommunity: Command = {
 		const communityIds = new Set([...guildConfig.trustedCommunities])
 		args.forEach((id) => communityIds.delete(id))
 		guildConfig.trustedCommunities = [...communityIds]
-		await client.saveGuildConfig(guildConfig)
-		return message.channel.send("Successfully removed community filters")
+		try {
+			await client.saveGuildConfig(guildConfig)
+			return message.channel.send("Successfully removed community filters")
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 export default RemoveCommunity

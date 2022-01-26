@@ -1,3 +1,4 @@
+import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 
 const RevokeReport: Command = {
@@ -62,14 +63,21 @@ const RevokeReport: Command = {
 			"Are you sure you want to revoke this report?",
 		)
 		if (!confirm) return message.channel.send("Report revocation cancelled")
+		
+		try {
+			await client.fagc.revocations.revoke({
+				reportId: id,
+				adminId: message.author.id,
+				reqConfig: { apikey: guildConfig.apiKey },
+			})
 
-		await client.fagc.revocations.revoke({
-			reportId: id,
-			adminId: message.author.id,
-			reqConfig: { apikey: guildConfig.apiKey },
-		})
-
-		return message.channel.send("Report revoked!")
+			return message.channel.send("Report revoked!")
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 
