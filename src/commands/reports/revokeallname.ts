@@ -1,4 +1,5 @@
 import { EmbedField } from "discord.js"
+import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -59,14 +60,21 @@ const RevokeAllName: Command = {
 		)
 		if (!confirm) return message.channel.send("Report revocation cancelled")
 
-		await client.fagc.revocations.revokePlayer({
-			playername: playername,
-			adminId: message.author.id,
-			reqConfig: {
-				apikey: guildConfig.apiKey,
-			},
-		})
-		return message.channel.send("Reports revoked!")
+		try {
+			await client.fagc.revocations.revokePlayer({
+				playername: playername,
+				adminId: message.author.id,
+				reqConfig: {
+					apikey: guildConfig.apiKey,
+				},
+			})
+			return message.channel.send("Reports revoked!")
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 

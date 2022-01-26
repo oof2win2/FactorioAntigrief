@@ -2,6 +2,7 @@ import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
+import { AuthError } from "fagc-api-wrapper"
 
 const CreateAdvanced: Command = {
 	name: "createadvanced",
@@ -174,30 +175,37 @@ const CreateAdvanced: Command = {
 		if (!confirmationMessage)
 			return message.channel.send("Report creation cancelled")
 
+		try {
 		// create the reports for each category
-		const reports = await Promise.all(
-			validCategoryIDs.map(async (categoryId) => {
-				return client.fagc.reports.create({
-					report: {
-						playername: playername,
-						adminId: adminUser.id,
-						description: description ?? "No description",
-						proof: proof ?? "No proof",
-						categoryId: categoryId,
-						reportedTime: timestamp,
-						automated: false,
-					},
-					reqConfig: {
-						apikey: guildConfig.apiKey,
-					},
-				})
-			}),
-		)
-		return message.channel.send(
-			`Reports created with IDs: ${reports
-				.map((report) => `\`${report.id}\``)
-				.join(", ")}`,
-		)
+			const reports = await Promise.all(
+				validCategoryIDs.map(async (categoryId) => {
+					return client.fagc.reports.create({
+						report: {
+							playername: playername,
+							adminId: adminUser.id,
+							description: description ?? "No description",
+							proof: proof ?? "No proof",
+							categoryId: categoryId,
+							reportedTime: timestamp,
+							automated: false,
+						},
+						reqConfig: {
+							apikey: guildConfig.apiKey,
+						},
+					})
+				}),
+			)
+			return message.channel.send(
+				`Reports created with IDs: ${reports
+					.map((report) => `\`${report.id}\``)
+					.join(", ")}`,
+			)
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 export default CreateAdvanced

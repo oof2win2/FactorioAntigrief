@@ -1,6 +1,7 @@
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import { Category } from "fagc-api-types"
+import { AuthError } from "fagc-api-wrapper"
 
 const RemoveCategories: Command = {
 	name: "removecategory",
@@ -88,14 +89,21 @@ const RemoveCategories: Command = {
 			(categoryFilter) => !categoryIDs.includes(categoryFilter),
 		)
 
+		try {
 		// save the community's config
-		await client.saveGuildConfig({
-			guildId: message.guild.id,
-			categoryFilters: newCategoryFilters,
-			apikey: guildConfig.apiKey || undefined,
-		})
+			await client.saveGuildConfig({
+				guildId: message.guild.id,
+				categoryFilters: newCategoryFilters,
+				apikey: guildConfig.apiKey || undefined,
+			})
 
-		return message.channel.send("Successfully removed specified filtered categories")
+			return message.channel.send("Successfully removed specified filtered categories")
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 export default RemoveCategories

@@ -1,3 +1,4 @@
+import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -73,8 +74,16 @@ const AddCommunity: Command = {
 		communitiesToAdd.forEach((id) => {
 			guildConfig.trustedCommunities.push(id)
 		})
-		await client.saveGuildConfig(guildConfig)
-		return message.channel.send("Successfully added community filters")
+		
+		try {
+			await client.saveGuildConfig(guildConfig)
+			return message.channel.send("Successfully added community filters")
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 export default AddCommunity

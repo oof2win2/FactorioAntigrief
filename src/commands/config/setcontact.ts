@@ -1,3 +1,4 @@
+import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 
 const SetContact: Command = {
@@ -23,14 +24,22 @@ const SetContact: Command = {
 				`${client.emotes.warn} Provided user is invalid`,
 			)
 
-		await client.fagc.communities.setCommunityConfig({
-			config: {
-				contact: user.id,
-			},
-			reqConfig: {
-				apikey: guildConfig.apiKey,
-			},
-		})
+		try {
+			await client.fagc.communities.setCommunityConfig({
+				config: {
+					contact: user.id,
+				},
+				reqConfig: {
+					apikey: guildConfig.apiKey,
+				},
+			})
+			return message.channel.send(`Contact set to ${user.tag}`)
+		} catch (e) {
+			if (e instanceof AuthError) {
+				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+			}
+			throw e
+		}
 	},
 }
 
