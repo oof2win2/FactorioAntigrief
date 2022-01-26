@@ -21,7 +21,7 @@ const SetPermissions: Command = {
 			"reports",
 			"webhooks",
 			"setConfig",
-			"setRules",
+			"setCategories",
 			"setCommunities",
 		]
 
@@ -31,7 +31,7 @@ const SetPermissions: Command = {
 				reports: undefined,
 				webhooks: undefined,
 				setConfig: undefined,
-				setRules: undefined,
+				setCategories: undefined,
 				setCommunities: undefined,
 			}
 
@@ -64,7 +64,7 @@ const SetPermissions: Command = {
 					{ name: "Reports Management", value: `<@&${permissions.reports?.id}>` },
 					{ name: "Webhook Management", value: `<@&${permissions.webhooks?.id}>` },
 					{ name: "Config Management", value: `<@&${permissions.setConfig?.id}>` },
-					{ name: "Rule Management", value: `<@&${permissions.setRules?.id}>` },
+					{ name: "Category Management", value: `<@&${permissions.setCategories?.id}>` },
 					{
 						name: "Communities Management",
 						value: `<@&${permissions.setCommunities?.id}>`,
@@ -83,7 +83,7 @@ const SetPermissions: Command = {
 			await client.saveGuildConfig({
 				...guildConfig,
 				roles: {
-					setRules: permissions.setRules?.id || "",
+					setCategories: permissions.setCategories?.id || "",
 					setCommunities: permissions.setCommunities?.id || "",
 					setConfig: permissions.setConfig?.id || "",
 					reports: permissions.reports?.id || "",

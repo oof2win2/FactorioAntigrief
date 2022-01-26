@@ -21,7 +21,7 @@
 		"discord.js": "^13.6.0",
 		"dotenv": "^8.2.0",
 		"envalid": "^7.2.1",
-		"fagc-api-wrapper": "^1.27.5",
+		"fagc-api-wrapper": "^1.28.1",
 		"fs-extra": "^9.1.0",
 		"moment": "^2.29.1",
 		"node-fetch": "^2.6.1",

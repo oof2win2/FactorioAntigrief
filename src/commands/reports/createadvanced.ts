@@ -15,8 +15,8 @@ const CreateAdvanced: Command = {
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
 	async run({ client, message, args, guildConfig }) {
-		if (!guildConfig.ruleFilters.length)
-			return message.channel.send(`${client.emotes.warn} No rules are filtered`)
+		if (!guildConfig.categoryFilters.length)
+			return message.channel.send(`${client.emotes.warn} No categories are filtered`)
 		const playername = await client.argsOrInput(args, message, `${client.emotes.type} Type in the player name`)
 		if (!playername)
 			return message.channel.send(
@@ -62,61 +62,61 @@ const CreateAdvanced: Command = {
 				`${client.emotes.warn} Invalid timestamp provided`,
 			)
 
-		// send a message with the community's filtered rules to pick from
-		const ruleEmbed = client.createBaseEmbed()
+		// send a message with the community's filtered categories to pick from
+		const categoryEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			.setDescription("Your community's filtered rules")
-		const allRules = await client.fagc.rules.fetchAll({})
-		const fields: EmbedField[] = allRules
-			// make sure the rule is filtered
-			.filter((rule) => guildConfig.ruleFilters.includes(rule.id))
-			// sort the rules by their index
-			.sort((a, b) => guildConfig.ruleFilters.indexOf(a.id) - guildConfig.ruleFilters.indexOf(b.id))
-			.map((rule) => {
+			.setDescription("Your community's filtered categories")
+		const allCategories = await client.fagc.categories.fetchAll({})
+		const fields: EmbedField[] = allCategories
+			// make sure the category is filtered
+			.filter((category) => guildConfig.categoryFilters.includes(category.id))
+			// sort the categories by their index
+			.sort((a, b) => guildConfig.categoryFilters.indexOf(a.id) - guildConfig.categoryFilters.indexOf(b.id))
+			.map((category) => {
 				return {
-					name: `${guildConfig.ruleFilters.indexOf(rule.id) + 1}) ${
-						rule.shortdesc
-					} (\`${rule.id}\`)`,
-					value: rule.longdesc,
+					name: `${guildConfig.categoryFilters.indexOf(category.id) + 1}) ${
+						category.shortdesc
+					} (\`${category.id}\`)`,
+					value: category.longdesc,
 					inline: false,
 				}
 			})
-		createPagedEmbed(fields, ruleEmbed, message)
+		createPagedEmbed(fields, categoryEmbed, message)
 
-		const rules = await client.getMessageResponse(
+		const categories = await client.getMessageResponse(
 			message,
-			`${client.emotes.type} Type in the rule(s) broken by the player, separated with spaces`,
+			`${client.emotes.type} Type in the category(s) broken by the player, separated with spaces`,
 		)
-		if (!rules) return message.channel.send("Rule(s) not specified")
-		const ruleIds = rules.content.split(" ")
-		if (ruleIds.length === 1 && ruleIds[0] === "none") {
-			return message.channel.send("Rule(s) not specified")
+		if (!categories) return message.channel.send("Category(s) not specified")
+		const categoryIds = categories.content.split(" ")
+		if (categoryIds.length === 1 && categoryIds[0] === "none") {
+			return message.channel.send("Category(s) not specified")
 		}
-		// check for validity of rules, sort into valid and invalid IDs
-		const invalidRuleIds: string[] = []
-		const validRuleIDs: string[] = []
-		ruleIds.map((ruleId) => {
+		// check for validity of categories, sort into valid and invalid IDs
+		const invalidCategoryIds: string[] = []
+		const validCategoryIDs: string[] = []
+		categoryIds.map((categoryId) => {
 			let id: string
-			if (isNaN(Number(ruleId))) {
+			if (isNaN(Number(categoryId))) {
 				// id is string
-				id = ruleId
+				id = categoryId
 			} else {
-				// id is index in rule filters
-				const i = Number(ruleId)
-				if (i < 0 || i > guildConfig.ruleFilters.length) {
-					return invalidRuleIds.push(ruleId)
+				// id is index in category filters
+				const i = Number(categoryId)
+				if (i < 0 || i > guildConfig.categoryFilters.length) {
+					return invalidCategoryIds.push(categoryId)
 				}
-				const found = guildConfig.ruleFilters[i - 1]
+				const found = guildConfig.categoryFilters[i - 1]
 				id = found
 			}
-			// all rules are fetched above so they are cached
-			const rule = client.fagc.rules.resolveID(id)
-			if (!rule) invalidRuleIds.push(id)
-			else validRuleIDs.push(id)
+			// all categories are fetched above so they are cached
+			const category = client.fagc.categories.resolveID(id)
+			if (!category) invalidCategoryIds.push(id)
+			else validCategoryIDs.push(id)
 		})
-		if (invalidRuleIds.length)
+		if (invalidCategoryIds.length)
 			return message.channel.send(
-				`Invalid rule(s): \`${invalidRuleIds.join("`, `")}\``,
+				`Invalid category(s): \`${invalidCategoryIds.join("`, `")}\``,
 			)
 
 		let proof = await client.getMessageResponse(
@@ -139,15 +139,15 @@ const CreateAdvanced: Command = {
 		// send an embed to display the report that will be created
 		const checkEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Rule(s):** ${validRuleIDs.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
+			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Category(s):** ${validCategoryIDs.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
 			.addFields([
 				{ name: "Player", value: playername, inline: true },
 				{
-					name: "Rule(s)",
-					value: validRuleIDs
+					name: "Category(s)",
+					value: validCategoryIDs
 						.map(
 							(id) =>
-								`${client.fagc.rules.resolveID(id)?.shortdesc} (\`${id}\`)`,
+								`${client.fagc.categories.resolveID(id)?.shortdesc} (\`${id}\`)`,
 						)
 						.join(", "),
 					inline: true,
@@ -174,16 +174,16 @@ const CreateAdvanced: Command = {
 		if (!confirmationMessage)
 			return message.channel.send("Report creation cancelled")
 
-		// create the reports for each rule
+		// create the reports for each category
 		const reports = await Promise.all(
-			validRuleIDs.map(async (ruleId) => {
+			validCategoryIDs.map(async (categoryId) => {
 				return client.fagc.reports.create({
 					report: {
 						playername: playername,
 						adminId: adminUser.id,
 						description: description ?? "No description",
 						proof: proof ?? "No proof",
-						brokenRule: ruleId,
+						categoryId: categoryId,
 						reportedTime: timestamp,
 						automated: false,
 					},

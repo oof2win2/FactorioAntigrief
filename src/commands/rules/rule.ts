@@ -1,42 +1,42 @@
 import { Command } from "../../base/Command"
 
-const Rule: Command = {
-	name: "rule",
+const Category: Command = {
+	name: "category",
 	aliases: [],
-	description: "Gets a rule by its ID or index in filtered rules",
-	category: "rules",
-	usage: "[ruleID|index]",
-	examples: ["rule XuciBx7", "rule 1"],
+	description: "Gets a category by its ID or index in filtered categories",
+	category: "categories",
+	usage: "[categoryID|index]",
+	examples: ["category XuciBx7", "category 1"],
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		// if the person did not provide an argument, get a message response
-		const ruleID = await client.argsOrInput(args, message, `${client.emotes.type} Provide a rule ID or index  to fetch`)
-		if (!ruleID)
+		const categoryID = await client.argsOrInput(args, message, `${client.emotes.type} Provide a category ID or index  to fetch`)
+		if (!categoryID)
 			return message.channel.send(
-				`${client.emotes.warn} No rule ID or index was provided`,
+				`${client.emotes.warn} No category ID or index was provided`,
 			)
-		const rule = Number(ruleID)
-			? await client.fagc.rules.fetchRule({
-				ruleid: guildConfig.ruleFilters[Number(ruleID) - 1],
+		const category = Number(categoryID)
+			? await client.fagc.categories.fetchCategory({
+				categoryid: guildConfig.categoryFilters[Number(categoryID) - 1],
 			  })
-			: await client.fagc.rules.fetchRule({ ruleid: ruleID })
+			: await client.fagc.categories.fetchCategory({ categoryid: categoryID })
 
-		if (rule === null)
+		if (category === null)
 			return message.reply(
-				`${client.emotes.warn} No rule with ID of \`${ruleID}\` exists`,
+				`${client.emotes.warn} No category with ID of \`${categoryID}\` exists`,
 			)
 
 		const embed = client.createBaseEmbed()
-			.setTitle("FAGC Rules")
-			.setDescription(`FAGC Rule with ID \`${rule.id}\``)
-		embed.addField(rule.shortdesc, rule.longdesc)
+			.setTitle("FAGC Categories")
+			.setDescription(`FAGC Category with ID \`${category.id}\``)
+		embed.addField(category.shortdesc, category.longdesc)
 
-		if (client.config && guildConfig.ruleFilters) {
-			if (guildConfig.ruleFilters.indexOf(rule.id) != -1) {
+		if (client.config && guildConfig.categoryFilters) {
+			if (guildConfig.categoryFilters.indexOf(category.id) != -1) {
 				embed.addField(
-					"Rule index",
-					(guildConfig.ruleFilters.indexOf(rule.id) + 1).toString(),
+					"Category index",
+					(guildConfig.categoryFilters.indexOf(category.id) + 1).toString(),
 				)
 			}
 		}
@@ -47,4 +47,4 @@ const Rule: Command = {
 	},
 }
 
-export default Rule
+export default Category

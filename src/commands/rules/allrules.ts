@@ -2,30 +2,30 @@ import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const AllRules: Command = {
-	name: "allrules",
-	description: "Gets all rules",
-	category: "rules",
+const AllCategories: Command = {
+	name: "allcategories",
+	description: "Gets all categories",
+	category: "categories",
 	aliases: [],
 	usage: "",
 	examples: [],
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message }) => {
-		// fetch rules from backend
-		const rules = await client.fagc.rules.fetchAll({})
-		// create a nice embed to display the rules
+		// fetch categories from backend
+		const categories = await client.fagc.categories.fetchAll({})
+		// create a nice embed to display the categories
 		const embed = client.createBaseEmbed()
-			.setTitle("FAGC Rules")
-			.setDescription("All FAGC Rules")
+			.setTitle("FAGC Categories")
+			.setDescription("All FAGC Categories")
 		// create the fields for the embed
 		const fields: EmbedField[] = []
-		for (let i = 0; i < rules.length; i += 2) {
+		for (let i = 0; i < categories.length; i += 2) {
 			fields.push({
-				name: `${rules[i].shortdesc} (\`${rules[i].id}\`)`,
-				// this is done so that two rules are per field to take up less space
-				value: rules[i + 1]
-					? `**${rules[i + 1].shortdesc}** (\`${rules[i + 1].id}\`)`
+				name: `${categories[i].shortdesc} (\`${categories[i].id}\`)`,
+				// this is done so that two categories are per field to take up less space
+				value: categories[i + 1]
+					? `**${categories[i + 1].shortdesc}** (\`${categories[i + 1].id}\`)`
 					: "\u200b",
 				inline: false,
 			})
@@ -33,4 +33,4 @@ const AllRules: Command = {
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	},
 }
-export default AllRules
+export default AllCategories

@@ -41,12 +41,17 @@ export default async (client: FAGCBot, message: Message) => {
 
 	// if command doesnt require guild config (like help, ping etc), it can be ran
 	if (!command.requiresRoles) {
-		return await command.run({
-			message,
-			args,
-			client,
-			guildConfig,
-		})
+		try {
+			return await command.run({
+				message,
+				args,
+				client,
+				guildConfig,
+			})
+		} catch (e) {
+			message.channel.send("An error occured while running this command!")
+			throw e
+		}
 	}
 
 	// if any of the roles are not present on the guild config, they must be filled first
@@ -55,7 +60,7 @@ export default async (client: FAGCBot, message: Message) => {
 		(!guildConfig.roles.reports ||
 			!guildConfig.roles.setCommunities ||
 			!guildConfig.roles.setConfig ||
-			!guildConfig.roles.setRules ||
+			!guildConfig.roles.setCategories ||
 			!guildConfig.roles.webhooks)
 	)
 		return message.reply(

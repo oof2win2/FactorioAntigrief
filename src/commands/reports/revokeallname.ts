@@ -40,7 +40,7 @@ const RevokeAllName: Command = {
 					name: report.id,
 					value:
 						`By: <@${report.adminId}> | ${admin?.tag}\nCommunity ID: ${report.communityId}\n` +
-						`Broken rule: ${report.brokenRule}\nProof: ${report.proof}\n` +
+						`Broken category: ${report.categoryId}\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
 						`Reported at: <t:${Math.round(
 							report.reportedTime.valueOf() / 1000,

@@ -59,9 +59,9 @@ const ViewConfig: Command = {
 				inline: true,
 			},
 			{
-				name: "Rule filter management",
-				value: guildConfig.roles.setRules
-					? `<@&${guildConfig.roles.setRules}> | ${guildConfig.roles.setRules}`
+				name: "Category filter management",
+				value: guildConfig.roles.setCategories
+					? `<@&${guildConfig.roles.setCategories}> | ${guildConfig.roles.setCategories}`
 					: "No role",
 				inline: true,
 			},
