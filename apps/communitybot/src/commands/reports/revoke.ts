@@ -41,7 +41,7 @@ const RevokeReport: Command = {
 					name: "Admin",
 					value: `<@${report.adminId}> | ${adminUser?.tag ?? "Unknown"}`,
 				},
-				{ name: "Broken rule ID", value: report.brokenRule },
+				{ name: "Broken category ID", value: report.categoryId },
 				{ name: "Description", value: report.description },
 				{ name: "Proof", value: report.proof },
 				{ name: "Automated", value: report.automated ? "True" : "False" },

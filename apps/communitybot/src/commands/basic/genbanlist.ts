@@ -13,8 +13,8 @@ const Genbanlist: Command = {
 	requiredPermissions: ["reports"],
 	requiresApikey: false,
 	run: async ({ message, client, guildConfig }) => {
-		if (!guildConfig.ruleFilters.length)
-			return message.reply("Set rule filters first")
+		if (!guildConfig.categoryFilters.length)
+			return message.reply("Set category filters first")
 		if (!guildConfig.trustedCommunities.length)
 			return message.reply("Set trusted communities first")
 
@@ -22,7 +22,7 @@ const Genbanlist: Command = {
 
 		const reports = await client.fagc.reports.list({
 			communityIds: guildConfig.trustedCommunities,
-			ruleIds: guildConfig.ruleFilters,
+			categoryIds: guildConfig.categoryFilters,
 		})
 		const toBanWith = new Set(reports.map(r => r.playername))
 		const banlist = [...toBanWith].map((playername) => {

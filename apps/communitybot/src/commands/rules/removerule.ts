@@ -1,42 +1,42 @@
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
-import { Rule } from "fagc-api-types"
+import { Category } from "fagc-api-types"
 
-const RemoveRules: Command = {
-	name: "removerule",
-	aliases: ["removerules"],
+const RemoveCategories: Command = {
+	name: "removecategory",
+	aliases: ["removecategories"],
 	description:
-		"Removes a rule filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
+		"Removes a category filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 	usage: "[...ids]",
-	examples: ["removerule XuciBx7", "removerule XuciBx7 XuciBx9 XuciBx/"],
-	category: "rules",
+	examples: ["removecategory XuciBx7", "removecategory XuciBx7 XuciBx9 XuciBx/"],
+	category: "categories",
 	requiresRoles: true,
-	requiredPermissions: ["setRules"],
+	requiredPermissions: ["setCategories"],
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
-		// if no args provided, ask for rule ids to remove from filters
-		const allRules = await client.fagc.rules.fetchAll({})
+		// if no args provided, ask for category ids to remove from filters
+		const allCategories = await client.fagc.categories.fetchAll({})
 		if (!args[0]) {
 			const embed = client.createBaseEmbed()
-				.setTitle("FAGC Rules")
-				.setDescription("All FAGC Rules")
-			const ruleFields = allRules
-				// make sure the rules are filtered
-				.filter((rule) => guildConfig.ruleFilters.includes(rule.id))
-				.sort((a, b) => guildConfig.ruleFilters.indexOf(a.id) - guildConfig.ruleFilters.indexOf(b.id))
-				.map((rule) => {
+				.setTitle("FAGC Categories")
+				.setDescription("All FAGC Categories")
+			const categoryFields = allCategories
+				// make sure the categories are filtered
+				.filter((category) => guildConfig.categoryFilters.includes(category.id))
+				.sort((a, b) => guildConfig.categoryFilters.indexOf(a.id) - guildConfig.categoryFilters.indexOf(b.id))
+				.map((category) => {
 					return {
-						name: `${guildConfig.ruleFilters.indexOf(rule.id) + 1}) ${
-							rule.shortdesc
-						} (\`${rule.id}\`)`,
-						value: rule.longdesc,
+						name: `${guildConfig.categoryFilters.indexOf(category.id) + 1}) ${
+							category.shortdesc
+						} (\`${category.id}\`)`,
+						value: category.longdesc,
 						inline: false,
 					}
 				})
-			createPagedEmbed(ruleFields, embed, message, { maxPageCount: 5 })
+			createPagedEmbed(categoryFields, embed, message, { maxPageCount: 5 })
 			const newIDsMessage = await client.getMessageResponse(
 				message,
-				`${client.emotes.type} No rules provided. Please provide IDs`,
+				`${client.emotes.type} No categories provided. Please provide IDs`,
 			)
 
 			if (!newIDsMessage || !newIDsMessage.content)
@@ -44,58 +44,58 @@ const RemoveRules: Command = {
 			args = newIDsMessage.content.split(" ")
 		}
 
-		// check if the rules are in the community's rule filters
-		const rules = args
-			.map((ruleid) =>
-				isNaN(Number(ruleid))
-					? client.fagc.rules.resolveID(ruleid)
-					: // if it is an index in filtered rules, it needs to be resolved
-					  client.fagc.rules.resolveID(
-						guildConfig.ruleFilters[Number(ruleid) - 1],
+		// check if the categories are in the community's category filters
+		const categories = args
+			.map((categoryid) =>
+				isNaN(Number(categoryid))
+					? client.fagc.categories.resolveID(categoryid)
+					: // if it is an index in filtered categories, it needs to be resolved
+					  client.fagc.categories.resolveID(
+						guildConfig.categoryFilters[Number(categoryid) - 1],
 					  ),
 			)
-			.filter((r): r is Rule => Boolean(r))
-			.filter((r) => guildConfig.ruleFilters.includes(r.id))
+			.filter((r): r is Category => Boolean(r))
+			.filter((r) => guildConfig.categoryFilters.includes(r.id))
 
-		// if there are no rules that are already in the community's filters, then exit
-		if (!rules.length)
-			return message.channel.send("No valid rules to be removed")
+		// if there are no categories that are already in the community's filters, then exit
+		if (!categories.length)
+			return message.channel.send("No valid categories to be removed")
 
-		// otherwise, send a paged embed with the rules to be removed and ask for confirmation
+		// otherwise, send a paged embed with the categories to be removed and ask for confirmation
 		const embed = client.createBaseEmbed()
-			.setTitle("FAGC Rules")
+			.setTitle("FAGC Categories")
 			.setDescription(
-				"Remove Filtered Rules. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
+				"Remove Filtered Categories. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 			)
-		const ruleFields = rules.map((rule) => {
+		const categoryFields = categories.map((category) => {
 			return {
-				name: `${rule.shortdesc} (\`${rule.id}\`)`,
-				value: rule.longdesc,
+				name: `${category.shortdesc} (\`${category.id}\`)`,
+				value: category.longdesc,
 				inline: false,
 			}
 		})
-		createPagedEmbed(ruleFields, embed, message, { maxPageCount: 5 })
+		createPagedEmbed(categoryFields, embed, message, { maxPageCount: 5 })
 
 		const confirm = await client.getConfirmationMessage(
 			message,
-			"Are you sure you want to remove these rules from your rule filters?",
+			"Are you sure you want to remove these categories from your category filters?",
 		)
-		if (!confirm) return message.channel.send("Removing rules cancelled")
+		if (!confirm) return message.channel.send("Removing categories cancelled")
 
-		// remove the rules from the community's filters
-		const ruleIDs = rules.map((rule) => rule.id)
-		const newRuleFilters = guildConfig.ruleFilters.filter(
-			(ruleFilter) => !ruleIDs.includes(ruleFilter),
+		// remove the categories from the community's filters
+		const categoryIDs = categories.map((category) => category.id)
+		const newCategoryFilters = guildConfig.categoryFilters.filter(
+			(categoryFilter) => !categoryIDs.includes(categoryFilter),
 		)
 
 		// save the community's config
 		await client.saveGuildConfig({
 			guildId: message.guild.id,
-			ruleFilters: newRuleFilters,
+			categoryFilters: newCategoryFilters,
 			apikey: guildConfig.apiKey || undefined,
 		})
 
-		return message.channel.send("Successfully removed specified filtered rules")
+		return message.channel.send("Successfully removed specified filtered categories")
 	},
 }
-export default RemoveRules
+export default RemoveCategories

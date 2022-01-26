@@ -3,7 +3,7 @@ import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
 import { Command } from "./Command"
-import { GuildConfig } from "fagc-api-types"
+import { GuildConfig, Category } from "fagc-api-types"
 
 export default class FAGCBot extends Client {
 	config: typeof CONFIG
@@ -46,15 +46,15 @@ export default class FAGCBot extends Client {
 		return true
 	}
 
-	async getFilteredRules(config) {
-		const allRules = await this.fagc.rules.fetchAll({})
-		const filteredRules = allRules
-			.filter((rule) => config.ruleFilters.some((id) => id === rule.id))
+	async getFilteredCategories(config: GuildConfig): Promise<Category[]> {
+		const allCategories = await this.fagc.categories.fetchAll({})
+		const filteredCategories = allCategories
+			.filter((category) => config.categoryFilters.some((id) => id === category.id))
 			.sort(
 				(a, b) =>
-					config.ruleFilters.indexOf(a.id) - config.ruleFilters.indexOf(b.id),
+					config.categoryFilters.indexOf(a.id) - config.categoryFilters.indexOf(b.id),
 			)
-		return filteredRules
+		return filteredCategories
 	}
 	async saveGuildConfig(
 		config: Partial<GuildConfig> & {

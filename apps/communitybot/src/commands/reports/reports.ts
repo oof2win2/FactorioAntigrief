@@ -5,7 +5,7 @@ import { createPagedEmbed } from "../../utils/functions"
 const GetReports: Command = {
 	name: "reports",
 	description:
-		"Gets reports of a player from only trusted communities and filtered rules",
+		"Gets reports of a player from only trusted communities and filtered categories",
 	aliases: ["check", "viewreports", "viewfilteredreports"],
 	category: "reports",
 	usage: "[playername]",
@@ -15,7 +15,7 @@ const GetReports: Command = {
 	async run({ client, message, args, guildConfig }) {
 		if (!guildConfig.trustedCommunities)
 			return message.reply("No filtered communities set")
-		if (!guildConfig.ruleFilters) return message.reply("No filtered rules set")
+		if (!guildConfig.categoryFilters) return message.reply("No filtered categories set")
 
 		const playername = await client.argsOrInput(args, message, `${client.emotes.type} Type in the player name`)
 		if (!playername)
@@ -30,7 +30,7 @@ const GetReports: Command = {
 		const reports = await client.fagc.reports.list({
 			playername: playername,
 			communityIds: guildConfig.trustedCommunities,
-			ruleIds: guildConfig.ruleFilters,
+			categoryIds: guildConfig.categoryFilters,
 		})
 		const fields: EmbedField[] = await Promise.all(
 			reports.map(async (report) => {
@@ -39,7 +39,7 @@ const GetReports: Command = {
 					name: report.id,
 					value:
 						`By: <@${report.adminId}> | ${admin?.tag}\nCommunity ID: ${report.communityId}\n` +
-						`Broken rule: ${report.brokenRule}\nProof: ${report.proof}\n` +
+						`Broken category: ${report.categoryId}\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
 						`Reported at: <t:${Math.round(
 							report.reportedTime.valueOf() / 1000,
