@@ -19,7 +19,7 @@ const start = async () => {
 		const port = typeof address === "string" ? address : address?.port
 		console.log(`Server listening on :${port}`)
 
-		client.login(ENV.DISCORD_BOTTOKEN)
+		await client.login(ENV.DISCORD_BOTTOKEN)
 
 		const communityCount = await CommunityModel.countDocuments()
 		if (communityCount == 0) {
