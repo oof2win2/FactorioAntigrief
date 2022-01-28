@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 import CategoryModel from "../database/category"
-import { Authenticate, createApikey, MasterAuthenticate, OptionalAuthenticate } from "../utils/authentication"
+import { Authenticate, createApikey, MasterAuthenticate, OptionalAuthenticate, parseJWT } from "../utils/authentication"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import {
@@ -250,8 +250,8 @@ export default class CommunityController {
 						setConfig: z.string().optional(),
 						setCategories: z.string().optional(),
 						setCommunities: z.string().optional(),
-						apiKey: z.string().optional(),
-					}).optional()
+					}).optional(),
+					apiKey: z.string().optional(),
 				}),
 
 				tags: [ "community" ],
@@ -356,7 +356,16 @@ export default class CommunityController {
 		}
 
 		// check other stuff
-		if (apiKey) guildConfig.apikey = apiKey
+		if (apiKey) {
+			const parsed = await parseJWT(apiKey)
+			if (parsed) {
+				const community = await CommunityModel.findOne({ id: parsed.sub })
+				if (community) {
+					guildConfig.apikey = apiKey
+					guildConfig.communityId = community.id
+				}
+			}
+		}
 		if (categoryFilters) guildConfig.categoryFilters = categoryFilters
 		// explicitly add ID of community to trusted communities, as you need to trust yourself
 		const communityIds = new Set(trustedCommunities)
@@ -392,7 +401,8 @@ export default class CommunityController {
 			},
 			guildConfig.toObject()
 		)
-
+		
+		console.log(guildConfig)
 		guildConfigChanged(guildConfig)
 		return res.status(200).send({
 			...guildConfig.toObject(),
@@ -810,7 +820,6 @@ export default class CommunityController {
 		const auth = await createApikey(community, "private")
 
 		const contactUser = await client.users.fetch(contact)
-
 		communityCreatedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
