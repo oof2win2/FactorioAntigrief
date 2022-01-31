@@ -1,4 +1,4 @@
-import { getUserStringFromID } from "../utils/functions-databaseless"
+import { getUserStringFromId } from "../utils/functions-databaseless"
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
 import IdModel, { IdType } from "./ids"
 
@@ -13,7 +13,7 @@ import IdModel, { IdType } from "./ids"
 })
 @pre<LogClass>("save", async function (next) {
 	if (!this.id || !this._id) {
-		const id = await getUserStringFromID(IdType.COMMUNITY)
+		const id = await getUserStringFromId(IdType.COMMUNITY)
 		this.id = id.id
 		this._id = id._id
 	}

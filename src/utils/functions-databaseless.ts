@@ -4,7 +4,7 @@ import IdModel, { IdType } from "../database/ids"
 /**
  * Used to set the id of the database items, so it's not a 24-char-long hex ObjectID but is readable
  **/
-export async function getUserStringFromID(type: IdType): Promise<{
+export async function getUserStringFromId(type: IdType): Promise<{
 	id: string,
 	_id: ObjectId,
 }> {

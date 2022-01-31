@@ -84,7 +84,7 @@ export default class RevocationController {
 		},
 	})
 	@Authenticate
-	async fetchID(
+	async fetchId(
 		req: FastifyRequest<{
 			Params: {
 				id: string
