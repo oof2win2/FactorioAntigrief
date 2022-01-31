@@ -72,7 +72,7 @@ const trustedCategories = async (
 ) => {
 	const rawResults: { id: string; count: number }[] = []
 	const CachedCategories = new Map()
-	const getOrFetchCategory = async (categoryId) => {
+	const getOrFetchCategory = async (categoryId: string) => {
 		const cachedCategory = CachedCategories.get(categoryId)
 		if (cachedCategory) return cachedCategory
 		const category = CachedCategories.set(

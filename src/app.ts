@@ -49,7 +49,7 @@ if (hasSentry) {
 // swagger
 fastify.register(fastifySwagger, {
 	routePrefix: "/documentation",
-	transform: (schema) => {
+	transform: (schema: any) => {
 		const {
 			params = undefined,
 			body = undefined,
