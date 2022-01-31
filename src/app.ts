@@ -215,17 +215,26 @@ fastify.register(bootstrap, {
 fastify.setErrorHandler(async (error, request, reply) => {
 	if (error instanceof z.ZodError) {
 		// is a validaiton error
-		const x = error.format()
-		const errorOutput = {}
+		const fieldErrors: { [path: string]: string[] } = {}
+		const formErrors: string[] = []
+		for (const issue of error.issues) {
+			if (issue.path.length > 0) {
+				const path = issue.path.map(String).reduce((a, b) => `${a}.${b}`)
+				fieldErrors[path] = fieldErrors[path] || []
+				fieldErrors[path].push(issue.message)
+			} else {
+				formErrors.push(issue.message)
+			}
+		}
 
-		Object.keys(x).forEach((key) => {
-			if (key === "_errors") return
-			errorOutput[key] =  x[key]._errors
-		})
+		const formMessages = formErrors.map(m => `${m}\n`).join()
+		const fieldMessages = Object.entries(fieldErrors).flatMap(
+			([ name, messages ]) => messages.map(message => `${name}: ${message}\n`)
+		).join()
 		return reply.status(400).send({
 			errorCode: 400,
 			error: "Invalid Request",
-			message: Array.isArray(x._errors) && x._errors.length ? x._errors[0] : errorOutput
+			message: `Invalid request data\n${formMessages}${fieldMessages}`,
 		})
 	}
 
