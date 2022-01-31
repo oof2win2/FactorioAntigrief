@@ -16,7 +16,7 @@ import {
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
 
-const WebhookGuildIDs = new WeakMap<WebSocket, string[]>()
+const WebhookGuildIds = new WeakMap<WebSocket, string[]>()
 
 let WebhookQueue: MessageEmbed[] = []
 
@@ -81,7 +81,7 @@ export class WsClient {
 
 	async handleMessage(message: { type: string, [index: string]: unknown }) {
 		if (typeof message.type === "string" && typeof message.guildId === "string") {
-			if (message.type === "addGuildID") {
+			if (message.type === "addGuildId") {
 				const guildConfig = await GuildConfigModel.findOne({
 					guildId: message.guildId,
 				}).then((c) => c?.toObject())
@@ -94,24 +94,24 @@ export class WsClient {
 					)
 
 
-					// add guildID to webhook only if the guild id has an existing config
-					const existing = WebhookGuildIDs.get(this.ws)
+					// add guildId to webhook only if the guild id has an existing config
+					const existing = WebhookGuildIds.get(this.ws)
 					if (existing) {
 						// limit to 25 guilds per webhook
 						if (existing.length < 25) {
 							// only add if it's not already in the list
 							if (!existing.includes(message.guildId)) existing.push(message.guildId)
 						}
-						WebhookGuildIDs.set(this.ws, existing)
+						WebhookGuildIds.set(this.ws, existing)
 					} else {
-						WebhookGuildIDs.set(this.ws, [ message.guildId ])
+						WebhookGuildIds.set(this.ws, [ message.guildId ])
 					}
 				}
 			}
-			if (message.type === "removeGuildID") {
-				const existing = WebhookGuildIDs.get(this.ws)
+			if (message.type === "removeGuildId") {
+				const existing = WebhookGuildIds.get(this.ws)
 				if (existing)
-					WebhookGuildIDs.set(this.ws, existing.filter(id => id !== message.guildID))
+					WebhookGuildIds.set(this.ws, existing.filter(id => id !== message.guildId))
 			}
 		}
 	}
@@ -557,7 +557,7 @@ export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
 	wsClients.forEach((client) => {
-		const guildIds = WebhookGuildIDs.get(client.ws)
+		const guildIds = WebhookGuildIds.get(client.ws)
 		if (guildIds?.includes(config.guildId)) {
 			client.ws.send(
 				JSON.stringify({
