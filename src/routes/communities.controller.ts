@@ -389,10 +389,10 @@ export default class CommunityController {
 				setCommunities: "",
 			}
 		if (roles) {
-			Object.keys(roles).map((roleType) => {
-				const role = findRole(roles[roleType])
-				if (role) guildConfig.roles[roleType] = role.id
-			})
+			for (const [roleType, roleId] of Object.entries(roles)) {
+				const role = findRole(roleId);
+				if (role) (guildConfig.roles as any)[roleType] = role.id;
+			}
 		}
 
 		await GuildConfigModel.findOneAndReplace(
