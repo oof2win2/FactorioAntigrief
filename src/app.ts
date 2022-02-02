@@ -77,15 +77,14 @@ fastify.register(fastifySwagger, {
 		tags: [
 			{ name: "community", description: "Community related end-points" },
 			{ name: "categories", description: "Category related end-points" },
+			{
+				name: "discord",
+				description: "Discord integration related end-points",
+			},
 			{ name: "reports", description: "Report related end-points" },
-			{ name: "profiles", description: "Profile related end-points" },
 			{
 				name: "revocations",
 				description: "Revocation related end-points",
-			},
-			{
-				name: "informatics",
-				description: "Informatics related end-points",
 			},
 			{ name: "master", description: "Master API" },
 		],

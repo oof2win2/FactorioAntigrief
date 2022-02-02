@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
-import CategoryModel from "../database/category"
-import { Authenticate, createApikey, MasterAuthenticate, OptionalAuthenticate, parseJWT } from "../utils/authentication"
+import { Authenticate, createApikey, MasterAuthenticate } from "../utils/authentication"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import {
@@ -19,7 +18,6 @@ import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
-import validator from "validator"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -27,6 +25,7 @@ export default class CommunityController {
 		url: "/",
 		options: {
 			schema: {
+				description: "Fetch all communities",
 				tags: [ "community" ],
 				response: {
 					"200": {
@@ -39,7 +38,7 @@ export default class CommunityController {
 			},
 		},
 	})
-	async getAllCommunities(
+	async fetchAll(
 		req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
@@ -55,6 +54,7 @@ export default class CommunityController {
 					id: z.string(),
 				}),
 
+				description: "Fetch community",
 				tags: [ "community" ],
 				response: {
 					"200": {
@@ -67,7 +67,7 @@ export default class CommunityController {
 			},
 		},
 	})
-	async getCommunity(
+	async fetch(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -84,6 +84,7 @@ export default class CommunityController {
 		url: "/own",
 		options: {
 			schema: {
+				description: "Fetch your community",
 				tags: [ "community" ],
 				security: [
 					{
@@ -102,7 +103,7 @@ export default class CommunityController {
 		},
 	})
 	@Authenticate
-	async getOwnCommunity(
+	async fetchOwn(
 		req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
@@ -111,7 +112,7 @@ export default class CommunityController {
 	}
 
 	@PATCH({
-		url: "/",
+		url: "/own",
 		options: {
 			schema: {
 				body: z.object({
@@ -119,8 +120,8 @@ export default class CommunityController {
 					name: z.string().optional()
 				}),
 
+				description: "Update your community",
 				tags: [ "community" ],
-				description: "Update your community config",
 				security: [
 					{
 						authorization: [],
@@ -138,7 +139,7 @@ export default class CommunityController {
 		},
 	})
 	@Authenticate
-	async updateCommunity(
+	async updateOwn(
 		req: FastifyRequest<{
 			Body: {
 				contact?: string
@@ -185,285 +186,14 @@ export default class CommunityController {
 	}
 
 	@POST({
-		url: "/guilds",
+		url: "/own/apikey",
 		options: {
 			schema: {
 				body: z.object({
-					guildId: z.string(),
+					create: z.boolean().optional(),
+					invalidate: z.boolean().optional(),
 				}),
-
-				tags: [ "master" ],
-				security: [
-					{
-						masterAuthorization: [],
-					},
-				],
-				response: {
-					"200": {
-						$ref: "GuildConfigClass#"
-					},
-				},
-			},
-		},
-	})
-	@MasterAuthenticate
-	async createGuildConfig(
-		req: FastifyRequest<{
-			Body: {
-				guildId: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { guildId } = req.body
-
-		const existing = await GuildConfigModel.findOne({ guildId: guildId })
-
-		if (existing)
-			// return an error that the guild already has a config
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Bad Request",
-				message: `Guild ${guildId} already has a config`,
-			})
-
-		const guildConfig = await GuildConfigModel.create({
-			guildId: guildId,
-		})
-
-		return res.status(200).send(guildConfig)
-	}
-
-	@PATCH({
-		url: "/guilds/:guildId",
-		options: {
-			schema: {
-				params: z.object({
-					guildId: z.string()
-				}),
-				body: z.object({
-					categoryFilters: z.array(z.string()).optional(),
-					trustedCommunities: z.array(z.string()).optional(),
-					roles: z.object({
-						reports: z.string().optional(),
-						webhooks: z.string().optional(),
-						setConfig: z.string().optional(),
-						setCategories: z.string().optional(),
-						setCommunities: z.string().optional(),
-					}).optional(),
-					apiKey: z.string().optional(),
-				}),
-
-				tags: [ "community" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
-				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "GuildConfigClass#" },
-						],
-					},
-				},
-			},
-		},
-	})
-	@Authenticate
-	async setGuildConfig(
-		req: FastifyRequest<{
-			Params: {
-				guildId: string
-			}
-			Body: {
-				categoryFilters?: string[]
-				trustedCommunities?: string[]
-				roles?: {
-					reports?: string
-					webhooks?: string
-					setConfig?: string
-					setCategories?: string
-					setCommunities?: string
-				}
-				apiKey?: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { categoryFilters, trustedCommunities, roles, apiKey } = req.body
-		const { guildId } = req.params
-
-		// check if the community exists
-		const community = req.requestContext.get("community")
-		if (!community)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Not Found",
-				message: "Community config was not found",
-			})
-		// check if guild exists
-		if (!client.guilds.resolve(guildId)) {
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Not Found",
-				message: "Guild was not found",
-			})
-		}
-
-		// check if the api key is accessing a community it doesn't have access to
-		const guildConfig = await GuildConfigModel.findOne({
-			guildId: guildId,
-		})
-		if (!guildConfig)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Not Found",
-				message: "Community config was not found",
-			})
-		const authType = req.requestContext.get("authType")
-		// if it's not the master api key and the community IDs are not the same, then return an error
-		if (authType !== "master" && guildConfig.communityId !== community.id)
-			return res.status(403).send({
-				errorCode: 403,
-				error: "Forbidden",
-				message: "You are not allowed to edit this guild's config",
-			})
-
-		// query database if categories and communities actually exist
-		if (categoryFilters) {
-			const categoriesExist = await CategoryModel.find({
-				id: { $in: categoryFilters },
-			})
-			if (categoriesExist.length !== categoryFilters.length)
-				return res.status(400).send({
-					errorCode: 400,
-					error: "Bad Request",
-					message: `categoryFilters must be array of IDs of categories, got ${categoryFilters.toString()}, some of which are not real category IDs`,
-				})
-		}
-		if (trustedCommunities) {
-			const communitiesExist = await CommunityModel.find({
-				id: { $in: trustedCommunities },
-			})
-			if (communitiesExist.length !== trustedCommunities.length)
-				return res.status(400).send({
-					errorCode: 400,
-					error: "Bad Request",
-					message: `trustedCommunities must be array of IDs of communities, got ${trustedCommunities.toString()}, some of which are not real community IDs`,
-				})
-		}
-
-		// check other stuff
-		if (apiKey) {
-			const parsed = await parseJWT(apiKey)
-			if (parsed) {
-				const community = await CommunityModel.findOne({ id: parsed.sub })
-				if (community) {
-					guildConfig.apikey = apiKey
-					guildConfig.communityId = community.id
-				}
-			}
-		}
-		if (categoryFilters) guildConfig.categoryFilters = categoryFilters
-		// explicitly add ID of community to trusted communities, as you need to trust yourself
-		const communityIds = new Set(trustedCommunities)
-		if (guildConfig.communityId) communityIds.add(guildConfig.communityId)
-		if (trustedCommunities)
-			guildConfig.trustedCommunities = [ ...communityIds ]
-
-		const findRole = (id: string) => {
-			const guildRoles = client.guilds.cache
-				.map((guild) => guild.roles.resolve(id))
-				.filter((r) => r && r.id)
-			return guildRoles[0]
-		}
-
-		if (!guildConfig.roles)
-			guildConfig.roles = {
-				reports: "",
-				webhooks: "",
-				setConfig: "",
-				setCategories: "",
-				setCommunities: "",
-			}
-		if (roles) {
-			for (const [roleType, roleId] of Object.entries(roles)) {
-				const role = findRole(roleId);
-				if (role) (guildConfig.roles as any)[roleType] = role.id;
-			}
-		}
-
-		await GuildConfigModel.findOneAndReplace(
-			{
-				guildId: guildConfig.guildId,
-			},
-			guildConfig.toObject()
-		)
-		
-		console.log(guildConfig)
-		guildConfigChanged(guildConfig)
-		return res.status(200).send({
-			...guildConfig.toObject(),
-			apiKey: req.requestContext.get("authType") === "master" ? guildConfig?.apikey : null,
-		})
-	}
-
-	@GET({
-		url: "/guilds/:guildId",
-		options: {
-			schema: {
-				params: z.object({
-					guildId: z.string()
-				}),
-
-				tags: [ "community" ],
-				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{
-								// this is to merge two schemas and add other props
-								allOf: [
-									{ $ref: "GuildConfigClass#" },
-									{ properties: {
-										apiKey: {
-											allOf: [ { nullable: true }, { type: "string" } ],
-										}
-									} }
-								]
-							},
-						],
-					},
-				},
-			},
-		},
-	})
-	@OptionalAuthenticate
-	async getGuildConfig(
-		req: FastifyRequest<{
-			Params: {
-				guildId: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { guildId } = req.params
-		const config = await GuildConfigModel.findOne({ guildId: guildId })
-		if (!config) return res.send(null)
-		const response = {
-			...config?.toObject(),
-			apiKey: req.requestContext.get("authType") === "master" ? config?.apikey : null,
-		}
-
-		return res.send(response)
-	}
-
-	@POST({
-		url: "/apikey/create",
-		options: {
-			schema: {
+				description: "Manage apikey for your community",
 				tags: [ "community" ],
 				security: [
 					{
@@ -484,71 +214,14 @@ export default class CommunityController {
 	})
 	@Authenticate
 	async createApiKey(
-		req: FastifyRequest,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const community = req.requestContext.get("community")
-		if (!community)
-			return res.status(404).send({
-				errorCode: 404,
-				error: "Not found",
-				message: "Your community was not found",
-			})
-		const auth = await createApikey(community, "private")
-		return res.send({
-			apiKey: auth
-		})
-	}
-
-	@POST({
-		url: "/apikey/revoke/:timestamp",
-		options: {
-			schema: {
-				params: z.object({
-					timestamp: z.string()
-						.refine(
-							(input) =>
-							// use validator to check if it's a valid timestamp
-								validator.isISO8601(input),
-							"Invalid timestamp"
-						)
-						.refine(
-							(input) =>
-								// check that the date is not in the future
-								Date.now() > new Date(input).valueOf(),
-							"Timestamp is in the future"
-						)
-						.transform((input) => new Date(input)),
-				}),
-
-				tags: [ "community" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
-				response: {
-					"200": {
-						properties: {
-							apiKey: {
-								type: "string",
-							}
-						}
-					},
-				},
-			}
-		}
-	})
-	@Authenticate
-	async revokeApiKey(
 		req: FastifyRequest<{
-			Params: {
-				timestamp: Date
-			}
+			Body: {
+				create?: boolean,
+				invalidate: boolean,
+			},
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { timestamp } = req.params
 		const community = req.requestContext.get("community")
 		if (!community)
 			return res.status(404).send({
@@ -556,37 +229,34 @@ export default class CommunityController {
 				error: "Not found",
 				message: "Your community was not found",
 			})
-		
-		// invalidate the tokens created before the specified timestamp
-		const updated = await CommunityModel.findOneAndUpdate({ id: community.id }, {
-			tokenInvalidBefore: timestamp
-		}).exec()
-		if (!updated)
-			return res.status(404).send({
-				errorCode: 404,
-				error: "Not found",
-				message: "Your community was not found",
-			})
-		
-		// create a new api token for the community to use just in case
-		const auth = await createApikey(community, "private")
+
+
+		if (req.body.invalidate) {
+			// invalidate all existing tokens
+			await CommunityModel.findOneAndUpdate({ id: community.id }, {
+				tokenInvalidBefore: Date.now(),
+			}).exec()
+		}
+
+		const auth = req.body.create ? await createApikey(community, "private") : undefined
 		return res.send({
 			apiKey: auth
 		})
 	}
 
 	@POST({
-		url: "/apikey/create/:communityId",
+		url: "/:id/apikey",
 		options: {
 			schema: {
 				params: z.object({
-					communityId: z.string()
+					id: z.string()
 				}),
-
-				querystring: z.object({
-					type: z.enum([ "private", "master" ]).default("private")
+				body: z.object({
+					create: z.boolean().optional(),
+					type: z.enum([ "private", "master" ]).default("private"),
+					invalidate: z.boolean().optional(),
 				}),
-
+				description: "Manage apikey for community",
 				tags: [ "master" ],
 				security: [
 					{
@@ -609,149 +279,37 @@ export default class CommunityController {
 	async masterCreateApikey(
 		req: FastifyRequest<{
 			Params: {
-				communityId: string
+				id: string
 			}
-			Querystring: {
-				type: "private" | "master"
-			}
+			Body: {
+				create?: boolean,
+				type?: "private" | "master"
+				invalidate: boolean,
+			},
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { communityId } = req.params
+		const { id } = req.params
 
-		const community = await CommunityModel.findOne({ id: communityId }).exec()
+		const community = await CommunityModel.findOne({ id: id }).exec()
 		if (!community)
 			return res.status(404).send({
 				errorCode: 404,
 				error: "Not found",
-				message: `Community with the ID ${communityId} was not found`,
+				message: `Community with the ID ${id} was not found`,
 			})
-		
-		const auth = createApikey(community, req.query.type)
+
+		if (req.body.invalidate) {
+			// invalidate all existing tokens
+			await CommunityModel.findOneAndUpdate({ id: community.id }, {
+				tokenInvalidBefore: Date.now(),
+			}).exec()
+		}
+
+		const auth = req.body.create ? await createApikey(community, req.body.type) : undefined
 		return res.send({
 			apiKey: auth
 		})
-	}
-
-	@POST({
-		url: "/apikey/revoke/:timestamp/:communityId",
-		options: {
-			schema: {
-				params: z.object({
-					timestamp: z.string()
-						.refine(
-							(input) =>
-							// use validator to check if it's a valid timestamp
-								validator.isISO8601(input),
-							"Invalid timestamp"
-						)
-						.refine(
-							(input) =>
-								// check that the date is not in the future
-								Date.now() > new Date(input).valueOf(),
-							"Timestamp is in the future"
-						)
-						.transform((input) => new Date(input)),
-					communityId: z.string(),
-				}),
-
-				tags: [ "master" ],
-				security: [
-					{
-						masterAuthorization: [],
-					},
-				],
-				response: {
-					"200": {
-						properties: {
-							apiKey: {
-								type: "string",
-							}
-						}
-					},
-				},
-			}
-		}
-	})
-	@MasterAuthenticate
-	async masterRevokeApiKey(
-		req: FastifyRequest<{
-			Params: {
-				timestamp: Date
-				communityId: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { timestamp, communityId } = req.params
-		const community = await CommunityModel.findOne({ id: communityId }).exec()
-		if (!community)
-			return res.status(404).send({
-				errorCode: 404,
-				error: "Not found",
-				message: `Community with the ID ${communityId} was not found`,
-			})
-		
-		// invalidate the tokens created before the specified timestamp
-		const updated = await CommunityModel.findOneAndUpdate({ id: community.id }, {
-			tokenInvalidBefore: timestamp
-		}).exec()
-		if (!updated)
-			return res.status(404).send({
-				errorCode: 404,
-				error: "Not found",
-				message: `Community with the ID ${communityId} was not found`,
-			})
-		
-		return res.send({
-			status: "ok"
-		})
-	}
-	
-
-	@POST({
-		url: "/notifyGuildConfigChanged/:guildId",
-		options: {
-			schema: {
-				params: z.object({
-					guildId: z.string()
-				}),
-
-				description: "Notify guild config changed",
-				tags: [ "master" ],
-				security: [
-					{
-						masterAuthorization: [],
-					},
-				],
-			},
-		},
-	})
-	@MasterAuthenticate
-	async notifyGuildConfigChanged(
-		req: FastifyRequest<{
-			Params: {
-				guildId: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { guildId } = req.params
-		const guildConfig = await GuildConfigModel.findOne({
-			guildId: guildId,
-		})
-
-		if (!guildConfig)
-			return res.status(404).send({
-				errorCode: 404,
-				error: "Guild config not found",
-				message: `Guild config for guild ${guildId} was not found`,
-			})
-
-		guildConfig.set("apikey", null)
-		guildConfigChanged(guildConfig)
-
-		return res.send({ status: "ok" })
 	}
 
 	@POST({
@@ -763,7 +321,7 @@ export default class CommunityController {
 					contact: z.string(),
 				}),
 
-				description: "Create a FAGC community",
+				description: "Create community",
 				tags: [ "master" ],
 				security: [
 					{
@@ -785,7 +343,7 @@ export default class CommunityController {
 		},
 	})
 	@MasterAuthenticate
-	async createCommunity(
+	async create(
 		req: FastifyRequest<{
 			Body: {
 				name: string
@@ -833,14 +391,14 @@ export default class CommunityController {
 	}
 
 	@DELETE({
-		url: "/:communityId",
+		url: "/:id",
 		options: {
 			schema: {
 				params: z.object({
-					communityId: z.string(),
+					id: z.string(),
 				}),
 
-				description: "Delete a FAGC community",
+				description: "Delete community",
 				tags: [ "master" ],
 				security: [
 					{
@@ -856,35 +414,35 @@ export default class CommunityController {
 		},
 	})
 	@MasterAuthenticate
-	async removeCommunity(
+	async delete(
 		req: FastifyRequest<{
 			Params: {
-				communityId: string
+				id: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { communityId } = req.params
+		const { id } = req.params
 
 		const community = await CommunityModel.findOneAndDelete({
-			id: communityId,
+			id: id,
 		})
 		if (!community)
 			return res.status(404).send({
 				errorCode: 404,
 				error: "Not found",
-				message: `Community with ID ${communityId} was not found`,
+				message: `Community with ID ${id} was not found`,
 			})
 
 		const guildConfigs = await GuildConfigModel.find({
-			communityId: community.id,
+			id: community.id,
 		})
 		await GuildConfigModel.deleteMany({
-			communityId: community.id,
+			id: community.id,
 		})
 
 		await ReportInfoModel.deleteMany({
-			communityId: community.id,
+			id: community.id,
 		})
 
 		if (guildConfigs) {
@@ -941,7 +499,7 @@ export default class CommunityController {
 				}),
 
 				description: "Merge community idDissolving into community idReceiving",
-				tags: [ "community" ],
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -1052,53 +610,5 @@ export default class CommunityController {
 		})
 
 		return res.send(receiving)
-	}
-
-	@POST({
-		url: "/guildLeave/:guildId",
-		options: {
-			schema: {
-				params: z.object({
-					guildId: z.string(),
-				}),
-
-				description: "Notify leaving a guild",
-				tags: [ "master" ],
-				security: [
-					{
-						masterAuthorization: [],
-					},
-				],
-			},
-		},
-	})
-	@MasterAuthenticate
-	async guildLeave(
-		req: FastifyRequest<{
-			Params: {
-				guildId: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { guildId } = req.params
-
-		await WebhookModel.deleteMany({
-			guildId: guildId,
-		})
-		await GuildConfigModel.deleteMany({
-			guildId: guildId,
-		})
-		const communityConfig = await CommunityModel.findOne({
-			guildIds: [ guildId ],
-		})
-		if (communityConfig) {
-			communityConfig.guildIds = communityConfig.guildIds.filter(
-				(id) => id !== guildId
-			)
-			await communityConfig.save()
-		}
-
-		return res.status(200).send({ status: "ok" })
 	}
 }

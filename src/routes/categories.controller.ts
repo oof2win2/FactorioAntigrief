@@ -26,7 +26,7 @@ export default class CategoryController {
 			},
 		},
 	})
-	async getAllCategories(
+	async fetchAll(
 		_req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
@@ -42,7 +42,7 @@ export default class CategoryController {
 					id: z.string(),
 				}).required(),
 
-				description: "Fetch a category by ID",
+				description: "Fetch category",
 				tags: [ "categories" ],
 				response: {
 					"200": {
@@ -52,7 +52,7 @@ export default class CategoryController {
 			},
 		},
 	})
-	async getCategory(
+	async fetch(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -74,8 +74,8 @@ export default class CategoryController {
 					longdesc: z.string()
 				}).required(),
 
-				description: "Create a category",
-				tags: [ "categories" ],
+				description: "Create category",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -120,8 +120,8 @@ export default class CategoryController {
 					longdesc: z.string().optional(),
 				}).optional(),
 
-				description: "Update a category",
-				tags: [ "categories" ],
+				description: "Update category",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -178,8 +178,8 @@ export default class CategoryController {
 					id: z.string(),
 				}),
 
-				description: "Remove a category",
-				tags: [ "categories" ],
+				description: "Delete category",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
@@ -257,8 +257,8 @@ export default class CategoryController {
 					idDissolving: z.string(),
 				}),
 
-				description: "Merge category idTwo into category idReceiving",
-				tags: [ "categories" ],
+				description: "Merge category idDissolving into category idReceiving",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
