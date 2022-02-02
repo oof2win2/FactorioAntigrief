@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST, PUT } from "fastify-decorators"
 import { Webhook, WebhookClient } from "discord.js"
-import { Authenticate, MasterAuthenticate, OptionalAuthenticate, parseJWT } from "../utils/authentication"
+import { Authenticate, MasterAuthenticate, OptionalAuthenticate, forbidden, parseJWT } from "../utils/authentication"
 import CategoryModel from "../database/category"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
@@ -155,11 +155,7 @@ export default class DiscordController {
 		const authType = req.requestContext.get("authType")
 		// if it's not the master api key and the community IDs are not the same, then return an error
 		if (authType !== "master" && guildConfig.communityId !== community.id)
-			return res.status(403).send({
-				errorCode: 403,
-				error: "Forbidden",
-				message: "You are not allowed to edit this guild's config",
-			})
+			return forbidden(res, "master", "Agent is not authorized to edit this guild's config")
 
 		// query database if categories and communities actually exist
 		if (categoryFilters) {
@@ -187,7 +183,7 @@ export default class DiscordController {
 
 		// check other stuff
 		if (apiKey) {
-			const parsed = await parseJWT(apiKey)
+			const parsed = await parseJWT(apiKey, [ "private", "master" ])
 			if (parsed) {
 				const community = await CommunityModel.findOne({ id: parsed.sub })
 				if (community) {
@@ -482,8 +478,8 @@ export default class DiscordController {
 			const msg = `This guild already has another webhook in the FAGC database with the ID of ${webhooksInSameGuild[0].id}, therefore another webhook was not added`
 			webhook.send(msg)
 			return res
-				.status(403)
-				.send({ errorCode: 403, error: "Forbidden", message: msg })
+				.status(409)
+				.send({ errorCode: 409, error: "Conflict", message: msg })
 		}
 		webhook.send("Success in adding this webhook to FAGC")
 		const dbRes = await WebhookModel.create({

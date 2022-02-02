@@ -186,17 +186,11 @@ export default class RevocationController {
 			id: req.body.reportId,
 			revokedAt: { $exists: false },
 		})
-		if (!report)
+		if (!report || report.communityId !== community.id)
 			return res.status(404).send({
 				errorCode: 404,
 				error: "Not Found",
 				message: "Report could not be found",
-			})
-		if (report.communityId !== community.id)
-			return res.status(403).send({
-				errorCode: 403,
-				error: "Access Denied",
-				message: `You are trying to access a report of community ${report.communityId} but your community ID is ${community.id}`,
 			})
 
 		const isDiscordUser = await validateDiscordUser(req.body.adminId)

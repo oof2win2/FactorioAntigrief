@@ -1,3 +1,4 @@
+import assert from "assert"
 import { FastifyRequest, FastifyReply } from "fastify"
 import { RouteGenericInterface } from "fastify/types/route"
 import CommunityModel from "../database/community"
@@ -28,7 +29,7 @@ export const apikey = z.object({
 })
 export type apikey = z.infer<typeof apikey>
 
-export const createApikey = async (cId: string | Community, audience: "master" | "private" = "private") => {
+export async function createApikey(cId: string | Community, audience: "master" | "private" = "private") {
 	const community = typeof cId === "string" ? await CommunityModel.findById(cId) : cId
 	if (!community) throw new Error("Community not found")
 	const apikey = await new jose.SignJWT({})
@@ -42,9 +43,11 @@ export const createApikey = async (cId: string | Community, audience: "master" |
 	return apikey
 }
 
-export const parseJWT = async (token: string): Promise<apikey | null> => {
+export async function parseJWT(token: string, audience: string | string[]): Promise<apikey | null> {
 	try {
-		const jwt = await jose.jwtVerify(token, Buffer.from(ENV.JWT_SECRET, "utf8"))
+		const jwt = await jose.jwtVerify(
+			token, Buffer.from(ENV.JWT_SECRET, "utf8"), { audience }
+		)
 		const parsed = apikey.parse(jwt.payload)
 		return parsed
 	} catch {
@@ -52,78 +55,92 @@ export const parseJWT = async (token: string): Promise<apikey | null> => {
 	}
 }
 
-export const Authenticate = <
-	T extends RouteGenericInterface = RouteGenericInterface
->(
-		_target: unknown,
-		_propertyKey: unknown,
-		descriptor: TypedPropertyDescriptor<
-		(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
-	>
-	): TypedPropertyDescriptor<
-	(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
-> => {
-	// a bit of magic to get the request and response
-	const originalRoute = descriptor.value
-	if (!originalRoute) return descriptor
-	descriptor.value = async (...args) => {
-		const [ req, res ] = args
-		const auth = req.headers["authorization"]
-		// if no api key is provided then they are definitely not authed
-		if (!auth)
-			return res.status(401).send({
-				statusCode: 401,
-				error: "Unauthorized",
-				message: "Your API key is invalid",
-			})
-		// token (JWT)
-		else if (auth.startsWith("Bearer ")) {
-			try {
-				const token = auth.slice("Bearer ".length)
-				const data = await parseJWT(token)
-				if (!data)
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
-				const community = await CommunityModel.findOne({
-					id: data.sub,
-				})
-				if (!community)
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
-				
-				// if the community's tokens are invalid after the token was issued, the token is invalid
-				if (community.tokenInvalidBefore.valueOf() > data.iat.valueOf())
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
-
-				req.requestContext.set("community", community)
-				req.requestContext.set("authType", data.aud)
-
-				// run the rest of the route handler
-				return originalRoute.apply(this, args)
-			} catch (e) {
-				return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key is invalid",
-				})
-			}
-		}
-		// if it is something else then it's invalid
-		return res.status(401).send({
+// Credentials are missing or invalid
+export function unauthorized(
+	res: FastifyReply,
+	realms: string | [string, ...string[]],
+	message = "Missing or invalid credentials"
+) {
+	if (typeof realms === "string")
+		realms = [ realms ]
+	return res
+		.header("WWW-Authenticate", realms.map(r => `Bearer realm="${r}"`).join(" "))
+		.status(401)
+		.send({
 			statusCode: 401,
 			error: "Unauthorized",
-			message: "Your API key is invalid",
+			message,
 		})
+}
+
+// Credentials are valid but does not grant access to the requested resource
+export function forbidden(
+	res: FastifyReply,
+	realms?: string | string[],
+	message = "Agent is not authorized to access this resource"
+) {
+	if (typeof realms === "string")
+		realms = [ realms ]
+	return res
+		.header("WWW-Authenticate", realms ? realms.map(r => `Bearer realm="${r}"`).join(" ") : "Bearer")
+		.status(403)
+		.send({
+			statusCode: 403,
+			error: "Forbidden",
+			message,
+		})
+}
+
+type RouteDescriptor<T> = TypedPropertyDescriptor<
+	(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
+>;
+
+async function authenticate(req: FastifyRequest, audience: string | string[]) {
+	const authorization = req.headers["authorization"]
+	// if no api key is provided then they are definitely not authed
+	if (!authorization)
+		return false
+	if (!authorization.startsWith("Bearer "))
+		return false
+
+	try {
+		const token = authorization.slice("Bearer ".length)
+		const data = await parseJWT(token, audience)
+		if (!data)
+			return false
+		const community = await CommunityModel.findOne({
+			id: data.sub,
+		})
+		if (!community)
+			return false
+
+		// if the community's tokens are invalid after the token was issued, the token is invalid
+		if (community.tokenInvalidBefore.valueOf() > data.iat.valueOf())
+			return false
+
+		req.requestContext.set("community", community)
+		req.requestContext.set("authType", data.aud)
+
+	} catch (e) {
+		return false
+	}
+
+	return true
+}
+
+export function Authenticate<T extends RouteGenericInterface>(
+	_target: unknown,
+	_propertyKey: unknown,
+	descriptor: RouteDescriptor<T>,
+): RouteDescriptor<T> {
+	const originalRoute = descriptor.value
+	assert(originalRoute)
+	descriptor.value = async function(...args) {
+		const [ req, res ] = args
+		if (!await authenticate(req, [ "private", "master" ]))
+			return unauthorized(res, [ "private", "master" ])
+
+		return originalRoute.apply(this, args)
 	}
 	return descriptor
 }
@@ -131,149 +148,36 @@ export const Authenticate = <
 /**
  * If no authentication is provided, it will continue executing response. If a wrong one is provided, it will return a 401
  */
-export const OptionalAuthenticate = <
-T extends RouteGenericInterface = RouteGenericInterface
->(
-		_target: unknown,
-		_propertyKey: unknown,
-		descriptor: TypedPropertyDescriptor<
-	(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
->
-	): TypedPropertyDescriptor<
-(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
-> => {
-// a bit of magic to get the request and response
+export function OptionalAuthenticate<T extends RouteGenericInterface>(
+	_target: unknown,
+	_propertyKey: unknown,
+	descriptor: RouteDescriptor<T>,
+): RouteDescriptor<T> {
 	const originalRoute = descriptor.value
-	if (!originalRoute) return descriptor
-	descriptor.value = async (...args) => {
+	assert(originalRoute)
+	descriptor.value = async function(...args) {
 		const [ req, res ] = args
-		const auth = req.headers["authorization"]
-		// if no api key is provided then they are definitely not authed
-		if (!auth)
-			return originalRoute.apply(this, args)
-		// token (JWT)
-		else if (auth.startsWith("Bearer ")) {
-			try {
-				const token = auth.slice("Bearer ".length)
-				const data = await parseJWT(token)
-				if (!data) return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key is invalid",
-				})
-				const community = await CommunityModel.findOne({
-					id: data.sub,
-				})
-				if (!community)
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
-			
-				// if the community's tokens are invalid after the token was issued, the token is invalid
-				if (community.tokenInvalidBefore.valueOf() > data.iat.valueOf())
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
+		if (req.headers["authorization"] && !await authenticate(req, [ "private", "master" ]))
+			return unauthorized(res, [ "private", "master" ])
 
-				req.requestContext.set("community", community)
-				req.requestContext.set("authType", data.aud)
-
-				// run the rest of the route handler
-				return originalRoute.apply(this, args)
-			} catch (e) {
-				return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key is invalid",
-				})
-			}
-		}
 		return originalRoute.apply(this, args)
 	}
 	return descriptor
 }
 
-export const MasterAuthenticate = <
-	T extends RouteGenericInterface = RouteGenericInterface
->(
-		_target: unknown,
-		_propertyKey: unknown,
-		descriptor: TypedPropertyDescriptor<
-		(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
-	>
-	): TypedPropertyDescriptor<
-	(req: FastifyRequest<T>, res: FastifyReply) => Promise<FastifyReply>
-> => {
+export function MasterAuthenticate<T extends RouteGenericInterface>(
+	_target: unknown,
+	_propertyKey: unknown,
+	descriptor: RouteDescriptor<T>,
+): RouteDescriptor<T> {
 	const originalRoute = descriptor.value
-	if (!originalRoute) return descriptor
-	descriptor.value = async (...args) => {
+	assert(originalRoute)
+	descriptor.value = async function(...args) {
 		const [ req, res ] = args
-		// return originalRoute.apply(this, args)
-		const auth = req.headers["authorization"]
-		if (!auth)
-			return res.status(401).send({
-				statusCode: 401,
-				error: "Unauthorized",
-				message: "Your Master API key is invalid",
-			})
-		// token (JWT)
-		else if (auth.startsWith("Bearer ")) {
-			try {
-				const token = auth.slice("Bearer ".length)
-				const data = await parseJWT(token)
-				if (!data) return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key is invalid",
-				})
-				if (data.aud !== "master")
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
+		if (!await authenticate(req, "master"))
+			return unauthorized(res, "master")
 
-				const community = await CommunityModel.findOne({
-					id: data.sub,
-				})
-				if (!community)
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
-			
-				// if the community's tokens are invalid after the token was issued, the token is invalid
-				if (community.tokenInvalidBefore.valueOf() > data.iat.valueOf())
-					return res.status(401).send({
-						statusCode: 401,
-						error: "Unauthorized",
-						message: "Your API key is invalid",
-					})
-
-				req.requestContext.set("community", community)
-				req.requestContext.set("authType", data.aud)
-
-				// run the rest of the route handler
-				return originalRoute.apply(this, args)
-			} catch (e) {
-				return res.status(401).send({
-					statusCode: 401,
-					error: "Unauthorized",
-					message: "Your API key is invalid",
-				})
-			}
-		}
-		// if it is something else then it's invalid
-		return res.status(401).send({
-			statusCode: 401,
-			error: "Unauthorized",
-			message: "Your Master API key is invalid",
-		})
+		return originalRoute.apply(this, args)
 	}
 	return descriptor
 }
