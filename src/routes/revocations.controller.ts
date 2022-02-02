@@ -193,22 +193,20 @@ export default class RevocationController {
 				message: "Report could not be found",
 			})
 
-		const isDiscordUser = await validateDiscordUser(req.body.adminId)
-		if (!isDiscordUser)
+		const revoker = await validateDiscordUser(req.body.adminId)
+		if (!revoker)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
 				message: "adminId must be a valid Discord user",
 			})
-		const revoker = await client.users.fetch(req.body.adminId)
-		const admin = await client.users.fetch(report.adminId)
 		const category = await CategoryModel.findOne({ id: report.categoryId })
 
 		const revocation = await ReportInfoModel.findOneAndUpdate({
 			id: report.id
 		}, {
 			revokedAt: new Date(),
-			revokedBy: admin.id,
+			revokedBy: revoker.id,
 		}, { new: true })
 		if (!revocation) return res.status(404).send({
 			errorCode: 404,

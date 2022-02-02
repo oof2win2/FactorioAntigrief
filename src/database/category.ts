@@ -28,7 +28,7 @@ export class CategoryClass {
 
 const CategoryModel = getModelForClass(CategoryClass)
 
-const watcher = CategoryModel.watch()
+export const watcher = CategoryModel.watch()
 watcher.on("change", async (change) => {
 	if (change.operationType === "delete") {
 		// delete the ID from the db too
