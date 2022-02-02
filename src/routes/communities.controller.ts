@@ -200,7 +200,7 @@ export default class CommunityController {
 				response: {
 					"200": {
 						properties: {
-							apiKey: {
+							apikey: {
 								type: "string",
 							}
 						}
@@ -237,7 +237,7 @@ export default class CommunityController {
 
 		const auth = req.body.create ? await createApikey(community, "private") : undefined
 		return res.send({
-			apiKey: auth
+			apikey: auth
 		})
 	}
 
@@ -263,7 +263,7 @@ export default class CommunityController {
 				response: {
 					"200": {
 						properties: {
-							apiKey: {
+							apikey: {
 								type: "string",
 							}
 						}
@@ -305,7 +305,7 @@ export default class CommunityController {
 
 		const auth = req.body.create ? await createApikey(community, req.body.type) : undefined
 		return res.send({
-			apiKey: auth
+			apikey: auth
 		})
 	}
 
@@ -329,7 +329,7 @@ export default class CommunityController {
 					"200": {
 						type: "object",
 						properties: {
-							apiKey: { type: "string" },
+							apikey: { type: "string" },
 							community: {
 								$ref: "CommunityClass#",
 							},
@@ -382,7 +382,7 @@ export default class CommunityController {
 
 		return res.send({
 			community: community,
-			apiKey: auth,
+			apikey: auth,
 		})
 	}
 
