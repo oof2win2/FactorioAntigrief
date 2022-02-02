@@ -34,7 +34,7 @@ export class CommunityClass {
 
 const CommunityModel = getModelForClass(CommunityClass)
 
-const watcher = CommunityModel.watch()
+export const watcher = CommunityModel.watch()
 watcher.on("change", async (change) => {
 	if (change.operationType === "delete") {
 		// delete the ID from the db too

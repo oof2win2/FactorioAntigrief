@@ -21,10 +21,10 @@ export default class ReportController {
 		options: {
 			schema: {
 				querystring: z.object({
-					playername: z.string().or(z.array(z.string())),
-					communityId: z.string().or(z.array(z.string())),
-					categoryId: z.string().or(z.array(z.string())),
-					adminId: z.string().or(z.array(z.string())),
+					playername: z.string().or(z.array(z.string())).optional(),
+					communityId: z.string().or(z.array(z.string())).optional(),
+					categoryId: z.string().or(z.array(z.string())).optional(),
+					adminId: z.string().or(z.array(z.string())).optional(),
 					after: z.string().optional().refine(
 						(input) => input === undefined || validator.isISO8601(input),
 						"Invalid timestamp"
@@ -60,6 +60,7 @@ export default class ReportController {
 			categoryId: categoryId,
 			adminId: adminId,
 			...(after ? { createdAt: { $gt: new Date(after) } } : {}),
+			revokedAt: { $exists: false },
 		})
 		return res.send(reports)
 	}
@@ -187,6 +188,7 @@ export default class ReportController {
 
 		const allReports = await ReportInfoModel.find({
 			playername: playername,
+			revokedAt: { $exists: false },
 		}).select([ "communityId" ])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
@@ -230,7 +232,7 @@ export default class ReportController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const community = await ReportInfoModel.findOne({ id: id })
+		const community = await ReportInfoModel.findOne({ id: id, revokedAt: { $exists: false }})
 		return res.send(community)
 	}
 }

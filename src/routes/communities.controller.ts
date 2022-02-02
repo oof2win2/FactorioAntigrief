@@ -10,10 +10,7 @@ import {
 	communityUpdatedMessage,
 	communitiesMergedMessage,
 } from "../utils/info"
-import {
-	client,
-	validateDiscordUser,
-} from "../utils/discord"
+import { validateDiscordUser } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
 import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
@@ -354,14 +351,14 @@ export default class CommunityController {
 	): Promise<FastifyReply> {
 		const { name, contact } = req.body
 
-		const validDiscordUser = await validateDiscordUser(contact)
-		if (!validDiscordUser)
+		const contactUser = await validateDiscordUser(contact)
+		if (!contactUser)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Invalid Discord User",
 				message: `${contact} is not a valid Discord user`,
 			})
-		if (validDiscordUser.bot) {
+		if (contactUser.bot) {
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Invalid Discord User",
@@ -377,7 +374,6 @@ export default class CommunityController {
 
 		const auth = await createApikey(community, "private")
 
-		const contactUser = await client.users.fetch(contact)
 		communityCreatedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
@@ -435,14 +431,14 @@ export default class CommunityController {
 			})
 
 		const guildConfigs = await GuildConfigModel.find({
-			id: community.id,
+			communityId: community.id,
 		})
 		await GuildConfigModel.deleteMany({
-			id: community.id,
+			communityId: community.id,
 		})
 
 		await ReportInfoModel.deleteMany({
-			id: community.id,
+			communityId: community.id,
 		})
 
 		if (guildConfigs) {
@@ -479,7 +475,7 @@ export default class CommunityController {
 		}
 		sendGuildConfigInfo() // this will make it execute whilst letting other code still run
 
-		const contactUser = await client.users.fetch(community.contact)
+		const contactUser = await validateDiscordUser(community.contact)
 		communityRemovedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
