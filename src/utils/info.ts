@@ -157,7 +157,7 @@ export async function reportCreatedMessage(
 			{ name: "Playername", value: report.playername, inline: true },
 			{
 				name: "Category",
-				value: `${opts.category.shortdesc} (\`${opts.category.id}\`)`,
+				value: `${opts.category.name} (\`${opts.category.id}\`)`,
 				inline: true,
 			},
 			{ name: "Description", value: report.description, inline: false },
@@ -211,7 +211,7 @@ export async function reportRevokedMessage(
 			{ name: "Playername", value: revocation.playername, inline: true },
 			{
 				name: "Category",
-				value: `${opts.category.shortdesc} (\`${opts.category.id}\`)`,
+				value: `${opts.category.name} (\`${opts.category.id}\`)`,
 				inline: true,
 			},
 			{
@@ -255,8 +255,8 @@ export async function categoryCreatedMessage(
 ): Promise<void> {
 	if (
 		category === null ||
-		category.shortdesc === undefined ||
-		category.longdesc === undefined
+		category.name === undefined ||
+		category.description === undefined
 	)
 		return
 
@@ -269,13 +269,13 @@ export async function categoryCreatedMessage(
 		.addFields(
 			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
 			{
-				name: "Category short description",
-				value: category.shortdesc,
+				name: "Category name",
+				value: category.name,
 				inline: true,
 			},
 			{
-				name: "Category long description",
-				value: category.longdesc,
+				name: "Category description",
+				value: category.description,
 				inline: true,
 			}
 		)
@@ -295,8 +295,8 @@ export async function categoryRemovedMessage(
 ): Promise<void> {
 	if (
 		category === null ||
-		category.shortdesc === undefined ||
-		category.longdesc === undefined
+		category.name === undefined ||
+		category.description === undefined
 	)
 		return
 	// set the sent object's messageType to categoryRemoved
@@ -308,13 +308,13 @@ export async function categoryRemovedMessage(
 		.addFields(
 			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
 			{
-				name: "Category short description",
-				value: category.shortdesc,
+				name: "Category name",
+				value: category.name,
 				inline: true,
 			},
 			{
-				name: "Category long description",
-				value: category.longdesc,
+				name: "Category description",
+				value: category.description,
 				inline: true,
 			}
 		)
@@ -339,23 +339,23 @@ export async function categoryUpdatedMessage(
 		.addFields(
 			{ name: "Category ID", value: `\`${newCategory.id}\``, inline: true },
 			{
-				name: "Old Category short description",
-				value: oldCategory.shortdesc,
+				name: "Old Category name",
+				value: oldCategory.name,
 				inline: true,
 			},
 			{
-				name: "New Category short description",
-				value: newCategory.shortdesc,
+				name: "New Category name",
+				value: newCategory.name,
 				inline: true,
 			},
 			{
-				name: "Old Category long description",
-				value: oldCategory.longdesc,
+				name: "Old Category description",
+				value: oldCategory.description,
 				inline: true,
 			},
 			{
-				name: "New Category long description",
-				value: newCategory.longdesc,
+				name: "New Category description",
+				value: newCategory.description,
 				inline: true,
 			}
 		)
@@ -380,23 +380,23 @@ export async function categoriesMergedMessage(
 		.addFields(
 			{ name: "Receiving Category ID", value: `\`${dissolving.id}\``, inline: true },
 			{
-				name: "Dissolving Category short description",
-				value: receiving.shortdesc,
+				name: "Dissolving Category name",
+				value: receiving.name,
 				inline: true,
 			},
 			{
-				name: "Receiving Category short description",
-				value: dissolving.shortdesc,
+				name: "Receiving Category name",
+				value: dissolving.name,
 				inline: true,
 			},
 			{
-				name: "Dissolving Category long description",
-				value: receiving.longdesc,
+				name: "Dissolving Category description",
+				value: receiving.description,
 				inline: true,
 			},
 			{
-				name: "Receiving Category long description",
-				value: dissolving.longdesc,
+				name: "Receiving Category description",
+				value: dissolving.description,
 				inline: true,
 			}
 		)

@@ -17,8 +17,8 @@ export const createCommunities = (count: number): Community[] => {
 export const createCategory = (): Category => {
 	return {
 		id: faker.datatype.uuid(),
-		shortdesc: faker.lorem.word(),
-		longdesc: faker.lorem.sentence(),
+		name: faker.lorem.word(),
+		description: faker.lorem.sentence(),
 	}
 }
 export const createCategories = (count: number): Category[] => {

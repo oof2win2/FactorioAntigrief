@@ -70,8 +70,8 @@ export default class CategoryController {
 		options: {
 			schema: {
 				body: z.object({
-					shortdesc: z.string(),
-					longdesc: z.string()
+					name: z.string(),
+					description: z.string()
 				}).required(),
 
 				description: "Create category",
@@ -93,16 +93,16 @@ export default class CategoryController {
 	async create(
 		req: FastifyRequest<{
 			Body: {
-				shortdesc: string
-				longdesc: string
+				name: string
+				description: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { shortdesc, longdesc } = req.body
+		const { name, description } = req.body
 		const category = await CategoryModel.create({
-			shortdesc: shortdesc,
-			longdesc: longdesc,
+			name: name,
+			description: description,
 		})
 		categoryCreatedMessage(category)
 		return res.send(category)
@@ -116,8 +116,8 @@ export default class CategoryController {
 					id: z.string()
 				}).required(),
 				body: z.object({
-					shortdesc: z.string().optional(),
-					longdesc: z.string().optional(),
+					name: z.string().optional(),
+					description: z.string().optional(),
 				}).optional(),
 
 				description: "Update category",
@@ -142,16 +142,16 @@ export default class CategoryController {
 				id: string
 			}
 			Body: {
-				shortdesc?: string
-				longdesc?: string
+				name?: string
+				description?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { shortdesc, longdesc } = req.body
+		const { name, description } = req.body
 		const { id } = req.params
 
-		if (!shortdesc && !longdesc) {
+		if (!name && !description) {
 			return res.send(await CategoryModel.findOne({ id: id }))
 		}
 		const oldCategory = await CategoryModel.findOne({ id: id })
@@ -160,8 +160,8 @@ export default class CategoryController {
 		const newCategory = await CategoryModel.findOneAndUpdate({
 			id: id
 		}, {
-			...Boolean(shortdesc) && { shortdesc: shortdesc },
-			...Boolean(longdesc) && { longdesc: longdesc }
+			...Boolean(name) && { name: name },
+			...Boolean(description) && { description: description }
 		}, { new: true })
 		if (!newCategory) return res.send(null)
 
