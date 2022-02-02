@@ -80,7 +80,7 @@ export default class DiscordController {
 						setCategories: z.string().optional(),
 						setCommunities: z.string().optional(),
 					}).optional(),
-					apiKey: z.string().optional(),
+					apikey: z.string().optional(),
 				}),
 
 				description: "Update guild config",
@@ -117,12 +117,12 @@ export default class DiscordController {
 					setCategories?: string
 					setCommunities?: string
 				}
-				apiKey?: string
+				apikey?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { categoryFilters, trustedCommunities, roles, apiKey } = req.body
+		const { categoryFilters, trustedCommunities, roles, apikey } = req.body
 		const { guildId } = req.params
 
 		// check if the community exists
@@ -182,12 +182,12 @@ export default class DiscordController {
 		}
 
 		// check other stuff
-		if (apiKey) {
-			const parsed = await parseJWT(apiKey, [ "private", "master" ])
+		if (apikey) {
+			const parsed = await parseJWT(apikey, [ "private", "master" ])
 			if (parsed) {
 				const community = await CommunityModel.findOne({ id: parsed.sub })
 				if (community) {
-					guildConfig.apikey = apiKey
+					guildConfig.apikey = apikey
 					guildConfig.communityId = community.id
 				}
 			}
@@ -232,7 +232,7 @@ export default class DiscordController {
 		guildConfigChanged(guildConfig)
 		return res.status(200).send({
 			...guildConfig.toObject(),
-			apiKey: req.requestContext.get("authType") === "master" ? guildConfig?.apikey : null,
+			apikey: req.requestContext.get("authType") === "master" ? guildConfig?.apikey : null,
 		})
 	}
 
@@ -255,7 +255,7 @@ export default class DiscordController {
 								allOf: [
 									{ $ref: "GuildConfigClass#" },
 									{ properties: {
-										apiKey: {
+										apikey: {
 											allOf: [ { nullable: true }, { type: "string" } ],
 										}
 									} }
@@ -281,7 +281,7 @@ export default class DiscordController {
 		if (!config) return res.send(null)
 		const response = {
 			...config?.toObject(),
-			apiKey: req.requestContext.get("authType") === "master" ? config?.apikey : null,
+			apikey: req.requestContext.get("authType") === "master" ? config?.apikey : null,
 		}
 
 		return res.send(response)

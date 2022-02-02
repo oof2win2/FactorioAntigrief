@@ -233,7 +233,7 @@ describe("POST /communities/own/apikey", () => {
 			method: "GET",
 			path: "/communities/own",
 			headers: {
-				"authorization": `Bearer ${json.apiKey}`
+				"authorization": `Bearer ${json.apikey}`
 			},
 		})
 		expect(followup.statusCode).toBe(200)
@@ -301,7 +301,7 @@ describe("POST /communities/:id/apikey", () => {
 			method: "GET",
 			path: "/communities/own",
 			headers: {
-				"authorization": `Bearer ${json.apiKey}`
+				"authorization": `Bearer ${json.apikey}`
 			},
 		})
 		expect(followup.statusCode).toBe(200)
@@ -367,7 +367,7 @@ describe("POST /communities", () => {
 				method: "GET",
 				path: "/communities/own",
 				headers: {
-					"authorization": `Bearer ${json.apiKey}`
+					"authorization": `Bearer ${json.apikey}`
 				},
 			})
 			expect(followup.statusCode).toBe(200)
