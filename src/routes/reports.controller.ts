@@ -20,7 +20,17 @@ export default class ReportController {
 		url: "/",
 		options: {
 			schema: {
-				description: "Get all reports",
+				querystring: z.object({
+					playername: z.string().or(z.array(z.string())),
+					communityId: z.string().or(z.array(z.string())),
+					categoryId: z.string().or(z.array(z.string())),
+					adminId: z.string().or(z.array(z.string())),
+					after: z.string().optional().refine(
+						(input) => input === undefined || validator.isISO8601(input),
+						"Invalid timestamp"
+					),
+				}),
+				description: "Fetch reports",
 				tags: [ "reports" ],
 				response: {
 					"200": {
@@ -31,12 +41,27 @@ export default class ReportController {
 			},
 		},
 	})
-	async getAllReports(
-		req: FastifyRequest,
+	async fetchAll(
+		req: FastifyRequest<{
+			Querystring: {
+				playername?: string | string[],
+				communityId?: string | string[],
+				categoryId?: string | string[],
+				adminId?: string | string[],
+				after?: string,
+			}
+		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const community = await ReportInfoModel.find()
-		return res.send(community)
+		const { playername, communityId, categoryId, adminId, after } = req.query
+		const reports = await ReportInfoModel.find({
+			playername: playername,
+			communityId: communityId,
+			categoryId: categoryId,
+			adminId: adminId,
+			...(after ? { createdAt: { $gt: new Date(after) } } : {}),
+		})
+		return res.send(reports)
 	}
 
 	@POST({
@@ -59,7 +84,7 @@ export default class ReportController {
 					}, "Proof must be URLs split by a space"),
 				}),
 
-				description: "Create a report",
+				description: "Create report",
 				tags: [ "reports" ],
 				security: [
 					{
@@ -75,7 +100,7 @@ export default class ReportController {
 		},
 	})
 	@Authenticate
-	async createReport(
+	async create(
 		req: FastifyRequest<{
 			Body: {
 				adminId: string
@@ -186,7 +211,7 @@ export default class ReportController {
 					id: z.string(),
 				}),
 
-				description: "Fetch a report by it's ID",
+				description: "Fetch report",
 				tags: [ "reports" ],
 				response: {
 					"200": {
@@ -196,7 +221,7 @@ export default class ReportController {
 			},
 		},
 	})
-	async getReport(
+	async fetch(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -207,251 +232,5 @@ export default class ReportController {
 		const { id } = req.params
 		const community = await ReportInfoModel.findOne({ id: id })
 		return res.send(community)
-	}
-
-	@GET({
-		url: "/search",
-		options: {
-			schema: {
-				querystring: z.object({
-					playername: z.string(),
-					communityId: z.string(),
-					categoryId: z.string(),
-				}).partial().refine((x) => x.playername || x.communityId || x.categoryId, "At least one query param must be specified"),
-
-				description: "Search for reports using their playername, communityId or categoryId",
-				tags: [ "reports" ],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "ReportClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	async search(
-		req: FastifyRequest<{
-			Querystring: {
-				playername?: string
-				communityId?: string
-				categoryId?: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		// the querystring validator already makes sure that there is at least one prop, so we can just use it now
-		// TODO: finish + test this
-		const { playername, communityId, categoryId } = req.query
-		const reports = await ReportInfoModel.find({
-			playername: playername,
-			communityId: communityId,
-			categoryId: categoryId,
-		})
-		return res.send(reports)
-	}
-
-	@GET({
-		url: "/category/:id",
-		options: {
-			schema: {
-				params: z.object({
-					id: z.string()
-				}),
-
-				description: "Fetch a report by it's broken category ID",
-				tags: [ "reports" ],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "ReportClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	async getByCategory(
-		req: FastifyRequest<{
-			Params: {
-				id: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const reports = await ReportInfoModel.find({ categoryId: req.params.id })
-		return res.status(200).send(reports)
-	}
-
-	@GET({
-		url: "/player/:playername",
-		options: {
-			schema: {
-				params: z.object({
-					playername: z.string(),
-				}),
-
-				description: "Fetch reports by their player name",
-				tags: [ "reports" ],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							allOf: [
-								{ nullable: true },
-								{ $ref: "ReportClass#" },
-							],
-						},
-					},
-				},
-			},
-		},
-	})
-	async getPlayer(
-		req: FastifyRequest<{
-			Params: {
-				playername: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const reports = await ReportInfoModel.find({
-			playername: req.params.playername,
-		})
-		return res.status(200).send(reports)
-	}
-
-	@GET({
-		url: "/community/:communityId",
-		options: {
-			schema: {
-				params: z.object({
-					communityId: z.string(),
-				}),
-
-				description:
-					"Fetch reports by their community ID",
-				tags: [ "reports" ],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "ReportClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	async getCommunity(
-		req: FastifyRequest<{
-			Params: {
-				communityId: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const reports = await ReportInfoModel.find({
-			communityId: req.params.communityId,
-		})
-		return res.status(200).send(reports)
-	}
-
-	@POST({
-		url: "/list",
-		options: {
-			schema: {
-				body: z.object({
-					playername: z.string().nullish(),
-					categoryIds: z.array(z.string())
-						.max(100, "Exceeded maximum length of 100"),
-					communityIds: z.array(z.string())
-						.max(100, "Exceeded maximum length of 100"),
-
-				}),
-
-				description:
-					"Fetch reports by their community IDs and category IDs",
-				tags: [ "reports" ],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "ReportClass#",
-						},
-					},
-				},
-			}
-		}
-	})
-	async listReports(
-		req: FastifyRequest<{
-			Body: {
-				playername?: string | null
-				categoryIds: string[]
-				communityIds: string[]
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { playername, categoryIds, communityIds } = req.body
-		const reports = await ReportInfoModel.find({
-			playername: playername ?? undefined,
-			categoryId: {
-				$in: categoryIds
-			},
-			communityId: {
-				$in: communityIds
-			}
-		})
-		return res.send(reports)
-	}
-
-	@GET({
-		url: "/since/:timestamp",
-		options: {
-			schema: {
-				params: z.object({
-					timestamp: z.string().refine(
-						(input) =>
-						// use validator to check if it's a valid timestamp
-							validator.isISO8601(input),
-						"Invalid timestamp"
-					)
-				}),
-
-				description: "Fetch reports modified since a timestamp",
-				tags: [ "reports" ],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "ReportClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	async getSince(
-		req: FastifyRequest<{
-			Params: {
-				timestamp: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { timestamp } = req.params
-
-		const date = new Date(timestamp)
-		if (isNaN(date.getDate())) return res.send([])
-
-		const reports = await ReportInfoModel.find({
-			createdAt: { $gt: date },
-		})
-		return res.send(reports)
 	}
 }
