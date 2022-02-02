@@ -20,10 +20,10 @@ export class CategoryClass {
 		id!: string
 
 	@prop()
-		shortdesc!: string
+		name!: string
 
 	@prop()
-		longdesc!: string
+		description!: string
 }
 
 const CategoryModel = getModelForClass(CategoryClass)

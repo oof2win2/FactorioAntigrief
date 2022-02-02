@@ -21,7 +21,7 @@ const communityGauge = new promClient.Gauge({
 const categoryGauge = new promClient.Gauge({
 	name: "category_trust_count",
 	help: "Amount of communities that trust this category",
-	labelNames: [ "id", "shortdesc" ],
+	labelNames: [ "id", "name" ],
 })
 
 register.registerMetric(communityGauge)
@@ -120,7 +120,7 @@ const collectStatistics = async () => {
 	categories.forEach((category) => {
 		if (category.category)
 			categoryGauge.set(
-				{ id: category.category.id, shortdesc: category.category.shortdesc },
+				{ id: category.category.id, name: category.category.name },
 				category.count
 			)
 	})
