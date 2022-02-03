@@ -36,7 +36,7 @@ describe("Communities", () => {
 
 			communities.map((community) => {
 				// the different communities should be cached properly too
-				const resolved = wrapper.communities.resolveID(community.id)
+				const resolved = wrapper.communities.resolveId(community.id)
 				expect(resolved).toEqual(community)
 			})
 		})
@@ -64,7 +64,7 @@ describe("Communities", () => {
 			})
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(resolvedConfig).toEqual(wrapper.communities.resolveID(testCommunity.id))
+			expect(resolvedConfig).toEqual(wrapper.communities.resolveId(testCommunity.id))
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -94,7 +94,7 @@ describe("Communities", () => {
 			})
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveID(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -124,7 +124,7 @@ describe("Communities", () => {
 			})
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveID(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
 		})
 		it("Fetching cache should work with communities returned", async () => {
 			const testCommunity = testCommunities[0]
@@ -168,7 +168,7 @@ describe("Communities", () => {
 			await wrapper.communities.fetchOwnCommunity({})
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveID(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -240,7 +240,7 @@ describe("Communities", () => {
 			await wrapper.communities.create(testCommunity)
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveID(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -348,9 +348,9 @@ describe("Communities", () => {
 			expect(result).toEqual(testOne)
 
 			// the receiving community should still be in the cache
-			expect(wrapper.communities.resolveID(testOne.id)).toEqual(testOne)
+			expect(wrapper.communities.resolveId(testOne.id)).toEqual(testOne)
 			// the dissolved community should not be in the cache anymore
-			expect(wrapper.communities.resolveID(testTwo.id)).toBeNull()
+			expect(wrapper.communities.resolveId(testTwo.id)).toBeNull()
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))

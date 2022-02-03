@@ -31,7 +31,7 @@ describe("Categories", () => {
 			const categories = await wrapper.categories.fetchAll({})
 
 			categories.map((category) => {
-				const resolved = wrapper.categories.resolveID(category.id)
+				const resolved = wrapper.categories.resolveId(category.id)
 				expect(resolved).toEqual(category)
 			})
 		})
@@ -64,7 +64,7 @@ describe("Categories", () => {
 				}
 			})
 			
-			const resolved = wrapper.categories.resolveID(category.id)
+			const resolved = wrapper.categories.resolveId(category.id)
 			expect(resolved).toEqual(category)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
@@ -82,23 +82,23 @@ describe("Categories", () => {
 		it("Should fetch a single category correctly", async () => {
 			fetchMock.mockOnce(JSON.stringify(testCategories[0]))
 			const originalCategory = testCategories[0]
-			const category = await wrapper.categories.fetchCategory({ categoryid: originalCategory.id })
+			const category = await wrapper.categories.fetchCategory({ categoryId: originalCategory.id })
 			expect(category).not.toBeNull()
 			expect(category).toEqual(originalCategory)
 		})
 		it("Should cache a category after fetching it", async () => {
 			fetchMock.mockOnce(JSON.stringify(testCategories[0]))
-			const category = await wrapper.categories.fetchCategory({ categoryid: testCategories[0].id })
+			const category = await wrapper.categories.fetchCategory({ categoryId: testCategories[0].id })
 
 			expect(category).not.toBeNull()
-			const resolved = wrapper.categories.resolveID(category!.id)
+			const resolved = wrapper.categories.resolveId(category!.id)
 			expect(resolved).not.toBeNull()
 
 			expect(resolved).toEqual(category)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
-			await expect(wrapper.categories.fetchCategory({ categoryid: testCategories[0].id })).rejects.toThrow()
+			await expect(wrapper.categories.fetchCategory({ categoryId: testCategories[0].id })).rejects.toThrow()
 		})
 	})
 
@@ -124,7 +124,7 @@ describe("Categories", () => {
 			const testCategory = testCategories[0]
 			wrapper.categories.cache.set(testCategory.id, testCategory) // set it in the cache
 			
-			const oldCached = wrapper.categories.resolveID(testCategory.id)
+			const oldCached = wrapper.categories.resolveId(testCategory.id)
 
 			const newCategory = {
 				id: testCategory.id,
@@ -140,7 +140,7 @@ describe("Categories", () => {
 
 			expect(returned).not.toBeNull()
 
-			const newCached = wrapper.categories.resolveID(testCategory.id)
+			const newCached = wrapper.categories.resolveId(testCategory.id)
 
 			// check if the returned category is correct
 			expect(returned).toEqual(newCategory)
@@ -179,7 +179,7 @@ describe("Categories", () => {
 			fetchMock.mockOnce(JSON.stringify(testCategory))
 			const returned = await wrapper.categories.remove({ categoryId: testCategory.id })
 			expect(returned).toEqual(testCategory)
-			const resolved = wrapper.categories.resolveID(testCategory.id)
+			const resolved = wrapper.categories.resolveId(testCategory.id)
 			expect(resolved).toBeNull()
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
@@ -213,8 +213,8 @@ describe("Categories", () => {
 			})
 			expect(returned).toEqual(categoryOne)
 
-			expect(wrapper.categories.resolveID(categoryOne.id)).toEqual(categoryOne)
-			expect(wrapper.categories.resolveID(categoryTwo.id)).toBeNull()
+			expect(wrapper.categories.resolveId(categoryOne.id)).toEqual(categoryOne)
+			expect(wrapper.categories.resolveId(categoryTwo.id)).toBeNull()
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			const [ categoryOne, categoryTwo ] = testCategories

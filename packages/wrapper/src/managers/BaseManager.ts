@@ -66,7 +66,7 @@ export default class BaseManager<HoldsWithId extends Common> {
 		this.fetchingCache.clear()
 	}
 
-	resolveID(id: Common["id"]): HoldsWithId | null {
+	resolveId(id: Common["id"]): HoldsWithId | null {
 		const cached = this.cache.get(id)
 		if (cached) return cached
 		return null

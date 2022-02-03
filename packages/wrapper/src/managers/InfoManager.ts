@@ -34,16 +34,16 @@ export default class InfoManager extends BaseManager<Webhook> {
 		return Webhook.parse(add)
 	}
 	async removeWebhook({
-		webhookid, webhooktoken
+		webhookId, webhookToken
 	}: {
-		webhookid: string,
-		webhooktoken: string
+		webhookId: string,
+		webhookToken: string
 	}): Promise<Webhook | null> {
 		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
 			method: "DELETE",
 			body: JSON.stringify({
-				id: webhookid,
-				token: webhooktoken,
+				id: webhookId,
+				token: webhookToken,
 			}),
 			credentials: "include",
 			headers: { "content-type": "application/json" },
