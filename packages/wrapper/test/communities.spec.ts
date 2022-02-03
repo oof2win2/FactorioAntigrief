@@ -224,18 +224,18 @@ describe("Communities", () => {
 			const apikey = faker.internet.password()
 			fetchMock.mockOnce(JSON.stringify({
 				community: testCommunity,
-				apiKey: apikey
+				apikey: apikey
 			}))
 			const resolvedCommunity = await wrapper.communities.create(testCommunity)
 
 			expect(resolvedCommunity.community).toEqual(testCommunity)
-			expect(resolvedCommunity.apiKey).toEqual(apikey)
+			expect(resolvedCommunity.apikey).toEqual(apikey)
 		})
 		it("Should be able to cache the created community", async () => {
 			const testCommunity = testCommunities[0]
 			fetchMock.mockOnce(JSON.stringify({
 				community: testCommunity,
-				apiKey: faker.internet.password()
+				apikey: faker.internet.password()
 			}))
 			await wrapper.communities.create(testCommunity)
 

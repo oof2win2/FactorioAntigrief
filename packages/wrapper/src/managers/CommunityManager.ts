@@ -256,9 +256,9 @@ export default class CommunityManager extends BaseManager<Community> {
 
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
-			apiKey: z.string(),
+			apikey: z.string(),
 		}).parse(key)
-		return parsed.apiKey
+		return parsed.apikey
 	}
 	
 	/**
@@ -283,9 +283,9 @@ export default class CommunityManager extends BaseManager<Community> {
 
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
-			apiKey: z.string(),
+			apikey: z.string(),
 		}).parse(key)
-		return parsed.apiKey
+		return parsed.apikey
 	}
 
 	/**
@@ -314,9 +314,9 @@ export default class CommunityManager extends BaseManager<Community> {
 
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
-			apiKey: z.string(),
+			apikey: z.string(),
 		}).parse(key)
-		return parsed.apiKey
+		return parsed.apikey
 	}
 
 	/**
@@ -343,9 +343,9 @@ export default class CommunityManager extends BaseManager<Community> {
 
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
-			apiKey: z.string(),
+			apikey: z.string(),
 		}).parse(key)
-		return parsed.apiKey
+		return parsed.apikey
 	}
 
 	async create({
@@ -358,7 +358,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		contact: string,
 	} & FetchRequestTypes): Promise<{
 		community: Community
-		apiKey: string
+		apikey: string
 	}> {
 		const req = await fetch(`${this.apiurl}/communities`, {
 			method: "POST",
@@ -379,7 +379,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		
 		const parsedCreate = z.object({
 			community: Community,
-			apiKey: z.string(),
+			apikey: z.string(),
 		}).parse(create)
 		if (cache) this.add(parsedCreate.community)
 		return parsedCreate

@@ -1,5 +1,6 @@
 ## UNRELEASED
 
+-	Renamed apiKey to apikey
 -	Renamed fields to consistent casing of ID
 -	Renamed category shortdesc and longdesc to name and description
 

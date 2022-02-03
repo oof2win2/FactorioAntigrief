@@ -29,6 +29,6 @@ export const createGuildConfig = (): GuildConfig => {
 			reports: faker.datatype.string(),
 			setConfig: faker.datatype.string(),
 		},
-		apiKey: faker.datatype.boolean() ? faker.internet.password() : null,
+		apikey: faker.datatype.boolean() ? faker.internet.password() : null,
 	}
 }
