@@ -97,11 +97,11 @@ export class CategoryManager extends BaseManager<Category> {
 
 	async modify({
 		categoryId,
-		shortdesc, longdesc,
+		name, description,
 		reqConfig = {}
 	}: {
 		categoryId: string,
-		shortdesc?: string, longdesc?: string
+		name?: string, description?: string
 	} & FetchRequestTypes): Promise<Category | null> {
 		const req = await fetch(
 			`${this.apiurl}/categories/${strictUriEncode(categoryId)}`,
@@ -109,8 +109,8 @@ export class CategoryManager extends BaseManager<Category> {
 				method: "PATCH",
 				credentials: "include",
 				body: JSON.stringify({
-					shortdesc: shortdesc,
-					longdesc: longdesc
+					name: name,
+					description: description
 				}),
 				headers: {
 					authorization: masterAuthenticate(this, reqConfig),

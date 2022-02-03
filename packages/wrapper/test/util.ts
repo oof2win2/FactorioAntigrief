@@ -4,8 +4,8 @@ import faker from "faker"
 export const createCategory = (): Category => {
 	return {
 		id: faker.datatype.uuid(),
-		shortdesc: faker.random.word(),
-		longdesc: faker.random.words(),
+		name: faker.random.word(),
+		description: faker.random.words(),
 	}
 }
 export const createCommunity = (): Community => {

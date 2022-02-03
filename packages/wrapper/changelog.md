@@ -1,6 +1,7 @@
 ## UNRELEASED
 
 -	Renamed fields to consistent casing of ID
+-	Renamed category shortdesc and longdesc to name and description
 
 ## [1.28.1] - [2022-01-24]
 

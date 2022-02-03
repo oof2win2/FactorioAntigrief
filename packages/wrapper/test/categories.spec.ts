@@ -47,8 +47,8 @@ describe("Categories", () => {
 			fetchMock.mockOnce(JSON.stringify(testCategory))
 			const category = await wrapper.categories.create({
 				category: {
-					shortdesc: testCategory.shortdesc,
-					longdesc: testCategory.longdesc,
+					name: testCategory.name,
+					description: testCategory.description,
 				}
 			})
 
@@ -59,8 +59,8 @@ describe("Categories", () => {
 			fetchMock.mockOnce(JSON.stringify(testCategory))
 			const category = await wrapper.categories.create({
 				category: {
-					shortdesc: testCategory.shortdesc,
-					longdesc: testCategory.longdesc,
+					name: testCategory.name,
+					description: testCategory.description,
 				}
 			})
 			
@@ -71,8 +71,8 @@ describe("Categories", () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
 			await expect(wrapper.categories.create({
 				category: {
-					shortdesc: "test",
-					longdesc: "test",
+					name: "test",
+					description: "test",
 				}
 			})).rejects.toThrow()
 		})
@@ -108,14 +108,14 @@ describe("Categories", () => {
 
 			const newCategory = {
 				id: testCategory.id,
-				shortdesc: testCategory.shortdesc + "test",
-				longdesc: testCategory.longdesc + "test",
+				name: testCategory.name + "test",
+				description: testCategory.description + "test",
 			}
 			fetchMock.mockOnce(JSON.stringify(newCategory))
 			const returned = await wrapper.categories.modify({
 				categoryId: testCategory.id,
-				shortdesc: newCategory.shortdesc,
-				longdesc: newCategory.longdesc,
+				name: newCategory.name,
+				description: newCategory.description,
 			})
 
 			expect(returned).toEqual(newCategory)
@@ -128,14 +128,14 @@ describe("Categories", () => {
 
 			const newCategory = {
 				id: testCategory.id,
-				shortdesc: testCategory.shortdesc + "test",
-				longdesc: testCategory.longdesc + "test",
+				name: testCategory.name + "test",
+				description: testCategory.description + "test",
 			}
 			fetchMock.mockOnce(JSON.stringify(newCategory))
 			const returned = await wrapper.categories.modify({
 				categoryId: testCategory.id,
-				shortdesc: newCategory.shortdesc,
-				longdesc: newCategory.longdesc,
+				name: newCategory.name,
+				description: newCategory.description,
 			})
 
 			expect(returned).not.toBeNull()
@@ -159,8 +159,8 @@ describe("Categories", () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
 			await expect(wrapper.categories.modify({
 				categoryId: testCategory.id,
-				shortdesc: testCategory.shortdesc,
-				longdesc: testCategory.longdesc,
+				name: testCategory.name,
+				description: testCategory.description,
 			})).rejects.toThrow()
 		})
 	})
