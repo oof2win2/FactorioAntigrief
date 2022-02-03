@@ -42,8 +42,8 @@ export const Community = z.object({
 export type Community = z.infer<typeof Community>
 
 export const Category = z.object({
-	shortdesc: z.string(),
-	longdesc: z.string(),
+	name: z.string(),
+	description: z.string(),
 }).merge(Common)
 export type Category = z.infer<typeof Category>
 

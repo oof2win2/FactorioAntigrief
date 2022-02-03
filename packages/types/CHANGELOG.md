@@ -1,3 +1,7 @@
+## UNRELEASED
+
+-   Renamed category shortdesc and longdesc fields to name and description
+
 ## [1.9.0] - [2022-01-24]
 
 ### Changes
