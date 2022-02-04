@@ -193,17 +193,9 @@ export default class RevocationController {
 			})
 		const category = await CategoryModel.findOne({ id: report.categoryId })
 
-		const revocation = await ReportInfoModel.findOneAndUpdate({
-			id: report.id
-		}, {
-			revokedAt: new Date(),
-			revokedBy: revoker.id,
-		}, { new: true })
-		if (!revocation) return res.status(404).send({
-			errorCode: 404,
-			error: "Not Found",
-			message: "Report could not be found",
-		})
+		report.revokedAt = new Date()
+		report.revokedBy = revoker.id
+		await report.save()
 
 		const allReports = await ReportInfoModel.find({
 			playername: report.playername,
@@ -214,7 +206,7 @@ export default class RevocationController {
 			differentCommunities.add(report.communityId)
 		)
 
-		reportRevokedMessage(Revocation.parse(revocation), {
+		reportRevokedMessage(Revocation.parse(report), {
 			community: <Community>(<unknown>community),
 			// this is allowed since the category is GUARANTEED to exist if the report exists
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -225,7 +217,7 @@ export default class RevocationController {
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
-		return res.status(200).send(revocation)
+		return res.status(200).send(report)
 	}
 
 	@POST({

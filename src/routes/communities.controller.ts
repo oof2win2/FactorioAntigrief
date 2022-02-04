@@ -145,13 +145,7 @@ export default class CommunityController {
 
 		community.name = name || community.name
 		community.contact = contact || community.contact
-
-		await CommunityModel.findOneAndReplace(
-			{
-				id: community.id,
-			},
-			community.toObject()
-		)
+		await community.save()
 
 		communityUpdatedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
@@ -206,9 +200,8 @@ export default class CommunityController {
 
 		if (req.body.invalidate) {
 			// invalidate all existing tokens
-			await CommunityModel.findOneAndUpdate({ id: community.id }, {
-				tokenInvalidBefore: Date.now(),
-			}).exec()
+			community.tokenInvalidBefore = new Date()
+			await community.save()
 		}
 
 		const auth = req.body.create ? await createApikey(community, "private") : undefined
@@ -270,9 +263,8 @@ export default class CommunityController {
 
 		if (req.body.invalidate) {
 			// invalidate all existing tokens
-			await CommunityModel.findOneAndUpdate({ id: community.id }, {
-				tokenInvalidBefore: Date.now(),
-			}).exec()
+			community.tokenInvalidBefore = new Date()
+			await community.save()
 		}
 
 		const auth = req.body.create ? await createApikey(community, req.body.type) : undefined

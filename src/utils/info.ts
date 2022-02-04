@@ -10,6 +10,7 @@ import { CategoryClass } from "../database/category"
 import { CommunityClass } from "../database/community"
 import { ReportInfoClass } from "../database/reportinfo"
 import {
+	Category,
 	CommunityCreatedMessageExtraOpts,
 	ReportMessageExtraOpts,
 	Revocation,
@@ -330,8 +331,8 @@ export async function categoryRemovedMessage(
 }
 
 export async function categoryUpdatedMessage(
-	oldCategory: DocumentType<CategoryClass, BeAnObject>,
-	newCategory: DocumentType<CategoryClass, BeAnObject>
+	oldCategory: Category,
+	newCategory: Category
 ): Promise<void> {
 	const categoryEmbed = new MessageEmbed()
 		.setTitle("FAGC - Category Updated")

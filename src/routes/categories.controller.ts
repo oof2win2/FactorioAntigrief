@@ -141,23 +141,19 @@ export default class CategoryController {
 		const { name, description } = req.body
 		const { id } = req.params
 
+		const category = await CategoryModel.findOne({ id: id })
+		if (!category) return res.send(null)
 		if (!name && !description) {
 			return res.send(await CategoryModel.findOne({ id: id }))
 		}
-		const oldCategory = await CategoryModel.findOne({ id: id })
 
-		if (!oldCategory) return res.send(null)
-		const newCategory = await CategoryModel.findOneAndUpdate({
-			id: id
-		}, {
-			...Boolean(name) && { name: name },
-			...Boolean(description) && { description: description }
-		}, { new: true })
-		if (!newCategory) return res.send(null)
+		const oldCategory = category.toObject()
+		if (name) category.name = name
+		if (description) category.description = description
+		await category.save()
+		categoryUpdatedMessage(oldCategory, category.toObject())
 
-		categoryUpdatedMessage(oldCategory, newCategory)
-
-		return res.send(newCategory)
+		return res.send(category)
 	}
 
 	@DELETE({
