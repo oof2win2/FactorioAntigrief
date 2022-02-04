@@ -221,19 +221,12 @@ export default class DiscordController {
 			}
 		}
 
-		await GuildConfigModel.findOneAndReplace(
-			{
-				guildId: guildConfig.guildId,
-			},
-			guildConfig.toObject()
-		)
-		
-		console.log(guildConfig)
+		await guildConfig.save()
 		guildConfigChanged(guildConfig)
-		return res.status(200).send({
-			...guildConfig.toObject(),
-			apikey: req.requestContext.get("authType") === "master" ? guildConfig?.apikey : null,
-		})
+		const includeApikey = req.requestContext.get("authType") === "master"
+		return res.status(200).send(
+			guildConfig.toObject({ includeApikey } as any),
+		)
 	}
 
 	@GET({
@@ -279,12 +272,9 @@ export default class DiscordController {
 		const { guildId } = req.params
 		const config = await GuildConfigModel.findOne({ guildId: guildId })
 		if (!config) return res.send(null)
-		const response = {
-			...config?.toObject(),
-			apikey: req.requestContext.get("authType") === "master" ? config?.apikey : null,
-		}
 
-		return res.send(response)
+		const includeApikey = req.requestContext.get("authType") === "master"
+		return res.send(config.toObject({ includeApikey } as any))
 	}
 
 	@DELETE({

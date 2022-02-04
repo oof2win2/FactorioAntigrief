@@ -11,7 +11,6 @@ import { DocumentType } from "@typegoose/typegoose"
 import { CommunityClass } from "./database/community"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import fastifyFormBodyPlugin from "fastify-formbody"
-import removeIdMiddleware from "./utils/removeId"
 import * as Sentry from "@sentry/node"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from "@sentry/tracing"
@@ -190,9 +189,6 @@ fastify.register(fastifyHelmetPlugin, {
 
 // form body for backwards compat with the express api
 fastify.register(fastifyFormBodyPlugin)
-
-// middlware to remove garbage from responses
-fastify.addHook("onSend", removeIdMiddleware)
 
 fastify.setValidatorCompiler(({ schema }: {
 	schema: z.ZodAny
