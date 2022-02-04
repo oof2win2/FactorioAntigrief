@@ -8,6 +8,7 @@ import { validateDiscordUser, client } from "../utils/discord"
 import {
 	Community,
 	Category,
+	Report,
 	ReportMessageExtraOpts,
 } from "fagc-api-types"
 import GuildConfigModel from "../database/guildconfig"
@@ -33,10 +34,7 @@ export default class ReportController {
 				description: "Fetch reports",
 				tags: [ "reports" ],
 				response: {
-					"200": {
-						type: "array",
-						items: { $ref: "ReportClass#" }
-					},
+					"200": z.array(Report),
 				},
 			},
 		},
@@ -93,9 +91,7 @@ export default class ReportController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "ReportClass#",
-					},
+					"200": Report,
 				},
 			},
 		},
@@ -216,9 +212,7 @@ export default class ReportController {
 				description: "Fetch report",
 				tags: [ "reports" ],
 				response: {
-					"200": {
-						allOf: [ { nullable: true }, { $ref: "ReportClass#" } ],
-					},
+					"200": Report.nullable(),
 				},
 			},
 		},
@@ -232,7 +226,7 @@ export default class ReportController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const community = await ReportInfoModel.findOne({ id: id, revokedAt: { $exists: false }})
+		const community = await ReportInfoModel.findOne({ id: id, revokedAt: { $exists: false } })
 		return res.send(community)
 	}
 }

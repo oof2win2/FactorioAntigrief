@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST, PUT } from "fastify-decorators"
-import { Webhook, WebhookClient } from "discord.js"
+import { Webhook as DiscordWebhook, WebhookClient } from "discord.js"
 import { Authenticate, MasterAuthenticate, OptionalAuthenticate, forbidden, parseJWT } from "../utils/authentication"
 import CategoryModel from "../database/category"
 import CommunityModel from "../database/community"
@@ -8,6 +8,7 @@ import GuildConfigModel from "../database/guildconfig"
 import WebhookModel from "../database/webhook"
 import { guildConfigChanged } from "../utils/info"
 import { client } from "../utils/discord"
+import { GuildConfig, Webhook } from "fagc-api-types"
 import { z } from "zod"
 
 @Controller({ route: "/discord" })
@@ -28,9 +29,7 @@ export default class DiscordController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "GuildConfigClass#"
-					},
+					"200": GuildConfig,
 				},
 			},
 		},
@@ -91,12 +90,7 @@ export default class DiscordController {
 					},
 				],
 				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "GuildConfigClass#" },
-						],
-					},
+					"200": GuildConfig.nullable(),
 				},
 			},
 		},
@@ -240,22 +234,7 @@ export default class DiscordController {
 				description: "Fetch guild config",
 				tags: [ "discord" ],
 				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{
-								// this is to merge two schemas and add other props
-								allOf: [
-									{ $ref: "GuildConfigClass#" },
-									{ properties: {
-										apikey: {
-											allOf: [ { nullable: true }, { type: "string" } ],
-										}
-									} }
-								]
-							},
-						],
-					},
+					"200": GuildConfig.nullable(),
 				},
 			},
 		},
@@ -434,9 +413,7 @@ export default class DiscordController {
 				description: "Add Discord webhook to FAGC notifications",
 				tags: [ "discord" ],
 				response: {
-					"200": {
-						$ref: "WebhookClass#",
-					},
+					"200": Webhook,
 				},
 			},
 		},
@@ -451,7 +428,7 @@ export default class DiscordController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id, token } = req.params
-		let webhook: Webhook
+		let webhook: DiscordWebhook
 		try {
 			webhook = await client.fetchWebhook(id, token)
 		} catch {
@@ -492,9 +469,7 @@ export default class DiscordController {
 				description: "Remove a webhook from FAGC notifications",
 				tags: [ "discord" ],
 				response: {
-					"200": {
-						$ref: "WebhookClass#",
-					},
+					"200": Webhook,
 				},
 			},
 		},
