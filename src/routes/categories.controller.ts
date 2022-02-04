@@ -4,6 +4,7 @@ import CategoryModel from "../database/category"
 import GuildConfigModel from "../database/guildconfig"
 import { MasterAuthenticate } from "../utils/authentication"
 import { guildConfigChanged, categoryCreatedMessage, categoryRemovedMessage, categoriesMergedMessage, categoryUpdatedMessage } from "../utils/info"
+import { Category } from "fagc-api-types"
 import { z } from "zod"
 import ReportInfoModel from "../database/reportinfo"
 
@@ -16,12 +17,7 @@ export default class CategoryController {
 				description: "Fetch all categories",
 				tags: [ "categories" ],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "CategoryClass#",
-						},
-					},
+					"200": z.array(Category),
 				},
 			},
 		},
@@ -45,9 +41,7 @@ export default class CategoryController {
 				description: "Fetch category",
 				tags: [ "categories" ],
 				response: {
-					"200": {
-						allOf: [ { nullable: true }, { $ref: "CategoryClass#" } ],
-					},
+					"200": Category.nullable(),
 				},
 			},
 		},
@@ -82,9 +76,7 @@ export default class CategoryController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},
@@ -128,9 +120,7 @@ export default class CategoryController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},
@@ -186,9 +176,7 @@ export default class CategoryController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},
@@ -265,9 +253,7 @@ export default class CategoryController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},

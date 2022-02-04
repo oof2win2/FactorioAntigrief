@@ -13,7 +13,7 @@ import {
 import { validateDiscordUser } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
-import { CommunityCreatedMessageExtraOpts } from "fagc-api-types"
+import { Community, CommunityCreatedMessageExtraOpts } from "fagc-api-types"
 import { z } from "zod"
 
 @Controller({ route: "/communities" })
@@ -25,12 +25,7 @@ export default class CommunityController {
 				description: "Fetch all communities",
 				tags: [ "community" ],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "CommunityClass#",
-						},
-					},
+					"200": z.array(Community),
 				},
 			},
 		},
@@ -54,12 +49,7 @@ export default class CommunityController {
 				description: "Fetch community",
 				tags: [ "community" ],
 				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "CommunityClass#" },
-						],
-					},
+					"200": Community.nullable(),
 				},
 			},
 		},
@@ -89,12 +79,7 @@ export default class CommunityController {
 					},
 				],
 				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "CommunityClass#" },
-						],
-					},
+					"200": Community.nullable(),
 				},
 			},
 		},
@@ -125,12 +110,7 @@ export default class CommunityController {
 					},
 				],
 				response: {
-					"200": {
-						allOf: [
-							{ nullable: true },
-							{ $ref: "CommunityClass#" },
-						],
-					},
+					"200": Community.nullable(),
 				},
 			},
 		},
@@ -198,13 +178,9 @@ export default class CommunityController {
 					},
 				],
 				response: {
-					"200": {
-						properties: {
-							apikey: {
-								type: "string",
-							}
-						}
-					},
+					"200": z.object({
+						apikey: z.string().optional(),
+					}),
 				},
 			}
 		}
@@ -261,13 +237,9 @@ export default class CommunityController {
 					},
 				],
 				response: {
-					"200": {
-						properties: {
-							apikey: {
-								type: "string",
-							}
-						}
-					},
+					"200": z.object({
+						apikey: z.string().optional(),
+					}),
 				},
 			}
 		}
@@ -326,15 +298,10 @@ export default class CommunityController {
 					},
 				],
 				response: {
-					"200": {
-						type: "object",
-						properties: {
-							apikey: { type: "string" },
-							community: {
-								$ref: "CommunityClass#",
-							},
-						},
-					},
+					"200": z.object({
+						community: Community,
+						apikey: z.string(),
+					}),
 				},
 			},
 		},
@@ -402,9 +369,7 @@ export default class CommunityController {
 					},
 				],
 				response: {
-					"200": {
-						type: "boolean",
-					},
+					"200": z.boolean(),
 				},
 			},
 		},
@@ -502,9 +467,7 @@ export default class CommunityController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CommunityClass#",
-					},
+					"200": Community,
 				},
 			},
 		},

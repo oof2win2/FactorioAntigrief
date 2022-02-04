@@ -44,12 +44,7 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
@@ -106,9 +101,7 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						allOf: [ { nullable: true }, { $ref: "ReportClass#" } ],
-					},
+					"200": Revocation.nullable(),
 				},
 			},
 		},
@@ -157,9 +150,7 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "RevocationClass#",
-					},
+					"200": Revocation,
 				},
 			},
 		},
@@ -256,12 +247,7 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
@@ -379,12 +365,7 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
@@ -499,12 +480,7 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
