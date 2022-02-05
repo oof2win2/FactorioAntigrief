@@ -18,7 +18,7 @@
 		"@types/dateformat": "^5.0.0",
 		"chalk": "^4.1.1",
 		"common-tags": "^1.8.0",
-		"dateformat": "^4.5.1",
+		"dateformat": "^5.0.2",
 		"discord.js": "^13.6.0",
 		"dotenv": "^8.2.0",
 		"envalid": "^7.2.1",
