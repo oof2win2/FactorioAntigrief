@@ -30,8 +30,8 @@ const Setaction: SubCommand = {
 		const revocation = z.enum([ "unban", "custom", "none" ]).nullable().parse(interaction.options.getString("revocation"))
 		const report = z.enum([ "ban", "custom", "none" ]).nullable().parse(interaction.options.getString("report"))
 		
-		const config: Partial<BotConfigType> & Pick<BotConfigType, "guildID"> = {
-			guildID: interaction.guildId,
+		const config: Partial<BotConfigType> & Pick<BotConfigType, "guildId"> = {
+			guildId: interaction.guildId,
 		} as const
 		if (report) config.reportAction = report
 		if (revocation) config.revocationAction = revocation

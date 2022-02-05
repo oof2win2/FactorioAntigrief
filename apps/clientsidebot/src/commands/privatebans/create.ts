@@ -29,13 +29,13 @@ const Setaction: SubCommand = {
 			}
 		})
 		if (existing) return interaction.reply({
-			content: `Player ${playername} was already banned by <@${existing.adminID}> on <t:${Math.round(existing.createdAt.valueOf()/1000)}> for ${existing.reason}`,
+			content: `Player ${playername} was already banned by <@${existing.adminId}> on <t:${Math.round(existing.createdAt.valueOf()/1000)}> for ${existing.reason}`,
 			ephemeral: true,
 		})
 		
 		await client.db.privatebans.create({
 			data: {
-				adminID: interaction.user.id,
+				adminId: interaction.user.id,
 				playername: playername,
 				reason: reason ?? undefined,
 			}

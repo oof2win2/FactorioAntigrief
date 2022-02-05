@@ -60,11 +60,11 @@ export default class FAGCBot extends Client {
 		const rawServers = getServers()
 
 		rawServers.map((server) => {
-			const existing = this.servers.get(server.discordGuildID)
+			const existing = this.servers.get(server.discordGuildId)
 			if (existing) {
-				this.servers.set(server.discordGuildID, [ ...existing, server ])
+				this.servers.set(server.discordGuildId, [ ...existing, server ])
 			} else {
-				this.servers.set(server.discordGuildID, [ server ])
+				this.servers.set(server.discordGuildId, [ server ])
 			}
 		})
 
@@ -78,18 +78,18 @@ export default class FAGCBot extends Client {
 		// load info channels
 		this.db.infoChannel.findMany().then(channels => {
 			channels.forEach(channel => {
-				const existing = this.infochannels.get(channel.guildID)
+				const existing = this.infochannels.get(channel.guildId)
 				if (existing) {
-					this.infochannels.set(channel.guildID, [ ...existing, channel ])
+					this.infochannels.set(channel.guildId, [ ...existing, channel ])
 				} else {
-					this.infochannels.set(channel.guildID, [ channel ])
+					this.infochannels.set(channel.guildId, [ channel ])
 				}
 			})
 		})
 
 		this.getBotConfigs().then((configs) => {
 			configs.forEach(config => {
-				this.botConfigs.set(config.guildID, config)
+				this.botConfigs.set(config.guildId, config)
 			})
 		})
 		
@@ -109,42 +109,42 @@ export default class FAGCBot extends Client {
 		const records = await this.db.botConfig.findMany()
 		return z.array(database.BotConfig).parse(records)
 	}
-	async getBotConfig(guildID: string): Promise<database.BotConfigType> {
-		const existing = this.botConfigs.get(guildID)
+	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
+		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing
 		const record = await this.db.botConfig.findFirst({
 			where: {
-				guildID: guildID,
+				guildId: guildId,
 			}
 		})
-		const created = database.BotConfig.parse(record ?? { guildID: guildID })
+		const created = database.BotConfig.parse(record ?? { guildId: guildId })
 		if (!record) await this.setBotConfig(created)
 		return created
 	}
-	async setBotConfig(config: Partial<database.BotConfigType> & Pick<database.BotConfigType, "guildID">) {
-		const existingConfig = await this.getBotConfig(config.guildID)
+	async setBotConfig(config: Partial<database.BotConfigType> & Pick<database.BotConfigType, "guildId">) {
+		const existingConfig = await this.getBotConfig(config.guildId)
 		const toSetConfig = database.BotConfig.parse({
 			...existingConfig,
 			...config
 		})
 		const newConfig = await this.db.botConfig.upsert({
-			where: { guildID: config.guildID },
+			where: { guildId: config.guildId },
 			create: {
 				...toSetConfig,
-				guildID: config.guildID,
+				guildId: config.guildId,
 			},
 			update: {
 				...toSetConfig,
 			}
 		})
-		this.botConfigs.set(config.guildID, database.BotConfig.parse(newConfig))
+		this.botConfigs.set(config.guildId, database.BotConfig.parse(newConfig))
 	}
 
 	private sendEmbeds() {
-		for (const [ channelID ] of this.embedQueue) {
-			const embeds = this.embedQueue.get(channelID)?.splice(0, 10) ?? []
+		for (const [ channelId ] of this.embedQueue) {
+			const embeds = this.embedQueue.get(channelId)?.splice(0, 10) ?? []
 			if (!embeds.length) continue
-			const channel = this.channels.resolve(channelID)
+			const channel = this.channels.resolve(channelId)
 			if (!channel || !channel.isNotDMChannel()) continue
 			const infoChannels = this.infochannels.get(channel.guild.id)
 			if (!infoChannels) continue
@@ -152,28 +152,28 @@ export default class FAGCBot extends Client {
 		}
 	}
 
-	addEmbedToQueue(channelID: string, embed: MessageEmbed) {
-		const channel = this.channels.resolve(channelID)
+	addEmbedToQueue(channelId: string, embed: MessageEmbed) {
+		const channel = this.channels.resolve(channelId)
 		if (!channel || !channel.isNotDMChannel()) return false
-		if (this.embedQueue.has(channelID)) {
+		if (this.embedQueue.has(channelId)) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			this.embedQueue.set(channelID, [ ...this.embedQueue.get(channelID)!, embed ])
+			this.embedQueue.set(channelId, [ ...this.embedQueue.get(channelId)!, embed ])
 		} else {
-			this.embedQueue.set(channelID, [ embed ])
+			this.embedQueue.set(channelId, [ embed ])
 		}
 	}
 
-	async getGuildConfig(guildID: string): Promise<GuildConfig | null> {
-		const existing = this.guildConfigs.get(guildID)
+	async getGuildConfig(guildId: string): Promise<GuildConfig | null> {
+		const existing = this.guildConfigs.get(guildId)
 		if (existing) return existing
-		const config = await this.fagc.communities.fetchGuildConfig({ guildId: guildID })
+		const config = await this.fagc.communities.fetchGuildConfig({ guildId: guildId })
 		if (!config) return null
-		this.guildConfigs.set(guildID, config)
+		this.guildConfigs.set(guildId, config)
 		return config
 	}
 
-	createBanCommand(report: Report, guildID: string) {
-		const botConfig = this.botConfigs.get(guildID)
+	createBanCommand(report: Report, guildId: string) {
+		const botConfig = this.botConfigs.get(guildId)
 		if (!botConfig || botConfig.reportAction === "none") return false
 
 		const rawBanMessage = botConfig.reportAction === "ban" ? ENV.BANCOMMAND : ENV.CUSTOMBANCOMMAND
@@ -190,8 +190,8 @@ export default class FAGCBot extends Client {
 		return command
 	}
 
-	createUnbanCommand(playername: string, guildID: string) {
-		const botConfig = this.botConfigs.get(guildID)
+	createUnbanCommand(playername: string, guildId: string) {
+		const botConfig = this.botConfigs.get(guildId)
 		if (!botConfig || botConfig.revocationAction === "none") return false
 
 		const rawUnbanMessage = botConfig.reportAction === "ban" ? ENV.UNBANCOMMAND : ENV.CUSTOMUNBANCOMMAND
@@ -200,17 +200,17 @@ export default class FAGCBot extends Client {
 		return command
 	}
 
-	async ban(report: Report, guildID: string) {
-		const command = this.createBanCommand(report, guildID)
+	async ban(report: Report, guildId: string) {
+		const command = this.createBanCommand(report, guildId)
 		if (!command) return
 		
-		this.rcon.rconCommandGuild(command, guildID)
+		this.rcon.rconCommandGuild(command, guildId)
 	}
 
-	async unban(revocation: Revocation, guildID: string) {
-		const servers = this.servers.get(guildID)
+	async unban(revocation: Revocation, guildId: string) {
+		const servers = this.servers.get(guildId)
 		if (!servers || !servers.length) return
-		const botConfig = await this.getBotConfig(guildID)
+		const botConfig = await this.getBotConfig(guildId)
 		if (!botConfig || botConfig.revocationAction === "none") return
 
 		const rawUnbanMessage = botConfig.revocationAction === "unban" ? ENV.UNBANCOMMAND : ENV.CUSTOMUNBANCOMMAND
@@ -226,15 +226,15 @@ export default class FAGCBot extends Client {
 			.replace("{PROOF}", revocation.proof)
 			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
 		
-		this.rcon.rconCommandGuild(command, guildID)
+		this.rcon.rconCommandGuild(command, guildId)
 	}
 	
-	async syncCommandPerms(guildID: string) {
-		const guildConfig = this.guildConfigs.get(guildID) || await this.getGuildConfig(guildID)
+	async syncCommandPerms(guildId: string) {
+		const guildConfig = this.guildConfigs.get(guildId) || await this.getGuildConfig(guildId)
 		if (!guildConfig) return false
 		const guildCommands = await this.db.command.findMany({
 			where: {
-				guildID: guildID
+				guildId: guildId
 			}
 		})
 		if (!guildCommands.length) return false
@@ -295,7 +295,7 @@ export default class FAGCBot extends Client {
 				permissions: perms,
 			}
 		})
-		await this.guilds.cache.get(guildID)?.commands.permissions.set({
+		await this.guilds.cache.get(guildId)?.commands.permissions.set({
 			fullPermissions: toSetPermissions,
 		})
 	}

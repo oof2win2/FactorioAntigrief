@@ -21,8 +21,8 @@ const Setaction: SubCommand = {
 		const channel = interaction.options.getChannel("channel", true)
 		const existing = await client.db.infoChannel.findFirst({
 			where: {
-				guildID: interaction.guildId,
-				channelID: channel.id,
+				guildId: interaction.guildId,
+				channelId: channel.id,
 			}
 		})
 		if (existing) return interaction.reply({
@@ -32,8 +32,8 @@ const Setaction: SubCommand = {
 		
 		await client.db.infoChannel.create({
 			data: {
-				guildID: interaction.guildId,
-				channelID: channel.id
+				guildId: interaction.guildId,
+				channelId: channel.id
 			}
 		})
 		return interaction.reply({

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model BotConfig {
-  guildID                   String   @id
+  guildId                   String   @id
   owner                     String
   apikey                    String?
   lastNotificationProcessed DateTime @default(now())
@@ -18,19 +18,19 @@ model BotConfig {
 
 model InfoChannel {
   id        Int    @id @default(autoincrement())
-  channelID String @unique
-  guildID   String
+  channelId String @unique
+  guildId   String
 }
 
 model Command {
   id      String @id
-  guildID String
+  guildId String
   name    String
 }
 
 model Privatebans {
   id         Int      @id @default(autoincrement())
-  adminID    String
+  adminId    String
   createdAt  DateTime @default(now())
   playername String   @unique
   reason     String   @default("No reason")
@@ -38,7 +38,7 @@ model Privatebans {
 
 model Whitelist {
   id         Int      @id @default(autoincrement())
-  adminID    String
+  adminId    String
   createdAt  DateTime @default(now())
   playername String   @unique
   reason     String   @default("No reason")
@@ -48,5 +48,5 @@ model FagcBan {
   id          String @id
   playername  String
   categoryId  String
-  communityID String
+  communityId String
 }

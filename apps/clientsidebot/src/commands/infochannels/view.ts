@@ -9,7 +9,7 @@ const Setaction: SubCommand = {
 	execute: async ({ client, interaction }) => {
 		const channels = await client.db.infoChannel.findMany({
 			where: {
-				guildID: interaction.guildId
+				guildId: interaction.guildId
 			}
 		})
 		if (!channels.length) return interaction.reply({
@@ -17,7 +17,7 @@ const Setaction: SubCommand = {
 			ephemeral: true
 		})
 		return interaction.reply({
-			content: `This guild has the following info channels: <#${channels.map(c => c.channelID).join(">, <#")}>`,
+			content: `This guild has the following info channels: <#${channels.map(c => c.channelId).join(">, <#")}>`,
 			ephemeral: true,
 		})
 	}

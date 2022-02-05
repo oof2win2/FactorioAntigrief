@@ -10,7 +10,7 @@ export default function handler(client: FAGCBot) {
 		// create bot configs if they dont exist
 		const config = client.getBotConfig(guild.id)
 		if (!config) client.setBotConfig({
-			guildID: guild.id,
+			guildId: guild.id,
 			owner: guild.ownerId,
 		})
 	}))

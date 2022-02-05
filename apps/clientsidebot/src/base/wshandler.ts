@@ -13,7 +13,7 @@ export const communityCreated = ({ client,event }: HandlerOpts<"communityCreated
 
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
-			const channel = client.channels.cache.get(c.channelID)
+			const channel = client.channels.cache.get(c.channelId)
 			if (!channel || !channel.isNotDMChannel()) return
 			client.addEmbedToQueue(channel.id, embed)
 		})
@@ -25,7 +25,7 @@ export const communityRemoved = ({ client, event }: HandlerOpts<"communityRemove
 
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
-			const channel = client.channels.cache.get(c.channelID)
+			const channel = client.channels.cache.get(c.channelId)
 			if (!channel || !channel.isNotDMChannel()) return
 			client.addEmbedToQueue(channel.id, embed)
 		})
@@ -38,7 +38,7 @@ export const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated"
 
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
-			const channel = client.channels.cache.get(c.channelID)
+			const channel = client.channels.cache.get(c.channelId)
 			if (!channel || !channel.isNotDMChannel()) return
 			client.addEmbedToQueue(channel.id, embed)
 		})
@@ -50,7 +50,7 @@ export const categoryRemoved = async ({ client, event }: HandlerOpts<"categoryRe
 
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach(c => {
-			const channel = client.channels.cache.get(c.channelID)
+			const channel = client.channels.cache.get(c.channelId)
 			if (!channel || !channel.isNotDMChannel()) return
 			client.addEmbedToQueue(channel.id, embed)
 		})
@@ -73,7 +73,7 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 		) {
 			if (infochannels) {
 				infochannels.forEach(c => {
-					const channel = client.channels.cache.get(c.channelID)
+					const channel = client.channels.cache.get(c.channelId)
 					if (!channel || !channel.isNotDMChannel()) return
 					client.addEmbedToQueue(channel.id, embed)
 				})
@@ -105,7 +105,7 @@ const reportHandler = async (client: FAGCBot, guildConfigs: GuildConfig[], repor
 			id: report.id,
 			playername: report.playername,
 			categoryId: report.categoryId,
-			communityID: report.communityId,
+			communityId: report.communityId,
 		}
 	})
 
@@ -133,7 +133,7 @@ export const revocation = async ({ client, event }: HandlerOpts<"revocation">) =
 		) {
 			if (infochannels) {
 				infochannels.forEach(c => {
-					const channel = client.channels.cache.get(c.channelID)
+					const channel = client.channels.cache.get(c.channelId)
 					if (!channel || !channel.isNotDMChannel()) return
 					client.addEmbedToQueue(channel.id, embed)
 				})
@@ -240,14 +240,14 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	const playersToUnban: Set<string> = new Set()
 
 	// array of report IDs that can be removed
-	const toRemoveIDs = currentReports
+	const toRemoveIds = currentReports
 		.map((record) => {
 			// check whether the record is no longer in categories that should be forgiven
 			if (!newConfig.categoryFilters.includes(record.categoryId)) {
 				playersToUnban.add(record.playername)
 				return record.id
 			}
-			if (!newConfig.trustedCommunities.includes(record.communityID)) {
+			if (!newConfig.trustedCommunities.includes(record.communityId)) {
 				playersToUnban.add(record.playername)
 				return record.id
 			}
@@ -260,7 +260,7 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	await client.db.fagcBan.deleteMany({
 		where: {
 			id: {
-				in: toRemoveIDs
+				in: toRemoveIds
 			}
 		}
 	})
@@ -334,7 +334,7 @@ export const guildConfigChanged = async ({ client, event }: HandlerOpts<"guildCo
 	}, [])
 	// iterate over the chunks with a for loop and insert the records into the db
 	for (const records of newRecordChunks) {
-		await client.db.$executeRawUnsafe(`INSERT OR IGNORE INTO \`main\`.\`fagcban\` (id, playername, categoryId, communityID) VALUES ${records.join(",")};`)
+		await client.db.$executeRawUnsafe(`INSERT OR IGNORE INTO \`main\`.\`fagcban\` (id, playername, categoryId, communityId) VALUES ${records.join(",")};`)
 		// wait for 50ms to allow other queries to run
 		await new Promise((resolve) => setTimeout(resolve, 50))
 	}
