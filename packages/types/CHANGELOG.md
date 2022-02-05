@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.10.0] - [2022-02-05]
 
 -   Renamed guild apiKey to apikey
 -   Renamed category shortdesc and longdesc fields to name and description
