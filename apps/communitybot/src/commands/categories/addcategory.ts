@@ -85,7 +85,7 @@ const AddCategory: Command = {
 			await client.saveGuildConfig({
 				guildId: message.guild.id,
 				categoryFilters: [...newCategoryIds],
-				apikey: guildConfig.apiKey ?? undefined,
+				apikey: guildConfig.apikey ?? undefined,
 			})
 
 			// send a success message

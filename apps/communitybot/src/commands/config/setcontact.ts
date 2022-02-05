@@ -12,7 +12,7 @@ const SetContact: Command = {
 	requiresApikey: true,
 	requiredPermissions: ["setConfig"],
 	run: async ({ client, message, args, guildConfig }) => {
-		if (!guildConfig.apiKey)
+		if (!guildConfig.apikey)
 			return message.channel.send(
 				`${client.emotes.warn} You must have an API key set for this command`,
 			)
@@ -30,7 +30,7 @@ const SetContact: Command = {
 					contact: user.id,
 				},
 				reqConfig: {
-					apikey: guildConfig.apiKey,
+					apikey: guildConfig.apikey,
 				},
 			})
 			return message.channel.send(`Contact set to ${user.tag}`)

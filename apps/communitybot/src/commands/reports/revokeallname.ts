@@ -14,7 +14,7 @@ const RevokeAllName: Command = {
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
 	async run({ client, message, args, guildConfig }) {
-		if (!guildConfig.apiKey)
+		if (!guildConfig.apikey)
 			return message.reply(`${client.emotes.warn} No API key set`)
 
 		// get playername
@@ -65,7 +65,7 @@ const RevokeAllName: Command = {
 				playername: playername,
 				adminId: message.author.id,
 				reqConfig: {
-					apikey: guildConfig.apiKey,
+					apikey: guildConfig.apikey,
 				},
 			})
 			return message.channel.send("Reports revoked!")

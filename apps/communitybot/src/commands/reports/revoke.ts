@@ -12,7 +12,7 @@ const RevokeReport: Command = {
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
 	async run({ message, args, guildConfig, client }) {
-		if (!guildConfig.apiKey)
+		if (!guildConfig.apikey)
 			return message.reply(`${client.emotes.warn} No API key set`)
 		const id = await client.argsOrInput(args, message, `${client.emotes.type} Provide a report ID to revoke`)
 		if (!id)
@@ -68,7 +68,7 @@ const RevokeReport: Command = {
 			await client.fagc.revocations.revoke({
 				reportId: id,
 				adminId: message.author.id,
-				reqConfig: { apikey: guildConfig.apiKey },
+				reqConfig: { apikey: guildConfig.apikey },
 			})
 
 			return message.channel.send("Report revoked!")

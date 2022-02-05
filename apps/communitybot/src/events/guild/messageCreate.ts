@@ -34,7 +34,7 @@ export default async (client: FAGCBot, message: Message) => {
 	const guildConfig = tmpGuildConfig
 
 	// check if the command requires api key
-	if (command.requiresApikey && !guildConfig.apiKey)
+	if (command.requiresApikey && !guildConfig.apikey)
 		return message.channel.send(
 			`${client.config.emotes.warn} API key must be set for use of this command`,
 		)

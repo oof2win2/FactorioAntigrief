@@ -94,7 +94,7 @@ const RemoveCategories: Command = {
 			await client.saveGuildConfig({
 				guildId: message.guild.id,
 				categoryFilters: newCategoryFilters,
-				apikey: guildConfig.apiKey || undefined,
+				apikey: guildConfig.apikey || undefined,
 			})
 
 			return message.channel.send("Successfully removed specified filtered categories")
