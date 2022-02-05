@@ -64,8 +64,8 @@ All `id` properties are generated automatically by the API and cannot be set by 
   - `revokedBy` - The Discord UserID of who revoked the report
 - **Category**
   - `id` - The ID of the category. Used to tell the API which category a report is filed under. Can also be used to fetch said category
-  - `shortdesc` - A short description/tagline of the category
-  - `longdesc` - A long, verbose definition of the category
+  - `name` - Name of the category
+  - `description` - A short definition of the category
 
 ## Installation
 
