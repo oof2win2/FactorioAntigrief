@@ -4,11 +4,11 @@ database.sqlite
 
 # Config
 servers.json
-/database.sqlite
-/database.sqlite-journal
+database.sqlite
+database.sqlite-journal
 *.env
 
-/dist
+dist
 
 # Logs
 logs
