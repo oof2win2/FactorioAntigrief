@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
 		"importHelpers": false,
-		"noImplicitAny": false,
 		"lib": [
 			"esnext",
 			"DOM"
@@ -22,5 +21,6 @@
 	},
 	"include": [
 		"src/**/*",
+		"modules.d.ts",
 	]
 }

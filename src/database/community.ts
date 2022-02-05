@@ -1,5 +1,5 @@
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
-import { getUserStringFromID } from "../utils/functions-databaseless"
+import { getUserStringFromId } from "../utils/functions-databaseless"
 import IdModel, { IdType } from "./ids"
 
 @modelOptions({
@@ -9,7 +9,7 @@ import IdModel, { IdType } from "./ids"
 })
 @pre<CommunityClass>("save", async function (next) {
 	if (!this.id || !this._id) {
-		const id = await getUserStringFromID(IdType.COMMUNITY)
+		const id = await getUserStringFromId(IdType.COMMUNITY)
 		this.id = id.id
 		this._id = id._id
 	}
@@ -34,7 +34,7 @@ export class CommunityClass {
 
 const CommunityModel = getModelForClass(CommunityClass)
 
-const watcher = CommunityModel.watch()
+export const watcher = CommunityModel.watch()
 watcher.on("change", async (change) => {
 	if (change.operationType === "delete") {
 		// delete the ID from the db too
