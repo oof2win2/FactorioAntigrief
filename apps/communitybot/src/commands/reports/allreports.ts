@@ -29,7 +29,7 @@ const AllReports: Command = {
 		const fields = await Promise.all(
 			reports.map(async (report) => {
 				const category = await client.fagc.categories.fetchCategory({
-					categoryid: report.categoryId,
+					categoryId: report.categoryId,
 				})
 				const community = await client.fagc.communities.fetchCommunity({
 					communityId: report.communityId,

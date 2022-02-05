@@ -95,7 +95,7 @@ const CreateAdvanced: Command = {
 		}
 		// check for validity of categories, sort into valid and invalid IDs
 		const invalidCategoryIds: string[] = []
-		const validCategoryIDs: string[] = []
+		const validCategoryIds: string[] = []
 		categoryIds.map((categoryId) => {
 			let id: string
 			if (isNaN(Number(categoryId))) {
@@ -111,9 +111,9 @@ const CreateAdvanced: Command = {
 				id = found
 			}
 			// all categories are fetched above so they are cached
-			const category = client.fagc.categories.resolveID(id)
+			const category = client.fagc.categories.resolveId(id)
 			if (!category) invalidCategoryIds.push(id)
-			else validCategoryIDs.push(id)
+			else validCategoryIds.push(id)
 		})
 		if (invalidCategoryIds.length)
 			return message.channel.send(
@@ -140,15 +140,15 @@ const CreateAdvanced: Command = {
 		// send an embed to display the report that will be created
 		const checkEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Category(s):** ${validCategoryIDs.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
+			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Category(s):** ${validCategoryIds.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
 			.addFields([
 				{ name: "Player", value: playername, inline: true },
 				{
 					name: "Category(s)",
-					value: validCategoryIDs
+					value: validCategoryIds
 						.map(
 							(id) =>
-								`${client.fagc.categories.resolveID(id)?.shortdesc} (\`${id}\`)`,
+								`${client.fagc.categories.resolveId(id)?.shortdesc} (\`${id}\`)`,
 						)
 						.join(", "),
 					inline: true,
@@ -178,7 +178,7 @@ const CreateAdvanced: Command = {
 		try {
 		// create the reports for each category
 			const reports = await Promise.all(
-				validCategoryIDs.map(async (categoryId) => {
+				validCategoryIds.map(async (categoryId) => {
 					return client.fagc.reports.create({
 						report: {
 							playername: playername,

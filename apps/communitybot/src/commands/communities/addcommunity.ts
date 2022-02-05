@@ -32,13 +32,13 @@ const AddCommunity: Command = {
 					}),
 			)
 			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
-			const newIDsMessage = await client.getMessageResponse(
+			const newIdsMessage = await client.getMessageResponse(
 				message,
 				`${client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces:`,
 			)
-			if (!newIDsMessage || !newIDsMessage.content)
+			if (!newIdsMessage || !newIdsMessage.content)
 				return message.channel.send("No IDs were provided")
-			args = newIDsMessage.content.split(" ")
+			args = newIdsMessage.content.split(" ")
 		}
 
 		const communitiesToAdd = args
