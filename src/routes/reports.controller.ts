@@ -57,7 +57,7 @@ export default class ReportController {
 			communityId: communityId,
 			categoryId: categoryId,
 			adminId: adminId,
-			...(after ? { createdAt: { $gt: new Date(after) } } : {}),
+			...(after ? { reportCreatedAt: { $gt: new Date(after) } } : {}),
 			revokedAt: { $exists: false },
 		})
 		return res.send(reports)
