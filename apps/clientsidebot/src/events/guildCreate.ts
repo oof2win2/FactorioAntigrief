@@ -12,7 +12,7 @@ export default async (client: FAGCBot, [ guild ]: [Guild]) => {
 	
 	client.fagc.websocket.addGuildId(guild.id)
 	await client.setBotConfig({
-		guildID: guild.id,
+		guildId: guild.id,
 		owner: guild.ownerId
 	})
 }

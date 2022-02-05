@@ -21,8 +21,8 @@ const Setaction: SubCommand = {
 		const channel = interaction.options.getChannel("channel", true)
 		const removed = await client.db.infoChannel.deleteMany({
 			where: {
-				guildID: interaction.guildId,
-				channelID: channel.id,
+				guildId: interaction.guildId,
+				channelId: channel.id,
 			}
 		})
 		if (!removed.count) return interaction.reply({

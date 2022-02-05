@@ -35,13 +35,13 @@ await prisma.$connect()
 
 try {
 	const self = await rest.get(Routes.user()) as RESTGetAPIUserResult
-	const guildIDs = (await rest.get(Routes.userGuilds()) as RESTAPIPartialCurrentUserGuild[])
+	const guildIds = (await rest.get(Routes.userGuilds()) as RESTAPIPartialCurrentUserGuild[])
 		.map(guild => guild.id)
 	const guildConfigs = new Map<string, GuildConfig>()
 	await Promise.all(
-		guildIDs.map(async (guildID) => {
-			const config = await FAGC.communities.fetchGuildConfig({ guildId: guildID })
-			if (config) guildConfigs.set(guildID, config)
+		guildIds.map(async (guildId) => {
+			const config = await FAGC.communities.fetchGuildConfig({ guildId: guildId })
+			if (config) guildConfigs.set(guildId, config)
 		})
 	)
 	console.log("Started refreshing application (/) commands.")
@@ -52,13 +52,13 @@ try {
 	await prisma.command.deleteMany()
 
 	console.log("Replacing commands")
-	for (const guildID of guildIDs) {
-		console.log(`Replacing commands in guild ${guildID}`)
+	for (const guildId of guildIds) {
+		console.log(`Replacing commands in guild ${guildId}`)
 		const newCommands = await rest.put(
-			Routes.applicationGuildCommands(self.id, guildID),
+			Routes.applicationGuildCommands(self.id, guildId),
 			{ body: toPushCommmands.map(c => c.data.toJSON()) }
 		) as APIApplicationCommand[]
-		commands.set(guildID, newCommands)
+		commands.set(guildId, newCommands)
 	}
 
 	console.log("Saving new commands to DB")
@@ -66,7 +66,7 @@ try {
 		return guildCommands.map(guildCommand => {
 			return {
 				id: guildCommand.id,
-				guildID: guildCommand.guild_id!,
+				guildId: guildCommand.guild_id!,
 				name: guildCommand.name,
 			}
 		})
@@ -76,19 +76,19 @@ try {
 	// current createMany alternative
 	// https://github.com/prisma/prisma/issues/10710
 	const createCommandQueryValues = toSaveCommands
-		.map(command => `('${command.id}', '${command.guildID}', '${command.name}')`)
+		.map(command => `('${command.id}', '${command.guildId}', '${command.name}')`)
 		.join(",\n\t")
 		.concat(";")
-	await prisma.$executeRawUnsafe(`INSERT INTO \`main\`.\`Command\` (id, guildID, name) VALUES \n\t${createCommandQueryValues}`)
+	await prisma.$executeRawUnsafe(`INSERT INTO \`main\`.\`Command\` (id, guildId, name) VALUES \n\t${createCommandQueryValues}`)
 	console.log("Saved new commands to DB")
 
 	console.log("Setting permission overrides")
-	for (const guildID of guildIDs) {
-		console.log(`Setting permission overrides in guild ${guildID}`)
-		const guildConfig = guildConfigs.get(guildID)
-		const guildCommands = commands.get(guildID)
+	for (const guildId of guildIds) {
+		console.log(`Setting permission overrides in guild ${guildId}`)
+		const guildConfig = guildConfigs.get(guildId)
+		const guildCommands = commands.get(guildId)
 		if (!guildCommands) {
-			console.log(`Guild ${guildID} does not have any commands`)
+			console.log(`Guild ${guildId} does not have any commands`)
 			continue
 		}
 
@@ -151,7 +151,7 @@ try {
 
 		if (toSetPermissions.length)
 			await rest.put(
-				Routes.guildApplicationCommandsPermissions(self.id, guildID),
+				Routes.guildApplicationCommandsPermissions(self.id, guildId),
 				{ body: toSetPermissions }
 			)
 	}

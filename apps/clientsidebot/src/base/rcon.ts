@@ -46,7 +46,7 @@ export default class RCONInterface {
 					const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
 					if (!channel || !channel.isNotDMChannel()) return
 					channel.send(
-						`Server <#${server.discordChannelID}> has reconnected to RCON`
+						`Server <#${server.discordChannelId}> has reconnected to RCON`
 					)
 				} catch {
 					i++
@@ -54,7 +54,7 @@ export default class RCONInterface {
 						const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
 						if (!channel || !channel.isNotDMChannel()) return
 						channel.send(
-							`Server <#${server.discordChannelID}> is having RCON issues`
+							`Server <#${server.discordChannelId}> is having RCON issues`
 						)
 					}
 					if (i === 60) {
@@ -64,7 +64,7 @@ export default class RCONInterface {
 						const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
 						if (!channel || !channel.isNotDMChannel()) return
 						channel.send(
-							`Server <#${server.discordChannelID}> has been unable to connect to RCON`
+							`Server <#${server.discordChannelId}> has been unable to connect to RCON`
 						)
 					}
 				}
@@ -78,7 +78,7 @@ export default class RCONInterface {
 	 */
 	async rconCommand(command: string, serverIdentifier: string): Promise<RCONResponse|false> {
 		command = command.startsWith("/") ? command : `/${command}`
-		const server = this.connections.find((s) => s.server.servername === serverIdentifier || s.server.discordChannelID === serverIdentifier)
+		const server = this.connections.find((s) => s.server.servername === serverIdentifier || s.server.discordChannelId === serverIdentifier)
 		if (!server) return false
 		const response = await server.rcon.send(command).catch(() => {})
 		if (!response) return false
@@ -88,11 +88,11 @@ export default class RCONInterface {
 		}
 	}
 
-	async rconCommandGuild(command: string, guildID: string) {
+	async rconCommandGuild(command: string, guildId: string) {
 		command = command.startsWith("/") ? command : `/${command}`
 		console.log(command)
 		const servers = this.servers
-			.map(s => s.discordGuildID === guildID ? s : undefined)
+			.map(s => s.discordGuildId === guildId ? s : undefined)
 			.filter(r=>r !== undefined) as FactorioServerType[]
 		const responses = await Promise.all(
 			servers.map(server => this.rconCommand(command, server.servername))

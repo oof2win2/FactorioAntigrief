@@ -26,7 +26,7 @@ const Setaction: SubCommand = {
 		// TODO: check if they are currently banned on servers due to FAGC and state if so
 		if (existing) {
 			return interaction.reply({
-				content: `Player ${playername} is whitelisted by <@${existing.adminID}> since <t:${Math.round(existing.createdAt.valueOf() / 1000)}> for ${existing.reason}`,
+				content: `Player ${playername} is whitelisted by <@${existing.adminId}> since <t:${Math.round(existing.createdAt.valueOf() / 1000)}> for ${existing.reason}`,
 				ephemeral: true
 			})
 		} else {

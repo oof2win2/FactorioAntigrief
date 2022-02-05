@@ -4,7 +4,7 @@ import ENV from "../utils/env.js"
 export type PickPartial<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>> 
 
 export const BotConfig = z.object({
-	guildID: z.string(),
+	guildId: z.string(),
 	apikey: z.string().nullable().optional(),
 	owner: z.string().default(ENV.OWNERID),
 	lastNotificationProcessed: z.date().default(new Date()),
@@ -14,9 +14,9 @@ export const BotConfig = z.object({
 export type BotConfigType = z.infer<typeof BotConfig>
 
 export const FactorioServer = z.object({
-	discordChannelID: z.string().optional(),
+	discordChannelId: z.string().optional(),
 	servername: z.string().describe("Name of Factorio server that it can be identified with"),
-	discordGuildID: z.string(),
+	discordGuildId: z.string(),
 	rconPort: z.number().max(65535).min(0),
 	rconPassword: z.string().default(ENV.RCONPASSWORD),
 	// banlistPath: z.string().superRefine(async (path, ctx) => {

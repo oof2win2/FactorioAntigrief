@@ -29,13 +29,13 @@ const Setaction: SubCommand = {
 			}
 		})
 		if (existing) return interaction.reply({
-			content: `Player ${playername} is already whitelisted by <@${existing.adminID}> since <t:${Math.round(existing.createdAt.valueOf() / 1000)}> for ${existing.reason}`,
+			content: `Player ${playername} is already whitelisted by <@${existing.adminId}> since <t:${Math.round(existing.createdAt.valueOf() / 1000)}> for ${existing.reason}`,
 			ephemeral: true,
 		})
 		
 		await client.db.whitelist.create({
 			data: {
-				adminID: interaction.user.id,
+				adminId: interaction.user.id,
 				playername: playername,
 				reason: reason ?? undefined,
 			}
