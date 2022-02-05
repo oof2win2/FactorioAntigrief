@@ -10,13 +10,14 @@ import { CategoryClass } from "../database/category"
 import { CommunityClass } from "../database/community"
 import { ReportInfoClass } from "../database/reportinfo"
 import {
+	Category,
 	CommunityCreatedMessageExtraOpts,
 	ReportMessageExtraOpts,
 	Revocation,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
 
-const WebhookGuildIDs = new WeakMap<WebSocket, string[]>()
+const WebhookGuildIds = new WeakMap<WebSocket, string[]>()
 
 let WebhookQueue: MessageEmbed[] = []
 
@@ -81,7 +82,7 @@ export class WsClient {
 
 	async handleMessage(message: { type: string, [index: string]: unknown }) {
 		if (typeof message.type === "string" && typeof message.guildId === "string") {
-			if (message.type === "addGuildID") {
+			if (message.type === "addGuildId") {
 				const guildConfig = await GuildConfigModel.findOne({
 					guildId: message.guildId,
 				}).then((c) => c?.toObject())
@@ -94,24 +95,24 @@ export class WsClient {
 					)
 
 
-					// add guildID to webhook only if the guild id has an existing config
-					const existing = WebhookGuildIDs.get(this.ws)
+					// add guildId to webhook only if the guild id has an existing config
+					const existing = WebhookGuildIds.get(this.ws)
 					if (existing) {
 						// limit to 25 guilds per webhook
 						if (existing.length < 25) {
 							// only add if it's not already in the list
 							if (!existing.includes(message.guildId)) existing.push(message.guildId)
 						}
-						WebhookGuildIDs.set(this.ws, existing)
+						WebhookGuildIds.set(this.ws, existing)
 					} else {
-						WebhookGuildIDs.set(this.ws, [ message.guildId ])
+						WebhookGuildIds.set(this.ws, [ message.guildId ])
 					}
 				}
 			}
-			if (message.type === "removeGuildID") {
-				const existing = WebhookGuildIDs.get(this.ws)
+			if (message.type === "removeGuildId") {
+				const existing = WebhookGuildIds.get(this.ws)
 				if (existing)
-					WebhookGuildIDs.set(this.ws, existing.filter(id => id !== message.guildID))
+					WebhookGuildIds.set(this.ws, existing.filter(id => id !== message.guildId))
 			}
 		}
 	}
@@ -157,7 +158,7 @@ export async function reportCreatedMessage(
 			{ name: "Playername", value: report.playername, inline: true },
 			{
 				name: "Category",
-				value: `${opts.category.shortdesc} (\`${opts.category.id}\`)`,
+				value: `${opts.category.name} (\`${opts.category.id}\`)`,
 				inline: true,
 			},
 			{ name: "Description", value: report.description, inline: false },
@@ -211,7 +212,7 @@ export async function reportRevokedMessage(
 			{ name: "Playername", value: revocation.playername, inline: true },
 			{
 				name: "Category",
-				value: `${opts.category.shortdesc} (\`${opts.category.id}\`)`,
+				value: `${opts.category.name} (\`${opts.category.id}\`)`,
 				inline: true,
 			},
 			{
@@ -255,8 +256,8 @@ export async function categoryCreatedMessage(
 ): Promise<void> {
 	if (
 		category === null ||
-		category.shortdesc === undefined ||
-		category.longdesc === undefined
+		category.name === undefined ||
+		category.description === undefined
 	)
 		return
 
@@ -269,13 +270,13 @@ export async function categoryCreatedMessage(
 		.addFields(
 			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
 			{
-				name: "Category short description",
-				value: category.shortdesc,
+				name: "Category name",
+				value: category.name,
 				inline: true,
 			},
 			{
-				name: "Category long description",
-				value: category.longdesc,
+				name: "Category description",
+				value: category.description,
 				inline: true,
 			}
 		)
@@ -295,8 +296,8 @@ export async function categoryRemovedMessage(
 ): Promise<void> {
 	if (
 		category === null ||
-		category.shortdesc === undefined ||
-		category.longdesc === undefined
+		category.name === undefined ||
+		category.description === undefined
 	)
 		return
 	// set the sent object's messageType to categoryRemoved
@@ -308,13 +309,13 @@ export async function categoryRemovedMessage(
 		.addFields(
 			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
 			{
-				name: "Category short description",
-				value: category.shortdesc,
+				name: "Category name",
+				value: category.name,
 				inline: true,
 			},
 			{
-				name: "Category long description",
-				value: category.longdesc,
+				name: "Category description",
+				value: category.description,
 				inline: true,
 			}
 		)
@@ -330,8 +331,8 @@ export async function categoryRemovedMessage(
 }
 
 export async function categoryUpdatedMessage(
-	oldCategory: DocumentType<CategoryClass, BeAnObject>,
-	newCategory: DocumentType<CategoryClass, BeAnObject>
+	oldCategory: Category,
+	newCategory: Category
 ): Promise<void> {
 	const categoryEmbed = new MessageEmbed()
 		.setTitle("FAGC - Category Updated")
@@ -339,23 +340,23 @@ export async function categoryUpdatedMessage(
 		.addFields(
 			{ name: "Category ID", value: `\`${newCategory.id}\``, inline: true },
 			{
-				name: "Old Category short description",
-				value: oldCategory.shortdesc,
+				name: "Old Category name",
+				value: oldCategory.name,
 				inline: true,
 			},
 			{
-				name: "New Category short description",
-				value: newCategory.shortdesc,
+				name: "New Category name",
+				value: newCategory.name,
 				inline: true,
 			},
 			{
-				name: "Old Category long description",
-				value: oldCategory.longdesc,
+				name: "Old Category description",
+				value: oldCategory.description,
 				inline: true,
 			},
 			{
-				name: "New Category long description",
-				value: newCategory.longdesc,
+				name: "New Category description",
+				value: newCategory.description,
 				inline: true,
 			}
 		)
@@ -380,23 +381,23 @@ export async function categoriesMergedMessage(
 		.addFields(
 			{ name: "Receiving Category ID", value: `\`${dissolving.id}\``, inline: true },
 			{
-				name: "Dissolving Category short description",
-				value: receiving.shortdesc,
+				name: "Dissolving Category name",
+				value: receiving.name,
 				inline: true,
 			},
 			{
-				name: "Receiving Category short description",
-				value: dissolving.shortdesc,
+				name: "Receiving Category name",
+				value: dissolving.name,
 				inline: true,
 			},
 			{
-				name: "Dissolving Category long description",
-				value: receiving.longdesc,
+				name: "Dissolving Category description",
+				value: receiving.description,
 				inline: true,
 			},
 			{
-				name: "Receiving Category long description",
-				value: dissolving.longdesc,
+				name: "Receiving Category description",
+				value: dissolving.description,
 				inline: true,
 			}
 		)
@@ -557,7 +558,7 @@ export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
 	wsClients.forEach((client) => {
-		const guildIds = WebhookGuildIDs.get(client.ws)
+		const guildIds = WebhookGuildIds.get(client.ws)
 		if (guildIds?.includes(config.guildId)) {
 			client.ws.send(
 				JSON.stringify({

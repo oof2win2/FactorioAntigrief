@@ -18,6 +18,13 @@ class Roles {
 @modelOptions({
 	schemaOptions: {
 		collection: "guildconfigs",
+		toObject: {
+			transform(_doc, ret, options) {
+				if (!options.includeApikey) {
+					delete ret.apikey
+				}
+			}
+		},
 	},
 })
 export class GuildConfigClass {

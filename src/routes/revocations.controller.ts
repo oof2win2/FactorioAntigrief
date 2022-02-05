@@ -15,6 +15,7 @@ import {
 } from "fagc-api-types"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
+import validator from "validator"
 
 @Controller({ route: "/revocations" })
 export default class RevocationController {
@@ -22,7 +23,20 @@ export default class RevocationController {
 		url: "/",
 		options: {
 			schema: {
-				description: "Fetch all revocations",
+				querystring: z.object({
+					playername: z.string().or(z.array(z.string())),
+					categoryId: z.string().or(z.array(z.string())),
+					adminId: z.string().or(z.array(z.string())),
+					after: z.string().optional().refine(
+						(input) => input === undefined || validator.isISO8601(input),
+						"Invalid timestamp"
+					),
+					revokedAfter: z.string().optional().refine(
+						(input) => input === undefined || validator.isISO8601(input),
+						"Invalid timestamp"
+					),
+				}),
+				description: "Fetch revocations from your community",
 				tags: [ "revocations" ],
 				security: [
 					{
@@ -30,21 +44,25 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
 	})
 	@Authenticate
 	async fetchAll(
-		req: FastifyRequest,
+		req: FastifyRequest<{
+			Querystring: {
+				playername?: string | string[],
+				categoryId?: string | string[],
+				adminId?: string | string[],
+				after?: string,
+				revokedAfter?: string,
+			}
+		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
+		const { playername, categoryId, adminId, after, revokedAfter } = req.query
 		const community = req.requestContext.get("community")
 		if (!community) return res.status(404).send({
 			errorCode: 404,
@@ -53,8 +71,15 @@ export default class RevocationController {
 		})
 
 		const revocations = await ReportInfoModel.find({
+			playername: playername,
+			categoryId: categoryId,
+			adminId: adminId,
+			...(after ? { createdAt: { $gt: new Date(after) } } : {}),
 			communityId: community.id,
-			revokedAt: { $ne: null },
+			revokedAt: {
+				$ne: null,
+				...(revokedAfter ? { $gt: new Date(revokedAfter) } : {}),
+			},
 		})
 
 		return res.send(revocations)
@@ -68,7 +93,7 @@ export default class RevocationController {
 					id: z.string(),
 				}),
 
-				description: "Fetch a revocation by ID",
+				description: "Fetch revocation",
 				tags: [ "revocations" ],
 				security: [
 					{
@@ -76,15 +101,13 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						allOf: [ { nullable: true }, { $ref: "ReportInfoClass#" } ],
-					},
+					"200": Revocation.nullable(),
 				},
 			},
 		},
 	})
 	@Authenticate
-	async fetchID(
+	async fetch(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -111,13 +134,11 @@ export default class RevocationController {
 	}
 
 	@POST({
-		url: "/:id",
+		url: "/",
 		options: {
 			schema: {
-				params: z.object({
-					id: z.string(),
-				}),
 				body: z.object({
+					reportId: z.string(),
 					adminId: z.string(),
 				}),
 
@@ -129,9 +150,7 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						$ref: "RevocationClass#",
-					},
+					"200": Revocation,
 				},
 			},
 		},
@@ -139,10 +158,8 @@ export default class RevocationController {
 	@Authenticate
 	async revokeReport(
 		req: FastifyRequest<{
-			Params: {
-				id: string
-			}
 			Body: {
+				reportId: string
 				adminId: string
 			}
 		}>,
@@ -157,44 +174,28 @@ export default class RevocationController {
 			})
 
 		const report = await ReportInfoModel.findOne({
-			id: req.params.id,
+			id: req.body.reportId,
 			revokedAt: { $exists: false },
 		})
-		if (!report)
+		if (!report || report.communityId !== community.id)
 			return res.status(404).send({
 				errorCode: 404,
 				error: "Not Found",
 				message: "Report could not be found",
 			})
-		if (report.communityId !== community.id)
-			return res.status(403).send({
-				errorCode: 403,
-				error: "Access Denied",
-				message: `You are trying to access a report of community ${report.communityId} but your community ID is ${community.id}`,
-			})
 
-		const isDiscordUser = await validateDiscordUser(req.body.adminId)
-		if (!isDiscordUser)
+		const revoker = await validateDiscordUser(req.body.adminId)
+		if (!revoker)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
 				message: "adminId must be a valid Discord user",
 			})
-		const revoker = await client.users.fetch(req.body.adminId)
-		const admin = await client.users.fetch(report.adminId)
 		const category = await CategoryModel.findOne({ id: report.categoryId })
 
-		const revocation = await ReportInfoModel.findOneAndUpdate({
-			id: report.id
-		}, {
-			revokedAt: new Date(),
-			revokedBy: admin.id,
-		}, { new: true })
-		if (!revocation) return res.status(404).send({
-			errorCode: 404,
-			error: "Not Found",
-			message: "Report could not be found",
-		})
+		report.revokedAt = new Date()
+		report.revokedBy = revoker.id
+		await report.save()
 
 		const allReports = await ReportInfoModel.find({
 			playername: report.playername,
@@ -205,7 +206,7 @@ export default class RevocationController {
 			differentCommunities.add(report.communityId)
 		)
 
-		reportRevokedMessage(Revocation.parse(revocation), {
+		reportRevokedMessage(Revocation.parse(report), {
 			community: <Community>(<unknown>community),
 			// this is allowed since the category is GUARANTEED to exist if the report exists
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -216,59 +217,7 @@ export default class RevocationController {
 			totalReports: allReports.length,
 			totalCommunities: differentCommunities.size,
 		})
-		return res.status(200).send(revocation)
-	}
-
-	@GET({
-		url: "/category/:id",
-		options: {
-			schema: {
-				params: z.object({
-					id: z.string(),
-				}),
-
-				description: "Fetch all revocations of a category in your community",
-				tags: [ "revocations" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	@Authenticate
-	async fetchCategory(
-		req: FastifyRequest<{
-			Params: {
-				id: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { id } = req.params
-		const community = req.requestContext.get("community")
-		if (!community) return res.status(404).send({
-			errorCode: 404,
-			error: "Community not found",
-			message: "Community not found",
-		})
-
-		const revocations = await ReportInfoModel.find({
-			categoryIdId: id,
-			communityId: community.id,
-			revokedAt: { $ne: null },
-		})
-		
-		return res.send(revocations)
+		return res.status(200).send(report)
 	}
 
 	@POST({
@@ -290,18 +239,13 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
 	})
 	@Authenticate
-	async revokeCategory(
+	async revokeByCategory(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -394,58 +338,6 @@ export default class RevocationController {
 		return res.status(200).send(revocations)
 	}
 
-	@GET({
-		url: "/player/:playername",
-		options: {
-			schema: {
-				params: z.object({
-					playername: z.string(),
-				}),
-
-				description: "Fetch all revocations of a player in your community",
-				tags: [ "revocations" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	@Authenticate
-	async fetchPlayer(
-		req: FastifyRequest<{
-			Params: {
-				playername: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { playername } = req.params
-		const community = req.requestContext.get("community")
-		if (!community) return res.status(404).send({
-			errorCode: 404,
-			error: "Community not found",
-			message: "Community not found",
-		})
-
-		const revocations = await ReportInfoModel.find({
-			playername: playername,
-			communityId: community.id,
-			revokedAt: { $ne: null },
-		})
-
-		return res.send(revocations)
-	}
-
 	@POST({
 		url: "/player/:playername",
 		options: {
@@ -465,18 +357,13 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
 	})
 	@Authenticate
-	async revokePlayer(
+	async revokeByPlayer(
 		req: FastifyRequest<{
 			Params: {
 				playername: string
@@ -569,66 +456,6 @@ export default class RevocationController {
 		return res.status(200).send(revocations)
 	}
 
-	@GET({
-		url: "/admin/:snowflake",
-		options: {
-			schema: {
-				params: z.object({
-					snowflake: z.string(),
-				}),
-
-				description: "Fetch all revocations revoked by an admin in your community",
-				tags: [ "revocations" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	@Authenticate
-	async fetchAdmin(
-		req: FastifyRequest<{
-			Params: {
-				snowflake: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { snowflake } = req.params
-		const community = req.requestContext.get("community")
-		if (!community) return res.status(404).send({
-			errorCode: 404,
-			error: "Community not found",
-			message: "Community not found",
-		})
-
-		const admin = await validateDiscordUser(snowflake)
-		if (!admin)
-			return res.status(400).send({
-				errorCode: 400,
-				error: "Bad Request",
-				message: "adminId must be a valid Discord user ID",
-			})
-
-		const revocations = await ReportInfoModel.find({
-			adminId: snowflake,
-			communityId: community.id,
-			revokedAt: { $ne: null },
-		})
-		
-		return res.send(revocations)
-	}
-
 	@POST({
 		url: "/admin/:snowflake",
 		options: {
@@ -645,18 +472,13 @@ export default class RevocationController {
 					},
 				],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
+					"200": z.array(Revocation),
 				},
 			},
 		},
 	})
 	@Authenticate
-	async revokeAdmin(
+	async revokeByAdmin(
 		req: FastifyRequest<{
 			Params: {
 				snowflake: string
@@ -736,51 +558,6 @@ export default class RevocationController {
 			})
 		})
 		
-		return res.send(revocations)
-	}
-
-	@GET({
-		url: "/since/:timestamp",
-		options: {
-			schema: {
-				params: z.object({
-					timestamp: z.string(), // TODO: better time validation
-				}),
-
-				description:
-					"Fetch all revocations of a player modified since a timestamp",
-				tags: [ "revocations" ],
-				security: [
-					{
-						authorization: [],
-					},
-				],
-				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "RevocationClass#",
-						},
-					},
-				},
-			},
-		},
-	})
-	async getModifiedSince(
-		req: FastifyRequest<{
-			Params: {
-				timestamp: string
-			}
-		}>,
-		res: FastifyReply
-	): Promise<FastifyReply> {
-		const { timestamp } = req.params
-
-		const date = new Date(timestamp)
-
-		const revocations = await ReportInfoModel.find({
-			revokedAt: { $gt: date },
-		})
 		return res.send(revocations)
 	}
 }

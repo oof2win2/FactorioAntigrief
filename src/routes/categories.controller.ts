@@ -4,6 +4,7 @@ import CategoryModel from "../database/category"
 import GuildConfigModel from "../database/guildconfig"
 import { MasterAuthenticate } from "../utils/authentication"
 import { guildConfigChanged, categoryCreatedMessage, categoryRemovedMessage, categoriesMergedMessage, categoryUpdatedMessage } from "../utils/info"
+import { Category } from "fagc-api-types"
 import { z } from "zod"
 import ReportInfoModel from "../database/reportinfo"
 
@@ -16,17 +17,12 @@ export default class CategoryController {
 				description: "Fetch all categories",
 				tags: [ "categories" ],
 				response: {
-					"200": {
-						type: "array",
-						items: {
-							$ref: "CategoryClass#",
-						},
-					},
+					"200": z.array(Category),
 				},
 			},
 		},
 	})
-	async getAllCategories(
+	async fetchAll(
 		_req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
@@ -42,17 +38,15 @@ export default class CategoryController {
 					id: z.string(),
 				}).required(),
 
-				description: "Fetch a category by ID",
+				description: "Fetch category",
 				tags: [ "categories" ],
 				response: {
-					"200": {
-						allOf: [ { nullable: true }, { $ref: "CategoryClass#" } ],
-					},
+					"200": Category.nullable(),
 				},
 			},
 		},
 	})
-	async getCategory(
+	async fetch(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -70,21 +64,19 @@ export default class CategoryController {
 		options: {
 			schema: {
 				body: z.object({
-					shortdesc: z.string(),
-					longdesc: z.string()
+					name: z.string(),
+					description: z.string()
 				}).required(),
 
-				description: "Create a category",
-				tags: [ "categories" ],
+				description: "Create category",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},
@@ -93,16 +85,16 @@ export default class CategoryController {
 	async create(
 		req: FastifyRequest<{
 			Body: {
-				shortdesc: string
-				longdesc: string
+				name: string
+				description: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { shortdesc, longdesc } = req.body
+		const { name, description } = req.body
 		const category = await CategoryModel.create({
-			shortdesc: shortdesc,
-			longdesc: longdesc,
+			name: name,
+			description: description,
 		})
 		categoryCreatedMessage(category)
 		return res.send(category)
@@ -116,21 +108,19 @@ export default class CategoryController {
 					id: z.string()
 				}).required(),
 				body: z.object({
-					shortdesc: z.string().optional(),
-					longdesc: z.string().optional(),
+					name: z.string().optional(),
+					description: z.string().optional(),
 				}).optional(),
 
-				description: "Update a category",
-				tags: [ "categories" ],
+				description: "Update category",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},
@@ -142,32 +132,28 @@ export default class CategoryController {
 				id: string
 			}
 			Body: {
-				shortdesc?: string
-				longdesc?: string
+				name?: string
+				description?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { shortdesc, longdesc } = req.body
+		const { name, description } = req.body
 		const { id } = req.params
 
-		if (!shortdesc && !longdesc) {
+		const category = await CategoryModel.findOne({ id: id })
+		if (!category) return res.send(null)
+		if (!name && !description) {
 			return res.send(await CategoryModel.findOne({ id: id }))
 		}
-		const oldCategory = await CategoryModel.findOne({ id: id })
 
-		if (!oldCategory) return res.send(null)
-		const newCategory = await CategoryModel.findOneAndUpdate({
-			id: id
-		}, {
-			...Boolean(shortdesc) && { shortdesc: shortdesc },
-			...Boolean(longdesc) && { longdesc: longdesc }
-		}, { new: true })
-		if (!newCategory) return res.send(null)
+		const oldCategory = category.toObject()
+		if (name) category.name = name
+		if (description) category.description = description
+		await category.save()
+		categoryUpdatedMessage(oldCategory, category.toObject())
 
-		categoryUpdatedMessage(oldCategory, newCategory)
-
-		return res.send(newCategory)
+		return res.send(category)
 	}
 
 	@DELETE({
@@ -178,17 +164,15 @@ export default class CategoryController {
 					id: z.string(),
 				}),
 
-				description: "Remove a category",
-				tags: [ "categories" ],
+				description: "Delete category",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},
@@ -257,17 +241,15 @@ export default class CategoryController {
 					idDissolving: z.string(),
 				}),
 
-				description: "Merge category idTwo into category idReceiving",
-				tags: [ "categories" ],
+				description: "Merge category idDissolving into category idReceiving",
+				tags: [ "master" ],
 				security: [
 					{
 						masterAuthorization: [],
 					},
 				],
 				response: {
-					"200": {
-						$ref: "CategoryClass#",
-					},
+					"200": Category,
 				},
 			},
 		},
