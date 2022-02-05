@@ -26,7 +26,7 @@
 		"discord.js": "^13.5.0",
 		"dotenv": "^10.0.0",
 		"envalid": "^7.2.2",
-		"fagc-api-wrapper": "^1.28.0",
+		"fagc-api-wrapper": "^1.28.1",
 		"rcon-client": "^4.2.3",
 		"utility-types": "^3.10.0",
 		"why-is-node-still-running": "^1.0.0",
