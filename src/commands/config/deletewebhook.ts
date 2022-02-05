@@ -32,8 +32,8 @@ const DeleteWebhook: Command = {
 			.map(async (webhook) => {
 				// there should be only one removeWebhook call, as guilds are limited to 1 webhook / guild
 				await client.fagc.info.removeWebhook({
-					webhookid: webhook.id,
-					webhooktoken: webhook.token,
+					webhookId: webhook.id,
+					webhookToken: webhook.token,
 				})
 				statusMessage.edit(`Removed webhook from <#${channel.id}>`)
 				webhook.delete()

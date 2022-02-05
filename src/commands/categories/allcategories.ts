@@ -22,10 +22,10 @@ const AllCategories: Command = {
 		const fields: EmbedField[] = []
 		for (let i = 0; i < categories.length; i += 2) {
 			fields.push({
-				name: `${categories[i].shortdesc} (\`${categories[i].id}\`)`,
+				name: `${categories[i].name} (\`${categories[i].id}\`)`,
 				// this is done so that two categories are per field to take up less space
 				value: categories[i + 1]
-					? `**${categories[i + 1].shortdesc}** (\`${categories[i + 1].id}\`)`
+					? `**${categories[i + 1].name}** (\`${categories[i + 1].id}\`)`
 					: "\u200b",
 				inline: false,
 			})

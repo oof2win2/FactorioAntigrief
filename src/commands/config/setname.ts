@@ -12,7 +12,7 @@ const SetName: Command = {
 	requiresApikey: true, // community is required, api key is given with community
 	requiredPermissions: ["setConfig"],
 	run: async ({ client, message, args, guildConfig }) => {
-		if (!guildConfig.apiKey)
+		if (!guildConfig.apikey)
 			return message.channel.send(
 				`${client.emotes.warn} You must have an API key set for this command`,
 			)
@@ -33,7 +33,7 @@ const SetName: Command = {
 					name: name,
 				},
 				reqConfig: {
-					apikey: guildConfig.apiKey,
+					apikey: guildConfig.apikey,
 				},
 			})
 			return message.channel.send(

@@ -2,12 +2,12 @@ import { Message } from "discord.js"
 import FAGCBot from "./fagcbot"
 import { GuildConfig } from "fagc-api-types"
 
-type CommandRunOpts<ApiKey extends boolean> = {
+type CommandRunOpts<Apikey extends boolean> = {
 	client: FAGCBot
 	message: Message<true> & Message<boolean>
 	args: string[]
-	// if ApiKey is true, the guildConfig will have an api key GUARANTEED. if it isn't true, it won't be guaranteed
-	guildConfig: ApiKey extends true ? GuildConfig & { apiKey: string } : GuildConfig
+	// if Apikey is true, the guildConfig will have an api key GUARANTEED. if it isn't true, it won't be guaranteed
+	guildConfig: Apikey extends true ? GuildConfig & { apikey: string } : GuildConfig
 }
 
 type BaseCommand = {

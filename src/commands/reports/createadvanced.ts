@@ -76,9 +76,9 @@ const CreateAdvanced: Command = {
 			.map((category) => {
 				return {
 					name: `${guildConfig.categoryFilters.indexOf(category.id) + 1}) ${
-						category.shortdesc
+						category.name
 					} (\`${category.id}\`)`,
-					value: category.longdesc,
+					value: category.description,
 					inline: false,
 				}
 			})
@@ -86,16 +86,16 @@ const CreateAdvanced: Command = {
 
 		const categories = await client.getMessageResponse(
 			message,
-			`${client.emotes.type} Type in the category(s) broken by the player, separated with spaces`,
+			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`,
 		)
-		if (!categories) return message.channel.send("Category(s) not specified")
+		if (!categories) return message.channel.send("No categories specified")
 		const categoryIds = categories.content.split(" ")
 		if (categoryIds.length === 1 && categoryIds[0] === "none") {
-			return message.channel.send("Category(s) not specified")
+			return message.channel.send("No categories specified")
 		}
 		// check for validity of categories, sort into valid and invalid IDs
 		const invalidCategoryIds: string[] = []
-		const validCategoryIDs: string[] = []
+		const validCategoryIds: string[] = []
 		categoryIds.map((categoryId) => {
 			let id: string
 			if (isNaN(Number(categoryId))) {
@@ -111,13 +111,13 @@ const CreateAdvanced: Command = {
 				id = found
 			}
 			// all categories are fetched above so they are cached
-			const category = client.fagc.categories.resolveID(id)
+			const category = client.fagc.categories.resolveId(id)
 			if (!category) invalidCategoryIds.push(id)
-			else validCategoryIDs.push(id)
+			else validCategoryIds.push(id)
 		})
 		if (invalidCategoryIds.length)
 			return message.channel.send(
-				`Invalid category(s): \`${invalidCategoryIds.join("`, `")}\``,
+				`Invalid categories: \`${invalidCategoryIds.join("`, `")}\``,
 			)
 
 		let proof = await client.getMessageResponse(
@@ -140,15 +140,15 @@ const CreateAdvanced: Command = {
 		// send an embed to display the report that will be created
 		const checkEmbed = client.createBaseEmbed()
 			.setTitle("FAGC Reports")
-			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Category(s):** ${validCategoryIDs.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
+			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Categories:** ${validCategoryIds.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
 			.addFields([
 				{ name: "Player", value: playername, inline: true },
 				{
-					name: "Category(s)",
-					value: validCategoryIDs
+					name: "Categories",
+					value: validCategoryIds
 						.map(
 							(id) =>
-								`${client.fagc.categories.resolveID(id)?.shortdesc} (\`${id}\`)`,
+								`${client.fagc.categories.resolveId(id)?.name} (\`${id}\`)`,
 						)
 						.join(", "),
 					inline: true,
@@ -178,7 +178,7 @@ const CreateAdvanced: Command = {
 		try {
 		// create the reports for each category
 			const reports = await Promise.all(
-				validCategoryIDs.map(async (categoryId) => {
+				validCategoryIds.map(async (categoryId) => {
 					return client.fagc.reports.create({
 						report: {
 							playername: playername,
@@ -190,7 +190,7 @@ const CreateAdvanced: Command = {
 							automated: false,
 						},
 						reqConfig: {
-							apikey: guildConfig.apiKey,
+							apikey: guildConfig.apikey,
 						},
 					})
 				}),
