@@ -1,1 +1,0 @@
-{"version":3,"file":"privatetypes.d.ts","sourceRoot":"","sources":["../../src/types/privatetypes.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,GAAG,CAAA;AAEjC,MAAM,WAAW,iBAAiB;IACjC,SAAS,CAAC,EAAE,aAAa,CAAA;IACzB,KAAK,CAAC,EAAE,OAAO,CAAA;IACf,KAAK,CAAC,EAAE,OAAO,CAAA;CACf"}

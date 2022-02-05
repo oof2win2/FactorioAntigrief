@@ -1,0 +1,59 @@
+{
+	"name": "fagc-api-wrapper",
+	"version": "1.28.2",
+	"description": "Wrapper for the FAGC API",
+	"main": "dist/index.js",
+	"scripts": {
+		"lint": "npm run eslint",
+		"eslint": "eslint src/ --fix --ext .js,.ts",
+		"prepare": "npx tsc",
+		"test": "jest",
+		"build": "tsc --build --clean"
+	},
+	"files": [
+		"dist/"
+	],
+	"types": "dist/index.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/oof2win2/fagc-api-wrapper.git"
+	},
+	"author": "oof2win2",
+	"keywords": [
+		"api",
+		"wrapper",
+		"fagc"
+	],
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/oof2win2/fagc-api-wrapper/issues"
+	},
+	"homepage": "https://github.com/oof2win2/fagc-api-wrapper#readme",
+	"dependencies": {
+		"@discordjs/collection": "^0.1.6",
+		"cross-fetch": "^3.1.4",
+		"discord-api-types": "^0.23.1",
+		"fagc-api-types": "^1.10.0",
+		"faker": "^5.5.3",
+		"isomorphic-ws": "^4.0.1",
+		"jest-fetch-mock": "^3.0.3",
+		"reconnecting-websocket": "^4.4.0",
+		"strict-uri-encode": "^2.0.0",
+		"tslib": "^2.3.1",
+		"ws": "^7.5.0",
+		"zod": "^3.11.6"
+	},
+	"devDependencies": {
+		"@types/faker": "^5.5.9",
+		"@types/jest": "^27.4.0",
+		"@types/strict-uri-encode": "^2.0.0",
+		"@types/ws": "^7.4.5",
+		"@typescript-eslint/eslint-plugin": "^4.33.0",
+		"@typescript-eslint/parser": "^4.33.0",
+		"eslint": "^7.32.0",
+		"jest": "^27.4.7",
+		"ts-jest": "^27.1.3",
+		"ts-node": "^10.0.0",
+		"typescript": "^4.5.4"
+	}
+}
