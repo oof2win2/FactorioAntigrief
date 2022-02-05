@@ -9,33 +9,33 @@ const CreateCategory: SubCommand = {
 		.setDescription("Create a FAGC category")
 		.addStringOption(option =>
 			option
-				.setName("shortdesc")
-				.setDescription("Short category description")
+				.setName("name")
+				.setDescription("Category Name")
 				.setRequired(true)
 		)
 		.addStringOption(option =>
 			option
-				.setName("longdesc")
-				.setDescription("Long category description")
+				.setName("description")
+				.setDescription("Category description")
 				.setRequired(true)
 		)
 	,
 	execute: async ({client, interaction}) => {
 		const user = interaction.user
 
-		const shortdesc = interaction.options.getString("shortdesc")
-		if (!shortdesc) return interaction.reply("Category short description not provided")
-		const longdesc = interaction.options.getString("longdesc")
-		if (!longdesc) return interaction.reply("Category long description not provided")
+		const name = interaction.options.getString("name")
+		if (!name) return interaction.reply("Category name not provided")
+		const description = interaction.options.getString("description")
+		if (!description) return interaction.reply("Category description not provided")
 
 		const category = await client.FAGC.categories.create({
 			category: {
-				shortdesc: shortdesc,
-				longdesc: longdesc
+				name: name,
+				description: description
 			}
 		})
 
-		return interaction.reply(`Category ${category.shortdesc} (\`${category.id}\`) was created`)
+		return interaction.reply(`Category ${category.name} (\`${category.id}\`) was created`)
 	}
 }
 

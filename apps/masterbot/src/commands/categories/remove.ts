@@ -25,7 +25,7 @@ const CreateCategory: SubCommand = {
 		})
 
 		if (!category) return interaction.reply(`Category with ID \`${id}\` does not exist`)
-		return interaction.reply(`Category ${category.shortdesc} (\`${category.id}\`) was removed`)
+		return interaction.reply(`Category ${category.name} (\`${category.id}\`) was removed`)
 	}
 }
 
