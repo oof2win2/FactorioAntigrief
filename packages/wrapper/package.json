@@ -1,6 +1,6 @@
 {
 	"name": "fagc-api-wrapper",
-	"version": "1.28.1",
+	"version": "1.28.2",
 	"description": "Wrapper for the FAGC API",
 	"main": "dist/index.js",
 	"scripts": {

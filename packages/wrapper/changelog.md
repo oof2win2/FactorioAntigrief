@@ -1,4 +1,4 @@
-## UNRELEASED
+## [1.28.2] - [2022-02-05]
 
 -	Renamed apiKey to apikey
 -	Renamed fields to consistent casing of ID
