@@ -4,8 +4,8 @@ import faker from "faker"
 export const createCategory = (): Category => {
 	return {
 		id: faker.datatype.uuid(),
-		shortdesc: faker.random.word(),
-		longdesc: faker.random.words(),
+		name: faker.random.word(),
+		description: faker.random.words(),
 	}
 }
 export const createCommunity = (): Community => {
@@ -29,6 +29,6 @@ export const createGuildConfig = (): GuildConfig => {
 			reports: faker.datatype.string(),
 			setConfig: faker.datatype.string(),
 		},
-		apiKey: faker.datatype.boolean() ? faker.internet.password() : null,
+		apikey: faker.datatype.boolean() ? faker.internet.password() : null,
 	}
 }

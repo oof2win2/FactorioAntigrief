@@ -21,50 +21,45 @@ export default class InfoManager extends BaseManager<Webhook> {
 		webhookId: string,
 		webhookToken: string
 	}): Promise<Webhook> {
-		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
-			method: "POST",
-			body: JSON.stringify({
-				id: webhookId,
-				token: webhookToken,
-			}),
+		const webhookPath = `${strictUriEncode(webhookId)}/${strictUriEncode(webhookToken)}`
+		const add = await fetch(`${this.apiurl}/discord/webhook/${webhookPath}`, {
+			method: "PUT",
 			credentials: "include",
-			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
 		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
 		return Webhook.parse(add)
 	}
 	async removeWebhook({
-		webhookid, webhooktoken
+		webhookId, webhookToken
 	}: {
-		webhookid: string,
-		webhooktoken: string
+		webhookId: string,
+		webhookToken: string
 	}): Promise<Webhook | null> {
-		const add = await fetch(`${this.apiurl}/informatics/webhook`, {
+		const webhookPath = `${strictUriEncode(webhookId)}/${strictUriEncode(webhookToken)}`
+		const add = await fetch(`${this.apiurl}/discord/webhook/${webhookPath}`, {
 			method: "DELETE",
-			body: JSON.stringify({
-				id: webhookid,
-				token: webhooktoken,
-			}),
 			credentials: "include",
-			headers: { "content-type": "application/json" },
 		}).then((w) => w.json())
 		return Webhook.nullable().parse(add)
 	}
 
-	async notifyGuildText({
+	async messageGuild({
 		guildId,
-		text,
-		reqConfig = {}
+		content,
+		embeds,
+		reqConfig = {},
 	}: {
 		guildId: string,
-		text: string,
+		content?: string,
+		embeds?: APIEmbed[],
 	} & FetchRequestTypes): Promise<void> {
 		await fetch(
-			`${this.apiurl}/informatics/notify/${strictUriEncode(guildId)}`,
+			`${this.apiurl}/discord/guilds/${strictUriEncode(guildId)}/message`,
 			{
 				method: "POST",
 				body: JSON.stringify({
-					data: text,
+					content: content,
+					embeds: embeds,
 				}),
 				credentials: "include",
 				headers: {
@@ -75,6 +70,17 @@ export default class InfoManager extends BaseManager<Webhook> {
 		)
 	}
 
+	async notifyGuildText({
+		guildId,
+		text,
+		reqConfig = {}
+	}: {
+		guildId: string,
+		text: string,
+	} & FetchRequestTypes): Promise<void> {
+		return await this.messageGuild({ guildId, content: text, reqConfig })
+	}
+
 	async notifyGuildEmbed({
 		guildId,
 		embed,
@@ -83,19 +89,6 @@ export default class InfoManager extends BaseManager<Webhook> {
 		guildId: string,
 		embed: APIEmbed,
 	} & FetchRequestTypes): Promise<void> {
-		await fetch(
-			`${this.apiurl}/informatics/notify/${strictUriEncode(
-				guildId
-			)}/embed`,
-			{
-				method: "POST",
-				body: JSON.stringify(embed),
-				credentials: "include",
-				headers: {
-					authorization: masterAuthenticate(this, reqConfig),
-					"content-type": "application/json",
-				},
-			}
-		)
+		return await this.messageGuild({ guildId, embeds: [ embed ], reqConfig })
 	}
 }

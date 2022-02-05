@@ -1,4 +1,5 @@
 import "cross-fetch/polyfill"
+import { strict as assert } from "assert"
 import { ManagerOptions, WrapperOptions, GenericAPIError, AuthError } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
@@ -44,7 +45,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		config: SetCommunityConfig,
 	} & FetchRequestTypes): Promise<Community> {
 		const req = await fetch(
-			`${this.apiurl}/communities`,
+			`${this.apiurl}/communities/own`,
 			{
 				method: "PATCH",
 				body: JSON.stringify(config),
@@ -163,7 +164,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		config: SetGuildConfig,
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		const req = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
+		const req = await fetch(`${this.apiurl}/discord/guilds/${config.guildId}`, {
 			method: "PATCH",
 			body: JSON.stringify(config),
 			credentials: "include",
@@ -186,7 +187,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		config: SetGuildConfig,
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		const req = await fetch(`${this.apiurl}/communities/guilds/${config.guildId}`, {
+		const req = await fetch(`${this.apiurl}/discord/guilds/${config.guildId}`, {
 			method: "PATCH",
 			body: JSON.stringify(config),
 			credentials: "include",
@@ -207,7 +208,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		guildId,
 	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
 		const config = await fetch(
-			`${this.apiurl}/communities/guilds/${strictUriEncode(guildId)}`,
+			`${this.apiurl}/discord/guilds/${strictUriEncode(guildId)}`,
 			{
 				credentials: "include",
 			}
@@ -222,7 +223,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		reqConfig = {}
 	}: {guildId: string} & FetchRequestTypes): Promise<GuildConfig | null> {
 		const req = await fetch(
-			`${this.apiurl}/communities/guilds/${strictUriEncode(guildId)}`,
+			`${this.apiurl}/discord/guilds/${strictUriEncode(guildId)}`,
 			{
 				credentials: "include",
 				headers: {
@@ -239,43 +240,86 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	/**
+	 * Manage API key for your community
+	 */
+	async manageApikey({
+		create,
+		invalidate,
+		reqConfig = {},
+	}: {
+		create?: boolean,
+		invalidate?: boolean,
+	} & FetchRequestTypes): Promise<{ apikey?: string }> {
+		const req = await fetch(`${this.apiurl}/communites/own/apikey`, {
+			method: "POST",
+			body: JSON.stringify({
+				create,
+				invalidate,
+			}),
+			credentials: "include",
+			headers: {
+				authorization: authenticate(this, reqConfig),
+				"content-type": "application/json",
+			},
+		})
+		if (req.status === 401) throw new AuthError()
+		const key = await req.json()
+
+		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
+		const parsed = z.object({
+			apikey: z.string().optional(),
+		}).parse(key)
+		return parsed
+	}
+	/**
 	 * Create a new API key for your community
 	 */
 	async createApikey({
 		reqConfig = {}
 	}: FetchRequestTypes): Promise<string> {
-		const req = await fetch(`${this.apiurl}/apikeys`, {
-			method: "POST",
-			credentials: "include",
-			headers: {
-				authorization: authenticate(this, reqConfig),
-			},
-		})
-		if (req.status === 401) throw new AuthError()
-		const key = await req.json()
-
-		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
-		const parsed = z.object({
-			apiKey: z.string(),
-		}).parse(key)
-		return parsed.apiKey
+		const result = await this.manageApikey({ create: true, reqConfig })
+		assert(result.apikey)
+		return result.apikey
 	}
-	
+
 	/**
-	 * Revoke API keys created until a specific timestamp
-	 * @returns New API key in case you revoke all of your keys by accident
+	 * Revoke all currently valid API keys created
+	 * @returns New API key to use
 	 */
 	async revokeApikeys({
-		invalidateUntil,
+		reqConfig = {}
+	}:  FetchRequestTypes): Promise<string> {
+		const result = await this.manageApikey({ create: true, invalidate: true, reqConfig })
+		assert(result.apikey)
+		return result.apikey
+	}
+
+	/**
+	 * Manage an API key for a community with the use of the master API
+	 */
+	async masterManageApikey({
+		communityId,
+		create,
+		keyType = "private",
+		invalidate,
 		reqConfig = {}
 	}: {
-		invalidateUntil: Date
-	} & FetchRequestTypes): Promise<string> {
-		const req = await fetch(`${this.apiurl}/apikey/revoke/${strictUriEncode(invalidateUntil.toISOString())}`, {
+		communityId: string,
+		create?: boolean,
+		keyType?: "master" | "private"
+		invalidate?: boolean,
+	} & FetchRequestTypes): Promise<{ apikey?: string }> {
+		const req = await fetch(`${this.apiurl}/communities/${strictUriEncode(communityId)}/apikey`, {
 			method: "POST",
+			body: JSON.stringify({
+				create,
+				...(create ? { type: keyType } : {}),
+				invalidate,
+			}),
 			credentials: "include",
 			headers: {
-				authorization: authenticate(this, reqConfig),
+				authorization: masterAuthenticate(this, reqConfig),
+				"content-type": "application/json",
 			},
 		})
 		if (req.status === 401) throw new AuthError()
@@ -283,10 +327,11 @@ export default class CommunityManager extends BaseManager<Community> {
 
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z.object({
-			apiKey: z.string(),
+			apikey: z.string().optional(),
 		}).parse(key)
-		return parsed.apiKey
+		return parsed
 	}
+
 
 	/**
 	 * Create an API key for a community with the use of the master API
@@ -299,53 +344,24 @@ export default class CommunityManager extends BaseManager<Community> {
 		communityId: string,
 		keyType: "master" | "private"
 	} & FetchRequestTypes): Promise<string> {
-		const params = new URLSearchParams({
-			type: keyType
-		})
-		const req = await fetch(`${this.apiurl}/communities/apikey/create/${strictUriEncode(communityId)}?${params.toString()}`, {
-			method: "POST",
-			credentials: "include",
-			headers: {
-				authorization: masterAuthenticate(this, reqConfig),
-			},
-		})
-		if (req.status === 401) throw new AuthError()
-		const key = await req.json()
-
-		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
-		const parsed = z.object({
-			apiKey: z.string(),
-		}).parse(key)
-		return parsed.apiKey
+		const result = await this.masterManageApikey({ communityId, create: true, keyType, reqConfig })
+		assert(result.apikey)
+		return result.apikey
 	}
 
 	/**
-	 * Revoke API keys created until a specific timestamp with the use of the master API
-	 * @returns New API key in case you revoke all of the keys by accident
+	 * Revoke all currently valid API keys created for community
+	 * @returns New API key to use
 	 */
 	async masterRevokeKeys({
 		communityId,
-		invalidateUntil,
 		reqConfig = {}
 	}: {
 		communityId: string
-		invalidateUntil: Date,
 	} & FetchRequestTypes): Promise<string> {
-		const req = await fetch(`${this.apiurl}/communities/apikey/revoke/${invalidateUntil.toISOString()}/${strictUriEncode(communityId)}`, {
-			method: "POST",
-			credentials: "include",
-			headers: {
-				authorization: masterAuthenticate(this, reqConfig),
-			},
-		})
-		if (req.status === 401) throw new AuthError()
-		const key = await req.json()
-
-		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
-		const parsed = z.object({
-			apiKey: z.string(),
-		}).parse(key)
-		return parsed.apiKey
+		const result = await this.masterManageApikey({ communityId, create: true, invalidate: true, reqConfig })
+		assert(result.apikey)
+		return result.apikey
 	}
 
 	async create({
@@ -358,7 +374,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		contact: string,
 	} & FetchRequestTypes): Promise<{
 		community: Community
-		apiKey: string
+		apikey: string
 	}> {
 		const req = await fetch(`${this.apiurl}/communities`, {
 			method: "POST",
@@ -379,7 +395,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		
 		const parsedCreate = z.object({
 			community: Community,
-			apiKey: z.string(),
+			apikey: z.string(),
 		}).parse(create)
 		if (cache) this.add(parsedCreate.community)
 		return parsedCreate
@@ -391,7 +407,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		guildId: string
 	} & FetchRequestTypes): Promise<GuildConfig> {
-		const req = await fetch(`${this.apiurl}/communities/guilds`, {
+		const req = await fetch(`${this.apiurl}/discord/guilds`, {
 			method: "POST",
 			body: JSON.stringify({
 				guildId: guildId,
@@ -417,8 +433,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		guildId: string,
 	} & FetchRequestTypes): Promise<void> {
 		const req = await fetch(
-			`${this.apiurl
-			}/communities/notifyGuildConfigChanged/${strictUriEncode(guildId)}`,
+			`${this.apiurl}/discord/guilds/${strictUriEncode(guildId)}/notifyChanged`,
 			{
 				method: "POST",
 				credentials: "include",
@@ -440,9 +455,9 @@ export default class CommunityManager extends BaseManager<Community> {
 		guildId: string,
 	} & FetchRequestTypes): Promise<void> {
 		const req = await fetch(
-			`${this.apiurl}/communities/guildLeave/${strictUriEncode(guildId)}`,
+			`${this.apiurl}/discord/guilds/${strictUriEncode(guildId)}`,
 			{
-				method: "POST",
+				method: "DELETE",
 				credentials: "include",
 				headers: {
 					authorization: masterAuthenticate(this, reqConfig),

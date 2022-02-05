@@ -28,4 +28,4 @@ export interface WrapperOptions extends BaseWrapperOptions {
 export interface AddOptions {
 	id?: never
 }
-export type ApiID = string
+export type ApiId = string

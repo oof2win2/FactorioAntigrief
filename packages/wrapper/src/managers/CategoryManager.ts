@@ -53,15 +53,15 @@ export class CategoryManager extends BaseManager<Category> {
 	}
 
 	async fetchCategory({
-		categoryid,
+		categoryId,
 		cache = true,
 		force = false
 	}: {
-		categoryid: string
+		categoryId: string
 	} & FetchRequestTypes): Promise<Category | null> {
 		if (!force) {
 			const cached =
-				this.cache.get(categoryid) || this.fetchingCache.get(categoryid)
+				this.cache.get(categoryId) || this.fetchingCache.get(categoryId)
 			if (cached) return cached
 		}
 		let promiseResolve!: (value: Category | PromiseLike<Category | null> | null) => void
@@ -69,10 +69,10 @@ export class CategoryManager extends BaseManager<Category> {
 			promiseResolve = resolve
 		})
 
-		if (cache) this.fetchingCache.set(categoryid, fetchingPromise)
+		if (cache) this.fetchingCache.set(categoryId, fetchingPromise)
 
 		const req = await fetch(
-			`${this.apiurl}/categories/${strictUriEncode(categoryid)}`,
+			`${this.apiurl}/categories/${strictUriEncode(categoryId)}`,
 			{
 				credentials: "include",
 			}
@@ -82,7 +82,7 @@ export class CategoryManager extends BaseManager<Category> {
 		const parsed = Category.nullable().safeParse(fetched)
 		if (!parsed.success || parsed.data === null) {
 			promiseResolve(null)
-			setTimeout(() => this.fetchingCache.delete(categoryid), 0)
+			setTimeout(() => this.fetchingCache.delete(categoryId), 0)
 			if (!parsed.success) throw parsed.error
 			return null
 		}
@@ -90,18 +90,18 @@ export class CategoryManager extends BaseManager<Category> {
 		if (cache) this.add(parsed.data)
 		promiseResolve(fetched)
 		setTimeout(() => {
-			this.fetchingCache.delete(categoryid)
+			this.fetchingCache.delete(categoryId)
 		}, 0)
 		return parsed.data
 	}
 
 	async modify({
 		categoryId,
-		shortdesc, longdesc,
+		name, description,
 		reqConfig = {}
 	}: {
 		categoryId: string,
-		shortdesc?: string, longdesc?: string
+		name?: string, description?: string
 	} & FetchRequestTypes): Promise<Category | null> {
 		const req = await fetch(
 			`${this.apiurl}/categories/${strictUriEncode(categoryId)}`,
@@ -109,8 +109,8 @@ export class CategoryManager extends BaseManager<Category> {
 				method: "PATCH",
 				credentials: "include",
 				body: JSON.stringify({
-					shortdesc: shortdesc,
-					longdesc: longdesc
+					name: name,
+					description: description
 				}),
 				headers: {
 					authorization: masterAuthenticate(this, reqConfig),

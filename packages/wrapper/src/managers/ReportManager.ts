@@ -18,9 +18,32 @@ export default class ReportManager extends BaseManager<Report> {
 	}
 
 	async fetchAll({
+		playername,
+		communityId,
+		categoryId,
+		adminId,
+		after,
 		cache = true,
-	}: FetchRequestTypes): Promise<Report[]> {
-		const reports = await fetch(`${this.apiurl}/reports`, {
+	}: {
+		playername?: string | string[],
+		communityId?: string | string[],
+		categoryId?: string | string[],
+		adminId?: string | string[],
+		after?: Date,
+	} & FetchRequestTypes): Promise<Report[]> {
+		const url = new URL("./reports", this.apiurl)
+		function addParams(name: string, values?: string | string[]) {
+			if (values === undefined) values = []
+			if (!(values instanceof Array)) values = [ values ]
+			values.forEach((v) => url.searchParams.append(name, v))
+		}
+
+		addParams("playername", playername)
+		addParams("communityId", communityId)
+		addParams("categoryId", categoryId)
+		addParams("adminId", adminId)
+		if (after) url.searchParams.set("after", after.toISOString())
+		const reports = await fetch(url.toString(), {
 			credentials: "include",
 		}).then((c) => c.json())
 
@@ -112,6 +135,7 @@ export default class ReportManager extends BaseManager<Report> {
 		return parsed.data
 	}
 
+	// Obsolete accessors
 	async search({
 		playername,
 		categoryId,
@@ -122,42 +146,15 @@ export default class ReportManager extends BaseManager<Report> {
 		categoryId?: string,
 		communityId?: string,
 	} & FetchRequestTypes):	 Promise<Report[]> {
-		if (!playername && !categoryId && !communityId)
-			throw new Error("At least one of the search parameters must be set")
-		
-		const params = new URLSearchParams()
-		if (playername) params.append("playername", playername)
-		if (categoryId) params.append("categoryId", categoryId)
-		if (communityId) params.append("communityId", communityId)
-
-		const data = await fetch(`${this.apiurl}/reports/search?${params.toString()}`, {
-			credentials: "include",
-		}).then((c) => c.json())
-		if (data.error)
-			throw new GenericAPIError(`${data.error}: ${data.message}`)
-
-		const parsed = z.array(Report).parse(data)
-
-		if (cache) parsed.forEach((report) => this.add(report))
-		return parsed
+		return await this.fetchAll({ playername, categoryId, communityId, cache })
 	}
-	
+
 	async fetchByCategory({
 		categoryId, cache = true
 	}: {
 		categoryId: string
 	} & FetchRequestTypes): Promise<Report[]> {
-		const categoryReports = await fetch(
-			`${this.apiurl}/reports/category/${strictUriEncode(categoryId)}`,
-			{
-				credentials: "include",
-			}
-		).then((c) => c.json())
-
-		const parsed = z.array(Report).parse(categoryReports)
-
-		if (cache) parsed.forEach((report) => this.add(report))
-		return parsed
+		return await this.fetchAll({ categoryId, cache })
 	}
 
 	async fetchAllName({
@@ -165,21 +162,7 @@ export default class ReportManager extends BaseManager<Report> {
 	}: {
 		playername: string
 	} & FetchRequestTypes): Promise<Report[]> {
-		const allReports = await fetch(
-			`${this.apiurl}/reports/player/${strictUriEncode(playername)}`,
-			{
-				credentials: "include",
-			}
-		).then((c) => c.json())
-
-		if (allReports.error)
-			throw new GenericAPIError(
-				`${allReports.error}: ${allReports.message}`
-			)
-		
-		const parsed = z.array(Report).parse(allReports)
-		if (cache) parsed.forEach((report) => this.add(report))
-		return parsed
+		return await this.fetchAll({ playername, cache })
 	}
 
 	async fetchByCommunity({
@@ -187,20 +170,7 @@ export default class ReportManager extends BaseManager<Report> {
 	}: {
 		communityId: string
 	} & FetchRequestTypes): Promise<Report[]> {
-		const communityReports = await fetch(
-			`${this.apiurl}/reports/community/${strictUriEncode(communityId)}`,
-			{
-				credentials: "include",
-			}
-		).then((c) => c.json())
-		if (communityReports.error)
-			throw new GenericAPIError(
-				`${communityReports.error}: ${communityReports.message}`
-			)
-		
-		const parsed = z.array(Report).parse(communityReports)
-		if (cache) parsed.forEach((report) => this.add(report))
-		return parsed
+		return await this.fetchAll({ communityId, cache })
 	}
 
 	async list({
@@ -214,24 +184,7 @@ export default class ReportManager extends BaseManager<Report> {
 		communityIds: string[]
 		cache?: boolean
 	}): Promise<Report[]> {
-		const reports = await fetch(`${this.apiurl}/reports/list`, {
-			method: "POST",
-			body: JSON.stringify({
-				playername: playername,
-				categoryIds: categoryIds,
-				communityIds: communityIds,
-			}),
-			credentials: "include",
-			headers: {
-				"content-type": "application/json",
-			},
-		}).then((u) => u.json())
-		if (reports.error)
-			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
-		
-		const parsed = z.array(Report).parse(reports)
-		if (cache) parsed.forEach((report) => this.add(report))
-		return parsed
+		return await this.fetchAll({ playername, categoryId: categoryIds, communityId: communityIds, cache })
 	}
 
 	async fetchSince({
@@ -239,18 +192,6 @@ export default class ReportManager extends BaseManager<Report> {
 	}: {
 		timestamp: Date
 	} & FetchRequestTypes): Promise<Report[]> {
-		const reports = await fetch(
-			`${this.apiurl}/reports/since/${timestamp.toISOString()}`,
-			{
-				credentials: "include",
-			}
-		).then((c) => c.json())
-
-		if (reports.error)
-			throw new GenericAPIError(`${reports.error}: ${reports.message}`)
-		
-		const parsed = z.array(Report).parse(reports)
-		if (cache) parsed.forEach((report) => this.add(report))
-		return parsed
+		return await this.fetchAll({ after: timestamp, cache })
 	}
 }
