@@ -16,13 +16,13 @@ const EditCategory: SubCommand = {
 		.addStringOption(option =>
 			option
 				.setName("shortdesc")
-				.setDescription("Short category description")
+				.setDescription("Category name")
 				.setRequired(false)
 		)
 		.addStringOption(option =>
 			option
-				.setName("longdesc")
-				.setDescription("Long category description")
+				.setName("description")
+				.setDescription("Category description")
 				.setRequired(false)
 		)
 	,
@@ -30,17 +30,17 @@ const EditCategory: SubCommand = {
 		const user = interaction.user
 
 		const id = interaction.options.getString("id", true)
-		const shortdesc = interaction.options.getString("shortdesc")
-		const longdesc = interaction.options.getString("longdesc")
-		if (!shortdesc && !longdesc) return interaction.reply({
+		const name = interaction.options.getString("name")
+		const description = interaction.options.getString("description")
+		if (!name && !description) return interaction.reply({
 			content: "No changes would be made!",
 			ephemeral: true
 		})
 
 		const category = await client.FAGC.categories.modify({
 			categoryId: id,
-			shortdesc: shortdesc ?? undefined,
-			longdesc: longdesc ?? undefined,
+			name: name ?? undefined,
+			description: description ?? undefined,
 		})
 		
 		if (!category) return interaction.reply({
@@ -48,7 +48,7 @@ const EditCategory: SubCommand = {
 			ephemeral: true
 		})
 
-		return interaction.reply(`Category \`${category.id}\` was edited. Changes may take a ~5 minutes to take effect. ${category.shortdesc}: ${category.longdesc}`)
+		return interaction.reply(`Category \`${category.id}\` was edited. Changes may take ~5 minutes to take effect. ${category.name}: ${category.description}`)
 	}
 }
 
