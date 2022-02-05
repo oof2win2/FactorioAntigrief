@@ -37,9 +37,9 @@ const CreateCommunity: SubCommand = {
 				contact: contact.id,
 			})
 			if (community.community) {
-				contact.send(`You have created a new community ${name} (\`${community.community.id}\`). Your API key is \`${community.apiKey}\``)
+				contact.send(`You have created a new community ${name} (\`${community.community.id}\`). Your API key is \`${community.apikey}\``)
 				interaction.reply({
-					content: `Community ${name} (\`${community.community.id}\`) has API key \`${community.apiKey}\``,
+					content: `Community ${name} (\`${community.community.id}\`) has API key \`${community.apikey}\``,
 					ephemeral: true
 				})
 				return interaction.channel?.send(`Community ${name} (\`${community.community.id}\`) has been created`)
