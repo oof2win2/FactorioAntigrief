@@ -59,7 +59,7 @@ export default class FAGCBot extends Client {
 	async saveGuildConfig(
 		config: Partial<GuildConfig> & {
 			roles?: Partial<GuildConfig["roles"]>
-		} & Pick<GuildConfig, "guildId"> & { apikey?: string },
+		} & Pick<GuildConfig, "guildId">,
 	) {
 		if (config.apikey) {
 			// if the guild has an API key, it can be set by themselves

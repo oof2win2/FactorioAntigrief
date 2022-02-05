@@ -190,7 +190,7 @@ const CreateAdvanced: Command = {
 							automated: false,
 						},
 						reqConfig: {
-							apikey: guildConfig.apiKey,
+							apikey: guildConfig.apikey,
 						},
 					})
 				}),

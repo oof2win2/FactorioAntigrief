@@ -34,7 +34,7 @@ const ViewConfig: Command = {
 			},
 			{
 				name: "API key",
-				value: guildConfig.apiKey ? "Set" : "None",
+				value: guildConfig.apikey ? "Set" : "None",
 				inline: true,
 			},
 			{

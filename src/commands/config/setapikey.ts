@@ -50,7 +50,7 @@ const Setapikey: Command = {
 			config: {
 				communityId: community.id,
 				guildId: message.guild.id,
-				apiKey: key,
+				apikey: key,
 			},
 		})
 
