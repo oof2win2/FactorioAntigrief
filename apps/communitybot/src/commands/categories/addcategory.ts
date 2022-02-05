@@ -25,28 +25,28 @@ const AddCategory: Command = {
 			const fields: EmbedField[] = []
 			for (let i = 0; i < allCategories.length; i += 2) {
 				fields.push({
-					name: `${allCategories[i].shortdesc} (\`${allCategories[i].id}\`)`,
+					name: `${allCategories[i].name} (\`${allCategories[i].id}\`)`,
 					// this is done so that two categories are per field to take up less space
 					value: allCategories[i + 1]
-						? `**${allCategories[i + 1].shortdesc}** (\`${allCategories[i + 1].id}\`)`
+						? `**${allCategories[i + 1].name}** (\`${allCategories[i + 1].id}\`)`
 						: "\u200b",
 					inline: false,
 				})
 			}
 			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
-			const newIDsMessage = await client.getMessageResponse(
+			const newIdsMessage = await client.getMessageResponse(
 				message,
 				`${client.emotes.type} No categories provided. Please provide IDs`,
 			)
 
-			if (!newIDsMessage || !newIDsMessage.content)
+			if (!newIdsMessage || !newIdsMessage.content)
 				return message.channel.send("No IDs were provided")
-			args = newIDsMessage.content.split(" ")
+			args = newIdsMessage.content.split(" ")
 		}
 
 		// get the IDs that are not in their config
 		const newCategories = args
-			.map((categoryid) => client.fagc.categories.resolveID(categoryid))
+			.map((categoryId) => client.fagc.categories.resolveId(categoryId))
 			.filter((r): r is Category => Boolean(r))
 			.filter((r) => !guildConfig.categoryFilters.includes(r.id))
 
@@ -60,8 +60,8 @@ const AddCategory: Command = {
 			.setDescription("New Categories")
 		const newCategoryFields = newCategories.map((category) => {
 			return {
-				name: `${category.shortdesc} (\`${category.id}\`)`,
-				value: category.longdesc,
+				name: `${category.name} (\`${category.id}\`)`,
+				value: category.description,
 				inline: false,
 			}
 		})
@@ -85,7 +85,7 @@ const AddCategory: Command = {
 			await client.saveGuildConfig({
 				guildId: message.guild.id,
 				categoryFilters: [...newCategoryIds],
-				apikey: guildConfig.apiKey ?? undefined,
+				apikey: guildConfig.apikey ?? undefined,
 			})
 
 			// send a success message
