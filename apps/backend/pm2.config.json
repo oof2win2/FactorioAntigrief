@@ -1,0 +1,11 @@
+{
+	"apps": [
+		{
+			"name": "fagc-backend",
+			"script": "node .",
+			"env": {
+				"NODE_ENV": "development"
+			}
+		}
+	]
+}
