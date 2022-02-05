@@ -10,21 +10,21 @@ const FetchReport: Command = {
 	requiresRoles: false,
 	requiresApikey: false,
 	async run({ message, args, client }) {
-		const reportID = await client.argsOrInput(args, message, `${client.emotes.type} Provide a report ID to fetch`)
-		if (!reportID)
+		const reportId = await client.argsOrInput(args, message, `${client.emotes.type} Provide a report ID to fetch`)
+		if (!reportId)
 			return message.channel.send(
 				`${client.emotes.warn} No report ID was provided`,
 			)
 
-		const report = await client.fagc.reports.fetchReport({ reportId: reportID })
+		const report = await client.fagc.reports.fetchReport({ reportId: reportId })
 		if (!report)
 			return message.channel.send(
-				`${client.emotes.warn} Report with ID \`${reportID}\` doesn't exist`,
+				`${client.emotes.warn} Report with ID \`${reportId}\` doesn't exist`,
 			)
 
 		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Report")
-			.setDescription(`FAGC Report with ID \`${reportID}\``)
+			.setDescription(`FAGC Report with ID \`${reportId}\``)
 
 		embed.addFields([
 			{

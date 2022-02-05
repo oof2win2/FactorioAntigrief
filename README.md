@@ -36,7 +36,7 @@ All `id` properties are generated automatically by the API and cannot be set by 
   - `id` - ID of the community. Only used to fetch said community
   - `name` - Name of the community. Does not need to be the same as the name of the community's guild server
   - `contact` - Discord UserID of the contact user for the community
-  - `guildid` - Discord GuildID of the Discord guild for the community
+  - `guildId` - Discord GuildID of the Discord guild for the community
 - **Report**
   - `id` - ID of the report. Used to fetch and revoke reports created by your community
   - `playername` - Name of the player that is being reported
