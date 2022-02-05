@@ -7,7 +7,7 @@
 	"scripts": {
 		"lint": "eslint src/ --fix",
 		"postinstall": "install-types",
-		"build": "tsc --build --clean",
+		"build": "tsc --build",
 		"dev": "tsc -b --watch",
 		"bot:addcommands": "node dist/commands.js"
 	},

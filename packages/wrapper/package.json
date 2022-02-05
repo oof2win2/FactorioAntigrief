@@ -8,7 +8,7 @@
 		"eslint": "eslint src/ --fix --ext .js,.ts",
 		"prepare": "npx tsc",
 		"test": "jest",
-		"build": "tsc --build --clean"
+		"build": "tsc --build"
 	},
 	"files": [
 		"dist/"

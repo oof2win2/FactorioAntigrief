@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "tsc --build --clean",
+		"build": "tsc --build",
 		"lint": "npm run eslint && npm run prettier",
 		"eslint": "eslint src/ --fix --ext .js,.ts",
 		"prettier": "prettier --write src/",
