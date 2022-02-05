@@ -1,0 +1,26 @@
+name: "GitHub Actions Test"
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
+  schedule:
+    # run every monday at midnight
+    - cron: "0 0 * * 1"
+
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: 'Install Node'
+              uses: actions/setup-node@v2
+              with:
+                node-version: '16'
+            - name: Install dependencies
+              run: npm install -D
+            - name: Run Test
+              run: npm run test
