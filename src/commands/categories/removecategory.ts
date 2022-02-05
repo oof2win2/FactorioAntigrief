@@ -28,9 +28,9 @@ const RemoveCategories: Command = {
 				.map((category) => {
 					return {
 						name: `${guildConfig.categoryFilters.indexOf(category.id) + 1}) ${
-							category.shortdesc
+							category.name
 						} (\`${category.id}\`)`,
-						value: category.longdesc,
+						value: category.description,
 						inline: false,
 					}
 				})
@@ -70,8 +70,8 @@ const RemoveCategories: Command = {
 			)
 		const categoryFields = categories.map((category) => {
 			return {
-				name: `${category.shortdesc} (\`${category.id}\`)`,
-				value: category.longdesc,
+				name: `${category.name} (\`${category.id}\`)`,
+				value: category.description,
 				inline: false,
 			}
 		})

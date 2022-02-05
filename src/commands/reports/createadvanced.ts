@@ -76,9 +76,9 @@ const CreateAdvanced: Command = {
 			.map((category) => {
 				return {
 					name: `${guildConfig.categoryFilters.indexOf(category.id) + 1}) ${
-						category.shortdesc
+						category.name
 					} (\`${category.id}\`)`,
-					value: category.longdesc,
+					value: category.description,
 					inline: false,
 				}
 			})
@@ -148,7 +148,7 @@ const CreateAdvanced: Command = {
 					value: validCategoryIds
 						.map(
 							(id) =>
-								`${client.fagc.categories.resolveId(id)?.shortdesc} (\`${id}\`)`,
+								`${client.fagc.categories.resolveId(id)?.name} (\`${id}\`)`,
 						)
 						.join(", "),
 					inline: true,

@@ -30,7 +30,7 @@ const Category: Command = {
 		const embed = client.createBaseEmbed()
 			.setTitle("FAGC Categories")
 			.setDescription(`FAGC Category with ID \`${category.id}\``)
-		embed.addField(category.shortdesc, category.longdesc)
+		embed.addField(category.name, category.description)
 
 		if (client.config && guildConfig.categoryFilters) {
 			if (guildConfig.categoryFilters.indexOf(category.id) != -1) {

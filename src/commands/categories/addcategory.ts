@@ -25,10 +25,10 @@ const AddCategory: Command = {
 			const fields: EmbedField[] = []
 			for (let i = 0; i < allCategories.length; i += 2) {
 				fields.push({
-					name: `${allCategories[i].shortdesc} (\`${allCategories[i].id}\`)`,
+					name: `${allCategories[i].name} (\`${allCategories[i].id}\`)`,
 					// this is done so that two categories are per field to take up less space
 					value: allCategories[i + 1]
-						? `**${allCategories[i + 1].shortdesc}** (\`${allCategories[i + 1].id}\`)`
+						? `**${allCategories[i + 1].name}** (\`${allCategories[i + 1].id}\`)`
 						: "\u200b",
 					inline: false,
 				})
@@ -60,8 +60,8 @@ const AddCategory: Command = {
 			.setDescription("New Categories")
 		const newCategoryFields = newCategories.map((category) => {
 			return {
-				name: `${category.shortdesc} (\`${category.id}\`)`,
-				value: category.longdesc,
+				name: `${category.name} (\`${category.id}\`)`,
+				value: category.description,
 				inline: false,
 			}
 		})
