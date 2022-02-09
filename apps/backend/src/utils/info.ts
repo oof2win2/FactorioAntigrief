@@ -4,7 +4,7 @@ import WebSocket from "ws"
 import GuildConfigModel, {
 	GuildConfigClass,
 } from "../database/guildconfig"
-import { DocumentType } from "@typegoose/typegoose"
+import { DocumentType, mongoose } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import { CategoryClass } from "../database/category"
 import { CommunityClass } from "../database/community"
@@ -22,6 +22,8 @@ const WebhookGuildIds = new WeakMap<WebSocket, string[]>()
 let WebhookQueue: MessageEmbed[] = []
 
 async function SendWebhookMessages() {
+	// mongoose isn't connected so no point in sending webhooks, as it will error
+	if (mongoose.connection.readyState !== 1) return
 	const embeds = WebhookQueue.slice(0, 10)
 	if (!embeds[0]) return
 	WebhookQueue = WebhookQueue.slice(10)
