@@ -233,7 +233,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		)
 		if (req.status === 401) throw new AuthError()
 		const config = await req.json()
-
+		if (!config) return null
 		if (config?.error) throw new GenericAPIError(`${config.error}: ${config.message}`)
 		const parsedConfig = GuildConfig.parse(config)
 		return parsedConfig
