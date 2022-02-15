@@ -1,14 +1,14 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
 import { CommandWithSubcommands, PermissionOverrideType, SubCommand } from "../base/Commands.js"
 import { readdirSync } from "fs"
-import ENV from "../utils/env.js"
 
-const commands: SubCommand[] = await Promise.all(readdirSync("./commands/config/")
+const commands: SubCommand[] = readdirSync("./commands/config/")
 	.filter(command => command.endsWith(".js"))
-	.map(async commandName => {
-		const command = await import(`./config/${commandName}`)
+	.map(commandName => {
+		// const command = await import(`./config/${commandName}`)
+		const command = require(`./config/${commandName}`)
 		return command.default
-	}))
+	})
 
 const Config: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()

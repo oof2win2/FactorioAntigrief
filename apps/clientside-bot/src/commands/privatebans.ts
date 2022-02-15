@@ -4,12 +4,12 @@ import { readdirSync } from "fs"
 import ENV from "../utils/env.js"
 import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 
-const commands: SubCommand[] = await Promise.all(readdirSync("./commands/privatebans/")
+const commands: SubCommand[] = readdirSync("./commands/privatebans/")
 	.filter(command => command.endsWith(".js"))
-	.map(async commandName => {
-		const command = await import(`./privatebans/${commandName}`)
+	.map(commandName => {
+		const command = require(`./privatebans/${commandName}`)
 		return command.default
-	}))
+	})
 
 const Bans: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()

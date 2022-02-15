@@ -4,12 +4,12 @@ import { readdirSync } from "fs"
 import ENV from "../utils/env.js"
 import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 
-const commands: SubCommand[] = await Promise.all(readdirSync("./commands/whitelist/")
+const commands: SubCommand[] = readdirSync("./commands/whitelist/")
 	.filter(command => command.endsWith(".js"))
-	.map(async commandName => {
-		const command = await import(`./whitelist/${commandName}`)
+	.map(commandName => {
+		const command = require(`./whitelist/${commandName}`)
 		return command.default
-	}))
+	})
 
 const Bans: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
