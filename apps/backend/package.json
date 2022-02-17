@@ -4,11 +4,11 @@
 	"private": true,
 	"main": "dist/index.js",
 	"type": "commonjs",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
 		"start": "ts-node ./src/index.ts",
 		"dev": "nodemon ./dist/index.ts",
-		"lint": "npm run eslint",
-		"eslint": "eslint src/ --fix --ext .ts",
+		"lint": "eslint src/ --fix --ext .ts && prettier --write",
 		"pm2:build": "tsc",
 		"pm2:start": "pm2 start pm2.config.js",
 		"pm2": "npm run pm2:build && npm run pm2:start",

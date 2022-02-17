@@ -3,9 +3,9 @@
 	"version": "2.0.0",
 	"description": "The master bot for the Factorio Anti-Grief community",
 	"main": "dist/app.js",
-	"type": "module",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
-		"lint": "eslint src/ --fix",
+		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
 		"postinstall": "install-types",
 		"build": "tsc --build",
 		"dev": "tsc -b --watch",

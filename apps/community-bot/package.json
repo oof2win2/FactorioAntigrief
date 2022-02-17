@@ -3,11 +3,10 @@
 	"version": "0.0.1",
 	"description": "",
 	"main": "dist/index.js",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
+		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
 		"build": "tsc --build",
-		"lint": "npm run eslint && npm run prettier",
-		"eslint": "eslint src/ --fix --ext .js,.ts",
-		"prettier": "prettier --write src/",
 		"dev": "nodemon"
 	},
 	"dependencies": {

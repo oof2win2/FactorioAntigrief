@@ -4,9 +4,9 @@
 	"description": "",
 	"main": "dist/src/index.js",
 	"types": "dist/src/index.d.ts",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
-		"lint": "npm run eslint",
-		"eslint": "eslint src/ --fix --ext .js,.ts",
+		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
 		"prepare": "npx tsc",
 		"build": "tsc --build"
 	},

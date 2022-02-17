@@ -3,10 +3,11 @@
 	"version": "1.0.0",
 	"description": "## Installation",
 	"main": "dist/index.js",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
+		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
 		"build": "tsc --build",
-		"bot:addcommands": "node dist/addCommands.js",
-		"lint": "eslint src/ --fix"
+		"bot:addcommands": "node dist/addCommands.js"
 	},
 	"repository": {
 		"type": "git",

@@ -3,9 +3,9 @@
 	"version": "1.28.2",
 	"description": "Wrapper for the FAGC API",
 	"main": "dist/index.js",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
-		"lint": "npm run eslint",
-		"eslint": "eslint src/ --fix --ext .js,.ts",
+		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
 		"prepare": "npx tsc",
 		"test": "jest",
 		"build": "tsc --build"
