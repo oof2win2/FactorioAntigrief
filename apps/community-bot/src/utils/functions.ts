@@ -15,7 +15,7 @@ export async function createPagedEmbed(
 	message: Message,
 	options: {
 		maxPageCount?: number
-	} = {},
+	} = {}
 ) {
 	const newOptions = {
 		maxPageCount: 25,
@@ -28,19 +28,19 @@ export async function createPagedEmbed(
 	const maxPages = Math.floor(fields.length / newOptions.maxPageCount)
 	embed.fields = fields.slice(0, options.maxPageCount)
 	let embedMsg = await message.channel.send({
-		embeds: [ embed ],
+		embeds: [embed],
 	})
 
 	const setData = async () => {
 		const start = page * newOptions.maxPageCount
 		embed.fields = fields.slice(start, start + newOptions.maxPageCount)
 		embedMsg = await embedMsg.edit({
-			embeds: [ embed ],
+			embeds: [embed],
 		})
 	}
 	const removeReaction = async (emoteName: string) => {
 		const foundReaction = embedMsg.reactions.cache.find(
-			(r) => r.emoji.name === emoteName,
+			(r) => r.emoji.name === emoteName
 		)
 		if (foundReaction) foundReaction.users.remove(message.author.id)
 	}
@@ -65,39 +65,41 @@ export async function createPagedEmbed(
 
 	reactionCollector.on("collect", (reaction) => {
 		switch (reaction.emoji.name) {
-		case "⬅️": {
-			page--
-			removeReaction("⬅️") // remove the user's reaction no matter what
-			if (page <= -1) page = 0
-			else setData()
-			break
-		}
-		case "➡️": {
-			page++
-			removeReaction("➡️") // remove the user's reaction no matter what
-			if (page > maxPages) page = maxPages
-			else setData()
-			break
-		}
-		case "🗑️": {
-			reactionCollector.stop()
-			embedMsg.delete()
-			message.delete()
-		}
+			case "⬅️": {
+				page--
+				removeReaction("⬅️") // remove the user's reaction no matter what
+				if (page <= -1) page = 0
+				else setData()
+				break
+			}
+			case "➡️": {
+				page++
+				removeReaction("➡️") // remove the user's reaction no matter what
+				if (page > maxPages) page = maxPages
+				else setData()
+				break
+			}
+			case "🗑️": {
+				reactionCollector.stop()
+				embedMsg.delete()
+				message.delete()
+			}
 		}
 	})
 }
 
 export async function sendToGuild(
 	guild: Guild,
-	options: string | MessagePayload | MessageOptions,
+	options: string | MessagePayload | MessageOptions
 ) {
 	const guildOwner = await guild.fetchOwner()
 
 	const owner = () => {
 		guildOwner
 			.send(options)
-			.catch(() => console.log(`Could not send embed for guild ID ${guild.id}`))
+			.catch(() =>
+				console.log(`Could not send embed for guild ID ${guild.id}`)
+			)
 	}
 
 	const systemChannel = () => {
@@ -108,7 +110,9 @@ export async function sendToGuild(
 
 	const publicUpdates = () => {
 		if (guild.publicUpdatesChannel)
-			guild.publicUpdatesChannel.send(options).catch(() => systemChannel())
+			guild.publicUpdatesChannel
+				.send(options)
+				.catch(() => systemChannel())
 		else systemChannel()
 	}
 	publicUpdates()
@@ -127,8 +131,7 @@ export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 				guildId: guild.id,
 			})
 		})
-	const embed = client.createBaseEmbed()
-		.setTitle("Welcome to FAGC")
+	const embed = client.createBaseEmbed().setTitle("Welcome to FAGC")
 	embed.addFields(
 		{ name: "FAGC Invite", value: client.config.fagcInvite },
 		{
@@ -140,12 +143,11 @@ export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 		},
 		{
 			name: "Bot Prefix",
-			value:
-				"The bot prefix is, and always will be, `fagc!`. This is displayed in the bot's status",
-		},
+			value: "The bot prefix is, and always will be, `fagc!`. This is displayed in the bot's status",
+		}
 	)
 
 	sendToGuild(guild, {
-		embeds: [ embed ],
+		embeds: [embed],
 	})
 }

@@ -6,8 +6,10 @@ import { BotConfigType } from "../../base/database.js"
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("setaction")
-		.setDescription("Set an action which happens on report or revocation creation")
-		.addStringOption(option => 
+		.setDescription(
+			"Set an action which happens on report or revocation creation"
+		)
+		.addStringOption((option) =>
 			option
 				.setName("report")
 				.setDescription("Action to perform on report creation")
@@ -16,7 +18,7 @@ const Setaction: SubCommand = {
 				.addChoice("custom", "custom")
 				.addChoice("none", "none")
 		)
-		.addStringOption(option => 
+		.addStringOption((option) =>
 			option
 				.setName("revocation")
 				.setDescription("Action to perform on revocation creation")
@@ -24,15 +26,21 @@ const Setaction: SubCommand = {
 				.addChoice("unban", "unban")
 				.addChoice("custom", "custom")
 				.addChoice("none", "none")
-		)
-	,
+		),
 	execute: async ({ client, interaction }) => {
-		const revocation = z.enum([ "unban", "custom", "none" ]).nullable().parse(interaction.options.getString("revocation"))
-		const report = z.enum([ "ban", "custom", "none" ]).nullable().parse(interaction.options.getString("report"))
-		
-		const config: Partial<BotConfigType> & Pick<BotConfigType, "guildId"> = {
-			guildId: interaction.guildId,
-		} as const
+		const revocation = z
+			.enum(["unban", "custom", "none"])
+			.nullable()
+			.parse(interaction.options.getString("revocation"))
+		const report = z
+			.enum(["ban", "custom", "none"])
+			.nullable()
+			.parse(interaction.options.getString("report"))
+
+		const config: Partial<BotConfigType> & Pick<BotConfigType, "guildId"> =
+			{
+				guildId: interaction.guildId,
+			} as const
 		if (report) config.reportAction = report
 		if (revocation) config.revocationAction = revocation
 		await client.setBotConfig(config)
@@ -40,8 +48,8 @@ const Setaction: SubCommand = {
 		const botConfig = await client.getBotConfig(interaction.guildId)
 		if (!botConfig) return interaction.reply("An error occured")
 		return interaction.reply({
-			content: `Report action is ${botConfig.reportAction}. Revocation action is ${botConfig.revocationAction}`
+			content: `Report action is ${botConfig.reportAction}. Revocation action is ${botConfig.revocationAction}`,
 		})
-	}
+	},
 }
 export default Setaction

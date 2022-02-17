@@ -15,7 +15,8 @@ const AllCategories: Command = {
 		// fetch categories from backend
 		const categories = await client.fagc.categories.fetchAll({})
 		// create a nice embed to display the categories
-		const embed = client.createBaseEmbed()
+		const embed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Categories")
 			.setDescription("All FAGC Categories")
 		// create the fields for the embed
@@ -25,7 +26,9 @@ const AllCategories: Command = {
 				name: `${categories[i].name} (\`${categories[i].id}\`)`,
 				// this is done so that two categories are per field to take up less space
 				value: categories[i + 1]
-					? `**${categories[i + 1].name}** (\`${categories[i + 1].id}\`)`
+					? `**${categories[i + 1].name}** (\`${
+							categories[i + 1].id
+					  }\`)`
 					: "\u200b",
 				inline: false,
 			})

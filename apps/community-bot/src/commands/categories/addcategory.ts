@@ -8,18 +8,19 @@ const AddCategory: Command = {
 	name: "addcategory",
 	description:
 		"Adds a category filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
-	aliases: [ "addcategories" ],
+	aliases: ["addcategories"],
 	usage: "[...ids]",
-	examples: [ "addcategory XuciBx7", "addcategory XuciBx7 XuciBx9 XuciBx/" ],
+	examples: ["addcategory XuciBx7", "addcategory XuciBx7 XuciBx9 XuciBx/"],
 	category: "categories",
 	requiresRoles: true,
-	requiredPermissions: [ "setCategories" ],
+	requiredPermissions: ["setCategories"],
 	requiresApikey: false,
 	run: async ({ client, message, guildConfig, args }) => {
 		// if they haven't provided any IDs, we'll show them all the categories and ask for IDs
 		const allCategories = await client.fagc.categories.fetchAll({})
 		if (!args[0]) {
-			const embed = client.createBaseEmbed()
+			const embed = client
+				.createBaseEmbed()
 				.setTitle("FAGC Categories")
 				.setDescription("All FAGC Categories")
 			const fields: EmbedField[] = []
@@ -28,7 +29,9 @@ const AddCategory: Command = {
 					name: `${allCategories[i].name} (\`${allCategories[i].id}\`)`,
 					// this is done so that two categories are per field to take up less space
 					value: allCategories[i + 1]
-						? `**${allCategories[i + 1].name}** (\`${allCategories[i + 1].id}\`)`
+						? `**${allCategories[i + 1].name}** (\`${
+								allCategories[i + 1].id
+						  }\`)`
 						: "\u200b",
 					inline: false,
 				})
@@ -36,7 +39,7 @@ const AddCategory: Command = {
 			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 			const newIdsMessage = await client.getMessageResponse(
 				message,
-				`${client.emotes.type} No categories provided. Please provide IDs`,
+				`${client.emotes.type} No categories provided. Please provide IDs`
 			)
 
 			if (!newIdsMessage || !newIdsMessage.content)
@@ -52,10 +55,13 @@ const AddCategory: Command = {
 
 		// if there are no new categories, return
 		if (!newCategories.length)
-			return message.channel.send("No valid or non-duplicate categories to be added")
+			return message.channel.send(
+				"No valid or non-duplicate categories to be added"
+			)
 
 		// send the new categories as an embed
-		const newCategoryEmbed = client.createBaseEmbed()
+		const newCategoryEmbed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Categories")
 			.setDescription("New Categories")
 		const newCategoryFields = newCategories.map((category) => {
@@ -65,12 +71,14 @@ const AddCategory: Command = {
 				inline: false,
 			}
 		})
-		createPagedEmbed(newCategoryFields, newCategoryEmbed, message, { maxPageCount: 10 })
+		createPagedEmbed(newCategoryFields, newCategoryEmbed, message, {
+			maxPageCount: 10,
+		})
 
 		// ask for confirmation if they want it like this
 		const confirm = await client.getConfirmationMessage(
 			message,
-			"Are you sure you want to add these categories to your category filters?",
+			"Are you sure you want to add these categories to your category filters?"
 		)
 		if (!confirm) return message.channel.send("Adding categories cancelled")
 
@@ -81,18 +89,22 @@ const AddCategory: Command = {
 		])
 
 		try {
-		// save the config
+			// save the config
 			await client.saveGuildConfig({
 				guildId: message.guild.id,
-				categoryFilters: [ ...newCategoryIds ],
+				categoryFilters: [...newCategoryIds],
 				apikey: guildConfig.apikey ?? undefined,
 			})
 
 			// send a success message
-			return message.channel.send("Successfully added filtered categories")
+			return message.channel.send(
+				"Successfully added filtered categories"
+			)
 		} catch (e) {
 			if (e instanceof AuthError) {
-				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+				return message.channel.send(
+					`${client.emotes.warn} Your API key is not recognized by FAGC`
+				)
 			}
 			throw e
 		}

@@ -24,5 +24,5 @@ export default class WsHandler extends RequestHandler {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	async handle() { }
+	async handle() {}
 }

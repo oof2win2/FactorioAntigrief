@@ -7,9 +7,6 @@
     "lint": {
       "outputs": ["src/**"]
     },
-    "dev": {
-      "cache": false
-    },
     "test": {
       "dependsOn": ["^build"]
     }

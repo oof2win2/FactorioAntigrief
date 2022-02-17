@@ -4,7 +4,9 @@ import Logger from "../../utils/logger"
 
 export default (client: FAGCBot) => {
 	Logger.log(
-		`${client.user?.username} is online: ${new Date().toString().slice(4, 24)}`,
+		`${client.user?.username} is online: ${new Date()
+			.toString()
+			.slice(4, 24)}`
 	)
 	const activities = [
 		`${client.guilds.cache.size} servers!`,
@@ -16,8 +18,8 @@ export default (client: FAGCBot) => {
 		() =>
 			client.user?.setActivity(
 				`${ENV.BOTPREFIX}help | ${activities[i++ % activities.length]}`,
-				{ type: "WATCHING" },
+				{ type: "WATCHING" }
 			),
-		15000,
+		15000
 	)
 }

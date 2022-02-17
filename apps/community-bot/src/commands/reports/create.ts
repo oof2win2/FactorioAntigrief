@@ -8,34 +8,48 @@ const CreateReport: Command = {
 	name: "createreport",
 	description: "Create a report for a player",
 	category: "reports",
-	aliases: [ "create", "ban" ],
+	aliases: ["create", "ban"],
 	usage: "[player] [...description]",
-	examples: [ "create", "create Potato", "create Potato hacking" ],
+	examples: ["create", "create Potato", "create Potato hacking"],
 	requiresRoles: true,
-	requiredPermissions: [ "reports" ],
+	requiredPermissions: ["reports"],
 	requiresApikey: true,
 	run: async ({ client, message, args, guildConfig }) => {
 		if (!guildConfig.categoryFilters.length)
-			return message.channel.send(`${client.emotes.warn} No categories are filtered`)
+			return message.channel.send(
+				`${client.emotes.warn} No categories are filtered`
+			)
 
-		const playername = await client.argsOrInput(args, message, `${client.emotes.type} Type in the player name`)
-		if (!playername) return message.channel.send("Player name not specified")
+		const playername = await client.argsOrInput(
+			args,
+			message,
+			`${client.emotes.type} Type in the player name`
+		)
+		if (!playername)
+			return message.channel.send("Player name not specified")
 
 		// send a message with the community's filtered categories to pick from
-		const categoryEmbed = client.createBaseEmbed()
+		const categoryEmbed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Reports")
 			.setDescription("Your community's filtered categories")
 		const allCategories = await client.fagc.categories.fetchAll({})
 		const fields: EmbedField[] = allCategories
 			// make sure the category is filtered
-			.filter((category) => guildConfig.categoryFilters.includes(category.id))
+			.filter((category) =>
+				guildConfig.categoryFilters.includes(category.id)
+			)
 			// sort the categories by their index
-			.sort((a, b) => guildConfig.categoryFilters.indexOf(a.id) - guildConfig.categoryFilters.indexOf(b.id))
+			.sort(
+				(a, b) =>
+					guildConfig.categoryFilters.indexOf(a.id) -
+					guildConfig.categoryFilters.indexOf(b.id)
+			)
 			.map((category) => {
 				return {
-					name: `${guildConfig.categoryFilters.indexOf(category.id) + 1}) ${
-						category.name
-					} (\`${category.id}\`)`,
+					name: `${
+						guildConfig.categoryFilters.indexOf(category.id) + 1
+					}) ${category.name} (\`${category.id}\`)`,
 					value: category.name,
 					inline: false,
 				}
@@ -44,7 +58,7 @@ const CreateReport: Command = {
 
 		const categories = await client.getMessageResponse(
 			message,
-			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`,
+			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`
 		)
 		if (!categories) return message.channel.send("No categories specified")
 		const categoryIds = categories.content.split(" ")
@@ -74,21 +88,25 @@ const CreateReport: Command = {
 		})
 		if (invalidCategoryIds.length)
 			return message.channel.send(
-				`Invalid categories: \`${invalidCategoryIds.join("`, `")}\``,
+				`Invalid categories: \`${invalidCategoryIds.join("`, `")}\``
 			)
 
 		let desc =
 			args.join(" ") ||
-			(await client.getMessageResponse(
-				message,
-				`${client.emotes.type} Type in description of the report or \`none\` if you don't want to set one`,
-			).then((m) => m?.content))
+			(await client
+				.getMessageResponse(
+					message,
+					`${client.emotes.type} Type in description of the report or \`none\` if you don't want to set one`
+				)
+				.then((m) => m?.content))
 		if (!desc || desc.toLowerCase() === "none") desc = undefined
 
-		let proof = await client.getMessageResponse(
-			message,
-			`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`,
-		).then((x) => x?.content)
+		let proof = await client
+			.getMessageResponse(
+				message,
+				`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`
+			)
+			.then((x) => x?.content)
 		if (!proof || proof.toLowerCase() === "none") proof = "No proof"
 		if (proof !== "No proof") {
 			// check if each link is a valid URL
@@ -98,14 +116,15 @@ const CreateReport: Command = {
 				.reduce((a, b) => a && b)
 			if (!areAllURLs)
 				return message.channel.send(
-					`${client.config.emotes.warn} Invalid proof link(s)`,
+					`${client.config.emotes.warn} Invalid proof link(s)`
 				)
 		}
 
 		const timestamp = Date.now()
 
 		// send an embed to display the report that will be created
-		const checkEmbed = client.createBaseEmbed()
+		const checkEmbed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Reports")
 			// .setDescription(`**Report created by ${message.author.tag}**\n\n**Player:** ${playername}\n**Categories:** ${validCategoryIds.join(", ")}\n**Description:** ${desc}\n**Proof:** ${proof}`)
 			.addFields([
@@ -115,12 +134,18 @@ const CreateReport: Command = {
 					value: validCategoryIds
 						.map(
 							(id) =>
-								`${client.fagc.categories.resolveId(id)?.name} (\`${id}\`)`,
+								`${
+									client.fagc.categories.resolveId(id)?.name
+								} (\`${id}\`)`
 						)
 						.join(", "),
 					inline: true,
 				},
-				{ name: "Description", value: desc || "No description", inline: true },
+				{
+					name: "Description",
+					value: desc || "No description",
+					inline: true,
+				},
 				{ name: "Proof", value: proof || "No proof", inline: true },
 				{
 					name: "Reported at",
@@ -129,17 +154,17 @@ const CreateReport: Command = {
 				},
 			])
 		message.channel.send({
-			embeds: [ checkEmbed ],
+			embeds: [checkEmbed],
 		})
 		const confirmationMessage = await client.getConfirmationMessage(
 			message,
-			"Are you sure you want to create these reports?",
+			"Are you sure you want to create these reports?"
 		)
 		if (!confirmationMessage)
 			return message.channel.send("Report creation cancelled")
 
 		try {
-		// create the reports for each category
+			// create the reports for each category
 			const reports = await Promise.all(
 				validCategoryIds.map(async (categoryId) => {
 					return client.fagc.reports.create({
@@ -153,19 +178,21 @@ const CreateReport: Command = {
 							automated: false,
 						},
 						reqConfig: {
-							apikey: guildConfig.apikey,
+							apikey: guildConfig.apikey ?? undefined,
 						},
 					})
-				}),
+				})
 			)
 			return message.channel.send(
 				`Reports created with IDs: ${reports
 					.map((report) => `\`${report.id}\``)
-					.join(", ")}`,
+					.join(", ")}`
 			)
 		} catch (e) {
 			if (e instanceof AuthError) {
-				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+				return message.channel.send(
+					`${client.emotes.warn} Your API key is not recognized by FAGC`
+				)
 			}
 			throw e
 		}

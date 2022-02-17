@@ -47,7 +47,9 @@ export default class BaseManager<HoldsWithId extends Common> {
 		}
 		return data
 	}
-	protected removeFromCache(data: Pick<HoldsWithId, "id">): Pick<HoldsWithId, "id"> | null {
+	protected removeFromCache(
+		data: Pick<HoldsWithId, "id">
+	): Pick<HoldsWithId, "id"> | null {
 		if (!data) return null
 		this.cache.delete(data.id)
 		this.sweepCache.delete(data.id)

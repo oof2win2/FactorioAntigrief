@@ -6,23 +6,30 @@ const FetchReport: Command = {
 	category: "reports",
 	usage: "[reportId]",
 	aliases: [],
-	examples: [ "report FX07kpn" ],
+	examples: ["report FX07kpn"],
 	requiresRoles: false,
 	requiresApikey: false,
 	async run({ message, args, client }) {
-		const reportId = await client.argsOrInput(args, message, `${client.emotes.type} Provide a report ID to fetch`)
+		const reportId = await client.argsOrInput(
+			args,
+			message,
+			`${client.emotes.type} Provide a report ID to fetch`
+		)
 		if (!reportId)
 			return message.channel.send(
-				`${client.emotes.warn} No report ID was provided`,
+				`${client.emotes.warn} No report ID was provided`
 			)
 
-		const report = await client.fagc.reports.fetchReport({ reportId: reportId })
+		const report = await client.fagc.reports.fetchReport({
+			reportId: reportId,
+		})
 		if (!report)
 			return message.channel.send(
-				`${client.emotes.warn} Report with ID \`${reportId}\` doesn't exist`,
+				`${client.emotes.warn} Report with ID \`${reportId}\` doesn't exist`
 			)
 
-		const embed = client.createBaseEmbed()
+		const embed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Report")
 			.setDescription(`FAGC Report with ID \`${reportId}\``)
 
@@ -43,15 +50,19 @@ const FetchReport: Command = {
 			{ name: "Proof", value: report.proof, inline: false },
 			{
 				name: "Reported At",
-				value: `<t:${Math.round(report.reportedTime.valueOf() / 1000)}>`,
+				value: `<t:${Math.round(
+					report.reportedTime.valueOf() / 1000
+				)}>`,
 			},
 			{
 				name: "Report Created At",
-				value: `<t:${Math.round(report.reportCreatedAt.valueOf() / 1000)}>`,
+				value: `<t:${Math.round(
+					report.reportCreatedAt.valueOf() / 1000
+				)}>`,
 			},
 		])
 		return message.channel.send({
-			embeds: [ embed ],
+			embeds: [embed],
 		})
 	},
 }

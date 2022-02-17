@@ -17,7 +17,8 @@ const stats: Command = {
 		const users = client.users.cache.size // get amount of users the bot is in
 		const channels = client.channels.cache.size // get amount of channels the bot is in
 
-		const embed = client.createBaseEmbed()
+		const embed = client
+			.createBaseEmbed()
 			.setTitle("Stats")
 			.addField("Memory usage", `${memUsage.toFixed(2)} MB`, true)
 			.addField("Uptime", `${uptime.toFixed(2)} seconds`, true)
@@ -26,7 +27,7 @@ const stats: Command = {
 			.addField("User count", users.toString(), true)
 			.addField("Channel count", channels.toString(), true)
 		return message.channel.send({
-			embeds: [ embed ],
+			embeds: [embed],
 		})
 	},
 }

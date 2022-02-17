@@ -7,13 +7,13 @@ import { getModelForClass, modelOptions, prop } from "@typegoose/typegoose"
 })
 export class WebhookClass {
 	@prop()
-		id!: string
+	id!: string
 
 	@prop()
-		token!: string
+	token!: string
 
 	@prop()
-		guildId!: string
+	guildId!: string
 }
 
 const WebhookModel = getModelForClass(WebhookClass)

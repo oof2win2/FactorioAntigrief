@@ -5,21 +5,21 @@ const Setapikey: Command = {
 	description: "Set API key",
 	aliases: [],
 	usage: "[API KEY]",
-	examples: [ "setapikey potatoKey" ],
+	examples: ["setapikey potatoKey"],
 	category: "config",
 	requiresRoles: true,
-	requiredPermissions: [ "setConfig" ],
+	requiredPermissions: ["setConfig"],
 	requiresApikey: false,
 	run: async ({ client, message, args }) => {
 		const key = args.shift()
 		if (!key)
 			return message.channel.send(
-				"You must provide your API key as a parameter",
+				"You must provide your API key as a parameter"
 			)
 
 		message.delete()
 		message.channel.send(
-			"Your message has been removed to prevent unauthorized API access",
+			"Your message has been removed to prevent unauthorized API access"
 		)
 
 		const community = await client.fagc.communities
@@ -31,7 +31,7 @@ const Setapikey: Command = {
 			.catch(() => null)
 		if (!community)
 			return message.channel.send(
-				"That API key is not associated with a community",
+				"That API key is not associated with a community"
 			)
 		if (community.contact !== message.author.id) {
 			const contact = await client.users
@@ -39,10 +39,10 @@ const Setapikey: Command = {
 				.catch(() => null)
 			if (contact)
 				contact.send(
-					`User ${message.author.tag} has attempted to use your API key in ${message.guild.name}`,
+					`User ${message.author.tag} has attempted to use your API key in ${message.guild.name}`
 				)
 			return message.channel.send(
-				"That API key is not associated with your Discord user ID",
+				"That API key is not associated with your Discord user ID"
 			)
 		}
 

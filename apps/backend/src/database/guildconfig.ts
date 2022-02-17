@@ -23,19 +23,19 @@ class Roles {
 				if (!options.includeApikey) {
 					delete ret.apikey
 				}
-			}
+			},
 		},
 	},
 })
 export class GuildConfigClass {
 	@prop()
-		communityId?: string
+	communityId?: string
 
 	@prop()
-		guildId!: string
+	guildId!: string
 
 	@prop()
-		apikey?: string
+	apikey?: string
 
 	@prop({
 		type: () =>
@@ -52,15 +52,15 @@ export class GuildConfigClass {
 			setConfig: "",
 			setCategories: "",
 			setCommunities: "",
-		}
+		},
 	})
-		roles!: Roles
+	roles!: Roles
 
-	@prop({ type: [ String ], default: [] })
-		trustedCommunities!: string[]
+	@prop({ type: [String], default: [] })
+	trustedCommunities!: string[]
 
-	@prop({ type: [ String ], default: [] })
-		categoryFilters!: string[]
+	@prop({ type: [String], default: [] })
+	categoryFilters!: string[]
 }
 
 const GuildConfigModel = getModelForClass(GuildConfigClass)

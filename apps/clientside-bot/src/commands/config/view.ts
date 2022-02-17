@@ -6,22 +6,36 @@ import { SubCommand } from "../../base/Commands.js"
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("view")
-		.setDescription("View your bot config")
-	,
+		.setDescription("View your bot config"),
 	execute: async ({ client, interaction, botConfig }) => {
-		const embed = new MessageEmbed()
-			.setTitle("Current bot config")
+		const embed = new MessageEmbed().setTitle("Current bot config")
 		const ownerUser = await client.users.fetch(botConfig.owner)
 		embed.addFields([
-			{ name: "Bot Owner", value: `<@${ownerUser.id}> | ${ownerUser.tag}` , inline: true },
-			{ name: "Report Action", value: botConfig.reportAction, inline: true },
-			{ name: "Revocation action", value: botConfig.revocationAction, inline: true },
-			{ name: "API key", value: botConfig.apikey ? "Set" : "None", inline: true },
+			{
+				name: "Bot Owner",
+				value: `<@${ownerUser.id}> | ${ownerUser.tag}`,
+				inline: true,
+			},
+			{
+				name: "Report Action",
+				value: botConfig.reportAction,
+				inline: true,
+			},
+			{
+				name: "Revocation action",
+				value: botConfig.revocationAction,
+				inline: true,
+			},
+			{
+				name: "API key",
+				value: botConfig.apikey ? "Set" : "None",
+				inline: true,
+			},
 		])
 		return interaction.reply({
 			ephemeral: true,
-			embeds: [ embed ]
+			embeds: [embed],
 		})
-	}
+	},
 }
 export default Setaction

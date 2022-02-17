@@ -2,13 +2,15 @@ import { Client, User } from "discord.js"
 
 // this is so that the client can be accessed from any file
 export const client = new Client({
-	intents: [ "GUILDS" ],
+	intents: ["GUILDS"],
 })
 
 /**
  * Checks if a string is a valid Discord user ID. Returns false if the user is not in a server with the bot
  */
-export async function validateDiscordUser(userId: string): Promise<false | User> {
+export async function validateDiscordUser(
+	userId: string
+): Promise<false | User> {
 	try {
 		const user = await client.users.fetch(userId)
 		return user

@@ -7,19 +7,18 @@ const CreateCommunity: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
 		.setDescription("Create a FAGC community")
-		.addStringOption(option =>
+		.addStringOption((option) =>
 			option
 				.setName("name")
 				.setDescription("Community name")
 				.setRequired(true)
 		)
-		.addUserOption(option =>
+		.addUserOption((option) =>
 			option
 				.setName("contact")
 				.setDescription("Community contact or owner")
 				.setRequired(true)
-		)
-	,
+		),
 	execute: async ({ client, interaction }) => {
 		const user = interaction.user
 
@@ -37,17 +36,21 @@ const CreateCommunity: SubCommand = {
 				contact: contact.id,
 			})
 			if (community.community) {
-				contact.send(`You have created a new community ${name} (\`${community.community.id}\`). Your API key is \`${community.apikey}\``)
+				contact.send(
+					`You have created a new community ${name} (\`${community.community.id}\`). Your API key is \`${community.apikey}\``
+				)
 				interaction.reply({
 					content: `Community ${name} (\`${community.community.id}\`) has API key \`${community.apikey}\``,
-					ephemeral: true
+					ephemeral: true,
 				})
-				return interaction.channel?.send(`Community ${name} (\`${community.community.id}\`) has been created`)
+				return interaction.channel?.send(
+					`Community ${name} (\`${community.community.id}\`) has been created`
+				)
 			}
 		} catch (e) {
 			return interaction.reply(`Error: ${e}`)
 		}
-	}
+	},
 }
 
 export default CreateCommunity

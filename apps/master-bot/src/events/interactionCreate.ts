@@ -10,10 +10,13 @@ export default async (client: FAGCBot, interaction: Interaction) => {
 	try {
 		await client.commands.get(commandName)?.execute({
 			client: client,
-			interaction: interaction
+			interaction: interaction,
 		})
 	} catch (e) {
 		console.error(e)
-		return interaction.reply({ content: "There was an error whilst executing this command", ephemeral: true })
+		return interaction.reply({
+			content: "There was an error whilst executing this command",
+			ephemeral: true,
+		})
 	}
 }

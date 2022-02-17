@@ -15,14 +15,14 @@ import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
-	const servers = z.array(database.FactorioServer).parse(JSON.parse(serverJSON))
+	const servers = z
+		.array(database.FactorioServer)
+		.parse(JSON.parse(serverJSON))
 	return servers
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface BotOptions extends ClientOptions {
-
-}
+interface BotOptions extends ClientOptions {}
 export default class FAGCBot extends Client {
 	fagc: FAGCWrapper
 	db: PrismaClient
@@ -47,7 +47,7 @@ export default class FAGCBot extends Client {
 		this.fagc = new FAGCWrapper({
 			apiurl: ENV.APIURL,
 			socketurl: ENV.WSURL,
-			enableWebSocket: true
+			enableWebSocket: true,
 		})
 		this.commands = new Collection()
 
@@ -62,13 +62,11 @@ export default class FAGCBot extends Client {
 		rawServers.map((server) => {
 			const existing = this.servers.get(server.discordGuildId)
 			if (existing) {
-				this.servers.set(server.discordGuildId, [ ...existing, server ])
+				this.servers.set(server.discordGuildId, [...existing, server])
 			} else {
-				this.servers.set(server.discordGuildId, [ server ])
+				this.servers.set(server.discordGuildId, [server])
 			}
 		})
-
-		
 
 		this.rcon = new RCONInterface(this, rawServers)
 
@@ -76,33 +74,50 @@ export default class FAGCBot extends Client {
 		this.db.$connect()
 
 		// load info channels
-		this.db.infoChannel.findMany().then(channels => {
-			channels.forEach(channel => {
+		this.db.infoChannel.findMany().then((channels) => {
+			channels.forEach((channel) => {
 				const existing = this.infochannels.get(channel.guildId)
 				if (existing) {
-					this.infochannels.set(channel.guildId, [ ...existing, channel ])
+					this.infochannels.set(channel.guildId, [
+						...existing,
+						channel,
+					])
 				} else {
-					this.infochannels.set(channel.guildId, [ channel ])
+					this.infochannels.set(channel.guildId, [channel])
 				}
 			})
 		})
 
 		this.getBotConfigs().then((configs) => {
-			configs.forEach(config => {
+			configs.forEach((config) => {
 				this.botConfigs.set(config.guildId, config)
 			})
 		})
-		
-		// parsing WS notifications
-		this.fagc.websocket.on("communityCreated", (event) => wshandler.communityCreated({ event, client: this }))
-		this.fagc.websocket.on("communityRemoved", (event) => wshandler.communityRemoved({ event, client: this }))
-		this.fagc.websocket.on("categoryCreated", (event) => wshandler.categoryCreated({ event, client: this }))
-		this.fagc.websocket.on("categoryRemoved", (event) => wshandler.categoryRemoved({ event, client: this }))
-		this.fagc.websocket.on("report", (event) => wshandler.report({ event, client: this }))
-		this.fagc.websocket.on("revocation", (event) => wshandler.revocation({ event, client: this }))
-		this.fagc.websocket.on("guildConfigChanged", (event) => wshandler.guildConfigChanged({ event, client: this }))
 
-		setInterval(() => this.sendEmbeds(), 10*1000) // send embeds every 10 seconds
+		// parsing WS notifications
+		this.fagc.websocket.on("communityCreated", (event) =>
+			wshandler.communityCreated({ event, client: this })
+		)
+		this.fagc.websocket.on("communityRemoved", (event) =>
+			wshandler.communityRemoved({ event, client: this })
+		)
+		this.fagc.websocket.on("categoryCreated", (event) =>
+			wshandler.categoryCreated({ event, client: this })
+		)
+		this.fagc.websocket.on("categoryRemoved", (event) =>
+			wshandler.categoryRemoved({ event, client: this })
+		)
+		this.fagc.websocket.on("report", (event) =>
+			wshandler.report({ event, client: this })
+		)
+		this.fagc.websocket.on("revocation", (event) =>
+			wshandler.revocation({ event, client: this })
+		)
+		this.fagc.websocket.on("guildConfigChanged", (event) =>
+			wshandler.guildConfigChanged({ event, client: this })
+		)
+
+		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
 	}
 
 	async getBotConfigs(): Promise<database.BotConfigType[]> {
@@ -115,17 +130,20 @@ export default class FAGCBot extends Client {
 		const record = await this.db.botConfig.findFirst({
 			where: {
 				guildId: guildId,
-			}
+			},
 		})
 		const created = database.BotConfig.parse(record ?? { guildId: guildId })
 		if (!record) await this.setBotConfig(created)
 		return created
 	}
-	async setBotConfig(config: Partial<database.BotConfigType> & Pick<database.BotConfigType, "guildId">) {
+	async setBotConfig(
+		config: Partial<database.BotConfigType> &
+			Pick<database.BotConfigType, "guildId">
+	) {
 		const existingConfig = await this.getBotConfig(config.guildId)
 		const toSetConfig = database.BotConfig.parse({
 			...existingConfig,
-			...config
+			...config,
 		})
 		const newConfig = await this.db.botConfig.upsert({
 			where: { guildId: config.guildId },
@@ -135,13 +153,13 @@ export default class FAGCBot extends Client {
 			},
 			update: {
 				...toSetConfig,
-			}
+			},
 		})
 		this.botConfigs.set(config.guildId, database.BotConfig.parse(newConfig))
 	}
 
 	private sendEmbeds() {
-		for (const [ channelId ] of this.embedQueue) {
+		for (const [channelId] of this.embedQueue) {
 			const embeds = this.embedQueue.get(channelId)?.splice(0, 10) ?? []
 			if (!embeds.length) continue
 			const channel = this.channels.resolve(channelId)
@@ -157,16 +175,21 @@ export default class FAGCBot extends Client {
 		if (!channel || !channel.isNotDMChannel()) return false
 		if (this.embedQueue.has(channelId)) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			this.embedQueue.set(channelId, [ ...this.embedQueue.get(channelId)!, embed ])
+			this.embedQueue.set(channelId, [
+				...this.embedQueue.get(channelId)!,
+				embed,
+			])
 		} else {
-			this.embedQueue.set(channelId, [ embed ])
+			this.embedQueue.set(channelId, [embed])
 		}
 	}
 
 	async getGuildConfig(guildId: string): Promise<GuildConfig | null> {
 		const existing = this.guildConfigs.get(guildId)
 		if (existing) return existing
-		const config = await this.fagc.communities.fetchGuildConfig({ guildId: guildId })
+		const config = await this.fagc.communities.fetchGuildConfig({
+			guildId: guildId,
+		})
 		if (!config) return null
 		this.guildConfigs.set(guildId, config)
 		return config
@@ -176,7 +199,10 @@ export default class FAGCBot extends Client {
 		const botConfig = this.botConfigs.get(guildId)
 		if (!botConfig || botConfig.reportAction === "none") return false
 
-		const rawBanMessage = botConfig.reportAction === "ban" ? ENV.BANCOMMAND : ENV.CUSTOMBANCOMMAND
+		const rawBanMessage =
+			botConfig.reportAction === "ban"
+				? ENV.BANCOMMAND
+				: ENV.CUSTOMBANCOMMAND
 		const command = rawBanMessage
 			.replaceAll("{ADMINID}", report.adminId)
 			.replaceAll("{AUTOMATED}", report.automated ? "true" : "false")
@@ -194,16 +220,18 @@ export default class FAGCBot extends Client {
 		const botConfig = this.botConfigs.get(guildId)
 		if (!botConfig || botConfig.revocationAction === "none") return false
 
-		const rawUnbanMessage = botConfig.reportAction === "ban" ? ENV.UNBANCOMMAND : ENV.CUSTOMUNBANCOMMAND
-		const command = rawUnbanMessage
-			.replaceAll("{PLAYERNAME}", playername)
+		const rawUnbanMessage =
+			botConfig.reportAction === "ban"
+				? ENV.UNBANCOMMAND
+				: ENV.CUSTOMUNBANCOMMAND
+		const command = rawUnbanMessage.replaceAll("{PLAYERNAME}", playername)
 		return command
 	}
 
 	async ban(report: Report, guildId: string) {
 		const command = this.createBanCommand(report, guildId)
 		if (!command) return
-		
+
 		this.rcon.rconCommandGuild(command, guildId)
 	}
 
@@ -213,7 +241,10 @@ export default class FAGCBot extends Client {
 		const botConfig = await this.getBotConfig(guildId)
 		if (!botConfig || botConfig.revocationAction === "none") return
 
-		const rawUnbanMessage = botConfig.revocationAction === "unban" ? ENV.UNBANCOMMAND : ENV.CUSTOMUNBANCOMMAND
+		const rawUnbanMessage =
+			botConfig.revocationAction === "unban"
+				? ENV.UNBANCOMMAND
+				: ENV.CUSTOMUNBANCOMMAND
 
 		const command = rawUnbanMessage
 			.replace("{ADMINID}", revocation.adminId)
@@ -225,32 +256,45 @@ export default class FAGCBot extends Client {
 			.replace("{PLAYERNAME}", revocation.playername)
 			.replace("{PROOF}", revocation.proof)
 			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
-		
+
 		this.rcon.rconCommandGuild(command, guildId)
 	}
-	
+
 	async syncCommandPerms(guildId: string) {
-		const guildConfig = this.guildConfigs.get(guildId) || await this.getGuildConfig(guildId)
+		const guildConfig =
+			this.guildConfigs.get(guildId) ||
+			(await this.getGuildConfig(guildId))
 		if (!guildConfig) return false
 		const guildCommands = await this.db.command.findMany({
 			where: {
-				guildId: guildId
-			}
+				guildId: guildId,
+			},
 		})
 		if (!guildCommands.length) return false
 
-		type CommandWithPerms = Required<Command, "permissionOverrides" | "permissionType">
+		type CommandWithPerms = Required<
+			Command,
+			"permissionOverrides" | "permissionType"
+		>
 
 		const commandData: CommandWithPerms[] = guildCommands
-			.map(command => this.commands.find(c => c.data.name === command.name))
-			.filter((c): c is CommandWithPerms => Boolean(c?.permissionType) || Boolean(c?.permissionOverrides?.length))
-			.map(c=> {
+			.map((command) =>
+				this.commands.find((c) => c.data.name === command.name)
+			)
+			.filter(
+				(c): c is CommandWithPerms =>
+					Boolean(c?.permissionType) ||
+					Boolean(c?.permissionOverrides?.length)
+			)
+			.map((c) => {
 				if (!c.permissionOverrides) c.permissionOverrides = []
 				if (!c.permissionType) c.permissionType = "configrole"
 				return c
 			})
 		const toSetPermissions = commandData.map((command) => {
-			const guildCommand = guildCommands.find(c => c.name === command.data.name)!
+			const guildCommand = guildCommands.find(
+				(c) => c.name === command.data.name
+			)!
 			const perms = command.permissionOverrides.slice()
 			perms.push({
 				type: ApplicationCommandPermissionTypes.USER,
@@ -260,33 +304,33 @@ export default class FAGCBot extends Client {
 
 			if (guildConfig?.roles) {
 				switch (command.permissionType) {
-				case "banrole": {
-					if (guildConfig.roles.reports)
-						perms.push({
-							type: ApplicationCommandPermissionTypes.ROLE,
-							id: guildConfig.roles.reports,
-							permission: true
-						})
-					break
-				}
-				case "configrole": {
-					if (guildConfig.roles.setConfig)
-						perms.push({
-							type: ApplicationCommandPermissionTypes.ROLE,
-							id: guildConfig.roles.setConfig,
-							permission: true
-						})
-					break
-				}
-				case "notificationsrole": {
-					if (guildConfig.roles.webhooks)
-						perms.push({
-							type: ApplicationCommandPermissionTypes.ROLE,
-							id: guildConfig.roles.webhooks,
-							permission: true
-						})
-					break
-				}
+					case "banrole": {
+						if (guildConfig.roles.reports)
+							perms.push({
+								type: ApplicationCommandPermissionTypes.ROLE,
+								id: guildConfig.roles.reports,
+								permission: true,
+							})
+						break
+					}
+					case "configrole": {
+						if (guildConfig.roles.setConfig)
+							perms.push({
+								type: ApplicationCommandPermissionTypes.ROLE,
+								id: guildConfig.roles.setConfig,
+								permission: true,
+							})
+						break
+					}
+					case "notificationsrole": {
+						if (guildConfig.roles.webhooks)
+							perms.push({
+								type: ApplicationCommandPermissionTypes.ROLE,
+								id: guildConfig.roles.webhooks,
+								permission: true,
+							})
+						break
+					}
 				}
 			}
 			return {

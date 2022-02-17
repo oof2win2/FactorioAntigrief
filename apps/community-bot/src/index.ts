@@ -14,7 +14,7 @@ Sentry.init({
 	integrations: [
 		new CaptureConsole({
 			// capture stuff on console.error
-			levels: [ "error" ],
+			levels: ["error"],
 		}),
 	],
 
@@ -41,22 +41,22 @@ const init = async () => {
 	commandDirs.forEach(async (dir) => {
 		const evts = await fs.readdir(`./commands/${dir}/`)
 		// gets every dir inside events
-		evts
-			.filter((evt) => evt.endsWith(".js"))
-			.forEach(async (cmd) => {
-				// splits the command and gets first part. commands are in the format "commandName.js"
-				const command = (await import(`./commands/${dir}/${cmd}`).then(
-					(x) => x.default,
-				)) as Command
+		evts.filter((evt) => evt.endsWith(".js")).forEach(async (cmd) => {
+			// splits the command and gets first part. commands are in the format "commandName.js"
+			const command = (await import(`./commands/${dir}/${cmd}`).then(
+				(x) => x.default
+			)) as Command
 
-				if (!command)
-					return console.log(`./commands/${dir}/${cmd} is not a command`)
+			if (!command)
+				return console.log(`./commands/${dir}/${cmd} is not a command`)
 
-				// adds command to client
-				client.commands.set(command.name, command)
-				// adds aliases to the command
-				command.aliases.forEach((alias) => client.commands.set(alias, command))
-			})
+			// adds command to client
+			client.commands.set(command.name, command)
+			// adds aliases to the command
+			command.aliases.forEach((alias) =>
+				client.commands.set(alias, command)
+			)
+		})
 	})
 
 	// Loads events
@@ -65,17 +65,15 @@ const init = async () => {
 	evtDirs.forEach(async (dir) => {
 		const evts = await fs.readdir(`./events/${dir}/`)
 		// gets every dir inside events
-		evts
-			.filter((evt) => evt.endsWith(".js"))
-			.forEach(async (evt) => {
-				// splits the event and gets first part. events are in the format "eventName.js"
-				const evtName = evt.split(".")[0]
-				const event = await import(`./events/${dir}/${evt}`).then(
-					(x) => x.default,
-				)
-				// binds client to the event
-				client.on(evtName, (...args) => event(client, ...args))
-			})
+		evts.filter((evt) => evt.endsWith(".js")).forEach(async (evt) => {
+			// splits the event and gets first part. events are in the format "eventName.js"
+			const evtName = evt.split(".")[0]
+			const event = await import(`./events/${dir}/${evt}`).then(
+				(x) => x.default
+			)
+			// binds client to the event
+			client.on(evtName, (...args) => event(client, ...args))
+		})
 	})
 
 	// log in to discord

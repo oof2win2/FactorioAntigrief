@@ -17,19 +17,19 @@ import IdModel, { IdType } from "./ids"
 })
 export class CommunityClass {
 	@prop({ unique: true })
-		id!: string
+	id!: string
 
 	@prop()
-		name!: string
+	name!: string
 
 	@prop()
-		contact!: string
+	contact!: string
 
-	@prop({ type: [ String ] })
-		guildIds!: string[]
-	
+	@prop({ type: [String] })
+	guildIds!: string[]
+
 	@prop({ type: Date, default: new Date(0) })
-		tokenInvalidBefore!: Date
+	tokenInvalidBefore!: Date
 }
 
 const CommunityModel = getModelForClass(CommunityClass)

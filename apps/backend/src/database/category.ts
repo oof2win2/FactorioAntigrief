@@ -17,13 +17,13 @@ import IdModel, { IdType } from "./ids"
 })
 export class CategoryClass {
 	@prop({ unique: true })
-		id!: string
+	id!: string
 
 	@prop()
-		name!: string
+	name!: string
 
 	@prop()
-		description!: string
+	description!: string
 }
 
 const CategoryModel = getModelForClass(CategoryClass)

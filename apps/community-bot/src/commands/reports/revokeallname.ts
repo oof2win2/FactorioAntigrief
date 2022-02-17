@@ -9,19 +9,23 @@ const RevokeAllName: Command = {
 	aliases: [],
 	category: "reports",
 	usage: "[playername]",
-	examples: [ "revokeallname", "revokeallname Potato" ],
+	examples: ["revokeallname", "revokeallname Potato"],
 	requiresRoles: true,
-	requiredPermissions: [ "reports" ],
+	requiredPermissions: ["reports"],
 	requiresApikey: true,
 	async run({ client, message, args, guildConfig }) {
 		if (!guildConfig.apikey)
 			return message.reply(`${client.emotes.warn} No API key set`)
 
 		// get playername
-		const playername = await client.argsOrInput(args, message, `${client.emotes.type} Provide a player name to revoke reports of`)
+		const playername = await client.argsOrInput(
+			args,
+			message,
+			`${client.emotes.type} Provide a player name to revoke reports of`
+		)
 		if (!playername)
 			return message.channel.send(
-				`${client.emotes.warn} No player name was provided`,
+				`${client.emotes.warn} No player name was provided`
 			)
 
 		// get all their reports and display them on an embed
@@ -29,14 +33,20 @@ const RevokeAllName: Command = {
 			playername: playername,
 			communityId: guildConfig.communityId,
 		})
-		if (!reports.length) return message.channel.send(`${client.emotes.warn} No reports found for player ${playername} in your community`)
+		if (!reports.length)
+			return message.channel.send(
+				`${client.emotes.warn} No reports found for player ${playername} in your community`
+			)
 
-		const embed = client.createBaseEmbed()
+		const embed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Report Revocation")
 			.setDescription(`FAGC Reports of player \`${playername}\``)
 		const fields: EmbedField[] = await Promise.all(
 			reports.map(async (report) => {
-				const admin = await client.users.fetch(report.adminId).catch(() => null)
+				const admin = await client.users
+					.fetch(report.adminId)
+					.catch(() => null)
 				return {
 					name: report.id,
 					value:
@@ -44,19 +54,19 @@ const RevokeAllName: Command = {
 						`Category: ${report.categoryId}\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
 						`Reported at: <t:${Math.round(
-							report.reportedTime.valueOf() / 1000,
+							report.reportedTime.valueOf() / 1000
 						)}>\n` +
 						`Report created at: <t:${Math.round(
-							report.reportCreatedAt.valueOf() / 1000,
+							report.reportCreatedAt.valueOf() / 1000
 						)}>`,
 					inline: true,
 				}
-			}),
+			})
 		)
 		createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
 		const confirm = await client.getConfirmationMessage(
 			message,
-			"Are you sure you want to revoke all reports of this player?",
+			"Are you sure you want to revoke all reports of this player?"
 		)
 		if (!confirm) return message.channel.send("Report revocation cancelled")
 
@@ -71,7 +81,9 @@ const RevokeAllName: Command = {
 			return message.channel.send("Reports revoked!")
 		} catch (e) {
 			if (e instanceof AuthError) {
-				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+				return message.channel.send(
+					`${client.emotes.warn} Your API key is not recognized by FAGC`
+				)
 			}
 			throw e
 		}

@@ -1,10 +1,16 @@
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { GuildApplicationCommandPermissionData, CommandInteraction } from "discord.js"
+import {
+	SlashCommandBuilder,
+	SlashCommandSubcommandBuilder,
+} from "@discordjs/builders"
+import {
+	GuildApplicationCommandPermissionData,
+	CommandInteraction,
+} from "discord.js"
 import FAGCBot from "./FAGCBot.js"
 import { BotConfigType } from "./database.js"
 
 interface CommandParams {
-	client: FAGCBot,
+	client: FAGCBot
 	interaction: CommandInteraction<"present">
 	botConfig: BotConfigType
 }

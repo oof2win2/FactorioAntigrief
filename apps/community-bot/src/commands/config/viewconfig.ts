@@ -4,18 +4,19 @@ const ViewConfig: Command = {
 	name: "viewconfig",
 	description: "View your guild config",
 	aliases: [],
-	examples: [ "viewconfig" ],
+	examples: ["viewconfig"],
 	usage: "",
 	category: "config",
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message, guildConfig }) => {
-		const embed = client.createBaseEmbed()
+		const embed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Config")
 			.setDescription("Your FAGC Configuration")
 		const community = guildConfig.communityId
 			? await client.fagc.communities.fetchCommunity({
-				communityId: guildConfig.communityId,
+					communityId: guildConfig.communityId,
 			  })
 			: null
 
@@ -71,11 +72,11 @@ const ViewConfig: Command = {
 					? `<@&${guildConfig.roles.setCommunities}> | ${guildConfig.roles.setCommunities}`
 					: "No role",
 				inline: true,
-			},
+			}
 		)
 
 		return message.channel.send({
-			embeds: [ embed ],
+			embeds: [embed],
 		})
 	},
 }
