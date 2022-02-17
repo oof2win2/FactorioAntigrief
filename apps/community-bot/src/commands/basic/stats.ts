@@ -26,7 +26,7 @@ const stats: Command = {
 			.addField("User count", users.toString(), true)
 			.addField("Channel count", channels.toString(), true)
 		return message.channel.send({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 	},
 }

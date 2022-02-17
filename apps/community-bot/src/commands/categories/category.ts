@@ -6,7 +6,7 @@ const Category: Command = {
 	description: "Gets a category by its ID or index in filtered categories",
 	category: "categories",
 	usage: "[categoryId|index]",
-	examples: ["category XuciBx7", "category 1"],
+	examples: [ "category XuciBx7", "category 1" ],
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
@@ -42,7 +42,7 @@ const Category: Command = {
 		}
 
 		return message.channel.send({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 	},
 }

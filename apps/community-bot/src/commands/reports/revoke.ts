@@ -4,12 +4,12 @@ import { Command } from "../../base/Command"
 const RevokeReport: Command = {
 	name: "revoke",
 	description: "Revokes a player's report with the report ID",
-	aliases: ["revokeid"],
+	aliases: [ "revokeid" ],
 	category: "reports",
 	usage: "[reportid]",
-	examples: ["revoke p1UgG0G"],
+	examples: [ "revoke p1UgG0G" ],
 	requiresRoles: true,
-	requiredPermissions: ["reports"],
+	requiredPermissions: [ "reports" ],
 	requiresApikey: true,
 	async run({ message, args, guildConfig, client }) {
 		if (!guildConfig.apikey)
@@ -56,7 +56,7 @@ const RevokeReport: Command = {
 				},
 			])
 		message.channel.send({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 		const confirm = await client.getConfirmationMessage(
 			message,

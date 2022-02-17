@@ -6,7 +6,7 @@ const FetchReport: Command = {
 	category: "reports",
 	usage: "[reportId]",
 	aliases: [],
-	examples: ["report FX07kpn"],
+	examples: [ "report FX07kpn" ],
 	requiresRoles: false,
 	requiresApikey: false,
 	async run({ message, args, client }) {
@@ -51,7 +51,7 @@ const FetchReport: Command = {
 			},
 		])
 		return message.channel.send({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 	},
 }

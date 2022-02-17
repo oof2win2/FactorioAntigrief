@@ -1,12 +1,12 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import {Command} from '../utils/Command';
+import { SlashCommandBuilder } from "@discordjs/builders"
+import { Command } from "../utils/Command"
 
 const Ping: Command = {
 	data: new SlashCommandBuilder()
 		.setName("ping")
 		.setDescription("Ping the bot")
 	,
-	execute: async ({client, interaction}) => {
+	execute: async ({ client, interaction }) => {
 		const beforeReply = Date.now()
 		await interaction.reply("Pong")
 		const afterReply = Date.now()

@@ -5,7 +5,7 @@ import { createPagedEmbed } from "../../utils/functions"
 const RemoveCommunity: Command = {
 	name: "removecommunity",
 	description: "Remove communities from your list of filtered communities",
-	aliases: ["removecommunities"],
+	aliases: [ "removecommunities" ],
 	usage: "[...ids]",
 	examples: [
 		"removecommunity XuciBx7",
@@ -13,13 +13,13 @@ const RemoveCommunity: Command = {
 	],
 	category: "communities",
 	requiresRoles: true,
-	requiredPermissions: ["setCommunities"],
+	requiredPermissions: [ "setCommunities" ],
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		// you need to trust at least one external community for this command to be useful and do anything
 		if (
 			guildConfig.communityId &&
-			guildConfig.trustedCommunities === [guildConfig.communityId]
+			guildConfig.trustedCommunities === [ guildConfig.communityId ]
 		)
 			return message.channel.send(
 				"You need to have at least one trusted community",
@@ -64,9 +64,9 @@ const RemoveCommunity: Command = {
 		if (!confirm) return message.channel.send("Removing communities cancelled")
 
 		// remove the communities from the config
-		const communityIds = new Set([...guildConfig.trustedCommunities])
+		const communityIds = new Set([ ...guildConfig.trustedCommunities ])
 		args.forEach((id) => communityIds.delete(id))
-		guildConfig.trustedCommunities = [...communityIds]
+		guildConfig.trustedCommunities = [ ...communityIds ]
 		try {
 			await client.saveGuildConfig(guildConfig)
 			return message.channel.send("Successfully removed community filters")

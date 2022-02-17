@@ -28,14 +28,14 @@ export async function createPagedEmbed(
 	const maxPages = Math.floor(fields.length / newOptions.maxPageCount)
 	embed.fields = fields.slice(0, options.maxPageCount)
 	let embedMsg = await message.channel.send({
-		embeds: [embed],
+		embeds: [ embed ],
 	})
 
 	const setData = async () => {
 		const start = page * newOptions.maxPageCount
 		embed.fields = fields.slice(start, start + newOptions.maxPageCount)
 		embedMsg = await embedMsg.edit({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 	}
 	const removeReaction = async (emoteName: string) => {
@@ -146,6 +146,6 @@ export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 	)
 
 	sendToGuild(guild, {
-		embeds: [embed],
+		embeds: [ embed ],
 	})
 }

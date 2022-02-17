@@ -2,11 +2,11 @@ import { Command } from "../../base/Command"
 
 const Help: Command = {
 	name: "help",
-	aliases: ["h"],
+	aliases: [ "h" ],
 	category: "basic",
 	description: "Get help on a command",
 	usage: "[command]",
-	examples: ["help", "help ping"],
+	examples: [ "help", "help ping" ],
 	requiresRoles: false,
 	requiresApikey: false,
 	run: ({ message, client, args, guildConfig }) => {
@@ -16,7 +16,7 @@ const Help: Command = {
 			client.commands.forEach((command) => {
 				const existing = categories.get(command.category)
 				if (!existing) {
-					categories.set(command.category, [command.name])
+					categories.set(command.category, [ command.name ])
 				} else {
 					if (!existing.includes(command.name)) existing.push(command.name)
 				}
@@ -33,7 +33,7 @@ const Help: Command = {
 				)
 			})
 			return message.channel.send({
-				embeds: [embed],
+				embeds: [ embed ],
 			})
 		}
 		const command = client.commands.get(args[0])
@@ -81,7 +81,7 @@ const Help: Command = {
 					: "No specific permission is required to execute this command",
 			)
 		return message.channel.send({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 	},
 }

@@ -1,8 +1,8 @@
 import { Client, ClientOptions, Collection, Constants } from "discord.js"
-import {Command} from "./Command.js"
+import { Command } from "./Command.js"
 import fs from "fs"
 import { FAGCWrapper } from "fagc-api-wrapper"
-import {PrismaClient} from ".prisma/client/index.js"
+import { PrismaClient } from ".prisma/client/index.js"
 import ENV from "./env.js"
 
 interface FAGCBotOptions extends ClientOptions {

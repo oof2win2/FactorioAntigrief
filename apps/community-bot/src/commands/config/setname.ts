@@ -6,11 +6,11 @@ const SetName: Command = {
 	description: "Set your community's name",
 	aliases: [],
 	usage: "setname [name]",
-	examples: ["setname AwF"],
+	examples: [ "setname AwF" ],
 	category: "config",
 	requiresRoles: true,
 	requiresApikey: true, // community is required, api key is given with community
-	requiredPermissions: ["setConfig"],
+	requiredPermissions: [ "setConfig" ],
 	run: async ({ client, message, args, guildConfig }) => {
 		if (!guildConfig.apikey)
 			return message.channel.send(

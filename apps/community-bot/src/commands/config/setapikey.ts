@@ -5,10 +5,10 @@ const Setapikey: Command = {
 	description: "Set API key",
 	aliases: [],
 	usage: "[API KEY]",
-	examples: ["setapikey potatoKey"],
+	examples: [ "setapikey potatoKey" ],
 	category: "config",
 	requiresRoles: true,
-	requiredPermissions: ["setConfig"],
+	requiredPermissions: [ "setConfig" ],
 	requiresApikey: false,
 	run: async ({ client, message, args }) => {
 		const key = args.shift()

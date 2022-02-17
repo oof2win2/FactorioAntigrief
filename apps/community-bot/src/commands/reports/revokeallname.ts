@@ -9,9 +9,9 @@ const RevokeAllName: Command = {
 	aliases: [],
 	category: "reports",
 	usage: "[playername]",
-	examples: ["revokeallname", "revokeallname Potato"],
+	examples: [ "revokeallname", "revokeallname Potato" ],
 	requiresRoles: true,
-	requiredPermissions: ["reports"],
+	requiredPermissions: [ "reports" ],
 	requiresApikey: true,
 	async run({ client, message, args, guildConfig }) {
 		if (!guildConfig.apikey)

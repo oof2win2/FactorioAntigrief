@@ -20,16 +20,16 @@ const EditCategory: SubCommand = {
 				.setRequired(true)
 		)
 	,
-	execute: async ({client, interaction}) => {
+	execute: async ({ client, interaction }) => {
 		const idReceiving = interaction.options.getString("receiving", true)
 		const idDissolving = interaction.options.getString("dissolving", true)
 		
-		const receiving = await client.FAGC.categories.fetchCategory({categoryId: idReceiving})
+		const receiving = await client.FAGC.categories.fetchCategory({ categoryId: idReceiving })
 		if (!receiving) return interaction.reply({
 			content: `Category ID \`${idReceiving}\` does not exist`,
 			ephemeral: true
 		})
-		const dissolving = await client.FAGC.categories.fetchCategory({categoryId: idDissolving})
+		const dissolving = await client.FAGC.categories.fetchCategory({ categoryId: idDissolving })
 		if (!dissolving) return interaction.reply({
 			content: `Category ID \`${idDissolving}\` does not exist`,
 			ephemeral: true

@@ -4,7 +4,7 @@ const ViewConfig: Command = {
 	name: "viewconfig",
 	description: "View your guild config",
 	aliases: [],
-	examples: ["viewconfig"],
+	examples: [ "viewconfig" ],
 	usage: "",
 	category: "config",
 	requiresRoles: false,
@@ -75,7 +75,7 @@ const ViewConfig: Command = {
 		)
 
 		return message.channel.send({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 	},
 }

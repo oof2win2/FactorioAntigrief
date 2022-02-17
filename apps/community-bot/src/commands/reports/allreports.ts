@@ -4,10 +4,10 @@ import { createPagedEmbed } from "../../utils/functions"
 const AllReports: Command = {
 	name: "allreports",
 	description: "Gets all reports of a player",
-	aliases: ["checkall", "viewallreports"],
+	aliases: [ "checkall", "viewallreports" ],
 	category: "reports",
 	usage: "[playername]",
-	examples: ["allreports Windsinger"],
+	examples: [ "allreports Windsinger" ],
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message, args }) => {

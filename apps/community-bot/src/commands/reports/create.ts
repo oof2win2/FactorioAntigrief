@@ -8,11 +8,11 @@ const CreateReport: Command = {
 	name: "createreport",
 	description: "Create a report for a player",
 	category: "reports",
-	aliases: ["create", "ban"],
+	aliases: [ "create", "ban" ],
 	usage: "[player] [...description]",
-	examples: ["create", "create Potato", "create Potato hacking"],
+	examples: [ "create", "create Potato", "create Potato hacking" ],
 	requiresRoles: true,
-	requiredPermissions: ["reports"],
+	requiredPermissions: [ "reports" ],
 	requiresApikey: true,
 	run: async ({ client, message, args, guildConfig }) => {
 		if (!guildConfig.categoryFilters.length)
@@ -129,7 +129,7 @@ const CreateReport: Command = {
 				},
 			])
 		message.channel.send({
-			embeds: [checkEmbed],
+			embeds: [ checkEmbed ],
 		})
 		const confirmationMessage = await client.getConfirmationMessage(
 			message,

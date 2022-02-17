@@ -6,11 +6,11 @@ const SetContact: Command = {
 	description: "Set your community's contact",
 	aliases: [],
 	usage: "setcontact (user)",
-	examples: ["setcontact @oof2win2#3149", "setcontact 429696038266208258"],
+	examples: [ "setcontact @oof2win2#3149", "setcontact 429696038266208258" ],
 	category: "config",
 	requiresRoles: true,
 	requiresApikey: true,
-	requiredPermissions: ["setConfig"],
+	requiredPermissions: [ "setConfig" ],
 	run: async ({ client, message, args, guildConfig }) => {
 		if (!guildConfig.apikey)
 			return message.channel.send(

@@ -2,13 +2,13 @@ import path from "node:path"
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 process.chdir(__dirname)
 
-import { REST } from '@discordjs/rest';
-import { APIApplicationCommand, RESTGetAPIUserResult, Routes } from 'discord-api-types/v9';
+import { REST } from "@discordjs/rest"
+import { APIApplicationCommand, RESTGetAPIUserResult, Routes } from "discord-api-types/v9"
 import ENV from "./utils/env.js"
-import fs from 'fs/promises';
-import {Command} from './utils/Command.js';
-import pkg from "@prisma/client";
-import { Constants } from "discord.js";
+import fs from "fs/promises"
+import { Command } from "./utils/Command.js"
+import pkg from "@prisma/client"
+import { Constants } from "discord.js"
 const { ApplicationCommandPermissionTypes } = Constants
 const { PrismaClient } = pkg
 
@@ -25,7 +25,7 @@ const rest = new REST({ version: "9" }).setToken(ENV.DISCORD_BOTTOKEN)
 const self = await rest.get(Routes.user()) as RESTGetAPIUserResult
 
 try {
-	console.log('Started refreshing application (/) commands.');
+	console.log("Started refreshing application (/) commands.")
 
 	console.log("Removing old commands from DB")
 	// delete old commands from db
@@ -41,11 +41,11 @@ try {
 	const perms = APICommands.map((command) => {
 		return {
 			id: command.id,
-			permissions: [{
+			permissions: [ {
 				type: ApplicationCommandPermissionTypes.ROLE,
 				id: ENV.ACCESSROLEID,
 				permission: true
-			}]
+			} ]
 		}
 	})
 	await rest.put(
@@ -61,7 +61,7 @@ try {
 	await prisma.$executeRawUnsafe(`INSERT INTO \`main\`.\`Command\` (id, name) VALUES \n\t${createCommandQueryValues}`)
 	console.log("Saved new commands to DB")
 
-	console.log('Successfully reloaded application (/) commands.');
+	console.log("Successfully reloaded application (/) commands.")
 } catch (error) {
-	console.error(error);
+	console.error(error)
 }

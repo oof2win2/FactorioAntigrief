@@ -5,12 +5,12 @@ import { createPagedEmbed } from "../../utils/functions"
 const AddCommunity: Command = {
 	name: "addcommunity",
 	description: "Add communities to your community filter",
-	aliases: ["addcommunities"],
+	aliases: [ "addcommunities" ],
 	usage: "[...ids]",
-	examples: ["addcommunity XuciBx7", "addcommunity XuciBx7 XuciBx9 XuciBx/"],
+	examples: [ "addcommunity XuciBx7", "addcommunity XuciBx7 XuciBx9 XuciBx/" ],
 	category: "communities",
 	requiresRoles: true,
-	requiredPermissions: ["setCommunities"],
+	requiredPermissions: [ "setCommunities" ],
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		const allCommunities = await client.fagc.communities.fetchAll({})

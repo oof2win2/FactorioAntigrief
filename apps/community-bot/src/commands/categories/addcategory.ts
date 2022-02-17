@@ -8,12 +8,12 @@ const AddCategory: Command = {
 	name: "addcategory",
 	description:
 		"Adds a category filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
-	aliases: ["addcategories"],
+	aliases: [ "addcategories" ],
 	usage: "[...ids]",
-	examples: ["addcategory XuciBx7", "addcategory XuciBx7 XuciBx9 XuciBx/"],
+	examples: [ "addcategory XuciBx7", "addcategory XuciBx7 XuciBx9 XuciBx/" ],
 	category: "categories",
 	requiresRoles: true,
-	requiredPermissions: ["setCategories"],
+	requiredPermissions: [ "setCategories" ],
 	requiresApikey: false,
 	run: async ({ client, message, guildConfig, args }) => {
 		// if they haven't provided any IDs, we'll show them all the categories and ask for IDs
@@ -84,7 +84,7 @@ const AddCategory: Command = {
 		// save the config
 			await client.saveGuildConfig({
 				guildId: message.guild.id,
-				categoryFilters: [...newCategoryIds],
+				categoryFilters: [ ...newCategoryIds ],
 				apikey: guildConfig.apikey ?? undefined,
 			})
 

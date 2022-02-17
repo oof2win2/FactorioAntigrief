@@ -6,10 +6,10 @@ const CreateWebhook: Command = {
 		"Create a webhook in specified channel to send FAGC notifications to",
 	aliases: [],
 	usage: "(channel or current channel)",
-	examples: ["createwebhook #notifications", "createwebhook"],
+	examples: [ "createwebhook #notifications", "createwebhook" ],
 	category: "config",
 	requiresRoles: true,
-	requiredPermissions: ["webhooks"],
+	requiredPermissions: [ "webhooks" ],
 	requiresApikey: false,
 	run: async ({ client, message }) => {
 		const channel = message.mentions.channels.first() || message.channel

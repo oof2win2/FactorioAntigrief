@@ -6,14 +6,14 @@ import { AuthError } from "fagc-api-wrapper"
 
 const CreateAdvanced: Command = {
 	name: "createadvanced",
-	aliases: ["createadv", "createadvanced"],
+	aliases: [ "createadv", "createadvanced" ],
 	usage: "[player] [...description]",
-	examples: ["create", "create Potato", "create Potato hacking"],
+	examples: [ "create", "create Potato", "create Potato hacking" ],
 	description:
 		"Create a report for a player, with the possiblity of input of admin who banned the user and customizing the time when the player was reported",
 	category: "reports",
 	requiresRoles: true,
-	requiredPermissions: ["reports"],
+	requiredPermissions: [ "reports" ],
 	requiresApikey: true,
 	async run({ client, message, args, guildConfig }) {
 		if (!guildConfig.categoryFilters.length)
@@ -166,7 +166,7 @@ const CreateAdvanced: Command = {
 				},
 			])
 		message.channel.send({
-			embeds: [checkEmbed],
+			embeds: [ checkEmbed ],
 		})
 		const confirmationMessage = await client.getConfirmationMessage(
 			message,

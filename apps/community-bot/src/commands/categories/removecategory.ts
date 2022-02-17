@@ -5,14 +5,14 @@ import { AuthError } from "fagc-api-wrapper"
 
 const RemoveCategories: Command = {
 	name: "removecategory",
-	aliases: ["removecategories"],
+	aliases: [ "removecategories" ],
 	description:
 		"Removes a category filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
 	usage: "[...ids]",
-	examples: ["removecategory XuciBx7", "removecategory XuciBx7 XuciBx9 XuciBx/"],
+	examples: [ "removecategory XuciBx7", "removecategory XuciBx7 XuciBx9 XuciBx/" ],
 	category: "categories",
 	requiresRoles: true,
-	requiredPermissions: ["setCategories"],
+	requiredPermissions: [ "setCategories" ],
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		// if no args provided, ask for category ids to remove from filters

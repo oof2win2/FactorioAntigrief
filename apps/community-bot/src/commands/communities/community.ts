@@ -31,7 +31,7 @@ const Community: Command = {
 			value: await client.safeGetContactString(community.contact),
 		})
 		return message.channel.send({
-			embeds: [embed],
+			embeds: [ embed ],
 		})
 	},
 }

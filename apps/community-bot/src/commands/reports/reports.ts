@@ -6,10 +6,10 @@ const GetReports: Command = {
 	name: "reports",
 	description:
 		"Gets reports of a player from only trusted communities and filtered categories",
-	aliases: ["check", "viewreports", "viewfilteredreports"],
+	aliases: [ "check", "viewreports", "viewfilteredreports" ],
 	category: "reports",
 	usage: "[playername]",
-	examples: ["reports Potato"],
+	examples: [ "reports Potato" ],
 	requiresRoles: false,
 	requiresApikey: false,
 	async run({ client, message, args, guildConfig }) {

@@ -5,7 +5,7 @@ import { AuthError } from "fagc-api-wrapper"
 
 const SetPermissions: Command = {
 	name: "setpermissions",
-	aliases: ["setperms", "setperms", "setperms", "setperms"],
+	aliases: [ "setperms", "setperms", "setperms", "setperms" ],
 	description: "Set the permissions for a role",
 	usage: "[setting] [permission] [role]",
 	examples: [
@@ -15,7 +15,7 @@ const SetPermissions: Command = {
 	],
 	category: "config",
 	requiresRoles: true,
-	requiredPermissions: ["setConfig"],
+	requiredPermissions: [ "setConfig" ],
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		const permStrings = [
@@ -72,7 +72,7 @@ const SetPermissions: Command = {
 					},
 				])
 			message.channel.send({
-				embeds: [embed],
+				embeds: [ embed ],
 			})
 			const confirmation = await client.getConfirmationMessage(
 				message,

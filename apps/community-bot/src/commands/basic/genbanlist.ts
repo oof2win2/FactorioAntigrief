@@ -5,12 +5,12 @@ import { MessageAttachment } from "discord.js"
 const Genbanlist: Command = {
 	name: "generatebanlist",
 	description: "Creates a .json banlist file to use for servers",
-	aliases: ["banlist", "genbanlist"],
+	aliases: [ "banlist", "genbanlist" ],
 	usage: "",
 	examples: [],
 	category: "basic",
 	requiresRoles: true,
-	requiredPermissions: ["reports"],
+	requiredPermissions: [ "reports" ],
 	requiresApikey: false,
 	run: async ({ message, client, guildConfig }) => {
 		if (!guildConfig.categoryFilters.length)
@@ -25,7 +25,7 @@ const Genbanlist: Command = {
 			categoryIds: guildConfig.categoryFilters,
 		})
 		const toBanWith = new Set(reports.map(r => r.playername))
-		const banlist = [...toBanWith].map((playername) => {
+		const banlist = [ ...toBanWith ].map((playername) => {
 			return {
 				username: playername,
 				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${
@@ -40,7 +40,7 @@ const Genbanlist: Command = {
 		)
 		return await message.reply({
 			content: "Banlist attatched",
-			files: [file],
+			files: [ file ],
 		})
 	},
 }

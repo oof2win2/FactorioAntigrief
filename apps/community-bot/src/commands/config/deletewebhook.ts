@@ -6,10 +6,10 @@ const DeleteWebhook: Command = {
 		"Remove a webhook from a specified channel to stop sending FAGC notifications to",
 	aliases: [],
 	usage: "[channel]",
-	examples: ["deletewebhook", "deletewebhook #notifications"],
+	examples: [ "deletewebhook", "deletewebhook #notifications" ],
 	category: "config",
 	requiresRoles: true,
-	requiredPermissions: ["webhooks"],
+	requiredPermissions: [ "webhooks" ],
 	requiresApikey: false,
 	run: async ({ client, message }) => {
 		const channel = message.mentions.channels.first() || message.channel

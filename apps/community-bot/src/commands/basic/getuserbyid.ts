@@ -3,10 +3,10 @@ import { Command } from "../../base/Command"
 const GetUserById: Command = {
 	name: "getuserbyid",
 	description: "Gets a Discord user by their ID",
-	aliases: ["getuser", "viewuserbyid", "viewuser"],
+	aliases: [ "getuser", "viewuserbyid", "viewuser" ],
 	category: "basic",
 	usage: "[user]",
-	examples: ["getuserbyid 429696038266208258"],
+	examples: [ "getuserbyid 429696038266208258" ],
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ message, client, args }) => {
@@ -26,7 +26,7 @@ const GetUserById: Command = {
 					},
 				])
 			message.reply({
-				embeds: [embed],
+				embeds: [ embed ],
 			})
 		} catch {
 			return message.reply(`User with the ID ${uid} could not be found`)

@@ -20,16 +20,16 @@ const EditCategory: SubCommand = {
 				.setRequired(true)
 		)
 	,
-	execute: async ({client, interaction}) => {
+	execute: async ({ client, interaction }) => {
 		const idReceiving = interaction.options.getString("receiving", true)
 		const idDissolving = interaction.options.getString("dissolving", true)
 		
-		const receiving = await client.FAGC.communities.fetchCommunity({communityId: idReceiving})
+		const receiving = await client.FAGC.communities.fetchCommunity({ communityId: idReceiving })
 		if (!receiving) return interaction.reply({
 			content: `Community with the ID \`${idReceiving}\` does not exist`,
 			ephemeral: true
 		})
-		const dissolving = await client.FAGC.communities.fetchCommunity({communityId: idDissolving})
+		const dissolving = await client.FAGC.communities.fetchCommunity({ communityId: idDissolving })
 		if (!dissolving) return interaction.reply({
 			content: `Community with the ID \`${idDissolving}\` does not exist`,
 			ephemeral: true

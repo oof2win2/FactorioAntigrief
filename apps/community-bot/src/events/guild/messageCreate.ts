@@ -79,7 +79,7 @@ export default async (client: FAGCBot, message: Message) => {
 	) {
 		const nonexistentRoles: string[] = []
 		const roles = doesntHaveRoles
-			.map((permname) => [permname, guildConfig.roles[permname]]) // get the role ID of the perm
+			.map((permname) => [ permname, guildConfig.roles[permname] ]) // get the role ID of the perm
 			.map((permname): [string, string | undefined] => [
 				permname[0],
 				message.guild.roles.cache.get(permname[1])?.name,
