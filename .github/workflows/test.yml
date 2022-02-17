@@ -1,12 +1,12 @@
-name: "Lint"
+name: "Test"
 
 on:
   - push
   - pull_request
 
 jobs:
-  lint:
-      name: Lint
+  Test:
+      name: Test
       runs-on: ubuntu-latest
 
       steps:
@@ -25,4 +25,4 @@ jobs:
           run: yarn install -D
         
         - name: Run lint
-          run: turbo run lint-check
+          run: turbo run build test
