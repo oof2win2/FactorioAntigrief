@@ -51,13 +51,16 @@ export class FAGCWrapper {
 		})
 	}
 	destroy(): void {
-		Object.keys(this).forEach((key) => {
+		(Object.keys(this) as (keyof this)[]).forEach((key) => {
 			if (
 				typeof this[key] == "object" &&
 				this[key] !== null &&
+				// @ts-ignore
 				typeof this[key]["destroy"] == "function"
-			)
+			) {
+				// @ts-ignore
 				this[key]["destroy"]()
+			}
 		})
 
 		this.apikey = null
