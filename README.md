@@ -13,6 +13,10 @@ Prerequisites:
 3. Run tests and build with `turbo run test build`. This will make sure that every project has TypeScript built and is tested, so you know that it worked when you cloned it
 4. Enjoy! It is reccomended to run the apps with `pm2`, which has it's documentation [here](https://pm2.io)
 
+## Workflow
+
+For everything, `turbo` and `yarn` are used. To build a specific app/package, go into the directory of said app/package and run `yarn build`. To build, lint, and test all apps, run `turbo run lint build test`. If you instead run `turbo run lint && turbo run test && turbo run build`, `turbo` will be unable to schedule it's work smartly and take less time, which it does when running the reccomended way.
+
 ## Contrubuting
 
 To contribute to the project, please see [Installation](#installation) to install the project first. Please also see the [contribution guidelines](CONTRIBUTING).
