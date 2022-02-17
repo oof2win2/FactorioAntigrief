@@ -1,0 +1,39 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "Lint"
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  lint:
+      name: Lint
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+
+        - name: Install node
+          uses: actions/setup-node@v2
+          with:
+            node-version: '16'
+        
+        - name: Install yarn & turbo
+          run: npm i -g yarn turbo
+        
+        - name: Install dependencies
+          run: yarn install -D
+        
+        - name: Run lint
+          run: turbo run lint-check

@@ -6,6 +6,7 @@
 	"prettier": "../../.prettierrc.json",
 	"scripts": {
 		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
+		"lint-check": "eslint src/ --ext .ts && prettier --check src/",
 		"postinstall": "install-types",
 		"build": "tsc --build",
 		"dev": "tsc -b --watch",
