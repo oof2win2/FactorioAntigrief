@@ -34,7 +34,13 @@ jobs:
         
         - name: Setup testing .env files
           run: |
-            echo "${{ secrets.BACKEND_ENV }}" > apps/backend/.env
+            echo "MONGOURI=mongodb://FAKEUSER:FAKEPASSWORD@127.0.0.1:27017/fagcsandbox
+DISCORD_BOTTOKEN=FAKE BOT TOKEN
+SENTRY_LINK=https://6a437e6af9d346e5b44f9223a45d1765@o745688.ingest.sentry.io/5790614
+API_PORT=3001
+PROMETHEUS_PORT=9111
+CLIENTID=913107375441993789
+JWT_SECRET="hGWdE47Uym6Avp"" > apps/backend/.env
         
-        - name: Run lint
+        - name: Run test
           run: turbo run build test
