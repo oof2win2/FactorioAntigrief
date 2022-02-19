@@ -13,7 +13,7 @@
 		"pm2:start": "pm2 start pm2.config.js",
 		"pm2": "npm run pm2:build && npm run pm2:start",
 		"build": "tsc --build",
-		"test": "MONGOMS_DEBUG=1 jest --runInBand --detectOpenHandles --verbose"
+		"test": "MONGOMS_DEBUG=1 jest --runInBand --detectOpenHandles --forceExit --verbose"
 	},
 	"lint-staged": {
 		"**/*": "prettier --write --ignore-unknown"
