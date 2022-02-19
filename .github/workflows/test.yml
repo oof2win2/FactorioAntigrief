@@ -13,16 +13,28 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v2
 
+        - name: Cache dependencies & test outputs
+          uses: actions/cache@v2
+          with:
+            path: |
+              **/.turbo/**
+              **/node_modules/**
+            key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
         - name: Install node
           uses: actions/setup-node@v2
           with:
             node-version: '16'
         
-        - name: Install yarn & turbo
-          run: npm i -g yarn turbo
+        - name: Install turbo
+          run: yarn global add turbo
         
         - name: Install dependencies
           run: yarn install -D
+        
+        - name: Setup testing .env files
+          run: |
+            echo "${{ secrets.BACKEND_ENV }}" > apps/backend/.env
         
         - name: Run lint
           run: turbo run build test

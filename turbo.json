@@ -1,17 +1,17 @@
 {
-  "pipeline": {
-    "build": {
-      "dependsOn": ["^build", "lint"],
-      "outputs": ["dist/**"]
-    },
-	"lint-check": {
-		
-	},
-    "lint": {
-      "outputs": ["src/**"]
-    },
-    "test": {
-      "dependsOn": ["^build"]
-    }
-  }
+	"pipeline": {
+		"build": {
+			"dependsOn": ["^build", "lint"],
+			"outputs": ["dist/**"]
+		},
+		"lint-check": {
+			
+		},
+		"lint": {
+			"outputs": ["src/**"]
+		},
+		"test": {
+			"dependsOn": ["^build"]
+		}
+	}
 }
