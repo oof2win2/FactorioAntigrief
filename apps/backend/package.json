@@ -13,7 +13,7 @@
 		"pm2:start": "pm2 start pm2.config.js",
 		"pm2": "npm run pm2:build && npm run pm2:start",
 		"build": "tsc --build",
-		"test": "MONGOMS_DEBUG=1 jest --runInBand --detectOpenHandles --forceExit --verbose"
+		"test": "jest --runInBand --detectOpenHandles --verbose"
 	},
 	"lint-staged": {
 		"**/*": "prettier --write --ignore-unknown"
@@ -48,6 +48,7 @@
 		"openapi3-ts": "^2.0.1",
 		"prom-client": "^14.0.1",
 		"validator": "^13.7.0",
+		"why-is-node-running": "^2.2.1",
 		"zod": "^3.11.6"
 	},
 	"repository": {

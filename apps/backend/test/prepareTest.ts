@@ -1,3 +1,5 @@
+// @ts-ignore
+import why from "why-is-node-running"
 import { MongoMemoryReplSet } from "mongodb-memory-server"
 import mongoose from "mongoose"
 import CommunityModel, { CommunityClass, watcher as communityWatcher } from "../src/database/community"
@@ -29,6 +31,7 @@ afterAll(async () => {
 	await backend.close()
 	await mongoose.disconnect()
 	await mongod.stop()
+	setInterval(() => why(), 1000)
 }, 20e3)
 
 export { default as backend } from "../src/app"
