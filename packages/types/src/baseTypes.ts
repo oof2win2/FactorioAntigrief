@@ -6,7 +6,7 @@ export const Common = z.object({
 export type Common = z.infer<typeof Common>
 
 // date types, used privately here
-const DateType = z.union([z.string().transform((x) => new Date(x)), z.date()])
+const DateType = z.union([ z.string().transform((x) => new Date(x)), z.date() ])
 const DateTypeDefault = z.union([
 	z
 		.string()
