@@ -10,21 +10,24 @@ const Community: Command = {
 	requiresRoles: false,
 	requiresApikey: false,
 	run: async ({ client, message, args }) => {
-		const communityId = await client.argsOrInput(args, message, `${client.emotes.type} Provide a community ID to fetch`)
+		const communityId = await client.argsOrInput(
+			args,
+			message,
+			`${client.emotes.type} Provide a community ID to fetch`
+		)
 		if (!communityId)
 			return message.channel.send(
-				`${client.emotes.warn} No community ID was provided`,
+				`${client.emotes.warn} No community ID was provided`
 			)
 		const community = await client.fagc.communities.fetchCommunity({
 			communityId: communityId,
 		})
 		if (!community)
 			return message.channel.send(
-				`${client.emotes.warn} Community with the ID \`${communityId}\` does not exist!`,
+				`${client.emotes.warn} Community with the ID \`${communityId}\` does not exist!`
 			)
 
-		const embed = client.createBaseEmbed()
-			.setTitle("FAGC Communities")
+		const embed = client.createBaseEmbed().setTitle("FAGC Communities")
 
 		embed.addFields({
 			name: `${community.name} | \`${community.id}\``,

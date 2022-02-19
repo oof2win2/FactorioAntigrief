@@ -1,21 +1,24 @@
 import { z } from "zod"
 import ENV from "../utils/env.js"
 
-export type PickPartial<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>> 
+export type PickPartial<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> &
+	Partial<Pick<T, K>>
 
 export const BotConfig = z.object({
 	guildId: z.string(),
 	apikey: z.string().nullable().optional(),
 	owner: z.string().default(ENV.OWNERID),
 	lastNotificationProcessed: z.date().default(new Date()),
-	reportAction: z.enum([ "ban", "custom", "none" ]).default("none"),
-	revocationAction: z.enum([ "unban", "custom", "none" ]).default("none"),
+	reportAction: z.enum(["ban", "custom", "none"]).default("none"),
+	revocationAction: z.enum(["unban", "custom", "none"]).default("none"),
 })
 export type BotConfigType = z.infer<typeof BotConfig>
 
 export const FactorioServer = z.object({
 	discordChannelId: z.string().optional(),
-	servername: z.string().describe("Name of Factorio server that it can be identified with"),
+	servername: z
+		.string()
+		.describe("Name of Factorio server that it can be identified with"),
 	discordGuildId: z.string(),
 	rconPort: z.number().max(65535).min(0),
 	rconPassword: z.string().default(ENV.RCONPASSWORD),

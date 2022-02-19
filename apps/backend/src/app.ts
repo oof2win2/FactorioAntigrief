@@ -23,7 +23,7 @@ import * as Types from "fagc-api-types"
 const fastify: FastifyInstance = Fastify({
 	jsonShorthand: false,
 	logger: false,
-// jsonShorthand is missing in the type definition for fastify :|
+	// jsonShorthand is missing in the type definition for fastify :|
 } as unknown as FastifyServerOptions)
 
 const hasSentry = Boolean(ENV.SENTRY_LINK)
@@ -46,8 +46,6 @@ if (hasSentry) {
 	})
 }
 
-
-
 // swagger
 fastify.register(fastifySwagger, {
 	routePrefix: "/documentation",
@@ -64,9 +62,12 @@ fastify.register(fastifySwagger, {
 		if (body) transformed.body = generateSchema(body)
 		if (querystring) transformed.querystring = generateSchema(querystring)
 		if (response) {
-			transformed.response = Object.fromEntries(Object.entries(response).map(
-				([ status, zodSchema ]) => ([ status, relinkSchema(generateSchema(zodSchema as z.ZodTypeAny)) ])
-			))
+			transformed.response = Object.fromEntries(
+				Object.entries(response).map(([status, zodSchema]) => [
+					status,
+					relinkSchema(generateSchema(zodSchema as z.ZodTypeAny)),
+				])
+			)
 		}
 		return transformed
 	},
@@ -134,33 +135,37 @@ fastify.register(fastifySwagger, {
 
 fastify.addSchema({
 	$id: "CommunityClass",
-	...generateSchema(Types.Community)
+	...generateSchema(Types.Community),
 })
 fastify.addSchema({
 	$id: "CategoryClass",
-	...generateSchema(Types.Category)
+	...generateSchema(Types.Category),
 })
 fastify.addSchema({
 	$id: "ReportClass",
-	...generateSchema(Types.Report)
+	...generateSchema(Types.Report),
 })
 fastify.addSchema({
 	$id: "RevocationClass",
-	...generateSchema(Types.Revocation)
+	...generateSchema(Types.Revocation),
 })
 fastify.addSchema({
 	$id: "GuildConfigClass",
-	...generateSchema(Types.GuildConfig)
+	...generateSchema(Types.GuildConfig),
 })
 fastify.addSchema({
 	$id: "WebhookClass",
-	...generateSchema(Types.Webhook)
+	...generateSchema(Types.Webhook),
 })
 
 const builtinSchemas: Map<string, any> = new Map()
-for (const [ id, schema ] of Object.entries(fastify.getSchemas())) {
-	const clone = { ...schema as object } as any
-	for (const prop of [ "$id", "title", ...Object.getOwnPropertySymbols(clone) ]) {
+for (const [id, schema] of Object.entries(fastify.getSchemas())) {
+	const clone = { ...(schema as object) } as any
+	for (const prop of [
+		"$id",
+		"title",
+		...Object.getOwnPropertySymbols(clone),
+	]) {
 		delete clone[prop]
 	}
 	builtinSchemas.set(id, clone)
@@ -171,15 +176,19 @@ for (const [ id, schema ] of Object.entries(fastify.getSchemas())) {
  * to known schemas on the server.
  */
 function relinkSchema(schema: any) {
-	for (const [ id, builtinSchema ] of builtinSchemas) {
+	for (const [id, builtinSchema] of builtinSchemas) {
 		if (util.isDeepStrictEqual(schema, builtinSchema)) {
 			return { $ref: id }
 		}
 		if (
-			schema.nullable && !builtinSchema.nullable
-			&& util.isDeepStrictEqual(schema, { ...builtinSchema, nullable: schema.nullable })
+			schema.nullable &&
+			!builtinSchema.nullable &&
+			util.isDeepStrictEqual(schema, {
+				...builtinSchema,
+				nullable: schema.nullable,
+			})
 		) {
-			return { allOf: [ { type: "object", nullable: true }, { $ref: id } ] }
+			return { allOf: [{ type: "object", nullable: true }, { $ref: id }] }
 		}
 	}
 
@@ -190,7 +199,10 @@ function relinkSchema(schema: any) {
 	if (clone.items) clone.items = relinkSchema(clone.items)
 	if (clone.properties)
 		clone.properties = Object.fromEntries(
-			Object.entries(clone.properties).map(([ k, v ]) => [ k, relinkSchema(v) ])
+			Object.entries(clone.properties).map(([k, v]) => [
+				k,
+				relinkSchema(v),
+			])
 		)
 	return clone
 }
@@ -207,14 +219,13 @@ fastify.register(fastifyCorsPlugin, {
 fastify.register(fastifyRateLimitPlugin, {
 	max: 50,
 	timeWindow: 1000 * 60, // 100 reqs in 60s
-	allowList: [ "::ffff:127.0.0.1", "::1", "127.0.0.1" ],
+	allowList: ["::ffff:127.0.0.1", "::1", "127.0.0.1"],
 })
 
 // context
 fastify.register(fastifyRequestContextPlugin, {
 	hook: "preValidation",
-	defaultStoreValues: {
-	},
+	defaultStoreValues: {},
 })
 // typed context
 declare module "fastify-request-context" {
@@ -228,17 +239,19 @@ declare module "fastify-request-context" {
 fastify.register(fastifyHelmetPlugin, {
 	contentSecurityPolicy: {
 		directives: {
-			...(ENV.NODE_ENV === "development" ? { "upgrade-insecure-requests": null } : {}),
+			...(ENV.NODE_ENV === "development"
+				? { "upgrade-insecure-requests": null }
+				: {}),
 		},
 	},
-	...(ENV.NODE_ENV === "development" ? { hsts: false, } : {}),
+	...(ENV.NODE_ENV === "development" ? { hsts: false } : {}),
 })
 
 // form body for backwards compat with the express api
 fastify.register(fastifyFormBodyPlugin)
 
 fastify.setValidatorCompiler(({ schema }) => {
-	return function(data) {
+	return function (data) {
 		const result = (schema as z.ZodTypeAny).safeParse(data)
 		if (!result.success) return { error: result.error }
 		return { value: result.data }
@@ -246,11 +259,13 @@ fastify.setValidatorCompiler(({ schema }) => {
 })
 
 class ResponseValidationError extends Error {
-	constructor(public original: z.ZodError) { super() }
+	constructor(public original: z.ZodError) {
+		super()
+	}
 }
 
 fastify.setSerializerCompiler(({ schema }) => {
-	return function(data) {
+	return function (data) {
 		try {
 			return JSON.stringify((schema as z.ZodTypeAny).parse(data))
 		} catch (error) {
@@ -263,7 +278,7 @@ fastify.setSerializerCompiler(({ schema }) => {
 
 fastify.register(bootstrap, {
 	directory: path.resolve(__dirname, "routes"),
-	mask: /\.(handler|controller)\.(js|ts)$/
+	mask: /\.(handler|controller)\.(js|ts)$/,
 })
 
 // fastify.register(fastifyResponseValidationPlugin)
@@ -281,11 +296,13 @@ function formatZodError(error: z.ZodError) {
 		}
 	}
 
-	const formMessages = formErrors.map(m => `${m}\n`).join()
-	const fieldMessages = Object.entries(fieldErrors).flatMap(
-		([ name, messages ]) => messages.map(message => `${name}: ${message}\n`)
-	).join()
-	return [ formMessages, fieldMessages ].join("")
+	const formMessages = formErrors.map((m) => `${m}\n`).join()
+	const fieldMessages = Object.entries(fieldErrors)
+		.flatMap(([name, messages]) =>
+			messages.map((message) => `${name}: ${message}\n`)
+		)
+		.join()
+	return [formMessages, fieldMessages].join("")
 }
 
 fastify.setErrorHandler(async (error, request, reply) => {
@@ -294,7 +311,9 @@ fastify.setErrorHandler(async (error, request, reply) => {
 		return reply.status(500).send({
 			errorCode: 500,
 			error: "Internal Eerver Error",
-			message: `Validation of response data failed\n${formatZodError(error.original)}`,
+			message: `Validation of response data failed\n${formatZodError(
+				error.original
+			)}`,
 		})
 	}
 	if (error instanceof z.ZodError) {
@@ -308,8 +327,7 @@ fastify.setErrorHandler(async (error, request, reply) => {
 
 	console.error(error)
 	// Sending error to be logged in Sentry
-	if (hasSentry)
-		Sentry.captureException(error)
+	if (hasSentry) Sentry.captureException(error)
 	reply.status(500).send({
 		errorCode: 500,
 		error: "Something went wrong",

@@ -1,8 +1,6 @@
 import promClient from "prom-client"
 import http from "http"
-import GuildConfigModel, {
-	GuildConfigClass,
-} from "../database/guildconfig"
+import GuildConfigModel, { GuildConfigClass } from "../database/guildconfig"
 import CommunityModel, { CommunityClass } from "../database/community"
 import CategoryModel from "../database/category"
 import { DocumentType } from "@typegoose/typegoose"
@@ -16,12 +14,12 @@ collectDefaultMetrics({ register })
 const communityGauge = new promClient.Gauge({
 	name: "community_trust_count",
 	help: "Amount of communities that trust this community",
-	labelNames: [ "id", "name", "contact" ],
+	labelNames: ["id", "name", "contact"],
 })
 const categoryGauge = new promClient.Gauge({
 	name: "category_trust_count",
 	help: "Amount of communities that trust this category",
-	labelNames: [ "id", "name" ],
+	labelNames: ["id", "name"],
 })
 
 register.registerMetric(communityGauge)

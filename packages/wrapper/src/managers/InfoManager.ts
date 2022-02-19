@@ -16,30 +16,42 @@ export default class InfoManager extends BaseManager<Webhook> {
 		this.apiurl = options.apiurl
 	}
 	async addWebhook({
-		webhookId, webhookToken
+		webhookId,
+		webhookToken,
 	}: {
-		webhookId: string,
+		webhookId: string
 		webhookToken: string
 	}): Promise<Webhook> {
-		const webhookPath = `${strictUriEncode(webhookId)}/${strictUriEncode(webhookToken)}`
-		const add = await fetch(`${this.apiurl}/discord/webhook/${webhookPath}`, {
-			method: "PUT",
-			credentials: "include",
-		}).then((w) => w.json())
+		const webhookPath = `${strictUriEncode(webhookId)}/${strictUriEncode(
+			webhookToken
+		)}`
+		const add = await fetch(
+			`${this.apiurl}/discord/webhook/${webhookPath}`,
+			{
+				method: "PUT",
+				credentials: "include",
+			}
+		).then((w) => w.json())
 		if (add.error) throw new GenericAPIError(`${add.error}: ${add.message}`)
 		return Webhook.parse(add)
 	}
 	async removeWebhook({
-		webhookId, webhookToken
+		webhookId,
+		webhookToken,
 	}: {
-		webhookId: string,
+		webhookId: string
 		webhookToken: string
 	}): Promise<Webhook | null> {
-		const webhookPath = `${strictUriEncode(webhookId)}/${strictUriEncode(webhookToken)}`
-		const add = await fetch(`${this.apiurl}/discord/webhook/${webhookPath}`, {
-			method: "DELETE",
-			credentials: "include",
-		}).then((w) => w.json())
+		const webhookPath = `${strictUriEncode(webhookId)}/${strictUriEncode(
+			webhookToken
+		)}`
+		const add = await fetch(
+			`${this.apiurl}/discord/webhook/${webhookPath}`,
+			{
+				method: "DELETE",
+				credentials: "include",
+			}
+		).then((w) => w.json())
 		return Webhook.nullable().parse(add)
 	}
 
@@ -49,9 +61,9 @@ export default class InfoManager extends BaseManager<Webhook> {
 		embeds,
 		reqConfig = {},
 	}: {
-		guildId: string,
-		content?: string,
-		embeds?: APIEmbed[],
+		guildId: string
+		content?: string
+		embeds?: APIEmbed[]
 	} & FetchRequestTypes): Promise<void> {
 		await fetch(
 			`${this.apiurl}/discord/guilds/${strictUriEncode(guildId)}/message`,
@@ -73,10 +85,10 @@ export default class InfoManager extends BaseManager<Webhook> {
 	async notifyGuildText({
 		guildId,
 		text,
-		reqConfig = {}
+		reqConfig = {},
 	}: {
-		guildId: string,
-		text: string,
+		guildId: string
+		text: string
 	} & FetchRequestTypes): Promise<void> {
 		return await this.messageGuild({ guildId, content: text, reqConfig })
 	}
@@ -84,11 +96,11 @@ export default class InfoManager extends BaseManager<Webhook> {
 	async notifyGuildEmbed({
 		guildId,
 		embed,
-		reqConfig = {}
+		reqConfig = {},
 	}: {
-		guildId: string,
-		embed: APIEmbed,
+		guildId: string
+		embed: APIEmbed
 	} & FetchRequestTypes): Promise<void> {
-		return await this.messageGuild({ guildId, embeds: [ embed ], reqConfig })
+		return await this.messageGuild({ guildId, embeds: [embed], reqConfig })
 	}
 }

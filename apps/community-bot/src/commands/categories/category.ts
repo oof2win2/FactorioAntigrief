@@ -11,23 +11,31 @@ const Category: Command = {
 	requiresApikey: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		// if the person did not provide an argument, get a message response
-		const categoryId = await client.argsOrInput(args, message, `${client.emotes.type} Provide a category Id or index  to fetch`)
+		const categoryId = await client.argsOrInput(
+			args,
+			message,
+			`${client.emotes.type} Provide a category Id or index  to fetch`
+		)
 		if (!categoryId)
 			return message.channel.send(
-				`${client.emotes.warn} No category ID or index was provided`,
+				`${client.emotes.warn} No category ID or index was provided`
 			)
 		const category = Number(categoryId)
 			? await client.fagc.categories.fetchCategory({
-				categoryId: guildConfig.categoryFilters[Number(categoryId) - 1],
+					categoryId:
+						guildConfig.categoryFilters[Number(categoryId) - 1],
 			  })
-			: await client.fagc.categories.fetchCategory({ categoryId: categoryId })
+			: await client.fagc.categories.fetchCategory({
+					categoryId: categoryId,
+			  })
 
 		if (category === null)
 			return message.reply(
-				`${client.emotes.warn} No category with ID of \`${categoryId}\` exists`,
+				`${client.emotes.warn} No category with ID of \`${categoryId}\` exists`
 			)
 
-		const embed = client.createBaseEmbed()
+		const embed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Categories")
 			.setDescription(`FAGC Category with ID \`${category.id}\``)
 		embed.addField(category.name, category.description)
@@ -36,7 +44,9 @@ const Category: Command = {
 			if (guildConfig.categoryFilters.indexOf(category.id) != -1) {
 				embed.addField(
 					"Category index",
-					(guildConfig.categoryFilters.indexOf(category.id) + 1).toString(),
+					(
+						guildConfig.categoryFilters.indexOf(category.id) + 1
+					).toString()
 				)
 			}
 		}

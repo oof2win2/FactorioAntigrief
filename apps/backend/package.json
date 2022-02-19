@@ -4,16 +4,16 @@
 	"private": true,
 	"main": "dist/index.js",
 	"type": "commonjs",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
 		"start": "ts-node ./src/index.ts",
 		"dev": "nodemon ./dist/index.ts",
-		"lint": "npm run eslint",
-		"eslint": "eslint src/ --fix --ext .ts",
+		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
 		"pm2:build": "tsc",
 		"pm2:start": "pm2 start pm2.config.js",
 		"pm2": "npm run pm2:build && npm run pm2:start",
 		"build": "tsc --build",
-		"test": "jest"
+		"test": "MONGOMS_DEBUG=1 jest --runInBand --detectOpenHandles --forceExit --verbose"
 	},
 	"lint-staged": {
 		"**/*": "prettier --write --ignore-unknown"
@@ -63,18 +63,14 @@
 	"homepage": "https://github.com/oof2win2/fagc-backend#readme",
 	"devDependencies": {
 		"@types/debug": "^4.1.7",
-		"@types/eslint": "^8.2.2",
 		"@types/faker": "^5.5.9",
 		"@types/fastify-rate-limit": "^2.1.0",
 		"@types/jest": "^27.4.0",
 		"@types/mongoose": "^5.11.97",
 		"@types/node-fetch": "^3.0.3",
 		"@types/nodemon": "^1.19.1",
-		"@types/prettier": "^2.4.3",
 		"@types/validator": "^13.7.1",
 		"@types/ws": "^8.2.2",
-		"@typescript-eslint/eslint-plugin": "^5.10.0",
-		"@typescript-eslint/parser": "^5.10.0",
 		"faker": "^5.5.3",
 		"inversify": "^6.0.1",
 		"jest": "^27.4.7",

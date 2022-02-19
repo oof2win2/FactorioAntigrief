@@ -36,7 +36,7 @@ export default async (client: FAGCBot, message: Message) => {
 	// check if the command requires api key
 	if (command.requiresApikey && !guildConfig.apikey)
 		return message.channel.send(
-			`${client.config.emotes.warn} API key must be set for use of this command`,
+			`${client.config.emotes.warn} API key must be set for use of this command`
 		)
 
 	// if command doesnt require guild config (like help, ping etc), it can be ran
@@ -64,7 +64,7 @@ export default async (client: FAGCBot, message: Message) => {
 			!guildConfig.roles.webhooks)
 	)
 		return message.reply(
-			"You need to run the setup command and set all roles before you can run any other commands!",
+			"You need to run the setup command and set all roles before you can run any other commands!"
 		)
 
 	// check which roles the user doesnt have
@@ -99,13 +99,13 @@ export default async (client: FAGCBot, message: Message) => {
 			sendToGuild(
 				message.guild,
 				`The following roles are not set on the guild config: \`${nonexistentRoles.join(
-					"`, `",
-				)}\``,
+					"`, `"
+				)}\``
 			)
 		return message.reply(
 			`You need the following roles to execute this command: \`${roles.join(
-				"`, `",
-			)}\``,
+				"`, `"
+			)}\``
 		)
 	}
 

@@ -54,8 +54,9 @@ const SetPermissions: Command = {
 						permMessage.content?.split(" ")[0]
 					}\` is not a valid role`,
 				)
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				permissions[permType] = permRole
-
 			}
 
 			const embed = client.createBaseEmbed()

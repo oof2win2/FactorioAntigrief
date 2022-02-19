@@ -14,21 +14,25 @@ const CreateWebhook: Command = {
 	run: async ({ client, message }) => {
 		const channel = message.mentions.channels.first() || message.channel
 		if (!channel.isText())
-			return message.channel.send(`${client.emotes.warn} Please specify a text channel`)
+			return message.channel.send(
+				`${client.emotes.warn} Please specify a text channel`
+			)
 		if (channel.type === "DM")
-			return message.channel.send(`${client.emotes.warn} You can't create webhooks in DMs`)
+			return message.channel.send(
+				`${client.emotes.warn} You can't create webhooks in DMs`
+			)
 		if (channel.isThread())
 			return message.channel.send(
-				`${client.emotes.warn} You can't create a webhook in a thread`,
+				`${client.emotes.warn} You can't create a webhook in a thread`
 			)
 
 		const confirmation = await client.getConfirmationMessage(
 			message,
-			`Are you sure you want to create a webhook in <#${channel.id}>?`,
+			`Are you sure you want to create a webhook in <#${channel.id}>?`
 		)
 		if (!confirmation)
 			return message.channel.send(
-				`${client.emotes.warn} Webhook creation cancelled`,
+				`${client.emotes.warn} Webhook creation cancelled`
 			)
 
 		const webhook = await channel.createWebhook("FAGC Notifier")
@@ -40,13 +44,13 @@ const CreateWebhook: Command = {
 			})
 
 			return message.channel.send(
-				"Webhook created successfully! A testing message from the FAGC API should be sent",
+				"Webhook created successfully! A testing message from the FAGC API should be sent"
 			)
 		} catch {
 			// there is a webhook in this guild already, so it can't be created
 			await webhook.delete()
 			return message.channel.send(
-				`${client.emotes.warn} You already have a webhook in this guild`,
+				`${client.emotes.warn} You already have a webhook in this guild`
 			)
 		}
 	},

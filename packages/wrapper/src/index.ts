@@ -2,7 +2,11 @@ import CommunityManager from "./managers/CommunityManager"
 import InfoManager from "./managers/InfoManager"
 import RevocationManager from "./managers/RevocationManager"
 import { CategoryManager } from "./managers/CategoryManager"
-import { ManagerOptions, BaseWrapperOptions, WrapperOptions } from "./types/types"
+import {
+	ManagerOptions,
+	BaseWrapperOptions,
+	WrapperOptions,
+} from "./types/types"
 import ReportManager from "./managers/ReportManager"
 import WebSocketHandler from "./WebsocketListener"
 
@@ -30,10 +34,11 @@ export class FAGCWrapper {
 		const options: WrapperOptions = {
 			apiurl: "https://factoriobans.club/api",
 			socketurl: "https://factoriobans.club/api/ws",
-			...baseOptions
+			...baseOptions,
 		}
 		if (!options.apiurl) options.apiurl = "https://factoriobans.club/api"
-		if (!options.socketurl) options.socketurl = "https://factoriobans.club/api/ws"
+		if (!options.socketurl)
+			options.socketurl = "https://factoriobans.club/api/ws"
 
 		this.apiurl = options.apiurl
 		if (options.apikey) this.apikey = options.apikey
@@ -51,25 +56,32 @@ export class FAGCWrapper {
 		})
 	}
 	destroy(): void {
-		Object.keys(this).forEach((key) => {
+		;(Object.keys(this) as (keyof this)[]).forEach((key) => {
 			if (
 				typeof this[key] == "object" &&
 				this[key] !== null &&
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				typeof this[key]["destroy"] == "function"
-			)
+			) {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				this[key]["destroy"]()
+			}
 		})
 
 		this.apikey = null
 		this.masterapikey = null
 	}
 	setdata({
-		apikey, masterapikey,
-		url, socketurl,
+		apikey,
+		masterapikey,
+		url,
+		socketurl,
 	}: {
-		apikey?: string | null,
-		masterapikey?: string | null,
-		url?: string,
+		apikey?: string | null
+		masterapikey?: string | null
+		url?: string
 		socketurl?: string
 	}): void {
 		if (apikey || apikey === null) {

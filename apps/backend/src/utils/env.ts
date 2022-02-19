@@ -7,7 +7,10 @@ dotenv.config({
 const ENV = cleanEnv(
 	process.env,
 	{
-		NODE_ENV: str({ default: "production", choices: [ "development", "production", "test" ] }),
+		NODE_ENV: str({
+			default: "production",
+			choices: ["development", "production", "test"],
+		}),
 		MONGOURI: url({
 			example:
 				"mongodb+srv://dbUse:dbPassword@databaseLocation/defaultDatabaseName",
@@ -26,7 +29,9 @@ const ENV = cleanEnv(
 			desc: "Port where Prometheus should run for statistics etc.",
 		}),
 		JWT_SECRET: str({ desc: "Secret for signing JWTs" }),
-		CLIENTID: str({ desc: "Client ID for Discord, contact for the first community" }),
+		CLIENTID: str({
+			desc: "Client ID for Discord, contact for the first community",
+		}),
 	},
 	{}
 )

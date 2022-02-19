@@ -27,17 +27,27 @@ export default class RevocationController {
 					playername: z.string().or(z.array(z.string())).optional(),
 					categoryId: z.string().or(z.array(z.string())).optional(),
 					adminId: z.string().or(z.array(z.string())).optional(),
-					after: z.string().optional().refine(
-						(input) => input === undefined || validator.isISO8601(input),
-						"Invalid timestamp"
-					),
-					revokedAfter: z.string().optional().refine(
-						(input) => input === undefined || validator.isISO8601(input),
-						"Invalid timestamp"
-					),
+					after: z
+						.string()
+						.optional()
+						.refine(
+							(input) =>
+								input === undefined ||
+								validator.isISO8601(input),
+							"Invalid timestamp"
+						),
+					revokedAfter: z
+						.string()
+						.optional()
+						.refine(
+							(input) =>
+								input === undefined ||
+								validator.isISO8601(input),
+							"Invalid timestamp"
+						),
 				}),
 				description: "Fetch revocations from your community",
-				tags: [ "revocations" ],
+				tags: ["revocations"],
 				security: [
 					{
 						authorization: [],
@@ -53,22 +63,24 @@ export default class RevocationController {
 	async fetchAll(
 		req: FastifyRequest<{
 			Querystring: {
-				playername?: string | string[],
-				categoryId?: string | string[],
-				adminId?: string | string[],
-				after?: string,
-				revokedAfter?: string,
+				playername?: string | string[]
+				categoryId?: string | string[]
+				adminId?: string | string[]
+				after?: string
+				revokedAfter?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { playername, categoryId, adminId, after, revokedAfter } = req.query
+		const { playername, categoryId, adminId, after, revokedAfter } =
+			req.query
 		const community = req.requestContext.get("community")
-		if (!community) return res.status(404).send({
-			errorCode: 404,
-			error: "Community not found",
-			message: "Community not found",
-		})
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Community not found",
+				message: "Community not found",
+			})
 
 		const revocations = await ReportInfoModel.find({
 			playername: playername,
@@ -94,7 +106,7 @@ export default class RevocationController {
 				}),
 
 				description: "Fetch revocation",
-				tags: [ "revocations" ],
+				tags: ["revocations"],
 				security: [
 					{
 						authorization: [],
@@ -117,11 +129,12 @@ export default class RevocationController {
 	): Promise<FastifyReply> {
 		const { id } = req.params
 		const community = req.requestContext.get("community")
-		if (!community) return res.status(404).send({
-			errorCode: 404,
-			error: "Community not found",
-			message: "Community not found",
-		})
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Community not found",
+				message: "Community not found",
+			})
 
 		const revocation = await ReportInfoModel.findOne({
 			id: id,
@@ -143,7 +156,7 @@ export default class RevocationController {
 				}),
 
 				description: "Revoke a report",
-				tags: [ "revocations" ],
+				tags: ["revocations"],
 				security: [
 					{
 						authorization: [],
@@ -200,7 +213,7 @@ export default class RevocationController {
 		const allReports = await ReportInfoModel.find({
 			playername: report.playername,
 			revokedAt: { $eq: null },
-		}).select([ "communityId" ])
+		}).select(["communityId"])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
@@ -231,8 +244,9 @@ export default class RevocationController {
 					adminId: z.string(),
 				}),
 
-				description: "Revoke all reports of a category in your community",
-				tags: [ "revocations" ],
+				description:
+					"Revoke all reports of a category in your community",
+				tags: ["revocations"],
 				security: [
 					{
 						authorization: [],
@@ -274,7 +288,7 @@ export default class RevocationController {
 				error: "Bad Request",
 				message: "adminId must be a valid Discord user",
 			})
-		
+
 		const category = await CategoryModel.findOne({ id: categoryId })
 		if (!category)
 			return res.status(400).send({
@@ -283,14 +297,17 @@ export default class RevocationController {
 				message: "id must be a valid ID",
 			})
 
-		await ReportInfoModel.updateMany({
-			communityId: community.id,
-			categoryId: categoryId,
-			revokedAt: { $eq: null },
-		}, {
-			revokedAt: new Date(),
-			revokedBy: adminId
-		})
+		await ReportInfoModel.updateMany(
+			{
+				communityId: community.id,
+				categoryId: categoryId,
+				revokedAt: { $eq: null },
+			},
+			{
+				revokedAt: new Date(),
+				revokedBy: adminId,
+			}
+		)
 
 		const rawRevocations = await ReportInfoModel.find({
 			communityId: community.id,
@@ -299,8 +316,10 @@ export default class RevocationController {
 		})
 		const revocations = z.array(Revocation).parse(rawRevocations)
 
-		const CategoryMap: Map<string, DocumentType<CategoryClass, BeAnObject> | null> =
-			new Map()
+		const CategoryMap: Map<
+			string,
+			DocumentType<CategoryClass, BeAnObject> | null
+		> = new Map()
 
 		await Promise.all(
 			revocations.map(async (revocation) => {
@@ -320,16 +339,22 @@ export default class RevocationController {
 			const totalReports = await ReportInfoModel.find({
 				playername: revocation.playername,
 			})
-			const differentCommunities = new Set(totalReports.map((report) => report.communityId)).size
-				
+			const differentCommunities = new Set(
+				totalReports.map((report) => report.communityId)
+			).size
+
 			reportRevokedMessage(revocation, {
 				community: <ReportMessageExtraOpts["community"]>(
 					(<unknown>community.toObject())
 				),
 				// this is allowed since the category is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				category: <ReportMessageExtraOpts["category"]><unknown>CategoryMap.get(revocation.categoryId)!,
-				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
+				category: <ReportMessageExtraOpts["category"]>(
+					(<unknown>CategoryMap.get(revocation.categoryId)!)
+				),
+				revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
+					(<unknown>revoker)
+				),
 				totalReports: totalReports.length,
 				totalCommunities: differentCommunities,
 			})
@@ -350,7 +375,7 @@ export default class RevocationController {
 				}),
 
 				description: "Revoke all reports of a player in your community",
-				tags: [ "revocations" ],
+				tags: ["revocations"],
 				security: [
 					{
 						authorization: [],
@@ -398,14 +423,17 @@ export default class RevocationController {
 			playername: playername,
 		})
 
-		await ReportInfoModel.updateMany({
-			communityId: community.id,
-			playername: playername,
-			revokedAt: { $eq: null },
-		}, {
-			revokedAt: new Date(),
-			revokedBy: adminId,
-		})
+		await ReportInfoModel.updateMany(
+			{
+				communityId: community.id,
+				playername: playername,
+				revokedAt: { $eq: null },
+			},
+			{
+				revokedAt: new Date(),
+				revokedBy: adminId,
+			}
+		)
 
 		const rawRevocations = await ReportInfoModel.find({
 			communityId: community.id,
@@ -414,8 +442,10 @@ export default class RevocationController {
 		})
 		const revocations = z.array(Revocation).parse(rawRevocations)
 
-		const CategoryMap: Map<string, DocumentType<CategoryClass, BeAnObject> | null> =
-			new Map()
+		const CategoryMap: Map<
+			string,
+			DocumentType<CategoryClass, BeAnObject> | null
+		> = new Map()
 
 		await Promise.all(
 			revocations.map(async (revocation) => {
@@ -432,7 +462,7 @@ export default class RevocationController {
 
 		const allReports = await ReportInfoModel.find({
 			playername: playername,
-		}).select([ "communityId" ])
+		}).select(["communityId"])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
@@ -446,8 +476,12 @@ export default class RevocationController {
 				),
 				// this is allowed since the category is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				category: <ReportMessageExtraOpts["category"]><unknown>CategoryMap.get(revocation.categoryId)!,
-				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
+				category: <ReportMessageExtraOpts["category"]>(
+					(<unknown>CategoryMap.get(revocation.categoryId)!)
+				),
+				revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
+					(<unknown>revoker)
+				),
 				totalReports: allReports.length,
 				totalCommunities: differentCommunities.size,
 			})
@@ -464,8 +498,9 @@ export default class RevocationController {
 					snowflake: z.string(),
 				}),
 
-				description: "Revoke all reports created by an admin in your community",
-				tags: [ "revocations" ],
+				description:
+					"Revoke all reports created by an admin in your community",
+				tags: ["revocations"],
 				security: [
 					{
 						authorization: [],
@@ -492,11 +527,12 @@ export default class RevocationController {
 		const { snowflake } = req.params
 		const { adminId } = req.body
 		const community = req.requestContext.get("community")
-		if (!community) return res.status(404).send({
-			errorCode: 404,
-			error: "Community not found",
-			message: "Community not found",
-		})
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Community not found",
+				message: "Community not found",
+			})
 
 		const admin = await validateDiscordUser(adminId)
 		if (!admin)
@@ -505,25 +541,30 @@ export default class RevocationController {
 				error: "Bad Request",
 				message: "adminId must be a valid Discord user ID",
 			})
-		
+
 		// revoke all the reports
-		await ReportInfoModel.updateMany({
-			communityId: community.id,
-			adminId: adminId,
-			revokedAt: { $eq: null },
-		}, {
-			revokedAt: new Date(),
-			revokedBy: snowflake,
-		})
+		await ReportInfoModel.updateMany(
+			{
+				communityId: community.id,
+				adminId: adminId,
+				revokedAt: { $eq: null },
+			},
+			{
+				revokedAt: new Date(),
+				revokedBy: snowflake,
+			}
+		)
 		const rawRevocations = await ReportInfoModel.find({
 			communityId: community.id,
 			adminId: adminId,
 			revokedAt: { $ne: null },
 		})
 		const revocations = z.array(Revocation).parse(rawRevocations)
-		
-		const CategoryMap: Map<string, DocumentType<CategoryClass, BeAnObject> | null> =
-			new Map()
+
+		const CategoryMap: Map<
+			string,
+			DocumentType<CategoryClass, BeAnObject> | null
+		> = new Map()
 
 		await Promise.all(
 			revocations.map(async (revocation) => {
@@ -543,21 +584,27 @@ export default class RevocationController {
 			const totalReports = await ReportInfoModel.find({
 				playername: revocation.playername,
 			})
-			const differentCommunities = new Set(totalReports.map((report) => report.communityId)).size
-				
+			const differentCommunities = new Set(
+				totalReports.map((report) => report.communityId)
+			).size
+
 			reportRevokedMessage(revocation, {
 				community: <ReportMessageExtraOpts["community"]>(
 					(<unknown>community.toObject())
 				),
 				// this is allowed since the category is GUARANTEED to exist if the report exists
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				category: <ReportMessageExtraOpts["category"]><unknown>CategoryMap.get(revocation.categoryId)!,
-				revokedBy: <RevocationMessageExtraOpts["revokedBy"]><unknown>revoker,
+				category: <ReportMessageExtraOpts["category"]>(
+					(<unknown>CategoryMap.get(revocation.categoryId)!)
+				),
+				revokedBy: <RevocationMessageExtraOpts["revokedBy"]>(
+					(<unknown>revoker)
+				),
 				totalReports: totalReports.length,
 				totalCommunities: differentCommunities,
 			})
 		})
-		
+
 		return res.send(revocations)
 	}
 }

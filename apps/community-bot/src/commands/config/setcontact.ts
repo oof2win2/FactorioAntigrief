@@ -14,14 +14,14 @@ const SetContact: Command = {
 	run: async ({ client, message, args, guildConfig }) => {
 		if (!guildConfig.apikey)
 			return message.channel.send(
-				`${client.emotes.warn} You must have an API key set for this command`,
+				`${client.emotes.warn} You must have an API key set for this command`
 			)
 		const user =
 			message.mentions.users.first() ||
 			(await client.users.fetch(args[0]).catch(() => null))
 		if (!user)
 			return message.channel.send(
-				`${client.emotes.warn} Provided user is invalid`,
+				`${client.emotes.warn} Provided user is invalid`
 			)
 
 		try {
@@ -36,7 +36,9 @@ const SetContact: Command = {
 			return message.channel.send(`Contact set to ${user.tag}`)
 		} catch (e) {
 			if (e instanceof AuthError) {
-				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+				return message.channel.send(
+					`${client.emotes.warn} Your API key is not recognized by FAGC`
+				)
 			}
 			throw e
 		}

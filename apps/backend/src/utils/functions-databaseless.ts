@@ -5,8 +5,8 @@ import IdModel, { IdType } from "../database/ids"
  * Used to set the id of the database items, so it's not a 24-char-long hex ObjectID but is readable
  **/
 export async function getUserStringFromId(type: IdType): Promise<{
-	id: string,
-	_id: ObjectId,
+	id: string
+	_id: ObjectId
 }> {
 	let executions = 0
 	// The code will eventually create a successfull ID
@@ -29,7 +29,8 @@ export async function getUserStringFromId(type: IdType): Promise<{
 
 			// to prevent too many execution loops
 			executions++
-			if (executions > 100) throw new Error("Could not generate unique ID")
+			if (executions > 100)
+				throw new Error("Could not generate unique ID")
 		}
 	}
 	throw new Error("Was not able to generate a unique ID")

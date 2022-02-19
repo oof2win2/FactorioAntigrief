@@ -3,11 +3,11 @@
 	"version": "1.0.0",
 	"description": "## Installation",
 	"main": "dist/index.js",
-	"type": "module",
+	"prettier": "../../.prettierrc.json",
 	"scripts": {
+		"lint": "eslint src/ --fix --ext .ts && prettier --write src/",
 		"build": "tsc --build",
-		"bot:addcommands": "node dist/addCommands.js",
-		"lint": "eslint src/ --fix"
+		"bot:addcommands": "node dist/addCommands.js"
 	},
 	"repository": {
 		"type": "git",
@@ -35,9 +35,6 @@
 	},
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.4.1",
-		"@typescript-eslint/eslint-plugin": "^5.6.0",
-		"@typescript-eslint/parser": "^5.6.0",
-		"eslint": "^8.4.1",
 		"prisma": "^3.6.0"
 	}
 }

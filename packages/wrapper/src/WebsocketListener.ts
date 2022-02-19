@@ -93,17 +93,23 @@ class WebSocketHandler extends EventEmitter {
 
 		this.socketurl = this.opts.uri
 
-		this.socket = new ReconnectingWebSocket(() => this.socketurl, undefined, {
-			WebSocket: WebSocket,
-			startClosed: true
-		})
+		this.socket = new ReconnectingWebSocket(
+			() => this.socketurl,
+			undefined,
+			{
+				WebSocket: WebSocket,
+				startClosed: true,
+			}
+		)
 
 		if (this.opts.enabled) this.socket.reconnect()
-		
+
 		// handle socket messages
 		this.socket.onmessage = (msg) => {
 			try {
-				const parsed = BaseWebsocketMessage.safeParse(JSON.parse(msg.data as string))
+				const parsed = BaseWebsocketMessage.safeParse(
+					JSON.parse(msg.data as string)
+				)
 				if (parsed.success) this.handleMessage(parsed.data)
 			} catch (e) {
 				console.error(e)
@@ -125,72 +131,99 @@ class WebSocketHandler extends EventEmitter {
 	handleMessage(message: BaseWebsocketMessage): void {
 		const messageType = message.messageType
 		switch (messageType) {
-		case "guildConfigChanged": {
-			const parsed = GuildConfigChangedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("guildConfigChanged", parsed.data as GuildConfigChangedMessage)
-			break
-		}
-		case "report": {
-			const parsed = ReportCreatedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("report", parsed.data as ReportCreatedMessage)
-			break
-		}
-		case "revocation": {
-			const parsed = RevocationMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("revocation", parsed.data as RevocationMessage)
-			break
-		}
-		case "categoryCreated": {
-			const parsed = CategoryCreatedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("categoryCreated", parsed.data as CategoryCreatedMessage)
-			break
-		}
-		case "categoryUpdated": {
-			const parsed = CategoryUpdatedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("categoryUpdated", parsed.data as CategoryUpdatedMessage)
-			break
-		}
-		case "categoryRemoved": {
-			const parsed = CategoryRemovedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("categoryRemoved", parsed.data as CategoryRemovedMessage)
-			break
-		}
-		case "categoriesMerged": {
-			const parsed = CategoriesMergedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("categoriesMerged",parsed.data as CategoriesMergedMessage)
-			break
-		}
-		case "communityCreated": {
-			const parsed = CommunityCreatedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("communityCreated", parsed.data as CommunityCreatedMessage)
-			break
-		}
-		case "communityRemoved": {
-			const parsed = CommunityRemovedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("communityRemoved", parsed.data as CommunityRemovedMessage)
-			break
-		}
-		case "communityUpdated": {
-			const parsed = CommunityUpdatedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("communityUpdated", parsed.data as CommunityUpdatedMessage)
-			break
-		}
-		case "communitiesMerged": {
-			const parsed = CommunitiesMergedMessage.safeParse(message)
-			if (parsed.success)
-				this.emit("communitiesMerged", parsed.data as CommunitiesMergedMessage)
-			break
-		}
+			case "guildConfigChanged": {
+				const parsed = GuildConfigChangedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"guildConfigChanged",
+						parsed.data as GuildConfigChangedMessage
+					)
+				break
+			}
+			case "report": {
+				const parsed = ReportCreatedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit("report", parsed.data as ReportCreatedMessage)
+				break
+			}
+			case "revocation": {
+				const parsed = RevocationMessage.safeParse(message)
+				if (parsed.success)
+					this.emit("revocation", parsed.data as RevocationMessage)
+				break
+			}
+			case "categoryCreated": {
+				const parsed = CategoryCreatedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"categoryCreated",
+						parsed.data as CategoryCreatedMessage
+					)
+				break
+			}
+			case "categoryUpdated": {
+				const parsed = CategoryUpdatedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"categoryUpdated",
+						parsed.data as CategoryUpdatedMessage
+					)
+				break
+			}
+			case "categoryRemoved": {
+				const parsed = CategoryRemovedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"categoryRemoved",
+						parsed.data as CategoryRemovedMessage
+					)
+				break
+			}
+			case "categoriesMerged": {
+				const parsed = CategoriesMergedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"categoriesMerged",
+						parsed.data as CategoriesMergedMessage
+					)
+				break
+			}
+			case "communityCreated": {
+				const parsed = CommunityCreatedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"communityCreated",
+						parsed.data as CommunityCreatedMessage
+					)
+				break
+			}
+			case "communityRemoved": {
+				const parsed = CommunityRemovedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"communityRemoved",
+						parsed.data as CommunityRemovedMessage
+					)
+				break
+			}
+			case "communityUpdated": {
+				const parsed = CommunityUpdatedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"communityUpdated",
+						parsed.data as CommunityUpdatedMessage
+					)
+				break
+			}
+			case "communitiesMerged": {
+				const parsed = CommunitiesMergedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"communitiesMerged",
+						parsed.data as CommunitiesMergedMessage
+					)
+				break
+			}
 		}
 	}
 
@@ -209,7 +242,7 @@ class WebSocketHandler extends EventEmitter {
 	removeGuildId(guildId: string): void {
 		if (!this.guildIds.includes(guildId)) return // don't do anything if it isn't there
 		// remove the id from local list & then send info to backend
-		this.guildIds = this.guildIds.filter(id => id !== guildId)
+		this.guildIds = this.guildIds.filter((id) => id !== guildId)
 		this.socket?.send(
 			JSON.stringify({
 				type: "removeGuildId",

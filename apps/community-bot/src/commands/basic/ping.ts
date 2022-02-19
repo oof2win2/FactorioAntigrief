@@ -13,7 +13,9 @@ const Ping: Command = {
 		const msg = await message.channel.send("Pinging...")
 		const ping = msg.createdTimestamp - message.createdTimestamp
 
-		return msg.edit(`My ping: ${ping}ms\nDiscord API ping: ${client.ws.ping}ms`)
+		return msg.edit(
+			`My ping: ${ping}ms\nDiscord API ping: ${client.ws.ping}ms`
+		)
 	},
 }
 

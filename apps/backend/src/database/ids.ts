@@ -15,9 +15,9 @@ export enum IdType {
 })
 export class IdClass {
 	@prop({ unique: true })
-		id!: string
+	id!: string
 	@prop({ enum: IdType })
-		type!: IdType
+	type!: IdType
 }
 
 const IdModel = getModelForClass(IdClass)

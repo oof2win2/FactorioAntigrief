@@ -505,6 +505,4 @@ export default class DiscordController {
 			message: "Provided webhook could not be found",
 		})
 	}
-
-	
 }

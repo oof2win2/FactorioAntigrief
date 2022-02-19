@@ -1,4 +1,10 @@
-import { Client, ClientOptions, Collection, Message, MessageEmbed } from "discord.js"
+import {
+	Client,
+	ClientOptions,
+	Collection,
+	Message,
+	MessageEmbed,
+} from "discord.js"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
@@ -49,17 +55,20 @@ export default class FAGCBot extends Client {
 	async getFilteredCategories(config: GuildConfig): Promise<Category[]> {
 		const allCategories = await this.fagc.categories.fetchAll({})
 		const filteredCategories = allCategories
-			.filter((category) => config.categoryFilters.some((id) => id === category.id))
+			.filter((category) =>
+				config.categoryFilters.some((id) => id === category.id)
+			)
 			.sort(
 				(a, b) =>
-					config.categoryFilters.indexOf(a.id) - config.categoryFilters.indexOf(b.id),
+					config.categoryFilters.indexOf(a.id) -
+					config.categoryFilters.indexOf(b.id)
 			)
 		return filteredCategories
 	}
 	async saveGuildConfig(
 		config: Partial<GuildConfig> & {
 			roles?: Partial<GuildConfig["roles"]>
-		} & Pick<GuildConfig, "guildId">,
+		} & Pick<GuildConfig, "guildId">
 	) {
 		if (config.apikey) {
 			// if the guild has an API key, it can be set by themselves
@@ -85,7 +94,7 @@ export default class FAGCBot extends Client {
 	async getConfirmationMessage(
 		message: Message,
 		content: string,
-		timeout = 120000,
+		timeout = 120000
 	): Promise<boolean> {
 		const confirm = await message.channel.send(content)
 		confirm.react("✅")
@@ -105,7 +114,7 @@ export default class FAGCBot extends Client {
 	async getMessageResponse(
 		message: Message,
 		content: string,
-		timeout = 30000,
+		timeout = 30000
 	): Promise<Message | null> {
 		const msg = await message.channel.send(content)
 		return (
@@ -119,7 +128,11 @@ export default class FAGCBot extends Client {
 		)
 	}
 
-	async argsOrInput(args: string[], message: Message, content: string): Promise<string | null> {
+	async argsOrInput(
+		args: string[],
+		message: Message,
+		content: string
+	): Promise<string | null> {
 		const arg = args.shift()
 		if (arg) return arg
 

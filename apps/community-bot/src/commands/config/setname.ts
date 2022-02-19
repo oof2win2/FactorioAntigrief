@@ -14,15 +14,17 @@ const SetName: Command = {
 	run: async ({ client, message, args, guildConfig }) => {
 		if (!guildConfig.apikey)
 			return message.channel.send(
-				`${client.emotes.warn} You must have an API key set for this command`,
+				`${client.emotes.warn} You must have an API key set for this command`
 			)
 		const name = args.join(" ")
 		if (!name)
-			return message.channel.send(`${client.emotes.warn} No name provided`)
+			return message.channel.send(
+				`${client.emotes.warn} No name provided`
+			)
 		const confirmation = await client.getConfirmationMessage(
 			message,
 			`Are you sure you want to set your community's name to ${name}?`,
-			120000,
+			120000
 		)
 		if (!confirmation)
 			return message.channel.send(`${client.emotes.warn} Cancelled`)
@@ -37,11 +39,13 @@ const SetName: Command = {
 				},
 			})
 			return message.channel.send(
-				`Community name set to ${name} successfully. Changes may take a few minutes to take effect`,
+				`Community name set to ${name} successfully. Changes may take a few minutes to take effect`
 			)
 		} catch (e) {
 			if (e instanceof AuthError) {
-				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+				return message.channel.send(
+					`${client.emotes.warn} Your API key is not recognized by FAGC`
+				)
 			}
 			throw e
 		}

@@ -17,24 +17,29 @@ const AddCommunity: Command = {
 
 		// if there are no args, show the current communities and ask for new args
 		if (!args.length) {
-			const embed = client.createBaseEmbed()
+			const embed = client
+				.createBaseEmbed()
 				.setTitle("FAGC Communities")
 				.setDescription("All FAGC Communities")
 			const fields = await Promise.all(
 				allCommunities
-					.filter((r) => !guildConfig.trustedCommunities.includes(r.id))
+					.filter(
+						(r) => !guildConfig.trustedCommunities.includes(r.id)
+					)
 					.map(async (community) => {
 						return {
 							name: `${community.name} | \`${community.id}\``,
-							value: await client.safeGetContactString(community.contact),
+							value: await client.safeGetContactString(
+								community.contact
+							),
 							inline: false,
 						}
-					}),
+					})
 			)
 			createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 			const newIdsMessage = await client.getMessageResponse(
 				message,
-				`${client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces:`,
+				`${client.emotes.type} No communities provided. Please provide IDs in a single message, separated with spaces:`
 			)
 			if (!newIdsMessage || !newIdsMessage.content)
 				return message.channel.send("No IDs were provided")
@@ -50,7 +55,8 @@ const AddCommunity: Command = {
 		if (!communitiesToAdd.length)
 			return message.channel.send("No valid or new communities to add")
 
-		const confirmationEmbed = client.createBaseEmbed()
+		const confirmationEmbed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Communities")
 			.setDescription("All FAGC Communities")
 		const fields = await Promise.all(
@@ -62,25 +68,30 @@ const AddCommunity: Command = {
 					value: await client.safeGetContactString(community.contact),
 					inline: false,
 				}
-			}),
+			})
 		)
-		createPagedEmbed(fields, confirmationEmbed, message, { maxPageCount: 10 })
+		createPagedEmbed(fields, confirmationEmbed, message, {
+			maxPageCount: 10,
+		})
 		const confirm = await client.getConfirmationMessage(
 			message,
-			"Are you sure you want to add these communities to your communities filters?",
+			"Are you sure you want to add these communities to your communities filters?"
 		)
-		if (!confirm) return message.channel.send("Adding communities cancelled")
+		if (!confirm)
+			return message.channel.send("Adding communities cancelled")
 
 		communitiesToAdd.forEach((id) => {
 			guildConfig.trustedCommunities.push(id)
 		})
-		
+
 		try {
 			await client.saveGuildConfig(guildConfig)
 			return message.channel.send("Successfully added community filters")
 		} catch (e) {
 			if (e instanceof AuthError) {
-				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+				return message.channel.send(
+					`${client.emotes.warn} Your API key is not recognized by FAGC`
+				)
 			}
 			throw e
 		}

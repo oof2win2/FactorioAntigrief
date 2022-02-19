@@ -24,7 +24,7 @@ const Genbanlist: Command = {
 			communityIds: guildConfig.trustedCommunities,
 			categoryIds: guildConfig.categoryFilters,
 		})
-		const toBanWith = new Set(reports.map(r => r.playername))
+		const toBanWith = new Set(reports.map((r) => r.playername))
 		const banlist = [...toBanWith].map((playername) => {
 			return {
 				username: playername,
@@ -36,7 +36,7 @@ const Genbanlist: Command = {
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab
 		const file = new MessageAttachment(
 			Buffer.from(JSON.stringify(banlist, null, 4)),
-			"banlist.json",
+			"banlist.json"
 		)
 		return await message.reply({
 			content: "Banlist attatched",

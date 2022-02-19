@@ -1,0 +1,40 @@
+name: "Test"
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  Test:
+      name: Test
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+
+        - name: Cache dependencies & test outputs
+          uses: actions/cache@v2
+          with:
+            path: |
+              **/.turbo/**
+              **/node_modules/**
+            key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+        - name: Install node
+          uses: actions/setup-node@v2
+          with:
+            node-version: '16'
+        
+        - name: Install turbo
+          run: yarn global add turbo
+        
+        - name: Install dependencies
+          run: yarn install -D
+        
+        - name: Setup testing .env files
+          run: |
+            echo $'MONGOURI=mongodb://FAKEUSER:FAKEPASSWORD@127.0.0.1:27017/fagcsandbox\nDISCORD_BOTTOKEN=FAKE BOT TOKEN\nSENTRY_LINK=https://6a437e6af9d346e5b44f9223a45d1765@o745688.ingest.sentry.io/5790614\nAPI_PORT=3001\nPROMETHEUS_PORT=9111\nCLIENTID=913107375441993789\nJWT_SECRET="hGWdE47Uym6Avp"' > apps/backend/.env
+        
+        - name: Run test
+          run: turbo run build test

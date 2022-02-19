@@ -13,7 +13,8 @@ const GetAllCommunities: Command = {
 	run: async ({ client, message }) => {
 		const communities = await client.fagc.communities.fetchAll({})
 
-		const embed = client.createBaseEmbed()
+		const embed = client
+			.createBaseEmbed()
 			.setTitle("FAGC Communities")
 			.setDescription("All FAGC Communities")
 

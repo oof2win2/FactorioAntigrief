@@ -21,7 +21,7 @@ export default class RCONInterface {
 		this.client = client
 		this.servers = servers
 		this.connections = []
-		
+
 		this.servers.map((_, i) => this.initServer(i))
 	}
 	private initServer(index: number) {
@@ -34,7 +34,7 @@ export default class RCONInterface {
 		connection.connect()
 		this.connections.push({
 			server: server,
-			rcon: connection
+			rcon: connection,
 		})
 		// reconnection utility
 		connection.on("end", () => {
@@ -43,7 +43,9 @@ export default class RCONInterface {
 				try {
 					await connection.connect()
 					clearInterval(interval)
-					const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
+					const channel = this.client.channels.resolve(
+						ENV.ERRORCHANNELID
+					)
 					if (!channel || !channel.isNotDMChannel()) return
 					channel.send(
 						`Server <#${server.discordChannelId}> has reconnected to RCON`
@@ -51,7 +53,9 @@ export default class RCONInterface {
 				} catch {
 					i++
 					if (i === 5) {
-						const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
+						const channel = this.client.channels.resolve(
+							ENV.ERRORCHANNELID
+						)
 						if (!channel || !channel.isNotDMChannel()) return
 						channel.send(
 							`Server <#${server.discordChannelId}> is having RCON issues`
@@ -61,30 +65,40 @@ export default class RCONInterface {
 						// 60 attempts = 15 minutes since 1 every 15s, 15*60 = 900s
 						// most likely failed
 						clearInterval(interval)
-						const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
+						const channel = this.client.channels.resolve(
+							ENV.ERRORCHANNELID
+						)
 						if (!channel || !channel.isNotDMChannel()) return
 						channel.send(
 							`Server <#${server.discordChannelId}> has been unable to connect to RCON`
 						)
 					}
 				}
-			}, 15*1000)
+			}, 15 * 1000)
 		})
 	}
 	/**
-	 * 
+	 *
 	 * @param command RCON command, automatically is prefixed with / if it is not provided
 	 * @param serverIdentifier Server name or Discord channel ID to find server with
 	 */
-	async rconCommand(command: string, serverIdentifier: string): Promise<RCONResponse|false> {
+	async rconCommand(
+		command: string,
+		serverIdentifier: string
+	): Promise<RCONResponse | false> {
 		command = command.startsWith("/") ? command : `/${command}`
-		const server = this.connections.find((s) => s.server.servername === serverIdentifier || s.server.discordChannelId === serverIdentifier)
+		const server = this.connections.find(
+			(s) =>
+				s.server.servername === serverIdentifier ||
+				s.server.discordChannelId === serverIdentifier
+		)
 		if (!server) return false
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		const response = await server.rcon.send(command).catch(() => {})
 		if (!response) return false
 		return {
 			response: response,
-			server: server.server
+			server: server.server,
 		}
 	}
 
@@ -92,10 +106,12 @@ export default class RCONInterface {
 		command = command.startsWith("/") ? command : `/${command}`
 		console.log(command)
 		const servers = this.servers
-			.map(s => s.discordGuildId === guildId ? s : undefined)
-			.filter(r=>r !== undefined) as FactorioServerType[]
+			.map((s) => (s.discordGuildId === guildId ? s : undefined))
+			.filter((r) => r !== undefined) as FactorioServerType[]
 		const responses = await Promise.all(
-			servers.map(server => this.rconCommand(command, server.servername))
+			servers.map((server) =>
+				this.rconCommand(command, server.servername)
+			)
 		)
 		return responses
 	}
@@ -103,7 +119,9 @@ export default class RCONInterface {
 	async rconCommandAll(command: string) {
 		command = command.startsWith("/") ? command : `/${command}`
 		const responses = await Promise.all(
-			this.servers.map(server => this.rconCommand(command, server.servername))
+			this.servers.map((server) =>
+				this.rconCommand(command, server.servername)
+			)
 		)
 		return responses
 	}

@@ -3,7 +3,13 @@ import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
 import CategoryModel from "../database/category"
 import GuildConfigModel from "../database/guildconfig"
 import { MasterAuthenticate } from "../utils/authentication"
-import { guildConfigChanged, categoryCreatedMessage, categoryRemovedMessage, categoriesMergedMessage, categoryUpdatedMessage } from "../utils/info"
+import {
+	guildConfigChanged,
+	categoryCreatedMessage,
+	categoryRemovedMessage,
+	categoriesMergedMessage,
+	categoryUpdatedMessage,
+} from "../utils/info"
 import { Category } from "fagc-api-types"
 import { z } from "zod"
 import ReportInfoModel from "../database/reportinfo"
@@ -15,7 +21,7 @@ export default class CategoryController {
 		options: {
 			schema: {
 				description: "Fetch all categories",
-				tags: [ "categories" ],
+				tags: ["categories"],
 				response: {
 					"200": z.array(Category),
 				},
@@ -34,12 +40,14 @@ export default class CategoryController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: z.object({
-					id: z.string(),
-				}).required(),
+				params: z
+					.object({
+						id: z.string(),
+					})
+					.required(),
 
 				description: "Fetch category",
-				tags: [ "categories" ],
+				tags: ["categories"],
 				response: {
 					"200": Category.nullable(),
 				},
@@ -63,13 +71,15 @@ export default class CategoryController {
 		url: "/",
 		options: {
 			schema: {
-				body: z.object({
-					name: z.string(),
-					description: z.string()
-				}).required(),
+				body: z
+					.object({
+						name: z.string(),
+						description: z.string(),
+					})
+					.required(),
 
 				description: "Create category",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -104,16 +114,20 @@ export default class CategoryController {
 		url: "/:id",
 		options: {
 			schema: {
-				params: z.object({
-					id: z.string()
-				}).required(),
-				body: z.object({
-					name: z.string().optional(),
-					description: z.string().optional(),
-				}).optional(),
+				params: z
+					.object({
+						id: z.string(),
+					})
+					.required(),
+				body: z
+					.object({
+						name: z.string().optional(),
+						description: z.string().optional(),
+					})
+					.optional(),
 
 				description: "Update category",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -165,7 +179,7 @@ export default class CategoryController {
 				}),
 
 				description: "Delete category",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -195,31 +209,37 @@ export default class CategoryController {
 			categoryRemovedMessage(category)
 			// store the IDs of the affected guilds - ones which have the category filtered
 			const affectedGuildConfigs = await GuildConfigModel.find({
-				categoryFilters: [ category.id ]
-			})
-			
-			// remove the category ID from any guild configs which may have it
-			await GuildConfigModel.updateMany({
-				_id: { $in: affectedGuildConfigs.map(config => config._id) }
-			}, {
-				$pull: { categoryFilters: category.id }
+				categoryFilters: [category.id],
 			})
 
+			// remove the category ID from any guild configs which may have it
+			await GuildConfigModel.updateMany(
+				{
+					_id: {
+						$in: affectedGuildConfigs.map((config) => config._id),
+					},
+				},
+				{
+					$pull: { categoryFilters: category.id },
+				}
+			)
+
 			const newGuildConfigs = await GuildConfigModel.find({
-				_id: { $in: affectedGuildConfigs.map(config => config._id) }
+				_id: { $in: affectedGuildConfigs.map((config) => config._id) },
 			})
 
 			await ReportInfoModel.deleteMany({
-				categoryId: category.id
+				categoryId: category.id,
 			})
 
 			// tell guilds about it after the revocations + reports have been removed
 			const sendGuildConfigInfo = async () => {
-				const wait = (ms: number): Promise<void> => new Promise((resolve) => {
-					setTimeout(() => {
-						resolve()
-					}, ms)
-				})
+				const wait = (ms: number): Promise<void> =>
+					new Promise((resolve) => {
+						setTimeout(() => {
+							resolve()
+						}, ms)
+					})
 				for (const config of newGuildConfigs) {
 					guildConfigChanged(config)
 					// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
@@ -241,8 +261,9 @@ export default class CategoryController {
 					idDissolving: z.string(),
 				}),
 
-				description: "Merge category idDissolving into category idReceiving",
-				tags: [ "master" ],
+				description:
+					"Merge category idDissolving into category idReceiving",
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -266,7 +287,7 @@ export default class CategoryController {
 	): Promise<FastifyReply> {
 		const { idReceiving, idDissolving } = req.params
 		const receiving = await CategoryModel.findOne({
-			id: idReceiving
+			id: idReceiving,
 		})
 		if (!receiving)
 			return res.status(400).send({
@@ -275,7 +296,7 @@ export default class CategoryController {
 				message: "idOne must be a valid category ID",
 			})
 		const dissolving = await CategoryModel.findOne({
-			id: idDissolving
+			id: idDissolving,
 		})
 		if (!dissolving)
 			return res.status(400).send({
@@ -284,37 +305,46 @@ export default class CategoryController {
 				message: "idTwo must be a valid category ID",
 			})
 
-
 		await CategoryModel.findOneAndDelete({
-			id: idDissolving
+			id: idDissolving,
 		})
-		await ReportInfoModel.updateMany({
-			categoryId: idDissolving
-		}, {
-			categoryId: idReceiving
-		})
-		
-		await GuildConfigModel.updateMany({
-			categoryFilters: idDissolving
-		}, {
-			$addToSet: { categoryFilters: idReceiving }
-		})
-		await GuildConfigModel.updateMany({
-			categoryFilters: idDissolving,
-		}, {
-			$pull: { categoryFilters: idDissolving },
-		})
+		await ReportInfoModel.updateMany(
+			{
+				categoryId: idDissolving,
+			},
+			{
+				categoryId: idReceiving,
+			}
+		)
+
+		await GuildConfigModel.updateMany(
+			{
+				categoryFilters: idDissolving,
+			},
+			{
+				$addToSet: { categoryFilters: idReceiving },
+			}
+		)
+		await GuildConfigModel.updateMany(
+			{
+				categoryFilters: idDissolving,
+			},
+			{
+				$pull: { categoryFilters: idDissolving },
+			}
+		)
 
 		const affectedConfigs = await GuildConfigModel.find({
-			categoryFilters: idReceiving
+			categoryFilters: idReceiving,
 		})
 
 		const sendGuildConfigInfo = async () => {
-			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
-				setTimeout(() => {
-					resolve()
-				}, ms)
-			})
+			const wait = (ms: number): Promise<void> =>
+				new Promise((resolve) => {
+					setTimeout(() => {
+						resolve()
+					}, ms)
+				})
 			for (const config of affectedConfigs) {
 				guildConfigChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities

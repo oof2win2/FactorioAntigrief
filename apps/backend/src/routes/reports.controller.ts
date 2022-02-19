@@ -26,13 +26,18 @@ export default class ReportController {
 					communityId: z.string().or(z.array(z.string())).optional(),
 					categoryId: z.string().or(z.array(z.string())).optional(),
 					adminId: z.string().or(z.array(z.string())).optional(),
-					after: z.string().optional().refine(
-						(input) => input === undefined || validator.isISO8601(input),
-						"Invalid timestamp"
-					),
+					after: z
+						.string()
+						.optional()
+						.refine(
+							(input) =>
+								input === undefined ||
+								validator.isISO8601(input),
+							"Invalid timestamp"
+						),
 				}),
 				description: "Fetch reports",
-				tags: [ "reports" ],
+				tags: ["reports"],
 				response: {
 					"200": z.array(Report),
 				},
@@ -42,16 +47,17 @@ export default class ReportController {
 	async fetchAll(
 		req: FastifyRequest<{
 			Querystring: {
-				playername?: string | string[],
-				communityId?: string | string[],
-				categoryId?: string | string[],
-				adminId?: string | string[],
-				after?: string,
+				playername?: string | string[]
+				communityId?: string | string[]
+				categoryId?: string | string[]
+				adminId?: string | string[]
+				after?: string
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { playername, communityId, categoryId, adminId, after } = req.query
+		const { playername, communityId, categoryId, adminId, after } =
+			req.query
 		const reports = await ReportInfoModel.find({
 			playername: playername,
 			communityId: communityId,
@@ -72,19 +78,28 @@ export default class ReportController {
 					playername: z.string(),
 					categoryId: z.string(),
 					automated: z.boolean().nullish().default(false),
-					reportedTime: z.string().default(new Date().toISOString()).refine((input) => validator.isISO8601(input), "reportedTime must be a valid ISO8601 date"),
+					reportedTime: z
+						.string()
+						.default(new Date().toISOString())
+						.refine(
+							(input) => validator.isISO8601(input),
+							"reportedTime must be a valid ISO8601 date"
+						),
 					description: z.string().default("No description"),
-					proof: z.string().default("No proof").refine((input) => {
-						if (input === "No proof") return true
-						return input
-							.split(" ")
-							.map((part) => validator.isURL(part))
-							.reduce((prev, current) => prev && current)
-					}, "Proof must be URLs split by a space"),
+					proof: z
+						.string()
+						.default("No proof")
+						.refine((input) => {
+							if (input === "No proof") return true
+							return input
+								.split(" ")
+								.map((part) => validator.isURL(part))
+								.reduce((prev, current) => prev && current)
+						}, "Proof must be URLs split by a space"),
 				}),
 
 				description: "Create report",
-				tags: [ "reports" ],
+				tags: ["reports"],
 				security: [
 					{
 						authorization: [],
@@ -169,7 +184,6 @@ export default class ReportController {
 				message:
 					"Your community does not filter for the specified category",
 			})
-		
 
 		const report = await ReportInfoModel.create({
 			playername: playername,
@@ -185,7 +199,7 @@ export default class ReportController {
 		const allReports = await ReportInfoModel.find({
 			playername: playername,
 			revokedAt: { $exists: false },
-		}).select([ "communityId" ])
+		}).select(["communityId"])
 		const differentCommunities: Set<string> = new Set()
 		allReports.forEach((report) =>
 			differentCommunities.add(report.communityId)
@@ -210,7 +224,7 @@ export default class ReportController {
 				}),
 
 				description: "Fetch report",
-				tags: [ "reports" ],
+				tags: ["reports"],
 				response: {
 					"200": Report.nullable(),
 				},
@@ -226,7 +240,10 @@ export default class ReportController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const community = await ReportInfoModel.findOne({ id: id, revokedAt: { $exists: false } })
+		const community = await ReportInfoModel.findOne({
+			id: id,
+			revokedAt: { $exists: false },
+		})
 		return res.send(community)
 	}
 }

@@ -18,42 +18,42 @@ import { IdType } from "./ids"
 })
 export class ReportInfoClass {
 	@prop()
-		id!: string
+	id!: string
 
 	@prop()
-		playername!: string
+	playername!: string
 
 	@prop()
-		communityId!: string
+	communityId!: string
 
 	@prop()
-		categoryId!: string
+	categoryId!: string
 
 	@prop()
-		proof!: string
+	proof!: string
 
 	@prop()
-		description!: string
+	description!: string
 
 	@prop()
-		automated!: boolean
+	automated!: boolean
 
 	@prop()
-		reportedTime!: Date
+	reportedTime!: Date
 
 	@prop()
-		adminId!: string
+	adminId!: string
 
 	@prop()
-		reportCreatedAt!: Date
+	reportCreatedAt!: Date
 
 	// revocation specific stuff. is not there on reports but is on revocations
-	
-	@prop()
-		revokedBy?: string
 
 	@prop()
-		revokedAt?: Date
+	revokedBy?: string
+
+	@prop()
+	revokedAt?: Date
 }
 
 const ReportInfoModel = getModelForClass(ReportInfoClass)

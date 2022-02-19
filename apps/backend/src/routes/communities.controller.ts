@@ -1,6 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST } from "fastify-decorators"
-import { Authenticate, createApikey, MasterAuthenticate } from "../utils/authentication"
+import {
+	Authenticate,
+	createApikey,
+	MasterAuthenticate,
+} from "../utils/authentication"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import {
@@ -23,7 +27,7 @@ export default class CommunityController {
 		options: {
 			schema: {
 				description: "Fetch all communities",
-				tags: [ "community" ],
+				tags: ["community"],
 				response: {
 					"200": z.array(Community),
 				},
@@ -47,7 +51,7 @@ export default class CommunityController {
 				}),
 
 				description: "Fetch community",
-				tags: [ "community" ],
+				tags: ["community"],
 				response: {
 					"200": Community.nullable(),
 				},
@@ -72,7 +76,7 @@ export default class CommunityController {
 		options: {
 			schema: {
 				description: "Fetch your community",
-				tags: [ "community" ],
+				tags: ["community"],
 				security: [
 					{
 						authorization: [],
@@ -99,11 +103,11 @@ export default class CommunityController {
 			schema: {
 				body: z.object({
 					contact: z.string().optional(),
-					name: z.string().optional()
+					name: z.string().optional(),
 				}),
 
 				description: "Update your community",
-				tags: [ "community" ],
+				tags: ["community"],
 				security: [
 					{
 						authorization: [],
@@ -150,7 +154,7 @@ export default class CommunityController {
 		communityUpdatedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
-			)
+			),
 		})
 
 		return res.status(200).send(community)
@@ -165,7 +169,7 @@ export default class CommunityController {
 					invalidate: z.boolean().optional(),
 				}),
 				description: "Manage apikey for your community",
-				tags: [ "community" ],
+				tags: ["community"],
 				security: [
 					{
 						authorization: [],
@@ -176,16 +180,16 @@ export default class CommunityController {
 						apikey: z.string().optional(),
 					}),
 				},
-			}
-		}
+			},
+		},
 	})
 	@Authenticate
 	async createApiKey(
 		req: FastifyRequest<{
 			Body: {
-				create?: boolean,
-				invalidate: boolean,
-			},
+				create?: boolean
+				invalidate: boolean
+			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
@@ -197,16 +201,17 @@ export default class CommunityController {
 				message: "Your community was not found",
 			})
 
-
 		if (req.body.invalidate) {
 			// invalidate all existing tokens
 			community.tokenInvalidBefore = new Date()
 			await community.save()
 		}
 
-		const auth = req.body.create ? await createApikey(community, "private") : undefined
+		const auth = req.body.create
+			? await createApikey(community, "private")
+			: undefined
 		return res.send({
-			apikey: auth
+			apikey: auth,
 		})
 	}
 
@@ -215,15 +220,15 @@ export default class CommunityController {
 		options: {
 			schema: {
 				params: z.object({
-					id: z.string()
+					id: z.string(),
 				}),
 				body: z.object({
 					create: z.boolean().optional(),
-					type: z.enum([ "private", "master" ]).default("private"),
+					type: z.enum(["private", "master"]).default("private"),
 					invalidate: z.boolean().optional(),
 				}),
 				description: "Manage apikey for community",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -234,8 +239,8 @@ export default class CommunityController {
 						apikey: z.string().optional(),
 					}),
 				},
-			}
-		}
+			},
+		},
 	})
 	@MasterAuthenticate
 	async masterCreateApikey(
@@ -244,10 +249,10 @@ export default class CommunityController {
 				id: string
 			}
 			Body: {
-				create?: boolean,
+				create?: boolean
 				type?: "private" | "master"
-				invalidate: boolean,
-			},
+				invalidate: boolean
+			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
@@ -267,9 +272,11 @@ export default class CommunityController {
 			await community.save()
 		}
 
-		const auth = req.body.create ? await createApikey(community, req.body.type) : undefined
+		const auth = req.body.create
+			? await createApikey(community, req.body.type)
+			: undefined
 		return res.send({
-			apikey: auth
+			apikey: auth,
 		})
 	}
 
@@ -283,7 +290,7 @@ export default class CommunityController {
 				}),
 
 				description: "Create community",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -328,7 +335,7 @@ export default class CommunityController {
 		const community = await CommunityModel.create({
 			name: name,
 			contact: contact,
-			guildIds: []
+			guildIds: [],
 		})
 
 		const auth = await createApikey(community, "private")
@@ -354,7 +361,7 @@ export default class CommunityController {
 				}),
 
 				description: "Delete community",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -400,29 +407,33 @@ export default class CommunityController {
 
 		if (guildConfigs) {
 			await WebhookModel.deleteMany({
-				guildId: { $in: guildConfigs.map(config => config.guildId) },
+				guildId: { $in: guildConfigs.map((config) => config.guildId) },
 			})
 		}
 
 		// remove the community ID from any guild configs which may have it
 		const affectedGuildConfigs = await GuildConfigModel.find({
-			trustedCommunities: [ community.id ]
+			trustedCommunities: [community.id],
 		})
-		await GuildConfigModel.updateMany({
-			_id: { $in: affectedGuildConfigs.map(config => config._id) }
-		}, {
-			$pull: { trustedCommunities: community.id }
-		})
+		await GuildConfigModel.updateMany(
+			{
+				_id: { $in: affectedGuildConfigs.map((config) => config._id) },
+			},
+			{
+				$pull: { trustedCommunities: community.id },
+			}
+		)
 		const newGuildConfigs = await GuildConfigModel.find({
-			_id: { $in: affectedGuildConfigs.map(config => config._id) }
+			_id: { $in: affectedGuildConfigs.map((config) => config._id) },
 		})
 
 		const sendGuildConfigInfo = async () => {
-			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
-				setTimeout(() => {
-					resolve()
-				}, ms)
-			})
+			const wait = (ms: number): Promise<void> =>
+				new Promise((resolve) => {
+					setTimeout(() => {
+						resolve()
+					}, ms)
+				})
 			for (const config of newGuildConfigs) {
 				guildConfigChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
@@ -451,8 +462,9 @@ export default class CommunityController {
 					idDissolving: z.string(),
 				}),
 
-				description: "Merge community idDissolving into community idReceiving",
-				tags: [ "master" ],
+				description:
+					"Merge community idDissolving into community idReceiving",
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -476,7 +488,7 @@ export default class CommunityController {
 	): Promise<FastifyReply> {
 		const { idReceiving, idDissolving } = req.params
 		const receiving = await CommunityModel.findOne({
-			id: idReceiving
+			id: idReceiving,
 		})
 		if (!receiving)
 			return res.status(400).send({
@@ -485,7 +497,7 @@ export default class CommunityController {
 				message: "idOne must be a valid community ID",
 			})
 		const dissolving = await CommunityModel.findOne({
-			id: idDissolving
+			id: idDissolving,
 		})
 		if (!dissolving)
 			return res.status(400).send({
@@ -494,55 +506,74 @@ export default class CommunityController {
 				message: "idTwo must be a valid community ID",
 			})
 
-
 		await CommunityModel.findOneAndDelete({
-			id: idDissolving
+			id: idDissolving,
 		})
-		await ReportInfoModel.updateMany({
-			communityId: idDissolving
-		}, {
-			communityId: idReceiving
-		})
-		
+		await ReportInfoModel.updateMany(
+			{
+				communityId: idDissolving,
+			},
+			{
+				communityId: idReceiving,
+			}
+		)
+
 		// remove old stuff from the config and replace with new
-		await GuildConfigModel.updateMany({
-			trustedCommunities: idDissolving
-		}, {
-			$addToSet: { trustedCommunities: idReceiving }
-		})
-		await GuildConfigModel.updateMany({
-			trustedCommunities: idDissolving,
-		}, {
-			$pull: { trustedCommunities: idDissolving },
-		})
+		await GuildConfigModel.updateMany(
+			{
+				trustedCommunities: idDissolving,
+			},
+			{
+				$addToSet: { trustedCommunities: idReceiving },
+			}
+		)
+		await GuildConfigModel.updateMany(
+			{
+				trustedCommunities: idDissolving,
+			},
+			{
+				$pull: { trustedCommunities: idDissolving },
+			}
+		)
 
 		const guildConfigs = await GuildConfigModel.find({
-			communityId: { $in: [ idReceiving, idDissolving ] }
+			communityId: { $in: [idReceiving, idDissolving] },
 		})
 
 		// change configs + remove old auth
-		await CommunityModel.updateOne({
-			id: idReceiving
-		}, {
-			$addToSet: { guildIds:  guildConfigs.map(config => config.guildId) }
-		})
-		await GuildConfigModel.updateMany({
-			communityId: idDissolving
-		}, {
-			communityId: idReceiving,
-			apikey: guildConfigs.find(c => c.communityId === idReceiving)?.apikey || undefined,
-		})
+		await CommunityModel.updateOne(
+			{
+				id: idReceiving,
+			},
+			{
+				$addToSet: {
+					guildIds: guildConfigs.map((config) => config.guildId),
+				},
+			}
+		)
+		await GuildConfigModel.updateMany(
+			{
+				communityId: idDissolving,
+			},
+			{
+				communityId: idReceiving,
+				apikey:
+					guildConfigs.find((c) => c.communityId === idReceiving)
+						?.apikey || undefined,
+			}
+		)
 
 		const affectedConfigs = await GuildConfigModel.find({
-			trustedCommunities: idReceiving
+			trustedCommunities: idReceiving,
 		})
 
 		const sendGuildConfigInfo = async () => {
-			const wait = (ms: number): Promise<void> => new Promise((resolve) => {
-				setTimeout(() => {
-					resolve()
-				}, ms)
-			})
+			const wait = (ms: number): Promise<void> =>
+				new Promise((resolve) => {
+					setTimeout(() => {
+						resolve()
+					}, ms)
+				})
 			for (const config of affectedConfigs) {
 				guildConfigChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
@@ -557,7 +588,7 @@ export default class CommunityController {
 		communitiesMergedMessage(receiving, dissolving, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
 				(<unknown>contactUser)
-			)
+			),
 		})
 
 		return res.send(receiving)

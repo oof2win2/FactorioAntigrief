@@ -1,9 +1,7 @@
 import { WebhookClient, MessageEmbed } from "discord.js"
 import WebhookSchema from "../database/webhook"
 import WebSocket from "ws"
-import GuildConfigModel, {
-	GuildConfigClass,
-} from "../database/guildconfig"
+import GuildConfigModel, { GuildConfigClass } from "../database/guildconfig"
 import { DocumentType, mongoose } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import { CategoryClass } from "../database/category"
@@ -60,7 +58,13 @@ export class WsClient {
 			ws.pong()
 		})
 		ws.on("message", (data) => {
-			let message: { type: string } | Array<unknown> | string | number | boolean | null
+			let message:
+				| { type: string }
+				| Array<unknown>
+				| string
+				| number
+				| boolean
+				| null
 			try {
 				message = JSON.parse(data.toString("utf8"))
 			} catch {
@@ -68,12 +72,14 @@ export class WsClient {
 				return
 			}
 			if (
-				typeof message === "object"
-				&& message !== null
-				&& !(message instanceof Array)
-				&& typeof message.type === "string"
+				typeof message === "object" &&
+				message !== null &&
+				!(message instanceof Array) &&
+				typeof message.type === "string"
 			) {
-				this.handleMessage(message as { type: string }).catch(console.error)
+				this.handleMessage(message as { type: string }).catch(
+					console.error
+				)
 			}
 		})
 		ws.on("close", (code, reason) => {
@@ -82,8 +88,11 @@ export class WsClient {
 		})
 	}
 
-	async handleMessage(message: { type: string, [index: string]: unknown }) {
-		if (typeof message.type === "string" && typeof message.guildId === "string") {
+	async handleMessage(message: { type: string; [index: string]: unknown }) {
+		if (
+			typeof message.type === "string" &&
+			typeof message.guildId === "string"
+		) {
 			if (message.type === "addGuildId") {
 				const guildConfig = await GuildConfigModel.findOne({
 					guildId: message.guildId,
@@ -96,25 +105,28 @@ export class WsClient {
 						})
 					)
 
-
 					// add guildId to webhook only if the guild id has an existing config
 					const existing = WebhookGuildIds.get(this.ws)
 					if (existing) {
 						// limit to 25 guilds per webhook
 						if (existing.length < 25) {
 							// only add if it's not already in the list
-							if (!existing.includes(message.guildId)) existing.push(message.guildId)
+							if (!existing.includes(message.guildId))
+								existing.push(message.guildId)
 						}
 						WebhookGuildIds.set(this.ws, existing)
 					} else {
-						WebhookGuildIds.set(this.ws, [ message.guildId ])
+						WebhookGuildIds.set(this.ws, [message.guildId])
 					}
 				}
 			}
 			if (message.type === "removeGuildId") {
 				const existing = WebhookGuildIds.get(this.ws)
 				if (existing)
-					WebhookGuildIds.set(this.ws, existing.filter(id => id !== message.guildId))
+					WebhookGuildIds.set(
+						this.ws,
+						existing.filter((id) => id !== message.guildId)
+					)
 			}
 		}
 	}
@@ -340,7 +352,11 @@ export async function categoryUpdatedMessage(
 		.setTitle("FAGC - Category Updated")
 		.setColor("#6f4fe3")
 		.addFields(
-			{ name: "Category ID", value: `\`${newCategory.id}\``, inline: true },
+			{
+				name: "Category ID",
+				value: `\`${newCategory.id}\``,
+				inline: true,
+			},
 			{
 				name: "Old Category name",
 				value: oldCategory.name,
@@ -369,7 +385,7 @@ export async function categoryUpdatedMessage(
 			messageType: "categoryUpdated",
 			embed: categoryEmbed,
 			oldCategory: oldCategory,
-			newCategory: newCategory
+			newCategory: newCategory,
 		})
 	)
 }
@@ -381,7 +397,11 @@ export async function categoriesMergedMessage(
 		.setTitle("FAGC - Categories merged")
 		.setColor("#6f4fe3")
 		.addFields(
-			{ name: "Receiving Category ID", value: `\`${dissolving.id}\``, inline: true },
+			{
+				name: "Receiving Category ID",
+				value: `\`${dissolving.id}\``,
+				inline: true,
+			},
 			{
 				name: "Dissolving Category name",
 				value: receiving.name,
@@ -410,7 +430,7 @@ export async function categoriesMergedMessage(
 			messageType: "categoriesMerged",
 			embed: categoryEmbed,
 			receiving: receiving,
-			dissolving: dissolving
+			dissolving: dissolving,
 		})
 	)
 }
@@ -530,7 +550,11 @@ export async function communitiesMergedMessage(
 				value: `\`${receiving.id}\``,
 				inline: true,
 			},
-			{ name: "Receiving Community name", value: receiving.name, inline: true },
+			{
+				name: "Receiving Community name",
+				value: receiving.name,
+				inline: true,
+			},
 			{
 				name: "Receiving Community Contact",
 				value: `<@${opts.createdBy.id}> | ${opts.createdBy.username}#${opts.createdBy.discriminator}`,
@@ -539,9 +563,13 @@ export async function communitiesMergedMessage(
 			{
 				name: "Dissolving Community ID",
 				value: `\`${dissolving.id}\``,
-				inline: true
+				inline: true,
 			},
-			{ name: "Dissolving Community name", value: dissolving.name, inline: true },
+			{
+				name: "Dissolving Community name",
+				value: dissolving.name,
+				inline: true,
+			}
 		)
 	WebhookMessage(embed)
 

@@ -7,28 +7,29 @@ const CreateCommunity: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
 		.setDescription("Remove a FAGC community")
-		.addStringOption(option =>
+		.addStringOption((option) =>
 			option
 				.setName("id")
 				.setDescription("Community ID")
 				.setRequired(true)
-		)
-	,
-	execute: async ({client, interaction}) => {
+		),
+	execute: async ({ client, interaction }) => {
 		const user = interaction.user
 
 		const id = interaction.options.getString("id")!
 		try {
 			const community = await client.FAGC.communities.remove({
-				communityId: id
+				communityId: id,
 			})
 			if (community) {
-				return interaction.reply(`Community with ID \`${id}\` has been removed`)
+				return interaction.reply(
+					`Community with ID \`${id}\` has been removed`
+				)
 			}
 		} catch (e) {
 			return interaction.reply(`Error: ${e}`)
 		}
-	}
+	},
 }
 
 export default CreateCommunity
