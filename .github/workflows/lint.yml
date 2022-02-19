@@ -25,4 +25,4 @@ jobs:
           run: yarn install -D
         
         - name: Run lint
-          run: turbo run lint-check
+          run: turbo run lint
