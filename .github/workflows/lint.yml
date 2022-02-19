@@ -19,7 +19,7 @@ jobs:
             path: |
               **/.turbo/**
               **/node_modules/**
-            key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+            key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
 
         - name: Install node
           uses: actions/setup-node@v2

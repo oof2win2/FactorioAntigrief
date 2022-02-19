@@ -13,13 +13,13 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v2
 
-        # - name: Cache dependencies & test outputs
-        #   uses: actions/cache@v2
-        #   with:
-        #     path: |
-        #       **/.turbo/**
-        #       **/node_modules/**
-        #     key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+        - name: Cache dependencies & test outputs
+          uses: actions/cache@v2
+          with:
+            path: |
+              **/.turbo/**
+              **/node_modules/**
+            key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
 
         - name: Install node
           uses: actions/setup-node@v2
