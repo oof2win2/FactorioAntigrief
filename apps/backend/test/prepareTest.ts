@@ -1,11 +1,12 @@
 // @ts-ignore
-import why from "why-is-node-running"
+// import why from 'why-is-node-running';
 import { MongoMemoryReplSet } from "mongodb-memory-server"
 import mongoose from "mongoose"
 import CommunityModel, { CommunityClass, watcher as communityWatcher } from "../src/database/community"
 import CategoryModel, { CategoryClass, watcher as categoryWatcher } from "../src/database/category"
 import { createCategories } from "./utils"
 import backend from "../src/app"
+import fs from "fs"
 
 
 let mongod: MongoMemoryReplSet
@@ -19,7 +20,7 @@ beforeAll(async () => {
 	// Insert test data
 	testCommunity = await CommunityModel.create({ name: "Test Community", contact: "12345" })
 	testCategories = await CategoryModel.create(createCategories(3))
-	await backend.listen(0)
+	// await backend.listen(0)
 // TODO: reduce to 20s once MongoMemoryReplSet takes less time to startup
 }, 60e3)
 
@@ -27,11 +28,12 @@ afterAll(async () => {
 	// Watchers throw when disconnecting for some reason
 	await communityWatcher.close()
 	await categoryWatcher.close()
-
-	await backend.close()
+	
+	// await backend.close()
 	await mongoose.disconnect()
 	await mongod.stop()
-	setInterval(() => why(), 1000)
+	console.log("done")
+	// setInterval(() => why(), 5000)
 }, 20e3)
 
 export { default as backend } from "../src/app"

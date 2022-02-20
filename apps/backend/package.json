@@ -13,7 +13,7 @@
 		"pm2:start": "pm2 start pm2.config.js",
 		"pm2": "npm run pm2:build && npm run pm2:start",
 		"build": "tsc --build",
-		"test": "jest --runInBand --detectOpenHandles --verbose"
+		"test": "jest --verbose"
 	},
 	"lint-staged": {
 		"**/*": "prettier --write --ignore-unknown"
@@ -49,6 +49,7 @@
 		"prom-client": "^14.0.1",
 		"validator": "^13.7.0",
 		"why-is-node-running": "^2.2.1",
+		"why-is-node-still-running": "^1.0.0",
 		"zod": "^3.11.6"
 	},
 	"repository": {
