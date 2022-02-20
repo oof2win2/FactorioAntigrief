@@ -25,7 +25,7 @@ afterAll(async () => {
 	// Watchers throw when disconnecting for some reason
 	await communityWatcher.close()
 	await categoryWatcher.close()
-
+	
 	await backend.close()
 	await mongoose.disconnect()
 	await mongod.stop()
