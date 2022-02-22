@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import { Intents } from "discord.js"
 import FAGCBot from "./base/FAGCBot.js"
 import ENV from "./utils/env.js"

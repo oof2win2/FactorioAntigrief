@@ -2,8 +2,7 @@ import { FAGCWrapper } from "fagc-api-wrapper"
 import { GuildConfig, Community } from "fagc-api-types"
 import ENV from "../utils/env.js"
 import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
-import { Command } from "./Commands.js"
-import { PrismaClient, InfoChannel } from "@prisma/client"
+import { Command as CommandType } from "./Commands.js"
 import * as database from "./database.js"
 import * as wshandler from "./wshandler.js"
 import { Report, Revocation } from "fagc-api-types"
@@ -12,6 +11,13 @@ import fs from "fs"
 import { z } from "zod"
 import { Required } from "utility-types"
 import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
+import { createConnection, Connection } from "typeorm"
+import BotConfig from "../database/BotConfig.js"
+import Command from "../database/Command.js"
+import FAGCBan from "../database/FAGCBan.js"
+import InfoChannel from "../database/InfoChannel.js"
+import PrivateBan from "../database/PrivateBan.js"
+import Whitelist from "../database/Whitelist.js"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -25,8 +31,8 @@ function getServers(): database.FactorioServerType[] {
 interface BotOptions extends ClientOptions {}
 export default class FAGCBot extends Client {
 	fagc: FAGCWrapper
-	db: PrismaClient
-	commands: Collection<string, Command>
+	db: Promise<Connection>
+	commands: Collection<string, CommandType>
 	/**
 	 * Info channels, grouped by guild ID
 	 */
@@ -70,11 +76,22 @@ export default class FAGCBot extends Client {
 
 		this.rcon = new RCONInterface(this, rawServers)
 
-		this.db = new PrismaClient()
-		this.db.$connect()
+		this.db = createConnection({
+			type: "better-sqlite3",
+			database: ENV.DATABASE_URL,
+			entities: [
+				FAGCBan,
+				InfoChannel,
+				BotConfig,
+				PrivateBan,
+				Whitelist,
+				Command,
+			],
+		})
 
 		// load info channels
-		this.db.infoChannel.findMany().then((channels) => {
+		this.db.then(async (connection) => {
+			const channels = await connection.getRepository(InfoChannel).find()
 			channels.forEach((channel) => {
 				const existing = this.infochannels.get(channel.guildId)
 				if (existing) {
@@ -120,14 +137,14 @@ export default class FAGCBot extends Client {
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
 	}
 
-	async getBotConfigs(): Promise<database.BotConfigType[]> {
-		const records = await this.db.botConfig.findMany()
-		return z.array(database.BotConfig).parse(records)
+	async getBotConfigs(): Promise<BotConfig[]> {
+		const records = await (await this.db).getRepository(BotConfig).find()
+		return records
 	}
 	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
 		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing
-		const record = await this.db.botConfig.findFirst({
+		const record = await (await this.db).getRepository(BotConfig).findOne({
 			where: {
 				guildId: guildId,
 			},
@@ -145,17 +162,14 @@ export default class FAGCBot extends Client {
 			...existingConfig,
 			...config,
 		})
-		const newConfig = await this.db.botConfig.upsert({
-			where: { guildId: config.guildId },
-			create: {
-				...toSetConfig,
-				guildId: config.guildId,
-			},
-			update: {
-				...toSetConfig,
-			},
-		})
-		this.botConfigs.set(config.guildId, database.BotConfig.parse(newConfig))
+		await (await this.db)
+			.getRepository(BotConfig)
+			.upsert({ ...toSetConfig, guildId: config.guildId }, ["guildId"])
+		// should exist as the config already exists
+		const newConfig = await (await this.db)
+			.getRepository(BotConfig)
+			.findOneOrFail(config.guildId)
+		this.botConfigs.set(config.guildId, newConfig)
 	}
 
 	private sendEmbeds() {
@@ -265,15 +279,15 @@ export default class FAGCBot extends Client {
 			this.guildConfigs.get(guildId) ||
 			(await this.getGuildConfig(guildId))
 		if (!guildConfig) return false
-		const guildCommands = await this.db.command.findMany({
-			where: {
+		const guildCommands = await (await this.db)
+			.getRepository(Command)
+			.find({
 				guildId: guildId,
-			},
-		})
+			})
 		if (!guildCommands.length) return false
 
 		type CommandWithPerms = Required<
-			Command,
+			CommandType,
 			"permissionOverrides" | "permissionType"
 		>
 

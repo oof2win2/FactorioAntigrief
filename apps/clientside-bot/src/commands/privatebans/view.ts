@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
+import PrivateBan from "../../database/PrivateBan.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -17,11 +18,11 @@ const Setaction: SubCommand = {
 			.string()
 			.parse(interaction.options.getString("playername"))
 
-		const existing = await client.db.privatebans.findFirst({
-			where: {
+		const existing = await (await client.db)
+			.getRepository(PrivateBan)
+			.findOne({
 				playername: playername,
-			},
-		})
+			})
 
 		// TODO: check if they are currently banned on servers due to FAGC and state if so
 		if (existing) {

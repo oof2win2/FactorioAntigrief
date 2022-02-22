@@ -2,6 +2,10 @@ import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 import FAGCBot from "./FAGCBot"
 import { MessageEmbed } from "discord.js"
 import { GuildConfig, Report, Revocation } from "fagc-api-types"
+import Whitelist from "../database/Whitelist"
+import FAGCBan from "../database/FAGCBan"
+import PrivateBan from "../database/PrivateBan"
+import { In } from "typeorm"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -106,21 +110,21 @@ const reportHandler = async (
 	guildConfigs: GuildConfig[],
 	report: Report
 ) => {
-	const isWhitelisted = await client.db.whitelist.findFirst({
-		where: {
-			playername: report.playername,
-		},
-	})
+	const isWhitelisted = await (await client.db)
+		.getRepository(Whitelist)
+		.findOne({
+			where: {
+				playername: report.playername,
+			},
+		})
 	if (isWhitelisted) return // if the player is whitelisted, don't do anything
 
 	// create the record for future safekeeping
-	await client.db.fagcBan.create({
-		data: {
-			id: report.id,
-			playername: report.playername,
-			categoryId: report.categoryId,
-			communityId: report.communityId,
-		},
+	await (await client.db).getRepository(FAGCBan).insert({
+		id: report.id,
+		playername: report.playername,
+		categoryId: report.categoryId,
+		communityId: report.communityId,
 	})
 
 	// ban in guilds that its supposed to
@@ -180,22 +184,23 @@ const revocationHandler = async (
 	revocation: Revocation
 ) => {
 	// remove the report record
-	await client.db.fagcBan
+	await (
+		await client.db
+	)
+		.getRepository(FAGCBan)
 		.delete({
-			where: {
-				id: revocation.id,
-			},
+			id: revocation.id,
 		})
 		.catch(() => null)
 
-	const isPrivateBanned = await client.db.privatebans.findFirst({
-		where: {
+	const isPrivateBanned = await (await client.db)
+		.getRepository(PrivateBan)
+		.findOne({
 			playername: revocation.playername,
-		},
-	})
+		})
 	if (isPrivateBanned) return // if the player is blacklisted, don't do anything
 
-	const otherBan = await client.db.fagcBan.findFirst({
+	const otherBan = await (await client.db).getRepository(FAGCBan).findOne({
 		where: {
 			playername: revocation.playername,
 		},
@@ -246,10 +251,17 @@ export const guildConfigChanged = async ({
 		!event.config.categoryFilters?.length ||
 		!event.config.trustedCommunities?.length
 	) {
-		const currentReports = await client.db.fagcBan.findMany()
+		const currentReports = await (await client.db)
+			.getRepository(FAGCBan)
+			.find()
 		const playernames: Set<string> = new Set()
 		currentReports.map((record) => playernames.add(record.playername))
-		await client.db.fagcBan.deleteMany() // delete all the records
+		// delete all the records
+		await (await client.db)
+			.getRepository(FAGCBan)
+			.createQueryBuilder()
+			.delete()
+			.execute()
 		// transform playernames into an array and split into chunks of 500
 		const toUnbanChunks = Array.from(playernames).reduce<string[][]>(
 			(acc, name) => {
@@ -291,9 +303,9 @@ export const guildConfigChanged = async ({
 				categoryIds: newConfig.categoryFilters,
 				communityIds: newConfig.trustedCommunities,
 			}),
-			client.db.fagcBan.findMany(),
-			client.db.whitelist.findMany(),
-			client.db.privatebans.findMany(),
+			(await client.db).getRepository(FAGCBan).find(),
+			(await client.db).getRepository(Whitelist).find(),
+			(await client.db).getRepository(PrivateBan).find(),
 		])
 
 	const playersToUnban: Set<string> = new Set()
@@ -316,12 +328,8 @@ export const guildConfigChanged = async ({
 		.filter((id): id is string => Boolean(id))
 
 	// remove the record of reports that are no longer deemed valid for this community
-	await client.db.fagcBan.deleteMany({
-		where: {
-			id: {
-				in: toRemoveIds,
-			},
-		},
+	await (await client.db).getRepository(FAGCBan).delete({
+		id: In(toRemoveIds),
 	})
 
 	const whitelistedPlayers = new Set(
@@ -400,29 +408,33 @@ export const guildConfigChanged = async ({
 
 	// create the records of the reports in the db
 
-	const newRecords = toBanReports.map(
-		(report) =>
-			`('${report.id}', '${report.playername}', '${report.categoryId}', '${report.communityId}')`
-	)
+	const newRecords = toBanReports.map((report) => {
+		return {
+			id: report.id,
+			playername: report.playername,
+			categoryId: report.categoryId,
+			communityId: report.communityId,
+		}
+	})
 	// split newRecords into arrays of 500 and join them with a comma
-	const newRecordChunks = Array.from(newRecords).reduce<string[][]>(
-		(acc, record) => {
-			const last = acc[acc.length - 1]
-			if (!last || last.length >= 500) {
-				acc.push([])
-			}
-			acc[acc.length - 1].push(record)
-			return acc
-		},
-		[]
-	)
+	const newRecordChunks = Array.from(newRecords).reduce<
+		{
+			id: string
+			playername: string
+			categoryId: string
+			communityId: string
+		}[][]
+	>((acc, record) => {
+		const last = acc[acc.length - 1]
+		if (!last || last.length >= 500) {
+			acc.push([])
+		}
+		acc[acc.length - 1].push(record)
+		return acc
+	}, [])
 	// iterate over the chunks with a for loop and insert the records into the db
 	for (const records of newRecordChunks) {
-		await client.db.$executeRawUnsafe(
-			`INSERT OR IGNORE INTO \`main\`.\`fagcban\` (id, playername, categoryId, communityId) VALUES ${records.join(
-				","
-			)};`
-		)
+		await (await client.db).getRepository(FAGCBan).insert(records)
 		// wait for 50ms to allow other queries to run
 		await new Promise((resolve) => setTimeout(resolve, 50))
 	}
