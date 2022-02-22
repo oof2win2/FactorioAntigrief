@@ -1,6 +1,6 @@
 import { Guild, TextChannel } from "discord.js"
 import { GuildConfig, Report, Revocation } from "fagc-api-types"
-import { In, Not } from "typeorm"
+import { Connection, In, Not } from "typeorm"
 import FAGCBot from "../base/FAGCBot"
 import FAGCBan from "../database/FAGCBan"
 import PrivateBan from "../database/PrivateBan"
@@ -69,12 +69,14 @@ export function splitIntoGroups<T>(items: T[], maxCount = 500): T[][] {
 export async function guildConfigChangedBanlists({
 	oldConfig,
 	newConfig,
-	client,
+	database,
+	allGuildConfigs,
 	filteredReports,
 }: {
 	oldConfig: GuildConfig
 	newConfig: GuildConfig
-	client: FAGCBot
+	database: Connection
+	allGuildConfigs: GuildConfig[]
 	filteredReports: Report[]
 }) {
 	/*
@@ -95,7 +97,7 @@ export async function guildConfigChangedBanlists({
 	const toUnbanPlayers = new Set<string>()
 
 	// FAGC reports acknowledged by the old config
-	const oldBans = await (await client.db).getRepository(FAGCBan).find({
+	const oldBans = await database.getRepository(FAGCBan).find({
 		communityId: In(oldConfig.trustedCommunities),
 		categoryId: In(oldConfig.categoryFilters),
 	})
@@ -144,14 +146,12 @@ export async function guildConfigChangedBanlists({
 
 	// remove bans from the database that are no longer accepted by ANY guild
 	const allFilteredCategoryIds = new Set(
-		client.guildConfigs.map((config) => config.categoryFilters)
+		allGuildConfigs.map((config) => config.categoryFilters)
 	)
 	const allFilteredCommunityIds = new Set(
-		client.guildConfigs.map((config) => config.trustedCommunities)
+		allGuildConfigs.map((config) => config.trustedCommunities)
 	)
-	await (
-		await client.db
-	)
+	await database
 		.getRepository(FAGCBan)
 		.createQueryBuilder()
 		.delete()
@@ -164,7 +164,7 @@ export async function guildConfigChangedBanlists({
 		.execute()
 
 	// create the new reports in the database
-	await (await client.db).getRepository(FAGCBan).insert(
+	await database.getRepository(FAGCBan).insert(
 		filteredReports.map((report) => {
 			return {
 				id: report.id,

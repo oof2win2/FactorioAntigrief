@@ -1,25 +1,42 @@
 import { Category, Community, GuildConfig, Report } from "fagc-api-types"
 import faker from "faker"
 
-export const createTimes = <T>(creator: () => T, count?: number): T[] => {
-	if (!count) {
-		count = faker.datatype.number()
+export function createTimes<F extends (...args: any[]) => any>(
+	creator: F,
+	params: Parameters<F> | (() => Parameters<F>),
+	count: number
+): ReturnType<F>[]
+export function createTimes<F extends () => any>(
+	creator: F,
+	count: number
+): ReturnType<F>[]
+export function createTimes<F extends (...args: any[]) => any>(
+	creator: F,
+	params: Parameters<F> | (() => Parameters<F>) | number,
+	count?: number
+): ReturnType<F>[] {
+	if (typeof params === "number") {
+		return Array.from({ length: params }, () => creator())
 	}
-	return Array.from({ length: count }, creator)
+
+	// TODO: remove the type cast when i figure out why `count` can be undefined here according to types - which it can't
+	return Array.from({ length: count as number }, () =>
+		typeof params === "function" ? creator(...params()) : creator(...params)
+	)
 }
 
 export const createFAGCId = (): string => {
-	return faker.datatype.hexaDecimal(6)
+	return faker.random.alphaNumeric(6)
 }
 
 /**
  * Get a random element from the provided array
  */
-const randomElementFromArray = <T>(array: T[]): T => {
+export const randomElementFromArray = <T>(array: T[]): T => {
 	return array[Math.floor(Math.random() * array.length)]
 }
 
-const randomElementsFromArray = <T>(array: T[], count?: number): T[] => {
+export const randomElementsFromArray = <T>(array: T[], count?: number): T[] => {
 	if (!count) {
 		count = Math.floor(Math.random() * array.length) + 1
 	}
@@ -61,7 +78,7 @@ export const createFAGCReport = ({
 		adminId: createDiscordId(),
 	}
 }
-
+type x = Parameters<typeof createFAGCReport>
 export const createGuildConfig = ({
 	categoryIds,
 	communityIds,
@@ -98,6 +115,7 @@ export const createFAGCCommunity = (): Community => {
 		contact: createDiscordId(),
 		guildIds: createTimes(
 			createDiscordId,
+			[],
 			faker.datatype.number({ min: 1, max: 5 })
 		),
 		tokenInvalidBefore: faker.date.past(),

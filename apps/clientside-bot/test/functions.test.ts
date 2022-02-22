@@ -1,12 +1,21 @@
 import { createConnection, Connection } from "typeorm"
-import { splitIntoGroups } from "../src/utils/functions"
-import BotConfig from "../src/database/BotConfig.js"
-import Command from "../src/database/Command.js"
-import FAGCBan from "../src/database/FAGCBan.js"
-import InfoChannel from "../src/database/InfoChannel.js"
-import PrivateBan from "../src/database/PrivateBan.js"
-import Whitelist from "../src/database/Whitelist.js"
-import { createFAGCCategory, createTimes } from "./utils"
+import {
+	guildConfigChangedBanlists,
+	splitIntoGroups,
+} from "../src/utils/functions"
+import BotConfig from "../src/database/BotConfig"
+import Command from "../src/database/Command"
+import FAGCBan from "../src/database/FAGCBan"
+import InfoChannel from "../src/database/InfoChannel"
+import PrivateBan from "../src/database/PrivateBan"
+import Whitelist from "../src/database/Whitelist"
+import {
+	createFAGCCategory,
+	createFAGCReport,
+	createGuildConfig,
+	createTimes,
+	randomElementsFromArray,
+} from "./utils"
 
 describe("splitIntoGroups", () => {
 	it("Should split a large array two smaller ones of an equal size", () => {
@@ -50,6 +59,9 @@ describe("guildConfigChangedBanlists", () => {
 			synchronize: true,
 		})
 	})
+	afterEach(async () => {
+		await database.close()
+	})
 	it("Should create bans for people that have none", async () => {
 		// remove any pre-existing bans, privatebans and whitelists
 		await database
@@ -67,8 +79,39 @@ describe("guildConfigChangedBanlists", () => {
 			.createQueryBuilder()
 			.delete()
 			.execute()
-	})
 
-	const rules = createTimes(createFAGCCategory, 1000)
-	const communities = createTimes(createFAGCCategory, 1000)
+		const categories = createTimes(createFAGCCategory, [], 1000)
+		const communities = createTimes(createFAGCCategory, 1000)
+
+		const oldGuildConfig = createGuildConfig({
+			categoryIds: categories.map((x) => x.id),
+			communityIds: communities.map((x) => x.id),
+		})
+		const newGuildConfig = {
+			...oldGuildConfig,
+			categoryIds: randomElementsFromArray(categories).map((x) => x.id),
+			communityIds: randomElementsFromArray(communities).map((x) => x.id),
+		}
+
+		const reports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: newGuildConfig.categoryFilters,
+					communityIds: newGuildConfig.trustedCommunities,
+				},
+			],
+			500
+		)
+
+		const results = guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			database: database,
+			allGuildConfigs: [newGuildConfig],
+			filteredReports: reports,
+		})
+		const foundFAGCBans = await database.getRepository(FAGCBan).find()
+		expect(foundFAGCBans.length).toBe(reports.length)
+	})
 })
