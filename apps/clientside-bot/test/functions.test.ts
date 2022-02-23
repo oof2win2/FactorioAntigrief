@@ -100,5 +100,73 @@ describe("guildConfigChangedBanlists", () => {
 		// since all reports are acknowledged by the filters
 		const foundFAGCBans = await database.getRepository(FAGCBan).find()
 		expect(foundFAGCBans.length).toBe(reports.length)
+		// expect the names of banned players to be the same
+		expect(foundFAGCBans.map((x) => x.playername)).toEqual(reports.map((x) => x.playername))
+		// except the found bans to be same as the filtereds reports (except for some values which are excluded on the FAGCBan type)
+		expect(foundFAGCBans).toEqual(reports.map<typeof foundFAGCBans[0]>((report) => {
+			return {
+				id: report.id,
+				playername: report.playername,
+				communityId: report.communityId,
+				categoryId: report.categoryId,
+			}
+		}))
+	})
+	it("Should create a smaller amount of bans than provided reports if only some reports are acknowledged", async () => {
+		const categories = createTimes(createFAGCCategory, 1000)
+		const categoryIds = categories.map((x) => x.id)
+		const communities = createTimes(createFAGCCategory, 1000)
+		const communityIds = communities.map((x) => x.id)
+
+		const oldGuildConfig = createGuildConfig({
+			categoryIds: [], // these fields are irrelevant in this test, as there are no pre-existing bans
+			communityIds: [],
+		})
+		const newGuildConfig: typeof oldGuildConfig = {
+			...oldGuildConfig,
+			categoryFilters: randomElementsFromArray(categoryIds),
+			trustedCommunities: randomElementsFromArray(communityIds),
+		}
+
+		const reports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: newGuildConfig.categoryFilters,
+					communityIds: newGuildConfig.trustedCommunities,
+				},
+			],
+			500
+		)
+
+		await guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			database: database,
+			allGuildConfigs: [newGuildConfig],
+			filteredReports: reports,
+		})
+		// the amount of FAGC bans should be equal to the amount of reports, as each report should be banned
+		// since all reports are acknowledged by the filters
+		const foundFAGCBans = await database.getRepository(FAGCBan).find()
+		const filteredReports = reports.filter((report) => {
+			// check if the community is trusted and the category is in the filter
+			return (
+				newGuildConfig.trustedCommunities.includes(report.communityId) &&
+				newGuildConfig.categoryFilters.includes(report.categoryId)
+			)
+		})
+		expect(foundFAGCBans.length).toBe(filteredReports.length)
+		// expect the names of banned players to be the same
+		expect(foundFAGCBans.map((x) => x.playername)).toEqual(filteredReports.map((x) => x.playername))
+		// except the found bans to be same as the filtereds reports (except for some values which are excluded on the FAGCBan type)
+		expect(foundFAGCBans).toEqual(filteredReports.map<typeof foundFAGCBans[0]>((report) => {
+			return {
+				id: report.id,
+				playername: report.playername,
+				communityId: report.communityId,
+				categoryId: report.categoryId,
+			}
+		}))
 	})
 })
