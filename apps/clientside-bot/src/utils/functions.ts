@@ -152,22 +152,19 @@ export async function guildConfigChangedBanlists({
 		[allGuildConfigs.map((config) => config.trustedCommunities)].flat(2)
 	)
 
-	// it's faster to selectively recreate the table than to remove only the bans that are no longer accepted
-	const currentFAGCBans = await database.getRepository(FAGCBan).find()
-	// delete all values from fagcban table
-	await database
-		.createQueryBuilder(FAGCBan, "ban")
+
+	// selectively remove reports that are not accepted by any guild
+	await database.getRepository(FAGCBan)
+		.createQueryBuilder()
 		.delete()
+		.where({
+			communityId: Not(In([...allFilteredCommunityIds])),
+		})
+		.orWhere({
+			categoryId: Not(In([...allFilteredCategoryIds])),
+		})
 		.execute()
-	// re-insert the bans that are still accepted
-	await database.getRepository(FAGCBan).insert(currentFAGCBans.filter((ban) => {
-		// if the ban is still accepted by ANY guild, keep it
-		return (
-			allFilteredCategoryIds.has(ban.categoryId) &&
-			allFilteredCommunityIds.has(ban.communityId)
-		)
-	}))
-	
+
 	
 
 	// create the new reports in the database
