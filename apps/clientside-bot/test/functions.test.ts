@@ -62,35 +62,20 @@ describe("guildConfigChangedBanlists", () => {
 	afterEach(async () => {
 		await database.close()
 	})
-	it("Should create bans for people that have none", async () => {
-		// remove any pre-existing bans, privatebans and whitelists
-		await database
-			.getRepository(FAGCBan)
-			.createQueryBuilder()
-			.delete()
-			.execute()
-		await database
-			.getRepository(PrivateBan)
-			.createQueryBuilder()
-			.delete()
-			.execute()
-		await database
-			.getRepository(Whitelist)
-			.createQueryBuilder()
-			.delete()
-			.execute()
-
-		const categories = createTimes(createFAGCCategory, [], 1000)
+	it("Should create the same amount of bans as provided reports if all reports are acknowledged", async () => {
+		const categories = createTimes(createFAGCCategory, 1000)
+		const categoryIds = categories.map((x) => x.id)
 		const communities = createTimes(createFAGCCategory, 1000)
+		const communityIds = communities.map((x) => x.id)
 
 		const oldGuildConfig = createGuildConfig({
-			categoryIds: categories.map((x) => x.id),
-			communityIds: communities.map((x) => x.id),
+			categoryIds: [], // these fields are irrelevant in this test, as there are no pre-existing bans
+			communityIds: [],
 		})
-		const newGuildConfig = {
+		const newGuildConfig: typeof oldGuildConfig = {
 			...oldGuildConfig,
-			categoryIds: randomElementsFromArray(categories).map((x) => x.id),
-			communityIds: randomElementsFromArray(communities).map((x) => x.id),
+			categoryFilters: randomElementsFromArray(categoryIds),
+			trustedCommunities: randomElementsFromArray(communityIds),
 		}
 
 		const reports = createTimes(
@@ -104,13 +89,15 @@ describe("guildConfigChangedBanlists", () => {
 			500
 		)
 
-		const results = guildConfigChangedBanlists({
+		await guildConfigChangedBanlists({
 			oldConfig: oldGuildConfig,
 			newConfig: newGuildConfig,
 			database: database,
 			allGuildConfigs: [newGuildConfig],
 			filteredReports: reports,
 		})
+		// the amount of FAGC bans should be equal to the amount of reports, as each report should be banned
+		// since all reports are acknowledged by the filters
 		const foundFAGCBans = await database.getRepository(FAGCBan).find()
 		expect(foundFAGCBans.length).toBe(reports.length)
 	})
