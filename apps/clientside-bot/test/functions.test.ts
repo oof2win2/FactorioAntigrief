@@ -18,6 +18,7 @@ import {
 	randomElementsFromArray,
 } from "./utils"
 import { Category, Community } from "fagc-api-types"
+import faker from "faker"
 
 describe("splitIntoGroups", () => {
 	it("Should split a large array two smaller ones of an equal size", () => {
@@ -279,6 +280,109 @@ describe("guildConfigChangedBanlists", () => {
 				.filter((playername) => !alreadyBannedPlayers.has(playername))
 		)
 		// check that the amount of people banned by the function is equal to the amount of new reports
+		expect(results.toBan.length).toBe(shouldBeBannedPlayers.size)
+		// expect that the names of the players banned are the same as the names of the new reports
+		expect([...results.toBan]).toEqual([...shouldBeBannedPlayers])
+	})
+	it("Should ban players with multiple reports only once", async () => {
+		// this simulates a very realistic situation where a player has multiple reports on FAGC that are all acknowledged
+		// this is to make sure that the function only bans the player once, but also doesn't re-ban players that are already banned
+
+		// there is so little of the playernames but more reports to ensure that the function doesn't ban the same player twice
+		// player names in the old reports
+		const oldPlayernames = createTimes(faker.internet.userName, 200)
+		// player names in the new reports
+		const newPlayernames = [
+			...new Set([
+				...createTimes(faker.internet.userName, 250),
+				...oldPlayernames,
+			]),
+		]
+
+		// you realistically wouldn't have new reports flow in out of nowhere, so we make it more real by increaseing filters in the guild config
+		const oldGuildConfig = createGuildConfig({
+			categoryIds: randomElementsFromArray(categoryIds, 25), // these fields are irrelevant in this test, as there are no pre-existing bans
+			communityIds: randomElementsFromArray(communityIds, 25),
+		})
+		const newGuildConfig: typeof oldGuildConfig = {
+			...oldGuildConfig,
+			// we filter the options from which the function may select the additional filters to ensure that
+			// the new config has more filters than the old one
+			categoryFilters: [
+				...oldGuildConfig.categoryFilters,
+				...randomElementsFromArray(
+					categoryIds.filter(
+						(id) => !oldGuildConfig.categoryFilters.includes(id)
+					),
+					25
+				),
+			],
+			trustedCommunities: [
+				...oldGuildConfig.trustedCommunities,
+				...randomElementsFromArray(
+					communityIds.filter(
+						(id) => !oldGuildConfig.trustedCommunities.includes(id)
+					),
+					25
+				),
+			],
+		}
+
+		const oldReports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: oldGuildConfig.categoryFilters,
+					communityIds: oldGuildConfig.trustedCommunities,
+					playernames: oldPlayernames,
+				},
+			],
+			2500
+		)
+		const newReports = createTimes(
+			createFAGCReport,
+			[
+				{
+					// we filter the new rules here so that we make sure that the reports consist of ONLY the new category and community filters
+					// simulates when rule filters are added
+					categoryIds: newGuildConfig.categoryFilters.filter(
+						(x) => !oldGuildConfig.categoryFilters.includes(x)
+					),
+					communityIds: newGuildConfig.trustedCommunities.filter(
+						(x) => !oldGuildConfig.trustedCommunities.includes(x)
+					),
+					playernames: [...newPlayernames, ...oldPlayernames],
+				},
+			],
+			2500
+		)
+
+		const allReports = [...oldReports, ...newReports]
+		await database.getRepository(FAGCBan).insert(oldReports)
+
+		// run the function with all of the reports
+		const results = await guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			database: database,
+			allGuildConfigs: [newGuildConfig],
+			filteredReports: allReports,
+		})
+
+		const foundFAGCBans = await database.getRepository(FAGCBan).find()
+		// check that the total amount of FAGC bans is the same as the total amount of reports
+		expect(foundFAGCBans.length).toBe(allReports.length)
+		// this is a set of players that should be banned by the function
+		// some players can potentially be already banned as they were already banned by the old config
+		// or they could have multiple reports in newReports, so they are banned only once
+		const shouldBeBannedPlayers = new Set(
+			newReports
+				// this is to account for players sometimes having multiple reports in the newReports array
+				.map((r) => r.playername)
+				// this is to account for players sometimes already being banned due to having reports in the oldReports array
+				.filter((playername) => !oldPlayernames.includes(playername))
+		)
+		// check that the amount of people banned by the function is equal to the amount of unique playernames in newReports
 		expect(results.toBan.length).toBe(shouldBeBannedPlayers.size)
 		// expect that the names of the players banned are the same as the names of the new reports
 		expect([...results.toBan]).toEqual([...shouldBeBannedPlayers])

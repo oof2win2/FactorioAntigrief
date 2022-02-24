@@ -61,13 +61,19 @@ const createDiscordId = (): string => {
 export const createFAGCReport = ({
 	categoryIds,
 	communityIds,
+	playernames,
+	adminIds,
 }: {
 	categoryIds: string[]
 	communityIds: string[]
+	playernames?: string[]
+	adminIds?: string[]
 }): Report => {
 	return {
 		id: createFAGCId(),
-		playername: faker.internet.userName(),
+		playername: playernames
+			? randomElementFromArray(playernames)
+			: faker.internet.userName(),
 		categoryId: randomElementFromArray(categoryIds),
 		communityId: randomElementFromArray(communityIds),
 		description: faker.lorem.sentence(),
@@ -75,7 +81,9 @@ export const createFAGCReport = ({
 		reportCreatedAt: faker.date.past(),
 		reportedTime: faker.date.past(),
 		automated: Math.random() > 0.5,
-		adminId: createDiscordId(),
+		adminId: adminIds
+			? randomElementFromArray(adminIds)
+			: createDiscordId(),
 	}
 }
 type x = Parameters<typeof createFAGCReport>
