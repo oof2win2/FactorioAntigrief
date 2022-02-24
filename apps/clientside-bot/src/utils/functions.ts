@@ -101,6 +101,7 @@ export async function guildConfigChangedBanlists({
 		communityId: In(oldConfig.trustedCommunities),
 		categoryId: In(oldConfig.categoryFilters),
 	})
+	const alreadyBannedPlayers = new Set(oldBans.map((r) => r.playername))
 
 	// get the reports by playername
 	const reportsByPlayer: Map<string, FAGCBan[]> = new Map()
@@ -137,6 +138,9 @@ export async function guildConfigChangedBanlists({
 	// go through the new reports that match filters and ban the players for them
 	const toBanPlayers = new Set<string>()
 	filteredReports.forEach((report) => {
+		// if the player is already banned, then don't ban them again
+		if (alreadyBannedPlayers.has(report.playername)) return
+
 		// if the player is to be unbanned, they will stay banned now
 		toUnbanPlayers.delete(report.playername)
 
@@ -168,16 +172,19 @@ export async function guildConfigChangedBanlists({
 	
 
 	// create the new reports in the database
-	await database.getRepository(FAGCBan).insert(
-		filteredReports.map((report) => {
+	await database.getRepository(FAGCBan)
+		.createQueryBuilder()
+		.insert()
+		.orIgnore() // ignore if the report already exists in the database
+		.values(filteredReports.map((report) => {
 			return {
 				id: report.id,
 				playername: report.playername,
 				communityId: report.communityId,
 				categoryId: report.categoryId,
 			}
-		})
-	)
+		}))
+		.execute()
 
 	return {
 		/**
