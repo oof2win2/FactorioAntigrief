@@ -11,11 +11,13 @@ import PrivateBan from "../src/database/PrivateBan"
 import Whitelist from "../src/database/Whitelist"
 import {
 	createFAGCCategory,
+	createFAGCCommunity,
 	createFAGCReport,
 	createGuildConfig,
 	createTimes,
 	randomElementsFromArray,
 } from "./utils"
+import { Category, Community } from "fagc-api-types"
 
 describe("splitIntoGroups", () => {
 	it("Should split a large array two smaller ones of an equal size", () => {
@@ -44,6 +46,10 @@ describe("splitIntoGroups", () => {
 
 describe("guildConfigChangedBanlists", () => {
 	let database: Connection
+	let categories: Category[]
+	let categoryIds: string[]
+	let communities: Community[]
+	let communityIds: string[]
 	beforeEach(async () => {
 		database = await createConnection({
 			type: "better-sqlite3",
@@ -58,6 +64,10 @@ describe("guildConfigChangedBanlists", () => {
 			],
 			synchronize: true,
 		})
+		categories = createTimes(createFAGCCategory, 100)
+		categoryIds = categories.map((x) => x.id)
+		communities = createTimes(createFAGCCommunity, 100)
+		communityIds = communities.map((x) => x.id)
 	})
 	afterEach(async () => {
 		await database.close()
@@ -66,10 +76,6 @@ describe("guildConfigChangedBanlists", () => {
 		// this emulates when the bot is initialized in a guild for example
 		// it doesn't have any records of previous bans in the database so it does this
 		// the amount of reports here is therefore expected to be pretty high
-		const categories = createTimes(createFAGCCategory, 100)
-		const categoryIds = categories.map((x) => x.id)
-		const communities = createTimes(createFAGCCategory, 100)
-		const communityIds = communities.map((x) => x.id)
 
 		const oldGuildConfig = createGuildConfig({
 			categoryIds: [], // these fields are irrelevant in this test, as there are no pre-existing bans
@@ -121,10 +127,6 @@ describe("guildConfigChangedBanlists", () => {
 	})
 	it("Should create a smaller amount of bans than provided reports if only some reports are acknowledged", async () => {
 		// this is for example if
-		const categories = createTimes(createFAGCCategory, 100)
-		const categoryIds = categories.map((x) => x.id)
-		const communities = createTimes(createFAGCCategory, 100)
-		const communityIds = communities.map((x) => x.id)
 
 		const oldGuildConfig = createGuildConfig({
 			categoryIds: [], // these fields are irrelevant in this test, as there are no pre-existing bans
@@ -186,10 +188,6 @@ describe("guildConfigChangedBanlists", () => {
 		// this can occur if some filters are added to a config
 		// the goal here is to check that the return of the value banlistResults.toBan totals to the amount of reports that have already
 		// been handled (are created in the databse), so people that have already been banned should not be banned again
-		const categories = createTimes(createFAGCCategory, 100)
-		const categoryIds = categories.map((x) => x.id)
-		const communities = createTimes(createFAGCCategory, 100)
-		const communityIds = communities.map((x) => x.id)
 
 		// the goal here is to create two configs, one that has only 10 filters for each, and another one that has *additional* filters
 		// this will make sure that some of the reports were already handled by the old guild config, whilst other ones are handled by the new one
