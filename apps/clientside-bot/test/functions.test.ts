@@ -387,4 +387,123 @@ describe("guildConfigChangedBanlists", () => {
 		// expect that the names of the players banned are the same as the names of the new reports
 		expect([...results.toBan]).toEqual([...shouldBeBannedPlayers])
 	})
+	it("Should unban players if all filters are removed", async () => {
+		const oldGuildConfig = createGuildConfig({
+			categoryIds: randomElementsFromArray(categoryIds, 50),
+			communityIds: randomElementsFromArray(communityIds, 50),
+		})
+		const newGuildConfig: typeof oldGuildConfig = {
+			...oldGuildConfig,
+			categoryFilters: [],
+			trustedCommunities: [],
+		}
+
+		const reports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: oldGuildConfig.categoryFilters,
+					communityIds: oldGuildConfig.trustedCommunities,
+				},
+			],
+			5000
+		)
+
+		await database.getRepository(FAGCBan).insert(reports)
+
+		const results = await guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			database: database,
+			allGuildConfigs: [newGuildConfig],
+			filteredReports: [],
+		})
+
+		const foundFAGCBans = await database.getRepository(FAGCBan).find()
+
+		// no FAGC bans should be found, as they are all deemed invalid
+		expect(foundFAGCBans.length).toBe(0)
+		// nobody should be banned, as there should be no valid reports
+		expect(results.toBan.length).toBe(0)
+		// expect that the names of the players unbanned are the same as the names of the reports
+		expect([...results.toUnban]).toEqual([
+			...new Set(reports.map((r) => r.playername)),
+		])
+	})
+	it("Should unban some players if only some filters are removed", async () => {
+		const oldGuildConfig = createGuildConfig({
+			categoryIds: randomElementsFromArray(categoryIds, 50),
+			communityIds: randomElementsFromArray(communityIds, 50),
+		})
+		const newGuildConfig: typeof oldGuildConfig = {
+			...oldGuildConfig,
+			categoryFilters: randomElementsFromArray(
+				oldGuildConfig.categoryFilters,
+				25
+			),
+			trustedCommunities: randomElementsFromArray(
+				oldGuildConfig.trustedCommunities,
+				25
+			),
+		}
+
+		const playernames = createTimes(faker.internet.userName, 4000)
+
+		const allReports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: oldGuildConfig.categoryFilters,
+					communityIds: oldGuildConfig.trustedCommunities,
+					playernames: playernames,
+				},
+			],
+			5000
+		)
+		// filter reports that are acknowledged by the new config
+		const filteredReports = allReports.filter(
+			(r) =>
+				newGuildConfig.categoryFilters.includes(r.categoryId) &&
+				newGuildConfig.trustedCommunities.includes(r.communityId)
+		)
+		const filteredReportPlayernames = new Set(
+			filteredReports.map((r) => r.playername)
+		)
+		// reports that are deemed invalid by the new config
+		const invalidReports = allReports.filter(
+			(r) =>
+				!newGuildConfig.categoryFilters.includes(r.categoryId) ||
+				!newGuildConfig.trustedCommunities.includes(r.communityId)
+		)
+
+		await database.getRepository(FAGCBan).insert(allReports)
+
+		const results = await guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			database: database,
+			allGuildConfigs: [newGuildConfig],
+			filteredReports: filteredReports,
+		})
+
+		const foundFAGCBans = await database.getRepository(FAGCBan).find()
+
+		// no FAGC bans should be found, as they are all deemed invalid
+		expect(foundFAGCBans.length).toBe(filteredReports.length)
+		// nobody should be banned, as there should be no valid reports
+		expect(results.toBan.length).toBe(0)
+		// expect that the names of the players unbanned are the same as the names of the invalid deemed reports, unless
+		// the player has a report that is valid in the new config
+		expect([...results.toUnban]).toEqual([
+			...new Set(
+				invalidReports
+					.map((r) => r.playername)
+					.filter(
+						(playername) =>
+							!filteredReportPlayernames.has(playername)
+					)
+			),
+		])
+	})
+	// TODO: test for a combination of banning and unbanning
 })
