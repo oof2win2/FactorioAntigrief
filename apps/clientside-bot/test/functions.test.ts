@@ -63,9 +63,12 @@ describe("guildConfigChangedBanlists", () => {
 		await database.close()
 	})
 	it("Should create the same amount of bans as provided reports if all reports are acknowledged", async () => {
-		const categories = createTimes(createFAGCCategory, 1000)
+		// this emulates when the bot is initialized in a guild for example
+		// it doesn't have any records of previous bans in the database so it does this
+		// the amount of reports here is therefore expected to be pretty high
+		const categories = createTimes(createFAGCCategory, 100)
 		const categoryIds = categories.map((x) => x.id)
-		const communities = createTimes(createFAGCCategory, 1000)
+		const communities = createTimes(createFAGCCategory, 100)
 		const communityIds = communities.map((x) => x.id)
 
 		const oldGuildConfig = createGuildConfig({
@@ -86,7 +89,7 @@ describe("guildConfigChangedBanlists", () => {
 					communityIds: newGuildConfig.trustedCommunities,
 				},
 			],
-			500
+			5000
 		)
 
 		await guildConfigChangedBanlists({
@@ -117,9 +120,10 @@ describe("guildConfigChangedBanlists", () => {
 		)
 	})
 	it("Should create a smaller amount of bans than provided reports if only some reports are acknowledged", async () => {
-		const categories = createTimes(createFAGCCategory, 1000)
+		// this is for example if
+		const categories = createTimes(createFAGCCategory, 100)
 		const categoryIds = categories.map((x) => x.id)
-		const communities = createTimes(createFAGCCategory, 1000)
+		const communities = createTimes(createFAGCCategory, 100)
 		const communityIds = communities.map((x) => x.id)
 
 		const oldGuildConfig = createGuildConfig({
@@ -140,7 +144,7 @@ describe("guildConfigChangedBanlists", () => {
 					communityIds: newGuildConfig.trustedCommunities,
 				},
 			],
-			500
+			2000
 		)
 
 		await guildConfigChangedBanlists({
@@ -179,6 +183,7 @@ describe("guildConfigChangedBanlists", () => {
 		)
 	})
 	it("Should ban smaller amounts of people if some reports are already banned for", async () => {
+		// this can occur if some filters are added to a config
 		// the goal here is to check that the return of the value banlistResults.toBan totals to the amount of reports that have already
 		// been handled (are created in the databse), so people that have already been banned should not be banned again
 		const categories = createTimes(createFAGCCategory, 100)
@@ -225,7 +230,7 @@ describe("guildConfigChangedBanlists", () => {
 					communityIds: oldGuildConfig.trustedCommunities,
 				},
 			],
-			500
+			2500
 		)
 		const newReports = createTimes(
 			createFAGCReport,
@@ -241,7 +246,7 @@ describe("guildConfigChangedBanlists", () => {
 					),
 				},
 			],
-			500
+			2500
 		)
 
 		const allReports = [...oldReports, ...newReports]
@@ -262,10 +267,22 @@ describe("guildConfigChangedBanlists", () => {
 
 		// check that the total amount of FAGC bans is the same as the total amount of reports
 		expect(foundFAGCBans.length).toBe(allReports.length)
-
+		const alreadyBannedPlayers = new Set(
+			oldReports.map((x) => x.playername)
+		)
+		// this is a set of players that should be banned by the function
+		// some players can potentially be already banned as they were already banned by the old config
+		// or they could have multiple reports in newReports, so they are banned only once
+		const shouldBeBannedPlayers = new Set(
+			newReports
+				// this is to account for players sometimes having multiple reports in the newReports array
+				.map((r) => r.playername)
+				// this is to account for players sometimes already being banned due to having reports in the oldReports array
+				.filter((playername) => !alreadyBannedPlayers.has(playername))
+		)
 		// check that the amount of people banned by the function is equal to the amount of new reports
-		expect(results.toBan.length).toBe(newReports.length)
+		expect(results.toBan.length).toBe(shouldBeBannedPlayers.size)
 		// expect that the names of the players banned are the same as the names of the new reports
-		expect([...results.toBan]).toEqual(newReports.map((x) => x.playername))
+		expect([...results.toBan]).toEqual([...shouldBeBannedPlayers])
 	})
 })

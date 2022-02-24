@@ -156,9 +156,9 @@ export async function guildConfigChangedBanlists({
 		[allGuildConfigs.map((config) => config.trustedCommunities)].flat(2)
 	)
 
-
 	// selectively remove reports that are not accepted by any guild
-	await database.getRepository(FAGCBan)
+	await database
+		.getRepository(FAGCBan)
 		.createQueryBuilder()
 		.delete()
 		.where({
@@ -169,21 +169,22 @@ export async function guildConfigChangedBanlists({
 		})
 		.execute()
 
-	
-
 	// create the new reports in the database
-	await database.getRepository(FAGCBan)
+	await database
+		.getRepository(FAGCBan)
 		.createQueryBuilder()
 		.insert()
 		.orIgnore() // ignore if the report already exists in the database
-		.values(filteredReports.map((report) => {
-			return {
-				id: report.id,
-				playername: report.playername,
-				communityId: report.communityId,
-				categoryId: report.categoryId,
-			}
-		}))
+		.values(
+			filteredReports.map((report) => {
+				return {
+					id: report.id,
+					playername: report.playername,
+					communityId: report.communityId,
+					categoryId: report.categoryId,
+				}
+			})
+		)
 		.execute()
 
 	return {
