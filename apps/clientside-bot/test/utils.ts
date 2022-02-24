@@ -25,8 +25,13 @@ export function createTimes<F extends (...args: any[]) => any>(
 	)
 }
 
+// this is to make sure that the IDs are unique
+const existingFAGCIds = new Set<string>()
 export const createFAGCId = (): string => {
-	return faker.random.alphaNumeric(6)
+	const id = faker.random.alphaNumeric(6)
+	if (existingFAGCIds.has(id)) return createFAGCId()
+	existingFAGCIds.add(id)
+	return id
 }
 
 /**
