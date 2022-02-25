@@ -73,4 +73,93 @@ describe("guildConfigChangedBanlists", () => {
 	afterEach(async () => {
 		await database.close()
 	})
+	it("Should create bans for reports that have just been included in the filters", async () => {
+		const oldGuildConfig = createGuildConfig({
+			categoryIds: [],
+			communityIds: [],
+		})
+		const newGuildConfig: typeof oldGuildConfig = {
+			...oldGuildConfig,
+			categoryFilters: categoryIds,
+			trustedCommunities: communityIds,
+		}
+
+		const reports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: newGuildConfig.categoryFilters,
+					communityIds: newGuildConfig.trustedCommunities,
+				},
+			],
+			5000
+		)
+
+		const results = await guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			validReports: reports,
+			database,
+			allGuildConfigs: [newGuildConfig],
+		})
+
+		const fetchedFAGCBans = await database.getRepository(FAGCBan).find()
+
+		const allReportPlayernames = [
+			...new Set(reports.map((report) => report.playername)),
+		]
+		// the function should ban everyone there is a report against
+		expect(results.toBan.length).toBe(allReportPlayernames.length)
+		expect(results.toBan).toEqual(allReportPlayernames)
+
+		// there should be a record for each report
+		const fagcBanIds = fetchedFAGCBans.map((ban) => ban.id)
+		const reportIds = reports.map((report) => report.id)
+		expect(fetchedFAGCBans.length).toBe(reports.length)
+		expect(fagcBanIds).toEqual(reportIds)
+	})
+	it("Should unban everyone if all filters are removed", async () => {
+		const oldGuildConfig = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+		const newGuildConfig: typeof oldGuildConfig = {
+			...oldGuildConfig,
+			categoryFilters: [],
+			trustedCommunities: [],
+		}
+
+		const reports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: oldGuildConfig.categoryFilters,
+					communityIds: oldGuildConfig.trustedCommunities,
+				},
+			],
+			5000
+		)
+
+		await database.getRepository(FAGCBan).insert(reports)
+
+		const results = await guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			validReports: [],
+			database,
+			allGuildConfigs: [newGuildConfig],
+		})
+
+		const fetchedFAGCBans = await database.getRepository(FAGCBan).find()
+
+		// the function should unban everyone there is a report against
+		const allPlayers = [
+			...new Set(reports.map((report) => report.playername)),
+		]
+		expect(results.toUnban.length).toBe(allPlayers.length)
+		expect(results.toUnban).toEqual(allPlayers)
+
+		// there should be no records of FAGC bans in the database, as they were all supposed to be removed
+		expect(fetchedFAGCBans.length).toBe(0)
+	})
 })

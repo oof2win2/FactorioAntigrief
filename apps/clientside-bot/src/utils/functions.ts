@@ -1,6 +1,6 @@
 import { Guild, TextChannel } from "discord.js"
-import { GuildConfig, Report, Revocation } from "fagc-api-types"
-import { Connection, In, Not } from "typeorm"
+import { GuildConfig, Report } from "fagc-api-types"
+import { Connection } from "typeorm"
 import FAGCBot from "../base/FAGCBot"
 import FAGCBan from "../database/FAGCBan"
 import PrivateBan from "../database/PrivateBan"
@@ -87,10 +87,107 @@ export async function guildConfigChangedBanlists({
 			- Has valid reports against them
 			- Is not privately banned
 		- Extra
-			- Remove reports from the database that are no longer valid, such as rules or communities that have been removed
+			- Remove reports from the database that are no longer valid, such as categories or communities that have been removed from filters
 			- Create reports in the database if they match rule and community filters, even if the player is privately banned
 			- Keep in mind, that some people's reports *still may be valid* in other guilds, so we need to keep track of which guilds they are valid in and not remove them from the DB outright
 	*/
+
+	const toBanPlayers = new Set<string>()
+	const toUnbanPlayers = new Set<string>()
+
+	const currentBans = await database.getRepository(FAGCBan).find()
+
+	const currentlyBannedPlayers = new Set(
+		currentBans.map((ban) => ban.playername)
+	)
+
+	// get all the reports into a single map
+	const bansByPlayer = new Map<string, FAGCBan[]>()
+	currentBans.forEach((ban) => {
+		if (!bansByPlayer.has(ban.playername)) {
+			bansByPlayer.set(ban.playername, [])
+		}
+		bansByPlayer.get(ban.playername)!.push(ban)
+	})
+	validReports.forEach((report) => {
+		if (!bansByPlayer.has(report.playername)) {
+			bansByPlayer.set(report.playername, [])
+		}
+		bansByPlayer.get(report.playername)!.push({
+			id: report.id,
+			playername: report.playername,
+			communityId: report.communityId,
+			categoryId: report.categoryId,
+		})
+	})
+	// loop over the single map and check if the player is banned in the new config
+	for (const [playername, bans] of bansByPlayer) {
+		const newBans = bans.filter((ban) => {
+			// check if the ban is valid under the new guild filters
+			return (
+				newConfig.trustedCommunities.includes(ban.communityId) &&
+				newConfig.categoryFilters.includes(ban.categoryId)
+			)
+		})
+
+		if (newBans.length > 0) {
+			// if the player is banned in the new config, add them to the list of players to ban
+			if (!currentlyBannedPlayers.has(playername))
+				toBanPlayers.add(playername)
+		} else {
+			// unban the player
+			toUnbanPlayers.add(playername)
+		}
+	}
+
+	// remove any old bans that are not in any config from the database
+	// this is done in a transaction so that the table temp.community_filters is not actually created
+	await database.transaction(async (transaction) => {
+		// compile a list of all filters
+		const allFilteredCommunities = [
+			...new Set(
+				allGuildConfigs.map((config) => config.trustedCommunities)
+			),
+		]
+		const allFilteredCategories = [
+			...new Set(allGuildConfigs.map((config) => config.categoryFilters)),
+		]
+
+		// create a temp table to store the filters
+		await transaction.query(
+			"CREATE TEMP TABLE `temp.community_filters` (id INTEGER PRIMARY KEY AUTOINCREMENT, communityId TEXT, categoryId TEXT);"
+		)
+		await transaction.query(
+			`INSERT INTO \`temp.community_filters\` (communityId) VALUES ('${allFilteredCommunities.join(
+				"'), ('"
+			)}');`
+		)
+		await transaction.query(
+			`INSERT INTO \`temp.community_filters\` (categoryId) VALUES ('${allFilteredCategories.join(
+				"'), ('"
+			)}');`
+		)
+
+		// remove all the bans that are not in the filters
+		await transaction
+			.getRepository(FAGCBan)
+			.createQueryBuilder()
+			.delete()
+			.where(
+				"communityId NOT IN (SELECT communityId FROM `temp.community_filters` WHERE communityId IS NOT NULL)"
+			)
+			.orWhere(
+				"categoryId NOT IN (SELECT categoryId FROM `temp.community_filters` WHERE categoryId IS NOT NULL)"
+			)
+			.execute()
+		// drop the temp table since it's useless now
+		await transaction.query("DROP TABLE `temp.community_filters`;")
+	})
+
+	// insert valid reports into the database AFTER the above transaction
+	// since all these reports are valid, it doesn't make sense for the transaction to check them
+	// and remove them from the database
+	await database.getRepository(FAGCBan).insert(validReports)
 
 	return {
 		/**
