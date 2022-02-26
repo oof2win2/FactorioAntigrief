@@ -4,9 +4,6 @@ on:
     - push
     - pull_request
 
-env:
-    backend_env: 'MONGOURI=mongodb://FAKEUSER:FAKEPASSWORD@127.0.0.1:27017/fagcsandbox\nDISCORD_BOTTOKEN=FAKE BOT TOKEN\nSENTRY_LINK=https://6a437e6af9d346e5b44f9223a45d1765@o745688.ingest.sentry.io/5790614\nAPI_PORT=3001\nPROMETHEUS_PORT=9111\nCLIENTID=913107375441993789\nJWT_SECRET="hGWdE47Uym6Avp"'
-
 jobs:
     Test:
         name: Test
@@ -40,9 +37,19 @@ jobs:
               run: |
                   echo -e '${{ env.backend_env }}' > apps/backend/.env && \
                   echo apps/backend.env
+              env:
+                  backend_env: 'MONGOURI=mongodb://FAKEUSER:FAKEPASSWORD@127.0.0.1:27017/fagcsandbox\nDISCORD_BOTTOKEN=FAKE BOT TOKEN\nSENTRY_LINK=https://6a437e6af9d346e5b44f9223a45d1765@o745688.ingest.sentry.io/5790614\nAPI_PORT=3001\nPROMETHEUS_PORT=9111\nCLIENTID=913107375441993789\nJWT_SECRET="hGWdE47Uym6Avp"'
 
             - name: Run test
               run: turbo run build test
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                  name: test-artifacts
+                  path: |
+                      **/.turbo/**
+                  retention-days: 5
     Lint:
         name: Lint
         runs-on: ubuntu-latest
@@ -72,3 +79,11 @@ jobs:
 
             - name: Run lint
               run: turbo run lint
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                  name: test-artifacts
+                  path: |
+                      **/.turbo/**
+                  retention-days: 5
