@@ -187,7 +187,24 @@ export async function guildConfigChangedBanlists({
 	// insert valid reports into the database AFTER the above transaction
 	// since all these reports are valid, it doesn't make sense for the transaction to check them
 	// and remove them from the database
-	await database.getRepository(FAGCBan).insert(validReports)
+	for (const splitReports of splitIntoGroups(validReports, 5000)) {
+		await database
+			.getRepository(FAGCBan)
+			.createQueryBuilder()
+			.insert()
+			.orIgnore()
+			.values(
+				splitReports.map((report) => {
+					return {
+						id: report.id,
+						playername: report.playername,
+						communityId: report.communityId,
+						categoryId: report.categoryId,
+					}
+				})
+			)
+			.execute()
+	}
 
 	return {
 		/**
