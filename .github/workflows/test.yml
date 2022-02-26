@@ -39,7 +39,7 @@ jobs:
                   echo -e '${{ env.clientsidebot_env }}' > apps/clientside-bot/.env
               env:
                   backend_env: 'MONGOURI=mongodb://FAKEUSER:FAKEPASSWORD@127.0.0.1:27017/fagcsandbox\nDISCORD_BOTTOKEN=FAKE BOT TOKEN\nSENTRY_LINK=https://6a437e6af9d346e5b44f9223a45d1765@o745688.ingest.sentry.io/5790614\nAPI_PORT=3001\nPROMETHEUS_PORT=9111\nCLIENTID=913107375441993789\nJWT_SECRET="hGWdE47Uym6Avp"'
-                  clientsidebot_env: "DISCORD_BOTTOKEN=FAKE BOT TOKEN"
+                  clientsidebot_env: "DISCORD_BOTTOKEN=FAKE BOT TOKEN\nTESTGUILDID=fake guild id\nGUILDID=fake guild id\nOWNERID=fake owner id"
 
             - name: Run test
               run: turbo run build test
