@@ -101,8 +101,14 @@ export const createGuildConfig = ({
 }): GuildConfig => {
 	return {
 		guildId: createDiscordId(),
-		categoryFilters: randomElementsFromArray(categoryIds),
-		trustedCommunities: randomElementsFromArray(communityIds),
+		categoryFilters: randomElementsFromArray(
+			categoryIds,
+			Math.round(categoryIds.length / 2)
+		),
+		trustedCommunities: randomElementsFromArray(
+			communityIds,
+			Math.round(communityIds.length / 2)
+		),
 		roles: {
 			reports: createDiscordId(),
 			webhooks: createDiscordId(),
