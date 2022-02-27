@@ -1,5 +1,8 @@
 import { Category, Community, GuildConfig, Report } from "fagc-api-types"
 import faker from "faker"
+import FAGCBan from "../src/database/FAGCBan"
+import PrivateBan from "../src/database/PrivateBan"
+import Whitelist from "../src/database/Whitelist"
 
 export function createTimes<F extends (...args: any[]) => any>(
 	creator: F,
@@ -91,7 +94,7 @@ export const createFAGCReport = ({
 			: createDiscordId(),
 	}
 }
-type x = Parameters<typeof createFAGCReport>
+
 export const createGuildConfig = ({
 	categoryIds,
 	communityIds,
@@ -138,5 +141,64 @@ export const createFAGCCommunity = (): Community => {
 			faker.datatype.number({ min: 1, max: 5 })
 		),
 		tokenInvalidBefore: faker.date.past(),
+	}
+}
+
+export const createFAGCBan = ({
+	categoryIds,
+	communityIds,
+	playernames,
+}: {
+	categoryIds: string[]
+	communityIds: string[]
+	playernames?: string[]
+}): FAGCBan => {
+	return {
+		id: createFAGCId(),
+		playername: playernames
+			? randomElementFromArray(playernames)
+			: faker.internet.userName(),
+		categoryId: randomElementFromArray(categoryIds),
+		communityId: randomElementFromArray(communityIds),
+	}
+}
+
+export const createWhitelist = ({
+	playernames,
+	adminIds,
+}: {
+	playernames?: string[]
+	adminIds?: string[]
+}): Whitelist => {
+	return {
+		id: faker.datatype.number(),
+		playername: playernames
+			? randomElementFromArray(playernames)
+			: faker.internet.userName(),
+		reason: faker.lorem.sentence(),
+		createdAt: faker.date.past(),
+		adminId: adminIds
+			? randomElementFromArray(adminIds)
+			: createDiscordId(),
+	}
+}
+
+export const createPrivateban = ({
+	playernames,
+	adminIds,
+}: {
+	playernames?: string[]
+	adminIds?: string[]
+}): PrivateBan => {
+	return {
+		id: faker.datatype.number(),
+		playername: playernames
+			? randomElementFromArray(playernames)
+			: faker.internet.userName(),
+		reason: faker.lorem.sentence(),
+		createdAt: faker.date.past(),
+		adminId: adminIds
+			? randomElementFromArray(adminIds)
+			: createDiscordId(),
 	}
 }
