@@ -120,6 +120,7 @@ export async function guildConfigChangedBanlists({
 			categoryId: report.categoryId,
 		})
 	})
+
 	// loop over the single map and check if the player is banned in the new config
 	for (const [playername, bans] of bansByPlayer) {
 		const newBans = bans.filter((ban) => {

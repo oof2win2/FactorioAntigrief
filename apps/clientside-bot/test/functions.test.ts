@@ -243,4 +243,112 @@ describe("guildConfigChangedBanlists", () => {
 		expect(results.toBan.length).toBe(expectedBans.size)
 		expect(results.toBan).toEqual([...expectedBans])
 	})
+	it("Should work with a combination of reports and revocations", async () => {
+		// this most commonly simulates adding and removing filters at the same time
+		const oldGuildConfig = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+		const newGuildConfig: typeof oldGuildConfig = {
+			...oldGuildConfig,
+			categoryFilters: [
+				...randomElementsFromArray(oldGuildConfig.categoryFilters),
+				...randomElementsFromArray(
+					categoryIds.filter(
+						(id) => !oldGuildConfig.categoryFilters.includes(id)
+					)
+				),
+			],
+			trustedCommunities: [
+				...randomElementsFromArray(oldGuildConfig.trustedCommunities),
+				...randomElementsFromArray(
+					communityIds.filter(
+						(id) => !oldGuildConfig.trustedCommunities.includes(id)
+					)
+				),
+			],
+		}
+
+		const playernames = createTimes(faker.internet.userName, 5000)
+
+		const oldReports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: oldGuildConfig.categoryFilters,
+					communityIds: oldGuildConfig.trustedCommunities,
+					playernames: playernames,
+				},
+			],
+			5000
+		)
+		const newReports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: newGuildConfig.categoryFilters,
+					communityIds: newGuildConfig.trustedCommunities,
+					playernames: playernames,
+				},
+			],
+			5000
+		)
+
+		await database.getRepository(FAGCBan).insert(oldReports)
+
+		// get all the reports into a single map
+		const playersToBan = new Set<string>()
+		const playersToUnban = new Set<string>()
+		const [invalidOldBans, validOldBans] = oldReports.reduce<
+			[Report[], Report[]]
+		>(
+			(all, report) => {
+				// if a report is valid under new filters, it falls into the second array
+				if (
+					newGuildConfig.categoryFilters.includes(
+						report.categoryId
+					) &&
+					newGuildConfig.trustedCommunities.includes(
+						report.communityId
+					)
+				) {
+					all[1].push(report)
+				} else {
+					all[0].push(report)
+				}
+				return all
+			},
+			[[], []]
+		)
+		invalidOldBans.forEach((report) =>
+			playersToUnban.add(report.playername)
+		)
+		newReports.forEach((report) => {
+			playersToBan.add(report.playername)
+			playersToUnban.delete(report.playername)
+		})
+		validOldBans.forEach((report) => {
+			playersToBan.delete(report.playername) // the player was banned before so shouldn't be banned again
+			playersToUnban.delete(report.playername) // the player was banned so shouldn't be unbanned
+		})
+		invalidOldBans.forEach((report) =>
+			playersToBan.delete(report.playername)
+		) // if a player was banned before, it makes no sense to unban and ban
+
+		const results = await guildConfigChangedBanlists({
+			oldConfig: oldGuildConfig,
+			newConfig: newGuildConfig,
+			validReports: [...validOldBans, ...newReports],
+			database,
+			allGuildConfigs: [newGuildConfig],
+		})
+
+		// the unbanned players should be the same
+		expect(results.toUnban.length).toBe(playersToUnban.size) // april, wendel, elda, vivien
+		expect(results.toUnban).toEqual([...playersToUnban])
+
+		// the banned players should be the same
+		expect(results.toBan.length).toBe(playersToBan.size)
+		expect(results.toBan).toEqual([...playersToBan])
+	})
 })
