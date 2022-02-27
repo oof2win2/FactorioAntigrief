@@ -1,9 +1,10 @@
 import { Guild, TextChannel } from "discord.js"
-import { GuildConfig, Report } from "fagc-api-types"
+import { GuildConfig, Report, ReportCreatedMessage } from "fagc-api-types"
 import { Connection } from "typeorm"
 import FAGCBot from "../base/FAGCBot"
 import FAGCBan from "../database/FAGCBan"
 import PrivateBan from "../database/PrivateBan"
+import Whitelist from "../database/Whitelist"
 
 export type ArgumentTypes<F> = F extends (...args: infer A) => any ? A : never
 
@@ -64,16 +65,14 @@ export function splitIntoGroups<T>(items: T[], maxCount = 500): T[][] {
 }
 
 /**
- * Generate the different
+ * Generate the list of players to ban and unban based on a guild config change
  */
 export async function guildConfigChangedBanlists({
-	oldConfig,
 	newConfig,
 	database,
 	allGuildConfigs,
 	validReports,
 }: {
-	oldConfig: GuildConfig
 	newConfig: GuildConfig
 	database: Connection
 	allGuildConfigs: GuildConfig[]
@@ -96,6 +95,8 @@ export async function guildConfigChangedBanlists({
 	const toUnbanPlayers = new Set<string>()
 
 	const currentBans = await database.getRepository(FAGCBan).find()
+	const whitelist = await database.getRepository(Whitelist).find()
+	const privateBans = await database.getRepository(PrivateBan).find()
 
 	const currentlyBannedPlayers = new Set(
 		currentBans.map((ban) => ban.playername)
@@ -205,6 +206,12 @@ export async function guildConfigChangedBanlists({
 				})
 			)
 			.execute()
+	}
+
+	// remove any mention of players that are whitelisted or private banned from results of banning and unbanning
+	for (const record of [...whitelist, ...privateBans]) {
+		toBanPlayers.delete(record.playername)
+		toUnbanPlayers.delete(record.playername)
 	}
 
 	return {
