@@ -680,6 +680,72 @@ describe("handleReport", () => {
 			reportIntoFAGCBan(newReport),
 		])
 	})
+	it("Should not ban a player if they are whitelisted", async () => {
+		const guildConfigs = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: guildConfigs.categoryFilters,
+			communityIds: guildConfigs.trustedCommunities,
+		})
+
+		await database.getRepository(Whitelist).insert({
+			playername: report.playername,
+			adminId: "123",
+		})
+
+		const results = await handleReport({
+			report,
+			database,
+			allGuildConfigs: [guildConfigs],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the array should be blank, as the player is ignored
+		expect(results).toEqual([])
+		// there should be a ban in the database, which is equal to the simplified report
+		expect(foundInDatabase.length).toBe(1)
+		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
+	})
+	it("Should not ban a player if they are private banned", async () => {
+		const guildConfigs = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: guildConfigs.categoryFilters,
+			communityIds: guildConfigs.trustedCommunities,
+		})
+
+		await database.getRepository(PrivateBan).insert({
+			playername: report.playername,
+			adminId: "123",
+		})
+
+		const results = await handleReport({
+			report,
+			database,
+			allGuildConfigs: [guildConfigs],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the array should be blank, as the player is ignored
+		expect(results).toEqual([])
+		// there should be a ban in the database, which is equal to the simplified report
+		expect(foundInDatabase.length).toBe(1)
+		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
+	})
 })
 
 /*

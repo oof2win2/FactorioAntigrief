@@ -234,7 +234,7 @@ export async function guildConfigChangedBanlists({
 
 /**
  * Handle a report event from the FAGC API
- * @returns List of guild IDs in which the player should be banned
+ * @returns List of guild IDs in which the player should be banned or false if the report is invalid across all guilds
  */
 export async function handleReport({
 	report,
