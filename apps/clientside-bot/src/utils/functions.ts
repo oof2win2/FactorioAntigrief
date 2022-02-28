@@ -225,3 +225,93 @@ export async function guildConfigChangedBanlists({
 		toUnban: [...toUnbanPlayers],
 	}
 }
+
+/*
+	[ ] implement handling of reports
+	[ ] implement handling of revocations
+	[ ] implement handling of removal of categories + communities
+*/
+
+/**
+ * Handle a report event from the FAGC API
+ * @returns List of guild IDs in which the player should be banned
+ */
+export async function handleReport({
+	report,
+	database,
+	allGuildConfigs,
+}: {
+	report: Report
+	database: Connection
+	allGuildConfigs: GuildConfig[]
+}): Promise<false | string[]> {
+	// check if the report is valid according to ANY of the guild configs
+	const isValidReport = allGuildConfigs.reduce<[boolean, GuildConfig[]]>(
+		(isValid, config) => {
+			// check whether the report is valid under the current guild config
+			if (
+				config.categoryFilters.includes(report.categoryId) &&
+				config.trustedCommunities.includes(report.communityId)
+			) {
+				// if the report is valid, add the guild ID to the list of guilds to ban
+				isValid[0] = true
+				isValid[1].push(config)
+			}
+
+			return isValid
+		},
+		[false, []]
+	)
+
+	// the report is not valid in ANY guild, so it makes no sense to do anything with it
+	if (!isValidReport[0]) return false
+
+	// insert the report to the database no matter what
+	await database.getRepository(FAGCBan).insert({
+		id: report.id,
+		playername: report.playername,
+		communityId: report.communityId,
+		categoryId: report.categoryId,
+	})
+
+	// if the player is whitelisted or private banned, do nothing
+	const isWhitelisted = await database.getRepository(Whitelist).findOne({
+		playername: report.playername,
+	})
+	if (isWhitelisted) return []
+	const isPrivatebanned = await database.getRepository(PrivateBan).findOne({
+		playername: report.playername,
+	})
+	if (isPrivatebanned) return []
+
+	const existing = await database.getRepository(FAGCBan).find({
+		playername: report.playername,
+	})
+
+	// figure out in which guilds the report is valid, but the player is not banned by other reports
+	const guildsToBan = isValidReport[1].filter((guild) => {
+		const isBannedAlready = existing
+			// ignore the report that is being handled
+			.filter((ban) => ban.id !== report.id)
+			.reduce<boolean>((isNotBanned, report) => {
+				// if the report matches this guild's filters, then the player is banned already
+				if (
+					guild.trustedCommunities.includes(report.communityId) &&
+					guild.categoryFilters.includes(report.categoryId)
+				) {
+					// the player is banned already
+					return true
+				} else {
+					// the player may or may not have previous reports against them valid
+					return isNotBanned
+				}
+				// the default value is true, as if there are no existing reports, the player is not banned yet
+			}, false)
+
+		// if the player is already banned in this guild, don't ban them again
+		return !isBannedAlready
+	})
+
+	// return the guild IDs in which the player should be banned
+	return guildsToBan.map((guild) => guild.guildId)
+}
