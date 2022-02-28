@@ -1,6 +1,7 @@
 import { createConnection, Connection } from "typeorm"
 import {
 	guildConfigChangedBanlists,
+	handleReport,
 	splitIntoGroups,
 } from "../src/utils/functions"
 import BotConfig from "../src/database/BotConfig"
@@ -18,6 +19,7 @@ import {
 	createTimes,
 	createWhitelist,
 	randomElementsFromArray,
+	reportIntoFAGCBan,
 } from "./utils"
 import { Category, Community, Report } from "fagc-api-types"
 import faker from "faker"
@@ -495,6 +497,188 @@ describe("guildConfigChangedBanlists", () => {
 		// the banned players should be the same
 		expect(results.toBan.length).toBe(playersToBan.size)
 		expect(results.toBan).toEqual([...playersToBan])
+	})
+})
+describe("handleReport", () => {
+	let database: Connection
+	let categories: Category[]
+	let categoryIds: string[]
+	let communities: Community[]
+	let communityIds: string[]
+	beforeEach(async () => {
+		database = await createConnection({
+			type: "better-sqlite3",
+			database: ":memory:",
+			entities: [
+				FAGCBan,
+				InfoChannel,
+				BotConfig,
+				PrivateBan,
+				Whitelist,
+				Command,
+			],
+			synchronize: true,
+		})
+		categories = createTimes(createFAGCCategory, 100)
+		categoryIds = categories.map((x) => x.id)
+		communities = createTimes(createFAGCCommunity, 100)
+		communityIds = communities.map((x) => x.id)
+	})
+	afterEach(async () => {
+		await database.close()
+	})
+	it("Should ban a player if the report is valid in a single guild", async () => {
+		const guildConfig = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: guildConfig.categoryFilters,
+			communityIds: guildConfig.trustedCommunities,
+		})
+
+		const results = await handleReport({
+			report,
+			database,
+			allGuildConfigs: [guildConfig],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		expect(results).toEqual([guildConfig.guildId])
+		// there should be only one ban in the database, which is equal to the simplified report
+		expect(foundInDatabase.length).toBe(1)
+		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
+	})
+	it("Should ban a player in multiple guilds if the report is valid in multiple guilds", async () => {
+		const guildConfigs = createTimes(
+			createGuildConfig,
+			[
+				{
+					categoryIds,
+					communityIds,
+					includeAllFilters: true,
+				},
+			],
+			// create only 10 because it is useless to have more
+			10
+		)
+		const report = createFAGCReport({
+			// the filters are the same across all guilds
+			categoryIds: guildConfigs[0].categoryFilters,
+			communityIds: guildConfigs[0].trustedCommunities,
+		})
+
+		const results = await handleReport({
+			report,
+			database,
+			allGuildConfigs: guildConfigs,
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the results should be the same as the guild IDs, as the report is valid in all guilds
+		expect(results).toEqual(guildConfigs.map((x) => x.guildId))
+		// there should be only one ban in the database, which is equal to the simplified report
+		expect(foundInDatabase.length).toBe(1)
+		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
+	})
+	it("Should ban only in some guilds if the report is valid in only some guilds", async () => {
+		const guildConfigs = createTimes(
+			createGuildConfig,
+			[
+				{
+					categoryIds,
+					communityIds,
+				},
+			],
+			10
+		)
+
+		const report = createFAGCReport({
+			categoryIds: guildConfigs[0].categoryFilters,
+			communityIds: guildConfigs[0].trustedCommunities,
+		})
+
+		const reportValidIn = guildConfigs.reduce<string[]>(
+			(validIn, config) => {
+				// if the report is valid in the guild, add the guild ID to the array
+				if (
+					config.categoryFilters.includes(report.categoryId) &&
+					config.trustedCommunities.includes(report.communityId)
+				) {
+					validIn.push(config.guildId)
+				}
+
+				return validIn
+			},
+			[]
+		)
+
+		const results = await handleReport({
+			report,
+			database,
+			allGuildConfigs: guildConfigs,
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the results should be the same as the guild IDs in which the report is valid
+		expect(results).toEqual(reportValidIn)
+		// there should be only one ban in the database, which is equal to the simplified report
+		expect(foundInDatabase.length).toBe(1)
+		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
+	})
+	it("Should not ban if the player already has an existing report in the database", async () => {
+		const guildConfigs = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const [oldReport, newReport] = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: guildConfigs.categoryFilters,
+					communityIds: guildConfigs.trustedCommunities,
+					// to ensure that the playername is identical
+					playernames: [faker.internet.userName()],
+				},
+			],
+			2
+		)
+
+		await database.getRepository(FAGCBan).insert(oldReport)
+
+		const results = await handleReport({
+			report: newReport,
+			database,
+			allGuildConfigs: [guildConfigs],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the array should be blank, as the player is banned already
+		expect(results).toEqual([])
+		// there should be two bans in the database, which are equal to the simplified reports
+		expect(foundInDatabase.length).toBe(2)
+		expect(foundInDatabase).toEqual([
+			reportIntoFAGCBan(oldReport),
+			reportIntoFAGCBan(newReport),
+		])
 	})
 })
 

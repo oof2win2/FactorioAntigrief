@@ -98,20 +98,26 @@ export const createFAGCReport = ({
 export const createGuildConfig = ({
 	categoryIds,
 	communityIds,
+	includeAllFilters,
 }: {
 	categoryIds: string[]
 	communityIds: string[]
+	includeAllFilters?: boolean
 }): GuildConfig => {
 	return {
 		guildId: createDiscordId(),
-		categoryFilters: randomElementsFromArray(
-			categoryIds,
-			Math.round(categoryIds.length / 2)
-		),
-		trustedCommunities: randomElementsFromArray(
-			communityIds,
-			Math.round(communityIds.length / 2)
-		),
+		categoryFilters: includeAllFilters
+			? categoryIds
+			: randomElementsFromArray(
+					categoryIds,
+					Math.round(categoryIds.length / 2)
+			  ),
+		trustedCommunities: includeAllFilters
+			? categoryIds
+			: randomElementsFromArray(
+					communityIds,
+					Math.round(communityIds.length / 2)
+			  ),
 		roles: {
 			reports: createDiscordId(),
 			webhooks: createDiscordId(),
@@ -200,5 +206,14 @@ export const createPrivateban = ({
 		adminId: adminIds
 			? randomElementFromArray(adminIds)
 			: createDiscordId(),
+	}
+}
+
+export const reportIntoFAGCBan = (report: Report): FAGCBan => {
+	return {
+		id: report.id,
+		playername: report.playername,
+		categoryId: report.categoryId,
+		communityId: report.communityId,
 	}
 }
