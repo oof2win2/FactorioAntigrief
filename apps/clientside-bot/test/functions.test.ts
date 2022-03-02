@@ -2,6 +2,7 @@ import { createConnection, Connection } from "typeorm"
 import {
 	guildConfigChangedBanlists,
 	handleReport,
+	handleRevocation,
 	splitIntoGroups,
 } from "../src/utils/functions"
 import BotConfig from "../src/database/BotConfig"
@@ -14,6 +15,7 @@ import {
 	createFAGCCategory,
 	createFAGCCommunity,
 	createFAGCReport,
+	createFAGCRevocation,
 	createGuildConfig,
 	createPrivateban,
 	createTimes,
@@ -527,6 +529,7 @@ describe("handleReport", () => {
 	afterEach(async () => {
 		await database.close()
 	})
+
 	it("Should ban a player if the report is valid in a single guild", async () => {
 		const guildConfig = createGuildConfig({
 			categoryIds,
@@ -553,6 +556,26 @@ describe("handleReport", () => {
 		// there should be only one ban in the database, which is equal to the simplified report
 		expect(foundInDatabase.length).toBe(1)
 		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
+	})
+	it("Should not ban a player if the report is not valid in any guild", async () => {
+		const guildConfig = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: ["invalid id"],
+			communityIds: ["invalid id"],
+		})
+
+		const results = await handleReport({
+			report,
+			database,
+			allGuildConfigs: [guildConfig],
+		})
+
+		// results should be false as the report is not valid in any guild
+		expect(results).toBe(false)
 	})
 	it("Should ban a player in multiple guilds if the report is valid in multiple guilds", async () => {
 		const guildConfigs = createTimes(
@@ -745,6 +768,297 @@ describe("handleReport", () => {
 		// there should be a ban in the database, which is equal to the simplified report
 		expect(foundInDatabase.length).toBe(1)
 		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
+	})
+})
+describe("handleRevocation", () => {
+	let database: Connection
+	let categories: Category[]
+	let categoryIds: string[]
+	let communities: Community[]
+	let communityIds: string[]
+	beforeEach(async () => {
+		database = await createConnection({
+			type: "better-sqlite3",
+			database: ":memory:",
+			entities: [
+				FAGCBan,
+				InfoChannel,
+				BotConfig,
+				PrivateBan,
+				Whitelist,
+				Command,
+			],
+			synchronize: true,
+		})
+		categories = createTimes(createFAGCCategory, 100)
+		categoryIds = categories.map((x) => x.id)
+		communities = createTimes(createFAGCCommunity, 100)
+		communityIds = communities.map((x) => x.id)
+	})
+	afterEach(async () => {
+		await database.close()
+	})
+
+	it("Should revoke a player's report if the report is valid", async () => {
+		const guildConfig = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: guildConfig.categoryFilters,
+			communityIds: guildConfig.trustedCommunities,
+		})
+
+		await database.getRepository(FAGCBan).insert(report)
+
+		const revocation = createFAGCRevocation({ report })
+
+		const results = await handleRevocation({
+			revocation,
+			database,
+			allGuildConfigs: [guildConfig],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// there should be no records in the database, as the report should have been deleted
+		expect(foundInDatabase.length).toBe(0)
+		// the results should be an array
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the results should be an array that consists of the guild's ID
+		expect(results).toEqual([guildConfig.guildId])
+	})
+	it("Should ignore a revocation if the revocation is not valid in any guild", async () => {
+		const guildConfig = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: guildConfig.categoryFilters,
+			communityIds: guildConfig.trustedCommunities,
+		})
+
+		await database.getRepository(FAGCBan).insert(report)
+
+		const revocation = createFAGCRevocation({
+			report: {
+				...report,
+				categoryId: "some random id",
+				communityId: "another random id",
+			},
+		})
+
+		const results = await handleRevocation({
+			revocation,
+			database,
+			allGuildConfigs: [],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// the record of the original report should stay in the database
+		expect(foundInDatabase.length).toBe(1)
+		// the results should be false, as no guild acknowledges this report
+		expect(results).toBe(false)
+	})
+	it("Should unban a player in multiple guilds if the report is valid in multiple guilds", async () => {
+		const guildConfigs = createTimes(
+			createGuildConfig,
+			[
+				{
+					categoryIds,
+					communityIds,
+					includeAllFilters: true,
+				},
+			],
+			// create only 10 because it is useless to have more
+			10
+		)
+		const report = createFAGCReport({
+			// the filters are the same across all guilds
+			categoryIds: guildConfigs[0].categoryFilters,
+			communityIds: guildConfigs[0].trustedCommunities,
+		})
+		const revocation = createFAGCRevocation({ report })
+
+		await database.getRepository(FAGCBan).insert(report)
+
+		const results = await handleRevocation({
+			revocation,
+			database,
+			allGuildConfigs: guildConfigs,
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// the record of the original report should be removed from the database, as it is now unbaned
+		expect(foundInDatabase.length).toBe(0)
+		// the results should be an array of all of the guild IDs
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		expect(results).toEqual(guildConfigs.map((x) => x.guildId))
+	})
+	it("Should unban only in some guilds if the report was valid in only some guilds", async () => {
+		const guildConfigs = createTimes(
+			createGuildConfig,
+			[
+				{
+					categoryIds,
+					communityIds,
+				},
+			],
+			10
+		)
+
+		const report = createFAGCReport({
+			categoryIds: guildConfigs[0].categoryFilters,
+			communityIds: guildConfigs[0].trustedCommunities,
+		})
+
+		const revocation = createFAGCRevocation({ report })
+
+		const reportValidIn = guildConfigs.reduce<string[]>(
+			(validIn, config) => {
+				// if the report is valid in the guild, add the guild ID to the array
+				if (
+					config.categoryFilters.includes(report.categoryId) &&
+					config.trustedCommunities.includes(report.communityId)
+				) {
+					validIn.push(config.guildId)
+				}
+
+				return validIn
+			},
+			[]
+		)
+
+		await database.getRepository(FAGCBan).insert(report)
+
+		const results = await handleRevocation({
+			revocation,
+			database,
+			allGuildConfigs: guildConfigs,
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// the record of the original report should be removed from the database, as it is now unbaned
+		expect(foundInDatabase.length).toBe(0)
+		// the results should be an array of all of the guild IDs where the report was valid
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		expect(results).toEqual(reportValidIn)
+	})
+	it("Should not unban the player if the player has another report in the database", async () => {
+		const guildConfig = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const [oldReport, newReport] = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: guildConfig.categoryFilters,
+					communityIds: guildConfig.trustedCommunities,
+					// to ensure that the playername is identical
+					playernames: [faker.internet.userName()],
+				},
+			],
+			2
+		)
+
+		await database.getRepository(FAGCBan).insert([oldReport, newReport])
+
+		const revocation = createFAGCRevocation({ report: newReport })
+
+		const results = await handleRevocation({
+			revocation,
+			database,
+			allGuildConfigs: [guildConfig],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// the record of the original report should be removed from the database, as it is now unbaned
+		expect(foundInDatabase.length).toBe(1)
+		// the results should be an empty array, as the player has another report in the database
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		expect(results).toEqual([])
+	})
+	it("Should not unban a player if they are whitelisted", async () => {
+		const guildConfigs = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: guildConfigs.categoryFilters,
+			communityIds: guildConfigs.trustedCommunities,
+		})
+
+		const revocation = createFAGCRevocation({ report })
+
+		await database.getRepository(FAGCBan).insert(report)
+		await database.getRepository(Whitelist).insert({
+			playername: report.playername,
+			adminId: "123",
+		})
+
+		const results = await handleRevocation({
+			revocation,
+			database,
+			allGuildConfigs: [guildConfigs],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the array should be blank, as the player is ignored
+		expect(results).toEqual([])
+		// there should be no reports in the database
+		expect(foundInDatabase.length).toBe(0)
+	})
+	it("Should not ban a player if they are private banned", async () => {
+		const guildConfigs = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: guildConfigs.categoryFilters,
+			communityIds: guildConfigs.trustedCommunities,
+		})
+
+		const revocation = createFAGCRevocation({ report })
+
+		await database.getRepository(FAGCBan).insert(report)
+		await database.getRepository(PrivateBan).insert({
+			playername: report.playername,
+			adminId: "123",
+		})
+
+		const results = await handleRevocation({
+			revocation,
+			database,
+			allGuildConfigs: [guildConfigs],
+		})
+
+		const foundInDatabase = await database.manager.find(FAGCBan)
+
+		// should be an array of guild IDs rather than false
+		expect(results).not.toBe(false)
+		expect(results).toBeInstanceOf(Array)
+		// the array should be blank, as the player is ignored
+		expect(results).toEqual([])
+		// there should be no reports in the database
+		expect(foundInDatabase.length).toBe(0)
 	})
 })
 

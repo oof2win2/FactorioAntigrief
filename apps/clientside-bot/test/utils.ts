@@ -1,4 +1,10 @@
-import { Category, Community, GuildConfig, Report } from "fagc-api-types"
+import {
+	Category,
+	Community,
+	GuildConfig,
+	Report,
+	Revocation,
+} from "fagc-api-types"
 import faker from "faker"
 import FAGCBan from "../src/database/FAGCBan"
 import PrivateBan from "../src/database/PrivateBan"
@@ -92,6 +98,18 @@ export const createFAGCReport = ({
 		adminId: adminIds
 			? randomElementFromArray(adminIds)
 			: createDiscordId(),
+	}
+}
+
+export const createFAGCRevocation = ({
+	report,
+}: {
+	report: Report
+}): Revocation => {
+	return {
+		...report,
+		revokedAt: faker.date.past(),
+		revokedBy: createDiscordId(),
 	}
 }
 
