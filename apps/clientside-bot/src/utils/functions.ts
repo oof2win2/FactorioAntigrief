@@ -73,9 +73,21 @@ export async function guildConfigChangedBanlists({
 	allGuildConfigs,
 	validReports,
 }: {
+	/**
+	 * The new guild config
+	 */
 	newConfig: GuildConfig
+	/**
+	 * Connection to the database
+	 */
 	database: Connection
+	/**
+	 * All guild configs that are currently loaded by the bot
+	 */
 	allGuildConfigs: GuildConfig[]
+	/**
+	 * New reports that are valid for the new config
+	 */
 	validReports: Report[]
 }) {
 	/*

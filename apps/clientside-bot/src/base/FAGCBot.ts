@@ -141,6 +141,7 @@ export default class FAGCBot extends Client {
 		const records = await (await this.db).getRepository(BotConfig).find()
 		return records
 	}
+	
 	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
 		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing
@@ -153,6 +154,7 @@ export default class FAGCBot extends Client {
 		if (!record) await this.setBotConfig(created)
 		return created
 	}
+
 	async setBotConfig(
 		config: Partial<database.BotConfigType> &
 			Pick<database.BotConfigType, "guildId">
@@ -243,6 +245,11 @@ export default class FAGCBot extends Client {
 	}
 
 	async ban(report: Report, guildId: string) {
+		const servers = this.servers.get(guildId)
+		if (!servers || !servers.length) return
+		const botConfig = await this.getBotConfig(guildId)
+		if (!botConfig || botConfig.reportAction === "none") return
+
 		const command = this.createBanCommand(report, guildId)
 		if (!command) return
 
