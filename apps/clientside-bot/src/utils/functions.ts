@@ -1,5 +1,5 @@
 import { Guild, TextChannel } from "discord.js"
-import { GuildConfig, Report, ReportCreatedMessage } from "fagc-api-types"
+import { GuildConfig, Report, Revocation } from "fagc-api-types"
 import { Connection } from "typeorm"
 import FAGCBot from "../base/FAGCBot"
 import FAGCBan from "../database/FAGCBan"
@@ -314,4 +314,83 @@ export async function handleReport({
 
 	// return the guild IDs in which the player should be banned
 	return guildsToBan.map((guild) => guild.guildId)
+}
+
+/**
+ * Handle a revocation event from the FAGC API
+ * @returns List of guild IDs in which the player should be unbanned or false if the revocation is invalid across all guilds
+ */
+export async function handleRevocation({
+	revocation,
+	database,
+	allGuildConfigs,
+}: {
+	revocation: Revocation
+	database: Connection
+	allGuildConfigs: GuildConfig[]
+}): Promise<false | string[]> {
+	// check if the report is valid according to ANY of the guild configs
+	const isValidRevocation = allGuildConfigs.reduce<[boolean, GuildConfig[]]>(
+		(isValid, config) => {
+			// check whether the report is valid under the current guild config
+			if (
+				config.categoryFilters.includes(revocation.categoryId) &&
+				config.trustedCommunities.includes(revocation.communityId)
+			) {
+				// if the report is valid, add the guild ID to the list of guilds to ban
+				isValid[0] = true
+				isValid[1].push(config)
+			}
+
+			return isValid
+		},
+		[false, []]
+	)
+
+	if (!isValidRevocation[0]) return false
+
+	// remove the report from the database no matter what
+	await database.getRepository(FAGCBan).delete({
+		id: revocation.id,
+	})
+
+	// if the player is whitelisted or private banned, do nothing
+	const isWhitelisted = await database.getRepository(Whitelist).findOne({
+		playername: revocation.playername,
+	})
+	if (isWhitelisted) return []
+	const isPrivatebanned = await database.getRepository(PrivateBan).findOne({
+		playername: revocation.playername,
+	})
+	if (isPrivatebanned) return []
+
+	const existing = await database.getRepository(FAGCBan).find({
+		playername: revocation.playername,
+	})
+
+	// figure out in which guilds the report is valid, but the player is not banned by other reports
+	const guildsToUnban = isValidRevocation[1].filter((guild) => {
+		// no filtering required here, as the report is already removed from the database
+		const isStillBanned = existing.reduce<boolean>(
+			(isNotBanned, report) => {
+				// if the report matches this guild's filters, then the player is still banned so don't unban them
+				if (
+					guild.trustedCommunities.includes(report.communityId) &&
+					guild.categoryFilters.includes(report.categoryId)
+				) {
+					// the player is still banned
+					return true
+				} else {
+					// the player may or may not have previous reports against them valid
+					return isNotBanned
+				}
+				// default to false, as if there are no existing reports, the player is not banned anymore
+			},
+			false
+		)
+		return !isStillBanned
+	})
+
+	// return the guild IDs in which the player should be unbanned
+	return guildsToUnban.map((guild) => guild.guildId)
 }
