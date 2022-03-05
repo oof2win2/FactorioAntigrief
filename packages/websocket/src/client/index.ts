@@ -21,11 +21,11 @@ type WebSocketEvents = {
 	/**
 	 * When a message is received by the server
 	 */
-	message: (message: any) => void
+	message: (messageId: string, message: any) => void
 	/**
 	 * When a response to a message is received by the server
 	 */
-	response: (id: string, message: any) => void
+	response: (messageId: string, message: any) => void
 	/**
 	 * When a message fails to receive a response from the server.
 	 * The message will however be sent at the earliest possible date
@@ -249,11 +249,11 @@ class Client extends TypedEventEmmiter<WebSocketEvents> {
 					break
 				case "message":
 					// an actual message was received from the server
-					this.emit("message", data.data)
+					this.emit("message", data.messageId, data.data)
 					break
 				case "response":
 					// a response to a request was received
-					this.emit("response", data.id, data.data)
+					this.emit("response", data.messageId, data.data)
 					break
 			}
 		} catch (e) {
