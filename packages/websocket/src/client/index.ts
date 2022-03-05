@@ -9,7 +9,9 @@ export interface Opts extends Options {}
 
 export type MessageType = string | ArrayBuffer | Blob | ArrayBufferView
 
-type WebSocketEvents = {
+export type WebSocketEvents = {
+	connected: () => void
+	disconnected: () => void
 	/**
 	 * When a message is acknowledged by the server
 	 */
@@ -94,6 +96,7 @@ class Client extends TypedEventEmmiter<WebSocketEvents> {
 
 		this.ws.addEventListener("open", () => {
 			this.connected = true
+			this.emit("connected")
 			if (this._clientId)
 				this.send(
 					JSON.stringify({
@@ -105,9 +108,12 @@ class Client extends TypedEventEmmiter<WebSocketEvents> {
 		})
 		this.ws.addEventListener("close", () => {
 			this.connected = false
+			this.emit("disconnected")
 		})
 
-		this.ws.addEventListener("message", this.parseMessage)
+		this.ws.addEventListener("message", (message) =>
+			this.parseMessage(message)
+		)
 
 		// a failed message is counted by anything that doesn't get an acknowledgement response
 		const clearFailedMessages = setInterval(() => {
@@ -135,7 +141,7 @@ class Client extends TypedEventEmmiter<WebSocketEvents> {
 	 * @param data Data to send to the WS server
 	 * @returns The ID of the message
 	 */
-	send(data: MessageType): string {
+	send(data: any): string {
 		const messageId = generateId(12)
 		if (this.connected) {
 			this.ws.send(
@@ -262,6 +268,10 @@ class Client extends TypedEventEmmiter<WebSocketEvents> {
 				data: data,
 			})
 		}
+	}
+
+	close() {
+		this.ws.close()
 	}
 }
 

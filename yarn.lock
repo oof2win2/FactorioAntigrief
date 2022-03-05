@@ -6092,6 +6092,11 @@ w3c-xmlserializer@^2.0.0:
   dependencies:
     xml-name-validator "^3.0.0"
 
+wait-for-event@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/wait-for-event/-/wait-for-event-2.0.1.tgz#ded6375b2f868b06121a1506266d9d69836863d0"
+  integrity sha512-CuUBvs/TnLfmgJvCVTXDU8yl3DyTilEzMYUe7mlGWtiQU1gndKT/lvdaUatG4AVwq+3heXugYTILZDOm4etc2Q==
+
 walker@^1.0.7:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/walker/-/walker-1.0.8.tgz#bd498db477afe573dc04185f011d3ab8a8d7653f"
