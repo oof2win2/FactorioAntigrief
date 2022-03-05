@@ -16,9 +16,8 @@
 	"types": "dist/index.d.ts",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/oof2win2/fagc-api-wrapper.git"
+		"url": "git+https://github.com/FactorioAntigrief/FactorioAntigrief.git"
 	},
-	"author": "oof2win2",
 	"keywords": [
 		"api",
 		"wrapper",
@@ -26,9 +25,9 @@
 	],
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/oof2win2/fagc-api-wrapper/issues"
+		"url": "https://github.com/FactorioAntigrief/FactorioAntigrief/issues"
 	},
-	"homepage": "https://github.com/oof2win2/fagc-api-wrapper#readme",
+	"homepage": "https://github.com/FactorioAntigrief/FactorioAntigrief#readme",
 	"dependencies": {
 		"@discordjs/collection": "^0.1.6",
 		"cross-fetch": "^3.1.4",

@@ -36,6 +36,9 @@
 		"nodemon": "^2.0.7",
 		"typescript": "^4.5.5"
 	},
-	"author": "Cooldude2606",
-	"license": "UNLICENSED"
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/FactorioAntigrief/FactorioAntigrief/issues"
+	},
+	"homepage": "https://github.com/FactorioAntigrief/FactorioAntigrief#readme"
 }

@@ -59,15 +59,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/oof2win2/fagc-backend.git"
+		"url": "git+https://github.com/FactorioAntigrief/FactorioAntigrief.git"
 	},
 	"keywords": [],
-	"author": "oof2win2",
-	"license": "ISC",
+	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/oof2win2/fagc-backend/issues"
+		"url": "https://github.com/FactorioAntigrief/FactorioAntigrief/issues"
 	},
-	"homepage": "https://github.com/oof2win2/fagc-backend#readme",
+	"homepage": "https://github.com/FactorioAntigrief/FactorioAntigrief#readme",
 	"devDependencies": {
 		"@types/debug": "^4.1.7",
 		"@types/faker": "^5.5.9",
