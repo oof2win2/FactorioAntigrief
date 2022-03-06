@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { ChannelType } from "discord-api-types"
 import { SubCommand } from "../../base/Commands.js"
+import InfoChannel from "../../database/InfoChannel.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -15,13 +16,11 @@ const Setaction: SubCommand = {
 		),
 	execute: async ({ client, interaction }) => {
 		const channel = interaction.options.getChannel("channel", true)
-		const removed = await client.db.infoChannel.deleteMany({
-			where: {
-				guildId: interaction.guildId,
-				channelId: channel.id,
-			},
+		const removed = await client.db.getRepository(InfoChannel).delete({
+			guildId: interaction.guildId,
+			channelId: channel.id,
 		})
-		if (!removed.count)
+		if (!removed.affected)
 			return interaction.reply({
 				content: `<#${channel.id}> is not an info channel`,
 				ephemeral: true,

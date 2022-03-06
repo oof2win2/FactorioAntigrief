@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
+import Whitelist from "../../database/Whitelist.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -27,10 +28,8 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const existing = await client.db.whitelist.findFirst({
-			where: {
-				playername: playername,
-			},
+		const existing = await client.db.getRepository(Whitelist).findOne({
+			playername: playername,
 		})
 		if (existing)
 			return interaction.reply({
@@ -42,12 +41,10 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		await client.db.whitelist.create({
-			data: {
-				adminId: interaction.user.id,
-				playername: playername,
-				reason: reason ?? undefined,
-			},
+		await client.db.getRepository(Whitelist).insert({
+			adminId: interaction.user.id,
+			playername: playername,
+			reason: reason,
 		})
 		return interaction.reply({
 			content: `Player ${playername} is now whitelisted for ${reason}`,

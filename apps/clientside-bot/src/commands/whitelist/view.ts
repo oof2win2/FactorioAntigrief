@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
+import Whitelist from "../../database/Whitelist.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -17,13 +18,11 @@ const Setaction: SubCommand = {
 			.string()
 			.parse(interaction.options.getString("playername"))
 
-		const existing = await client.db.whitelist.findFirst({
-			where: {
-				playername: playername,
-			},
+		const existing = await client.db.getRepository(Whitelist).findOne({
+			playername: playername,
 		})
 
-		// TODO: check if they are currently banned on servers due to FAGC and state if so
+		// TODO: check if they are currently banned on servers due to FAGC and state if so, unban them
 		if (existing) {
 			return interaction.reply({
 				content: `Player ${playername} is whitelisted by <@${

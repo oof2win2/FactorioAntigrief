@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import { Intents } from "discord.js"
 import FAGCBot from "./base/FAGCBot.js"
 import ENV from "./utils/env.js"
@@ -26,23 +27,12 @@ commands.forEach(async (name) => {
 	client.commands.set(name.slice(0, name.indexOf(".js")), handler)
 })
 
-client.login(ENV.DISCORD_BOTTOKEN)
-
-const checkBans = setTimeout(async () => {
-	// clear banlist from server's memory and also file
-	await client.rcon.rconCommandAll("/banlist clear")
+// log the client in only when the database is ready
+client.on("dbReady", () => {
+	client.login(ENV.DISCORD_BOTTOKEN)
 })
-
-const purgeBans = setInterval(() => {
-	console.log("Purging banlist")
-	// clear banlist from server's memory and also file
-	client.rcon.rconCommandAll("/banlist clear")
-}, 7 * 86400 * 1000)
-// 7 * 86400 * 1000 is a week in ms
 
 process.on("exit", () => {
 	client.destroy()
 	client.fagc.destroy()
-	clearTimeout(checkBans)
-	clearInterval(purgeBans)
 })

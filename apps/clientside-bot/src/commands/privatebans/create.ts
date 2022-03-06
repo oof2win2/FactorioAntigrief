@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
+import PrivateBan from "../../database/PrivateBan.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -27,10 +28,8 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const existing = await client.db.privatebans.findFirst({
-			where: {
-				playername: playername,
-			},
+		const existing = await client.db.getRepository(PrivateBan).findOne({
+			playername: playername,
 		})
 		if (existing)
 			return interaction.reply({
@@ -42,12 +41,10 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		await client.db.privatebans.create({
-			data: {
-				adminId: interaction.user.id,
-				playername: playername,
-				reason: reason ?? undefined,
-			},
+		await client.db.getRepository(PrivateBan).insert({
+			adminId: interaction.user.id,
+			playername: playername,
+			reason: reason,
 		})
 		return interaction.reply({
 			content: `Player ${playername} is now banned for ${reason}`,

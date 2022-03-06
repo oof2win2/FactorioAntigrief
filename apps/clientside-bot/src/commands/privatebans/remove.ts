@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
+import PrivateBan from "../../database/PrivateBan.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -27,12 +28,10 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const result = await client.db.privatebans.deleteMany({
-			where: {
-				playername: playername,
-			},
+		const result = await client.db.getRepository(PrivateBan).delete({
+			playername: playername,
 		})
-		if (!result.count)
+		if (!result.affected)
 			return interaction.reply({
 				content: `Player ${playername} was not banned`,
 				ephemeral: true,

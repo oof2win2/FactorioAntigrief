@@ -15,7 +15,7 @@ const ENV = cleanEnv(
 			desc: "FAGC WS URL",
 			default: "wss://factoriobans.club/api/ws",
 		}),
-		DATABASE_URL: str({ desc: "DB URL" }),
+		DATABASE_URL: str({ desc: "DB URL", default: "../database.sqlite" }),
 		DISCORD_BOTTOKEN: str({ desc: "Discord bot token" }),
 		TESTGUILDID: str({
 			desc: "Testing guild ID, where to deploy commands when NODE_ENV is development",
@@ -51,6 +51,7 @@ const ENV = cleanEnv(
 		SERVERSFILEPATH: str({
 			desc: "Path to JSON file of server descriptions",
 			example: "/home/fagc/fagc-clientside-bot/servers.json",
+			default: "../servers.json",
 		}),
 	},
 	{}

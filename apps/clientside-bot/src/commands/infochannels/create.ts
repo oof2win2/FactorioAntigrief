@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { ChannelType } from "discord-api-types"
 import { SubCommand } from "../../base/Commands.js"
+import InfoChannel from "../../database/InfoChannel.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -15,11 +16,9 @@ const Setaction: SubCommand = {
 		),
 	execute: async ({ client, interaction }) => {
 		const channel = interaction.options.getChannel("channel", true)
-		const existing = await client.db.infoChannel.findFirst({
-			where: {
-				guildId: interaction.guildId,
-				channelId: channel.id,
-			},
+		const existing = await client.db.getRepository(InfoChannel).findOne({
+			guildId: interaction.guildId,
+			channelId: channel.id,
 		})
 		if (existing)
 			return interaction.reply({
@@ -27,11 +26,9 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		await client.db.infoChannel.create({
-			data: {
-				guildId: interaction.guildId,
-				channelId: channel.id,
-			},
+		await client.db.getRepository(InfoChannel).insert({
+			guildId: interaction.guildId,
+			channelId: channel.id,
 		})
 		return interaction.reply({
 			content: `Info channel in <#${channel.id}> has been created`,
