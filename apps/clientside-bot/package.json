@@ -34,7 +34,7 @@
 		"rcon-client": "^4.2.3",
 		"reflect-metadata": "^0.1.13",
 		"sqlite3": "^5.0.2",
-		"typeorm": "^0.2.43",
+		"typeorm": "^0.2.45",
 		"utility-types": "^3.10.0",
 		"why-is-node-still-running": "^1.0.0",
 		"zod": "^3.11.6"

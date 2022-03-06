@@ -85,13 +85,14 @@ export const createFAGCReport = ({
 }): Report => {
 	return {
 		id: createFAGCId(),
-		playername: playernames
+		playername: (playernames
 			? randomElementFromArray(playernames)
-			: faker.internet.userName(),
+			: faker.internet.userName()
+		).slice(0, 60),
 		categoryId: randomElementFromArray(categoryIds),
 		communityId: randomElementFromArray(communityIds),
-		description: faker.lorem.sentence(),
-		proof: faker.lorem.sentence(),
+		description: faker.lorem.sentence(10),
+		proof: faker.lorem.sentence(10),
 		reportCreatedAt: faker.date.past(),
 		reportedTime: faker.date.past(),
 		automated: Math.random() > 0.5,
@@ -150,7 +151,7 @@ export const createFAGCCategory = (): Category => {
 	return {
 		id: createFAGCId(),
 		name: faker.lorem.words(),
-		description: faker.lorem.sentence(),
+		description: faker.lorem.sentence(10),
 	}
 }
 
@@ -179,9 +180,10 @@ export const createFAGCBan = ({
 }): FAGCBan => {
 	return {
 		id: createFAGCId(),
-		playername: playernames
+		playername: (playernames
 			? randomElementFromArray(playernames)
-			: faker.internet.userName(),
+			: faker.internet.userName()
+		).slice(0, 60),
 		categoryId: randomElementFromArray(categoryIds),
 		communityId: randomElementFromArray(communityIds),
 	}
@@ -196,10 +198,11 @@ export const createWhitelist = ({
 }): Whitelist => {
 	return {
 		id: faker.datatype.number(),
-		playername: playernames
+		playername: (playernames
 			? randomElementFromArray(playernames)
-			: faker.internet.userName(),
-		reason: faker.lorem.sentence(),
+			: faker.internet.userName()
+		).slice(0, 60),
+		reason: faker.lorem.sentence(10),
 		createdAt: faker.date.past(),
 		adminId: adminIds
 			? randomElementFromArray(adminIds)
@@ -216,10 +219,11 @@ export const createPrivateban = ({
 }): PrivateBan => {
 	return {
 		id: faker.datatype.number(),
-		playername: playernames
+		playername: (playernames
 			? randomElementFromArray(playernames)
-			: faker.internet.userName(),
-		reason: faker.lorem.sentence(),
+			: faker.internet.userName()
+		).slice(0, 60),
+		reason: faker.lorem.sentence(10),
 		createdAt: faker.date.past(),
 		adminId: adminIds
 			? randomElementFromArray(adminIds)

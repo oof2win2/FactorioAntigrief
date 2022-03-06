@@ -141,7 +141,7 @@ export default class FAGCBot extends Client {
 		const records = await (await this.db).getRepository(BotConfig).find()
 		return records
 	}
-	
+
 	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
 		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing

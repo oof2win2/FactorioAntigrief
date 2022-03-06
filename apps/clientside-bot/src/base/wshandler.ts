@@ -1,6 +1,11 @@
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 import FAGCBot from "./FAGCBot"
-import { MessageEmbed } from "discord.js"
+import {
+	MessageEmbed,
+	NewsChannel,
+	TextChannel,
+	ThreadChannel,
+} from "discord.js"
 import {
 	guildConfigChangedBanlists,
 	handleReport,
@@ -36,8 +41,12 @@ export const communityRemoved = ({
 
 	client.infochannels.forEach((guildChannels) => {
 		guildChannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId)
-			if (!channel || !channel.isNotDMChannel()) return
+			const channel = client.channels.cache.get(c.channelId) as
+				| NewsChannel
+				| TextChannel
+				| ThreadChannel
+				| undefined
+			if (!channel) return
 			client.addEmbedToQueue(channel.id, embed)
 		})
 	})
@@ -102,7 +111,7 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 		})
 	})
 
-	// get guilds where to unban
+	// get guilds where to ban
 	const guildsToBan = await handleReport({
 		database: await client.db,
 		report: event.report,
@@ -112,13 +121,10 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 
 	// unban in guilds that its supposed to
 	guildsToBan.map((guildId) => {
-		const command = client.createUnbanCommand(
-			event.report.playername,
-			guildId
-		)
+		const command = client.createBanCommand(event.report, guildId)
 		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
 		client.rcon.rconCommandGuild(
-			`/sc game.unban_player("${event.report.playername}"); rcon.print(true)`,
+			`/sc ${command}; rcon.print(true)`,
 			guildId
 		)
 	})
@@ -152,8 +158,12 @@ export const revocation = async ({
 		const infochannels = client.infochannels.get(guildConfig.guildId)
 		if (!infochannels) return
 		infochannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId)
-			if (!channel || !channel.isNotDMChannel()) return
+			const channel = client.channels.cache.get(c.channelId) as
+				| NewsChannel
+				| TextChannel
+				| ThreadChannel
+				| undefined
+			if (!channel) return
 			client.addEmbedToQueue(channel.id, embed)
 		})
 	})

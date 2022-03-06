@@ -10,7 +10,7 @@ export default class FAGCBan {
 
 	@Column({
 		type: "text",
-		length: 32, // hopefully max length of a playername
+		length: 60, // https://wiki.factorio.com/Multiplayer#Version_history
 	})
 	playername!: string
 

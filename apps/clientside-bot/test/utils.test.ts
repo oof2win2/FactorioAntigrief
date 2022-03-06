@@ -13,12 +13,12 @@ describe("createTimes", () => {
 		expect(result).toEqual([1, 1, 1])
 	})
 	it("Should give some random numbers when using Math.random as the parameter function", () => {
+		jest.spyOn(Math, "random")
+			.mockReturnValueOnce(0.1)
+			.mockReturnValueOnce(0.5)
+			.mockReturnValueOnce(0.9)
 		const result = createTimes(Math.random, [], 3)
-		result.forEach((element, index) => {
-			result.slice(index + 1).forEach((element2) => {
-				expect(element).not.toEqual(element2)
-			})
-		})
+		expect(result).toEqual([0.1, 0.5, 0.9])
 	})
 })
 
@@ -34,7 +34,7 @@ describe("createFAGCId", () => {
 })
 
 describe("randomElementFromArray", () => {
-	it("Should pick a random element from the array", () => {
+	it("Should pick an element from the array", () => {
 		const array = [1, 2, 3]
 		const result = randomElementFromArray(array)
 		expect(array).toContain(result)
@@ -44,7 +44,7 @@ describe("randomElementFromArray", () => {
 		const result = randomElementFromArray([1, 2, 3])
 		expect(result).toBe(1)
 
-		jest.spyOn(Math, "random").mockImplementation(() => 0.99) // Math.random returns a number between 0 and 1exclusive
+		jest.spyOn(Math, "random").mockImplementation(() => 0.99) // Math.random returns a number between 0 and 1 exclusive
 		const result2 = randomElementFromArray([1, 2, 3])
 		expect(result2).toBe(3)
 	})

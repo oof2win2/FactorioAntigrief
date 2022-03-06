@@ -42,6 +42,13 @@ describe("splitIntoGroups", () => {
 			expect(group.length).toBe(100)
 		}
 	})
+	it("Should split a large array into two partially filled ones if the amount of elements isn't divisible by the limit", () => {
+		const items = new Array(750).fill(0)
+		const groups = splitIntoGroups(items, 500)
+		expect(groups.length).toBe(2)
+		expect(groups[0].length).toBe(500)
+		expect(groups[1].length).toBe(250)
+	})
 	it("Should keep the original values of the inital array", () => {
 		const items = Array.from({ length: 1000 }, () =>
 			Math.floor(Math.random() * 10)
@@ -501,6 +508,7 @@ describe("guildConfigChangedBanlists", () => {
 		expect(results.toBan).toEqual([...playersToBan])
 	})
 })
+
 describe("handleReport", () => {
 	let database: Connection
 	let categories: Category[]
