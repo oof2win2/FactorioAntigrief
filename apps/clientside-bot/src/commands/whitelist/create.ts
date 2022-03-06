@@ -28,11 +28,9 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const existing = await (await client.db)
-			.getRepository(Whitelist)
-			.findOne({
-				playername: playername,
-			})
+		const existing = await client.db.getRepository(Whitelist).findOne({
+			playername: playername,
+		})
 		if (existing)
 			return interaction.reply({
 				content: `Player ${playername} is already whitelisted by <@${
@@ -43,7 +41,7 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		await (await client.db).getRepository(Whitelist).insert({
+		await client.db.getRepository(Whitelist).insert({
 			adminId: interaction.user.id,
 			playername: playername,
 			reason: reason,

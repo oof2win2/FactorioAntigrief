@@ -31,7 +31,7 @@ function getServers(): database.FactorioServerType[] {
 interface BotOptions extends ClientOptions {}
 export default class FAGCBot extends Client {
 	fagc: FAGCWrapper
-	db: Promise<Connection>
+	db!: Connection
 	commands: Collection<string, CommandType>
 	/**
 	 * Info channels, grouped by guild ID
@@ -76,22 +76,8 @@ export default class FAGCBot extends Client {
 
 		this.rcon = new RCONInterface(this, rawServers)
 
-		this.db = createConnection({
-			type: "better-sqlite3",
-			database: ENV.DATABASE_URL,
-			entities: [
-				FAGCBan,
-				InfoChannel,
-				BotConfig,
-				PrivateBan,
-				Whitelist,
-				Command,
-			],
-		})
-
-		// load info channels
-		this.db.then(async (connection) => {
-			const channels = await connection.getRepository(InfoChannel).find()
+		const loadInfoChannels = async () => {
+			const channels = await this.db.getRepository(InfoChannel).find()
 			channels.forEach((channel) => {
 				const existing = this.infochannels.get(channel.guildId)
 				if (existing) {
@@ -103,6 +89,23 @@ export default class FAGCBot extends Client {
 					this.infochannels.set(channel.guildId, [channel])
 				}
 			})
+		}
+
+		createConnection({
+			type: "better-sqlite3",
+			database: ENV.DATABASE_URL,
+			entities: [
+				FAGCBan,
+				InfoChannel,
+				BotConfig,
+				PrivateBan,
+				Whitelist,
+				Command,
+			],
+		}).then((db) => {
+			this.db = db
+			loadInfoChannels()
+			this.emit("dbReady")
 		})
 
 		this.getBotConfigs().then((configs) => {

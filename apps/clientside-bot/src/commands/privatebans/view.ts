@@ -18,11 +18,9 @@ const Setaction: SubCommand = {
 			.string()
 			.parse(interaction.options.getString("playername"))
 
-		const existing = await (await client.db)
-			.getRepository(PrivateBan)
-			.findOne({
-				playername: playername,
-			})
+		const existing = await client.db.getRepository(PrivateBan).findOne({
+			playername: playername,
+		})
 
 		// TODO: check if they are currently banned on servers due to FAGC and state if so
 		if (existing) {

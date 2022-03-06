@@ -28,11 +28,9 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const result = await (await client.db)
-			.getRepository(PrivateBan)
-			.delete({
-				playername: playername,
-			})
+		const result = await client.db.getRepository(PrivateBan).delete({
+			playername: playername,
+		})
 		if (!result.affected)
 			return interaction.reply({
 				content: `Player ${playername} was not banned`,

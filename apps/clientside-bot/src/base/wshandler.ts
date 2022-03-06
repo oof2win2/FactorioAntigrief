@@ -113,7 +113,7 @@ export const report = async ({ client, event }: HandlerOpts<"report">) => {
 
 	// get guilds where to ban
 	const guildsToBan = await handleReport({
-		database: await client.db,
+		database: client.db,
 		report: event.report,
 		allGuildConfigs: [...client.guildConfigs.values()],
 	})
@@ -170,7 +170,7 @@ export const revocation = async ({
 
 	// get guilds where to unban
 	const guildsToUnban = await handleRevocation({
-		database: await client.db,
+		database: client.db,
 		revocation: event.revocation,
 		allGuildConfigs: [...client.guildConfigs.values()],
 	})
@@ -202,7 +202,7 @@ export const guildConfigChanged = async ({
 	})
 
 	const results = await guildConfigChangedBanlists({
-		database: await client.db,
+		database: client.db,
 		newConfig: event.config,
 		allGuildConfigs: [...client.guildConfigs.values()],
 		validReports: validReports,

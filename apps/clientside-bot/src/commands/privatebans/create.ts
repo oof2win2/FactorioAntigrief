@@ -28,11 +28,9 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const existing = await (await client.db)
-			.getRepository(PrivateBan)
-			.findOne({
-				playername: playername,
-			})
+		const existing = await client.db.getRepository(PrivateBan).findOne({
+			playername: playername,
+		})
 		if (existing)
 			return interaction.reply({
 				content: `Player ${playername} was already banned by <@${
@@ -43,7 +41,7 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		await (await client.db).getRepository(PrivateBan).insert({
+		await client.db.getRepository(PrivateBan).insert({
 			adminId: interaction.user.id,
 			playername: playername,
 			reason: reason,

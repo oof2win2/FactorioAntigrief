@@ -16,12 +16,10 @@ const Setaction: SubCommand = {
 		),
 	execute: async ({ client, interaction }) => {
 		const channel = interaction.options.getChannel("channel", true)
-		const removed = await (await client.db)
-			.getRepository(InfoChannel)
-			.delete({
-				guildId: interaction.guildId,
-				channelId: channel.id,
-			})
+		const removed = await client.db.getRepository(InfoChannel).delete({
+			guildId: interaction.guildId,
+			channelId: channel.id,
+		})
 		if (!removed.affected)
 			return interaction.reply({
 				content: `<#${channel.id}> is not an info channel`,

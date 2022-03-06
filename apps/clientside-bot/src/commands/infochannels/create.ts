@@ -16,19 +16,17 @@ const Setaction: SubCommand = {
 		),
 	execute: async ({ client, interaction }) => {
 		const channel = interaction.options.getChannel("channel", true)
-		const existing = await (await client.db)
-			.getRepository(InfoChannel)
-			.findOne({
-				guildId: interaction.guildId,
-				channelId: channel.id,
-			})
+		const existing = await client.db.getRepository(InfoChannel).findOne({
+			guildId: interaction.guildId,
+			channelId: channel.id,
+		})
 		if (existing)
 			return interaction.reply({
 				content: `<#${channel.id}> already is an info channel`,
 				ephemeral: true,
 			})
 
-		await (await client.db).getRepository(InfoChannel).insert({
+		await client.db.getRepository(InfoChannel).insert({
 			guildId: interaction.guildId,
 			channelId: channel.id,
 		})

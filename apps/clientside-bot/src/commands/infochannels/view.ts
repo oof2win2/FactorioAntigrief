@@ -7,11 +7,9 @@ const Setaction: SubCommand = {
 		.setName("view")
 		.setDescription("View infochannels in this guild"),
 	execute: async ({ client, interaction }) => {
-		const channels = await (await client.db)
-			.getRepository(InfoChannel)
-			.find({
-				guildId: interaction.guildId,
-			})
+		const channels = await client.db.getRepository(InfoChannel).find({
+			guildId: interaction.guildId,
+		})
 		if (!channels.length)
 			return interaction.reply({
 				content: "This guild has no infochannels",

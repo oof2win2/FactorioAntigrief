@@ -28,7 +28,7 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const result = await (await client.db).getRepository(Whitelist).delete({
+		const result = await client.db.getRepository(Whitelist).delete({
 			playername: playername,
 		})
 		if (!result.affected)
