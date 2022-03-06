@@ -1,8 +1,11 @@
 import { EventEmitter } from "events"
 
-declare interface TypedEventEmmiter<
-	T extends Record<string | symbol, (...args: any[]) => any>
-> {
+export type TypedEventEmmiterTypes = Record<
+	string | symbol,
+	(...args: any[]) => void
+>
+
+declare interface TypedEventEmmiter<T extends TypedEventEmmiterTypes> {
 	addListener<E extends keyof T>(event: E, listener: T[E]): this
 	emit<E extends keyof T>(event: E, ...args: Parameters<T[E]>): boolean
 	listenerCount<E extends keyof T>(event: E): number
@@ -17,6 +20,6 @@ declare interface TypedEventEmmiter<
 }
 
 class TypedEventEmmiter<
-	T extends Record<string | symbol, (...args: any[]) => any>
+	T extends TypedEventEmmiterTypes
 > extends EventEmitter {}
 export default TypedEventEmmiter
