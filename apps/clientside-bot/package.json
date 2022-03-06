@@ -12,14 +12,13 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/FactorioAntigrief/fagc-clientside-bot.git"
+		"url": "git+https://github.com/FactorioAntigrief/FactorioAntigrief.git"
 	},
-	"author": "oof2win2",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/FactorioAntigrief/fagc-clientside-bot/issues"
+		"url": "https://github.com/FactorioAntigrief/FactorioAntigrief/issues"
 	},
-	"homepage": "https://github.com/FactorioAntigrief/fagc-clientside-bot#readme",
+	"homepage": "https://github.com/FactorioAntigrief/FactorioAntigrief#readme",
 	"dependencies": {
 		"@discordjs/builders": "^0.9.0",
 		"@discordjs/rest": "^0.1.0-canary.0",

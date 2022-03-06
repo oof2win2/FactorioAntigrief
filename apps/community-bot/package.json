@@ -22,7 +22,7 @@
 		"dotenv": "^8.2.0",
 		"envalid": "^7.2.1",
 		"fagc-api-wrapper": "^1.28.2",
-		"fs-extra": "^9.1.0",
+		"fs-extra": "^10.0.0",
 		"moment": "^2.29.1",
 		"node-fetch": "^2.6.1",
 		"path": "^0.12.7",
@@ -36,6 +36,9 @@
 		"nodemon": "^2.0.7",
 		"typescript": "^4.5.5"
 	},
-	"author": "Cooldude2606",
-	"license": "UNLICENSED"
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/FactorioAntigrief/FactorioAntigrief/issues"
+	},
+	"homepage": "https://github.com/FactorioAntigrief/FactorioAntigrief#readme"
 }

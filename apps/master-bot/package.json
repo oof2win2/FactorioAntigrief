@@ -13,14 +13,13 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/oof2win2/fagc-master-bot.git"
+		"url": "git+https://github.com/FactorioAntigrief/FactorioAntigrief.git"
 	},
-	"author": "oof2win2",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/oof2win2/fagc-master-bot/issues"
+		"url": "https://github.com/FactorioAntigrief/FactorioAntigrief/issues"
 	},
-	"homepage": "https://github.com/oof2win2/fagc-master-bot#readme",
+	"homepage": "https://github.com/FactorioAntigrief/FactorioAntigrief#readme",
 	"dependencies": {
 		"@discordjs/builders": "^0.10.0",
 		"@discordjs/rest": "^0.1.0-canary.0",

@@ -10,8 +10,15 @@
 		"prepare": "npx tsc",
 		"build": "tsc --build"
 	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/FactorioAntigrief/FactorioAntigrief.git"
+	},
+	"bugs": {
+		"url": "https://github.com/FactorioAntigrief/FactorioAntigrief/issues"
+	},
+	"homepage": "https://github.com/FactorioAntigrief/FactorioAntigrief#readme",
 	"keywords": [],
-	"author": "",
 	"license": "MIT",
 	"dependencies": {
 		"discord-api-types": "^0.23.1",
