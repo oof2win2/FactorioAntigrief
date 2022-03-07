@@ -6,6 +6,7 @@ export type TypedEventEmmiterTypes = Record<
 >
 
 declare interface TypedEventEmmiter<T extends TypedEventEmmiterTypes> {
+	_foo: T
 	addListener<E extends keyof T>(event: E, listener: T[E]): this
 	emit<E extends keyof T>(event: E, ...args: Parameters<T[E]>): boolean
 	listenerCount<E extends keyof T>(event: E): number
@@ -19,7 +20,7 @@ declare interface TypedEventEmmiter<T extends TypedEventEmmiterTypes> {
 	rawListeners<E extends keyof T>(event: E): Function[]
 }
 
-class TypedEventEmmiter<
-	T extends TypedEventEmmiterTypes
-> extends EventEmitter {}
+class TypedEventEmmiter<T extends TypedEventEmmiterTypes> extends EventEmitter {
+	foo!: T
+}
 export default TypedEventEmmiter

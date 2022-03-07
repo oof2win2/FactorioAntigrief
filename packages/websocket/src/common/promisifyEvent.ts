@@ -1,13 +1,12 @@
 import TypedEventEmmiter, { TypedEventEmmiterTypes } from "./TypedEventEmmiter"
 
 export default function promisifyEvent<
-	X extends TypedEventEmmiterTypes,
-	T extends TypedEventEmmiter<X> = TypedEventEmmiter<{}>,
-	E extends keyof X = keyof X
->(eventEmitter: T, eventName: E): Promise<Parameters<X[E]>> {
+	T extends TypedEventEmmiter<any>,
+	E extends keyof T["_foo"]
+>(eventEmitter: T, eventName: E): Promise<Parameters<T["_foo"][E]>> {
 	return new Promise<any>((resolve) => {
-		eventEmitter.once(eventName, ((...args: Parameters<X[E]>) => {
+		eventEmitter.once(eventName, ((...args: Parameters<T["_foo"][E]>) => {
 			resolve(args)
-		}) as X[E])
+		}) as T["_foo"][E])
 	})
 }
