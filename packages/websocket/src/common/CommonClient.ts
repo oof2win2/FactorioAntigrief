@@ -1,45 +1,36 @@
-import TypedEventEmmiter from "./TypedEventEmmiter"
-
-type MessageTypeEnum =
-	| "message"
-	| "heartbeat"
-	| "acknowledge"
-	| "request"
-	| "response"
-
-type BaseMessage = {
-	messageType: MessageTypeEnum
-	seq: number
-	data: any
-	sentAt: number
-}
-
-export type MessageType =
-	| (BaseMessage & { messageType: Exclude<MessageTypeEnum, "response"> })
-	| ({
-			messageType: "response"
-			requestId: number
-	  } & BaseMessage)
+import WebSocket, { RawData } from "ws"
+import { TypedEventEmitter } from "@oof2win2/promisify-event"
+import MessageType, { RequestMessage, Message, ResponseMessage } from "./types"
 
 export type CommonSocketClientEvents = {
 	unacknowledgedMessage: (message: MessageType) => void
-	message: (message: MessageType) => void
+	message: (message: Message) => void
+	/**
+	 * Heartbeat message, containing the last sequence that was received
+	 */
+	heartbeat: (lastSeq: number) => void
+	/**
+	 * A request has been received from the other end of the connection
+	 */
+	request: (message: RequestMessage) => void
+	response: (message: ResponseMessage) => void
+	connected: () => void
 }
 
-export default abstract class CommonSocketClient extends TypedEventEmmiter<CommonSocketClientEvents> {
+export default class CommonSocketClient extends TypedEventEmitter<CommonSocketClientEvents> {
 	private _seq = 0
 	private toReceiveResponse: MessageType[] = []
-	private _lastHeartbeat: number = -1
+	private _lastHeartbeat = -1
 	private intervals: NodeJS.Timeout[] = []
 	private heartbeatTimer: NodeJS.Timeout | null = null
 	/**
 	 * the amount of delay between heartbeats
 	 */
-	private heartbeatInterval: number = 5e3
+	private heartbeatInterval = 5e3
 	/**
 	 * amount of time after which the client should close the connection if no heartbeat was received from the server
 	 */
-	private heartbeatTimeout: number = 60e3
+	private heartbeatTimeout = 60e3
 
 	constructor(private ws: WebSocket) {
 		super()
@@ -48,6 +39,9 @@ export default abstract class CommonSocketClient extends TypedEventEmmiter<Commo
 		}, 3e6) // sweep the messages every 5 minutes
 		// unref if running in node
 		this.intervals.push(sweepInterval)
+
+		this.ws.on("message", (message) => this.handleMessage(message))
+		this.ws.on("open", () => this.emit("connected"))
 	}
 
 	/**
@@ -80,30 +74,30 @@ export default abstract class CommonSocketClient extends TypedEventEmmiter<Commo
 		this.toReceiveResponse.push(message)
 
 		return new Promise((resolve, reject) => {
-			const messageHandler = (msg: MessageType) => {
-				if (msg.messageType !== "response") return false
-				if (msg.requestId !== message.seq) return false
-				resolve(msg)
-				return true
-			}
-			const unacknowledgedHandler = (msg: MessageType) => {
-				if (msg.seq !== message.seq) return false
-				reject(msg)
-				return true
+			// this handler magic is used to remove the event listener when the promise is resolved or rejected
+			const combinedHandler = (msg: MessageType) => {
+				if (msg.messageType === "response") {
+					if (msg.requestId !== message.seq) return
+					this.removeListener("response", combinedHandler)
+					this.removeListener(
+						"unacknowledgedMessage",
+						combinedHandler
+					)
+					resolve(msg)
+				} else {
+					// handler for
+					if (msg.seq !== message.seq) return
+					this.removeListener("response", combinedHandler)
+					this.removeListener(
+						"unacknowledgedMessage",
+						combinedHandler
+					)
+					reject(msg)
+				}
 			}
 
-			this.on("message", (msg) => {
-				if (messageHandler(msg)) {
-					this.off("message", messageHandler)
-					this.off("unacknowledgedMessage", unacknowledgedHandler)
-				}
-			})
-			this.on("unacknowledgedMessage", (msg) => {
-				if (unacknowledgedHandler(msg)) {
-					this.off("message", messageHandler)
-					this.off("unacknowledgedMessage", unacknowledgedHandler)
-				}
-			})
+			this.on("response", combinedHandler)
+			this.on("unacknowledgedMessage", combinedHandler)
 		})
 	}
 
@@ -131,8 +125,38 @@ export default abstract class CommonSocketClient extends TypedEventEmmiter<Commo
 
 	/**
 	 * Handle a message received from the connection, such as requests, responses, closures etc.
+	 * Should be extended to handle client-specific messages
 	 */
-	abstract handleMessage(message: MessageType): void
+	protected handleMessage(msg: RawData | string) {
+		let message: MessageType
+		try {
+			message = JSON.parse(
+				typeof msg == "string" ? msg : msg.toString("utf8")
+			)
+			// TODO: use zod to validate the message later
+		} catch {
+			// errors will be ignored
+			return
+		}
+		switch (message.messageType) {
+			case "message":
+				this.emit("message", message)
+				break
+			case "heartbeat":
+				this._lastHeartbeat = Date.now()
+				this.emit("heartbeat", message.seq)
+				break
+			case "acknowledge":
+				this.handleAcknowledge(message.seq)
+				break
+			case "request":
+				this.emit("request", message)
+				break
+			case "response":
+				this.emit("response", message)
+				break
+		}
+	}
 
 	/**
 	 * Perform the actual heartbeat every few seconds
@@ -154,6 +178,15 @@ export default abstract class CommonSocketClient extends TypedEventEmmiter<Commo
 	}
 
 	/**
+	 * Stop sending heartbeats
+	 */
+	stopHeartbeat() {
+		if (this.heartbeatTimer) {
+			clearInterval(this.heartbeatTimer)
+		}
+	}
+
+	/**
 	 * Sequence ID of the last message
 	 */
 	get seq() {
@@ -161,7 +194,8 @@ export default abstract class CommonSocketClient extends TypedEventEmmiter<Commo
 	}
 
 	/**
-	 * The timestamp of when the last heartbeat was received
+	 * The timestamp of when the last heartbeat was received. -1 if no heartbeat has been received
+	 * @default -1
 	 */
 	get lastHeartbeat() {
 		return this._lastHeartbeat
