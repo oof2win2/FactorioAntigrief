@@ -4,6 +4,8 @@ type MessageTypeEnum =
 	| "acknowledge"
 	| "request"
 	| "response"
+	| "startHeartbeat"
+	| "stopHeartbeat"
 
 export interface BaseMessage {
 	messageType: MessageTypeEnum

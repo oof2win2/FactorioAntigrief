@@ -31,6 +31,7 @@ describe("CommonClient", () => {
 		ws.close()
 		server.close()
 		server.once("close", () => done())
+		client.destroy()
 	})
 	it("Should emit a message event if a message is received from the server", async () => {
 		const message = {
@@ -98,5 +99,33 @@ describe("CommonClient", () => {
 
 		const response = await client.request("getClientCount")
 		expect(response.data).toBe(1)
+	})
+	it("Heartbeats should be received correctly", async () => {
+		jest.useFakeTimers()
+		await promisifyEvent(client, "connected")
+
+		const serverClient = [...server.clients][0]
+
+		const heartbeatInterval = setInterval(() => {
+			serverClient.send(
+				JSON.stringify({
+					messageType: "heartbeat",
+					seq: -1,
+					sentAt: Date.now(),
+					data: null,
+				})
+			)
+		}, 5e3)
+
+		jest.advanceTimersByTime(5e3)
+
+		const [lastSeq] = await promisifyEvent(client, "heartbeat")
+
+		// there has been no sent message from the server
+		expect(lastSeq).toBe(-1)
+		// there should have been a timestamp when the last heartbeat was received
+		expect(client.lastHeartbeat).not.toBeNaN()
+
+		clearInterval(heartbeatInterval)
 	})
 })

@@ -15,14 +15,38 @@ export type CommonSocketClientEvents = {
 	request: (message: RequestMessage) => void
 	response: (message: ResponseMessage) => void
 	connected: () => void
+	disconnected: () => void
+
+	/**
+	 * The peer has requested to start a heartbeat
+	 */
+	peerStartHeartbeat: () => void
+	/**
+	 * The peer has requested to stop a heartbeat
+	 */
+	peerStopHeartbeat: () => void
 }
 
 export default class CommonSocketClient extends TypedEventEmitter<CommonSocketClientEvents> {
-	private _seq = 0
+	/**
+	 * Sequence number of the last sent message. -1 if no message has been sent yet
+	 * @default -1
+	 */
+	private _seq = -1
+	/**
+	 * Messages that have not yet been responded to
+	 */
 	private toReceiveResponse: MessageType[] = []
-	private _lastHeartbeat = -1
-	private intervals: NodeJS.Timeout[] = []
-	private heartbeatTimer: NodeJS.Timeout | null = null
+	/**
+	 * Timestamp of the last received heartbeat
+	 */
+	private _lastHeartbeat = NaN
+	/**
+	 * Timestamp of the connection opening
+	 */
+	private openedTime = NaN
+	private sweepInterval: NodeJS.Timeout
+	private heartbeatTimer: NodeJS.Timeout
 	/**
 	 * the amount of delay between heartbeats
 	 */
@@ -34,14 +58,29 @@ export default class CommonSocketClient extends TypedEventEmitter<CommonSocketCl
 
 	constructor(private ws: WebSocket) {
 		super()
-		const sweepInterval = setInterval(() => {
+		this.sweepInterval = setInterval(() => {
 			this.sweepUnacknowledged()
 		}, 3e6) // sweep the messages every 5 minutes
-		// unref if running in node
-		this.intervals.push(sweepInterval)
 
 		this.ws.on("message", (message) => this.handleMessage(message))
-		this.ws.on("open", () => this.emit("connected"))
+		this.ws.on("open", () => {
+			this.openedTime = Date.now()
+			this.emit("connected")
+		})
+		this.ws.on("close", () => {
+			// reset the opened time to NaN
+			this.openedTime = NaN
+			this.emit("disconnected")
+		})
+
+		this.heartbeatTimer = setInterval(() => {
+			this.doHeartbeat()
+		}, this.heartbeatInterval)
+
+		if (typeof this.sweepInterval !== "number") {
+			this.sweepInterval.unref()
+			this.heartbeatTimer.unref()
+		}
 	}
 
 	/**
@@ -162,42 +201,44 @@ export default class CommonSocketClient extends TypedEventEmitter<CommonSocketCl
 	 * Perform the actual heartbeat every few seconds
 	 */
 	private doHeartbeat() {
+		// if the connection is not open, we can't send a heartbeat
+		if (this.ws.readyState !== WebSocket.OPEN || isNaN(this.openedTime))
+			return
 		// if the last received heartbeat is older than the max allowed time, emit an event and close the connection
 		if (this._lastHeartbeat + this.heartbeatTimeout < Date.now()) {
 			this.ws.close()
+			return
 		}
+
+		this.ws.send(
+			JSON.stringify({
+				messageType: "heartbeat",
+				sentAt: Date.now(),
+				seq: this._seq,
+				data: null,
+			})
+		)
 	}
 
 	/**
-	 * Start sending heartbeats
-	 */
-	startHeartbeat() {
-		this.heartbeatTimer = setInterval(() => {
-			this.doHeartbeat()
-		}, this.heartbeatInterval)
-	}
-
-	/**
-	 * Stop sending heartbeats
-	 */
-	stopHeartbeat() {
-		if (this.heartbeatTimer) {
-			clearInterval(this.heartbeatTimer)
-		}
-	}
-
-	/**
-	 * Sequence ID of the last message
+	 * Sequence ID of the last sent message. -1 if no message has been sent yet
+	 * @default -1
 	 */
 	get seq() {
 		return this._seq
 	}
 
 	/**
-	 * The timestamp of when the last heartbeat was received. -1 if no heartbeat has been received
-	 * @default -1
+	 * The timestamp of when the last heartbeat was received. NaN if no heartbeat has been received
+	 * @default NaN
 	 */
 	get lastHeartbeat() {
 		return this._lastHeartbeat
+	}
+
+	destroy() {
+		clearInterval(this.heartbeatInterval)
+		clearInterval(this.sweepInterval)
+		this.ws.close()
 	}
 }
