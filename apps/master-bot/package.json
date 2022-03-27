@@ -23,7 +23,7 @@
 	"dependencies": {
 		"@discordjs/builders": "^0.10.0",
 		"@discordjs/rest": "^0.1.0-canary.0",
-		"@prisma/client": "^3.7.0",
+		"@prisma/client": "^3.11.1",
 		"@types/node": "^16.6.1",
 		"discord-api-types": "^0.22.0",
 		"discord.js": "^13.4.0",
@@ -37,6 +37,6 @@
 	"devDependencies": {
 		"@types/eslint": "^8.4.1",
 		"@types/nodemon": "^1.19.1",
-		"prisma": "^3.7.0"
+		"prisma": "^3.11.1"
 	}
 }

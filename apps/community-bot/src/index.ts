@@ -9,20 +9,22 @@ import { Intents } from "discord.js"
 import { Command } from "./base/Command"
 
 process.chdir(__dirname)
-Sentry.init({
-	dsn: ENV.SENTRY_LINK,
-	integrations: [
-		new CaptureConsole({
-			// capture stuff on console.error
-			levels: ["error"],
-		}),
-	],
+if (ENV.SENTRY_LINK) {
+	Sentry.init({
+		dsn: ENV.SENTRY_LINK,
+		integrations: [
+			new CaptureConsole({
+				// capture stuff on console.error
+				levels: ["error"],
+			}),
+		],
 
-	// Set tracesSampleRate to 1.0 to capture 100%
-	// of transactions for performance monitoring.
-	// We recommend adjusting this value in production
-	tracesSampleRate: 1.0,
-})
+		// Set tracesSampleRate to 1.0 to capture 100%
+		// of transactions for performance monitoring.
+		// We recommend adjusting this value in production
+		tracesSampleRate: 1.0,
+	})
+}
 
 const client = new FAGCBot({
 	// maybe fix these intents later?

@@ -6,12 +6,13 @@ import {
 } from "../utils/Command.js"
 import { readdirSync } from "fs"
 
-const commands: SubCommand[] = await Promise.all(
-	readdirSync("./commands/categories").map(async (commandName) => {
-		const command = await import(`./categories/${commandName}`)
+const commands: SubCommand[] = readdirSync("./commands/categories")
+	.filter((x) => x.endsWith(".js"))
+	.map((commandName) => {
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		const command = require(`./categories/${commandName}`)
 		return command.default
 	})
-)
 
 const Categories: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
