@@ -2,12 +2,13 @@ import { SlashCommandBuilder } from "@discordjs/builders"
 import { CommandWithSubcommands, SubCommand } from "../utils/Command.js"
 import { readdirSync } from "fs"
 
-const commands: SubCommand[] = await Promise.all(
-	readdirSync("./commands/communities").map(async (commandName) => {
-		const command = await import(`./communities/${commandName}`)
+const commands: SubCommand[] = readdirSync("./commands/communities")
+	.filter((x) => x.endsWith(".js"))
+	.map((commandName) => {
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		const command = require(`./communities/${commandName}`)
 		return command.default
 	})
-)
 
 const Communities: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()

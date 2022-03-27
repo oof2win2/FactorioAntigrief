@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { cleanEnv, str, port, url } from "envalid"
 dotenv.config({
-	path: "./.env",
+	path: "../.env",
 })
 const ENV = cleanEnv(process.env, {
 	API_URL: url({ desc: "API URL" }),
