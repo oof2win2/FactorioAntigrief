@@ -3,19 +3,22 @@ process.chdir(__dirname)
 import { REST } from "@discordjs/rest"
 import {
 	Routes,
-	RESTGetAPIUserResult,
-	RESTAPIPartialCurrentUserGuild,
 	APIApplicationCommand,
+	APIUser,
+	APIPartialGuild,
 } from "discord-api-types/v9"
 import ENV from "./utils/env.js"
 import fs from "fs"
-import { PrismaClient } from ".prisma/client/index.js"
+import { createConnection } from "typeorm"
 import { Command } from "./base/Commands.js"
 import { Collection } from "discord.js"
 import { Required } from "utility-types"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import { GuildConfig } from "fagc-api-types"
 import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
+import DBCommand from "./database/Command.js"
+import dbConnectionOptions from "./base/dbConnectionOptions.js"
+import InfoChannel from "./database/InfoChannel.js"
 
 const commandCategories = fs
 	.readdirSync("./commands")
@@ -26,7 +29,6 @@ const toPushCommmands = commandCategories.map((commandFile) => {
 	return command
 })
 
-const prisma = new PrismaClient()
 const rest = new REST({ version: "9" }).setToken(ENV.DISCORD_BOTTOKEN)
 
 const FAGC = new FAGCWrapper({
@@ -36,15 +38,14 @@ const FAGC = new FAGCWrapper({
 })
 
 const run = async () => {
-	await prisma.$connect()
+	const db = await createConnection(await dbConnectionOptions())
 	try {
-		const self = (await rest.get(Routes.user())) as RESTGetAPIUserResult
+		const self = (await rest.get(Routes.user())) as APIUser
 		const guildIds = (
-			(await rest.get(
-				Routes.userGuilds()
-			)) as RESTAPIPartialCurrentUserGuild[]
+			(await rest.get(Routes.userGuilds())) as APIPartialGuild[]
 		).map((guild) => guild.id)
 		const guildConfigs = new Map<string, GuildConfig>()
+		console.log(guildIds)
 		await Promise.all(
 			guildIds.map(async (guildId) => {
 				const config = await FAGC.communities.fetchGuildConfig({
@@ -58,8 +59,13 @@ const run = async () => {
 			new Collection()
 
 		console.log("Removing old commands from DB")
+		console.log(await db.getRepository(InfoChannel).find())
 		// delete old commands from db
-		await prisma.command.deleteMany()
+		await db
+			.getRepository(DBCommand)
+			.createQueryBuilder()
+			.delete()
+			.execute()
 
 		console.log("Replacing commands")
 		for (const guildId of guildIds) {
@@ -84,18 +90,7 @@ const run = async () => {
 			})
 			.flat()
 
-		// current createMany alternative
-		// https://github.com/prisma/prisma/issues/10710
-		const createCommandQueryValues = toSaveCommands
-			.map(
-				(command) =>
-					`('${command.id}', '${command.guildId}', '${command.name}')`
-			)
-			.join(",\n\t")
-			.concat(";")
-		await prisma.$executeRawUnsafe(
-			`INSERT INTO \`main\`.\`Command\` (id, guildId, name) VALUES \n\t${createCommandQueryValues}`
-		)
+		await db.getRepository(DBCommand).insert(toSaveCommands)
 		console.log("Saved new commands to DB")
 
 		console.log("Setting permission overrides")
@@ -176,19 +171,28 @@ const run = async () => {
 				}
 			})
 
-			if (toSetPermissions.length)
-				await rest.put(
-					Routes.guildApplicationCommandsPermissions(
-						self.id,
-						guildId
-					),
-					{ body: toSetPermissions }
-				)
+			// if (toSetPermissions.length) {
+			// 	// TODO: figure this out
+			// 	for (const command of toSetPermissions) {
+			// 		await rest.put(
+			// 			Routes.applicationCommandPermissions(
+			// 				self.id,
+			// 				guildId,
+			// 				command.id
+			// 			),
+			// 			{
+			// 				body: {
+			// 					permissions: command.permissions,
+			// 				},
+			// 			}
+			// 		)
+			// 	}
+			// }
 		}
 	} catch (error) {
 		console.error(error)
 	}
-	await prisma.$disconnect()
+	await db.close()
 	FAGC.destroy()
 }
 run()

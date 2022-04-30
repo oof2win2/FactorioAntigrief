@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { ChannelType } from "discord-api-types"
+import { ChannelType } from "discord-api-types/v9"
 import { SubCommand } from "../../base/Commands.js"
 import InfoChannel from "../../database/InfoChannel.js"
 
@@ -12,7 +12,7 @@ const Setaction: SubCommand = {
 				.setName("channel")
 				.setDescription("Channel where to create an info channel")
 				.setRequired(true)
-				.addChannelTypes([ChannelType.GuildNews, ChannelType.GuildText])
+				.addChannelType(ChannelType.GuildText)
 		),
 	execute: async ({ client, interaction }) => {
 		const channel = interaction.options.getChannel("channel", true)

@@ -14,10 +14,7 @@ import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 import { createConnection, Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
 import Command from "../database/Command.js"
-import FAGCBan from "../database/FAGCBan.js"
 import InfoChannel from "../database/InfoChannel.js"
-import PrivateBan from "../database/PrivateBan.js"
-import Whitelist from "../database/Whitelist.js"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -91,18 +88,7 @@ export default class FAGCBot extends Client {
 			})
 		}
 
-		createConnection({
-			type: "better-sqlite3",
-			database: ENV.DATABASE_URL,
-			entities: [
-				FAGCBan,
-				InfoChannel,
-				BotConfig,
-				PrivateBan,
-				Whitelist,
-				Command,
-			],
-		}).then((db) => {
+		createConnection().then((db) => {
 			this.db = db
 			loadInfoChannels()
 			this.emit("dbReady")
@@ -289,11 +275,9 @@ export default class FAGCBot extends Client {
 			this.guildConfigs.get(guildId) ||
 			(await this.getGuildConfig(guildId))
 		if (!guildConfig) return false
-		const guildCommands = await (await this.db)
-			.getRepository(Command)
-			.find({
-				guildId: guildId,
-			})
+		const guildCommands = await this.db.getRepository(Command).find({
+			guildId: guildId,
+		})
 		if (!guildCommands.length) return false
 
 		type CommandWithPerms = Required<
