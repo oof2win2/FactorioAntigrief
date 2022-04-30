@@ -225,6 +225,7 @@ export default class CommunityManager extends BaseManager<Community> {
 				credentials: "include",
 			}
 		).then((c) => c.json())
+		if (!config) return null
 		if (config?.error)
 			throw new GenericAPIError(`${config.error}: ${config.message}`)
 		const parsedConfig = GuildConfig.parse(config)
