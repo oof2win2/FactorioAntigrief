@@ -6,7 +6,6 @@ import {
 	splitIntoGroups,
 } from "../src/utils/functions"
 import BotConfig from "../src/database/BotConfig"
-import Command from "../src/database/Command"
 import FAGCBan from "../src/database/FAGCBan"
 import InfoChannel from "../src/database/InfoChannel"
 import PrivateBan from "../src/database/PrivateBan"
@@ -68,14 +67,7 @@ describe("guildConfigChangedBanlists", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [
-				FAGCBan,
-				InfoChannel,
-				BotConfig,
-				PrivateBan,
-				Whitelist,
-				Command,
-			],
+			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
 		categories = createTimes(createFAGCCategory, 100)
@@ -519,14 +511,7 @@ describe("handleReport", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [
-				FAGCBan,
-				InfoChannel,
-				BotConfig,
-				PrivateBan,
-				Whitelist,
-				Command,
-			],
+			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
 		categories = createTimes(createFAGCCategory, 100)
@@ -788,14 +773,7 @@ describe("handleRevocation", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [
-				FAGCBan,
-				InfoChannel,
-				BotConfig,
-				PrivateBan,
-				Whitelist,
-				Command,
-			],
+			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
 		categories = createTimes(createFAGCCategory, 100)

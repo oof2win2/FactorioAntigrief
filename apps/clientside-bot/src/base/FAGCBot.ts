@@ -9,11 +9,8 @@ import { Report, Revocation } from "fagc-api-types"
 import RCONInterface from "./rcon.js"
 import fs from "fs"
 import { z } from "zod"
-import { Required } from "utility-types"
-import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 import { createConnection, Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
-import Command from "../database/Command.js"
 import InfoChannel from "../database/InfoChannel.js"
 
 function getServers(): database.FactorioServerType[] {
@@ -268,87 +265,5 @@ export default class FAGCBot extends Client {
 			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
 
 		this.rcon.rconCommandGuild(command, guildId)
-	}
-
-	async syncCommandPerms(guildId: string) {
-		const guildConfig =
-			this.guildConfigs.get(guildId) ||
-			(await this.getGuildConfig(guildId))
-		if (!guildConfig) return false
-		const guildCommands = await this.db.getRepository(Command).find({
-			guildId: guildId,
-		})
-		if (!guildCommands.length) return false
-
-		type CommandWithPerms = Required<
-			CommandType,
-			"permissionOverrides" | "permissionType"
-		>
-
-		const commandData: CommandWithPerms[] = guildCommands
-			.map((command) =>
-				this.commands.find((c) => c.data.name === command.name)
-			)
-			.filter(
-				(c): c is CommandWithPerms =>
-					Boolean(c?.permissionType) ||
-					Boolean(c?.permissionOverrides?.length)
-			)
-			.map((c) => {
-				if (!c.permissionOverrides) c.permissionOverrides = []
-				if (!c.permissionType) c.permissionType = "configrole"
-				return c
-			})
-		const toSetPermissions = commandData.map((command) => {
-			const guildCommand = guildCommands.find(
-				(c) => c.name === command.data.name
-			)!
-			const perms = command.permissionOverrides.slice()
-			perms.push({
-				type: ApplicationCommandPermissionTypes.USER,
-				id: ENV.OWNERID,
-				permission: true,
-			})
-
-			if (guildConfig?.roles) {
-				switch (command.permissionType) {
-					case "banrole": {
-						if (guildConfig.roles.reports)
-							perms.push({
-								type: ApplicationCommandPermissionTypes.ROLE,
-								id: guildConfig.roles.reports,
-								permission: true,
-							})
-						break
-					}
-					case "configrole": {
-						if (guildConfig.roles.setConfig)
-							perms.push({
-								type: ApplicationCommandPermissionTypes.ROLE,
-								id: guildConfig.roles.setConfig,
-								permission: true,
-							})
-						break
-					}
-					case "notificationsrole": {
-						if (guildConfig.roles.webhooks)
-							perms.push({
-								type: ApplicationCommandPermissionTypes.ROLE,
-								id: guildConfig.roles.webhooks,
-								permission: true,
-							})
-						break
-					}
-				}
-			}
-			return {
-				id: guildCommand.id,
-				type: command.permissionType,
-				permissions: perms,
-			}
-		})
-		await this.guilds.cache.get(guildId)?.commands.permissions.set({
-			fullPermissions: toSetPermissions,
-		})
 	}
 }
