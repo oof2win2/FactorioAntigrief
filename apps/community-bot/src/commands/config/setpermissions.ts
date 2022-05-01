@@ -27,8 +27,13 @@ const SetPermissions: Command = {
 		]
 
 		if (!args[0]) {
-			const permTypes = Object.keys(GuildConfig._def.shape().roles._def.shape())
-			const permissions: Record<keyof GuildConfig["roles"], Role | undefined> = {
+			const permTypes = Object.keys(
+				GuildConfig._def.shape().roles._def.shape()
+			)
+			const permissions: Record<
+				keyof GuildConfig["roles"],
+				Role | undefined
+			> = {
 				reports: undefined,
 				webhooks: undefined,
 				setConfig: undefined,
@@ -42,31 +47,51 @@ const SetPermissions: Command = {
 			for (const permType of permTypes) {
 				const permMessage = await client.getMessageResponse(
 					message,
-					`Type in the ID or ping the role for the ${permStrings[permTypes.indexOf(permType)]} permission`,
+					`Type in the ID or ping the role for the ${
+						permStrings[permTypes.indexOf(permType)]
+					} permission`
 				)
-				if (!permMessage) return message.channel.send(`${client.emotes.warn} No permission was sent`)
-				const permRole = permMessage?.mentions.roles.first() ||
-					message.guild.roles.cache.get(
-						permMessage.content?.split(" ")[0] || "",
+				if (!permMessage)
+					return message.channel.send(
+						`${client.emotes.warn} No permission was sent`
 					)
-				if (!permRole)  message.channel.send(
-					`${client.emotes.warn} \`${
-						permMessage.content?.split(" ")[0]
-					}\` is not a valid role`,
-				)
+				const permRole =
+					permMessage?.mentions.roles.first() ||
+					message.guild.roles.cache.get(
+						permMessage.content?.split(" ")[0] || ""
+					)
+				if (!permRole)
+					message.channel.send(
+						`${client.emotes.warn} \`${
+							permMessage.content?.split(" ")[0]
+						}\` is not a valid role`
+					)
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				permissions[permType] = permRole
 			}
 
-			const embed = client.createBaseEmbed()
+			const embed = client
+				.createBaseEmbed()
 				.setTitle("FAGC Role Config")
 				.setDescription("Your FAGC Role Configuration")
 				.addFields([
-					{ name: "Reports Management", value: `<@&${permissions.reports?.id}>` },
-					{ name: "Webhook Management", value: `<@&${permissions.webhooks?.id}>` },
-					{ name: "Config Management", value: `<@&${permissions.setConfig?.id}>` },
-					{ name: "Category Management", value: `<@&${permissions.setCategories?.id}>` },
+					{
+						name: "Reports Management",
+						value: `<@&${permissions.reports?.id}>`,
+					},
+					{
+						name: "Webhook Management",
+						value: `<@&${permissions.webhooks?.id}>`,
+					},
+					{
+						name: "Config Management",
+						value: `<@&${permissions.setConfig?.id}>`,
+					},
+					{
+						name: "Category Management",
+						value: `<@&${permissions.setCategories?.id}>`,
+					},
 					{
 						name: "Communities Management",
 						value: `<@&${permissions.setCommunities?.id}>`,
@@ -77,7 +102,7 @@ const SetPermissions: Command = {
 			})
 			const confirmation = await client.getConfirmationMessage(
 				message,
-				"Are you sure you want these settings applied?",
+				"Are you sure you want these settings applied?"
 			)
 			if (!confirmation)
 				return message.channel.send("Role configuration cancelled")
@@ -94,11 +119,13 @@ const SetPermissions: Command = {
 					},
 				})
 				return message.channel.send(
-					`${client.emotes.success} Successfully set all permissions!`,
+					`${client.emotes.success} Successfully set all permissions!`
 				)
 			} catch (e) {
 				if (e instanceof AuthError) {
-					return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+					return message.channel.send(
+						`${client.emotes.warn} Your API key is not recognized by FAGC`
+					)
 				}
 				throw e
 			}
@@ -108,38 +135,45 @@ const SetPermissions: Command = {
 		const permType = args[0]
 		if (!permStrings.includes(permType))
 			return message.reply(
-				`${client.emotes.warn} \`${permType}\` is not a valid permission type`,
+				`${client.emotes.warn} \`${permType}\` is not a valid permission type`
 			)
-		
+
 		let role: Role
 		if (!args[1]) {
 			// id wasnt provided so need to ask
 			const roleMessage = await client.getMessageResponse(
 				message,
-				"Type in the ID or ping the role for the permission",
+				"Type in the ID or ping the role for the permission"
 			)
 			const tmpRole =
 				roleMessage?.mentions.roles.first() ||
-				message.guild.roles.cache.get(roleMessage?.content?.split(" ")[0] || "")
+				message.guild.roles.cache.get(
+					roleMessage?.content?.split(" ")[0] || ""
+				)
 			if (!tmpRole)
 				return message.channel.send(
 					`${client.emotes.warn} \`${
 						roleMessage?.content?.split(" ")[0]
-					}\` is not a valid role`,
+					}\` is not a valid role`
 				)
 			role = tmpRole
 		} else {
-			const tmpRole =  message.mentions.roles.first() || message.guild.roles.cache.get(args[1])
-			if (!tmpRole) return message.channel.send(`${client.emotes.warn} \`${args[1]}\` is not a valid role`)
+			const tmpRole =
+				message.mentions.roles.first() ||
+				message.guild.roles.cache.get(args[1])
+			if (!tmpRole)
+				return message.channel.send(
+					`${client.emotes.warn} \`${args[1]}\` is not a valid role`
+				)
 			role = tmpRole
 		}
 		const confirmation = await client.getConfirmationMessage(
 			message,
-			`Are you sure you want to set the ${permType} permission to ${role.name}?`,
+			`Are you sure you want to set the ${permType} permission to ${role.name}?`
 		)
 		if (!confirmation)
 			return message.channel.send("Role configuration cancelled")
-		
+
 		try {
 			await client.saveGuildConfig({
 				guildId: message.guild.id,
@@ -151,11 +185,13 @@ const SetPermissions: Command = {
 				},
 			})
 			return message.channel.send(
-				`${client.emotes.success} Successfully set the ${permType} permission to ${role.name}!`,
+				`${client.emotes.success} Successfully set the ${permType} permission to ${role.name}!`
 			)
 		} catch (e) {
 			if (e instanceof AuthError) {
-				return message.channel.send(`${client.emotes.warn} Your API key is not recognized by FAGC`)
+				return message.channel.send(
+					`${client.emotes.warn} Your API key is not recognized by FAGC`
+				)
 			}
 			throw e
 		}

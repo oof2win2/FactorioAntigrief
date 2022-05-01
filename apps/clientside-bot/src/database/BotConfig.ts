@@ -30,8 +30,11 @@ export default class BotConfig {
 			// assuming nobody messes with the database, x is always a valid ISO8601 string
 			from: (x: string) => new Date(x),
 			// if the date is valid, then set it to the ISO string. if it isn't, set it as the current date
-			to: (x) => isNaN(new Date(x).valueOf()) ? new Date().toISOString() : new Date(x).toISOString()
-		}
+			to: (x) =>
+				isNaN(new Date(x).valueOf())
+					? new Date().toISOString()
+					: new Date(x).toISOString(),
+		},
 	})
 	lastNotificationProcessed!: Date
 

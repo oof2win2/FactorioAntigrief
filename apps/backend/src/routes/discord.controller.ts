@@ -1,7 +1,13 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { Controller, DELETE, GET, PATCH, POST, PUT } from "fastify-decorators"
 import { Webhook as DiscordWebhook, WebhookClient } from "discord.js"
-import { Authenticate, MasterAuthenticate, OptionalAuthenticate, forbidden, parseJWT } from "../utils/authentication"
+import {
+	Authenticate,
+	MasterAuthenticate,
+	OptionalAuthenticate,
+	forbidden,
+	parseJWT,
+} from "../utils/authentication"
 import CategoryModel from "../database/category"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
@@ -22,7 +28,7 @@ export default class DiscordController {
 				}),
 
 				description: "Create guild config",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -67,23 +73,25 @@ export default class DiscordController {
 		options: {
 			schema: {
 				params: z.object({
-					guildId: z.string()
+					guildId: z.string(),
 				}),
 				body: z.object({
 					categoryFilters: z.array(z.string()).optional(),
 					trustedCommunities: z.array(z.string()).optional(),
-					roles: z.object({
-						reports: z.string().optional(),
-						webhooks: z.string().optional(),
-						setConfig: z.string().optional(),
-						setCategories: z.string().optional(),
-						setCommunities: z.string().optional(),
-					}).optional(),
+					roles: z
+						.object({
+							reports: z.string().optional(),
+							webhooks: z.string().optional(),
+							setConfig: z.string().optional(),
+							setCategories: z.string().optional(),
+							setCommunities: z.string().optional(),
+						})
+						.optional(),
 					apikey: z.string().optional(),
 				}),
 
 				description: "Update guild config",
-				tags: [ "discord" ],
+				tags: ["discord"],
 				security: [
 					{
 						authorization: [],
@@ -149,7 +157,11 @@ export default class DiscordController {
 		const authType = req.requestContext.get("authType")
 		// if it's not the master api key and the community IDs are not the same, then return an error
 		if (authType !== "master" && guildConfig.communityId !== community.id)
-			return forbidden(res, "master", "Agent is not authorized to edit this guild's config")
+			return forbidden(
+				res,
+				"master",
+				"Agent is not authorized to edit this guild's config"
+			)
 
 		// query database if categories and communities actually exist
 		if (categoryFilters) {
@@ -177,9 +189,11 @@ export default class DiscordController {
 
 		// check other stuff
 		if (apikey) {
-			const parsed = await parseJWT(apikey, [ "private", "master" ])
+			const parsed = await parseJWT(apikey, ["private", "master"])
 			if (parsed) {
-				const community = await CommunityModel.findOne({ id: parsed.sub })
+				const community = await CommunityModel.findOne({
+					id: parsed.sub,
+				})
 				if (community) {
 					guildConfig.apikey = apikey
 					guildConfig.communityId = community.id
@@ -191,7 +205,7 @@ export default class DiscordController {
 		const communityIds = new Set(trustedCommunities)
 		if (guildConfig.communityId) communityIds.add(guildConfig.communityId)
 		if (trustedCommunities)
-			guildConfig.trustedCommunities = [ ...communityIds ]
+			guildConfig.trustedCommunities = [...communityIds]
 
 		const findRole = (id: string) => {
 			const guildRoles = client.guilds.cache
@@ -209,7 +223,7 @@ export default class DiscordController {
 				setCommunities: "",
 			}
 		if (roles) {
-			for (const [ roleType, roleId ] of Object.entries(roles)) {
+			for (const [roleType, roleId] of Object.entries(roles)) {
 				const role = findRole(roleId)
 				if (role) (guildConfig.roles as any)[roleType] = role.id
 			}
@@ -218,9 +232,9 @@ export default class DiscordController {
 		await guildConfig.save()
 		guildConfigChanged(guildConfig)
 		const includeApikey = req.requestContext.get("authType") === "master"
-		return res.status(200).send(
-			guildConfig.toObject({ includeApikey } as any),
-		)
+		return res
+			.status(200)
+			.send(guildConfig.toObject({ includeApikey } as any))
 	}
 
 	@GET({
@@ -228,11 +242,11 @@ export default class DiscordController {
 		options: {
 			schema: {
 				params: z.object({
-					guildId: z.string()
+					guildId: z.string(),
 				}),
 
 				description: "Fetch guild config",
-				tags: [ "discord" ],
+				tags: ["discord"],
 				response: {
 					"200": GuildConfig.nullable(),
 				},
@@ -265,7 +279,7 @@ export default class DiscordController {
 				}),
 
 				description: "Delete guild config",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -292,7 +306,7 @@ export default class DiscordController {
 			guildId: guildId,
 		})
 		const communityConfig = await CommunityModel.findOne({
-			guildIds: [ guildId ],
+			guildIds: [guildId],
 		})
 		if (communityConfig) {
 			communityConfig.guildIds = communityConfig.guildIds.filter(
@@ -309,11 +323,11 @@ export default class DiscordController {
 		options: {
 			schema: {
 				params: z.object({
-					guildId: z.string()
+					guildId: z.string(),
 				}),
 
 				description: "Notify guild config changed",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -364,7 +378,7 @@ export default class DiscordController {
 				description:
 					"Notify a guild with a message, see [Embed Object]" +
 					"(https://discord.com/developers/docs/resources/channel#embed-object) for the format of embeds.",
-				tags: [ "master" ],
+				tags: ["master"],
 				security: [
 					{
 						masterAuthorization: [],
@@ -380,8 +394,8 @@ export default class DiscordController {
 				guildId: string
 			}
 			Body: {
-				content?: string,
-				embeds?: object[],
+				content?: string
+				embeds?: object[]
 			}
 		}>,
 		res: FastifyReply
@@ -394,7 +408,10 @@ export default class DiscordController {
 				.fetchWebhook(savedWebhook.id, savedWebhook.token)
 				.catch()
 			if (webhook) {
-				webhook.send({ content: req.body.content, embeds: req.body.embeds })
+				webhook.send({
+					content: req.body.content,
+					embeds: req.body.embeds,
+				})
 			}
 		}
 
@@ -411,7 +428,7 @@ export default class DiscordController {
 				}),
 
 				description: "Add Discord webhook to FAGC notifications",
-				tags: [ "discord" ],
+				tags: ["discord"],
 				response: {
 					"200": Webhook,
 				},
@@ -467,7 +484,7 @@ export default class DiscordController {
 				}),
 
 				description: "Remove a webhook from FAGC notifications",
-				tags: [ "discord" ],
+				tags: ["discord"],
 				response: {
 					"200": Webhook,
 				},
