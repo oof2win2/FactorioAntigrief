@@ -549,7 +549,7 @@ export default class DiscordController {
 				description: "Get the Discord OAuth URL",
 				tags: ["discord"],
 				response: {
-					"200": "text/text",
+					"200": z.string(),
 				},
 			},
 		},
@@ -580,7 +580,7 @@ export default class DiscordController {
 				description: "Callback for the Discord OAuth flow",
 				tags: ["discord"],
 				response: {
-					"200": "text/text",
+					"200": z.string(),
 				},
 			},
 		},
