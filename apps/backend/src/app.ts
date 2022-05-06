@@ -231,7 +231,7 @@ fastify.register(fastifyRequestContextPlugin, {
 declare module "fastify-request-context" {
 	interface RequestContextData {
 		community?: DocumentType<CommunityClass, BeAnObject>
-		authType?: "master" | "private" | "public"
+		authType?: "master" | "reports" | "bot"
 	}
 }
 

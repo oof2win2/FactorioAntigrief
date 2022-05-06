@@ -208,7 +208,7 @@ export default class CommunityController {
 		}
 
 		const auth = req.body.create
-			? await createApikey(community, "private")
+			? await createApikey(community, "reports")
 			: undefined
 		return res.send({
 			apikey: auth,
@@ -224,7 +224,9 @@ export default class CommunityController {
 				}),
 				body: z.object({
 					create: z.boolean().optional(),
-					type: z.enum(["private", "master"]).default("private"),
+					type: z
+						.enum(["bot", "reports", "master"])
+						.default("reports"),
 					invalidate: z.boolean().optional(),
 				}),
 				description: "Manage apikey for community",
@@ -250,7 +252,7 @@ export default class CommunityController {
 			}
 			Body: {
 				create?: boolean
-				type?: "private" | "master"
+				type?: "reports" | "master" | "bot"
 				invalidate: boolean
 			}
 		}>,
@@ -273,7 +275,7 @@ export default class CommunityController {
 		}
 
 		const auth = req.body.create
-			? await createApikey(community, req.body.type ?? "private")
+			? await createApikey(community, req.body.type ?? "reports")
 			: undefined
 		return res.send({
 			apikey: auth,
@@ -338,7 +340,7 @@ export default class CommunityController {
 			guildIds: [],
 		})
 
-		const auth = await createApikey(community, "private")
+		const auth = await createApikey(community, "reports")
 
 		communityCreatedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(

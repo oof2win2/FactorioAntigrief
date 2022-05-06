@@ -649,7 +649,7 @@ export default class DiscordController {
 			}
 		)
 
-		const apikey = await createApikey(apiUser.id, "public")
+		const apikey = await createApikey(apiUser.id, "bot")
 
 		let succeededSendingMessage = false
 		try {

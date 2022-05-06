@@ -15,7 +15,7 @@ export const apikey = z.object({
 	 * public: can only read, implemented for auth of clientside bots
 	 * @enum {string} "master" | "private"
 	 */
-	aud: z.enum(["master", "private", "public"]),
+	aud: z.enum(["master", "reports", "bot"]),
 	/**
 	 * sub | Subject - the community ID
 	 */
