@@ -1,7 +1,6 @@
 import { Guild, TextChannel } from "discord.js"
 import { GuildConfig, Report, Revocation } from "fagc-api-types"
 import { Connection } from "typeorm"
-import FAGCBot from "../base/FAGCBot"
 import FAGCBan from "../database/FAGCBan"
 import PrivateBan from "../database/PrivateBan"
 import Whitelist from "../database/Whitelist"

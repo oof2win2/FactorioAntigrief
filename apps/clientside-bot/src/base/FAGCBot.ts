@@ -4,7 +4,7 @@ import ENV from "../utils/env.js"
 import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
 import { Command as CommandType } from "./Commands.js"
 import * as database from "./database.js"
-import * as wshandler from "./wshandler.js"
+import wshandler from "./wshandler.js"
 import { Report, Revocation } from "fagc-api-types"
 import RCONInterface from "./rcon.js"
 import fs from "fs"
@@ -98,40 +98,32 @@ export default class FAGCBot extends Client {
 		})
 
 		// parsing WS notifications
-		this.fagc.websocket.on("communityCreated", (event) =>
-			wshandler.communityCreated({ event, client: this })
-		)
-		this.fagc.websocket.on("communityRemoved", (event) =>
-			wshandler.communityRemoved({ event, client: this })
-		)
-		this.fagc.websocket.on("categoryCreated", (event) =>
-			wshandler.categoryCreated({ event, client: this })
-		)
-		this.fagc.websocket.on("categoryRemoved", (event) =>
-			wshandler.categoryRemoved({ event, client: this })
-		)
-		this.fagc.websocket.on("report", (event) =>
-			wshandler.report({ event, client: this })
-		)
-		this.fagc.websocket.on("revocation", (event) =>
-			wshandler.revocation({ event, client: this })
-		)
-		this.fagc.websocket.on("guildConfigChanged", (event) =>
-			wshandler.guildConfigChanged({ event, client: this })
-		)
+		Object.keys((eventname: keyof typeof wshandler) => {
+			const handler = wshandler[eventname]
+			if (!handler) return
+			this.fagc.websocket.on(eventname, async (event: any) => {
+				await handler({ event, client: this })
+				for (const [_, botConfig] of this.botConfigs) {
+					this.setBotConfig({
+						guildId: botConfig.guildId,
+						lastNotificationProcessed: new Date(),
+					})
+				}
+			})
+		})
 
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
 	}
 
 	async getBotConfigs(): Promise<BotConfig[]> {
-		const records = await (await this.db).getRepository(BotConfig).find()
+		const records = await this.db.getRepository(BotConfig).find()
 		return records
 	}
 
 	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
 		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing
-		const record = await (await this.db).getRepository(BotConfig).findOne({
+		const record = await this.db.getRepository(BotConfig).findOne({
 			where: {
 				guildId: guildId,
 			},

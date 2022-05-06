@@ -540,7 +540,6 @@ export default class DiscordController {
 	}
 
 	// OAuth for users
-	// This is fully functional, but not currently enabled as it is not currently used
 
 	@GET({
 		url: "/oauth/url",
