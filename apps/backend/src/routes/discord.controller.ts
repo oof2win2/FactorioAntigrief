@@ -24,6 +24,7 @@ import {
 	RESTPostOAuth2AccessTokenResult,
 	RESTGetAPIOAuth2CurrentAuthorizationResult,
 } from "discord-api-types/v10"
+import { REST } from "@discordjs/rest"
 
 const BOT_SCOPES = [
 	"bot",
@@ -616,12 +617,17 @@ export default class DiscordController {
 			throw e
 		}
 
-		rest.setToken(exchangedData.access_token)
-		const userData = (await rest.get(Routes.oauth2CurrentAuthorization(), {
-			authPrefix: "Bearer",
-		})) as RESTGetAPIOAuth2CurrentAuthorizationResult
+		// we need to create a new instance of the REST class for this user specifically, since we can't set a token for individual requests
+		const userRest = new REST({ version: "v10" }).setToken(
+			exchangedData.access_token
+		)
+		const userData = (await userRest.get(
+			Routes.oauth2CurrentAuthorization(),
+			{
+				authPrefix: "Bearer",
+			}
+		)) as RESTGetAPIOAuth2CurrentAuthorizationResult
 		const apiUser = userData.user!
-		rest.setToken(ENV.DISCORD_BOTTOKEN)
 
 		// save the user to the database for future use
 		await UserModel.findOneAndUpdate(
