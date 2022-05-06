@@ -763,6 +763,7 @@ describe("handleReport", () => {
 		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
 	})
 })
+
 describe("handleRevocation", () => {
 	let database: Connection
 	let categories: Category[]
@@ -1046,6 +1047,34 @@ describe("handleRevocation", () => {
 		// there should be no reports in the database
 		expect(foundInDatabase.length).toBe(0)
 	})
+})
+
+describe("handleConnected", () => {
+	let database: Connection
+	let categories: Category[]
+	let categoryIds: string[]
+	let communities: Community[]
+	let communityIds: string[]
+	beforeEach(async () => {
+		database = await createConnection({
+			type: "better-sqlite3",
+			database: ":memory:",
+			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			synchronize: true,
+		})
+		categories = createTimes(createFAGCCategory, 100)
+		categoryIds = categories.map((x) => x.id)
+		communities = createTimes(createFAGCCommunity, 100)
+		communityIds = communities.map((x) => x.id)
+	})
+	afterEach(async () => {
+		await database.close()
+	})
+
+	it("Empty test", () => {
+		expect(true).toBe(true)
+	})
+	// TODO: add tests
 })
 
 /*

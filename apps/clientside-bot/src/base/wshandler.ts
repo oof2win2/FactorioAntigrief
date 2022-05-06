@@ -1,6 +1,7 @@
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 import FAGCBot from "./FAGCBot"
 import {
+	Collection,
 	MessageEmbed,
 	NewsChannel,
 	TextChannel,
@@ -228,6 +229,54 @@ const guildConfigChanged = async ({
 	}
 }
 
+// removing of guild IDs from the websocket is done so that they don't interfere once the socket connects again
+const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
+	for (const guildID of client.fagc.websocket.guildIds) {
+		client.fagc.websocket.removeGuildId(guildID)
+	}
+}
+// here, we handle stuff since the last connection, such as fetching missed reports, revocations etc.
+const connected = async ({ client }: HandlerOpts<"connected">) => {
+	const lastReceivedDate =
+		client.botConfigs.first()?.lastNotificationProcessed || new Date()
+
+	// we fetch the missed reports and revocations and act on each of them
+	const reports = await client.fagc.reports.fetchSince({
+		timestamp: lastReceivedDate,
+	})
+	const revocations = await client.fagc.revocations.fetchSince({
+		timestamp: lastReceivedDate,
+	})
+
+	const banCommands = new Collection<string, string[]>()
+	const unbanCommands = new Collection<string, string[]>()
+
+	client.guilds.cache.forEach((guild) => {
+		banCommands.set(guild.id, [])
+		unbanCommands.set(guild.id, [])
+	})
+
+	for (const report of reports) {
+		const guildsToBan = await handleReport({
+			database: client.db,
+			report: report,
+			allGuildConfigs: [...client.guildConfigs.values()],
+		})
+		if (!guildsToBan) return
+
+		// ban in guilds that its supposed to
+		guildsToBan.map((guildId) => {
+			const command = client.createBanCommand(report, guildId)
+			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+			banCommands.get(guildId)?.push(command)
+		})
+	}
+
+	// add guild IDs back into the websocket handler after all of this was done
+	for (const [_, guild] of client.guilds.cache) {
+		client.fagc.websocket.removeGuildId(guild.id)
+	}
+}
 
 const EventHandlers: Record<
 	keyof WebSocketEvents,
