@@ -7,15 +7,30 @@ import {
 	OptionalAuthenticate,
 	forbidden,
 	parseJWT,
+	createApikey,
 } from "../utils/authentication"
 import CategoryModel from "../database/category"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import WebhookModel from "../database/webhook"
 import { guildConfigChanged } from "../utils/info"
-import { client } from "../utils/discord"
+import { client, rest } from "../utils/discord"
 import { GuildConfig, Webhook } from "fagc-api-types"
 import { z } from "zod"
+import UserModel from "../database/user"
+import ENV from "../utils/env"
+import {
+	Routes,
+	RESTPostOAuth2AccessTokenResult,
+	RESTGetAPIOAuth2CurrentAuthorizationResult,
+} from "discord-api-types/v10"
+
+const BOT_SCOPES = [
+	"bot",
+	"identify",
+	"applications.commands",
+	"applications.commands.permissions.update",
+]
 
 @Controller({ route: "/discord" })
 export default class DiscordController {
@@ -521,5 +536,128 @@ export default class DiscordController {
 			error: "Not Found",
 			message: "Provided webhook could not be found",
 		})
+	}
+
+	// OAuth for users
+	// This is fully functional, but not currently enabled as it is not currently used
+
+	@GET({
+		url: "/oauth/url",
+		options: {
+			schema: {
+				description: "Get the Discord OAuth URL",
+				tags: ["discord"],
+				response: {
+					"200": "text/text",
+				},
+			},
+		},
+	})
+	async getOauthURL(
+		req: FastifyRequest,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const params = new URLSearchParams()
+		params.append("client_id", ENV.CLIENTID)
+		params.append("scope", BOT_SCOPES.join(" "))
+		params.append("response_type", "code")
+		params.append("redirect_uri", `${ENV.BASE_URL}/discord/oauth/callback`)
+
+		const url = `https://discord.com/api/oauth2/authorize?${params}`
+
+		return res.send(url)
+	}
+
+	@GET({
+		url: "/oauth/callback",
+		options: {
+			schema: {
+				querystring: z.object({
+					code: z.string(),
+				}),
+
+				description: "Callback for the Discord OAuth flow",
+				tags: ["discord"],
+				response: {
+					"200": "text/text",
+				},
+			},
+		},
+	})
+	async getOauthCallback(
+		req: FastifyRequest<{
+			Querystring: {
+				code: string
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		let exchangedData: RESTPostOAuth2AccessTokenResult
+		try {
+			exchangedData = (await rest.post(Routes.oauth2TokenExchange(), {
+				body: new URLSearchParams({
+					client_id: ENV.CLIENTID,
+					client_secret: ENV.DISCORD_SECRET,
+					grant_type: "authorization_code",
+					code: req.query.code,
+					redirect_uri: `${ENV.BASE_URL}/discord/oauth/callback`,
+				}),
+				passThroughBody: true,
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Accept: "application/json",
+				},
+			})) as RESTPostOAuth2AccessTokenResult
+		} catch (e) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-expect-error
+			if (e.message === `Invalid "code" in request.`)
+				return res.status(400).send("Invalid code")
+			throw e
+		}
+
+		rest.setToken(exchangedData.access_token)
+		const userData = (await rest.get(Routes.oauth2CurrentAuthorization(), {
+			authPrefix: "Bearer",
+		})) as RESTGetAPIOAuth2CurrentAuthorizationResult
+		const apiUser = userData.user!
+		rest.setToken(ENV.DISCORD_BOTTOKEN)
+
+		// save the user to the database for future use
+		await UserModel.findOneAndUpdate(
+			{
+				discordId: apiUser.id,
+			},
+			{
+				discordId: apiUser.id,
+				tag: `${apiUser.username}#${apiUser.discriminator}`,
+				accessToken: exchangedData.access_token,
+				// get date of expiry of the access token
+				expiresAt: new Date(
+					Date.now() + exchangedData.expires_in * 1000
+				),
+				refreshToken: exchangedData.refresh_token,
+			},
+			{
+				upsert: true,
+			}
+		)
+
+		const apikey = await createApikey(apiUser.id, "public")
+
+		let succeededSendingMessage = false
+		try {
+			const user = await client.users.fetch(apiUser.id)
+			await user.send(
+				`You have successfully logged in to FAGC! Your API key is: ||${apikey}||`
+			)
+			succeededSendingMessage = true
+			// eslint-disable-next-line no-empty
+		} finally {
+		}
+
+		if (succeededSendingMessage) return res.send("Success authenticating")
+		else
+			return res.send(`Success authenticating. Your API key is ${apikey}`)
 	}
 }

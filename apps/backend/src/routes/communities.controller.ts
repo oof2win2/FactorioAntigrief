@@ -273,7 +273,7 @@ export default class CommunityController {
 		}
 
 		const auth = req.body.create
-			? await createApikey(community, req.body.type)
+			? await createApikey(community, req.body.type ?? "private")
 			: undefined
 		return res.send({
 			apikey: auth,

@@ -9,10 +9,13 @@ import { Community } from "fagc-api-types"
 
 export const apikey = z.object({
 	/**
-	 * aud | Audience - type of API key, master or private
+	 * aud | Audience - type of API key, master, private, or public
+	 * master: can do CRUD operations on communities and categories
+	 * private: can do CURD operations on reports only
+	 * public: can only read, implemented for auth of clientside bots
 	 * @enum {string} "master" | "private"
 	 */
-	aud: z.enum(["master", "private"]), // the type of API key, master api or only private
+	aud: z.enum(["master", "private", "public"]),
 	/**
 	 * sub | Subject - the community ID
 	 */
@@ -26,20 +29,22 @@ export const apikey = z.object({
 })
 export type apikey = z.infer<typeof apikey>
 
+/**
+ * Create a FAGC API key
+ * @param cId Community or Discord user that the API key is for
+ * @param audience The type of API key that this is
+ */
 export async function createApikey(
 	cId: string | Community,
-	audience: "master" | "private" = "private"
+	audience: apikey["aud"]
 ) {
-	const community =
-		typeof cId === "string" ? await CommunityModel.findById(cId) : cId
-	if (!community) throw new Error("Community not found")
 	const apikey = await new jose.SignJWT({})
 		.setIssuedAt() // for validating when the token was issued
 		.setProtectedHeader({
 			// encoding method
 			alg: "HS256",
 		})
-		.setSubject(community.id) // subject, who is it issued to
+		.setSubject(typeof cId === "string" ? cId : cId.contact) // subject, who is it issued to
 		.setAudience(audience) // audience, what is it for
 		.sign(Buffer.from(ENV.JWT_SECRET, "utf8")) // sign the token itself and get an encoded string back
 	return apikey
@@ -145,6 +150,7 @@ export function Authenticate<T extends RouteGenericInterface>(
 	assert(originalRoute)
 	descriptor.value = async function (...args) {
 		const [req, res] = args
+		// we require the API key to be private or master, as public has no write access to most stuff
 		if (!(await authenticate(req, ["private", "master"])))
 			return unauthorized(res, ["private", "master"])
 
