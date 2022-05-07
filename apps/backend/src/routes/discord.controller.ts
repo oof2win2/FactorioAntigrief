@@ -617,7 +617,7 @@ export default class DiscordController {
 		}
 
 		// we need to create a new instance of the REST class for this user specifically, since we can't set a token for individual requests
-		const userRest = new REST({ version: "v10" }).setToken(
+		const userRest = new REST({ version: "10" }).setToken(
 			exchangedData.access_token
 		)
 		const userData = (await userRest.get(
@@ -631,10 +631,10 @@ export default class DiscordController {
 		// save the user to the database for future use
 		await UserModel.findOneAndUpdate(
 			{
-				discordId: apiUser.id,
+				id: apiUser.id,
 			},
 			{
-				discordId: apiUser.id,
+				id: apiUser.id,
 				tag: `${apiUser.username}#${apiUser.discriminator}`,
 				accessToken: exchangedData.access_token,
 				// get date of expiry of the access token
