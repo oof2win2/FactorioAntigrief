@@ -56,11 +56,8 @@ export class GuildConfigClass {
 	})
 	roles!: Roles
 
-	@prop({ type: [String], default: [] })
-	trustedCommunities!: string[]
-
-	@prop({ type: [String], default: [] })
-	categoryFilters!: string[]
+	@prop()
+	filterObjectId!: string
 }
 
 const GuildConfigModel = getModelForClass(GuildConfigClass)

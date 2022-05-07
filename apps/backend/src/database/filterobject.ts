@@ -4,40 +4,31 @@ import IdModel, { IdType } from "./ids"
 
 @modelOptions({
 	schemaOptions: {
-		collection: "communities",
+		collection: "categories",
 	},
 })
-@pre<CommunityClass>("save", async function (next) {
+@pre<FilterClass>("save", async function (next) {
 	if (!this.id || !this._id) {
-		const id = await getUserStringFromId(IdType.COMMUNITY)
+		const id = await getUserStringFromId(IdType.FILTER)
 		this.id = id.id
 		this._id = id._id
 	}
 	next()
 })
-export class CommunityClass {
+export class FilterClass {
 	@prop({ unique: true })
 	id!: string
 
-	@prop()
-	name!: string
+	@prop({ type: [String], default: [] })
+	categoryFilters!: string[]
 
-	@prop()
-	contact!: string
-
-	@prop({ type: [String] })
-	guildIds!: string[]
-
-	@prop({ type: Date, default: new Date(0) })
-	tokenInvalidBefore!: Date
-
-	@prop()
-	filterObjectId!: string
+	@prop({ type: [String], default: [] })
+	communityFilters!: string[]
 }
 
-const CommunityModel = getModelForClass(CommunityClass)
+const FilterModel = getModelForClass(FilterClass)
 
-export const watcher = CommunityModel.watch()
+export const watcher = FilterModel.watch()
 watcher.on("change", async (change) => {
 	if (change.operationType === "delete") {
 		// delete the ID from the db too
@@ -47,4 +38,4 @@ watcher.on("change", async (change) => {
 	}
 })
 
-export default CommunityModel
+export default FilterModel

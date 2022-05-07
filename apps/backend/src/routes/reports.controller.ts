@@ -14,6 +14,7 @@ import {
 import GuildConfigModel from "../database/guildconfig"
 import { z } from "zod"
 import validator from "validator"
+import FilterModel from "../database/filterobject"
 
 @Controller({ route: "/reports" })
 export default class ReportController {
@@ -162,22 +163,17 @@ export default class ReportController {
 		const admin = await client.users.fetch(adminId)
 
 		// check whether any one of the community configs allows for this category, if not, then don't accept the report
-		const communityConfigs = await GuildConfigModel.find({
-			communityId: community.id,
+		const filter = await FilterModel.findOne({
+			id: community.filterObjectId,
 		})
-		if (!communityConfigs.length)
+		if (!filter)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",
-				message: "Your community does not have a community config",
+				message: "Your community does not have a filter",
 			})
-		const foundCategoryFilter = communityConfigs.find((config) => {
-			return (
-				config.categoryFilters?.length &&
-				config.categoryFilters.indexOf(category.id) !== -1
-			)
-		})
-		if (!foundCategoryFilter)
+
+		if (filter.categoryFilters.indexOf(categoryId) === -1)
 			return res.status(400).send({
 				errorCode: 400,
 				error: "Bad Request",

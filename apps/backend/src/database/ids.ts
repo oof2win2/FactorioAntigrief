@@ -6,6 +6,7 @@ export enum IdType {
 	REPORT = "report",
 	REVOCATION = "revocation",
 	LOG = "log",
+	FILTER = "filter",
 }
 
 @modelOptions({

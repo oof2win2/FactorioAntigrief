@@ -2,9 +2,10 @@ import promClient from "prom-client"
 import http from "http"
 import GuildConfigModel, { GuildConfigClass } from "../database/guildconfig"
 import CommunityModel, { CommunityClass } from "../database/community"
-import CategoryModel from "../database/category"
+import CategoryModel, { CategoryClass } from "../database/category"
 import { DocumentType } from "@typegoose/typegoose"
 import ENV from "./env"
+import FilterModel, { FilterClass } from "../database/filterobject"
 
 const collectDefaultMetrics = promClient.collectDefaultMetrics
 const Registry = promClient.Registry
@@ -25,110 +26,92 @@ const categoryGauge = new promClient.Gauge({
 register.registerMetric(communityGauge)
 register.registerMetric(categoryGauge)
 
+type Result<T> = {
+	item: T
+	count: number
+}[]
+
 // Format community trust from config
 const trustedCommunities = async (
-	communities: Omit<DocumentType<GuildConfigClass>, "apikey">[]
-) => {
-	const rawResults: { id: string; count: number }[] = []
-	const CachedCommunities = new Map()
-	const getOrFetchCommunity = async (
-		communityId: string
-	): Promise<DocumentType<CommunityClass>> => {
-		const cachedCommunity = CachedCommunities.get(communityId)
-		if (cachedCommunity) return cachedCommunity
-		const community = CachedCommunities.set(
-			communityId,
-			CommunityModel.findOne({ id: communityId })
-		).get(communityId)
-		return community
-	}
-	communities.forEach((community) => {
-		community.trustedCommunities?.forEach((communityId) => {
-			let found = false
-			rawResults.forEach((trusted) => {
-				if (trusted.id === communityId) {
-					trusted.count++
-					found = true
-				}
-			})
-			if (!found) {
-				rawResults.push({ id: communityId, count: 1 })
-			}
-		})
+	filters: DocumentType<FilterClass>[]
+): Promise<Result<CommunityClass>> => {
+	const communityIds = new Set(
+		...filters.map((filter) => filter.communityFilters)
+	)
+	const communities = await CommunityModel.find({
+		id: {
+			$in: [...communityIds],
+		},
 	})
-	const results = rawResults.map(async (community) => {
+
+	// count the communities
+	const count = filters
+		.map((filter) => filter.communityFilters)
+		.flat()
+		.reduce<Record<string, number>>((acc, filter) => {
+			return {
+				...acc,
+				[filter]: (acc[filter] || 0) + 1,
+			}
+		}, {})
+
+	return Object.entries(count).map(([communityId, count]) => {
 		return {
-			community: await getOrFetchCommunity(community.id),
-			count: community.count,
+			item: communities.find((c) => c.id === communityId)!,
+			count,
 		}
 	})
-	return await Promise.all(results)
 }
 // Format category trust from config
 const trustedCategories = async (
-	communities: Omit<DocumentType<GuildConfigClass>, "apikey">[]
-) => {
-	const rawResults: { id: string; count: number }[] = []
-	const CachedCategories = new Map()
-	const getOrFetchCategory = async (categoryId: string) => {
-		const cachedCategory = CachedCategories.get(categoryId)
-		if (cachedCategory) return cachedCategory
-		const category = CachedCategories.set(
-			categoryId,
-			CategoryModel.findOne({ id: categoryId })
-		).get(categoryId)
-		return category
-	}
-	communities.forEach((community) => {
-		community.categoryFilters?.forEach((categoryId) => {
-			let found = false
-			rawResults.forEach((trusted) => {
-				if (trusted.id === categoryId) {
-					trusted.count++
-					found = true
-				}
-			})
-			if (!found) {
-				rawResults.push({ id: categoryId, count: 1 })
-			}
-		})
+	filters: DocumentType<FilterClass>[]
+): Promise<Result<CategoryClass>> => {
+	const categoryIds = new Set(
+		...filters.map((filter) => filter.categoryFilters)
+	)
+	const categories = await CategoryModel.find({
+		id: {
+			$in: [...categoryIds],
+		},
 	})
-	const results = rawResults.map(async (category) => {
+
+	// count the communities
+	const count = filters
+		.map((filter) => filter.categoryFilters)
+		.flat()
+		.reduce<Record<string, number>>((acc, filter) => {
+			return {
+				...acc,
+				[filter]: (acc[filter] || 0) + 1,
+			}
+		}, {})
+
+	return Object.entries(count).map(([categoryId, count]) => {
 		return {
-			category: await getOrFetchCategory(category.id),
-			count: category.count,
+			item: categories.find((c) => c.id === categoryId)!,
+			count,
 		}
 	})
-	return await Promise.all(results)
 }
 
 // collect statistics and put them to the server
 const collectStatistics = async () => {
-	const communitySettings = await GuildConfigModel.find({})
-		.exec()
-		.then((configs) =>
-			configs.map((CommunityConfig) => {
-				CommunityConfig.set("apikey", null)
-				return CommunityConfig
-			})
-		)
+	const communitySettings = await FilterModel.find()
 	const categories = await trustedCategories(communitySettings)
 	const communities = await trustedCommunities(communitySettings)
 
 	categories.forEach((category) => {
-		if (category.category)
-			categoryGauge.set(
-				{ id: category.category.id, name: category.category.name },
-				category.count
-			)
+		categoryGauge.set(
+			{ id: category.item.id, name: category.item.name },
+			category.count
+		)
 	})
 	communities.forEach((community) => {
-		if (!community.community || !community.community.id) return
 		communityGauge.set(
 			{
-				id: community.community.id,
-				name: community.community.name,
-				contact: community.community.contact,
+				id: community.item.id,
+				name: community.item.name,
+				contact: community.item.contact,
 			},
 			community.count
 		)

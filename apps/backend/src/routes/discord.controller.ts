@@ -92,8 +92,6 @@ export default class DiscordController {
 					guildId: z.string(),
 				}),
 				body: z.object({
-					categoryFilters: z.array(z.string()).optional(),
-					trustedCommunities: z.array(z.string()).optional(),
 					roles: z
 						.object({
 							reports: z.string().optional(),
@@ -126,8 +124,6 @@ export default class DiscordController {
 				guildId: string
 			}
 			Body: {
-				categoryFilters?: string[]
-				trustedCommunities?: string[]
 				roles?: {
 					reports?: string
 					webhooks?: string
@@ -140,7 +136,7 @@ export default class DiscordController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { categoryFilters, trustedCommunities, roles, apikey } = req.body
+		const { roles, apikey } = req.body
 		const { guildId } = req.params
 
 		// check if the community exists
@@ -179,28 +175,6 @@ export default class DiscordController {
 			)
 
 		// query database if categories and communities actually exist
-		if (categoryFilters) {
-			const categoriesExist = await CategoryModel.find({
-				id: { $in: categoryFilters },
-			})
-			if (categoriesExist.length !== categoryFilters.length)
-				return res.status(400).send({
-					errorCode: 400,
-					error: "Bad Request",
-					message: `categoryFilters must be array of IDs of categories, got ${categoryFilters.toString()}, some of which are not real category IDs`,
-				})
-		}
-		if (trustedCommunities) {
-			const communitiesExist = await CommunityModel.find({
-				id: { $in: trustedCommunities },
-			})
-			if (communitiesExist.length !== trustedCommunities.length)
-				return res.status(400).send({
-					errorCode: 400,
-					error: "Bad Request",
-					message: `trustedCommunities must be array of IDs of communities, got ${trustedCommunities.toString()}, some of which are not real community IDs`,
-				})
-		}
 
 		// check other stuff
 		if (apikey) {
@@ -215,12 +189,6 @@ export default class DiscordController {
 				}
 			}
 		}
-		if (categoryFilters) guildConfig.categoryFilters = categoryFilters
-		// explicitly add ID of community to trusted communities, as you need to trust yourself
-		const communityIds = new Set(trustedCommunities)
-		if (guildConfig.communityId) communityIds.add(guildConfig.communityId)
-		if (trustedCommunities)
-			guildConfig.trustedCommunities = [...communityIds]
 
 		const findRole = (id: string) => {
 			const guildRoles = client.guilds.cache
