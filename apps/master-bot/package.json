@@ -27,7 +27,7 @@
 		"@types/node": "^16.6.1",
 		"discord-api-types": "^0.22.0",
 		"discord.js": "^13.4.0",
-		"dotenv": "^10.0.0",
+		"dotenv": "^16.0.0",
 		"envalid": "^7.2.1",
 		"fagc-api-wrapper": "^1.28.2",
 		"install-types": "^2.0.1",
