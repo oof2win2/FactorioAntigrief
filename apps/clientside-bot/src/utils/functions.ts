@@ -502,7 +502,7 @@ export async function handleConnected({
 			.createQueryBuilder()
 			.delete()
 			.where(
-				"id NOT IN (SELECT id FROM `temp.revocations` WHERE id IS NOT NULL)"
+				"id IN (SELECT id FROM `temp.revocations` WHERE id IS NOT NULL)"
 			)
 			.execute()
 		// drop the temp table since it's useless now
