@@ -43,7 +43,7 @@ describe("GET /communities/:id", () => {
 
 describe("GET /communities/own", () => {
 	it("Should return own community if authenticated", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		const response = await backend.inject({
 			method: "GET",
 			path: "/communities/own",
@@ -63,7 +63,7 @@ describe("GET /communities/own", () => {
 		const json = response.json()
 		expect(response.statusCode).toBe(401)
 		expect(response.headers["www-authenticate"]).toBe(
-			'Bearer realm="private" Bearer realm="master"'
+			'Bearer realm="reports" Bearer realm="master"'
 		)
 		expect(json.error).toBe("Unauthorized")
 	})
@@ -82,9 +82,9 @@ describe("GET /communities/own", () => {
 	it("Should return 401 if API key is valid, but community does not exist", async () => {
 		const missingCommunity = await CommunityModel.create({
 			name: "missing",
-			contact: "12345",
+			contact: "987654321", // this contact is purposefully different so that it has no chance of being the same as some other contact
 		})
-		const apikey = await createApikey(missingCommunity, "private")
+		const apikey = await createApikey(missingCommunity, "reports")
 		await CommunityModel.findOneAndDelete({ id: missingCommunity.id })
 		const response = await backend.inject({
 			method: "GET",
@@ -98,7 +98,7 @@ describe("GET /communities/own", () => {
 		expect(json.error).toBe("Unauthorized")
 	})
 	it("Should return 401 if the authentication is wrong", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		const response = await backend.inject({
 			method: "GET",
 			path: "/communities/own",
@@ -111,7 +111,7 @@ describe("GET /communities/own", () => {
 		expect(json.error).toBe("Unauthorized")
 	})
 	it("Should return 401 if the key is revoked", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		await CommunityModel.findOneAndUpdate(
 			{ id: testCommunity.id },
 			{ tokenInvalidBefore: new Date() }
@@ -138,7 +138,7 @@ describe("GET /communities/own", () => {
 
 describe("PATCH /communities/own", () => {
 	it("Should return 400 if contact is not a discord user id", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		const response = await backend.inject({
 			method: "PATCH",
 			path: "/communities/own",
@@ -154,7 +154,7 @@ describe("PATCH /communities/own", () => {
 		expect(json.error).toBe("Bad Request")
 	})
 	it("Should update contact if passed", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		try {
 			const response = await backend.inject({
 				method: "PATCH",
@@ -181,7 +181,7 @@ describe("PATCH /communities/own", () => {
 		}
 	})
 	it("Should update name if passed", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		try {
 			const response = await backend.inject({
 				method: "PATCH",
@@ -211,7 +211,7 @@ describe("PATCH /communities/own", () => {
 
 describe("POST /communities/own/apikey", () => {
 	it("Should invalidate token", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		try {
 			const response = await backend.inject({
 				method: "POST",
@@ -240,7 +240,7 @@ describe("POST /communities/own/apikey", () => {
 		}
 	})
 	it("Should create a token", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+		const apikey = await createApikey(testCommunity, "reports")
 		const response = await backend.inject({
 			method: "POST",
 			path: "/communities/own/apikey",
@@ -265,8 +265,8 @@ describe("POST /communities/own/apikey", () => {
 })
 
 describe("POST /communities/:id/apikey", () => {
-	it("should return 401 if given a private key", async () => {
-		const apikey = await createApikey(testCommunity, "private")
+	it("should return 401 if given a reports key", async () => {
+		const apikey = await createApikey(testCommunity, "reports")
 		const response = await backend.inject({
 			method: "POST",
 			path: `/communities/${testCommunity.id}/apikey`,

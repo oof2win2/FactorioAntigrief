@@ -205,7 +205,7 @@ export default class DiscordController {
 
 		// check other stuff
 		if (apikey) {
-			const parsed = await parseJWT(apikey, ["private", "master"])
+			const parsed = await parseJWT(apikey, ["reports", "master"])
 			if (parsed) {
 				const community = await CommunityModel.findOne({
 					id: parsed.sub,

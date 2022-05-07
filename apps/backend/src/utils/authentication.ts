@@ -9,11 +9,10 @@ import { Community } from "fagc-api-types"
 
 export const apikey = z.object({
 	/**
-	 * aud | Audience - type of API key, master, private, or public
+	 * aud | Audience - type of API key, master, reports, or bpt
 	 * master: can do CRUD operations on communities and categories
-	 * private: can do CURD operations on reports only
-	 * public: can only read, implemented for auth of clientside bots
-	 * @enum {string} "master" | "private"
+	 * reports: can do CURD operations on reports only
+	 * bot: can only read, implemented for auth of clientside bots
 	 */
 	aud: z.enum(["master", "reports", "bot"]),
 	/**
@@ -124,7 +123,7 @@ async function authenticate(req: FastifyRequest, audience: string | string[]) {
 		const data = await parseJWT(token, audience)
 		if (!data) return false
 		const community = await CommunityModel.findOne({
-			id: data.sub,
+			contact: data.sub,
 		})
 		if (!community) return false
 
@@ -150,9 +149,9 @@ export function Authenticate<T extends RouteGenericInterface>(
 	assert(originalRoute)
 	descriptor.value = async function (...args) {
 		const [req, res] = args
-		// we require the API key to be private or master, as public has no write access to most stuff
-		if (!(await authenticate(req, ["private", "master"])))
-			return unauthorized(res, ["private", "master"])
+		// we require the API key to be reports or master, as public has no write access to most stuff
+		if (!(await authenticate(req, ["reports", "master"])))
+			return unauthorized(res, ["reports", "master"])
 
 		return originalRoute.apply(this, args)
 	}
@@ -173,9 +172,9 @@ export function OptionalAuthenticate<T extends RouteGenericInterface>(
 		const [req, res] = args
 		if (
 			req.headers["authorization"] &&
-			!(await authenticate(req, ["private", "master"]))
+			!(await authenticate(req, ["reports", "master"]))
 		)
-			return unauthorized(res, ["private", "master"])
+			return unauthorized(res, ["reports", "master"])
 
 		return originalRoute.apply(this, args)
 	}
