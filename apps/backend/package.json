@@ -73,7 +73,7 @@
 		"@types/debug": "^4.1.7",
 		"@types/faker": "^5.5.9",
 		"@types/fastify-rate-limit": "^2.1.0",
-		"@types/jest": "^27.4.0",
+		"@types/jest": "^27.5.0",
 		"@types/mongoose": "^5.11.97",
 		"@types/node-fetch": "^3.0.3",
 		"@types/nodemon": "^1.19.1",
