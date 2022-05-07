@@ -24,7 +24,7 @@
 		"fagc-api-wrapper": "^1.28.2",
 		"fs-extra": "^10.0.0",
 		"moment": "^2.29.1",
-		"node-fetch": "^2.6.1",
+		"node-fetch": "^3.2.4",
 		"path": "^0.12.7",
 		"validator": "^13.7.0"
 	},
