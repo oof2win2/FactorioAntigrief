@@ -93,7 +93,7 @@ export default class CommunityController {
 		req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		return res.send(community)
 	}
 
@@ -131,7 +131,7 @@ export default class CommunityController {
 	): Promise<FastifyReply> {
 		const { contact, name } = req.body
 
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,
@@ -193,7 +193,7 @@ export default class CommunityController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(404).send({
 				errorCode: 404,
@@ -208,7 +208,7 @@ export default class CommunityController {
 		}
 
 		const auth = req.body.create
-			? await createApikey(community, "reports")
+			? await createApikey(community, community, "reports")
 			: undefined
 		return res.send({
 			apikey: auth,
@@ -224,9 +224,7 @@ export default class CommunityController {
 				}),
 				body: z.object({
 					create: z.boolean().optional(),
-					type: z
-						.enum(["bot", "reports", "master"])
-						.default("reports"),
+					type: z.enum(["reports", "master"]).default("reports"),
 					invalidate: z.boolean().optional(),
 				}),
 				description: "Manage apikey for community",
@@ -252,7 +250,7 @@ export default class CommunityController {
 			}
 			Body: {
 				create?: boolean
-				type?: "reports" | "master" | "bot"
+				type?: "reports" | "master"
 				invalidate: boolean
 			}
 		}>,
@@ -275,7 +273,11 @@ export default class CommunityController {
 		}
 
 		const auth = req.body.create
-			? await createApikey(community, req.body.type ?? "reports")
+			? await createApikey(
+					community,
+					community,
+					req.body.type ?? "reports"
+			  )
 			: undefined
 		return res.send({
 			apikey: auth,
@@ -340,7 +342,7 @@ export default class CommunityController {
 			guildIds: [],
 		})
 
-		const auth = await createApikey(community, "reports")
+		const auth = await createApikey(community, community, "reports")
 
 		communityCreatedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(

@@ -74,7 +74,7 @@ export default class RevocationController {
 	): Promise<FastifyReply> {
 		const { playername, categoryId, adminId, after, revokedAfter } =
 			req.query
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(404).send({
 				errorCode: 404,
@@ -128,7 +128,7 @@ export default class RevocationController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(404).send({
 				errorCode: 404,
@@ -178,7 +178,7 @@ export default class RevocationController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,
@@ -273,7 +273,7 @@ export default class RevocationController {
 		const { adminId } = req.body
 		const { id: categoryId } = req.params
 
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,
@@ -402,7 +402,7 @@ export default class RevocationController {
 		const { adminId } = req.body
 		const { playername } = req.params
 
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,
@@ -526,7 +526,7 @@ export default class RevocationController {
 	): Promise<FastifyReply> {
 		const { snowflake } = req.params
 		const { adminId } = req.body
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(404).send({
 				errorCode: 404,

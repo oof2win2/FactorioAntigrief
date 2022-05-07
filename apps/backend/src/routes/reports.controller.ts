@@ -136,7 +136,7 @@ export default class ReportController {
 			proof,
 		} = req.body
 
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,

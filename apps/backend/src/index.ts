@@ -28,7 +28,7 @@ const start = async () => {
 				name: "FAGC Master Community",
 				contact: client.user?.id,
 			})
-			const apikey = await createApikey(community, "master")
+			const apikey = await createApikey(community, community, "master")
 			try {
 				await fs.writeFile("./masterapikey.txt", apikey, {
 					flag: "w",

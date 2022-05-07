@@ -144,7 +144,7 @@ export default class DiscordController {
 		const { guildId } = req.params
 
 		// check if the community exists
-		const community = req.requestContext.get("community")
+		const { community, authType } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,
@@ -170,7 +170,6 @@ export default class DiscordController {
 				error: "Not Found",
 				message: "Community config was not found",
 			})
-		const authType = req.requestContext.get("authType")
 		// if it's not the master api key and the community IDs are not the same, then return an error
 		if (authType !== "master" && guildConfig.communityId !== community.id)
 			return forbidden(
@@ -247,7 +246,7 @@ export default class DiscordController {
 
 		await guildConfig.save()
 		guildConfigChanged(guildConfig)
-		const includeApikey = req.requestContext.get("authType") === "master"
+		const includeApikey = authType === "master"
 		return res
 			.status(200)
 			.send(guildConfig.toObject({ includeApikey } as any))
@@ -282,7 +281,8 @@ export default class DiscordController {
 		const config = await GuildConfigModel.findOne({ guildId: guildId })
 		if (!config) return res.send(null)
 
-		const includeApikey = req.requestContext.get("authType") === "master"
+		const { authType } = req.requestContext.get("auth")
+		const includeApikey = authType === "master"
 		return res.send(config.toObject({ includeApikey } as any))
 	}
 
@@ -648,21 +648,6 @@ export default class DiscordController {
 			}
 		)
 
-		const apikey = await createApikey(apiUser.id, "bot")
-
-		let succeededSendingMessage = false
-		try {
-			const user = await client.users.fetch(apiUser.id)
-			await user.send(
-				`You have successfully logged in to FAGC! Your API key is: ||${apikey}||`
-			)
-			succeededSendingMessage = true
-			// eslint-disable-next-line no-empty
-		} finally {
-		}
-
-		if (succeededSendingMessage) return res.send("Success authenticating")
-		else
-			return res.send(`Success authenticating. Your API key is ${apikey}`)
+		return res.send(`Success authenticating`)
 	}
 }
