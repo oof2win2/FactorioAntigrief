@@ -4,20 +4,14 @@ import ENV from "../utils/env.js"
 import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
 import { Command as CommandType } from "./Commands.js"
 import * as database from "./database.js"
-import * as wshandler from "./wshandler.js"
+import wshandler from "./wshandler.js"
 import { Report, Revocation } from "fagc-api-types"
 import RCONInterface from "./rcon.js"
 import fs from "fs"
 import { z } from "zod"
-import { Required } from "utility-types"
-import { ApplicationCommandPermissionTypes } from "discord.js/typings/enums"
 import { createConnection, Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
-import Command from "../database/Command.js"
-import FAGCBan from "../database/FAGCBan.js"
 import InfoChannel from "../database/InfoChannel.js"
-import PrivateBan from "../database/PrivateBan.js"
-import Whitelist from "../database/Whitelist.js"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -91,18 +85,7 @@ export default class FAGCBot extends Client {
 			})
 		}
 
-		createConnection({
-			type: "better-sqlite3",
-			database: ENV.DATABASE_URL,
-			entities: [
-				FAGCBan,
-				InfoChannel,
-				BotConfig,
-				PrivateBan,
-				Whitelist,
-				Command,
-			],
-		}).then((db) => {
+		createConnection().then((db) => {
 			this.db = db
 			loadInfoChannels()
 			this.emit("dbReady")
@@ -115,40 +98,32 @@ export default class FAGCBot extends Client {
 		})
 
 		// parsing WS notifications
-		this.fagc.websocket.on("communityCreated", (event) =>
-			wshandler.communityCreated({ event, client: this })
-		)
-		this.fagc.websocket.on("communityRemoved", (event) =>
-			wshandler.communityRemoved({ event, client: this })
-		)
-		this.fagc.websocket.on("categoryCreated", (event) =>
-			wshandler.categoryCreated({ event, client: this })
-		)
-		this.fagc.websocket.on("categoryRemoved", (event) =>
-			wshandler.categoryRemoved({ event, client: this })
-		)
-		this.fagc.websocket.on("report", (event) =>
-			wshandler.report({ event, client: this })
-		)
-		this.fagc.websocket.on("revocation", (event) =>
-			wshandler.revocation({ event, client: this })
-		)
-		this.fagc.websocket.on("guildConfigChanged", (event) =>
-			wshandler.guildConfigChanged({ event, client: this })
-		)
+		Object.keys((eventname: keyof typeof wshandler) => {
+			const handler = wshandler[eventname]
+			if (!handler) return
+			this.fagc.websocket.on(eventname, async (event: any) => {
+				await handler({ event, client: this })
+				for (const [_, botConfig] of this.botConfigs) {
+					this.setBotConfig({
+						guildId: botConfig.guildId,
+						lastNotificationProcessed: new Date(),
+					})
+				}
+			})
+		})
 
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
 	}
 
 	async getBotConfigs(): Promise<BotConfig[]> {
-		const records = await (await this.db).getRepository(BotConfig).find()
+		const records = await this.db.getRepository(BotConfig).find()
 		return records
 	}
 
 	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
 		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing
-		const record = await (await this.db).getRepository(BotConfig).findOne({
+		const record = await this.db.getRepository(BotConfig).findOne({
 			where: {
 				guildId: guildId,
 			},
@@ -282,89 +257,5 @@ export default class FAGCBot extends Client {
 			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
 
 		this.rcon.rconCommandGuild(command, guildId)
-	}
-
-	async syncCommandPerms(guildId: string) {
-		const guildConfig =
-			this.guildConfigs.get(guildId) ||
-			(await this.getGuildConfig(guildId))
-		if (!guildConfig) return false
-		const guildCommands = await (await this.db)
-			.getRepository(Command)
-			.find({
-				guildId: guildId,
-			})
-		if (!guildCommands.length) return false
-
-		type CommandWithPerms = Required<
-			CommandType,
-			"permissionOverrides" | "permissionType"
-		>
-
-		const commandData: CommandWithPerms[] = guildCommands
-			.map((command) =>
-				this.commands.find((c) => c.data.name === command.name)
-			)
-			.filter(
-				(c): c is CommandWithPerms =>
-					Boolean(c?.permissionType) ||
-					Boolean(c?.permissionOverrides?.length)
-			)
-			.map((c) => {
-				if (!c.permissionOverrides) c.permissionOverrides = []
-				if (!c.permissionType) c.permissionType = "configrole"
-				return c
-			})
-		const toSetPermissions = commandData.map((command) => {
-			const guildCommand = guildCommands.find(
-				(c) => c.name === command.data.name
-			)!
-			const perms = command.permissionOverrides.slice()
-			perms.push({
-				type: ApplicationCommandPermissionTypes.USER,
-				id: ENV.OWNERID,
-				permission: true,
-			})
-
-			if (guildConfig?.roles) {
-				switch (command.permissionType) {
-					case "banrole": {
-						if (guildConfig.roles.reports)
-							perms.push({
-								type: ApplicationCommandPermissionTypes.ROLE,
-								id: guildConfig.roles.reports,
-								permission: true,
-							})
-						break
-					}
-					case "configrole": {
-						if (guildConfig.roles.setConfig)
-							perms.push({
-								type: ApplicationCommandPermissionTypes.ROLE,
-								id: guildConfig.roles.setConfig,
-								permission: true,
-							})
-						break
-					}
-					case "notificationsrole": {
-						if (guildConfig.roles.webhooks)
-							perms.push({
-								type: ApplicationCommandPermissionTypes.ROLE,
-								id: guildConfig.roles.webhooks,
-								permission: true,
-							})
-						break
-					}
-				}
-			}
-			return {
-				id: guildCommand.id,
-				type: command.permissionType,
-				permissions: perms,
-			}
-		})
-		await this.guilds.cache.get(guildId)?.commands.permissions.set({
-			fullPermissions: toSetPermissions,
-		})
 	}
 }

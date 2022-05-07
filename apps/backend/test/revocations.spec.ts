@@ -2,25 +2,27 @@ import ReportInfoModel from "../src/database/reportinfo"
 import { createApikey } from "../src/utils/authentication"
 import "./mockDiscord"
 import { backend, testCategories, testCommunity } from "./prepareTest"
-import { toJson, createReport, createRevocation } from "./utils"
+import { createReport } from "./utils"
 
 describe("POST /revocations", () => {
 	it("Should turn a report into a revocation", async () => {
-		const apikey = await createApikey(testCommunity, "master")
-		const report = await ReportInfoModel.create(createReport({
-			communityId: testCommunity.id,
-			categoryId: testCategories[0].id,
-		}))
+		const apikey = await createApikey(testCommunity, "reports")
+		const report = await ReportInfoModel.create(
+			createReport({
+				communityId: testCommunity.id,
+				categoryId: testCategories[0].id,
+			})
+		)
 		const response = await backend.inject({
 			method: "POST",
 			path: "/revocations",
 			headers: {
-				"authorization": `Bearer ${apikey}`
+				authorization: `Bearer ${apikey}`,
 			},
 			payload: {
 				reportId: report.id,
 				adminId: report.adminId,
-			}
+			},
 		})
 		expect(response.statusCode).toBe(200)
 		const json = response.json()

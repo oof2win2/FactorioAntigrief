@@ -34,7 +34,7 @@ export type WebSocketMessageType =
 	| "communityUpdated"
 	| "communitiesMerged"
 	| "announcement"
-	| "reconnecting"
+	| "disconnected"
 	| "connected"
 
 /**
@@ -55,8 +55,8 @@ export declare interface WebSocketEvents {
 	communityUpdated: (message: CommunityUpdatedMessage) => void
 	communitiesMerged: (message: CommunitiesMergedMessage) => void
 
-	reconnecting: (message: void) => void
 	connected: (message: void) => void
+	disconnected: (message: void) => void
 }
 
 declare interface WebSocketHandler {
@@ -81,13 +81,13 @@ declare interface WebSocketHandler {
 class WebSocketHandler extends EventEmitter {
 	private socket: ReconnectingWebSocket
 	private opts: WebSockethandlerOpts
-	private guildIds: string[]
+	private _guildIds: string[]
 	private socketurl: string
 
 	constructor(opts: WebSockethandlerOpts) {
 		super()
 		this.opts = opts
-		this.guildIds = []
+		this._guildIds = []
 
 		// don't create the websocket if it has not been enabled
 
@@ -116,8 +116,12 @@ class WebSocketHandler extends EventEmitter {
 			}
 		}
 		this.socket.onerror = console.error
+		this.socket.onclose = () => {
+			this.emit("disconnected")
+		}
 		this.socket.onopen = () => {
-			this.guildIds.map((id) => {
+			this.emit("connected")
+			this._guildIds.map((id) => {
 				this.socket.send(
 					JSON.stringify({
 						type: "addGuildId",
@@ -227,10 +231,14 @@ class WebSocketHandler extends EventEmitter {
 		}
 	}
 
+	get guildIds() {
+		return this._guildIds
+	}
+
 	addGuildId(guildId: string): void {
-		if (this.guildIds.includes(guildId)) return // don't do anything if it already is set
+		if (this._guildIds.includes(guildId)) return // don't do anything if it already is set
 		// save guild id to list
-		this.guildIds.push(guildId)
+		this._guildIds.push(guildId)
 		this.socket?.send(
 			JSON.stringify({
 				type: "addGuildId",
@@ -240,9 +248,9 @@ class WebSocketHandler extends EventEmitter {
 	}
 
 	removeGuildId(guildId: string): void {
-		if (!this.guildIds.includes(guildId)) return // don't do anything if it isn't there
+		if (!this._guildIds.includes(guildId)) return // don't do anything if it isn't there
 		// remove the id from local list & then send info to backend
-		this.guildIds = this.guildIds.filter((id) => id !== guildId)
+		this._guildIds = this._guildIds.filter((id) => id !== guildId)
 		this.socket?.send(
 			JSON.stringify({
 				type: "removeGuildId",

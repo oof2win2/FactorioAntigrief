@@ -32,6 +32,13 @@ const ENV = cleanEnv(
 		CLIENTID: str({
 			desc: "Client ID for Discord, contact for the first community",
 		}),
+		BASE_URL: str({
+			desc: "Base URL for the API",
+			example: "https://factoriobans.club/api",
+		}),
+		DISCORD_SECRET: str({
+			desc: "Secret for Discord OAuth",
+		}),
 	},
 	{}
 )

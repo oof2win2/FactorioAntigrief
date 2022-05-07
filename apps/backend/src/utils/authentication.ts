@@ -9,10 +9,12 @@ import { Community } from "fagc-api-types"
 
 export const apikey = z.object({
 	/**
-	 * aud | Audience - type of API key, master or private
-	 * @enum {string} "master" | "private"
+	 * aud | Audience - type of API key, master, reports, or bpt
+	 * master: can do CRUD operations on communities and categories
+	 * reports: can do CURD operations on reports only
+	 * bot: can only read, implemented for auth of clientside bots
 	 */
-	aud: z.enum(["master", "private"]), // the type of API key, master api or only private
+	aud: z.enum(["master", "reports", "bot"]),
 	/**
 	 * sub | Subject - the community ID
 	 */
@@ -26,20 +28,22 @@ export const apikey = z.object({
 })
 export type apikey = z.infer<typeof apikey>
 
+/**
+ * Create a FAGC API key
+ * @param cId Community or Discord user that the API key is for
+ * @param audience The type of API key that this is
+ */
 export async function createApikey(
 	cId: string | Community,
-	audience: "master" | "private" = "private"
+	audience: apikey["aud"]
 ) {
-	const community =
-		typeof cId === "string" ? await CommunityModel.findById(cId) : cId
-	if (!community) throw new Error("Community not found")
 	const apikey = await new jose.SignJWT({})
 		.setIssuedAt() // for validating when the token was issued
 		.setProtectedHeader({
 			// encoding method
 			alg: "HS256",
 		})
-		.setSubject(community.id) // subject, who is it issued to
+		.setSubject(typeof cId === "string" ? cId : cId.contact) // subject, who is it issued to
 		.setAudience(audience) // audience, what is it for
 		.sign(Buffer.from(ENV.JWT_SECRET, "utf8")) // sign the token itself and get an encoded string back
 	return apikey
@@ -119,7 +123,7 @@ async function authenticate(req: FastifyRequest, audience: string | string[]) {
 		const data = await parseJWT(token, audience)
 		if (!data) return false
 		const community = await CommunityModel.findOne({
-			id: data.sub,
+			contact: data.sub,
 		})
 		if (!community) return false
 
@@ -145,8 +149,9 @@ export function Authenticate<T extends RouteGenericInterface>(
 	assert(originalRoute)
 	descriptor.value = async function (...args) {
 		const [req, res] = args
-		if (!(await authenticate(req, ["private", "master"])))
-			return unauthorized(res, ["private", "master"])
+		// we require the API key to be reports or master, as public has no write access to most stuff
+		if (!(await authenticate(req, ["reports", "master"])))
+			return unauthorized(res, ["reports", "master"])
 
 		return originalRoute.apply(this, args)
 	}
@@ -167,9 +172,9 @@ export function OptionalAuthenticate<T extends RouteGenericInterface>(
 		const [req, res] = args
 		if (
 			req.headers["authorization"] &&
-			!(await authenticate(req, ["private", "master"]))
+			!(await authenticate(req, ["reports", "master"]))
 		)
-			return unauthorized(res, ["private", "master"])
+			return unauthorized(res, ["reports", "master"])
 
 		return originalRoute.apply(this, args)
 	}
