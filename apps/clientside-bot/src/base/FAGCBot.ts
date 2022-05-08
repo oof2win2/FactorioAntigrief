@@ -1,5 +1,5 @@
 import { FAGCWrapper } from "fagc-api-wrapper"
-import { GuildConfig, Community } from "fagc-api-types"
+import { GuildConfig, Community, FilterObject } from "fagc-api-types"
 import ENV from "../utils/env.js"
 import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
 import { Command as CommandType } from "./Commands.js"
@@ -115,6 +115,15 @@ export default class FAGCBot extends Client {
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
 	}
 
+	async getAllFilters(): Promise<FilterObject[]> {
+		const guilds = this.guildConfigs.map(async (config) => {
+			return (await this.fagc.communities.getFiltersById({
+				id: config.filterObjectId,
+			}))!
+		})
+		return await Promise.all(guilds)
+	}
+
 	async getBotConfigs(): Promise<BotConfig[]> {
 		const records = await this.db.getRepository(BotConfig).find()
 		return records
@@ -142,7 +151,7 @@ export default class FAGCBot extends Client {
 			...existingConfig,
 			...config,
 		})
-		await (await this.db)
+		await this.db
 			.getRepository(BotConfig)
 			.upsert({ ...toSetConfig, guildId: config.guildId }, ["guildId"])
 		// should exist as the config already exists

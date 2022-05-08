@@ -82,15 +82,17 @@ const categoryRemoved = async ({
 
 const report = async ({ client, event }: HandlerOpts<"report">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const allFilters = await client.getAllFilters()
 
 	const whereToSend = [...client.guildConfigs.values()].filter(
 		(guildConfig) => {
+			const filter = allFilters.find(
+				(f) => f.id === guildConfig.filterObjectId
+			)!
 			// check whether the revocation is valid under this guild's config
 			return (
-				guildConfig.categoryFilters.includes(event.report.categoryId) &&
-				guildConfig.trustedCommunities.includes(
-					event.report.communityId
-				)
+				filter.categoryFilters.includes(event.report.categoryId) &&
+				filter.communityFilters.includes(event.report.communityId)
 			)
 		}
 	)
@@ -114,6 +116,7 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 		database: client.db,
 		report: event.report,
 		allGuildConfigs: [...client.guildConfigs.values()],
+		allFilters,
 	})
 	if (!guildsToBan) return
 
@@ -130,17 +133,17 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 
 const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const allFilters = await client.getAllFilters()
 
 	const whereToSend = [...client.guildConfigs.values()].filter(
 		(guildConfig) => {
+			const filter = allFilters.find(
+				(f) => f.id === guildConfig.filterObjectId
+			)!
 			// check whether the revocation is valid under this guild's config
 			return (
-				guildConfig.categoryFilters.includes(
-					event.revocation.categoryId
-				) &&
-				guildConfig.trustedCommunities.includes(
-					event.revocation.communityId
-				)
+				filter.categoryFilters.includes(event.revocation.categoryId) &&
+				filter?.communityFilters.includes(event.revocation.communityId)
 			)
 		}
 	)
@@ -168,6 +171,7 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 		database: client.db,
 		revocation: event.revocation,
 		allGuildConfigs: [...client.guildConfigs.values()],
+		allFilters,
 	})
 	if (!guildsToUnban) return
 
@@ -190,10 +194,12 @@ const guildConfigChanged = async ({
 	event,
 }: HandlerOpts<"guildConfigChanged">) => {
 	client.guildConfigs.set(event.config.guildId, event.config) // set the new config
+	const allFilters = await client.getAllFilters()
+	const filter = allFilters.find((f) => f.id === event.config.filterObjectId)!
 
 	const validReports = await client.fagc.reports.list({
-		categoryIds: event.config.categoryFilters,
-		communityIds: event.config.trustedCommunities,
+		categoryIds: filter.categoryFilters,
+		communityIds: filter.communityFilters,
 	})
 
 	const results = await guildConfigChangedBanlists({
@@ -201,6 +207,7 @@ const guildConfigChanged = async ({
 		newConfig: event.config,
 		allGuildConfigs: [...client.guildConfigs.values()],
 		validReports: validReports,
+		allFilters,
 	})
 
 	// ban players
@@ -239,6 +246,7 @@ const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
 const connected = async ({ client }: HandlerOpts<"connected">) => {
 	const lastReceivedDate =
 		client.botConfigs.first()?.lastNotificationProcessed || new Date()
+	const allFilters = await client.getAllFilters()
 
 	// we fetch the missed reports and revocations and act on each of them
 	const reports = await client.fagc.reports.fetchSince({
@@ -261,6 +269,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 			database: client.db,
 			report: report,
 			allGuildConfigs: [...client.guildConfigs.values()],
+			allFilters,
 		})
 		if (!guildsToBan) return
 
@@ -272,9 +281,47 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 		})
 	}
 
+	for (const revocation of revocations) {
+		const guildsToUnban = await handleRevocation({
+			database: client.db,
+			revocation: revocation,
+			allGuildConfigs: [...client.guildConfigs.values()],
+			allFilters,
+		})
+		if (!guildsToUnban) return
+		guildsToUnban.map((guildId) => {
+			const command = client.createUnbanCommand(
+				revocation.playername,
+				guildId
+			)
+			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+			unbanCommands.get(guildId)?.push(command)
+		})
+	}
+
 	// add guild IDs back into the websocket handler after all of this was done
 	for (const [_, guild] of client.guilds.cache) {
-		client.fagc.websocket.removeGuildId(guild.id)
+		client.fagc.websocket.addGuildId(guild.id)
+	}
+
+	// execute the commands in batches
+	for (const [guildId, commands] of banCommands.entries()) {
+		if (!commands.length) continue
+		for (const commandGroup of splitIntoGroups(commands)) {
+			await client.rcon.rconCommandGuild(
+				`/sc ${commandGroup.join(";")}; rcon.print(true)`,
+				guildId
+			)
+		}
+	}
+	for (const [guildId, commands] of unbanCommands.entries()) {
+		if (!commands.length) continue
+		for (const commandGroup of splitIntoGroups(commands)) {
+			await client.rcon.rconCommandGuild(
+				`/sc ${commandGroup.join(";")}; rcon.print(true)`,
+				guildId
+			)
+		}
 	}
 }
 
@@ -297,8 +344,7 @@ const EventHandlers: Record<
 	report,
 	revocation,
 	guildConfigChanged,
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	disconnected: () => {},
+	disconnected: disconnected,
 	connected,
 }
 export default EventHandlers
