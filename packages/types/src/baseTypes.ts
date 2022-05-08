@@ -50,6 +50,7 @@ export const Community = z
 		contact: z.string(),
 		guildIds: z.array(z.string()),
 		tokenInvalidBefore: DateType,
+		filterObjectId: z.string(),
 	})
 	.merge(Common)
 export type Community = z.infer<typeof Community>
@@ -65,8 +66,7 @@ export type Category = z.infer<typeof Category>
 export const GuildConfig = z.object({
 	guildId: z.string(),
 	communityId: z.string().optional(),
-	trustedCommunities: z.array(z.string()).default([]),
-	categoryFilters: z.array(z.string()).default([]),
+	filterObjectId: z.string(),
 	roles: z.object({
 		reports: z.string().default(""),
 		webhooks: z.string().default(""),
@@ -77,6 +77,13 @@ export const GuildConfig = z.object({
 	apikey: z.string().nullable().optional(),
 })
 export type GuildConfig = z.infer<typeof GuildConfig>
+
+export const FilterObject = z.object({
+	id: z.string(),
+	categoryFilters: z.string(),
+	communityFilters: z.string(),
+})
+export type FilterObject = z.infer<typeof FilterObject>
 
 // this also extends common but the ID is a Discord string
 export const Webhook = z

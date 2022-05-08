@@ -17,7 +17,11 @@ import {
 import { validateDiscordUser } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
-import { Community, CommunityCreatedMessageExtraOpts } from "fagc-api-types"
+import {
+	Community,
+	CommunityCreatedMessageExtraOpts,
+	FilterObject,
+} from "fagc-api-types"
 import { z } from "zod"
 import FilterModel from "../database/filterobject"
 
@@ -177,6 +181,10 @@ export default class CommunityController {
 							!!data.id && !!data.guildId && !!data.communityId,
 						"You must have at least one of id, guildId, or communityId present in your query"
 					),
+
+				response: {
+					"200": FilterObject.nullable(),
+				},
 			},
 		},
 	})
@@ -229,6 +237,13 @@ export default class CommunityController {
 
 	@GET({
 		url: "/filter/own",
+		options: {
+			schema: {
+				response: {
+					"200": FilterObject.nullable(),
+				},
+			},
+		},
 	})
 	@Authenticate
 	async getOwnFilters(
@@ -248,7 +263,7 @@ export default class CommunityController {
 		return res.send(filter)
 	}
 
-	@POST({
+	@PATCH({
 		url: "/filters",
 		options: {
 			schema: {
@@ -300,7 +315,7 @@ export default class CommunityController {
 		return res.send(filter)
 	}
 
-	@POST({
+	@PATCH({
 		url: "/filters/:id",
 		options: {
 			schema: {
@@ -507,7 +522,7 @@ export default class CommunityController {
 		},
 	})
 	@MasterAuthenticate
-	async create(
+	async createCommunity(
 		req: FastifyRequest<{
 			Body: {
 				name: string
@@ -577,7 +592,7 @@ export default class CommunityController {
 		},
 	})
 	@MasterAuthenticate
-	async delete(
+	async deleteCommunity(
 		req: FastifyRequest<{
 			Params: {
 				id: string
