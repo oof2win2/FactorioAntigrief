@@ -21,6 +21,7 @@ import {
 	Community,
 	CommunityCreatedMessageExtraOpts,
 	FilterObject,
+	SetFilterObject,
 } from "fagc-api-types"
 import { z } from "zod"
 import FilterModel from "../database/filterobject"
@@ -166,7 +167,7 @@ export default class CommunityController {
 	}
 
 	@GET({
-		url: "/filter",
+		url: "/filters",
 		options: {
 			schema: {
 				querystring: z
@@ -178,7 +179,7 @@ export default class CommunityController {
 					.partial()
 					.refine(
 						(data) =>
-							!!data.id && !!data.guildId && !!data.communityId,
+							!(!data.id && !data.guildId && !data.communityId),
 						"You must have at least one of id, guildId, or communityId present in your query"
 					),
 
@@ -236,7 +237,7 @@ export default class CommunityController {
 	}
 
 	@GET({
-		url: "/filter/own",
+		url: "/filters/own",
 		options: {
 			schema: {
 				response: {
@@ -267,12 +268,7 @@ export default class CommunityController {
 		url: "/filters",
 		options: {
 			schema: {
-				body: z
-					.object({
-						communityIds: z.array(z.string()),
-						categoryIds: z.array(z.string()),
-					})
-					.partial(),
+				body: SetFilterObject.omit({ id: true }),
 			},
 		},
 	})
@@ -280,8 +276,8 @@ export default class CommunityController {
 	async setFilters(
 		req: FastifyRequest<{
 			Body: {
-				communityIds?: string[]
-				categoryIds?: string[]
+				categoryFilters?: string[]
+				communityFilters?: string[]
 			}
 		}>,
 		res: FastifyReply
@@ -294,19 +290,23 @@ export default class CommunityController {
 				message: "Your community was not found",
 			})
 
-		const { communityIds, categoryIds } = req.body
+		const { communityFilters, categoryFilters } = req.body
 		const toSetCommunityIds = new Set<string>([
-			...(communityIds || []),
+			...(communityFilters || []),
 			community.id,
 		])
-		const toSetCategoryIds = new Set<string>(categoryIds || [])
+		const toSetCategoryIds = new Set<string>(categoryFilters || [])
 		const filter = await FilterModel.findOneAndUpdate(
 			{
 				id: community.filterObjectId,
 			},
 			{
-				...(communityIds && { toSetCommunityIds }),
-				...(categoryIds && { toSetCategoryIds }),
+				...(communityFilters && {
+					communityFilters: [...toSetCommunityIds],
+				}),
+				...(categoryFilters && {
+					categoryFilters: [...toSetCategoryIds],
+				}),
 			},
 			{
 				new: true,
@@ -322,12 +322,9 @@ export default class CommunityController {
 				params: z.object({
 					id: z.string(),
 				}),
-				body: z
-					.object({
-						communityIds: z.array(z.string()),
-						categoryIds: z.array(z.string()),
-					})
-					.partial(),
+				body: SetFilterObject.omit({ id: true }).extend({
+					communityId: z.string().nullable(),
+				}),
 			},
 		},
 	})
@@ -338,29 +335,38 @@ export default class CommunityController {
 				id: string
 			}
 			Body: {
-				communityIds?: string[]
-				categoryIds?: string[]
+				categoryFilters?: string[]
+				communityFilters?: string[]
+				communityId: string | null
 			}
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
 
-		const { communityIds, categoryIds } = req.body
-		const toSetCommunityIds = new Set<string>(communityIds || [])
-		const toSetCategoryIds = new Set<string>(categoryIds || [])
+		const { categoryFilters, communityFilters, communityId } = req.body
+		const toSetCommunityIds = new Set<string>(communityFilters || [])
+		const toSetCategoryIds = new Set<string>(categoryFilters || [])
+
+		if (communityId) toSetCommunityIds.add(communityId)
+
 		const filter = await FilterModel.findOneAndUpdate(
 			{
 				id: id,
 			},
 			{
-				...(communityIds && { toSetCommunityIds }),
-				...(categoryIds && { toSetCategoryIds }),
+				...(communityFilters && {
+					communityFilters: [...toSetCommunityIds],
+				}),
+				...(categoryFilters && {
+					categoryFilters: [...toSetCategoryIds],
+				}),
 			},
 			{
 				new: true,
 			}
 		)
+		console.log(filter)
 
 		if (!filter) {
 			return res.status(404).send({

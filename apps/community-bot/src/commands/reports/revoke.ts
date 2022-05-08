@@ -1,7 +1,7 @@
 import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 
-const RevokeReport: Command = {
+const RevokeReport = Command({
 	name: "revoke",
 	description: "Revokes a player's report with the report ID",
 	aliases: ["revokeid"],
@@ -11,6 +11,7 @@ const RevokeReport: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
+	fetchFilters: false,
 	async run({ message, args, guildConfig, client }) {
 		if (!guildConfig.apikey)
 			return message.reply(`${client.emotes.warn} No API key set`)
@@ -97,6 +98,6 @@ const RevokeReport: Command = {
 			throw e
 		}
 	},
-}
+})
 
 export default RevokeReport

@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const ViewConfig: Command = {
+const ViewConfig = Command({
 	name: "viewconfig",
 	description: "View your guild config",
 	aliases: [],
@@ -9,6 +9,7 @@ const ViewConfig: Command = {
 	category: "config",
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message, guildConfig }) => {
 		const embed = client
 			.createBaseEmbed()
@@ -79,5 +80,6 @@ const ViewConfig: Command = {
 			embeds: [embed],
 		})
 	},
-}
+})
+
 export default ViewConfig

@@ -3,7 +3,7 @@ import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const RevokeAllName: Command = {
+const RevokeAllName = Command({
 	name: "revokeallname",
 	description: "Revokes all reports of a player in your community",
 	aliases: [],
@@ -13,6 +13,7 @@ const RevokeAllName: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
+	fetchFilters: false,
 	async run({ client, message, args, guildConfig }) {
 		if (!guildConfig.apikey)
 			return message.reply(`${client.emotes.warn} No API key set`)
@@ -88,6 +89,6 @@ const RevokeAllName: Command = {
 			throw e
 		}
 	},
-}
+})
 
 export default RevokeAllName

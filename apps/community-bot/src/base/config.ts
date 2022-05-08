@@ -3,6 +3,7 @@ const config = {
 		warn: ":warning:",
 		success: "<:success:841385407790317588>",
 		type: ":keyboard:",
+		error: ":x:",
 	},
 	embeds: {
 		color: "#0099ff",

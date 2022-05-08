@@ -4,7 +4,7 @@ import IdModel, { IdType } from "./ids"
 
 @modelOptions({
 	schemaOptions: {
-		collection: "categories",
+		collection: "filterobject",
 	},
 })
 @pre<FilterClass>("save", async function (next) {

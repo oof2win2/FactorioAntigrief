@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const GetUserById: Command = {
+const GetUserById = Command({
 	name: "getuserbyid",
 	description: "Gets a Discord user by their ID",
 	aliases: ["getuser", "viewuserbyid", "viewuser"],
@@ -9,6 +9,7 @@ const GetUserById: Command = {
 	examples: ["getuserbyid 429696038266208258"],
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ message, client, args }) => {
 		const uid = args.shift()
 		if (!uid) return message.reply("No user ID provided")
@@ -35,5 +36,6 @@ const GetUserById: Command = {
 			return message.reply(`User with the ID ${uid} could not be found`)
 		}
 	},
-}
+})
+
 export default GetUserById

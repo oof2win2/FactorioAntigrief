@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const Category: Command = {
+const Category = Command({
 	name: "category",
 	aliases: [],
 	description: "Gets a category by its ID or index in filtered categories",
@@ -9,7 +9,8 @@ const Category: Command = {
 	examples: ["category XuciBx7", "category 1"],
 	requiresRoles: false,
 	requiresApikey: false,
-	run: async ({ client, message, args, guildConfig }) => {
+	fetchFilters: true,
+	run: async ({ client, message, args, filters }) => {
 		// if the person did not provide an argument, get a message response
 		const categoryId = await client.argsOrInput(
 			args,
@@ -22,8 +23,7 @@ const Category: Command = {
 			)
 		const category = Number(categoryId)
 			? await client.fagc.categories.fetchCategory({
-					categoryId:
-						guildConfig.categoryFilters[Number(categoryId) - 1],
+					categoryId: filters.categoryFilters[Number(categoryId) - 1],
 			  })
 			: await client.fagc.categories.fetchCategory({
 					categoryId: categoryId,
@@ -40,12 +40,12 @@ const Category: Command = {
 			.setDescription(`FAGC Category with ID \`${category.id}\``)
 		embed.addField(category.name, category.description)
 
-		if (client.config && guildConfig.categoryFilters) {
-			if (guildConfig.categoryFilters.indexOf(category.id) != -1) {
+		if (client.config && filters.categoryFilters) {
+			if (filters.categoryFilters.indexOf(category.id) != -1) {
 				embed.addField(
 					"Category index",
 					(
-						guildConfig.categoryFilters.indexOf(category.id) + 1
+						filters.categoryFilters.indexOf(category.id) + 1
 					).toString()
 				)
 			}
@@ -55,6 +55,6 @@ const Category: Command = {
 			embeds: [embed],
 		})
 	},
-}
+})
 
 export default Category

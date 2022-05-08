@@ -10,6 +10,7 @@ import {
 	createApikey,
 } from "../utils/authentication"
 import CategoryModel from "../database/category"
+import FilterModel from "../database/filterobject"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import WebhookModel from "../database/webhook"
@@ -32,6 +33,7 @@ const BOT_SCOPES = [
 	"applications.commands",
 	"applications.commands.permissions.update",
 ]
+const BOT_PERMS = 156766628928
 
 @Controller({ route: "/discord" })
 export default class DiscordController {
@@ -77,8 +79,11 @@ export default class DiscordController {
 				message: `Guild ${guildId} already has a config`,
 			})
 
+		const filter = await FilterModel.create({})
+
 		const guildConfig = await GuildConfigModel.create({
 			guildId: guildId,
+			filterObjectId: filter.id,
 		})
 
 		return res.status(200).send(guildConfig)
@@ -530,6 +535,7 @@ export default class DiscordController {
 		params.append("scope", BOT_SCOPES.join(" "))
 		params.append("response_type", "code")
 		params.append("redirect_uri", `${ENV.BASE_URL}/discord/oauth/callback`)
+		params.append("permisions", BOT_PERMS.toString())
 
 		const url = `https://discord.com/api/oauth2/authorize?${params}`
 

@@ -8,8 +8,13 @@ import {
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
-import { Command } from "./Command"
-import { GuildConfig, Category } from "fagc-api-types"
+import type { Command } from "./Command"
+import {
+	Category,
+	FilterObject,
+	SetFilterObject,
+	SetGuildConfig,
+} from "fagc-api-types"
 
 export default class FAGCBot extends Client {
 	config: typeof CONFIG
@@ -17,7 +22,7 @@ export default class FAGCBot extends Client {
 	env = ENV
 	RateLimit: Collection<string, number>
 	fagc: FAGCWrapper
-	commands: Map<string, Command>
+	commands: Map<string, Command<boolean, boolean>>
 	aliases: Map<string, string>
 
 	constructor(options: ClientOptions) {
@@ -52,39 +57,32 @@ export default class FAGCBot extends Client {
 		return true
 	}
 
-	async getFilteredCategories(config: GuildConfig): Promise<Category[]> {
+	async getFilteredCategories(filter: FilterObject): Promise<Category[]> {
 		const allCategories = await this.fagc.categories.fetchAll({})
 		const filteredCategories = allCategories
 			.filter((category) =>
-				config.categoryFilters.some((id) => id === category.id)
+				filter.categoryFilters.some((id) => id === category.id)
 			)
 			.sort(
 				(a, b) =>
-					config.categoryFilters.indexOf(a.id) -
-					config.categoryFilters.indexOf(b.id)
+					filter.categoryFilters.indexOf(a.id) -
+					filter.categoryFilters.indexOf(b.id)
 			)
 		return filteredCategories
 	}
-	async saveGuildConfig(
-		config: Partial<GuildConfig> & {
-			roles?: Partial<GuildConfig["roles"]>
-		} & Pick<GuildConfig, "guildId">
-	) {
-		if (config.apikey) {
-			// if the guild has an API key, it can be set by themselves
-			return this.fagc.communities.setGuildConfig({
-				config: config,
-				reqConfig: {
-					apikey: config.apikey,
-				},
-			})
-		} else {
-			// since there is no api key, we set the guild config ourselves
-			return this.fagc.communities.setGuildConfigMaster({
-				config: config,
-			})
-		}
+	async saveGuildConfig(config: SetGuildConfig) {
+		return this.fagc.communities.setGuildConfigMaster({
+			config: config,
+		})
 	}
+
+	async saveFilters(filter: SetFilterObject, communityId: string | null) {
+		return this.fagc.communities.setMasterFilters({
+			filter,
+			communityId,
+		})
+	}
+
 	async safeGetContactString(userId: string): Promise<string> {
 		const user = await this.users.fetch(userId).catch(() => null)
 		if (!user) return `User ${userId} not found`

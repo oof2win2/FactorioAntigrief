@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const Community: Command = {
+const Community = Command({
 	name: "community",
 	description: "Gets a community by ID",
 	aliases: [],
@@ -9,6 +9,7 @@ const Community: Command = {
 	category: "communities",
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message, args }) => {
 		const communityId = await client.argsOrInput(
 			args,
@@ -37,6 +38,6 @@ const Community: Command = {
 			embeds: [embed],
 		})
 	},
-}
+})
 
 export default Community

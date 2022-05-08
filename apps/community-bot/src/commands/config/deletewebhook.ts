@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const DeleteWebhook: Command = {
+const DeleteWebhook = Command({
 	name: "deletewebhook",
 	description:
 		"Remove a webhook from a specified channel to stop sending FAGC notifications to",
@@ -11,6 +11,7 @@ const DeleteWebhook: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["webhooks"],
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message }) => {
 		const channel = message.mentions.channels.first() || message.channel
 		if (!channel.isText())
@@ -45,5 +46,6 @@ const DeleteWebhook: Command = {
 				webhook.delete()
 			})
 	},
-}
+})
+
 export default DeleteWebhook

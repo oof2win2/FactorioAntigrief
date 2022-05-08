@@ -4,7 +4,7 @@ import { createPagedEmbed } from "../../utils/functions"
 import { Category } from "fagc-api-types"
 import { AuthError } from "fagc-api-wrapper"
 
-const AddCategory: Command = {
+const AddCategory = Command({
 	name: "addcategory",
 	description:
 		"Adds a category filter. Please see the [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)",
@@ -15,7 +15,8 @@ const AddCategory: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["setCategories"],
 	requiresApikey: false,
-	run: async ({ client, message, guildConfig, args }) => {
+	fetchFilters: true,
+	run: async ({ client, message, args, filters, guildConfig }) => {
 		// if they haven't provided any IDs, we'll show them all the categories and ask for IDs
 		const allCategories = await client.fagc.categories.fetchAll({})
 		if (!args[0]) {
@@ -51,7 +52,7 @@ const AddCategory: Command = {
 		const newCategories = args
 			.map((categoryId) => client.fagc.categories.resolveId(categoryId))
 			.filter((r): r is Category => Boolean(r))
-			.filter((r) => !guildConfig.categoryFilters.includes(r.id))
+			.filter((r) => !filters.categoryFilters.includes(r.id))
 
 		// if there are no new categories, return
 		if (!newCategories.length)
@@ -84,17 +85,19 @@ const AddCategory: Command = {
 
 		// add the new categories to the config
 		const newCategoryIds = new Set([
-			...guildConfig.categoryFilters,
+			...filters.categoryFilters,
 			...newCategories.map((r) => r.id),
 		])
 
 		try {
 			// save the config
-			await client.saveGuildConfig({
-				guildId: message.guild.id,
-				categoryFilters: [...newCategoryIds],
-				apikey: guildConfig.apikey ?? undefined,
-			})
+			await client.saveFilters(
+				{
+					id: filters.id,
+					categoryFilters: Array.from(newCategoryIds),
+				},
+				guildConfig.communityId ?? null
+			)
 
 			// send a success message
 			return message.channel.send(
@@ -109,5 +112,6 @@ const AddCategory: Command = {
 			throw e
 		}
 	},
-}
+})
+
 export default AddCategory

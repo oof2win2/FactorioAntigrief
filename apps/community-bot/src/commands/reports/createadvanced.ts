@@ -4,7 +4,7 @@ import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
 import { AuthError } from "fagc-api-wrapper"
 
-const CreateAdvanced: Command = {
+const CreateAdvanced = Command({
 	name: "createadvanced",
 	aliases: ["createadv", "createadvanced"],
 	usage: "[player] [...description]",
@@ -15,8 +15,9 @@ const CreateAdvanced: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
-	async run({ client, message, args, guildConfig }) {
-		if (!guildConfig.categoryFilters.length)
+	fetchFilters: true,
+	async run({ client, message, args, guildConfig, filters }) {
+		if (!filters.categoryFilters.length)
 			return message.channel.send(
 				`${client.emotes.warn} No categories are filtered`
 			)
@@ -83,19 +84,17 @@ const CreateAdvanced: Command = {
 		const allCategories = await client.fagc.categories.fetchAll({})
 		const fields: EmbedField[] = allCategories
 			// make sure the category is filtered
-			.filter((category) =>
-				guildConfig.categoryFilters.includes(category.id)
-			)
+			.filter((category) => filters.categoryFilters.includes(category.id))
 			// sort the categories by their index
 			.sort(
 				(a, b) =>
-					guildConfig.categoryFilters.indexOf(a.id) -
-					guildConfig.categoryFilters.indexOf(b.id)
+					filters.categoryFilters.indexOf(a.id) -
+					filters.categoryFilters.indexOf(b.id)
 			)
 			.map((category) => {
 				return {
 					name: `${
-						guildConfig.categoryFilters.indexOf(category.id) + 1
+						filters.categoryFilters.indexOf(category.id) + 1
 					}) ${category.name} (\`${category.id}\`)`,
 					value: category.description,
 					inline: false,
@@ -123,10 +122,10 @@ const CreateAdvanced: Command = {
 			} else {
 				// id is index in category filters
 				const i = Number(categoryId)
-				if (i < 0 || i > guildConfig.categoryFilters.length) {
+				if (i < 0 || i > filters.categoryFilters.length) {
 					return invalidCategoryIds.push(categoryId)
 				}
-				const found = guildConfig.categoryFilters[i - 1]
+				const found = filters.categoryFilters[i - 1]
 				id = found
 			}
 			// all categories are fetched above so they are cached
@@ -233,5 +232,6 @@ const CreateAdvanced: Command = {
 			throw e
 		}
 	},
-}
+})
+
 export default CreateAdvanced

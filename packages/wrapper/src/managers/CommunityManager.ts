@@ -7,7 +7,12 @@ import {
 } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import { Community, FilterObject, GuildConfig } from "fagc-api-types"
+import {
+	Community,
+	FilterObject,
+	GuildConfig,
+	SetFilterObject,
+} from "fagc-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate, masterAuthenticate } from "../utils"
 import { z } from "zod"
@@ -69,7 +74,7 @@ export default class CommunityManager extends BaseManager<Community> {
 
 	async getFiltersById({ id }: { id: string }): Promise<FilterObject | null> {
 		const result = await fetch(
-			`${this.apiurl}/communities/filter?id=${strictUriEncode(id)}`
+			`${this.apiurl}/communities/filters?id=${strictUriEncode(id)}`
 		).then((r) => r.json())
 		if (!result) return null
 		if (result.error)
@@ -83,7 +88,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		guildId: string
 	}): Promise<FilterObject | null> {
 		const result = await fetch(
-			`${this.apiurl}/communities/filter?guildId=${strictUriEncode(
+			`${this.apiurl}/communities/filters?guildId=${strictUriEncode(
 				guildId
 			)}`
 		).then((r) => r.json())
@@ -97,7 +102,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		id,
 	}: { id: string } & FetchRequestTypes): Promise<FilterObject | null> {
 		const result = await fetch(
-			`${this.apiurl}/communities/filter?communityId=${strictUriEncode(
+			`${this.apiurl}/communities/filters?communityId=${strictUriEncode(
 				id
 			)}`
 		).then((r) => r.json())
@@ -111,7 +116,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	async getOwnFilter({
 		reqConfig = {},
 	}: FetchRequestTypes): Promise<FilterObject> {
-		const req = await fetch(`${this.apiurl}/communities/filter/own`, {
+		const req = await fetch(`${this.apiurl}/communities/filters/own`, {
 			credentials: "include",
 			headers: {
 				authorization: authenticate(this, reqConfig),
@@ -126,19 +131,14 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	async setFilters({
-		communityIds,
-		categoryIds,
+		filter,
 		reqConfig = {},
 	}: {
-		communityIds?: string[]
-		categoryIds?: string[]
+		filter: SetFilterObject
 	} & FetchRequestTypes): Promise<FilterObject> {
-		const req = await fetch(`${this.apiurl}/communities/filter`, {
+		const req = await fetch(`${this.apiurl}/communities/filters`, {
 			method: "PATCH",
-			body: JSON.stringify({
-				categoryIds,
-				communityIds,
-			}),
+			body: JSON.stringify(filter),
 			credentials: "include",
 			headers: {
 				authorization: authenticate(this, reqConfig),
@@ -154,22 +154,20 @@ export default class CommunityManager extends BaseManager<Community> {
 	}
 
 	async setMasterFilters({
-		filterId,
-		communityIds,
-		categoryIds,
+		filter,
+		communityId,
 		reqConfig = {},
 	}: {
-		filterId: string
-		communityIds?: string[]
-		categoryIds?: string[]
+		filter: SetFilterObject
+		communityId: string | null
 	} & FetchRequestTypes): Promise<FilterObject> {
 		const req = await fetch(
-			`${this.apiurl}/communities/filter/${strictUriEncode(filterId)}`,
+			`${this.apiurl}/communities/filters/${strictUriEncode(filter.id)}`,
 			{
 				method: "PATCH",
 				body: JSON.stringify({
-					categoryIds,
-					communityIds,
+					...filter,
+					communityId,
 				}),
 				credentials: "include",
 				headers: {
