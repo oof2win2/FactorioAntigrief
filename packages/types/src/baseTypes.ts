@@ -80,8 +80,8 @@ export type GuildConfig = z.infer<typeof GuildConfig>
 
 export const FilterObject = z.object({
 	id: z.string(),
-	categoryFilters: z.string(),
-	communityFilters: z.string(),
+	categoryFilters: z.array(z.string()),
+	communityFilters: z.array(z.string()),
 })
 export type FilterObject = z.infer<typeof FilterObject>
 
