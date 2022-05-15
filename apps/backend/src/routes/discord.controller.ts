@@ -189,6 +189,32 @@ export default class DiscordController {
 					id: parsed.sub,
 				})
 				if (community) {
+					// remove the filter object that belongs to this guild from the database
+					// also get the filter object data, so that it can be added to the community
+					let communityFilters: string[] = []
+					let categoryFilters: string[] = []
+					if (!guildConfig.apikey) {
+						const previousFilterObject =
+							await FilterModel.findOneAndDelete({
+								id: guildConfig.filterObjectId,
+							})
+						communityFilters =
+							previousFilterObject!.communityFilters
+						categoryFilters = previousFilterObject!.categoryFilters
+					}
+					// get the filter object ID of the community and set it on this guild config
+					const filterObject = await FilterModel.findOneAndUpdate(
+						{
+							id: community.filterObjectId,
+						},
+						{
+							$addToSet: {
+								communityFilters: communityFilters,
+								categoryFilters: categoryFilters,
+							},
+						}
+					)
+					guildConfig.filterObjectId = filterObject!.id
 					guildConfig.apikey = apikey
 					guildConfig.communityId = community.id
 				}
