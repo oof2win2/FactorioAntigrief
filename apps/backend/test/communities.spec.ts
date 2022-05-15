@@ -2,6 +2,7 @@ import CommunityModel from "../src/database/community"
 import GuildConfigModel from "../src/database/guildconfig"
 import ReportInfoModel from "../src/database/reportinfo"
 import WebhookModel from "../src/database/webhook"
+import FilterModel from "../src/database/filterobject"
 import { createApikey } from "../src/utils/authentication"
 import { validateDiscordUser } from "./mockDiscord"
 import { backend, testCategories, testCommunity } from "./prepareTest"
@@ -43,7 +44,11 @@ describe("GET /communities/:id", () => {
 
 describe("GET /communities/own", () => {
 	it("Should return own community if authenticated", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		const response = await backend.inject({
 			method: "GET",
 			path: "/communities/own",
@@ -84,7 +89,11 @@ describe("GET /communities/own", () => {
 			name: "missing",
 			contact: "987654321", // this contact is purposefully different so that it has no chance of being the same as some other contact
 		})
-		const apikey = await createApikey(missingCommunity, "reports")
+		const apikey = await createApikey(
+			missingCommunity,
+			missingCommunity,
+			"reports"
+		)
 		await CommunityModel.findOneAndDelete({ id: missingCommunity.id })
 		const response = await backend.inject({
 			method: "GET",
@@ -98,7 +107,11 @@ describe("GET /communities/own", () => {
 		expect(json.error).toBe("Unauthorized")
 	})
 	it("Should return 401 if the authentication is wrong", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		const response = await backend.inject({
 			method: "GET",
 			path: "/communities/own",
@@ -111,7 +124,11 @@ describe("GET /communities/own", () => {
 		expect(json.error).toBe("Unauthorized")
 	})
 	it("Should return 401 if the key is revoked", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		await CommunityModel.findOneAndUpdate(
 			{ id: testCommunity.id },
 			{ tokenInvalidBefore: new Date() }
@@ -138,7 +155,11 @@ describe("GET /communities/own", () => {
 
 describe("PATCH /communities/own", () => {
 	it("Should return 400 if contact is not a discord user id", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		const response = await backend.inject({
 			method: "PATCH",
 			path: "/communities/own",
@@ -154,7 +175,11 @@ describe("PATCH /communities/own", () => {
 		expect(json.error).toBe("Bad Request")
 	})
 	it("Should update contact if passed", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		try {
 			const response = await backend.inject({
 				method: "PATCH",
@@ -181,7 +206,11 @@ describe("PATCH /communities/own", () => {
 		}
 	})
 	it("Should update name if passed", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		try {
 			const response = await backend.inject({
 				method: "PATCH",
@@ -211,7 +240,11 @@ describe("PATCH /communities/own", () => {
 
 describe("POST /communities/own/apikey", () => {
 	it("Should invalidate token", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		try {
 			const response = await backend.inject({
 				method: "POST",
@@ -240,7 +273,11 @@ describe("POST /communities/own/apikey", () => {
 		}
 	})
 	it("Should create a token", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		const response = await backend.inject({
 			method: "POST",
 			path: "/communities/own/apikey",
@@ -266,7 +303,11 @@ describe("POST /communities/own/apikey", () => {
 
 describe("POST /communities/:id/apikey", () => {
 	it("should return 401 if given a reports key", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		const response = await backend.inject({
 			method: "POST",
 			path: `/communities/${testCommunity.id}/apikey`,
@@ -282,7 +323,11 @@ describe("POST /communities/:id/apikey", () => {
 		expect(json.error).toBe("Unauthorized")
 	})
 	it("Should invalidate token", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		try {
 			const response = await backend.inject({
 				method: "POST",
@@ -311,7 +356,11 @@ describe("POST /communities/:id/apikey", () => {
 		}
 	})
 	it("Should create a token", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		const response = await backend.inject({
 			method: "POST",
 			path: `/communities/${testCommunity.id}/apikey`,
@@ -337,7 +386,11 @@ describe("POST /communities/:id/apikey", () => {
 
 describe("POST /communities", () => {
 	it("Should return 400 if contact is not a discord user id", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		validateDiscordUser.mockReturnValueOnce(
 			Promise.resolve({ bot: true } as any)
 		)
@@ -357,7 +410,11 @@ describe("POST /communities", () => {
 		expect(json.error).toBe("Invalid Discord User")
 	})
 	it("Should return 400 if contact is a bot", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		validateDiscordUser.mockReturnValueOnce(
 			Promise.resolve({ bot: true } as any)
 		)
@@ -377,7 +434,11 @@ describe("POST /communities", () => {
 		expect(json.error).toBe("Invalid Discord User")
 	})
 	it("Should create a community", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		try {
 			const response = await backend.inject({
 				method: "POST",
@@ -412,7 +473,11 @@ describe("POST /communities", () => {
 
 describe("DELETE /communities/:id", () => {
 	it("Should return 404 if community does not exist", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		const response = await backend.inject({
 			method: "DELETE",
 			path: "/communities/xxxxxx",
@@ -433,10 +498,8 @@ describe("DELETE /communities/:id", () => {
 			trustedCommunities: [],
 			categoryFilters: [testCategories[0].id],
 		})
-		const trustingGuild = await GuildConfigModel.create({
-			communityId: testCommunity.id,
-			guildId: "10003",
-			trustedCommunities: [newCommunity.id],
+		const trustingFilterObject = await FilterModel.create({
+			communityFilters: [newCommunity.id],
 			categoryFilters: [testCategories[0].id],
 		})
 		const newReport = await ReportInfoModel.create(
@@ -456,7 +519,11 @@ describe("DELETE /communities/:id", () => {
 			token: "token",
 			guildId: "10002",
 		})
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		const response = await backend.inject({
 			method: "DELETE",
 			path: `/communities/${newCommunity.id}`,
@@ -467,9 +534,9 @@ describe("DELETE /communities/:id", () => {
 		expect(response.statusCode).toBe(200)
 		expect(await CommunityModel.findOne({ id: newCommunity.id })).toBeNull()
 		expect(
-			(await GuildConfigModel.findOne({
-				guildId: trustingGuild.guildId,
-			}))!.trustedCommunities
+			(await FilterModel.findOne({
+				id: trustingFilterObject.id,
+			}))!.communityFilters
 		).toEqual([])
 		expect(
 			await GuildConfigModel.findOne({ guildId: newGuild.guildId })
@@ -479,15 +546,19 @@ describe("DELETE /communities/:id", () => {
 			await ReportInfoModel.findOne({ id: newRevocation.id })
 		).toBeNull()
 		expect(await WebhookModel.findOne({ id: newWebhook.id })).toBeNull()
-		await GuildConfigModel.findOneAndDelete({
-			guildId: trustingGuild.guildId,
+		await FilterModel.findOneAndDelete({
+			id: trustingFilterObject.id,
 		})
 	})
 })
 
 describe("POST /communities/:id/merge/:id", () => {
 	it("Should return 400 if community does not exist", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		const response = await backend.inject({
 			method: "PATCH",
 			path: `/communities/xxxxxx/merge/${testCommunity.id}`,
@@ -498,7 +569,11 @@ describe("POST /communities/:id/merge/:id", () => {
 		expect(response.statusCode).toBe(400)
 	})
 	it("Should return 400 if community does not exist", async () => {
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		const response = await backend.inject({
 			method: "PATCH",
 			path: `/communities/${testCommunity.id}/merge/xxxxxx`,
@@ -509,15 +584,16 @@ describe("POST /communities/:id/merge/:id", () => {
 		expect(response.statusCode).toBe(400)
 	})
 	it("Should merge community", async () => {
+		const recvFilterObject = await FilterModel.create({})
 		const recvCommunity = await CommunityModel.create({
 			name: "Recv community",
 			contact: "111",
+			filterObjectId: recvFilterObject.id,
 		})
 		const recvGuild = await GuildConfigModel.create({
 			communityId: recvCommunity.id,
 			guildId: "10002",
-			trustedCommunities: [],
-			categoryFilters: [testCategories[0].id],
+			filterObjectId: recvFilterObject.id,
 		})
 		const recvReport = await ReportInfoModel.create(
 			createReport({
@@ -536,20 +612,19 @@ describe("POST /communities/:id/merge/:id", () => {
 			token: "token",
 			guildId: "10002",
 		})
+		const dissFilter = await FilterModel.create({})
 		const dissCommunity = await CommunityModel.create({
 			name: "New community",
 			contact: "222",
+			filterObjectId: dissFilter.id,
 		})
 		const dissGuild = await GuildConfigModel.create({
 			communityId: dissCommunity.id,
 			guildId: "20002",
-			trustedCommunities: [],
-			categoryFilters: [testCategories[1].id],
+			filterObjectId: dissFilter.id,
 		})
-		const trustingGuild = await GuildConfigModel.create({
-			communityId: testCommunity.id,
-			guildId: "10003",
-			trustedCommunities: [dissCommunity.id, recvCommunity.id],
+		const trustingFilterObject = await FilterModel.create({
+			communityFilters: [dissCommunity.id, recvCommunity.id],
 			categoryFilters: [testCategories[1].id],
 		})
 		const dissReport = await ReportInfoModel.create(
@@ -569,7 +644,11 @@ describe("POST /communities/:id/merge/:id", () => {
 			token: "token",
 			guildId: "20002",
 		})
-		const apikey = await createApikey(testCommunity, "master")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"master"
+		)
 		const response = await backend.inject({
 			method: "PATCH",
 			path: `/communities/${recvCommunity.id}/merge/${dissCommunity.id}`,
@@ -588,9 +667,9 @@ describe("POST /communities/:id/merge/:id", () => {
 			await GuildConfigModel.findOne({ guildId: dissGuild.guildId })
 		).not.toBeNull()
 		expect(
-			(await GuildConfigModel.findOne({
-				guildId: trustingGuild.guildId,
-			}))!.trustedCommunities
+			(await FilterModel.findOne({
+				id: trustingFilterObject.id,
+			}))!.communityFilters
 		).toEqual([recvCommunity.id])
 		expect(
 			(await ReportInfoModel.findOne({ id: recvReport.id }))!.communityId
@@ -615,8 +694,8 @@ describe("POST /communities/:id/merge/:id", () => {
 		await CommunityModel.findOneAndDelete({ id: recvCommunity.id })
 		await GuildConfigModel.findOneAndDelete({ guildId: recvGuild.guildId })
 		await GuildConfigModel.findOneAndDelete({ guildId: dissGuild.guildId })
-		await GuildConfigModel.findOneAndDelete({
-			guildId: trustingGuild.guildId,
+		await FilterModel.findOneAndDelete({
+			id: trustingFilterObject.id,
 		})
 		await ReportInfoModel.findOneAndDelete({ id: recvReport.id })
 		await ReportInfoModel.findOneAndDelete({ id: dissReport.id })

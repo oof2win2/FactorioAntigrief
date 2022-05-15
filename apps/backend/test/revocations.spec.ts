@@ -6,7 +6,11 @@ import { createReport } from "./utils"
 
 describe("POST /revocations", () => {
 	it("Should turn a report into a revocation", async () => {
-		const apikey = await createApikey(testCommunity, "reports")
+		const apikey = await createApikey(
+			testCommunity,
+			testCommunity,
+			"reports"
+		)
 		const report = await ReportInfoModel.create(
 			createReport({
 				communityId: testCommunity.id,

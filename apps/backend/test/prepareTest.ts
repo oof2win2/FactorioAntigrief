@@ -10,6 +10,7 @@ import CategoryModel, {
 } from "../src/database/category"
 import { createCategories } from "./utils"
 import backend from "../src/app"
+import FilterModel from "../src/database/filterobject"
 
 let mongod: MongoMemoryReplSet
 export let testCommunity: CommunityClass
@@ -22,9 +23,11 @@ beforeAll(async () => {
 	await mongoose.connect(mongod.getUri(), { ignoreUndefined: true })
 
 	// Insert test data
+	const filterObject = await FilterModel.create({})
 	testCommunity = await CommunityModel.create({
 		name: "Test Community",
 		contact: "12345",
+		filterObjectId: filterObject.id,
 	})
 	testCategories = await CategoryModel.create(createCategories(3))
 	await backend.listen(0)

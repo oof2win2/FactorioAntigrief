@@ -7,7 +7,7 @@ export function createId() {
 }
 
 export function createSnowflake() {
-	return String(Math.round(Math.random() * 2**63))
+	return String(Math.round(Math.random() * 2 ** 63))
 }
 
 export const createCommunity = (): Community => {
@@ -17,10 +17,13 @@ export const createCommunity = (): Community => {
 		contact: createSnowflake(),
 		tokenInvalidBefore: faker.date.past(),
 		guildIds: [],
+		filterObjectId: createId(),
 	}
 }
 export const createCommunities = (count: number): Community[] => {
-	return Array(count).fill(0).map(() => createCommunity())
+	return Array(count)
+		.fill(0)
+		.map(() => createCommunity())
 }
 
 export const createCategory = (): Category => {
@@ -31,7 +34,9 @@ export const createCategory = (): Category => {
 	}
 }
 export const createCategories = (count: number): Category[] => {
-	return Array(count).fill(0).map(() => createCategory())
+	return Array(count)
+		.fill(0)
+		.map(() => createCategory())
 }
 
 export function createReport(props = {}) {
