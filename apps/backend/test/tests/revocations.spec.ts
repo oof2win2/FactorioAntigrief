@@ -1,8 +1,9 @@
-import ReportInfoModel from "../src/database/reportinfo"
-import { createApikey } from "../src/utils/authentication"
-import "./mockDiscord"
-import { backend, testCategories, testCommunity } from "./prepareTest"
-import { createReport } from "./utils"
+import ReportInfoModel from "../../src/database/reportinfo"
+import { createApikey } from "../../src/utils/authentication"
+import "../mockDiscord"
+import { testCategories, testCommunity } from "../utils/initialData"
+import backend from "../../src/app"
+import { createReport } from "../utils"
 
 describe("POST /revocations", () => {
 	it("Should turn a report into a revocation", async () => {

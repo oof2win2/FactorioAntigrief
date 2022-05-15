@@ -1,12 +1,13 @@
-import CommunityModel from "../src/database/community"
-import GuildConfigModel from "../src/database/guildconfig"
-import ReportInfoModel from "../src/database/reportinfo"
-import WebhookModel from "../src/database/webhook"
-import FilterModel from "../src/database/filterobject"
-import { createApikey } from "../src/utils/authentication"
-import { validateDiscordUser } from "./mockDiscord"
-import { backend, testCategories, testCommunity } from "./prepareTest"
-import { toJson, createReport, createRevocation } from "./utils"
+import CommunityModel from "../../src/database/community"
+import GuildConfigModel from "../../src/database/guildconfig"
+import ReportInfoModel from "../../src/database/reportinfo"
+import WebhookModel from "../../src/database/webhook"
+import FilterModel from "../../src/database/filterobject"
+import { createApikey } from "../../src/utils/authentication"
+import { validateDiscordUser } from "../mockDiscord"
+import { testCategories, testCommunity } from "../utils/initialData"
+import backend from "../../src/app"
+import { toJson, createReport, createRevocation } from "../utils"
 
 describe("GET /communities", () => {
 	it("Should return all communities", async () => {
