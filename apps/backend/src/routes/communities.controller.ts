@@ -183,6 +183,9 @@ export default class CommunityController {
 						"You must have at least one of id, guildId, or communityId present in your query"
 					),
 
+				description: "Get filters",
+				tags: ["community"],
+				security: [],
 				response: {
 					"200": FilterObject.nullable(),
 				},
@@ -240,6 +243,13 @@ export default class CommunityController {
 		url: "/filters/own",
 		options: {
 			schema: {
+				description: "Get your own filters",
+				tags: ["community"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
 				response: {
 					"200": FilterObject.nullable(),
 				},
@@ -268,6 +278,13 @@ export default class CommunityController {
 		url: "/filters",
 		options: {
 			schema: {
+				description: "Set your filters",
+				tags: ["community"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
 				body: SetFilterObject.omit({ id: true }),
 			},
 		},
@@ -325,6 +342,13 @@ export default class CommunityController {
 				body: SetFilterObject.omit({ id: true }).extend({
 					communityId: z.string().nullable(),
 				}),
+				description: "Set a filter object by ID",
+				tags: ["master"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
 			},
 		},
 	})
