@@ -13,6 +13,7 @@ import {
 	communityRemovedMessage,
 	communityUpdatedMessage,
 	communitiesMergedMessage,
+	filterObjectChanged,
 } from "../utils/info"
 import { validateDiscordUser } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
@@ -659,20 +660,20 @@ export default class CommunityController {
 			})
 		}
 
-		// remove the community ID from any guild configs which may have it
-		const affectedGuildConfigs = await GuildConfigModel.find({
-			trustedCommunities: [community.id],
+		// remove the community ID from any filter objects which may have it
+		const affectedFilters = await FilterModel.find({
+			communityFilters: [community.id],
 		})
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
-				_id: { $in: affectedGuildConfigs.map((config) => config._id) },
+				_id: { $in: affectedFilters.map((config) => config._id) },
 			},
 			{
-				$pull: { trustedCommunities: community.id },
+				$pull: { communityFilters: community.id },
 			}
 		)
-		const newGuildConfigs = await GuildConfigModel.find({
-			_id: { $in: affectedGuildConfigs.map((config) => config._id) },
+		const newFilters = await FilterModel.find({
+			_id: { $in: affectedFilters.map((config) => config._id) },
 		})
 
 		const sendGuildConfigInfo = async () => {
@@ -682,8 +683,8 @@ export default class CommunityController {
 						resolve()
 					}, ms)
 				})
-			for (const config of newGuildConfigs) {
-				guildConfigChanged(config)
+			for (const config of newFilters) {
+				filterObjectChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
 				// staggered so not everyone at once tries to fetch their new banlists
 				await wait(100)
@@ -757,6 +758,9 @@ export default class CommunityController {
 		await CommunityModel.findOneAndDelete({
 			id: idDissolving,
 		})
+		await FilterModel.findOneAndDelete({
+			id: dissolving.filterObjectId,
+		})
 		await ReportInfoModel.updateMany(
 			{
 				communityId: idDissolving,
@@ -767,20 +771,20 @@ export default class CommunityController {
 		)
 
 		// remove old stuff from the config and replace with new
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
-				trustedCommunities: idDissolving,
+				communityFilters: idDissolving,
 			},
 			{
-				$addToSet: { trustedCommunities: idReceiving },
+				$addToSet: { communityFilters: idReceiving },
 			}
 		)
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
-				trustedCommunities: idDissolving,
+				communityFilters: idDissolving,
 			},
 			{
-				$pull: { trustedCommunities: idDissolving },
+				$pull: { communityFilters: idDissolving },
 			}
 		)
 
@@ -811,7 +815,7 @@ export default class CommunityController {
 			}
 		)
 
-		const affectedConfigs = await GuildConfigModel.find({
+		const affectedFilters = await FilterModel.find({
 			trustedCommunities: idReceiving,
 		})
 
@@ -822,8 +826,8 @@ export default class CommunityController {
 						resolve()
 					}, ms)
 				})
-			for (const config of affectedConfigs) {
-				guildConfigChanged(config)
+			for (const config of affectedFilters) {
+				filterObjectChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
 				// staggered so not everyone at once tries to fetch their new banlists
 				await wait(100)
