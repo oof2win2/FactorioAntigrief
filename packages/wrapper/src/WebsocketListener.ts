@@ -13,6 +13,7 @@ import {
 	CategoryUpdatedMessage,
 	CategoriesMergedMessage,
 	GuildConfigChangedMessage,
+	FilterObjectChangedMessage,
 	BaseWebsocketMessage,
 } from "fagc-api-types"
 
@@ -33,6 +34,7 @@ export type WebSocketMessageType =
 	| "communityRemoved"
 	| "communityUpdated"
 	| "communitiesMerged"
+	| "filterObjectChanged"
 	| "announcement"
 	| "disconnected"
 	| "connected"
@@ -54,6 +56,7 @@ export declare interface WebSocketEvents {
 	communityRemoved: (message: CommunityRemovedMessage) => void
 	communityUpdated: (message: CommunityUpdatedMessage) => void
 	communitiesMerged: (message: CommunitiesMergedMessage) => void
+	filterObjectChanged: (message: FilterObjectChangedMessage) => void
 
 	connected: (message: void) => void
 	disconnected: (message: void) => void
@@ -225,6 +228,15 @@ class WebSocketHandler extends EventEmitter {
 					this.emit(
 						"communitiesMerged",
 						parsed.data as CommunitiesMergedMessage
+					)
+				break
+			}
+			case "filterObjectChanged": {
+				const parsed = FilterObjectChangedMessage.safeParse(message)
+				if (parsed.success)
+					this.emit(
+						"filterObjectChanged",
+						parsed.data as FilterObjectChangedMessage
 					)
 				break
 			}
