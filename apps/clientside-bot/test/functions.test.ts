@@ -1,6 +1,6 @@
 import { createConnection, Connection } from "typeorm"
 import {
-	guildConfigChangedBanlists,
+	filterObjectChangedBanlists,
 	handleReport,
 	handleRevocation,
 	splitIntoGroups,
@@ -23,7 +23,13 @@ import {
 	randomElementsFromArray,
 	reportIntoFAGCBan,
 } from "./utils"
-import { Category, Community, Report } from "fagc-api-types"
+import {
+	Category,
+	Community,
+	FilterObject,
+	GuildConfig,
+	Report,
+} from "fagc-api-types"
 import faker from "faker"
 
 describe("splitIntoGroups", () => {
@@ -80,32 +86,32 @@ describe("guildConfigChangedBanlists", () => {
 		await database.close()
 	})
 	it("Should create bans for reports that have just been included in the filters", async () => {
-		const oldGuildConfig = createGuildConfig({
+		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds: [],
 			communityIds: [],
 		})
-		const newGuildConfig: typeof oldGuildConfig = {
-			...oldGuildConfig,
+		const newFilterObject: typeof oldFilterObject = {
+			...oldFilterObject,
 			categoryFilters: categoryIds,
-			trustedCommunities: communityIds,
+			communityFilters: communityIds,
 		}
 
 		const reports = createTimes(
 			createFAGCReport,
 			[
 				{
-					categoryIds: newGuildConfig.categoryFilters,
-					communityIds: newGuildConfig.trustedCommunities,
+					categoryIds: newFilterObject.categoryFilters,
+					communityIds: newFilterObject.communityFilters,
 				},
 			],
 			5000
 		)
 
-		const results = await guildConfigChangedBanlists({
-			newConfig: newGuildConfig,
+		const results = await filterObjectChangedBanlists({
+			newConfig: newFilterObject,
 			validReports: reports,
 			database,
-			allGuildConfigs: [newGuildConfig],
+			allFilters: [newFilterObject],
 		})
 
 		const fetchedFAGCBans = await database.getRepository(FAGCBan).find()
@@ -124,22 +130,22 @@ describe("guildConfigChangedBanlists", () => {
 		expect(fagcBanIds).toEqual(reportIds)
 	})
 	it("Should unban everyone if all filters are removed", async () => {
-		const oldGuildConfig = createGuildConfig({
+		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
-		const newGuildConfig: typeof oldGuildConfig = {
-			...oldGuildConfig,
+		const newFilterObject: typeof oldFilterObject = {
+			...oldFilterObject,
 			categoryFilters: [],
-			trustedCommunities: [],
+			communityFilters: [],
 		}
 
 		const reports = createTimes(
 			createFAGCReport,
 			[
 				{
-					categoryIds: oldGuildConfig.categoryFilters,
-					communityIds: oldGuildConfig.trustedCommunities,
+					categoryIds: oldFilterObject.categoryFilters,
+					communityIds: oldFilterObject.communityFilters,
 				},
 			],
 			5000
@@ -147,11 +153,11 @@ describe("guildConfigChangedBanlists", () => {
 
 		await database.getRepository(FAGCBan).insert(reports)
 
-		const results = await guildConfigChangedBanlists({
-			newConfig: newGuildConfig,
+		const results = await filterObjectChangedBanlists({
+			newConfig: newFilterObject,
 			validReports: [],
 			database,
-			allGuildConfigs: [newGuildConfig],
+			allFilters: [newFilterObject],
 		})
 
 		const fetchedFAGCBans = await database.getRepository(FAGCBan).find()
@@ -175,26 +181,26 @@ describe("guildConfigChangedBanlists", () => {
 		const communities = createTimes(createFAGCCategory, 100)
 		const communityIds = communities.map((x) => x.id)
 
-		const oldGuildConfig = createGuildConfig({
+		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
-		const newGuildConfig: typeof oldGuildConfig = {
-			...oldGuildConfig,
+		const newFilterObject: typeof oldFilterObject = {
+			...oldFilterObject,
 			categoryFilters: [
-				...oldGuildConfig.categoryFilters,
+				...oldFilterObject.categoryFilters,
 				...randomElementsFromArray(
 					categoryIds.filter(
-						(x) => !oldGuildConfig.categoryFilters.includes(x)
+						(x) => !oldFilterObject.categoryFilters.includes(x)
 					),
 					20
 				),
 			],
-			trustedCommunities: [
-				...oldGuildConfig.trustedCommunities,
+			communityFilters: [
+				...oldFilterObject.communityFilters,
 				...randomElementsFromArray(
 					communityIds.filter(
-						(x) => !oldGuildConfig.trustedCommunities.includes(x)
+						(x) => !oldFilterObject.communityFilters.includes(x)
 					),
 					20
 				),
@@ -208,8 +214,8 @@ describe("guildConfigChangedBanlists", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: oldGuildConfig.categoryFilters,
-					communityIds: oldGuildConfig.trustedCommunities,
+					categoryIds: oldFilterObject.categoryFilters,
+					communityIds: oldFilterObject.communityFilters,
 					playernames: playernames,
 				},
 			],
@@ -219,8 +225,8 @@ describe("guildConfigChangedBanlists", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: newGuildConfig.categoryFilters,
-					communityIds: newGuildConfig.trustedCommunities,
+					categoryIds: newFilterObject.categoryFilters,
+					communityIds: newFilterObject.communityFilters,
 					playernames: playernames,
 				},
 			],
@@ -229,11 +235,11 @@ describe("guildConfigChangedBanlists", () => {
 
 		await database.getRepository(FAGCBan).insert(oldReports)
 
-		const results = await guildConfigChangedBanlists({
-			newConfig: newGuildConfig,
+		const results = await filterObjectChangedBanlists({
+			newConfig: newFilterObject,
 			validReports: [...newReports, ...oldReports],
 			database,
-			allGuildConfigs: [newGuildConfig],
+			allFilters: [newFilterObject],
 		})
 
 		const expectedBans = new Set<string>()
@@ -248,25 +254,25 @@ describe("guildConfigChangedBanlists", () => {
 	})
 	it("Should work with a combination of reports and revocations", async () => {
 		// this would occur most likely only if the filters are managed directly with the api, rather than the discord bot
-		const oldGuildConfig = createGuildConfig({
+		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
-		const newGuildConfig: typeof oldGuildConfig = {
-			...oldGuildConfig,
+		const newFilterObject: typeof oldFilterObject = {
+			...oldFilterObject,
 			categoryFilters: [
-				...randomElementsFromArray(oldGuildConfig.categoryFilters),
+				...randomElementsFromArray(oldFilterObject.categoryFilters),
 				...randomElementsFromArray(
 					categoryIds.filter(
-						(id) => !oldGuildConfig.categoryFilters.includes(id)
+						(id) => !oldFilterObject.categoryFilters.includes(id)
 					)
 				),
 			],
-			trustedCommunities: [
-				...randomElementsFromArray(oldGuildConfig.trustedCommunities),
+			communityFilters: [
+				...randomElementsFromArray(oldFilterObject.communityFilters),
 				...randomElementsFromArray(
 					communityIds.filter(
-						(id) => !oldGuildConfig.trustedCommunities.includes(id)
+						(id) => !oldFilterObject.communityFilters.includes(id)
 					)
 				),
 			],
@@ -278,8 +284,8 @@ describe("guildConfigChangedBanlists", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: oldGuildConfig.categoryFilters,
-					communityIds: oldGuildConfig.trustedCommunities,
+					categoryIds: oldFilterObject.categoryFilters,
+					communityIds: oldFilterObject.communityFilters,
 					playernames: playernames,
 				},
 			],
@@ -289,8 +295,8 @@ describe("guildConfigChangedBanlists", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: newGuildConfig.categoryFilters,
-					communityIds: newGuildConfig.trustedCommunities,
+					categoryIds: newFilterObject.categoryFilters,
+					communityIds: newFilterObject.communityFilters,
 					playernames: playernames,
 				},
 			],
@@ -308,10 +314,10 @@ describe("guildConfigChangedBanlists", () => {
 			(all, report) => {
 				// if a report is valid under new filters, it falls into the second array
 				if (
-					newGuildConfig.categoryFilters.includes(
+					newFilterObject.categoryFilters.includes(
 						report.categoryId
 					) &&
-					newGuildConfig.trustedCommunities.includes(
+					newFilterObject.communityFilters.includes(
 						report.communityId
 					)
 				) {
@@ -338,11 +344,11 @@ describe("guildConfigChangedBanlists", () => {
 			playersToBan.delete(report.playername)
 		) // if a player was banned before, it makes no sense to unban and ban
 
-		const results = await guildConfigChangedBanlists({
-			newConfig: newGuildConfig,
+		const results = await filterObjectChangedBanlists({
+			newConfig: newFilterObject,
 			validReports: [...validOldReports, ...newReports],
 			database,
-			allGuildConfigs: [newGuildConfig],
+			allFilters: [newFilterObject],
 		})
 
 		// the unbanned players should be the same
@@ -355,25 +361,25 @@ describe("guildConfigChangedBanlists", () => {
 	})
 	it("Should ensure that people who are whitelisted or blacklisted are not banned", async () => {
 		// this test ensures that people are not banned uselessly if they are whitelisted or blacklisted
-		const oldGuildConfig = createGuildConfig({
+		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
-		const newGuildConfig: typeof oldGuildConfig = {
-			...oldGuildConfig,
+		const newFilterObject: typeof oldFilterObject = {
+			...oldFilterObject,
 			categoryFilters: [
-				...randomElementsFromArray(oldGuildConfig.categoryFilters),
+				...randomElementsFromArray(oldFilterObject.categoryFilters),
 				...randomElementsFromArray(
 					categoryIds.filter(
-						(id) => !oldGuildConfig.categoryFilters.includes(id)
+						(id) => !oldFilterObject.categoryFilters.includes(id)
 					)
 				),
 			],
-			trustedCommunities: [
-				...randomElementsFromArray(oldGuildConfig.trustedCommunities),
+			communityFilters: [
+				...randomElementsFromArray(oldFilterObject.communityFilters),
 				...randomElementsFromArray(
 					communityIds.filter(
-						(id) => !oldGuildConfig.trustedCommunities.includes(id)
+						(id) => !oldFilterObject.communityFilters.includes(id)
 					)
 				),
 			],
@@ -385,8 +391,8 @@ describe("guildConfigChangedBanlists", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: oldGuildConfig.categoryFilters,
-					communityIds: oldGuildConfig.trustedCommunities,
+					categoryIds: oldFilterObject.categoryFilters,
+					communityIds: oldFilterObject.communityFilters,
 					playernames: playernames,
 				},
 			],
@@ -396,8 +402,8 @@ describe("guildConfigChangedBanlists", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: newGuildConfig.categoryFilters,
-					communityIds: newGuildConfig.trustedCommunities,
+					categoryIds: newFilterObject.categoryFilters,
+					communityIds: newFilterObject.communityFilters,
 					playernames: playernames,
 				},
 			],
@@ -446,10 +452,10 @@ describe("guildConfigChangedBanlists", () => {
 			(all, report) => {
 				// if a report is valid under new filters, it falls into the second array
 				if (
-					newGuildConfig.categoryFilters.includes(
+					newFilterObject.categoryFilters.includes(
 						report.categoryId
 					) &&
-					newGuildConfig.trustedCommunities.includes(
+					newFilterObject.communityFilters.includes(
 						report.communityId
 					)
 				) {
@@ -485,11 +491,11 @@ describe("guildConfigChangedBanlists", () => {
 			playersToUnban.delete(privateban.playername)
 		})
 
-		const results = await guildConfigChangedBanlists({
-			newConfig: newGuildConfig,
+		const results = await filterObjectChangedBanlists({
+			newConfig: newFilterObject,
 			validReports: [...validOldReports, ...newReports],
 			database,
-			allGuildConfigs: [newGuildConfig],
+			allFilters: [newFilterObject],
 		})
 
 		// the unbanned players should be the same
@@ -525,19 +531,20 @@ describe("handleReport", () => {
 	})
 
 	it("Should ban a player if the report is valid in a single guild", async () => {
-		const guildConfig = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
 
 		const report = createFAGCReport({
-			categoryIds: guildConfig.categoryFilters,
-			communityIds: guildConfig.trustedCommunities,
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
 		})
 
 		const results = await handleReport({
 			report,
 			database,
+			allFilters: [filterObject],
 			allGuildConfigs: [guildConfig],
 		})
 
@@ -552,7 +559,7 @@ describe("handleReport", () => {
 		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
 	})
 	it("Should not ban a player if the report is not valid in any guild", async () => {
-		const guildConfig = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
@@ -565,6 +572,7 @@ describe("handleReport", () => {
 		const results = await handleReport({
 			report,
 			database,
+			allFilters: [filterObject],
 			allGuildConfigs: [guildConfig],
 		})
 
@@ -572,7 +580,7 @@ describe("handleReport", () => {
 		expect(results).toBe(false)
 	})
 	it("Should ban a player in multiple guilds if the report is valid in multiple guilds", async () => {
-		const guildConfigs = createTimes(
+		const [guildConfigs, filterObjects] = createTimes(
 			createGuildConfig,
 			[
 				{
@@ -581,18 +589,25 @@ describe("handleReport", () => {
 					includeAllFilters: true,
 				},
 			],
-			// create only 10 because it is useless to have more
 			10
+		).reduce<[GuildConfig[], FilterObject[]]>(
+			(acc, current) => {
+				acc[0].push(current[0])
+				acc[1].push(current[1])
+				return acc
+			},
+			[[], []]
 		)
 		const report = createFAGCReport({
 			// the filters are the same across all guilds
-			categoryIds: guildConfigs[0].categoryFilters,
-			communityIds: guildConfigs[0].trustedCommunities,
+			categoryIds: filterObjects[0].categoryFilters,
+			communityIds: filterObjects[0].communityFilters,
 		})
 
 		const results = await handleReport({
 			report,
 			database,
+			allFilters: filterObjects,
 			allGuildConfigs: guildConfigs,
 		})
 
@@ -608,7 +623,7 @@ describe("handleReport", () => {
 		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
 	})
 	it("Should ban only in some guilds if the report is valid in only some guilds", async () => {
-		const guildConfigs = createTimes(
+		const [guildConfigs, filterObjects] = createTimes(
 			createGuildConfig,
 			[
 				{
@@ -617,21 +632,29 @@ describe("handleReport", () => {
 				},
 			],
 			10
+		).reduce<[GuildConfig[], FilterObject[]]>(
+			(acc, current) => {
+				acc[0].push(current[0])
+				acc[1].push(current[1])
+				return acc
+			},
+			[[], []]
 		)
 
 		const report = createFAGCReport({
-			categoryIds: guildConfigs[0].categoryFilters,
-			communityIds: guildConfigs[0].trustedCommunities,
+			categoryIds: filterObjects[0].categoryFilters,
+			communityIds: filterObjects[0].communityFilters,
 		})
 
-		const reportValidIn = guildConfigs.reduce<string[]>(
-			(validIn, config) => {
+		const reportValidIn = filterObjects.reduce<string[]>(
+			(validIn, config, index) => {
+				const guildConfig = guildConfigs[index]
 				// if the report is valid in the guild, add the guild ID to the array
 				if (
 					config.categoryFilters.includes(report.categoryId) &&
-					config.trustedCommunities.includes(report.communityId)
+					config.communityFilters.includes(report.communityId)
 				) {
-					validIn.push(config.guildId)
+					validIn.push(guildConfig.guildId)
 				}
 
 				return validIn
@@ -642,6 +665,7 @@ describe("handleReport", () => {
 		const results = await handleReport({
 			report,
 			database,
+			allFilters: filterObjects,
 			allGuildConfigs: guildConfigs,
 		})
 
@@ -656,8 +680,9 @@ describe("handleReport", () => {
 		expect(foundInDatabase.length).toBe(1)
 		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
 	})
+
 	it("Should not ban if the player already has an existing report in the database", async () => {
-		const guildConfigs = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
@@ -666,8 +691,8 @@ describe("handleReport", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: guildConfigs.categoryFilters,
-					communityIds: guildConfigs.trustedCommunities,
+					categoryIds: filterObject.categoryFilters,
+					communityIds: filterObject.communityFilters,
 					// to ensure that the playername is identical
 					playernames: [faker.internet.userName()],
 				},
@@ -680,7 +705,8 @@ describe("handleReport", () => {
 		const results = await handleReport({
 			report: newReport,
 			database,
-			allGuildConfigs: [guildConfigs],
+			allFilters: [filterObject],
+			allGuildConfigs: [guildConfig],
 		})
 
 		const foundInDatabase = await database.manager.find(FAGCBan)
@@ -698,14 +724,14 @@ describe("handleReport", () => {
 		])
 	})
 	it("Should not ban a player if they are whitelisted", async () => {
-		const guildConfigs = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
 
 		const report = createFAGCReport({
-			categoryIds: guildConfigs.categoryFilters,
-			communityIds: guildConfigs.trustedCommunities,
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
 		})
 
 		await database.getRepository(Whitelist).insert({
@@ -716,7 +742,8 @@ describe("handleReport", () => {
 		const results = await handleReport({
 			report,
 			database,
-			allGuildConfigs: [guildConfigs],
+			allFilters: [filterObject],
+			allGuildConfigs: [guildConfig],
 		})
 
 		const foundInDatabase = await database.manager.find(FAGCBan)
@@ -731,14 +758,14 @@ describe("handleReport", () => {
 		expect(foundInDatabase[0]).toEqual(reportIntoFAGCBan(report))
 	})
 	it("Should not ban a player if they are private banned", async () => {
-		const guildConfigs = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
 
 		const report = createFAGCReport({
-			categoryIds: guildConfigs.categoryFilters,
-			communityIds: guildConfigs.trustedCommunities,
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
 		})
 
 		await database.getRepository(PrivateBan).insert({
@@ -749,7 +776,8 @@ describe("handleReport", () => {
 		const results = await handleReport({
 			report,
 			database,
-			allGuildConfigs: [guildConfigs],
+			allFilters: [filterObject],
+			allGuildConfigs: [guildConfig],
 		})
 
 		const foundInDatabase = await database.manager.find(FAGCBan)
@@ -788,14 +816,14 @@ describe("handleRevocation", () => {
 	})
 
 	it("Should revoke a player's report if the report is valid", async () => {
-		const guildConfig = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
 
 		const report = createFAGCReport({
-			categoryIds: guildConfig.categoryFilters,
-			communityIds: guildConfig.trustedCommunities,
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
 		})
 
 		await database.getRepository(FAGCBan).insert(report)
@@ -805,6 +833,7 @@ describe("handleRevocation", () => {
 		const results = await handleRevocation({
 			revocation,
 			database,
+			allFilters: [filterObject],
 			allGuildConfigs: [guildConfig],
 		})
 
@@ -819,14 +848,14 @@ describe("handleRevocation", () => {
 		expect(results).toEqual([guildConfig.guildId])
 	})
 	it("Should ignore a revocation if the revocation is not valid in any guild", async () => {
-		const guildConfig = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
 
 		const report = createFAGCReport({
-			categoryIds: guildConfig.categoryFilters,
-			communityIds: guildConfig.trustedCommunities,
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
 		})
 
 		await database.getRepository(FAGCBan).insert(report)
@@ -842,6 +871,7 @@ describe("handleRevocation", () => {
 		const results = await handleRevocation({
 			revocation,
 			database,
+			allFilters: [],
 			allGuildConfigs: [],
 		})
 
@@ -853,7 +883,7 @@ describe("handleRevocation", () => {
 		expect(results).toBe(false)
 	})
 	it("Should unban a player in multiple guilds if the report is valid in multiple guilds", async () => {
-		const guildConfigs = createTimes(
+		const [guildConfigs, filterObjects] = createTimes(
 			createGuildConfig,
 			[
 				{
@@ -862,13 +892,19 @@ describe("handleRevocation", () => {
 					includeAllFilters: true,
 				},
 			],
-			// create only 10 because it is useless to have more
 			10
+		).reduce<[GuildConfig[], FilterObject[]]>(
+			(acc, current) => {
+				acc[0].push(current[0])
+				acc[1].push(current[1])
+				return acc
+			},
+			[[], []]
 		)
 		const report = createFAGCReport({
 			// the filters are the same across all guilds
-			categoryIds: guildConfigs[0].categoryFilters,
-			communityIds: guildConfigs[0].trustedCommunities,
+			categoryIds: filterObjects[0].categoryFilters,
+			communityIds: filterObjects[0].communityFilters,
 		})
 		const revocation = createFAGCRevocation({ report })
 
@@ -877,6 +913,7 @@ describe("handleRevocation", () => {
 		const results = await handleRevocation({
 			revocation,
 			database,
+			allFilters: filterObjects,
 			allGuildConfigs: guildConfigs,
 		})
 
@@ -890,7 +927,7 @@ describe("handleRevocation", () => {
 		expect(results).toEqual(guildConfigs.map((x) => x.guildId))
 	})
 	it("Should unban only in some guilds if the report was valid in only some guilds", async () => {
-		const guildConfigs = createTimes(
+		const [guildConfigs, filterObjects] = createTimes(
 			createGuildConfig,
 			[
 				{
@@ -899,23 +936,31 @@ describe("handleRevocation", () => {
 				},
 			],
 			10
+		).reduce<[GuildConfig[], FilterObject[]]>(
+			(acc, current) => {
+				acc[0].push(current[0])
+				acc[1].push(current[1])
+				return acc
+			},
+			[[], []]
 		)
 
 		const report = createFAGCReport({
-			categoryIds: guildConfigs[0].categoryFilters,
-			communityIds: guildConfigs[0].trustedCommunities,
+			categoryIds: filterObjects[0].categoryFilters,
+			communityIds: filterObjects[0].communityFilters,
 		})
 
 		const revocation = createFAGCRevocation({ report })
 
-		const reportValidIn = guildConfigs.reduce<string[]>(
-			(validIn, config) => {
+		const reportValidIn = filterObjects.reduce<string[]>(
+			(validIn, config, index) => {
+				const guildConfig = guildConfigs[index]
 				// if the report is valid in the guild, add the guild ID to the array
 				if (
 					config.categoryFilters.includes(report.categoryId) &&
-					config.trustedCommunities.includes(report.communityId)
+					config.communityFilters.includes(report.communityId)
 				) {
-					validIn.push(config.guildId)
+					validIn.push(guildConfig.guildId)
 				}
 
 				return validIn
@@ -928,6 +973,7 @@ describe("handleRevocation", () => {
 		const results = await handleRevocation({
 			revocation,
 			database,
+			allFilters: filterObjects,
 			allGuildConfigs: guildConfigs,
 		})
 
@@ -941,7 +987,7 @@ describe("handleRevocation", () => {
 		expect(results).toEqual(reportValidIn)
 	})
 	it("Should not unban the player if the player has another report in the database", async () => {
-		const guildConfig = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
@@ -950,8 +996,8 @@ describe("handleRevocation", () => {
 			createFAGCReport,
 			[
 				{
-					categoryIds: guildConfig.categoryFilters,
-					communityIds: guildConfig.trustedCommunities,
+					categoryIds: filterObject.categoryFilters,
+					communityIds: filterObject.communityFilters,
 					// to ensure that the playername is identical
 					playernames: [faker.internet.userName()],
 				},
@@ -966,6 +1012,7 @@ describe("handleRevocation", () => {
 		const results = await handleRevocation({
 			revocation,
 			database,
+			allFilters: [filterObject],
 			allGuildConfigs: [guildConfig],
 		})
 
@@ -979,14 +1026,14 @@ describe("handleRevocation", () => {
 		expect(results).toEqual([])
 	})
 	it("Should not unban a player if they are whitelisted", async () => {
-		const guildConfigs = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
 
 		const report = createFAGCReport({
-			categoryIds: guildConfigs.categoryFilters,
-			communityIds: guildConfigs.trustedCommunities,
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
 		})
 
 		const revocation = createFAGCRevocation({ report })
@@ -1000,7 +1047,8 @@ describe("handleRevocation", () => {
 		const results = await handleRevocation({
 			revocation,
 			database,
-			allGuildConfigs: [guildConfigs],
+			allFilters: [filterObject],
+			allGuildConfigs: [guildConfig],
 		})
 
 		const foundInDatabase = await database.manager.find(FAGCBan)
@@ -1014,14 +1062,14 @@ describe("handleRevocation", () => {
 		expect(foundInDatabase.length).toBe(0)
 	})
 	it("Should not ban a player if they are private banned", async () => {
-		const guildConfigs = createGuildConfig({
+		const [guildConfig, filterObject] = createGuildConfig({
 			categoryIds,
 			communityIds,
 		})
 
 		const report = createFAGCReport({
-			categoryIds: guildConfigs.categoryFilters,
-			communityIds: guildConfigs.trustedCommunities,
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
 		})
 
 		const revocation = createFAGCRevocation({ report })
@@ -1035,7 +1083,8 @@ describe("handleRevocation", () => {
 		const results = await handleRevocation({
 			revocation,
 			database,
-			allGuildConfigs: [guildConfigs],
+			allFilters: [filterObject],
+			allGuildConfigs: [guildConfig],
 		})
 
 		const foundInDatabase = await database.manager.find(FAGCBan)

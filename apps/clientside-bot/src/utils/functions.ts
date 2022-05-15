@@ -64,19 +64,18 @@ export function splitIntoGroups<T>(items: T[], maxCount = 500): T[][] {
 }
 
 /**
- * Generate the list of players to ban and unban based on a guild config change
+ * Generate the list of players to ban and unban based on a filter object change
  */
-export async function guildConfigChangedBanlists({
+export async function filterObjectChangedBanlists({
 	newConfig,
 	database,
 	allFilters,
-	allGuildConfigs,
 	validReports,
 }: {
 	/**
-	 * The new guild config
+	 * The new filter
 	 */
-	newConfig: GuildConfig
+	newConfig: FilterObject
 	/**
 	 * Connection to the database
 	 */
@@ -85,10 +84,6 @@ export async function guildConfigChangedBanlists({
 	 * All filter objects that correspond to any guild configs
 	 */
 	allFilters: FilterObject[]
-	/**
-	 * All guild configs that are currently loaded by the bot
-	 */
-	allGuildConfigs: GuildConfig[]
 	/**
 	 * New reports that are valid for the new config
 	 */
@@ -138,17 +133,17 @@ export async function guildConfigChangedBanlists({
 		})
 	})
 
-	const filter = allFilters.find(
-		(filter) => filter.id === newConfig.filterObjectId
-	)!
+	// const filter = allFilters.find(
+	// 	(filter) => filter.id === newConfig.filterObjectId
+	// )!
 
 	// loop over the single map and check if the player is banned in the new config
 	for (const [playername, bans] of bansByPlayer) {
 		const newBans = bans.filter((ban) => {
 			// check if the ban is valid under the new guild filters
 			return (
-				filter.communityFilters.includes(ban.communityId) &&
-				filter.categoryFilters.includes(ban.categoryId)
+				newConfig.communityFilters.includes(ban.communityId) &&
+				newConfig.categoryFilters.includes(ban.categoryId)
 			)
 		})
 
@@ -167,12 +162,10 @@ export async function guildConfigChangedBanlists({
 	await database.transaction(async (transaction) => {
 		// compile a list of all filters
 		const allFilteredCommunities = [
-			...new Set(
-				allGuildConfigs.map((config) => filter.communityFilters)
-			),
+			...new Set(allFilters.map((filter) => filter.communityFilters)),
 		]
 		const allFilteredCategories = [
-			...new Set(allGuildConfigs.map((config) => filter.categoryFilters)),
+			...new Set(allFilters.map((filter) => filter.categoryFilters)),
 		]
 
 		// create a temp table to store the filters

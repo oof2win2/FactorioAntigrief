@@ -8,7 +8,7 @@ import {
 	ThreadChannel,
 } from "discord.js"
 import {
-	guildConfigChangedBanlists,
+	filterObjectChangedBanlists,
 	handleReport,
 	handleRevocation,
 	splitIntoGroups,
@@ -202,7 +202,7 @@ const guildConfigChanged = async ({
 		communityIds: filter.communityFilters,
 	})
 
-	const results = await guildConfigChangedBanlists({
+	const results = await filterObjectChangedBanlists({
 		database: client.db,
 		newConfig: event.config,
 		allGuildConfigs: [...client.guildConfigs.values()],
