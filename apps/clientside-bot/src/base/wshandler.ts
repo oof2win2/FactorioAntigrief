@@ -344,6 +344,8 @@ const EventHandlers: Record<
 	report,
 	revocation,
 	guildConfigChanged,
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	filterObjectChanged: () => {},
 	disconnected: disconnected,
 	connected,
 }
