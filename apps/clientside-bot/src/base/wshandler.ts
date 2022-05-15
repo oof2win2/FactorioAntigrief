@@ -194,8 +194,18 @@ const guildConfigChanged = async ({
 	event,
 }: HandlerOpts<"guildConfigChanged">) => {
 	client.guildConfigs.set(event.config.guildId, event.config) // set the new config
+}
+
+const filterObjectChanged = async ({
+	client,
+	event,
+}: HandlerOpts<"filterObjectChanged">) => {
+	// client.filterObjects.set(event.filterObject.id, event.filterObject) // set the new filter object
 	const allFilters = await client.getAllFilters()
-	const filter = allFilters.find((f) => f.id === event.config.filterObjectId)!
+	const filter = allFilters.find((f) => f.id === event.filterObject.id)!
+	const guildConfig = client.guildConfigs.find(
+		(config) => config.filterObjectId === filter.id
+	)!
 
 	const validReports = await client.fagc.reports.list({
 		categoryIds: filter.categoryFilters,
@@ -204,8 +214,7 @@ const guildConfigChanged = async ({
 
 	const results = await filterObjectChangedBanlists({
 		database: client.db,
-		newConfig: event.config,
-		allGuildConfigs: [...client.guildConfigs.values()],
+		newConfig: event.filterObject,
 		validReports: validReports,
 		allFilters,
 	})
@@ -220,7 +229,7 @@ const guildConfigChanged = async ({
 	for (const playerBanGroup of splitIntoGroups(playerBanStrings)) {
 		await client.rcon.rconCommandGuild(
 			`/sc ${playerBanGroup.join(";")}; rcon.print(true)`,
-			event.config.guildId
+			guildConfig.guildId
 		)
 	}
 
@@ -231,7 +240,7 @@ const guildConfigChanged = async ({
 	for (const playerUnbanGroup of splitIntoGroups(playerUnbanStrings)) {
 		await client.rcon.rconCommandGuild(
 			`/sc ${playerUnbanGroup.join(";")}; rcon.print(true)`,
-			event.config.guildId
+			guildConfig.guildId
 		)
 	}
 }
@@ -344,8 +353,7 @@ const EventHandlers: Record<
 	report,
 	revocation,
 	guildConfigChanged,
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	filterObjectChanged: () => {},
+	filterObjectChanged,
 	disconnected: disconnected,
 	connected,
 }
