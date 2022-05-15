@@ -3,6 +3,7 @@ import { z } from "zod"
 import {
 	Category,
 	Community,
+	FilterObject,
 	GuildConfig,
 	Report,
 	Revocation,
@@ -22,6 +23,7 @@ export const BaseWebsocketMessage = z.object({
 		"communitiesMerged",
 		"guildConfigChanged",
 		"announcement",
+		"filterObjectChanged",
 	]),
 })
 export type BaseWebsocketMessage = z.infer<typeof BaseWebsocketMessage>
@@ -179,6 +181,16 @@ export const GuildConfigChangedMessage = z
 	.merge(BaseWebsocketMessage)
 export type GuildConfigChangedMessage = z.infer<
 	typeof GuildConfigChangedMessage
+>
+
+export const FilterObjectChangedMessage = z
+	.object({
+		messageType: z.literal("filterObjectChanged"),
+		filterObject: FilterObject,
+	})
+	.merge(BaseWebsocketMessage)
+export type FilterObjectChangedMessage = z.infer<
+	typeof FilterObjectChangedMessage
 >
 
 export const AnnouncementMessage = z.object({
