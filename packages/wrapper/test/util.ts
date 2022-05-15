@@ -13,15 +13,17 @@ export const createCommunity = (): Community => {
 		id: faker.datatype.uuid(),
 		name: faker.random.word(),
 		contact: faker.datatype.number().toString(),
-		guildIds: Array(faker.datatype.number(5)).fill(0).map(() => faker.datatype.number().toString()),
+		guildIds: Array(faker.datatype.number(5))
+			.fill(0)
+			.map(() => faker.datatype.number().toString()),
 		tokenInvalidBefore: faker.date.past(),
+		filterObjectId: faker.datatype.string(),
 	}
 }
 export const createGuildConfig = (): GuildConfig => {
 	return {
 		guildId: faker.datatype.number().toString(),
-		categoryFilters: Array(faker.datatype.number(5)).fill((() => faker.datatype.string(6))()), // the bracket mess is to create strings
-		trustedCommunities: Array(faker.datatype.number(5)).fill((() => faker.datatype.string(6))()),
+		filterObjectId: faker.datatype.string(),
 		roles: {
 			setCommunities: faker.datatype.string(),
 			setCategories: faker.datatype.string(),
