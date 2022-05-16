@@ -8,7 +8,6 @@ This page describes how to connect to an existing FAGC instance in order to bene
    permissions that are necessary for it to function properly, so please do not disable some of them
 2. Once you have the bot in your server, you can use the `fagc!setperms` command to set permissions for commands.
    Only the server owner can do this initially. See the image below for how this looks
-     <!-- ![](../images/connect-to-instance_roleselect.png) -->
 3. Once you have set the permissions, you can set your community and category filters. This is when FAGC comes into play,
    as these filters are what ensures that players are banned only from communities you trust and categories you yourself acknowledge.
 4. If you have an API key that can be used to create reports (you would have been told about this explicitly by a FAGC core member), you can set the API
@@ -39,8 +38,9 @@ fagc.reports.create({
 ```
 
 You can alternatively also use the API itself, for which we have Swagger documentation available [here](https://factoriobans.club/api/documentation).
-**Important: In API requests, the API key must have a `Bearer ` prefix. This is managed by the API wrapper itself, but you must add this in with your**
-**request, even in the Swagger tester.**
+
+!> In API requests, the API key must have a `Bearer ` prefix. This is managed by the API wrapper itself, but you must add this in with your
+request, even in the Swagger tester.
 
 ## Importing your existing bans
 
@@ -77,4 +77,4 @@ To estimate the amount of time required to run the script, get the amount of cat
 multiply by the amount of records you have (rows in the sheet or lines in the file) and divide by 50. This will give roughtl you the amount of
 minutes that the import will take, but this may vary depending on the amount of categories per each record.
 
-_Note: Do not try changing the intervals or use the FAGC API in any other way during importing, or you will be hit with a rate limit_
+!> Do not try changing the intervals or use the FAGC API in any other way during importing, or you will be hit with a rate limit
