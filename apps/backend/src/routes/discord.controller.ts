@@ -186,6 +186,7 @@ export default class DiscordController {
 			const parsed = await parseJWT(apikey, ["reports", "master"])
 			if (parsed) {
 				const community = await CommunityModel.findOne({
+					contact: parsed.act,
 					id: parsed.sub,
 				})
 				if (community) {
