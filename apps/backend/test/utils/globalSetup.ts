@@ -18,5 +18,5 @@ export default async function globalSetup() {
 	const connection = await connect({ dbName: config.DataBase })
 	await connection.db.dropDatabase()
 	await connection.close()
-	// await connect()
+	await connect()
 }

@@ -1,6 +1,5 @@
 import { getModelForClass, modelOptions, pre, prop } from "@typegoose/typegoose"
-import { getUserStringFromId } from "../utils/functions-databaseless"
-import { IdType } from "./ids"
+import { createUniqueId } from "../utils/functions-databaseless"
 
 @modelOptions({
 	schemaOptions: {
@@ -9,9 +8,8 @@ import { IdType } from "./ids"
 })
 @pre<ReportInfoClass>("save", async function (next) {
 	if (!this.id || !this._id) {
-		const id = await getUserStringFromId(IdType.COMMUNITY)
-		this.id = id.id
-		this._id = id._id
+		const id = await createUniqueId(ReportInfoModel)
+		this.id = id
 	}
 	this.reportCreatedAt = this.reportCreatedAt || new Date()
 	next()

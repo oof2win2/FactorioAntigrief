@@ -57,6 +57,7 @@ export async function connect(
  */
 export async function disconnect(): Promise<void> {
 	await mongoose.disconnect()
+	await mongoose.connection.close()
 
 	return
 }

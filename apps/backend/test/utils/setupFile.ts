@@ -1,10 +1,6 @@
 import { connect, disconnect } from "./connect"
-import CommunityModel, {
-	watcher as communityWatcher,
-} from "../../src/database/community"
-import CategoryModel, {
-	watcher as categoryWatcher,
-} from "../../src/database/category"
+import CommunityModel from "../../src/database/community" // watcher as communityWatcher,
+import CategoryModel from "../../src/database/category" // watcher as categoryWatcher,
 import { createCategories } from "../utils"
 import backend from "../../src/app"
 import FilterModel from "../../src/database/filterobject"
@@ -21,20 +17,15 @@ beforeAll(async () => {
 		filterObjectId: filterObject.id,
 	})
 	const testCategories = await CategoryModel.create(createCategories(3))
-	setTestCategories(testCategories)
-	setTestCommunity(testCommunity)
+	setTestCategories(testCategories.map((category) => category.toObject()))
+	setTestCommunity(testCommunity.toObject())
 	await backend.listen(0)
-})
+}, 20e3)
 
 afterAll(async () => {
-	// Watchers throw when disconnecting for some reason
-	await communityWatcher.close()
-	await categoryWatcher.close()
-
 	for (const collection of Object.values(mongoose.connection.collections)) {
 		await collection.deleteMany({})
 	}
-
 	await disconnect()
 }, 20e3)
 ;(global as any).__backend = backend
