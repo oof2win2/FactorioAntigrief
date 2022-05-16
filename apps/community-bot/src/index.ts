@@ -47,7 +47,7 @@ const init = async () => {
 			// splits the command and gets first part. commands are in the format "commandName.js"
 			const command = (await import(`./commands/${dir}/${cmd}`).then(
 				(x) => x.default
-			)) as Command
+			)) as Command<boolean, boolean>
 
 			if (!command)
 				return console.log(`./commands/${dir}/${cmd} is not a command`)

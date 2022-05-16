@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const Setapikey: Command = {
+const Setapikey = Command({
 	name: "setapikey",
 	description: "Set API key",
 	aliases: [],
@@ -10,6 +10,7 @@ const Setapikey: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["setConfig"],
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message, args }) => {
 		const key = args.shift()
 		if (!key)
@@ -56,6 +57,6 @@ const Setapikey: Command = {
 
 		return message.channel.send(`API key set by <@${message.author.id}>`)
 	},
-}
+})
 
 export default Setapikey

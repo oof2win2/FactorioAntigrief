@@ -5,6 +5,7 @@ import { client } from "./utils/discord"
 import CommunityModel from "./database/community"
 import { createApikey } from "./utils/authentication"
 import fs from "fs/promises"
+import FilterModel from "./database/filterobject"
 
 mongoose.connect(ENV.MONGOURI, {
 	ignoreUndefined: true,
@@ -24,11 +25,16 @@ const start = async () => {
 		const communityCount = await CommunityModel.countDocuments()
 		if (communityCount == 0) {
 			// need to create the first community as none exist, so that the api can be used
+			const filterObject = await FilterModel.create({
+				categoryFilters: [],
+				communityFilters: [],
+			})
 			const community = await CommunityModel.create({
 				name: "FAGC Master Community",
 				contact: client.user?.id,
+				filterObjectId: filterObject.id,
 			})
-			const apikey = await createApikey(community, "master")
+			const apikey = await createApikey(community, community, "master")
 			try {
 				await fs.writeFile("./masterapikey.txt", apikey, {
 					flag: "w",

@@ -2,7 +2,7 @@ import { Command } from "../../base/Command"
 import { Report } from "fagc-api-types"
 import { MessageAttachment } from "discord.js"
 
-const Genbanlist: Command = {
+const Genbanlist = Command({
 	name: "generatebanlist",
 	description: "Creates a .json banlist file to use for servers",
 	aliases: ["banlist", "genbanlist"],
@@ -12,17 +12,18 @@ const Genbanlist: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["reports"],
 	requiresApikey: false,
-	run: async ({ message, client, guildConfig }) => {
-		if (!guildConfig.categoryFilters.length)
+	fetchFilters: true,
+	run: async ({ message, client, guildConfig, filters }) => {
+		if (!filters.categoryFilters.length)
 			return message.reply("Set category filters first")
-		if (!guildConfig.trustedCommunities.length)
+		if (!filters.communityFilters.length)
 			return message.reply("Set trusted communities first")
 
 		message.reply("Processing banlist. Please wait")
 
 		const reports = await client.fagc.reports.list({
-			communityIds: guildConfig.trustedCommunities,
-			categoryIds: guildConfig.categoryFilters,
+			communityIds: filters.communityFilters,
+			categoryIds: filters.categoryFilters,
 		})
 		const toBanWith = new Set(reports.map((r) => r.playername))
 		const banlist = [...toBanWith].map((playername) => {
@@ -43,5 +44,6 @@ const Genbanlist: Command = {
 			files: [file],
 		})
 	},
-}
+})
+
 export default Genbanlist

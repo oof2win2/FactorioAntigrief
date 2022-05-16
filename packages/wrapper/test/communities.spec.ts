@@ -1,7 +1,7 @@
 import { enableFetchMocks } from "jest-fetch-mock"
 enableFetchMocks()
 import { FAGCWrapper } from "../src/index"
-import { createCommunity, createGuildConfig,  } from "./util"
+import { createCommunity, createGuildConfig } from "./util"
 import faker from "faker"
 import util from "util"
 
@@ -10,7 +10,9 @@ const wrapper = new FAGCWrapper({
 	apikey: "x",
 })
 
-const testCommunities = Array(10).fill(0).map(() => createCommunity())
+const testCommunities = Array(10)
+	.fill(0)
+	.map(() => createCommunity())
 
 afterAll(() => wrapper.destroy())
 
@@ -32,7 +34,9 @@ describe("Communities", () => {
 			fetchMock.mockOnce(JSON.stringify(testCommunities))
 			const communities = await wrapper.communities.fetchAll({})
 
-			expect(wrapper.communities.cache.size).toEqual(testCommunities.length) // the amount of communities should be the same
+			expect(wrapper.communities.cache.size).toEqual(
+				testCommunities.length
+			) // the amount of communities should be the same
 
 			communities.map((community) => {
 				// the different communities should be cached properly too
@@ -50,21 +54,27 @@ describe("Communities", () => {
 		it("Should be able to set a community's config", async () => {
 			const testCommunity = testCommunities[0]
 			fetchMock.mockOnce(JSON.stringify(testCommunity))
-			const resolvedConfig = await wrapper.communities.setCommunityConfig({
-				config: testCommunity,
-			})
+			const resolvedConfig = await wrapper.communities.setCommunityConfig(
+				{
+					config: testCommunity,
+				}
+			)
 
 			expect(resolvedConfig).toEqual(testCommunity)
 		})
 		it("Should cache the community config after setting it", async () => {
 			const testCommunity = testCommunities[0]
 			fetchMock.mockOnce(JSON.stringify(testCommunity))
-			const resolvedConfig = await wrapper.communities.setCommunityConfig({
-				config: testCommunity,
-			})
+			const resolvedConfig = await wrapper.communities.setCommunityConfig(
+				{
+					config: testCommunity,
+				}
+			)
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(resolvedConfig).toEqual(wrapper.communities.resolveId(testCommunity.id))
+			expect(resolvedConfig).toEqual(
+				wrapper.communities.resolveId(testCommunity.id)
+			)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -94,7 +104,9 @@ describe("Communities", () => {
 			})
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(
+				testCommunity
+			)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -124,25 +136,39 @@ describe("Communities", () => {
 			})
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(
+				testCommunity
+			)
 		})
 		it("Fetching cache should work with communities returned", async () => {
 			const testCommunity = testCommunities[0]
 			fetchMock.mockResponse(JSON.stringify(testCommunity))
-		
-			const communityOneProm = wrapper.communities.fetchCommunity({ communityId: testCommunity.id })
-			const communityTwoProm = wrapper.communities.fetchCommunity({ communityId: testCommunity.id })
+
+			const communityOneProm = wrapper.communities.fetchCommunity({
+				communityId: testCommunity.id,
+			})
+			const communityTwoProm = wrapper.communities.fetchCommunity({
+				communityId: testCommunity.id,
+			})
 			await communityOneProm
-			expect(util.inspect(communityTwoProm).includes("<pending>")).toBe(false)
+			expect(util.inspect(communityTwoProm).includes("<pending>")).toBe(
+				false
+			)
 		})
 		it("Fetching cache should work with no communities returned", async () => {
 			fetchMock.mockResponse(JSON.stringify(null))
-		
-			const communityOneProm = wrapper.communities.fetchCommunity({ communityId: "1" })
-			const communityTwoProm = wrapper.communities.fetchCommunity({ communityId: "1" })
+
+			const communityOneProm = wrapper.communities.fetchCommunity({
+				communityId: "1",
+			})
+			const communityTwoProm = wrapper.communities.fetchCommunity({
+				communityId: "1",
+			})
 			await communityOneProm
 			// communityTwoProm should NOT be pending
-			expect(util.inspect(communityTwoProm).includes("<pending>")).toBe(false)
+			expect(util.inspect(communityTwoProm).includes("<pending>")).toBe(
+				false
+			)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -158,7 +184,8 @@ describe("Communities", () => {
 		it("Should be able to fetch own community", async () => {
 			const testCommunity = testCommunities[0]
 			fetchMock.mockOnce(JSON.stringify(testCommunity))
-			const fetchedCommunity = await wrapper.communities.fetchOwnCommunity({})
+			const fetchedCommunity =
+				await wrapper.communities.fetchOwnCommunity({})
 
 			expect(fetchedCommunity).toEqual(testCommunity)
 		})
@@ -168,7 +195,9 @@ describe("Communities", () => {
 			await wrapper.communities.fetchOwnCommunity({})
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(
+				testCommunity
+			)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -222,25 +251,33 @@ describe("Communities", () => {
 		it("Should be able to create communities", async () => {
 			const testCommunity = testCommunities[0]
 			const apikey = faker.internet.password()
-			fetchMock.mockOnce(JSON.stringify({
-				community: testCommunity,
-				apikey: apikey
-			}))
-			const resolvedCommunity = await wrapper.communities.create(testCommunity)
+			fetchMock.mockOnce(
+				JSON.stringify({
+					community: testCommunity,
+					apikey: apikey,
+				})
+			)
+			const resolvedCommunity = await wrapper.communities.create(
+				testCommunity
+			)
 
 			expect(resolvedCommunity.community).toEqual(testCommunity)
 			expect(resolvedCommunity.apikey).toEqual(apikey)
 		})
 		it("Should be able to cache the created community", async () => {
 			const testCommunity = testCommunities[0]
-			fetchMock.mockOnce(JSON.stringify({
-				community: testCommunity,
-				apikey: faker.internet.password()
-			}))
+			fetchMock.mockOnce(
+				JSON.stringify({
+					community: testCommunity,
+					apikey: faker.internet.password(),
+				})
+			)
 			await wrapper.communities.create(testCommunity)
 
 			expect(wrapper.communities.cache.size).toEqual(1) // the amount of cached communities should be only this added one
-			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(testCommunity)
+			expect(wrapper.communities.resolveId(testCommunity.id)).toEqual(
+				testCommunity
+			)
 		})
 		it("Should throw an error if an incorrect response is given from the API", async () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
@@ -264,7 +301,7 @@ describe("Communities", () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
 			await expect(
 				wrapper.communities.createGuildConfig({
-					guildId: "1"
+					guildId: "1",
 				})
 			).rejects.toThrow()
 		})
@@ -287,7 +324,7 @@ describe("Communities", () => {
 			fetchMock.mockOnce(JSON.stringify({ ok: true }))
 			await expect(
 				wrapper.communities.guildLeave({
-					guildId: "1"
+					guildId: "1",
 				})
 			).resolves.not.toThrow()
 		})
@@ -316,7 +353,7 @@ describe("Communities", () => {
 			fetchMock.mockOnce(JSON.stringify({ hi: "true" }))
 			await expect(
 				wrapper.communities.remove({
-					communityId: "1"
+					communityId: "1",
 				})
 			).rejects.toThrow()
 		})
@@ -324,7 +361,7 @@ describe("Communities", () => {
 
 	describe("merge", () => {
 		it("Should correctly merge two communities", async () => {
-			const [ testOne, testTwo ] = testCommunities
+			const [testOne, testTwo] = testCommunities
 			fetchMock.mockOnce(JSON.stringify(testOne))
 			const result = await wrapper.communities.merge({
 				idReceiving: testOne.id,
@@ -333,7 +370,7 @@ describe("Communities", () => {
 			expect(result).toEqual(testOne)
 		})
 		it("Should remove the dissolved community from cache but keep the receiving", async () => {
-			const [ testOne, testTwo ] = testCommunities
+			const [testOne, testTwo] = testCommunities
 
 			// add the communities to cache
 			wrapper.communities.cache.set(testOne.id, testOne)
@@ -357,7 +394,7 @@ describe("Communities", () => {
 			await expect(
 				wrapper.communities.merge({
 					idReceiving: "1",
-					idDissolving: "2"
+					idDissolving: "2",
 				})
 			).rejects.toThrow()
 		})

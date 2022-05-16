@@ -1,5 +1,6 @@
-import { backend, testCategories } from "./prepareTest"
-import { toJson } from "./utils"
+import { testCategories } from "../utils/initialData"
+import { toJson } from "../utils"
+import backend from "../../src/app"
 
 describe("GET /categories/", () => {
 	it("Should fetch all categories and return them correctly", async () => {

@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const FetchReport: Command = {
+const FetchReport = Command({
 	name: "report",
 	description: "Fetch a report by ID",
 	category: "reports",
@@ -9,6 +9,7 @@ const FetchReport: Command = {
 	examples: ["report FX07kpn"],
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	async run({ message, args, client }) {
 		const reportId = await client.argsOrInput(
 			args,
@@ -65,5 +66,6 @@ const FetchReport: Command = {
 			embeds: [embed],
 		})
 	},
-}
+})
+
 export default FetchReport

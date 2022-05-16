@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const Help: Command = {
+const Help = Command({
 	name: "help",
 	aliases: ["h"],
 	category: "basic",
@@ -9,6 +9,7 @@ const Help: Command = {
 	examples: ["help", "help ping"],
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: ({ message, client, args, guildConfig }) => {
 		if (!args.length) {
 			// no specific command to help with
@@ -90,5 +91,6 @@ const Help: Command = {
 			embeds: [embed],
 		})
 	},
-}
+})
+
 export default Help

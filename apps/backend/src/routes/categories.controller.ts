@@ -9,10 +9,12 @@ import {
 	categoryRemovedMessage,
 	categoriesMergedMessage,
 	categoryUpdatedMessage,
+	filterObjectChanged,
 } from "../utils/info"
 import { Category } from "fagc-api-types"
 import { z } from "zod"
 import ReportInfoModel from "../database/reportinfo"
+import FilterModel from "../database/filterobject"
 
 @Controller({ route: "/categories" })
 export default class CategoryController {
@@ -208,24 +210,22 @@ export default class CategoryController {
 		if (category) {
 			categoryRemovedMessage(category)
 			// store the IDs of the affected guilds - ones which have the category filtered
-			const affectedGuildConfigs = await GuildConfigModel.find({
+			const affectedFilters = await FilterModel.find({
 				categoryFilters: [category.id],
 			})
 
 			// remove the category ID from any guild configs which may have it
-			await GuildConfigModel.updateMany(
+			await FilterModel.updateMany(
 				{
-					_id: {
-						$in: affectedGuildConfigs.map((config) => config._id),
-					},
+					categoryFilters: category.id,
 				},
 				{
 					$pull: { categoryFilters: category.id },
 				}
 			)
 
-			const newGuildConfigs = await GuildConfigModel.find({
-				_id: { $in: affectedGuildConfigs.map((config) => config._id) },
+			const newFilters = await FilterModel.find({
+				_id: { $in: affectedFilters.map((config) => config._id) },
 			})
 
 			await ReportInfoModel.deleteMany({
@@ -240,8 +240,8 @@ export default class CategoryController {
 							resolve()
 						}, ms)
 					})
-				for (const config of newGuildConfigs) {
-					guildConfigChanged(config)
+				for (const config of newFilters) {
+					filterObjectChanged(config)
 					// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
 					// staggered so not everyone at once tries to fetch their new banlists
 					await wait(100)
@@ -317,7 +317,7 @@ export default class CategoryController {
 			}
 		)
 
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
 				categoryFilters: idDissolving,
 			},
@@ -325,7 +325,7 @@ export default class CategoryController {
 				$addToSet: { categoryFilters: idReceiving },
 			}
 		)
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
 				categoryFilters: idDissolving,
 			},
@@ -334,7 +334,7 @@ export default class CategoryController {
 			}
 		)
 
-		const affectedConfigs = await GuildConfigModel.find({
+		const affectedConfigs = await FilterModel.find({
 			categoryFilters: idReceiving,
 		})
 
@@ -346,7 +346,7 @@ export default class CategoryController {
 					}, ms)
 				})
 			for (const config of affectedConfigs) {
-				guildConfigChanged(config)
+				filterObjectChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
 				// staggered so not everyone at once tries to fetch their new banlists
 				await wait(100)

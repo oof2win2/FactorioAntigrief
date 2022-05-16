@@ -1,6 +1,5 @@
 # private stuff
 .env
-config.ts
 dist/
 *.code-workspace
 masterapikey.txt

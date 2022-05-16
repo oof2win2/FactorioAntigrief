@@ -13,12 +13,19 @@ import {
 	communityRemovedMessage,
 	communityUpdatedMessage,
 	communitiesMergedMessage,
+	filterObjectChanged,
 } from "../utils/info"
 import { validateDiscordUser } from "../utils/discord"
 import ReportInfoModel from "../database/reportinfo"
 import WebhookModel from "../database/webhook"
-import { Community, CommunityCreatedMessageExtraOpts } from "fagc-api-types"
+import {
+	Community,
+	CommunityCreatedMessageExtraOpts,
+	FilterObject,
+	SetFilterObject,
+} from "fagc-api-types"
 import { z } from "zod"
+import FilterModel from "../database/filterobject"
 
 @Controller({ route: "/communities" })
 export default class CommunityController {
@@ -93,7 +100,7 @@ export default class CommunityController {
 		req: FastifyRequest,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		return res.send(community)
 	}
 
@@ -131,7 +138,7 @@ export default class CommunityController {
 	): Promise<FastifyReply> {
 		const { contact, name } = req.body
 
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,
@@ -158,6 +165,242 @@ export default class CommunityController {
 		})
 
 		return res.status(200).send(community)
+	}
+
+	@GET({
+		url: "/filters",
+		options: {
+			schema: {
+				querystring: z
+					.object({
+						id: z.string(),
+						guildId: z.string(),
+						communityId: z.string(),
+					})
+					.partial()
+					.refine(
+						(data) =>
+							!(!data.id && !data.guildId && !data.communityId),
+						"You must have at least one of id, guildId, or communityId present in your query"
+					),
+
+				description: "Get filters",
+				tags: ["community"],
+				security: [],
+				response: {
+					"200": FilterObject.nullable(),
+				},
+			},
+		},
+	})
+	async getFilters(
+		req: FastifyRequest<{
+			Querystring: {
+				id?: string
+				guildId?: string
+				communityId?: string
+			}
+		}>,
+		res: FastifyReply
+	) {
+		const { id, guildId, communityId } = req.query
+		if (id !== undefined) {
+			const filter = await FilterModel.findOne({
+				id,
+			})
+			return res.send(filter)
+		} else if (guildId !== undefined) {
+			const guild = await GuildConfigModel.findOne({
+				guildId,
+			})
+			if (!guild)
+				return res.status(404).send({
+					errorCode: 404,
+					error: "Not found",
+					message: "The provided guild was not found",
+				})
+			const filter = await FilterModel.findOne({
+				id: guild.filterObjectId,
+			})
+			return res.send(filter)
+		} else {
+			const community = await CommunityModel.findOne({
+				id: communityId,
+			})
+			if (!community)
+				return res.status(404).send({
+					errorCode: 404,
+					error: "Not found",
+					message: "The provided community was not found",
+				})
+			const filter = await FilterModel.findOne({
+				id: community.filterObjectId,
+			})
+			return res.send(filter)
+		}
+	}
+
+	@GET({
+		url: "/filters/own",
+		options: {
+			schema: {
+				description: "Get your own filters",
+				tags: ["community"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				response: {
+					"200": FilterObject.nullable(),
+				},
+			},
+		},
+	})
+	@Authenticate
+	async getOwnFilters(
+		req: FastifyRequest,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { community } = req.requestContext.get("auth")
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: "Your community was not found",
+			})
+		const filter = await FilterModel.findOne({
+			id: community.filterObjectId,
+		})
+		return res.send(filter)
+	}
+
+	@PATCH({
+		url: "/filters",
+		options: {
+			schema: {
+				description: "Set your filters",
+				tags: ["community"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+				body: SetFilterObject.omit({ id: true }),
+			},
+		},
+	})
+	@Authenticate
+	async setFilters(
+		req: FastifyRequest<{
+			Body: {
+				categoryFilters?: string[]
+				communityFilters?: string[]
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { community } = req.requestContext.get("auth")
+		if (!community)
+			return res.status(404).send({
+				errorCode: 404,
+				error: "Not found",
+				message: "Your community was not found",
+			})
+
+		const { communityFilters, categoryFilters } = req.body
+		const toSetCommunityIds = new Set<string>([
+			...(communityFilters || []),
+			community.id,
+		])
+		const toSetCategoryIds = new Set<string>(categoryFilters || [])
+		const filter = await FilterModel.findOneAndUpdate(
+			{
+				id: community.filterObjectId,
+			},
+			{
+				...(communityFilters && {
+					communityFilters: [...toSetCommunityIds],
+				}),
+				...(categoryFilters && {
+					categoryFilters: [...toSetCategoryIds],
+				}),
+			},
+			{
+				new: true,
+			}
+		)
+		return res.send(filter)
+	}
+
+	@PATCH({
+		url: "/filters/:id",
+		options: {
+			schema: {
+				params: z.object({
+					id: z.string(),
+				}),
+				body: SetFilterObject.omit({ id: true }).extend({
+					communityId: z.string().nullable(),
+				}),
+				description: "Set a filter object by ID",
+				tags: ["master"],
+				security: [
+					{
+						authorization: [],
+					},
+				],
+			},
+		},
+	})
+	@MasterAuthenticate
+	async setMasterFilters(
+		req: FastifyRequest<{
+			Params: {
+				id: string
+			}
+			Body: {
+				categoryFilters?: string[]
+				communityFilters?: string[]
+				communityId: string | null
+			}
+		}>,
+		res: FastifyReply
+	): Promise<FastifyReply> {
+		const { id } = req.params
+
+		const { categoryFilters, communityFilters, communityId } = req.body
+		const toSetCommunityIds = new Set<string>(communityFilters || [])
+		const toSetCategoryIds = new Set<string>(categoryFilters || [])
+
+		if (communityId) toSetCommunityIds.add(communityId)
+
+		const filter = await FilterModel.findOneAndUpdate(
+			{
+				id: id,
+			},
+			{
+				...(communityFilters && {
+					communityFilters: [...toSetCommunityIds],
+				}),
+				...(categoryFilters && {
+					categoryFilters: [...toSetCategoryIds],
+				}),
+			},
+			{
+				new: true,
+			}
+		)
+		console.log(filter)
+
+		if (!filter) {
+			return res.status(404).send({
+				statusCode: 404,
+				error: "Not found",
+				message: "The provided filter was not found",
+			})
+		}
+		return res.send(filter)
 	}
 
 	@POST({
@@ -193,7 +436,7 @@ export default class CommunityController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const community = req.requestContext.get("community")
+		const { community } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(404).send({
 				errorCode: 404,
@@ -208,7 +451,7 @@ export default class CommunityController {
 		}
 
 		const auth = req.body.create
-			? await createApikey(community, "reports")
+			? await createApikey(community, community, "reports")
 			: undefined
 		return res.send({
 			apikey: auth,
@@ -224,9 +467,7 @@ export default class CommunityController {
 				}),
 				body: z.object({
 					create: z.boolean().optional(),
-					type: z
-						.enum(["bot", "reports", "master"])
-						.default("reports"),
+					type: z.enum(["reports", "master"]).default("reports"),
 					invalidate: z.boolean().optional(),
 				}),
 				description: "Manage apikey for community",
@@ -252,7 +493,7 @@ export default class CommunityController {
 			}
 			Body: {
 				create?: boolean
-				type?: "reports" | "master" | "bot"
+				type?: "reports" | "master"
 				invalidate: boolean
 			}
 		}>,
@@ -275,7 +516,11 @@ export default class CommunityController {
 		}
 
 		const auth = req.body.create
-			? await createApikey(community, req.body.type ?? "reports")
+			? await createApikey(
+					community,
+					community,
+					req.body.type ?? "reports"
+			  )
 			: undefined
 		return res.send({
 			apikey: auth,
@@ -308,7 +553,7 @@ export default class CommunityController {
 		},
 	})
 	@MasterAuthenticate
-	async create(
+	async createCommunity(
 		req: FastifyRequest<{
 			Body: {
 				name: string
@@ -334,13 +579,15 @@ export default class CommunityController {
 			})
 		}
 
+		const filter = await FilterModel.create({})
 		const community = await CommunityModel.create({
 			name: name,
 			contact: contact,
 			guildIds: [],
+			filterObjectId: filter.id,
 		})
 
-		const auth = await createApikey(community, "reports")
+		const auth = await createApikey(community, community, "reports")
 
 		communityCreatedMessage(community, {
 			createdBy: <CommunityCreatedMessageExtraOpts["createdBy"]>(
@@ -376,7 +623,7 @@ export default class CommunityController {
 		},
 	})
 	@MasterAuthenticate
-	async delete(
+	async deleteCommunity(
 		req: FastifyRequest<{
 			Params: {
 				id: string
@@ -413,20 +660,20 @@ export default class CommunityController {
 			})
 		}
 
-		// remove the community ID from any guild configs which may have it
-		const affectedGuildConfigs = await GuildConfigModel.find({
-			trustedCommunities: [community.id],
+		// remove the community ID from any filter objects which may have it
+		const affectedFilters = await FilterModel.find({
+			communityFilters: [community.id],
 		})
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
-				_id: { $in: affectedGuildConfigs.map((config) => config._id) },
+				_id: { $in: affectedFilters.map((config) => config._id) },
 			},
 			{
-				$pull: { trustedCommunities: community.id },
+				$pull: { communityFilters: community.id },
 			}
 		)
-		const newGuildConfigs = await GuildConfigModel.find({
-			_id: { $in: affectedGuildConfigs.map((config) => config._id) },
+		const newFilters = await FilterModel.find({
+			_id: { $in: affectedFilters.map((config) => config._id) },
 		})
 
 		const sendGuildConfigInfo = async () => {
@@ -436,8 +683,8 @@ export default class CommunityController {
 						resolve()
 					}, ms)
 				})
-			for (const config of newGuildConfigs) {
-				guildConfigChanged(config)
+			for (const config of newFilters) {
+				filterObjectChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
 				// staggered so not everyone at once tries to fetch their new banlists
 				await wait(100)
@@ -511,6 +758,9 @@ export default class CommunityController {
 		await CommunityModel.findOneAndDelete({
 			id: idDissolving,
 		})
+		await FilterModel.findOneAndDelete({
+			id: dissolving.filterObjectId,
+		})
 		await ReportInfoModel.updateMany(
 			{
 				communityId: idDissolving,
@@ -521,20 +771,20 @@ export default class CommunityController {
 		)
 
 		// remove old stuff from the config and replace with new
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
-				trustedCommunities: idDissolving,
+				communityFilters: idDissolving,
 			},
 			{
-				$addToSet: { trustedCommunities: idReceiving },
+				$addToSet: { communityFilters: idReceiving },
 			}
 		)
-		await GuildConfigModel.updateMany(
+		await FilterModel.updateMany(
 			{
-				trustedCommunities: idDissolving,
+				communityFilters: idDissolving,
 			},
 			{
-				$pull: { trustedCommunities: idDissolving },
+				$pull: { communityFilters: idDissolving },
 			}
 		)
 
@@ -565,7 +815,7 @@ export default class CommunityController {
 			}
 		)
 
-		const affectedConfigs = await GuildConfigModel.find({
+		const affectedFilters = await FilterModel.find({
 			trustedCommunities: idReceiving,
 		})
 
@@ -576,8 +826,8 @@ export default class CommunityController {
 						resolve()
 					}, ms)
 				})
-			for (const config of affectedConfigs) {
-				guildConfigChanged(config)
+			for (const config of affectedFilters) {
+				filterObjectChanged(config)
 				// 1000 * 100 / 1000 = amount of seconds it will take for 100 communities
 				// staggered so not everyone at once tries to fetch their new banlists
 				await wait(100)

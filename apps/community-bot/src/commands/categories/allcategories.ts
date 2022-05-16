@@ -2,7 +2,7 @@ import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const AllCategories: Command = {
+const AllCategories = Command({
 	name: "allcategories",
 	description: "Gets all categories",
 	category: "categories",
@@ -11,6 +11,7 @@ const AllCategories: Command = {
 	examples: [],
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message }) => {
 		// fetch categories from backend
 		const categories = await client.fagc.categories.fetchAll({})
@@ -35,5 +36,6 @@ const AllCategories: Command = {
 		}
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	},
-}
+})
+
 export default AllCategories

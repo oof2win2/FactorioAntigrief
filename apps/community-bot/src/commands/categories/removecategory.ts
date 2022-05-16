@@ -3,7 +3,7 @@ import { createPagedEmbed } from "../../utils/functions"
 import { Category } from "fagc-api-types"
 import { AuthError } from "fagc-api-wrapper"
 
-const RemoveCategories: Command = {
+const RemoveCategories = Command({
 	name: "removecategory",
 	aliases: ["removecategories"],
 	description:
@@ -17,7 +17,8 @@ const RemoveCategories: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["setCategories"],
 	requiresApikey: false,
-	run: async ({ client, message, args, guildConfig }) => {
+	fetchFilters: true,
+	run: async ({ client, message, args, filters, guildConfig }) => {
 		// if no args provided, ask for category ids to remove from filters
 		const allCategories = await client.fagc.categories.fetchAll({})
 		if (!args[0]) {
@@ -28,17 +29,17 @@ const RemoveCategories: Command = {
 			const categoryFields = allCategories
 				// make sure the categories are filtered
 				.filter((category) =>
-					guildConfig.categoryFilters.includes(category.id)
+					filters.categoryFilters.includes(category.id)
 				)
 				.sort(
 					(a, b) =>
-						guildConfig.categoryFilters.indexOf(a.id) -
-						guildConfig.categoryFilters.indexOf(b.id)
+						filters.categoryFilters.indexOf(a.id) -
+						filters.categoryFilters.indexOf(b.id)
 				)
 				.map((category) => {
 					return {
 						name: `${
-							guildConfig.categoryFilters.indexOf(category.id) + 1
+							filters.categoryFilters.indexOf(category.id) + 1
 						}) ${category.name} (\`${category.id}\`)`,
 						value: category.description,
 						inline: false,
@@ -64,11 +65,11 @@ const RemoveCategories: Command = {
 					? client.fagc.categories.resolveId(categoryId)
 					: // if it is an index in filtered categories, it needs to be resolved
 					  client.fagc.categories.resolveId(
-							guildConfig.categoryFilters[Number(categoryId) - 1]
+							filters.categoryFilters[Number(categoryId) - 1]
 					  )
 			)
 			.filter((r): r is Category => Boolean(r))
-			.filter((r) => guildConfig.categoryFilters.includes(r.id))
+			.filter((r) => filters.categoryFilters.includes(r.id))
 
 		// if there are no categories that are already in the community's filters, then exit
 		if (!categories.length)
@@ -99,17 +100,18 @@ const RemoveCategories: Command = {
 
 		// remove the categories from the community's filters
 		const categoryIds = categories.map((category) => category.id)
-		const newCategoryFilters = guildConfig.categoryFilters.filter(
+		const newCategoryFilters = filters.categoryFilters.filter(
 			(categoryFilter) => !categoryIds.includes(categoryFilter)
 		)
 
 		try {
-			// save the community's config
-			await client.saveGuildConfig({
-				guildId: message.guild.id,
-				categoryFilters: newCategoryFilters,
-				apikey: guildConfig.apikey || undefined,
-			})
+			await client.saveFilters(
+				{
+					id: filters.id,
+					categoryFilters: newCategoryFilters,
+				},
+				guildConfig.communityId ?? null
+			)
 
 			return message.channel.send(
 				"Successfully removed specified filtered categories"
@@ -123,5 +125,6 @@ const RemoveCategories: Command = {
 			throw e
 		}
 	},
-}
+})
+
 export default RemoveCategories

@@ -1,6 +1,7 @@
 import {
 	Category,
 	Community,
+	FilterObject,
 	GuildConfig,
 	Report,
 	Revocation,
@@ -122,21 +123,10 @@ export const createGuildConfig = ({
 	categoryIds: string[]
 	communityIds: string[]
 	includeAllFilters?: boolean
-}): GuildConfig => {
-	return {
+}): [GuildConfig, FilterObject] => {
+	const guildConfig: GuildConfig = {
 		guildId: createDiscordId(),
-		categoryFilters: includeAllFilters
-			? categoryIds
-			: randomElementsFromArray(
-					categoryIds,
-					Math.round(categoryIds.length / 2)
-			  ),
-		trustedCommunities: includeAllFilters
-			? categoryIds
-			: randomElementsFromArray(
-					communityIds,
-					Math.round(communityIds.length / 2)
-			  ),
+		filterObjectId: createFAGCId(),
 		roles: {
 			reports: createDiscordId(),
 			webhooks: createDiscordId(),
@@ -145,6 +135,22 @@ export const createGuildConfig = ({
 			setCommunities: createDiscordId(),
 		},
 	}
+	const filterObject: FilterObject = {
+		id: guildConfig.filterObjectId,
+		categoryFilters: includeAllFilters
+			? categoryIds
+			: randomElementsFromArray(
+					categoryIds,
+					Math.round(categoryIds.length / 2)
+			  ),
+		communityFilters: includeAllFilters
+			? communityIds
+			: randomElementsFromArray(
+					communityIds,
+					Math.round(communityIds.length / 2)
+			  ),
+	}
+	return [guildConfig, filterObject]
 }
 
 export const createFAGCCategory = (): Category => {
@@ -166,6 +172,7 @@ export const createFAGCCommunity = (): Community => {
 			faker.datatype.number({ min: 1, max: 5 })
 		),
 		tokenInvalidBefore: faker.date.past(),
+		filterObjectId: createFAGCId(),
 	}
 }
 

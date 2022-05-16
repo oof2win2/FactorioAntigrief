@@ -3,7 +3,7 @@ import { Role } from "discord.js"
 import { GuildConfig } from "fagc-api-types"
 import { AuthError } from "fagc-api-wrapper"
 
-const SetPermissions: Command = {
+const SetPermissions = Command({
 	name: "setpermissions",
 	aliases: ["setperms", "setperms", "setperms", "setperms"],
 	description: "Set the permissions for a role",
@@ -17,6 +17,7 @@ const SetPermissions: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["setConfig"],
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		const permStrings = [
 			"reports",
@@ -196,6 +197,6 @@ const SetPermissions: Command = {
 			throw e
 		}
 	},
-}
+})
 
 export default SetPermissions

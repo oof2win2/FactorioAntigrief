@@ -1,5 +1,4 @@
 import "cross-fetch/polyfill"
-import { strict as assert } from "assert"
 import {
 	ManagerOptions,
 	WrapperOptions,
@@ -8,7 +7,12 @@ import {
 } from "../types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
-import { Community, GuildConfig } from "fagc-api-types"
+import {
+	Community,
+	FilterObject,
+	GuildConfig,
+	SetFilterObject,
+} from "fagc-api-types"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate, masterAuthenticate } from "../utils"
 import { z } from "zod"
@@ -66,6 +70,118 @@ export default class CommunityManager extends BaseManager<Community> {
 		const parsedUpdate = Community.parse(update)
 		if (cache) this.add(parsedUpdate)
 		return parsedUpdate
+	}
+
+	async getFiltersById({ id }: { id: string }): Promise<FilterObject | null> {
+		const result = await fetch(
+			`${this.apiurl}/communities/filters?id=${strictUriEncode(id)}`
+		).then((r) => r.json())
+		if (!result) return null
+		if (result.error)
+			throw new GenericAPIError(`${result.error}: ${result.message}`)
+		const parsed = FilterObject.parse(result)
+		return parsed
+	}
+	async getFiltersByGuildId({
+		guildId,
+	}: {
+		guildId: string
+	}): Promise<FilterObject | null> {
+		const result = await fetch(
+			`${this.apiurl}/communities/filters?guildId=${strictUriEncode(
+				guildId
+			)}`
+		).then((r) => r.json())
+		if (!result) return null
+		if (result.error)
+			throw new GenericAPIError(`${result.error}: ${result.message}`)
+		const parsed = FilterObject.parse(result)
+		return parsed
+	}
+	async getFiltersByCommunityId({
+		id,
+	}: { id: string } & FetchRequestTypes): Promise<FilterObject | null> {
+		const result = await fetch(
+			`${this.apiurl}/communities/filters?communityId=${strictUriEncode(
+				id
+			)}`
+		).then((r) => r.json())
+		if (!result) return null
+		if (result.error)
+			throw new GenericAPIError(`${result.error}: ${result.message}`)
+		const parsed = FilterObject.parse(result)
+		return parsed
+	}
+
+	async getOwnFilter({
+		reqConfig = {},
+	}: FetchRequestTypes): Promise<FilterObject> {
+		const req = await fetch(`${this.apiurl}/communities/filters/own`, {
+			credentials: "include",
+			headers: {
+				authorization: authenticate(this, reqConfig),
+			},
+		})
+		if (req.status === 401) throw new AuthError()
+		const result = await req.json()
+		if (result.error)
+			throw new GenericAPIError(`${result.error}: ${result.message}`)
+		const parsed = FilterObject.parse(result)
+		return parsed
+	}
+
+	async setFilters({
+		filter,
+		reqConfig = {},
+	}: {
+		filter: SetFilterObject
+	} & FetchRequestTypes): Promise<FilterObject> {
+		const req = await fetch(`${this.apiurl}/communities/filters`, {
+			method: "PATCH",
+			body: JSON.stringify(filter),
+			credentials: "include",
+			headers: {
+				authorization: authenticate(this, reqConfig),
+				"content-type": "application/json",
+			},
+		})
+		if (req.status === 401) throw new AuthError()
+		const result = await req.json()
+		if (result.error)
+			throw new GenericAPIError(`${result.error}: ${result.message}`)
+		const parsed = FilterObject.parse(result)
+		return parsed
+	}
+
+	async setMasterFilters({
+		filter,
+		communityId,
+		reqConfig = {},
+	}: {
+		filter: SetFilterObject
+		communityId: string | null
+	} & FetchRequestTypes): Promise<FilterObject> {
+		const req = await fetch(
+			`${this.apiurl}/communities/filters/${strictUriEncode(filter.id)}`,
+			{
+				method: "PATCH",
+				body: JSON.stringify({
+					...filter,
+					communityId,
+				}),
+				credentials: "include",
+				headers: {
+					authorization: masterAuthenticate(this, reqConfig),
+					"content-type": "application/json",
+				},
+			}
+		)
+		if (req.status === 401) throw new AuthError()
+		const result = await req.json()
+		if (result.error)
+			throw new GenericAPIError(`${result.error}: ${result.message}`)
+		const parsed = FilterObject.parse(result)
+		return parsed
 	}
 
 	async getCommunityConfig({
@@ -264,7 +380,7 @@ export default class CommunityManager extends BaseManager<Community> {
 	}: {
 		create?: boolean
 		invalidate?: boolean
-	} & FetchRequestTypes): Promise<{ apikey?: string }> {
+	} & FetchRequestTypes): Promise<{ apikey: string }> {
 		const req = await fetch(`${this.apiurl}/communites/own/apikey`, {
 			method: "POST",
 			body: JSON.stringify({
@@ -283,7 +399,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z
 			.object({
-				apikey: z.string().optional(),
+				apikey: z.string(),
 			})
 			.parse(key)
 		return parsed
@@ -293,7 +409,6 @@ export default class CommunityManager extends BaseManager<Community> {
 	 */
 	async createApikey({ reqConfig = {} }: FetchRequestTypes): Promise<string> {
 		const result = await this.manageApikey({ create: true, reqConfig })
-		assert(result.apikey)
 		return result.apikey
 	}
 
@@ -309,7 +424,6 @@ export default class CommunityManager extends BaseManager<Community> {
 			invalidate: true,
 			reqConfig,
 		})
-		assert(result.apikey)
 		return result.apikey
 	}
 
@@ -327,7 +441,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		create?: boolean
 		keyType?: "master" | "private"
 		invalidate?: boolean
-	} & FetchRequestTypes): Promise<{ apikey?: string }> {
+	} & FetchRequestTypes): Promise<{ apikey: string }> {
 		const req = await fetch(
 			`${this.apiurl}/communities/${strictUriEncode(communityId)}/apikey`,
 			{
@@ -350,7 +464,7 @@ export default class CommunityManager extends BaseManager<Community> {
 		if (key.error) throw new GenericAPIError(`${key.error}: ${key.message}`)
 		const parsed = z
 			.object({
-				apikey: z.string().optional(),
+				apikey: z.string(),
 			})
 			.parse(key)
 		return parsed
@@ -373,7 +487,6 @@ export default class CommunityManager extends BaseManager<Community> {
 			keyType,
 			reqConfig,
 		})
-		assert(result.apikey)
 		return result.apikey
 	}
 
@@ -393,7 +506,6 @@ export default class CommunityManager extends BaseManager<Community> {
 			invalidate: true,
 			reqConfig,
 		})
-		assert(result.apikey)
 		return result.apikey
 	}
 

@@ -2,7 +2,7 @@ import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const AddCommunity: Command = {
+const AddCommunity = Command({
 	name: "addcommunity",
 	description: "Add communities to your community filter",
 	aliases: ["addcommunities"],
@@ -12,7 +12,8 @@ const AddCommunity: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["setCommunities"],
 	requiresApikey: false,
-	run: async ({ client, message, args, guildConfig }) => {
+	fetchFilters: true,
+	run: async ({ client, message, args, filters, guildConfig }) => {
 		const allCommunities = await client.fagc.communities.fetchAll({})
 
 		// if there are no args, show the current communities and ask for new args
@@ -23,9 +24,7 @@ const AddCommunity: Command = {
 				.setDescription("All FAGC Communities")
 			const fields = await Promise.all(
 				allCommunities
-					.filter(
-						(r) => !guildConfig.trustedCommunities.includes(r.id)
-					)
+					.filter((r) => !filters.communityFilters.includes(r.id))
 					.map(async (community) => {
 						return {
 							name: `${community.name} | \`${community.id}\``,
@@ -50,7 +49,7 @@ const AddCommunity: Command = {
 			// check if the community exists
 			.filter((id) => Boolean(allCommunities.find((c) => c.id === id)))
 			// check if the community is already in the filter
-			.filter((id) => !guildConfig.trustedCommunities.includes(id))
+			.filter((id) => !filters.communityFilters.includes(id))
 
 		if (!communitiesToAdd.length)
 			return message.channel.send("No valid or new communities to add")
@@ -80,12 +79,19 @@ const AddCommunity: Command = {
 		if (!confirm)
 			return message.channel.send("Adding communities cancelled")
 
-		communitiesToAdd.forEach((id) => {
-			guildConfig.trustedCommunities.push(id)
-		})
+		const newCommunityFilters = new Set([
+			...communitiesToAdd,
+			...filters.communityFilters,
+		])
 
 		try {
-			await client.saveGuildConfig(guildConfig)
+			await client.saveFilters(
+				{
+					id: filters.id,
+					communityFilters: [...newCommunityFilters],
+				},
+				guildConfig.communityId ?? null
+			)
 			return message.channel.send("Successfully added community filters")
 		} catch (e) {
 			if (e instanceof AuthError) {
@@ -96,5 +102,6 @@ const AddCommunity: Command = {
 			throw e
 		}
 	},
-}
+})
+
 export default AddCommunity

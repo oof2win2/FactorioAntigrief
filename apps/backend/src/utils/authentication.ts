@@ -14,11 +14,17 @@ export const apikey = z.object({
 	 * reports: can do CURD operations on reports only
 	 * bot: can only read, implemented for auth of clientside bots
 	 */
-	aud: z.enum(["master", "reports", "bot"]),
+	aud: z.enum(["master", "reports"]),
 	/**
-	 * sub | Subject - the community ID
+	 * sub | Subject - the community ID or discord guild ID
 	 */
 	sub: z.string(),
+
+	/**
+	 * act | Actor - the person that this token is issued to
+	 */
+	act: z.string(),
+
 	/**
 	 * iat | Issued At - the time the token was issued
 	 */
@@ -30,20 +36,24 @@ export type apikey = z.infer<typeof apikey>
 
 /**
  * Create a FAGC API key
- * @param cId Community or Discord user that the API key is for
+ * @param cId Community (ID) or guild ID that this key is for
+ * @param act Discord user that the API key is for. Can be community, as it maps to the contact
  * @param audience The type of API key that this is
  */
 export async function createApikey(
 	cId: string | Community,
+	act: string | Community,
 	audience: apikey["aud"]
 ) {
-	const apikey = await new jose.SignJWT({})
+	const apikey = await new jose.SignJWT({
+		act: typeof act === "string" ? act : act.contact, // actor, the discord ID of the person it is for
+	})
 		.setIssuedAt() // for validating when the token was issued
 		.setProtectedHeader({
 			// encoding method
 			alg: "HS256",
 		})
-		.setSubject(typeof cId === "string" ? cId : cId.contact) // subject, who is it issued to
+		.setSubject(typeof cId === "string" ? cId : cId.id) // community which it is issued to
 		.setAudience(audience) // audience, what is it for
 		.sign(Buffer.from(ENV.JWT_SECRET, "utf8")) // sign the token itself and get an encoded string back
 	return apikey
@@ -122,8 +132,10 @@ async function authenticate(req: FastifyRequest, audience: string | string[]) {
 		const token = authorization.slice("Bearer ".length)
 		const data = await parseJWT(token, audience)
 		if (!data) return false
+
 		const community = await CommunityModel.findOne({
-			contact: data.sub,
+			contact: data.act,
+			id: data.sub,
 		})
 		if (!community) return false
 
@@ -131,8 +143,10 @@ async function authenticate(req: FastifyRequest, audience: string | string[]) {
 		if (community.tokenInvalidBefore.valueOf() > data.iat.valueOf())
 			return false
 
-		req.requestContext.set("community", community)
-		req.requestContext.set("authType", data.aud)
+		req.requestContext.set("auth", {
+			authType: data.aud,
+			community,
+		})
 	} catch (e) {
 		return false
 	}

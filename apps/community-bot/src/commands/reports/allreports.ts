@@ -1,7 +1,7 @@
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const AllReports: Command = {
+const AllReports = Command({
 	name: "allreports",
 	description: "Gets all reports of a player",
 	aliases: ["checkall", "viewallreports"],
@@ -10,6 +10,7 @@ const AllReports: Command = {
 	examples: ["allreports Windsinger"],
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message, args }) => {
 		// if a playername is not provided as an arg, prompt the user to provide one
 		const playername = await client.argsOrInput(
@@ -60,6 +61,6 @@ const AllReports: Command = {
 		)
 		createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
 	},
-}
+})
 
 export default AllReports

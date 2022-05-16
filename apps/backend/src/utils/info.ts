@@ -7,6 +7,7 @@ import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import { CategoryClass } from "../database/category"
 import { CommunityClass } from "../database/community"
 import { ReportInfoClass } from "../database/reportinfo"
+import { FilterClass } from "../database/filterobject"
 import {
 	Category,
 	CommunityCreatedMessageExtraOpts,
@@ -14,8 +15,14 @@ import {
 	Revocation,
 	RevocationMessageExtraOpts,
 } from "fagc-api-types"
+import { z } from "zod"
 
-const WebhookGuildIds = new WeakMap<WebSocket, string[]>()
+interface WebSocketData {
+	guildIDs: Set<string>
+	filterObjectIDs: Set<string>
+}
+
+const WebhookGuildIds = new WeakMap<WebSocket, WebSocketData>()
 
 let WebhookQueue: MessageEmbed[] = []
 
@@ -49,6 +56,26 @@ export function WebhookMessage(message: MessageEmbed): void {
 	WebhookQueue.push(message)
 }
 
+const incomingWSMessages = z.union([
+	z.object({
+		type: z.literal("addGuildId"),
+		guildId: z.string(),
+	}),
+	z.object({
+		type: z.literal("removeGuildId"),
+		guildId: z.string(),
+	}),
+	z.object({
+		type: z.literal("addFilterObjectId"),
+		filterObjectId: z.string(),
+	}),
+	z.object({
+		type: z.literal("removeFilterObjectId"),
+		filterObjectId: z.string(),
+	}),
+])
+type incomingWSMessages = z.infer<typeof incomingWSMessages>
+
 export const wsClients = new Set<WsClient>()
 export class WsClient {
 	constructor(public ws: WebSocket) {
@@ -58,29 +85,18 @@ export class WsClient {
 			ws.pong()
 		})
 		ws.on("message", (data) => {
-			let message:
-				| { type: string }
-				| Array<unknown>
-				| string
-				| number
-				| boolean
-				| null
+			let message: incomingWSMessages
 			try {
-				message = JSON.parse(data.toString("utf8"))
+				const rawMessage = JSON.parse(data.toString("utf8"))
+				const parsed = incomingWSMessages.safeParse(rawMessage)
+				if (parsed.success) message = parsed.data
+				else throw parsed.error
 			} catch {
 				// if an error with parsing occurs, it's their problem
 				return
 			}
-			if (
-				typeof message === "object" &&
-				message !== null &&
-				!(message instanceof Array) &&
-				typeof message.type === "string"
-			) {
-				this.handleMessage(message as { type: string }).catch(
-					console.error
-				)
-			}
+
+			this.handleMessage(message).catch(console.error)
 		})
 		ws.on("close", (code, reason) => {
 			void code, reason
@@ -88,12 +104,9 @@ export class WsClient {
 		})
 	}
 
-	async handleMessage(message: { type: string; [index: string]: unknown }) {
-		if (
-			typeof message.type === "string" &&
-			typeof message.guildId === "string"
-		) {
-			if (message.type === "addGuildId") {
+	async handleMessage(message: incomingWSMessages) {
+		switch (message.type) {
+			case "addGuildId": {
 				const guildConfig = await GuildConfigModel.findOne({
 					guildId: message.guildId,
 				}).then((c) => c?.toObject())
@@ -109,24 +122,50 @@ export class WsClient {
 					const existing = WebhookGuildIds.get(this.ws)
 					if (existing) {
 						// limit to 25 guilds per webhook
-						if (existing.length < 25) {
-							// only add if it's not already in the list
-							if (!existing.includes(message.guildId))
-								existing.push(message.guildId)
+						if (existing.guildIDs.size < 25) {
+							existing.guildIDs.add(message.guildId)
 						}
 						WebhookGuildIds.set(this.ws, existing)
 					} else {
-						WebhookGuildIds.set(this.ws, [message.guildId])
+						WebhookGuildIds.set(this.ws, {
+							guildIDs: new Set([message.guildId]),
+							filterObjectIDs: new Set(),
+						})
 					}
 				}
+				break
 			}
-			if (message.type === "removeGuildId") {
+
+			case "removeGuildId": {
 				const existing = WebhookGuildIds.get(this.ws)
-				if (existing)
-					WebhookGuildIds.set(
-						this.ws,
-						existing.filter((id) => id !== message.guildId)
-					)
+				if (existing) {
+					existing.guildIDs.delete(message.guildId)
+					WebhookGuildIds.set(this.ws, existing)
+				}
+				break
+			}
+
+			case "addFilterObjectId": {
+				const existing = WebhookGuildIds.get(this.ws)
+				if (existing) {
+					existing.filterObjectIDs.add(message.filterObjectId)
+					WebhookGuildIds.set(this.ws, existing)
+				} else {
+					WebhookGuildIds.set(this.ws, {
+						guildIDs: new Set(),
+						filterObjectIDs: new Set([message.filterObjectId]),
+					})
+				}
+				break
+			}
+
+			case "removeFilterObjectId": {
+				const existing = WebhookGuildIds.get(this.ws)
+				if (existing) {
+					existing.filterObjectIDs.delete(message.filterObjectId)
+					WebhookGuildIds.set(this.ws, existing)
+				}
+				break
 			}
 		}
 	}
@@ -135,7 +174,6 @@ export class WsClient {
 setInterval(() => {
 	wsClients.forEach((client) => {
 		// ping the client
-		console.log("ping")
 		client.ws.ping()
 	})
 }, 30 * 1000).unref()
@@ -148,10 +186,10 @@ export function WebsocketMessage(message: string): void {
 	})
 }
 
-export async function reportCreatedMessage(
+export function reportCreatedMessage(
 	report: DocumentType<ReportInfoClass, BeAnObject>,
 	opts: ReportMessageExtraOpts
-): Promise<void> {
+) {
 	if (report === null || report.playername === undefined) return
 
 	// set the sent object's messageType to report
@@ -202,10 +240,10 @@ export async function reportCreatedMessage(
 	)
 }
 
-export async function reportRevokedMessage(
+export function reportRevokedMessage(
 	revocation: Revocation,
 	opts: RevocationMessageExtraOpts
-): Promise<void> {
+) {
 	if (revocation === null || revocation.playername === undefined) return
 
 	// set the sent object's messageType to revocation
@@ -265,9 +303,9 @@ export async function reportRevokedMessage(
 	)
 }
 
-export async function categoryCreatedMessage(
+export function categoryCreatedMessage(
 	category: DocumentType<CategoryClass, BeAnObject>
-): Promise<void> {
+) {
 	if (
 		category === null ||
 		category.name === undefined ||
@@ -305,9 +343,9 @@ export async function categoryCreatedMessage(
 	)
 }
 
-export async function categoryRemovedMessage(
+export function categoryRemovedMessage(
 	category: DocumentType<CategoryClass, BeAnObject>
-): Promise<void> {
+) {
 	if (
 		category === null ||
 		category.name === undefined ||
@@ -344,10 +382,10 @@ export async function categoryRemovedMessage(
 	)
 }
 
-export async function categoryUpdatedMessage(
+export function categoryUpdatedMessage(
 	oldCategory: Category,
 	newCategory: Category
-): Promise<void> {
+) {
 	const categoryEmbed = new MessageEmbed()
 		.setTitle("FAGC - Category Updated")
 		.setColor("#6f4fe3")
@@ -389,10 +427,10 @@ export async function categoryUpdatedMessage(
 		})
 	)
 }
-export async function categoriesMergedMessage(
+export function categoriesMergedMessage(
 	receiving: DocumentType<CategoryClass, BeAnObject>,
 	dissolving: DocumentType<CategoryClass, BeAnObject>
-): Promise<void> {
+) {
 	const categoryEmbed = new MessageEmbed()
 		.setTitle("FAGC - Categories merged")
 		.setColor("#6f4fe3")
@@ -435,10 +473,10 @@ export async function categoriesMergedMessage(
 	)
 }
 
-export async function communityCreatedMessage(
+export function communityCreatedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
 	opts: CommunityCreatedMessageExtraOpts
-): Promise<void> {
+) {
 	// set the sent object's messageType to communityCreated
 	// WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityCreated" })))
 
@@ -469,10 +507,10 @@ export async function communityCreatedMessage(
 		})
 	)
 }
-export async function communityRemovedMessage(
+export function communityRemovedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
 	opts: CommunityCreatedMessageExtraOpts
-): Promise<void> {
+) {
 	// set the sent object's messageType to communityRemoved
 	// WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityRemoved" })))
 
@@ -504,10 +542,10 @@ export async function communityRemovedMessage(
 	)
 }
 
-export async function communityUpdatedMessage(
+export function communityUpdatedMessage(
 	community: DocumentType<CommunityClass, BeAnObject>,
 	opts: CommunityCreatedMessageExtraOpts
-): Promise<void> {
+) {
 	const embed = new MessageEmbed()
 		.setTitle("FAGC - Community Updated")
 		.setColor("#6f4fe3")
@@ -536,11 +574,11 @@ export async function communityUpdatedMessage(
 	)
 }
 
-export async function communitiesMergedMessage(
+export function communitiesMergedMessage(
 	receiving: DocumentType<CommunityClass, BeAnObject>,
 	dissolving: DocumentType<CommunityClass, BeAnObject>,
 	opts: CommunityCreatedMessageExtraOpts
-): Promise<void> {
+) {
 	const embed = new MessageEmbed()
 		.setTitle("FAGC - Communities Updated")
 		.setColor("#6f4fe3")
@@ -588,12 +626,28 @@ export function guildConfigChanged(
 	config: DocumentType<GuildConfigClass, BeAnObject>
 ): void {
 	wsClients.forEach((client) => {
-		const guildIds = WebhookGuildIds.get(client.ws)
-		if (guildIds?.includes(config.guildId)) {
+		const data = WebhookGuildIds.get(client.ws)
+		if (data?.guildIDs.has(config.guildId)) {
 			client.ws.send(
 				JSON.stringify({
 					config: config,
 					messageType: "guildConfigChanged",
+				})
+			)
+		}
+	})
+}
+
+export function filterObjectChanged(
+	filterObject: DocumentType<FilterClass, BeAnObject>
+) {
+	wsClients.forEach((client) => {
+		const data = WebhookGuildIds.get(client.ws)
+		if (data?.filterObjectIDs.has(filterObject.id)) {
+			client.ws.send(
+				JSON.stringify({
+					filterObject: filterObject,
+					messageType: "filterObjectChanged",
 				})
 			)
 		}

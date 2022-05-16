@@ -1,7 +1,7 @@
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const GetAllCommunities: Command = {
+const GetAllCommunities = Command({
 	name: "allcommunities",
 	description: "Gets all communities",
 	aliases: [],
@@ -10,6 +10,7 @@ const GetAllCommunities: Command = {
 	category: "communities",
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message }) => {
 		const communities = await client.fagc.communities.fetchAll({})
 
@@ -29,5 +30,6 @@ const GetAllCommunities: Command = {
 		)
 		createPagedEmbed(fields, embed, message, { maxPageCount: 10 })
 	},
-}
+})
+
 export default GetAllCommunities

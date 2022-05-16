@@ -4,7 +4,7 @@ import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
 import { AuthError } from "fagc-api-wrapper"
 
-const CreateReport: Command = {
+const CreateReport = Command({
 	name: "createreport",
 	description: "Create a report for a player",
 	category: "reports",
@@ -14,8 +14,9 @@ const CreateReport: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["reports"],
 	requiresApikey: true,
-	run: async ({ client, message, args, guildConfig }) => {
-		if (!guildConfig.categoryFilters.length)
+	fetchFilters: true,
+	run: async ({ client, message, args, guildConfig, filters }) => {
+		if (!filters.categoryFilters.length)
 			return message.channel.send(
 				`${client.emotes.warn} No categories are filtered`
 			)
@@ -36,19 +37,17 @@ const CreateReport: Command = {
 		const allCategories = await client.fagc.categories.fetchAll({})
 		const fields: EmbedField[] = allCategories
 			// make sure the category is filtered
-			.filter((category) =>
-				guildConfig.categoryFilters.includes(category.id)
-			)
+			.filter((category) => filters.categoryFilters.includes(category.id))
 			// sort the categories by their index
 			.sort(
 				(a, b) =>
-					guildConfig.categoryFilters.indexOf(a.id) -
-					guildConfig.categoryFilters.indexOf(b.id)
+					filters.categoryFilters.indexOf(a.id) -
+					filters.categoryFilters.indexOf(b.id)
 			)
 			.map((category) => {
 				return {
 					name: `${
-						guildConfig.categoryFilters.indexOf(category.id) + 1
+						filters.categoryFilters.indexOf(category.id) + 1
 					}) ${category.name} (\`${category.id}\`)`,
 					value: category.name,
 					inline: false,
@@ -76,10 +75,10 @@ const CreateReport: Command = {
 			} else {
 				// id is index in category filters
 				const i = Number(categoryId)
-				if (i < 0 || i > guildConfig.categoryFilters.length) {
+				if (i < 0 || i > filters.categoryFilters.length) {
 					return invalidCategoryIds.push(categoryId)
 				}
-				id = guildConfig.categoryFilters[i - 1]
+				id = filters.categoryFilters[i - 1]
 			}
 			// all categories are fetched above so they are cached
 			const category = client.fagc.categories.resolveId(id)
@@ -197,5 +196,6 @@ const CreateReport: Command = {
 			throw e
 		}
 	},
-}
+})
+
 export default CreateReport

@@ -1,5 +1,5 @@
 import { Guild, TextChannel } from "discord.js"
-import { GuildConfig, Report, Revocation } from "fagc-api-types"
+import { FilterObject, GuildConfig, Report, Revocation } from "fagc-api-types"
 import { Connection } from "typeorm"
 import FAGCBan from "../database/FAGCBan"
 import PrivateBan from "../database/PrivateBan"
@@ -64,26 +64,26 @@ export function splitIntoGroups<T>(items: T[], maxCount = 500): T[][] {
 }
 
 /**
- * Generate the list of players to ban and unban based on a guild config change
+ * Generate the list of players to ban and unban based on a filter object change
  */
-export async function guildConfigChangedBanlists({
+export async function filterObjectChangedBanlists({
 	newConfig,
 	database,
-	allGuildConfigs,
+	allFilters,
 	validReports,
 }: {
 	/**
-	 * The new guild config
+	 * The new filter
 	 */
-	newConfig: GuildConfig
+	newConfig: FilterObject
 	/**
 	 * Connection to the database
 	 */
 	database: Connection
 	/**
-	 * All guild configs that are currently loaded by the bot
+	 * All filter objects that correspond to any guild configs
 	 */
-	allGuildConfigs: GuildConfig[]
+	allFilters: FilterObject[]
 	/**
 	 * New reports that are valid for the new config
 	 */
@@ -133,12 +133,16 @@ export async function guildConfigChangedBanlists({
 		})
 	})
 
+	// const filter = allFilters.find(
+	// 	(filter) => filter.id === newConfig.filterObjectId
+	// )!
+
 	// loop over the single map and check if the player is banned in the new config
 	for (const [playername, bans] of bansByPlayer) {
 		const newBans = bans.filter((ban) => {
 			// check if the ban is valid under the new guild filters
 			return (
-				newConfig.trustedCommunities.includes(ban.communityId) &&
+				newConfig.communityFilters.includes(ban.communityId) &&
 				newConfig.categoryFilters.includes(ban.categoryId)
 			)
 		})
@@ -158,12 +162,10 @@ export async function guildConfigChangedBanlists({
 	await database.transaction(async (transaction) => {
 		// compile a list of all filters
 		const allFilteredCommunities = [
-			...new Set(
-				allGuildConfigs.map((config) => config.trustedCommunities)
-			),
+			...new Set(allFilters.map((filter) => filter.communityFilters)),
 		]
 		const allFilteredCategories = [
-			...new Set(allGuildConfigs.map((config) => config.categoryFilters)),
+			...new Set(allFilters.map((filter) => filter.categoryFilters)),
 		]
 
 		// create a temp table to store the filters
@@ -250,19 +252,21 @@ export async function guildConfigChangedBanlists({
 export async function handleReport({
 	report,
 	database,
+	allFilters,
 	allGuildConfigs,
 }: {
 	report: Report
 	database: Connection
+	allFilters: FilterObject[]
 	allGuildConfigs: GuildConfig[]
 }): Promise<false | string[]> {
 	// check if the report is valid according to ANY of the guild configs
-	const isValidReport = allGuildConfigs.reduce<[boolean, GuildConfig[]]>(
+	const isValidReport = allFilters.reduce<[boolean, FilterObject[]]>(
 		(isValid, config) => {
 			// check whether the report is valid under the current guild config
 			if (
 				config.categoryFilters.includes(report.categoryId) &&
-				config.trustedCommunities.includes(report.communityId)
+				config.communityFilters.includes(report.communityId)
 			) {
 				// if the report is valid, add the guild ID to the list of guilds to ban
 				isValid[0] = true
@@ -300,14 +304,14 @@ export async function handleReport({
 	})
 
 	// figure out in which guilds the report is valid, but the player is not banned by other reports
-	const guildsToBan = isValidReport[1].filter((guild) => {
+	const filtersToBan = isValidReport[1].filter((guild) => {
 		const isBannedAlready = existing
 			// ignore the report that is being handled
 			.filter((ban) => ban.id !== report.id)
 			.reduce<boolean>((isNotBanned, report) => {
 				// if the report matches this guild's filters, then the player is banned already
 				if (
-					guild.trustedCommunities.includes(report.communityId) &&
+					guild.communityFilters.includes(report.communityId) &&
 					guild.categoryFilters.includes(report.categoryId)
 				) {
 					// the player is banned already
@@ -323,8 +327,14 @@ export async function handleReport({
 		return !isBannedAlready
 	})
 
+	const guildsToBan = filtersToBan.map(
+		(filter) =>
+			allGuildConfigs.find((guild) => guild.filterObjectId === filter.id)!
+				.guildId
+	)
+
 	// return the guild IDs in which the player should be banned
-	return guildsToBan.map((guild) => guild.guildId)
+	return guildsToBan
 }
 
 /**
@@ -334,23 +344,25 @@ export async function handleReport({
 export async function handleRevocation({
 	revocation,
 	database,
+	allFilters,
 	allGuildConfigs,
 }: {
 	revocation: Revocation
 	database: Connection
+	allFilters: FilterObject[]
 	allGuildConfigs: GuildConfig[]
 }): Promise<false | string[]> {
 	// check if the report is valid according to ANY of the guild configs
-	const isValidRevocation = allGuildConfigs.reduce<[boolean, GuildConfig[]]>(
-		(isValid, config) => {
+	const isValidRevocation = allFilters.reduce<[boolean, FilterObject[]]>(
+		(isValid, filter) => {
 			// check whether the report is valid under the current guild config
 			if (
-				config.categoryFilters.includes(revocation.categoryId) &&
-				config.trustedCommunities.includes(revocation.communityId)
+				filter.categoryFilters.includes(revocation.categoryId) &&
+				filter.communityFilters.includes(revocation.communityId)
 			) {
 				// if the report is valid, add the guild ID to the list of guilds to ban
 				isValid[0] = true
-				isValid[1].push(config)
+				isValid[1].push(filter)
 			}
 
 			return isValid
@@ -380,14 +392,14 @@ export async function handleRevocation({
 	})
 
 	// figure out in which guilds the report is valid, but the player is not banned by other reports
-	const guildsToUnban = isValidRevocation[1].filter((guild) => {
+	const filtersToUnban = isValidRevocation[1].filter((filter) => {
 		// no filtering required here, as the report is already removed from the database
 		const isStillBanned = existing.reduce<boolean>(
 			(isNotBanned, report) => {
 				// if the report matches this guild's filters, then the player is still banned so don't unban them
 				if (
-					guild.trustedCommunities.includes(report.communityId) &&
-					guild.categoryFilters.includes(report.categoryId)
+					filter.communityFilters.includes(report.communityId) &&
+					filter.categoryFilters.includes(report.categoryId)
 				) {
 					// the player is still banned
 					return true
@@ -402,8 +414,14 @@ export async function handleRevocation({
 		return !isStillBanned
 	})
 
+	const guildsToUnban = filtersToUnban.map(
+		(filter) =>
+			allGuildConfigs.find((guild) => guild.filterObjectId === filter.id)!
+				.guildId
+	)
+
 	// return the guild IDs in which the player should be unbanned
-	return guildsToUnban.map((guild) => guild.guildId)
+	return guildsToUnban
 }
 
 export async function handleConnected({

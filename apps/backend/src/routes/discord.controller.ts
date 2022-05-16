@@ -10,6 +10,7 @@ import {
 	createApikey,
 } from "../utils/authentication"
 import CategoryModel from "../database/category"
+import FilterModel from "../database/filterobject"
 import CommunityModel from "../database/community"
 import GuildConfigModel from "../database/guildconfig"
 import WebhookModel from "../database/webhook"
@@ -32,6 +33,7 @@ const BOT_SCOPES = [
 	"applications.commands",
 	"applications.commands.permissions.update",
 ]
+const BOT_PERMS = 156766628928
 
 @Controller({ route: "/discord" })
 export default class DiscordController {
@@ -77,8 +79,11 @@ export default class DiscordController {
 				message: `Guild ${guildId} already has a config`,
 			})
 
+		const filter = await FilterModel.create({})
+
 		const guildConfig = await GuildConfigModel.create({
 			guildId: guildId,
+			filterObjectId: filter.id,
 		})
 
 		return res.status(200).send(guildConfig)
@@ -92,8 +97,6 @@ export default class DiscordController {
 					guildId: z.string(),
 				}),
 				body: z.object({
-					categoryFilters: z.array(z.string()).optional(),
-					trustedCommunities: z.array(z.string()).optional(),
 					roles: z
 						.object({
 							reports: z.string().optional(),
@@ -126,8 +129,6 @@ export default class DiscordController {
 				guildId: string
 			}
 			Body: {
-				categoryFilters?: string[]
-				trustedCommunities?: string[]
 				roles?: {
 					reports?: string
 					webhooks?: string
@@ -140,11 +141,11 @@ export default class DiscordController {
 		}>,
 		res: FastifyReply
 	): Promise<FastifyReply> {
-		const { categoryFilters, trustedCommunities, roles, apikey } = req.body
+		const { roles, apikey } = req.body
 		const { guildId } = req.params
 
 		// check if the community exists
-		const community = req.requestContext.get("community")
+		const { community, authType } = req.requestContext.get("auth")
 		if (!community)
 			return res.status(400).send({
 				errorCode: 400,
@@ -170,7 +171,6 @@ export default class DiscordController {
 				error: "Not Found",
 				message: "Community config was not found",
 			})
-		const authType = req.requestContext.get("authType")
 		// if it's not the master api key and the community IDs are not the same, then return an error
 		if (authType !== "master" && guildConfig.communityId !== community.id)
 			return forbidden(
@@ -180,28 +180,6 @@ export default class DiscordController {
 			)
 
 		// query database if categories and communities actually exist
-		if (categoryFilters) {
-			const categoriesExist = await CategoryModel.find({
-				id: { $in: categoryFilters },
-			})
-			if (categoriesExist.length !== categoryFilters.length)
-				return res.status(400).send({
-					errorCode: 400,
-					error: "Bad Request",
-					message: `categoryFilters must be array of IDs of categories, got ${categoryFilters.toString()}, some of which are not real category IDs`,
-				})
-		}
-		if (trustedCommunities) {
-			const communitiesExist = await CommunityModel.find({
-				id: { $in: trustedCommunities },
-			})
-			if (communitiesExist.length !== trustedCommunities.length)
-				return res.status(400).send({
-					errorCode: 400,
-					error: "Bad Request",
-					message: `trustedCommunities must be array of IDs of communities, got ${trustedCommunities.toString()}, some of which are not real community IDs`,
-				})
-		}
 
 		// check other stuff
 		if (apikey) {
@@ -211,17 +189,37 @@ export default class DiscordController {
 					id: parsed.sub,
 				})
 				if (community) {
+					// remove the filter object that belongs to this guild from the database
+					// also get the filter object data, so that it can be added to the community
+					let communityFilters: string[] = []
+					let categoryFilters: string[] = []
+					if (!guildConfig.apikey) {
+						const previousFilterObject =
+							await FilterModel.findOneAndDelete({
+								id: guildConfig.filterObjectId,
+							})
+						communityFilters =
+							previousFilterObject!.communityFilters
+						categoryFilters = previousFilterObject!.categoryFilters
+					}
+					// get the filter object ID of the community and set it on this guild config
+					const filterObject = await FilterModel.findOneAndUpdate(
+						{
+							id: community.filterObjectId,
+						},
+						{
+							$addToSet: {
+								communityFilters: communityFilters,
+								categoryFilters: categoryFilters,
+							},
+						}
+					)
+					guildConfig.filterObjectId = filterObject!.id
 					guildConfig.apikey = apikey
 					guildConfig.communityId = community.id
 				}
 			}
 		}
-		if (categoryFilters) guildConfig.categoryFilters = categoryFilters
-		// explicitly add ID of community to trusted communities, as you need to trust yourself
-		const communityIds = new Set(trustedCommunities)
-		if (guildConfig.communityId) communityIds.add(guildConfig.communityId)
-		if (trustedCommunities)
-			guildConfig.trustedCommunities = [...communityIds]
 
 		const findRole = (id: string) => {
 			const guildRoles = client.guilds.cache
@@ -247,7 +245,7 @@ export default class DiscordController {
 
 		await guildConfig.save()
 		guildConfigChanged(guildConfig)
-		const includeApikey = req.requestContext.get("authType") === "master"
+		const includeApikey = authType === "master"
 		return res
 			.status(200)
 			.send(guildConfig.toObject({ includeApikey } as any))
@@ -282,7 +280,8 @@ export default class DiscordController {
 		const config = await GuildConfigModel.findOne({ guildId: guildId })
 		if (!config) return res.send(null)
 
-		const includeApikey = req.requestContext.get("authType") === "master"
+		const { authType } = req.requestContext.get("auth")
+		const includeApikey = authType === "master"
 		return res.send(config.toObject({ includeApikey } as any))
 	}
 
@@ -562,6 +561,7 @@ export default class DiscordController {
 		params.append("scope", BOT_SCOPES.join(" "))
 		params.append("response_type", "code")
 		params.append("redirect_uri", `${ENV.BASE_URL}/discord/oauth/callback`)
+		params.append("permisions", BOT_PERMS.toString())
 
 		const url = `https://discord.com/api/oauth2/authorize?${params}`
 
@@ -617,7 +617,7 @@ export default class DiscordController {
 		}
 
 		// we need to create a new instance of the REST class for this user specifically, since we can't set a token for individual requests
-		const userRest = new REST({ version: "v10" }).setToken(
+		const userRest = new REST({ version: "10" }).setToken(
 			exchangedData.access_token
 		)
 		const userData = (await userRest.get(
@@ -631,10 +631,10 @@ export default class DiscordController {
 		// save the user to the database for future use
 		await UserModel.findOneAndUpdate(
 			{
-				discordId: apiUser.id,
+				id: apiUser.id,
 			},
 			{
-				discordId: apiUser.id,
+				id: apiUser.id,
 				tag: `${apiUser.username}#${apiUser.discriminator}`,
 				accessToken: exchangedData.access_token,
 				// get date of expiry of the access token
@@ -648,21 +648,6 @@ export default class DiscordController {
 			}
 		)
 
-		const apikey = await createApikey(apiUser.id, "bot")
-
-		let succeededSendingMessage = false
-		try {
-			const user = await client.users.fetch(apiUser.id)
-			await user.send(
-				`You have successfully logged in to FAGC! Your API key is: ||${apikey}||`
-			)
-			succeededSendingMessage = true
-			// eslint-disable-next-line no-empty
-		} finally {
-		}
-
-		if (succeededSendingMessage) return res.send("Success authenticating")
-		else
-			return res.send(`Success authenticating. Your API key is ${apikey}`)
+		return res.send(`Success authenticating`)
 	}
 }

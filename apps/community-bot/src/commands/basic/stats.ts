@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const stats: Command = {
+const stats = Command({
 	name: "stats",
 	description: "Shows stats about the bot",
 	usage: "",
@@ -9,6 +9,7 @@ const stats: Command = {
 	category: "basic",
 	requiresRoles: false,
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ message, client }) => {
 		const memUsage = process.memoryUsage().heapUsed / 1024 / 1024 // get heap used in MB
 		const uptime = process.uptime() // get uptime in seconds
@@ -30,5 +31,6 @@ const stats: Command = {
 			embeds: [embed],
 		})
 	},
-}
+})
+
 export default stats

@@ -1,7 +1,7 @@
 import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 
-const SetName: Command = {
+const SetName = Command({
 	name: "setname",
 	description: "Set your community's name",
 	aliases: [],
@@ -11,6 +11,7 @@ const SetName: Command = {
 	requiresRoles: true,
 	requiresApikey: true, // community is required, api key is given with community
 	requiredPermissions: ["setConfig"],
+	fetchFilters: false,
 	run: async ({ client, message, args, guildConfig }) => {
 		if (!guildConfig.apikey)
 			return message.channel.send(
@@ -50,5 +51,6 @@ const SetName: Command = {
 			throw e
 		}
 	},
-}
+})
+
 export default SetName

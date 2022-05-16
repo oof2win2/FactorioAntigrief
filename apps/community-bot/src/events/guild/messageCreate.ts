@@ -39,6 +39,16 @@ export default async (client: FAGCBot, message: Message) => {
 			`${client.config.emotes.warn} API key must be set for use of this command`
 		)
 
+	const filters = command.fetchFilters
+		? await client.fagc.communities.getFiltersById({
+				id: guildConfig.filterObjectId,
+		  })
+		: null
+	if (!filters && command.fetchFilters)
+		return message.channel.send(
+			`${client.emotes.error} An error occured whilst fetching your filters`
+		)
+
 	// if command doesnt require guild config (like help, ping etc), it can be ran
 	if (!command.requiresRoles) {
 		try {
@@ -47,6 +57,7 @@ export default async (client: FAGCBot, message: Message) => {
 				args,
 				client,
 				guildConfig,
+				filters,
 			})
 		} catch (e) {
 			message.channel.send("An error occured while running this command!")
@@ -116,6 +127,7 @@ export default async (client: FAGCBot, message: Message) => {
 			args,
 			client,
 			guildConfig,
+			filters,
 		})
 	} catch (e) {
 		message.reply("Something went wrong... Please try again later!")

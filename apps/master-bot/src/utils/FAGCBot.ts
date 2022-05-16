@@ -55,29 +55,5 @@ export default class FAGCBot extends Client {
 				)
 				this.commands.set(commandName, command.default)
 			})
-
-		// refresh command perms after 5s
-		setTimeout(() => this.refreshCommandPerms(), 5000)
-	}
-
-	async refreshCommandPerms() {
-		// TODO: save categories to db when pushing to discord
-		const commands = await this.db.command.findMany()
-		const roleId = ENV.ACCESSROLEID
-		this.guilds.cache.get(ENV.TESTGUILDID)?.commands.permissions.set({
-			fullPermissions: commands.map((command) => {
-				return {
-					id: command.id,
-					permissions: [
-						{
-							id: roleId,
-							type: Constants.ApplicationCommandPermissionTypes
-								.ROLE,
-							permission: true,
-						},
-					],
-				}
-			}),
-		})
 	}
 }

@@ -2,7 +2,7 @@ import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const RemoveCommunity: Command = {
+const RemoveCommunity = Command({
 	name: "removecommunity",
 	description: "Remove communities from your list of filtered communities",
 	aliases: ["removecommunities"],
@@ -15,18 +15,19 @@ const RemoveCommunity: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["setCommunities"],
 	requiresApikey: false,
-	run: async ({ client, message, args, guildConfig }) => {
+	fetchFilters: true,
+	run: async ({ client, message, args, guildConfig, filters }) => {
 		// you need to trust at least one external community for this command to be useful and do anything
 		if (
 			guildConfig.communityId &&
-			guildConfig.trustedCommunities === [guildConfig.communityId]
+			filters.communityFilters === [guildConfig.communityId]
 		)
 			return message.channel.send(
 				"You need to have at least one trusted community"
 			)
 		const allCommunities = await client.fagc.communities.fetchAll({})
 		const currentCommunities = allCommunities.filter((c) =>
-			guildConfig.trustedCommunities.includes(c.id)
+			filters.communityFilters.includes(c.id)
 		)
 
 		// if no args are provided, show the current list of trusted communities and ask for args again
@@ -68,11 +69,17 @@ const RemoveCommunity: Command = {
 			return message.channel.send("Removing communities cancelled")
 
 		// remove the communities from the config
-		const communityIds = new Set([...guildConfig.trustedCommunities])
+		const communityIds = new Set(filters.communityFilters)
 		args.forEach((id) => communityIds.delete(id))
-		guildConfig.trustedCommunities = [...communityIds]
+
 		try {
-			await client.saveGuildConfig(guildConfig)
+			await client.saveFilters(
+				{
+					id: filters.id,
+					communityFilters: [...communityIds],
+				},
+				guildConfig.communityId ?? null
+			)
 			return message.channel.send(
 				"Successfully removed community filters"
 			)
@@ -85,5 +92,6 @@ const RemoveCommunity: Command = {
 			throw e
 		}
 	},
-}
+})
+
 export default RemoveCommunity

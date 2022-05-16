@@ -2,7 +2,7 @@ import { EmbedField } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
-const GetReports: Command = {
+const GetReports = Command({
 	name: "reports",
 	description:
 		"Gets reports of a player from only trusted communities and filtered categories",
@@ -12,10 +12,11 @@ const GetReports: Command = {
 	examples: ["reports Potato"],
 	requiresRoles: false,
 	requiresApikey: false,
-	async run({ client, message, args, guildConfig }) {
-		if (!guildConfig.trustedCommunities)
+	fetchFilters: true,
+	async run({ client, message, args, filters }) {
+		if (!filters.communityFilters)
 			return message.reply("No filtered communities set")
-		if (!guildConfig.categoryFilters)
+		if (!filters.categoryFilters)
 			return message.reply("No filtered categories set")
 
 		const playername = await client.argsOrInput(
@@ -35,8 +36,8 @@ const GetReports: Command = {
 
 		const reports = await client.fagc.reports.list({
 			playername: playername,
-			communityIds: guildConfig.trustedCommunities,
-			categoryIds: guildConfig.categoryFilters,
+			communityIds: filters.communityFilters,
+			categoryIds: filters.categoryFilters,
 		})
 		const fields: EmbedField[] = await Promise.all(
 			reports.map(async (report) => {
@@ -61,5 +62,6 @@ const GetReports: Command = {
 		)
 		createPagedEmbed(fields, embed, message, { maxPageCount: 5 })
 	},
-}
+})
+
 export default GetReports

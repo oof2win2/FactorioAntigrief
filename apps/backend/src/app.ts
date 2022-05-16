@@ -225,13 +225,34 @@ fastify.register(fastifyRateLimitPlugin, {
 // context
 fastify.register(fastifyRequestContextPlugin, {
 	hook: "preValidation",
-	defaultStoreValues: {},
+	defaultStoreValues: {
+		auth: {
+			authType: null,
+			community: null,
+		},
+	},
 })
+
+type Auth =
+	| {
+			authType: null
+			community: null
+	  }
+	| {
+			authType: "master" | "reports"
+			community: DocumentType<CommunityClass, BeAnObject>
+	  }
+
 // typed context
 declare module "fastify-request-context" {
+	// TODO: get the type above working with this
 	interface RequestContextData {
-		community?: DocumentType<CommunityClass, BeAnObject>
-		authType?: "master" | "reports" | "bot"
+		auth: Auth
+	}
+	// ensure that it will contain the right types
+	// see https://github.com/fastify/fastify-request-context/issues/93
+	interface RequestContext {
+		get<K extends keyof RequestContextData>(key: K): RequestContextData[K]
 	}
 }
 

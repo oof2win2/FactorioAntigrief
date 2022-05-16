@@ -50,6 +50,7 @@ export const Community = z
 		contact: z.string(),
 		guildIds: z.array(z.string()),
 		tokenInvalidBefore: DateType,
+		filterObjectId: z.string(),
 	})
 	.merge(Common)
 export type Community = z.infer<typeof Community>
@@ -62,21 +63,40 @@ export const Category = z
 	.merge(Common)
 export type Category = z.infer<typeof Category>
 
-export const GuildConfig = z.object({
+export const SetGuildConfing = z.object({
 	guildId: z.string(),
 	communityId: z.string().optional(),
-	trustedCommunities: z.array(z.string()).default([]),
-	categoryFilters: z.array(z.string()).default([]),
-	roles: z.object({
-		reports: z.string().default(""),
-		webhooks: z.string().default(""),
-		setConfig: z.string().default(""),
-		setCategories: z.string().default(""),
-		setCommunities: z.string().default(""),
-	}),
+	filterObjectId: z.string().optional(),
+	roles: z
+		.object({
+			reports: z.string().default(""),
+			webhooks: z.string().default(""),
+			setConfig: z.string().default(""),
+			setCategories: z.string().default(""),
+			setCommunities: z.string().default(""),
+		})
+		.optional(),
 	apikey: z.string().nullable().optional(),
 })
+export const GuildConfig = SetGuildConfing.required().merge(
+	SetGuildConfing.pick({
+		communityId: true,
+		apikey: true,
+	})
+)
+
+export type SetGuildConfig = z.infer<typeof SetGuildConfing>
 export type GuildConfig = z.infer<typeof GuildConfig>
+
+export const SetFilterObject = z.object({
+	id: z.string(),
+	categoryFilters: z.array(z.string()).optional(),
+	communityFilters: z.array(z.string()).optional(),
+})
+export const FilterObject = SetFilterObject.required()
+
+export type SetFilterObject = z.infer<typeof SetFilterObject>
+export type FilterObject = z.infer<typeof FilterObject>
 
 // this also extends common but the ID is a Discord string
 export const Webhook = z

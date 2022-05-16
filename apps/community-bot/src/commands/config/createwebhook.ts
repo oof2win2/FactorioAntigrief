@@ -1,6 +1,6 @@
 import { Command } from "../../base/Command"
 
-const CreateWebhook: Command = {
+const CreateWebhook = Command({
 	name: "createwebhook",
 	description:
 		"Create a webhook in specified channel to send FAGC notifications to",
@@ -11,6 +11,7 @@ const CreateWebhook: Command = {
 	requiresRoles: true,
 	requiredPermissions: ["webhooks"],
 	requiresApikey: false,
+	fetchFilters: false,
 	run: async ({ client, message }) => {
 		const channel = message.mentions.channels.first() || message.channel
 		if (!channel.isText())
@@ -54,6 +55,6 @@ const CreateWebhook: Command = {
 			)
 		}
 	},
-}
+})
 
 export default CreateWebhook
