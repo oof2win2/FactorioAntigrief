@@ -1,12 +1,21 @@
 # FAGC
 
 This repository is a monorepo that houses the entire FAGC project.
+FAGC is a free and open-source software project that aims to provide a centralized banlist for Factorio server owners and players.
+
+If you would like to view the documentation, you can see markdown [here](./docs/README.md) or the HTML version [here](https://FactorioAntigrief.github.io).
+This is most likely the page you are looking for if you are not attempting to set up your own instance of FAGC but instead use the public one hosted
+by the FAGC team.
 
 ## Installation
 
+This is to install the whole ecosystem from GitHub, which is often **not** what you want to do. Please check out
+[how to connect to the public instance](#-Usage-for-the-end-user) first, as that may be what you need.
+
 Prerequisites:
-- `yarn` installed globally (`npm i -g yarn`)
-- `turbo` repo installed globally (`npm i -g turbo`)
+
+-   `yarn` installed globally (`npm i -g yarn`)
+-   `turbo` repo installed globally (`npm i -g turbo`)
 
 1. Clone the repo by running `git clone https://github.com/FactorioAntigrief/FactorioAntigrief && cd FactorioAntigrief`
 2. Install dependencies with `yarn install`
