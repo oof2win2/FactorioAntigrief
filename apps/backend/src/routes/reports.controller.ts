@@ -81,7 +81,7 @@ export default class ReportController {
 					automated: z.boolean().nullish().default(false),
 					reportedTime: z
 						.string()
-						.default(new Date().toISOString())
+						.default(() => new Date().toISOString())
 						.refine(
 							(input) => validator.isISO8601(input),
 							"reportedTime must be a valid ISO8601 date"
