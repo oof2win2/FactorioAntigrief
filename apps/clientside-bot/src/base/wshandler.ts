@@ -13,6 +13,7 @@ import {
 	handleRevocation,
 	splitIntoGroups,
 } from "../utils/functions"
+import ENV from "../utils/env"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -124,10 +125,7 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 	guildsToBan.map((guildId) => {
 		const command = client.createBanCommand(event.report, guildId)
 		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-		client.rcon.rconCommandGuild(
-			`/sc ${command}; rcon.print(true)`,
-			guildId
-		)
+		client.rcon.rconCommandAll(`/sc ${command}; rcon.print(true)`)
 	})
 }
 
@@ -182,9 +180,8 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 			guildId
 		)
 		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-		client.rcon.rconCommandGuild(
-			`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`,
-			guildId
+		client.rcon.rconCommandAll(
+			`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`
 		)
 	})
 }
@@ -202,10 +199,7 @@ const filterObjectChanged = async ({
 }: HandlerOpts<"filterObjectChanged">) => {
 	// client.filterObjects.set(event.filterObject.id, event.filterObject) // set the new filter object
 	const allFilters = await client.getAllFilters()
-	const filter = allFilters.find((f) => f.id === event.filterObject.id)!
-	const guildConfig = client.guildConfigs.find(
-		(config) => config.filterObjectId === filter.id
-	)!
+	const filter = event.filterObject
 
 	const validReports = await client.fagc.reports.list({
 		categoryIds: filter.categoryFilters,
@@ -227,9 +221,8 @@ const filterObjectChanged = async ({
 			).toString()}")`
 	)
 	for (const playerBanGroup of splitIntoGroups(playerBanStrings)) {
-		await client.rcon.rconCommandGuild(
-			`/sc ${playerBanGroup.join(";")}; rcon.print(true)`,
-			guildConfig.guildId
+		await client.rcon.rconCommandAll(
+			`/sc ${playerBanGroup.join(";")}; rcon.print(true)`
 		)
 	}
 
@@ -238,9 +231,8 @@ const filterObjectChanged = async ({
 		(playername) => `game.unban_player("${playername}")`
 	)
 	for (const playerUnbanGroup of splitIntoGroups(playerUnbanStrings)) {
-		await client.rcon.rconCommandGuild(
-			`/sc ${playerUnbanGroup.join(";")}; rcon.print(true)`,
-			guildConfig.guildId
+		await client.rcon.rconCommandAll(
+			`/sc ${playerUnbanGroup.join(";")}; rcon.print(true)`
 		)
 	}
 }
@@ -250,6 +242,7 @@ const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
 	for (const guildID of client.fagc.websocket.guildIds) {
 		client.fagc.websocket.removeGuildId(guildID)
 	}
+	client.fagc.websocket.removeFilterObjectId(ENV.FILTEROBJECTID)
 }
 // here, we handle stuff since the last connection, such as fetching missed reports, revocations etc.
 const connected = async ({ client }: HandlerOpts<"connected">) => {
@@ -312,23 +305,22 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	for (const [_, guild] of client.guilds.cache) {
 		client.fagc.websocket.addGuildId(guild.id)
 	}
+	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 
 	// execute the commands in batches
-	for (const [guildId, commands] of banCommands.entries()) {
+	for (const [_, commands] of banCommands.entries()) {
 		if (!commands.length) continue
 		for (const commandGroup of splitIntoGroups(commands)) {
-			await client.rcon.rconCommandGuild(
-				`/sc ${commandGroup.join(";")}; rcon.print(true)`,
-				guildId
+			await client.rcon.rconCommandAll(
+				`/sc ${commandGroup.join(";")}; rcon.print(true)`
 			)
 		}
 	}
-	for (const [guildId, commands] of unbanCommands.entries()) {
+	for (const [_, commands] of unbanCommands.entries()) {
 		if (!commands.length) continue
 		for (const commandGroup of splitIntoGroups(commands)) {
-			await client.rcon.rconCommandGuild(
-				`/sc ${commandGroup.join(";")}; rcon.print(true)`,
-				guildId
+			await client.rcon.rconCommandAll(
+				`/sc ${commandGroup.join(";")}; rcon.print(true)`
 			)
 		}
 	}
@@ -336,25 +328,21 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 
 const EventHandlers: Record<
 	keyof WebSocketEvents,
-	(data: any) => Promise<any> | any
+	((data: any) => Promise<any> | any) | null
 > = {
 	communityCreated,
 	communityRemoved,
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	communityUpdated: () => {},
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	communitiesMerged: () => {},
+	communityUpdated: null,
+	communitiesMerged: null,
 	categoryCreated,
 	categoryRemoved,
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	categoryUpdated: () => {},
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	categoriesMerged: () => {},
+	categoryUpdated: null,
+	categoriesMerged: null,
 	report,
 	revocation,
 	guildConfigChanged,
 	filterObjectChanged,
-	disconnected: disconnected,
+	disconnected,
 	connected,
 }
 export default EventHandlers

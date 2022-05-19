@@ -12,6 +12,7 @@ import { z } from "zod"
 import { createConnection, Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
 import InfoChannel from "../database/InfoChannel.js"
+import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -51,6 +52,7 @@ export default class FAGCBot extends Client {
 			apiurl: ENV.APIURL,
 			socketurl: ENV.WSURL,
 			enableWebSocket: true,
+			apikey: ENV.APIKEY,
 		})
 		this.commands = new Collection()
 
@@ -96,18 +98,20 @@ export default class FAGCBot extends Client {
 		})
 
 		// parsing WS notifications
-		Object.keys((eventname: keyof typeof wshandler) => {
-			const handler = wshandler[eventname]
+		Object.entries(wshandler).forEach(([eventname, handler]) => {
 			if (!handler) return
-			this.fagc.websocket.on(eventname, async (event: any) => {
-				await handler({ event, client: this })
-				for (const [_, botConfig] of this.botConfigs) {
-					this.setBotConfig({
-						guildId: botConfig.guildId,
-						lastNotificationProcessed: new Date(),
-					})
+			this.fagc.websocket.on(
+				eventname as keyof WebSocketEvents,
+				async (event: any) => {
+					await handler({ event, client: this })
+					for (const [_, botConfig] of this.botConfigs) {
+						this.setBotConfig({
+							guildId: botConfig.guildId,
+							lastNotificationProcessed: new Date(),
+						})
+					}
 				}
-			})
+			)
 		})
 
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
@@ -130,15 +134,12 @@ export default class FAGCBot extends Client {
 	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
 		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing
-		console.log("y")
 		const record = await this.db.getRepository(BotConfig).findOne({
 			where: {
 				guildId: guildId,
 			},
 		})
-		console.log("y")
 		const created = database.BotConfig.parse(record ?? { guildId: guildId })
-		console.log("y")
 		if (!record) await this.setBotConfig(created)
 		return created
 	}
@@ -200,6 +201,15 @@ export default class FAGCBot extends Client {
 		if (!config) return null
 		this.guildConfigs.set(guildId, config)
 		return config
+	}
+
+	async getAllGuildConfigs(): Promise<GuildConfig[]> {
+		const records = await Promise.all(
+			this.guilds.cache.map((guild) => {
+				return this.getGuildConfig(guild.id)
+			})
+		)
+		return records.filter((record): record is GuildConfig => !!record)
 	}
 
 	createBanCommand(report: Report, guildId: string) {

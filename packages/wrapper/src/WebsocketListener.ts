@@ -84,13 +84,13 @@ declare interface WebSocketHandler {
 class WebSocketHandler extends EventEmitter {
 	private socket: ReconnectingWebSocket
 	private opts: WebSockethandlerOpts
-	private _guildIds: string[]
+	private _guildIds: string[] = []
+	private _filterObjectIds: string[] = []
 	private socketurl: string
 
 	constructor(opts: WebSockethandlerOpts) {
 		super()
 		this.opts = opts
-		this._guildIds = []
 
 		// don't create the websocket if it has not been enabled
 
@@ -267,6 +267,32 @@ class WebSocketHandler extends EventEmitter {
 			JSON.stringify({
 				type: "removeGuildId",
 				guildId: guildId,
+			})
+		)
+	}
+
+	addFilterObjectId(filterObjectId: string): void {
+		if (this._filterObjectIds.includes(filterObjectId)) return // don't do anything if it already is set
+		// save filter object id to list
+		this._filterObjectIds.push(filterObjectId)
+		this.socket?.send(
+			JSON.stringify({
+				type: "addFilterObjectId",
+				filterObjectId: filterObjectId,
+			})
+		)
+	}
+
+	removeFilterObjectId(filterObjectId: string): void {
+		if (!this._filterObjectIds.includes(filterObjectId)) return // don't do anything if it isn't there
+		// remove the id from local list & then send info to backend
+		this._filterObjectIds = this._filterObjectIds.filter(
+			(id) => id !== filterObjectId
+		)
+		this.socket?.send(
+			JSON.stringify({
+				type: "removeFilterObjectId",
+				filterObjectId: filterObjectId,
 			})
 		)
 	}

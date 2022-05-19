@@ -9,23 +9,25 @@ import {
 	Revocation,
 } from "./baseTypes"
 
-export const BaseWebsocketMessage = z.object({
-	messageType: z.enum([
-		"report",
-		"revocation",
-		"categoryCreated",
-		"categoryRemoved",
-		"categoryUpdated",
-		"categoriesMerged",
-		"communityCreated",
-		"communityRemoved",
-		"communityUpdated",
-		"communitiesMerged",
-		"guildConfigChanged",
-		"announcement",
-		"filterObjectChanged",
-	]),
-})
+export const BaseWebsocketMessage = z
+	.object({
+		messageType: z.enum([
+			"report",
+			"revocation",
+			"categoryCreated",
+			"categoryRemoved",
+			"categoryUpdated",
+			"categoriesMerged",
+			"communityCreated",
+			"communityRemoved",
+			"communityUpdated",
+			"communitiesMerged",
+			"guildConfigChanged",
+			"announcement",
+			"filterObjectChanged",
+		]),
+	})
+	.passthrough()
 export type BaseWebsocketMessage = z.infer<typeof BaseWebsocketMessage>
 
 export const ReportMessageExtraOpts = z.object({
@@ -44,7 +46,7 @@ export const ReportCreatedMessage = z
 		messageType: z.literal("report"),
 		embed: z.object({}).passthrough(), // no way to validate this
 		report: Report,
-		extra: ReportMessageExtraOpts,
+		extraData: ReportMessageExtraOpts,
 	})
 	.merge(BaseWebsocketMessage)
 export type ReportCreatedMessage = z.infer<typeof ReportCreatedMessage> & {
@@ -66,7 +68,7 @@ export const RevocationMessage = z
 		messageType: z.literal("revocation"),
 		embed: z.object({}).passthrough(), // no way to validate this
 		revocation: Revocation,
-		extra: RevocationMessageExtraOpts,
+		extraData: RevocationMessageExtraOpts,
 	})
 	.merge(BaseWebsocketMessage)
 export type RevocationMessage = z.infer<typeof RevocationMessage> & {
