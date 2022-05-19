@@ -78,3 +78,25 @@ multiply by the amount of records you have (rows in the sheet or lines in the fi
 minutes that the import will take, but this may vary depending on the amount of categories per each record.
 
 !> Do not try changing the intervals or use the FAGC API in any other way during importing, or you will be hit with a rate limit
+
+## Using the clientside bot
+
+The clientside bot is an integral part of the FAGC ecosystem if you want to automate banning and unbanning players on your server with a minimal setup
+and minimal effort. In this part, we will go through the setup of the bot, and how to use it to automate banning and unbanning players.
+
+1. Clone the FAGC repository and install it on your server, just as if you would [install it selfhosted](installation-selfhosted.md).
+   Below is a command that will do this for you.
+
+```
+git clone https://github.com/FactorioAntigrief/FactorioAntigrief/ && \
+cd FactorioAntigrief && \
+yarn install && \
+yarn build
+```
+
+2. Set up a Discord bot at the [discord developers site](https://discord.com/developers)
+3. Fill in the `.env` and `servers.json` files in the `apps/clientside-bot` directory with your information, according to the example files.
+4. Run the `yarn db:sync` command to create the tables in the database.
+5. Invite your bot to your guild with the `140123621440` permission integer and `bot+applications.commands` scopes.
+6. Run the `yarn bot:addcommands` command to populate commands in your guild.
+7. Run the bot with node, nodemon, pm2, or similar to keep it running.

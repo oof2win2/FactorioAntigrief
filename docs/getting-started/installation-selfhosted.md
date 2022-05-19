@@ -1,4 +1,4 @@
-## Installation of the ecosystem
+# Installation of the ecosystem
 
 This is to install the whole ecosystem from GitHub, which is often **not** what you want to do. Please check out
 [how to connect to the public instance](#-Usage-for-the-end-user) first, as that may be what you need.
@@ -12,3 +12,12 @@ Prerequisites:
 2. Install dependencies with `yarn install`
 3. Run tests and build with `turbo run test build`. This will make sure that every project has TypeScript built and is tested, so you know that it worked when you cloned it
 4. Enjoy! It is reccomended to run the apps with `pm2`, which has it's documentation [here](https://pm2.io)
+
+Below is a command that does this for you in one go
+
+```
+git clone https://github.com/FactorioAntigrief/FactorioAntigrief/ && \
+cd FactorioAntigrief && \
+yarn install && \
+yarn build
+```

@@ -3,6 +3,7 @@
 dist/
 *.code-workspace
 masterapikey.txt
+servers.json
 
 # Logs
 logs
