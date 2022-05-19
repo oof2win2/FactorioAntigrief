@@ -7,7 +7,7 @@ import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import { CategoryClass } from "../database/category"
 import { CommunityClass } from "../database/community"
 import { ReportInfoClass } from "../database/reportinfo"
-import { FilterClass } from "../database/filterobject"
+import FilterModel, { FilterClass } from "../database/filterobject"
 import {
 	Category,
 	CommunityCreatedMessageExtraOpts,
@@ -146,15 +146,28 @@ export class WsClient {
 			}
 
 			case "addFilterObjectId": {
-				const existing = WebhookGuildIds.get(this.ws)
-				if (existing) {
-					existing.filterObjectIDs.add(message.filterObjectId)
-					WebhookGuildIds.set(this.ws, existing)
-				} else {
-					WebhookGuildIds.set(this.ws, {
-						guildIDs: new Set(),
-						filterObjectIDs: new Set([message.filterObjectId]),
-					})
+				const filter = await FilterModel.findOne({
+					id: message.filterObjectId,
+				})
+				if (filter) {
+					this.ws.send(
+						JSON.stringify({
+							messageType: "filterObjectChanged",
+							filterObject: filter.toObject(),
+						})
+					)
+
+					// add the filter object id to the webhook only if the guild id has an existing config
+					const existing = WebhookGuildIds.get(this.ws)
+					if (existing) {
+						existing.filterObjectIDs.add(message.filterObjectId)
+						WebhookGuildIds.set(this.ws, existing)
+					} else {
+						WebhookGuildIds.set(this.ws, {
+							guildIDs: new Set(),
+							filterObjectIDs: new Set([message.filterObjectId]),
+						})
+					}
 				}
 				break
 			}
