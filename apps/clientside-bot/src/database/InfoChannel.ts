@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm"
 
-@Entity()
+@Entity({ name: "InfoChannel" })
 export default class InfoChannel {
 	@PrimaryGeneratedColumn("increment")
 	id!: number

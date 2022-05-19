@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, PrimaryColumn } from "typeorm"
 import ENV from "../utils/env"
 
-@Entity()
+@Entity({ name: "BotConfig" })
 export default class BotConfig {
 	@PrimaryColumn({
 		length: 32, // length of a Discord snowflake

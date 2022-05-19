@@ -5,7 +5,7 @@ import {
 	CreateDateColumn,
 } from "typeorm"
 
-@Entity()
+@Entity({ name: "PrivateBan" })
 export default class PrivateBan {
 	@PrimaryGeneratedColumn("increment")
 	id!: number

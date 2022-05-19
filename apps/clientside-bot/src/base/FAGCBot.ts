@@ -22,10 +22,12 @@ function getServers(): database.FactorioServerType[] {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface BotOptions extends ClientOptions {}
+interface BotOptions extends ClientOptions {
+	database: Connection
+}
 export default class FAGCBot extends Client {
 	fagc: FAGCWrapper
-	db!: Connection
+	db: Connection
 	commands: Collection<string, CommandType>
 	/**
 	 * Info channels, grouped by guild ID
@@ -43,6 +45,7 @@ export default class FAGCBot extends Client {
 
 	constructor(options: BotOptions) {
 		super(options)
+		this.db = options.database
 		this.guildConfigs = new Collection()
 		this.fagc = new FAGCWrapper({
 			apiurl: ENV.APIURL,
@@ -84,12 +87,7 @@ export default class FAGCBot extends Client {
 				}
 			})
 		}
-
-		createConnection().then((db) => {
-			this.db = db
-			loadInfoChannels()
-			this.emit("dbReady")
-		})
+		loadInfoChannels()
 
 		this.getBotConfigs().then((configs) => {
 			configs.forEach((config) => {
@@ -132,12 +130,15 @@ export default class FAGCBot extends Client {
 	async getBotConfig(guildId: string): Promise<database.BotConfigType> {
 		const existing = this.botConfigs.get(guildId)
 		if (existing) return existing
+		console.log("y")
 		const record = await this.db.getRepository(BotConfig).findOne({
 			where: {
 				guildId: guildId,
 			},
 		})
+		console.log("y")
 		const created = database.BotConfig.parse(record ?? { guildId: guildId })
+		console.log("y")
 		if (!record) await this.setBotConfig(created)
 		return created
 	}
@@ -146,16 +147,19 @@ export default class FAGCBot extends Client {
 		config: Partial<database.BotConfigType> &
 			Pick<database.BotConfigType, "guildId">
 	) {
-		const existingConfig = await this.getBotConfig(config.guildId)
-		const toSetConfig = database.BotConfig.parse({
-			...existingConfig,
-			...config,
-		})
-		await this.db
-			.getRepository(BotConfig)
-			.upsert({ ...toSetConfig, guildId: config.guildId }, ["guildId"])
+		if (this.botConfigs.get(config.guildId)) {
+			// has an existing config
+			await this.db
+				.getRepository(BotConfig)
+				.upsert({ ...config, guildId: config.guildId }, ["guildId"])
+		} else {
+			const toSave = database.BotConfig.parse(config)
+			await this.db
+				.getRepository(BotConfig)
+				.save({ ...toSave, guildId: config.guildId })
+		}
 		// should exist as the config already exists
-		const newConfig = await (await this.db)
+		const newConfig = await this.db
 			.getRepository(BotConfig)
 			.findOneOrFail(config.guildId)
 		this.botConfigs.set(config.guildId, newConfig)
