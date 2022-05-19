@@ -124,10 +124,7 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 	guildsToBan.map((guildId) => {
 		const command = client.createBanCommand(event.report, guildId)
 		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-		client.rcon.rconCommandGuild(
-			`/sc ${command}; rcon.print(true)`,
-			guildId
-		)
+		client.rcon.rconCommandAll(`/sc ${command}; rcon.print(true)`)
 	})
 }
 
@@ -182,9 +179,8 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 			guildId
 		)
 		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-		client.rcon.rconCommandGuild(
-			`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`,
-			guildId
+		client.rcon.rconCommandAll(
+			`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`
 		)
 	})
 }
@@ -227,9 +223,8 @@ const filterObjectChanged = async ({
 			).toString()}")`
 	)
 	for (const playerBanGroup of splitIntoGroups(playerBanStrings)) {
-		await client.rcon.rconCommandGuild(
-			`/sc ${playerBanGroup.join(";")}; rcon.print(true)`,
-			guildConfig.guildId
+		await client.rcon.rconCommandAll(
+			`/sc ${playerBanGroup.join(";")}; rcon.print(true)`
 		)
 	}
 
@@ -238,9 +233,8 @@ const filterObjectChanged = async ({
 		(playername) => `game.unban_player("${playername}")`
 	)
 	for (const playerUnbanGroup of splitIntoGroups(playerUnbanStrings)) {
-		await client.rcon.rconCommandGuild(
-			`/sc ${playerUnbanGroup.join(";")}; rcon.print(true)`,
-			guildConfig.guildId
+		await client.rcon.rconCommandAll(
+			`/sc ${playerUnbanGroup.join(";")}; rcon.print(true)`
 		)
 	}
 }
@@ -314,21 +308,19 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	}
 
 	// execute the commands in batches
-	for (const [guildId, commands] of banCommands.entries()) {
+	for (const [_, commands] of banCommands.entries()) {
 		if (!commands.length) continue
 		for (const commandGroup of splitIntoGroups(commands)) {
-			await client.rcon.rconCommandGuild(
-				`/sc ${commandGroup.join(";")}; rcon.print(true)`,
-				guildId
+			await client.rcon.rconCommandAll(
+				`/sc ${commandGroup.join(";")}; rcon.print(true)`
 			)
 		}
 	}
-	for (const [guildId, commands] of unbanCommands.entries()) {
+	for (const [_, commands] of unbanCommands.entries()) {
 		if (!commands.length) continue
 		for (const commandGroup of splitIntoGroups(commands)) {
-			await client.rcon.rconCommandGuild(
-				`/sc ${commandGroup.join(";")}; rcon.print(true)`,
-				guildId
+			await client.rcon.rconCommandAll(
+				`/sc ${commandGroup.join(";")}; rcon.print(true)`
 			)
 		}
 	}
