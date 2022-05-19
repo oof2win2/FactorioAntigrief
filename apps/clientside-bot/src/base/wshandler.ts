@@ -13,6 +13,7 @@ import {
 	handleRevocation,
 	splitIntoGroups,
 } from "../utils/functions"
+import ENV from "../utils/env"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -198,10 +199,7 @@ const filterObjectChanged = async ({
 }: HandlerOpts<"filterObjectChanged">) => {
 	// client.filterObjects.set(event.filterObject.id, event.filterObject) // set the new filter object
 	const allFilters = await client.getAllFilters()
-	const filter = allFilters.find((f) => f.id === event.filterObject.id)!
-	const guildConfig = client.guildConfigs.find(
-		(config) => config.filterObjectId === filter.id
-	)!
+	const filter = event.filterObject
 
 	const validReports = await client.fagc.reports.list({
 		categoryIds: filter.categoryFilters,
@@ -306,6 +304,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	for (const [_, guild] of client.guilds.cache) {
 		client.fagc.websocket.addGuildId(guild.id)
 	}
+	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 
 	// execute the commands in batches
 	for (const [_, commands] of banCommands.entries()) {
@@ -328,25 +327,21 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 
 const EventHandlers: Record<
 	keyof WebSocketEvents,
-	(data: any) => Promise<any> | any
+	((data: any) => Promise<any> | any) | null
 > = {
 	communityCreated,
 	communityRemoved,
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	communityUpdated: () => {},
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	communitiesMerged: () => {},
+	communityUpdated: null,
+	communitiesMerged: null,
 	categoryCreated,
 	categoryRemoved,
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	categoryUpdated: () => {},
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	categoriesMerged: () => {},
+	categoryUpdated: null,
+	categoriesMerged: null,
 	report,
 	revocation,
 	guildConfigChanged,
 	filterObjectChanged,
-	disconnected: disconnected,
+	disconnected,
 	connected,
 }
 export default EventHandlers
