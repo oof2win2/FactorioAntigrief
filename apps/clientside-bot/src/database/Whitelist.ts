@@ -5,7 +5,7 @@ import {
 	CreateDateColumn,
 } from "typeorm"
 
-@Entity()
+@Entity({ name: "Whitelist" })
 export default class Whitelist {
 	@PrimaryGeneratedColumn("increment")
 	id!: number

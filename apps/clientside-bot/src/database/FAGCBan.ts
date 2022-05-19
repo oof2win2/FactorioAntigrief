@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryColumn } from "typeorm"
 
-@Entity()
+@Entity({ name: "FAGCBan" })
 export default class FAGCBan {
 	@PrimaryColumn({
 		type: "text",

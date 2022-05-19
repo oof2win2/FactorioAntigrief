@@ -11,7 +11,7 @@ import { BotConfigType } from "./database.js"
 
 interface CommandParams {
 	client: FAGCBot
-	interaction: CommandInteraction<"present">
+	interaction: CommandInteraction<"cached">
 	botConfig: BotConfigType
 }
 
