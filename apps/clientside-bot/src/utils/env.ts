@@ -25,16 +25,15 @@ const ENV = cleanEnv(
 			desc: "RCON password for all servers",
 			default: "",
 		}),
-		// TODO: put in the reason properly when this is resolved https://forums.factorio.com/viewtopic.php?f=7&t=101053
 		BANCOMMAND: str({
 			desc: "Command to ban with",
 			default:
-				'game.ban_player("{PLAYERNAME}", "{PLAYERNAME} You have been banned for FAGC report {REPORTID} created on {REPORTEDTIME}")',
+				'game.ban_player("{PLAYERNAME}", "You have been banned for FAGC report {REPORTID} created on {REPORTEDTIME}")',
 		}),
 		CUSTOMBANCOMMAND: str({
 			desc: "Custom command to send over RCON",
 			default:
-				'game.ban_player("{PLAYERNAME}", "{PLAYERNAME} You have been banned for FAGC report {REPORTID} created on {REPORTEDTIME}")',
+				'game.ban_player("{PLAYERNAME}", "You have been banned for FAGC report {REPORTID} created on {REPORTEDTIME}")',
 		}),
 		UNBANCOMMAND: str({
 			desc: "Command to unban with",
