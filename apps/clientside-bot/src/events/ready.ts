@@ -1,9 +1,13 @@
 import FAGCBot from "../base/FAGCBot"
+import ENV from "../utils/env"
 
-export default function handler(client: FAGCBot) {
+export default async function handler(client: FAGCBot) {
 	console.log(
 		`${client.user?.tag} is online since ${new Date().toUTCString()}`
 	)
+
+	await client.guilds.fetch()
+	await client.getAllGuildConfigs()
 
 	client.guilds.cache.map(async (guild) => {
 		// send info to backend about guilds, get configs through WS
@@ -17,5 +21,5 @@ export default function handler(client: FAGCBot) {
 				owner: guild.ownerId,
 			})
 	})
-	console.log("finished ready")
+	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 }

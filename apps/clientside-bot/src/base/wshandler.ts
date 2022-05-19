@@ -242,6 +242,7 @@ const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
 	for (const guildID of client.fagc.websocket.guildIds) {
 		client.fagc.websocket.removeGuildId(guildID)
 	}
+	client.fagc.websocket.removeFilterObjectId(ENV.FILTEROBJECTID)
 }
 // here, we handle stuff since the last connection, such as fetching missed reports, revocations etc.
 const connected = async ({ client }: HandlerOpts<"connected">) => {
