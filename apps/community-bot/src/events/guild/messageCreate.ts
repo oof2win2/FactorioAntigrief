@@ -83,11 +83,13 @@ export default async (client: FAGCBot, message: Message) => {
 		const roleid = guildConfig.roles[permname] // get the role which has this perm
 		return !message.member?.roles.cache.has(roleid) // if the user does not have the role, return true to keep it in the array
 	})
-	// if the user doesnt have any of the roles and is not the guild owner, return
+	// if the user doesnt have any of the roles, is not the guild owner, or has the ADMINISTRATOR, return
 	if (
 		doesntHaveRoles.length > 0 &&
-		message.guild.ownerId !== message.author.id
+		message.guild.ownerId !== message.author.id &&
+		!message.member!.permissions.has("ADMINISTRATOR")
 	) {
+		// list of roles that are set on the guild config but have since been deleted
 		const nonexistentRoles: string[] = []
 		const roles = doesntHaveRoles
 			.map((permname) => [permname, guildConfig.roles[permname]]) // get the role ID of the perm
