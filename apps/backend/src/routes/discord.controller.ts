@@ -562,7 +562,7 @@ export default class DiscordController {
 		params.append("scope", BOT_SCOPES.join(" "))
 		params.append("response_type", "code")
 		params.append("redirect_uri", `${ENV.BASE_URL}/discord/oauth/callback`)
-		params.append("permisions", BOT_PERMS.toString())
+		params.append("permissions", BOT_PERMS.toString())
 
 		const url = `https://discord.com/api/oauth2/authorize?${params}`
 
