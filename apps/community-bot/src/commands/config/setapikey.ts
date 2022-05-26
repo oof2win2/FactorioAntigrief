@@ -8,20 +8,37 @@ const Setapikey = Command({
 	examples: ["setapikey potatoKey"],
 	category: "config",
 	requiresRoles: true,
-	requiredPermissions: ["setConfig"],
+	requiredPermissions: [],
 	requiresApikey: false,
 	fetchFilters: false,
-	run: async ({ client, message, args }) => {
+	run: async ({ client, message, args, guildConfig }) => {
+		message.delete()
+		message.channel.send(
+			"Your message has been removed to prevent unauthorized API access"
+		)
+
+		// if the person doesn't have sufficient permissions, throw an error
+		if (
+			!message.member!.permissions.has("ADMINISTRATOR") &&
+			message.guild.ownerId !== message.author.id &&
+			!message.member!.roles.cache.has(guildConfig.roles.setConfig)
+		) {
+			const role = await message.guild.roles.fetch(
+				guildConfig.roles.setConfig
+			)
+			return message.channel.send(
+				`${client.config.emotes.error} You do not have permission to run this command. ` +
+					`You need to either be the guild owner, have the \`ADMINISTRATOR\` permission, or have the \`${
+						role ? role.name : "unknown role"
+					}\` role.`
+			)
+		}
+
 		const key = args.shift()
 		if (!key)
 			return message.channel.send(
 				"You must provide your API key as a parameter"
 			)
-
-		message.delete()
-		message.channel.send(
-			"Your message has been removed to prevent unauthorized API access"
-		)
 
 		const community = await client.fagc.communities
 			.fetchOwnCommunity({
