@@ -2,6 +2,10 @@
 
 This page describes how to connect to an existing FAGC instance in order to benefit from banlist synchronization.
 
+You can however also "connect" to FAGC by only generating a banlist once in a while, which is an
+effective method if you are unable to host the bot yourself or it is too complicated for you to do.
+For that, please view [Generating a banlist only](#Generating-a-banlist-only)
+
 ## Connecting to view bans
 
 1. Invite the bot to your Discord server through [our invite link](https://factoriobans.club/api/discord/oauth/url). The bot will ask for some
@@ -100,3 +104,33 @@ yarn build
 5. Invite your bot to your guild with the `140123621440` permission integer and `bot+applications.commands` scopes.
 6. Run the `yarn bot:addcommands` command to populate commands in your guild.
 7. Run the bot with node, nodemon, pm2, or similar to keep it running.
+
+
+## Generating a banlist only
+
+This part of the guide serves to help if you want to only get your banlist once in a while, taking a
+"snapshot" of the current state of FAGC. This is very useful if you are unable to use the clientside bot.
+
+This method is also highly reccomended when you don't have a dedicated server that runs 24/7, as it
+would not be useful to have the bot run all the time if the Factorio server would not be online.
+
+
+Prerequisites:
+-	Have the FAGC bot in your guild, see the instructions [here](#Connecting-to-view-bans) for how to do so
+
+1. Create a list of categories your community will respect (ban for) by getting them with
+`fagc!allcategories`. You can then view the names of all categories that are in the system with
+their respective IDs. You can also use the `fagc!category {ID}` command to view the description
+of a specific category if you would like more thorough information. You will however need a list of category IDs separated with spaces, such as `7LxjUX Oefczd u6HCU2 d9lY7t 5YdwHW`
+2. Use the `fagc!addcategory` command to add the categories to your filters. You can input multiple
+categories at once, such as `fagc!addcategory 7LxjUX Oefczd u6HCU2 d9lY7t 5YdwHW`. Remember to
+confirm the action.
+3. Create a list of communities that your community will acknowledge (accept reports from) by
+getting them with `fagc!allcommunities`. Create a list of the communities that you wish to
+acknowledge, separated with spaces, such as `5nXzxm DbJ0mH 9KAbEA`
+4. Use the `fagc!addcommunity` command to add the communities to your filters. You can input multiple
+communities at once, such as `fagc!addcommunity 5nXzxm DbJ0mH 9KAbEA`
+5. Use `fagc!genbanlist` to get the bot to generate a banlist for you. This will send a JSON file
+to the channel that the command was executed in, which contains all the bans that match the criteria
+you input with the filters. You can use this JSON file with Factorio and have Factorio use it as
+your banlist.
