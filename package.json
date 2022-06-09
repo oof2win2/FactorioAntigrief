@@ -13,7 +13,8 @@
 	"scripts": {
 		"build": "turbo run build",
 		"lint": "turbo run lint",
-		"test": "turbo run test"
+		"test": "turbo run test",
+		"docs": "docsify serve docs"
 	},
 	"config": {
 		"mongodbMemoryServer": {
@@ -23,6 +24,7 @@
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^5.12.0",
 		"@typescript-eslint/parser": "^5.22.0",
+		"docsify-cli": "^4.4.4",
 		"eslint": "^8.9.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-prettier": "^4.0.0",
