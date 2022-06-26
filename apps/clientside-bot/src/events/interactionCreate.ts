@@ -8,7 +8,7 @@ export default async (client: FAGCBot, [interaction]: [Interaction]) => {
 	const { commandName } = interaction
 	if (!client.commands.has(commandName)) return
 
-	const botConfig = await client.getBotConfig(interaction.guildId)
+	const botConfig = client.botConfig
 
 	// idk but this shouldnt happen
 	if (!interaction.inCachedGuild()) return

@@ -123,7 +123,7 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 
 	// ban in guilds that its supposed to
 	guildsToBan.map((guildId) => {
-		const command = client.createBanCommand(event.report, guildId)
+		const command = client.createBanCommand(event.report)
 		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
 		client.rcon.rconCommandAll(`/sc ${command}; rcon.print(true)`)
 	})
@@ -175,10 +175,7 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 
 	// unban in guilds that its supposed to
 	guildsToUnban.map((guildId) => {
-		const command = client.createUnbanCommand(
-			event.revocation.playername,
-			guildId
-		)
+		const command = client.createUnbanCommand(event.revocation.playername)
 		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
 		client.rcon.rconCommandAll(
 			`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`
@@ -200,6 +197,7 @@ const filterObjectChanged = async ({
 	// client.filterObjects.set(event.filterObject.id, event.filterObject) // set the new filter object
 	const allFilters = await client.getAllFilters()
 	const filter = event.filterObject
+	client.filterObject = filter
 
 	const validReports = await client.fagc.reports.list({
 		categoryIds: filter.categoryFilters,
@@ -246,8 +244,7 @@ const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
 }
 // here, we handle stuff since the last connection, such as fetching missed reports, revocations etc.
 const connected = async ({ client }: HandlerOpts<"connected">) => {
-	const lastReceivedDate =
-		client.botConfigs.first()?.lastNotificationProcessed || new Date()
+	const lastReceivedDate = client.botConfig.lastNotificationProcessed
 	const allFilters = await client.getAllFilters()
 
 	// we fetch the missed reports and revocations and act on each of them
@@ -277,7 +274,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 
 		// ban in guilds that its supposed to
 		guildsToBan.map((guildId) => {
-			const command = client.createBanCommand(report, guildId)
+			const command = client.createBanCommand(report)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
 			banCommands.get(guildId)?.push(command)
 		})
@@ -292,10 +289,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 		})
 		if (!guildsToUnban) return
 		guildsToUnban.map((guildId) => {
-			const command = client.createUnbanCommand(
-				revocation.playername,
-				guildId
-			)
+			const command = client.createUnbanCommand(revocation.playername)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
 			unbanCommands.get(guildId)?.push(command)
 		})

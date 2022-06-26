@@ -12,14 +12,6 @@ export default async function handler(client: FAGCBot) {
 	client.guilds.cache.map(async (guild) => {
 		// send info to backend about guilds, get configs through WS
 		client.fagc.websocket.addGuildId(guild.id)
-
-		// create bot configs if they dont exist
-		const config = await client.getBotConfig(guild.id)
-		if (!config)
-			client.setBotConfig({
-				guildId: guild.id,
-				owner: guild.ownerId,
-			})
 	})
 	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 }
