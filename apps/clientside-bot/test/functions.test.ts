@@ -5,6 +5,7 @@ import {
 	handleRevocation,
 	splitIntoGroups,
 	handleConnected,
+	hasFAGCBans,
 } from "../src/utils/functions"
 import BotConfig from "../src/database/BotConfig"
 import FAGCBan from "../src/database/FAGCBan"
@@ -1025,9 +1026,66 @@ describe("handleConnected", () => {
 	})
 })
 
-/*
-	[ ] add some form of a "active" field to FAGCBan so that it can be known if a ban was handled or not
-		could potentially be useful if a privateban/whitelist is removed
-		bans are however stored in the database if they correspond to at least one guild's filters, so they don't need to be fetched again
-	[ ] add handling for new reports and new revocations
-*/
+describe("hasFAGCBans", () => {
+	let database: Connection
+	let categories: Category[]
+	let categoryIds: string[]
+	let communities: Community[]
+	let communityIds: string[]
+	beforeEach(async () => {
+		database = await createConnection({
+			type: "better-sqlite3",
+			database: ":memory:",
+			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			synchronize: true,
+		})
+		categories = createTimes(createFAGCCategory, 100)
+		categoryIds = categories.map((x) => x.id)
+		communities = createTimes(createFAGCCommunity, 100)
+		communityIds = communities.map((x) => x.id)
+	})
+	afterEach(async () => {
+		await database.close()
+	})
+
+	it("Should state that a player should be banned if there is a valid report against them", async () => {
+		const [guildConfig, filterObject] = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const report = createFAGCReport({
+			categoryIds: filterObject.categoryFilters,
+			communityIds: filterObject.communityFilters,
+		})
+
+		await database.getRepository(FAGCBan).insert(report)
+
+		const result = await hasFAGCBans({
+			playername: report.playername,
+			database,
+			filter: filterObject,
+		})
+
+		// the result should not be false, as that would mean that the player should not be banned
+		expect(result).not.toBe(false)
+		// the result should be equal to the simplified report
+		expect(result).toEqual(reportIntoFAGCBan(report))
+	})
+
+	it("Should state that a player should not be banned if there are no valid reports against them", async () => {
+		const [guildConfig, filterObject] = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+
+		const result = await hasFAGCBans({
+			playername: "some random playername",
+			database,
+			filter: filterObject,
+		})
+
+		// the result should be false, as that means that the player should not be banned
+		expect(result).toBe(false)
+	})
+})

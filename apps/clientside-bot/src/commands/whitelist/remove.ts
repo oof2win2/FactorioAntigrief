@@ -2,6 +2,7 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
 import Whitelist from "../../database/Whitelist.js"
+import { hasFAGCBans } from "../../utils/functions.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -38,6 +39,24 @@ const Setaction: SubCommand = {
 			})
 
 		await client.rcon.rconCommandAll(`/whitelist remove ${playername}`)
+
+		if (client.filterObject) {
+			const hasBan = await hasFAGCBans({
+				playername,
+				filter: client.filterObject,
+				database: client.db,
+			})
+			if (hasBan) {
+				const report = await client.fagc.reports.fetchReport({
+					reportId: hasBan.id,
+				})
+				const bancmd = client.createBanCommand(report!)
+				if (bancmd) await client.rcon.rconCommandAll(bancmd)
+				return interaction.reply({
+					content: `Player ${playername} was unwhitelisted, but was banned due to FAGC report ${hasBan.id}`,
+				})
+			}
+		}
 
 		return interaction.reply({
 			content: `Player ${playername} has been unwhitelisted by ${interaction.user} for ${reason}`,
