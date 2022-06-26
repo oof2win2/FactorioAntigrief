@@ -37,6 +37,8 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
+		await client.rcon.rconCommandAll(`/whitelist remove ${playername}`)
+
 		return interaction.reply({
 			content: `Player ${playername} has been unwhitelisted by ${interaction.user} for ${reason}`,
 		})

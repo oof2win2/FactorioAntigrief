@@ -37,6 +37,8 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
+		await client.rcon.rconCommandAll(`/unban ${playername}`)
+
 		return interaction.reply({
 			content: `Player ${playername} has been unbanned by ${interaction.user} for ${reason}`,
 		})

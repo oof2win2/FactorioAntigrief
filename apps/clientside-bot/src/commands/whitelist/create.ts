@@ -46,6 +46,9 @@ const Setaction: SubCommand = {
 			playername: playername,
 			reason: reason,
 		})
+
+		await client.rcon.rconCommandAll(`/whitelist add ${playername}`)
+
 		return interaction.reply({
 			content: `Player ${playername} is now whitelisted for ${reason}`,
 		})
