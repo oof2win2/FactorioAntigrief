@@ -22,6 +22,7 @@ import {
 	Community,
 	CommunityCreatedMessageExtraOpts,
 	FilterObject,
+	FilterObjectChangedMessage,
 	SetFilterObject,
 } from "fagc-api-types"
 import { z } from "zod"
@@ -330,6 +331,9 @@ export default class CommunityController {
 				new: true,
 			}
 		)
+
+		if (filter) filterObjectChanged(filter)
+
 		return res.send(filter)
 	}
 
@@ -391,7 +395,6 @@ export default class CommunityController {
 				new: true,
 			}
 		)
-		console.log(filter)
 
 		if (!filter) {
 			return res.status(404).send({
@@ -400,6 +403,9 @@ export default class CommunityController {
 				message: "The provided filter was not found",
 			})
 		}
+
+		if (filter) filterObjectChanged(filter)
+
 		return res.send(filter)
 	}
 
