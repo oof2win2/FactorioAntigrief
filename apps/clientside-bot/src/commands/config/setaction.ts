@@ -49,8 +49,7 @@ const Setaction: SubCommand = {
 		if (revocation) config.revocationAction = revocation
 		await client.setBotConfig(config)
 
-		const botConfig = await client.getBotConfig(interaction.guildId)
-		if (!botConfig) return interaction.reply("An error occured")
+		const botConfig = client.botConfig
 		return interaction.reply({
 			content: `Report action is ${botConfig.reportAction}. Revocation action is ${botConfig.revocationAction}`,
 		})

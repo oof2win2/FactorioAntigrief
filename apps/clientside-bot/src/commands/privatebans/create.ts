@@ -2,6 +2,7 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
 import PrivateBan from "../../database/PrivateBan.js"
+import dayjs from "dayjs"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -46,6 +47,13 @@ const Setaction: SubCommand = {
 			playername: playername,
 			reason: reason,
 		})
+
+		await client.rcon.rconCommandAll(
+			`/ban ${playername} ${reason} by ${interaction.user.username}#${
+				interaction.user.discriminator
+			} on ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+		)
+
 		return interaction.reply({
 			content: `Player ${playername} is now banned for ${reason}`,
 		})

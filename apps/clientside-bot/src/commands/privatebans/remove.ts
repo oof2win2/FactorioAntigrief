@@ -2,6 +2,7 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
 import PrivateBan from "../../database/PrivateBan.js"
+import { hasFAGCBans } from "../../utils/functions.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -36,6 +37,26 @@ const Setaction: SubCommand = {
 				content: `Player ${playername} was not banned`,
 				ephemeral: true,
 			})
+
+		await client.rcon.rconCommandAll(`/unban ${playername}`)
+
+		if (client.filterObject) {
+			const hasBan = await hasFAGCBans({
+				playername,
+				filter: client.filterObject,
+				database: client.db,
+			})
+			if (hasBan) {
+				const report = await client.fagc.reports.fetchReport({
+					reportId: hasBan.id,
+				})
+				const bancmd = client.createBanCommand(report!)
+				if (bancmd) await client.rcon.rconCommandAll(bancmd)
+				return interaction.reply({
+					content: `Player ${playername} was unbanned privately, but was banned due to FAGC report ${hasBan.id}`,
+				})
+			}
+		}
 
 		return interaction.reply({
 			content: `Player ${playername} has been unbanned by ${interaction.user} for ${reason}`,
