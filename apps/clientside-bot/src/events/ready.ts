@@ -7,7 +7,6 @@ export default async function handler(client: FAGCBot) {
 	)
 
 	await client.guilds.fetch()
-	await client.getAllGuildConfigs()
 
 	client.guilds.cache.map(async (guild) => {
 		// send info to backend about guilds, get configs through WS

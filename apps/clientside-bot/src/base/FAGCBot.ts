@@ -30,16 +30,17 @@ export default class FAGCBot extends Client {
 	fagc: FAGCWrapper
 	db: Connection
 	commands: Collection<string, CommandType>
+	// private _botConfig so that it can be accessed any time from external code with the botConfig getter
+	private _botConfig: database.BotConfigType | null = null
 	/**
-	 * Info channels, grouped by guild ID
+	 * Info channels
 	 */
-	infochannels: Collection<string, InfoChannel[]>
+	infochannels: InfoChannel[] = []
 	/**
 	 * Guild configs, by guild ID
 	 */
-	guildConfigs: Collection<string, GuildConfig>
-	community?: Community
-	private _botConfig: database.BotConfigType | null = null
+	guildConfig: GuildConfig | null = null
+	community: Community | null = null
 	embedQueue: Collection<string, MessageEmbed[]>
 	servers: Collection<string, database.FactorioServerType[]>
 	filterObject: FilterObject | null = null
@@ -48,7 +49,6 @@ export default class FAGCBot extends Client {
 	constructor(options: BotOptions) {
 		super(options)
 		this.db = options.database
-		this.guildConfigs = new Collection()
 		this.fagc = new FAGCWrapper({
 			apiurl: ENV.APIURL,
 			socketurl: ENV.WSURL,
@@ -57,7 +57,6 @@ export default class FAGCBot extends Client {
 		})
 		this.commands = new Collection()
 
-		this.infochannels = new Collection()
 		this.embedQueue = new Collection()
 		this.servers = new Collection()
 
@@ -74,21 +73,12 @@ export default class FAGCBot extends Client {
 
 		this.rcon = new RCONInterface(this, rawServers)
 
-		const loadInfoChannels = async () => {
-			const channels = await this.db.getRepository(InfoChannel).find()
-			channels.forEach((channel) => {
-				const existing = this.infochannels.get(channel.guildId)
-				if (existing) {
-					this.infochannels.set(channel.guildId, [
-						...existing,
-						channel,
-					])
-				} else {
-					this.infochannels.set(channel.guildId, [channel])
-				}
-			})
-		}
-		loadInfoChannels()
+		// load info channels
+		this.db
+			.getRepository(InfoChannel)
+			.find()
+			.then((channels) => (this.infochannels = channels))
+		// load bot config or create one if it doesnt exist yet
 		this.db
 			.getRepository(BotConfig)
 			.findOne()
@@ -99,7 +89,12 @@ export default class FAGCBot extends Client {
 				})
 			})
 
-		// parsing WS notifications
+		// load fagc guild config
+		this.fagc.communities
+			.fetchGuildConfig({ guildId: ENV.GUILDID })
+			.then((config) => (this.guildConfig = config))
+
+		// register listeners for parsing WS notifications
 		Object.entries(wshandler).forEach(([eventname, handler]) => {
 			if (!handler) return
 			this.fagc.websocket.on(
@@ -127,24 +122,6 @@ export default class FAGCBot extends Client {
 		}
 	}
 
-	async getAllFilters(): Promise<FilterObject[]> {
-		const guilds = this.guildConfigs.map(async (config) => {
-			return (await this.fagc.communities.getFiltersById({
-				id: config.filterObjectId,
-			}))!
-		})
-		return await Promise.all(guilds)
-	}
-
-	async getBotConfig(): Promise<database.BotConfigType> {
-		const existing = this.botConfig
-		if (existing) return existing
-		const record = await this.db.getRepository(BotConfig).findOne()
-		const created = database.BotConfig.parse(record)
-		if (!record) await this.setBotConfig(created)
-		return created
-	}
-
 	async setBotConfig(config: Partial<database.BotConfigType>) {
 		await this.db
 			.getRepository(BotConfig)
@@ -159,8 +136,6 @@ export default class FAGCBot extends Client {
 			if (!embeds.length) continue
 			const channel = this.channels.resolve(channelId)
 			if (!channel || !channel.isNotDMChannel()) continue
-			const infoChannels = this.infochannels.get(channel.guild.id)
-			if (!infoChannels) continue
 			channel.send({ embeds: embeds })
 		}
 	}
@@ -177,26 +152,6 @@ export default class FAGCBot extends Client {
 		} else {
 			this.embedQueue.set(channelId, [embed])
 		}
-	}
-
-	async getGuildConfig(guildId: string): Promise<GuildConfig | null> {
-		const existing = this.guildConfigs.get(guildId)
-		if (existing) return existing
-		const config = await this.fagc.communities.fetchGuildConfig({
-			guildId: guildId,
-		})
-		if (!config) return null
-		this.guildConfigs.set(guildId, config)
-		return config
-	}
-
-	async getAllGuildConfigs(): Promise<GuildConfig[]> {
-		const records = await Promise.all(
-			this.guilds.cache.map((guild) => {
-				return this.getGuildConfig(guild.id)
-			})
-		)
-		return records.filter((record): record is GuildConfig => !!record)
 	}
 
 	createBanCommand(report: Report) {

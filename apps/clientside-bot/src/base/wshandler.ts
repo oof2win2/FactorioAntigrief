@@ -26,12 +26,10 @@ const communityCreated = ({
 }: HandlerOpts<"communityCreated">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((guildChannels) => {
-		guildChannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId)
-			if (!channel || !channel.isNotDMChannel()) return
-			client.addEmbedToQueue(channel.id, embed)
-		})
+	client.infochannels.forEach((infoChannel) => {
+		const channel = client.channels.cache.get(infoChannel.channelId)
+		if (!channel || !channel.isNotDMChannel()) return
+		client.addEmbedToQueue(channel.id, embed)
 	})
 }
 
@@ -41,28 +39,24 @@ const communityRemoved = ({
 }: HandlerOpts<"communityRemoved">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((guildChannels) => {
-		guildChannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId) as
-				| NewsChannel
-				| TextChannel
-				| ThreadChannel
-				| undefined
-			if (!channel) return
-			client.addEmbedToQueue(channel.id, embed)
-		})
+	client.infochannels.forEach((infoChannel) => {
+		const channel = client.channels.cache.get(infoChannel.channelId) as
+			| NewsChannel
+			| TextChannel
+			| ThreadChannel
+			| undefined
+		if (!channel) return
+		client.addEmbedToQueue(channel.id, embed)
 	})
 }
 
 const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((guildChannels) => {
-		guildChannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId)
-			if (!channel || !channel.isNotDMChannel()) return
-			client.addEmbedToQueue(channel.id, embed)
-		})
+	client.infochannels.forEach((infoChannel) => {
+		const channel = client.channels.cache.get(infoChannel.channelId)
+		if (!channel || !channel.isNotDMChannel()) return
+		client.addEmbedToQueue(channel.id, embed)
 	})
 }
 
@@ -72,143 +66,101 @@ const categoryRemoved = async ({
 }: HandlerOpts<"categoryRemoved">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((guildChannels) => {
-		guildChannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId)
-			if (!channel || !channel.isNotDMChannel()) return
-			client.addEmbedToQueue(channel.id, embed)
-		})
+	client.infochannels.forEach((infoChannel) => {
+		const channel = client.channels.cache.get(infoChannel.channelId)
+		if (!channel || !channel.isNotDMChannel()) return
+		client.addEmbedToQueue(channel.id, embed)
 	})
 }
 
 const report = async ({ client, event }: HandlerOpts<"report">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
-	const allFilters = await client.getAllFilters()
+	const filterObject = client.filterObject
 
-	const whereToSend = [...client.guildConfigs.values()].filter(
-		(guildConfig) => {
-			const filter = allFilters.find(
-				(f) => f.id === guildConfig.filterObjectId
-			)!
-			// check whether the revocation is valid under this guild's config
-			return (
-				filter.categoryFilters.includes(event.report.categoryId) &&
-				filter.communityFilters.includes(event.report.communityId)
-			)
-		}
-	)
+	if (!filterObject) return
 
-	// the report is invalid for all guilds, so we don't care about it
-	if (whereToSend.length == 0) return
-
-	// send the embed to each guilds's info channels
-	whereToSend.map((guildConfig) => {
-		const infochannels = client.infochannels.get(guildConfig.guildId)
-		if (!infochannels) return
-		infochannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId)
-			if (!channel || !channel.isNotDMChannel()) return
-			client.addEmbedToQueue(channel.id, embed)
-		})
+	// send the embed to info channels
+	client.infochannels.forEach((c) => {
+		const channel = client.channels.cache.get(c.channelId)
+		if (!channel || !channel.isNotDMChannel()) return
+		client.addEmbedToQueue(channel.id, embed)
 	})
 
-	// get guilds where to ban
+	// figure out whether it should ban or not
 	const guildsToBan = await handleReport({
 		database: client.db,
 		report: event.report,
-		allGuildConfigs: [...client.guildConfigs.values()],
-		allFilters,
+		filter: filterObject,
 	})
 	if (!guildsToBan) return
 
 	// ban in guilds that its supposed to
-	guildsToBan.map((guildId) => {
-		const command = client.createBanCommand(event.report)
-		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-		client.rcon.rconCommandAll(`/sc ${command}; rcon.print(true)`)
-	})
+	const command = client.createBanCommand(event.report)
+	if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+	client.rcon.rconCommandAll(`/sc ${command}; rcon.print(true)`)
 }
 
 const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
-	const allFilters = await client.getAllFilters()
+	const filterObject = client.filterObject
 
-	const whereToSend = [...client.guildConfigs.values()].filter(
-		(guildConfig) => {
-			const filter = allFilters.find(
-				(f) => f.id === guildConfig.filterObjectId
-			)!
-			// check whether the revocation is valid under this guild's config
-			return (
-				filter.categoryFilters.includes(event.revocation.categoryId) &&
-				filter?.communityFilters.includes(event.revocation.communityId)
-			)
-		}
+	if (!filterObject) return
+	// return if the report does not match filters
+	if (
+		!filterObject.categoryFilters.includes(event.revocation.categoryId) ||
+		!filterObject.communityFilters.includes(event.revocation.communityId)
 	)
+		return
 
-	// the report is invalid for all guilds, so we don't care about it
-	if (whereToSend.length == 0) return
-
-	// send the embed to each guilds's info channels
-	whereToSend.map((guildConfig) => {
-		const infochannels = client.infochannels.get(guildConfig.guildId)
-		if (!infochannels) return
-		infochannels.forEach((c) => {
-			const channel = client.channels.cache.get(c.channelId) as
-				| NewsChannel
-				| TextChannel
-				| ThreadChannel
-				| undefined
-			if (!channel) return
-			client.addEmbedToQueue(channel.id, embed)
-		})
+	client.infochannels.forEach((c) => {
+		const channel = client.channels.cache.get(c.channelId) as
+			| NewsChannel
+			| TextChannel
+			| ThreadChannel
+			| undefined
+		if (!channel) return
+		client.addEmbedToQueue(channel.id, embed)
 	})
 
-	// get guilds where to unban
-	const guildsToUnban = await handleRevocation({
+	// check whether it should unban or not
+	const shouldUnban = await handleRevocation({
 		database: client.db,
 		revocation: event.revocation,
-		allGuildConfigs: [...client.guildConfigs.values()],
-		allFilters,
+		filter: filterObject,
 	})
-	if (!guildsToUnban) return
+	if (!shouldUnban) return
 
-	// unban in guilds that its supposed to
-	guildsToUnban.map((guildId) => {
-		const command = client.createUnbanCommand(event.revocation.playername)
-		if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-		client.rcon.rconCommandAll(
-			`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`
-		)
-	})
+	// unban if it should
+	const command = client.createUnbanCommand(event.revocation.playername)
+	if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+	client.rcon.rconCommandAll(
+		`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`
+	)
 }
 
 const guildConfigChanged = async ({
 	client,
 	event,
 }: HandlerOpts<"guildConfigChanged">) => {
-	client.guildConfigs.set(event.config.guildId, event.config) // set the new config
+	client.guildConfig = event.config // set the new config
 }
 
 const filterObjectChanged = async ({
 	client,
 	event,
 }: HandlerOpts<"filterObjectChanged">) => {
-	// client.filterObjects.set(event.filterObject.id, event.filterObject) // set the new filter object
-	const allFilters = await client.getAllFilters()
-	const filter = event.filterObject
-	client.filterObject = filter
+	const filterObject = event.filterObject
+	client.filterObject = filterObject
 
 	const validReports = await client.fagc.reports.list({
-		categoryIds: filter.categoryFilters,
-		communityIds: filter.communityFilters,
+		categoryIds: filterObject.categoryFilters,
+		communityIds: filterObject.communityFilters,
 	})
 
 	const results = await filterObjectChangedBanlists({
 		database: client.db,
-		newConfig: event.filterObject,
+		newFilter: filterObject,
 		validReports: validReports,
-		allFilters,
 	})
 
 	// ban players
@@ -245,7 +197,7 @@ const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
 // here, we handle stuff since the last connection, such as fetching missed reports, revocations etc.
 const connected = async ({ client }: HandlerOpts<"connected">) => {
 	const lastReceivedDate = client.botConfig.lastNotificationProcessed
-	const allFilters = await client.getAllFilters()
+	const filterObject = client.filterObject
 
 	// we fetch the missed reports and revocations and act on each of them
 	const reports = await client.fagc.reports.fetchSince({
@@ -255,44 +207,36 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 		timestamp: lastReceivedDate,
 	})
 
-	const banCommands = new Collection<string, string[]>()
-	const unbanCommands = new Collection<string, string[]>()
+	const banCommands: string[] = []
+	const unbanCommands: string[] = []
 
-	client.guilds.cache.forEach((guild) => {
-		banCommands.set(guild.id, [])
-		unbanCommands.set(guild.id, [])
-	})
+	if (filterObject) {
+		for (const report of reports) {
+			const shouldBan = await handleReport({
+				database: client.db,
+				report: report,
+				filter: filterObject,
+			})
+			if (!shouldBan) return
 
-	for (const report of reports) {
-		const guildsToBan = await handleReport({
-			database: client.db,
-			report: report,
-			allGuildConfigs: [...client.guildConfigs.values()],
-			allFilters,
-		})
-		if (!guildsToBan) return
-
-		// ban in guilds that its supposed to
-		guildsToBan.map((guildId) => {
+			// ban in guilds that its supposed to
 			const command = client.createBanCommand(report)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-			banCommands.get(guildId)?.push(command)
-		})
-	}
+			banCommands.push(command)
+		}
 
-	for (const revocation of revocations) {
-		const guildsToUnban = await handleRevocation({
-			database: client.db,
-			revocation: revocation,
-			allGuildConfigs: [...client.guildConfigs.values()],
-			allFilters,
-		})
-		if (!guildsToUnban) return
-		guildsToUnban.map((guildId) => {
+		for (const revocation of revocations) {
+			const shouldUnban = await handleRevocation({
+				database: client.db,
+				revocation: revocation,
+				filter: filterObject,
+			})
+			if (!shouldUnban) return
+
 			const command = client.createUnbanCommand(revocation.playername)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-			unbanCommands.get(guildId)?.push(command)
-		})
+			unbanCommands.push(command)
+		}
 	}
 
 	// add guild IDs back into the websocket handler after all of this was done
@@ -302,21 +246,16 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 
 	// execute the commands in batches
-	for (const [_, commands] of banCommands.entries()) {
-		if (!commands.length) continue
-		for (const commandGroup of splitIntoGroups(commands)) {
-			await client.rcon.rconCommandAll(
-				`/sc ${commandGroup.join(";")}; rcon.print(true)`
-			)
-		}
+	for (const commandGroup of splitIntoGroups(banCommands)) {
+		await client.rcon.rconCommandAll(
+			`/sc ${commandGroup.join(";")}; rcon.print(true)`
+		)
 	}
-	for (const [_, commands] of unbanCommands.entries()) {
-		if (!commands.length) continue
-		for (const commandGroup of splitIntoGroups(commands)) {
-			await client.rcon.rconCommandAll(
-				`/sc ${commandGroup.join(";")}; rcon.print(true)`
-			)
-		}
+
+	for (const commandGroup of splitIntoGroups(unbanCommands)) {
+		await client.rcon.rconCommandAll(
+			`/sc ${commandGroup.join(";")}; rcon.print(true)`
+		)
 	}
 }
 
