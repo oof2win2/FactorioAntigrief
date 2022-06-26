@@ -15,7 +15,7 @@ export const BotConfig = z.object({
 export type BotConfigType = z.infer<typeof BotConfig>
 
 export const FactorioServer = z.object({
-	discordChannelId: z.string().optional(),
+	discordChannelId: z.string(),
 	servername: z
 		.string()
 		.describe("Name of Factorio server that it can be identified with"),
