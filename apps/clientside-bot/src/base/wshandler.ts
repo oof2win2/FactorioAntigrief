@@ -240,9 +240,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	}
 
 	// add guild IDs back into the websocket handler after all of this was done
-	for (const [_, guild] of client.guilds.cache) {
-		client.fagc.websocket.addGuildId(guild.id)
-	}
+	client.fagc.websocket.addGuildId(ENV.GUILDID)
 	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 
 	// execute the commands in batches
