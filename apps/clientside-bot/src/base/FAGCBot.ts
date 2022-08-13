@@ -125,7 +125,9 @@ export default class FAGCBot extends Client {
 	async setBotConfig(config: Partial<database.BotConfigType>) {
 		await this.db
 			.getRepository(BotConfig)
-			.upsert({ ...config, guildId: config.guildId }, ["guildId"])
+			.upsert({ ...config, guildId: config.guildId ?? ENV.GUILDID }, [
+				"guildId",
+			])
 		const record = await this.db.getRepository(BotConfig).findOneOrFail()
 		this._botConfig = record
 	}
