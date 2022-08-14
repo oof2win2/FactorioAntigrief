@@ -180,10 +180,12 @@ export const createFAGCBan = ({
 	categoryIds,
 	communityIds,
 	playernames,
+	createdAt,
 }: {
 	categoryIds: string[]
 	communityIds: string[]
 	playernames?: string[]
+	createdAt: Date
 }): FAGCBan => {
 	return {
 		id: createFAGCId(),
@@ -193,6 +195,8 @@ export const createFAGCBan = ({
 		).slice(0, 60),
 		categoryId: randomElementFromArray(categoryIds),
 		communityId: randomElementFromArray(communityIds),
+		createdAt,
+		removedAt: null,
 	}
 }
 
@@ -214,6 +218,7 @@ export const createWhitelist = ({
 		adminId: adminIds
 			? randomElementFromArray(adminIds)
 			: createDiscordId(),
+		removedAt: null,
 	}
 }
 
@@ -235,14 +240,33 @@ export const createPrivateban = ({
 		adminId: adminIds
 			? randomElementFromArray(adminIds)
 			: createDiscordId(),
+		removedAt: null,
 	}
 }
 
-export const reportIntoFAGCBan = (report: Report): FAGCBan => {
+export const reportIntoFAGCBan = (
+	report: Report
+): Omit<FAGCBan, "createdAt"> => {
 	return {
 		id: report.id,
 		playername: report.playername,
 		categoryId: report.categoryId,
 		communityId: report.communityId,
+		removedAt: null,
+	}
+}
+
+export const simplifyDatabaseFAGCBan = <T>(
+	fagcBan: FAGCBan | T
+): T | Omit<FAGCBan, "createdAt"> => {
+	if (!(fagcBan instanceof FAGCBan)) {
+		return fagcBan
+	}
+	return {
+		id: fagcBan.id,
+		playername: fagcBan.playername,
+		categoryId: fagcBan.categoryId,
+		communityId: fagcBan.communityId,
+		removedAt: fagcBan.removedAt,
 	}
 }

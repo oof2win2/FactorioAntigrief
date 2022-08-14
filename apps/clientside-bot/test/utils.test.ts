@@ -1,4 +1,3 @@
-import faker from "faker"
 import { createFAGCId, createTimes, randomElementFromArray } from "./utils"
 
 describe("createTimes", () => {
@@ -50,8 +49,8 @@ describe("randomElementFromArray", () => {
 	})
 })
 
-describe("randomElementsFromArray", () => {
-	it("Should multiple random elements from the provided array", () => {
-		// TODO: get an array of numbers and test with that
-	})
-})
+// describe("randomElementsFromArray", () => {
+// 	it("Should multiple random elements from the provided array", () => {
+// 		// TODO: get an array of numbers and test with that
+// 	})
+// })

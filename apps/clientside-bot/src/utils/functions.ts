@@ -198,7 +198,7 @@ export async function filterObjectChangedBanlists({
 	// insert valid reports into the database AFTER the above transaction
 	// since all these reports are valid, it doesn't make sense for the transaction to check them
 	// and remove them from the database
-	for (const splitReports of splitIntoGroups(validReports, 5000)) {
+	for (const splitReports of splitIntoGroups(validReports, 750)) {
 		await database
 			.getRepository(FAGCBan)
 			.createQueryBuilder()
