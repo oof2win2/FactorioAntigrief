@@ -2,6 +2,11 @@ import { FactorioServerType } from "./database"
 import { Rcon } from "rcon-client"
 import FAGCBot from "./FAGCBot.js"
 import ENV from "../utils/env.js"
+import ServerOnline from "../database/ServerOnline"
+import dayjs from "dayjs"
+import relativeTime from "dayjs/plugin/relativeTime"
+
+dayjs.extend(relativeTime)
 
 interface RCONResponse {
 	response: string
@@ -13,10 +18,15 @@ interface Connection {
 	server: FactorioServerType
 }
 
-export default class RCONInterface {
+export default class RconInterface {
 	private servers: FactorioServerType[]
 	private client: FAGCBot
 	private connections: Connection[]
+	/**
+	 * Map of server name to timeout for the check if the server is online.
+	 * Can be used to cancel the check if a command is used etc.
+	 */
+	private checkIntervals: Map<string, NodeJS.Timeout> = new Map()
 	constructor(client: FAGCBot, servers: FactorioServerType[]) {
 		this.client = client
 		this.servers = servers
@@ -24,61 +34,156 @@ export default class RCONInterface {
 
 		this.servers.map((_, i) => this.initServer(i))
 	}
-	private initServer(index: number) {
-		const server = this.servers[index]
-		const connection = new Rcon({
+
+	private async initServer(serverIndex: number) {
+		const server = this.servers[serverIndex]
+		if (!server) return
+		const rcon = new Rcon({
 			host: "127.0.0.1",
 			port: server.rconPort,
 			password: server.rconPassword,
 		})
-		connection.connect()
-		this.connections.push({
-			server: server,
-			rcon: connection,
-		})
-		// reconnection utility
-		connection.on("end", () => {
-			let i = 0
-			const interval = setInterval(async () => {
-				try {
-					await connection.connect()
-					clearInterval(interval)
-					const channel = this.client.channels.resolve(
-						ENV.ERRORCHANNELID
-					)
-					if (!channel || !channel.isNotDMChannel()) return
-					channel.send(
-						`Server <#${server.discordChannelId}> has reconnected to RCON`
-					)
-				} catch {
-					i++
-					if (i === 5) {
-						const channel = this.client.channels.resolve(
-							ENV.ERRORCHANNELID
-						)
-						if (!channel || !channel.isNotDMChannel()) return
-						channel.send(
-							`Server <#${server.discordChannelId}> is having RCON issues`
-						)
-					}
-					if (i === 60) {
-						// 60 attempts = 15 minutes since 1 every 15s, 15*60 = 900s
-						// most likely failed
-						clearInterval(interval)
-						const channel = this.client.channels.resolve(
-							ENV.ERRORCHANNELID
-						)
-						if (!channel || !channel.isNotDMChannel()) return
-						channel.send(
-							`Server <#${server.discordChannelId}> has been unable to connect to RCON`
-						)
-					}
-				}
-			}, 15 * 1000)
-		})
+		try {
+			await rcon.connect()
+			this.markAsOnline(server)
+			this.connections.push({
+				rcon: rcon,
+				server: server,
+			})
+
+			// reconnection mechanism
+			rcon.on("end", () => {
+				// firstly, mark the server as offline in the database so it can get appropriate FAGC commands
+				// once it reconnects
+				this.markAsOffline(server)
+				this.reconnectRcon(rcon, server) // start the reconnection mechanism
+				const channel = this.client.channels.cache.get(
+					ENV.ERRORCHANNELID
+				)
+				if (!channel || !channel.isNotDMChannel()) return
+				channel.send(
+					`Server <#${
+						server.discordChannelId
+					}> has dropped connection to RCON at <t:${Math.floor(
+						Date.now() / 1000
+					)}>`
+				)
+			})
+		} catch (error) {
+			// mechanism to reconnect to RCON after some time
+
+			// firstly, mark the server as offline in the database so it can get appropriate FAGC commands
+			// once it reconnects
+			await this.markAsOffline(server)
+			this.reconnectRcon(rcon, server) // start the reconnection mechanism
+			const channel = this.client.channels.cache.get(ENV.ERRORCHANNELID)
+			if (!channel || !channel.isNotDMChannel()) return
+			channel.send(
+				`Server <#${
+					server.discordChannelId
+				}> has failed to initially connect to RCON at <t:${Math.floor(
+					Date.now() / 1000
+				)}>`
+			)
+		}
 	}
+
 	/**
-	 *
+	 * RCON server reconnection mechanism
+	 */
+	private reconnectRcon(rcon: Rcon, server: FactorioServerType) {
+		const times = [
+			30 * 1000,
+			60 * 1000,
+			5 * 60 * 1000,
+			10 * 60 * 1000,
+			15 * 60 * 1000,
+			30 * 60 * 1000,
+			60 * 60 * 1000,
+			3 * 60 * 60 * 1000,
+			6 * 60 * 60 * 1000,
+			12 * 60 * 60 * 1000,
+			24 * 60 * 60 * 1000,
+		]
+		let timeIndex = -1
+		const startedAt = Date.now()
+		const checkOnline = async () => {
+			try {
+				await rcon.connect()
+				this.markAsOnline(server)
+				// if the connection was successful, it would not error
+				// if it failed, it would throw and be caught in the catch block
+				const channel = this.client.channels.cache.get(
+					ENV.ERRORCHANNELID
+				)
+				if (!channel || !channel.isNotDMChannel()) return
+				channel.send(
+					`Server <#${
+						server.discordChannelId
+					}> has reconnected to RCON at <t:${Math.floor(
+						Date.now() / 1000
+					)}>, after ${dayjs(startedAt).fromNow(true)}`
+				)
+				return
+			} catch {
+				// make sure that the time between the checks is not exceeding 1 day at most
+				timeIndex = Math.min(timeIndex + 1, times.length - 1)
+				const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
+				setTimeout(checkOnline, times[timeIndex]) // set the interval for the next checks
+				if (!channel || !channel.isNotDMChannel()) return
+				// dayjs is used to get the relative time since the start of the reconnection attempts
+				channel.send(
+					`Server <#${
+						server.discordChannelId
+					}> has been unable to connect to RCON for the past ${dayjs(
+						startedAt
+					).fromNow(true)}`
+				)
+			}
+		}
+		setTimeout(checkOnline, 0)
+	}
+
+	/**
+	 * Mark a server as online in the database
+	 */
+	private async markAsOnline(server: FactorioServerType) {
+		await this.client.db
+			.getRepository(ServerOnline)
+			.createQueryBuilder()
+			.insert()
+			.values([
+				{
+					name: server.servername,
+					offlineSince: new Date(),
+					isOnline: true,
+				},
+			])
+			.orUpdate(["offlineSince", "isOnline"])
+			.execute()
+	}
+
+	/**
+	 * Mark a server as offline in the database
+	 */
+	private async markAsOffline(server: FactorioServerType) {
+		await this.client.db
+			.getRepository(ServerOnline)
+			.createQueryBuilder()
+			.insert()
+			.values([
+				{
+					name: server.servername,
+					offlineSince: new Date(),
+					isOnline: false,
+				},
+			])
+			.orUpdate(["offlineSince", "isOnline"])
+			.execute()
+	}
+
+	/**
+	 * Send a RCON command to a specific server
 	 * @param command RCON command, automatically is prefixed with / if it is not provided
 	 * @param serverIdentifier Server name or Discord channel ID to find server with
 	 */
@@ -102,20 +207,9 @@ export default class RCONInterface {
 		}
 	}
 
-	async rconCommandGuild(command: string, guildId: string) {
-		command = command.startsWith("/") ? command : `/${command}`
-		console.log(command)
-		const servers = this.servers
-			.map((s) => (s.discordGuildId === guildId ? s : undefined))
-			.filter((r) => r !== undefined) as FactorioServerType[]
-		const responses = await Promise.all(
-			servers.map((server) =>
-				this.rconCommand(command, server.servername)
-			)
-		)
-		return responses
-	}
-
+	/**
+	 * Send a command to all servers
+	 */
 	async rconCommandAll(command: string) {
 		command = command.startsWith("/") ? command : `/${command}`
 		const responses = await Promise.all(

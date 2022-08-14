@@ -10,6 +10,13 @@ export default class ServerOnline {
 
 	@Column({
 		type: "datetime",
+		default: () => "CURRENT_TIMESTAMP",
 	})
-	lastOnline!: Date
+	offlineSince!: Date
+
+	@Column({
+		type: "boolean",
+		default: false,
+	})
+	isOnline!: boolean
 }

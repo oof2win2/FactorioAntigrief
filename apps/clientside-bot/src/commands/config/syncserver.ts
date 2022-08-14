@@ -25,12 +25,9 @@ const Syncserver: SubCommand = {
 			true
 		)
 
-		if (!client.servers.has(serverchannel.guildId))
-			client.servers.set(interaction.guildId, [])
-
-		const server = client.servers
-			.get(interaction.guildId)!
-			.find((server) => server.discordChannelId === serverchannel.id)
+		const server = client.servers.find(
+			(server) => server.discordChannelId === serverchannel.id
+		)
 		if (!server)
 			return interaction.reply({
 				content: "The provided channel is not paired to any server",

@@ -125,6 +125,8 @@ export async function filterObjectChangedBanlists({
 			playername: report.playername,
 			communityId: report.communityId,
 			categoryId: report.categoryId,
+			removedAt: null,
+			createdAt: report.reportCreatedAt,
 		})
 	})
 
