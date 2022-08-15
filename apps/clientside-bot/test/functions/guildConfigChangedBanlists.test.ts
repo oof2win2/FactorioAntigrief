@@ -1,8 +1,5 @@
 import { createConnection, Connection } from "typeorm"
-import {
-	filterObjectChangedBanlists,
-	splitIntoGroups,
-} from "../../src/utils/functions"
+import filterObjectChangedBanlists from "../../src/utils/functions/filterObjectChangedBanlists"
 import BotConfig from "../../src/database/BotConfig"
 import FAGCBan from "../../src/database/FAGCBan"
 import InfoChannel from "../../src/database/InfoChannel"
@@ -13,9 +10,7 @@ import {
 	createFAGCCommunity,
 	createFAGCReport,
 	createGuildConfig,
-	createPrivateban,
 	createTimes,
-	createWhitelist,
 	randomElementsFromArray,
 } from "../utils"
 import { Category, Community, Report } from "fagc-api-types"

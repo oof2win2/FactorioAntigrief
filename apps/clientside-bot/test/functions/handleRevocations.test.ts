@@ -1,5 +1,5 @@
 import { createConnection, Connection } from "typeorm"
-import { handleRevocation } from "../../src/utils/functions"
+import handleRevocation from "../../src/utils/functions/handleRevocation"
 import BotConfig from "../../src/database/BotConfig"
 import FAGCBan from "../../src/database/FAGCBan"
 import InfoChannel from "../../src/database/InfoChannel"

@@ -1,5 +1,5 @@
 import { createConnection, Connection } from "typeorm"
-import { handleReport } from "../../src/utils/functions"
+import handleReport from "../../src/utils/functions/handleReport"
 import BotConfig from "../../src/database/BotConfig"
 import FAGCBan from "../../src/database/FAGCBan"
 import InfoChannel from "../../src/database/InfoChannel"

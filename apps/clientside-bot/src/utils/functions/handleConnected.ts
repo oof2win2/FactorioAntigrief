@@ -5,7 +5,7 @@ import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
 import splitIntoGroups from "./splitIntoGroups"
 
-export async function handleConnected({
+export default async function handleConnected({
 	reports,
 	revocations,
 	database,

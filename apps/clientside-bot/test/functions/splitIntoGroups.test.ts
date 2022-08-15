@@ -1,4 +1,4 @@
-import { splitIntoGroups } from "../../src/utils/functions"
+import splitIntoGroups from "../../src/utils/functions/splitIntoGroups"
 
 describe("splitIntoGroups", () => {
 	it("Should split a large array two smaller ones of an equal size", () => {
