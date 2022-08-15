@@ -22,6 +22,7 @@ describe("hasFAGCBans", () => {
 	let categoryIds: string[]
 	let communities: Community[]
 	let communityIds: string[]
+
 	beforeEach(async () => {
 		database = await createConnection({
 			type: "better-sqlite3",
@@ -34,6 +35,7 @@ describe("hasFAGCBans", () => {
 		communities = createTimes(createFAGCCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
+
 	afterEach(async () => {
 		await database.close()
 	})

@@ -35,9 +35,11 @@ describe("guildConfigChangedBanlists", () => {
 		communities = createTimes(createFAGCCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
+
 	afterEach(async () => {
 		await database.close()
 	})
+
 	it("Should create bans for reports that have just been included in the filters", async () => {
 		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds: [],
@@ -81,6 +83,7 @@ describe("guildConfigChangedBanlists", () => {
 		expect(fetchedFAGCBans.length).toBe(reports.length)
 		expect(fagcBanIds).toEqual(reportIds)
 	})
+
 	it("Should unban everyone if all filters are removed", async () => {
 		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds,
@@ -123,6 +126,7 @@ describe("guildConfigChangedBanlists", () => {
 		// there should be no records of FAGC bans in the database, as they were all supposed to be removed
 		expect(fetchedFAGCBans.length).toBe(0)
 	})
+
 	it("Should not re-ban players that are already banned", async () => {
 		// this can occur if some filters are added to a config
 		// the goal here is to check that the return of the value banlistResults.toBan totals to the amount of reports that have already
@@ -200,6 +204,7 @@ describe("guildConfigChangedBanlists", () => {
 		expect(results.toBan.length).toBe(expectedBans.size)
 		expect(results.toBan).toEqual([...expectedBans])
 	})
+
 	it("Should work with a combination of reports and revocations", async () => {
 		// this would occur most likely only if the filters are managed directly with the api, rather than the discord bot
 		const [guildConfig, oldFilterObject] = createGuildConfig({

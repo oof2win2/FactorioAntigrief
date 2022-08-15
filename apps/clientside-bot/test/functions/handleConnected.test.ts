@@ -23,6 +23,7 @@ describe("handleConnected", () => {
 	let categoryIds: string[]
 	let communities: Community[]
 	let communityIds: string[]
+
 	beforeEach(async () => {
 		database = await createConnection({
 			type: "better-sqlite3",
@@ -35,6 +36,7 @@ describe("handleConnected", () => {
 		communities = createTimes(createFAGCCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
+
 	afterEach(async () => {
 		await database.close()
 	})
