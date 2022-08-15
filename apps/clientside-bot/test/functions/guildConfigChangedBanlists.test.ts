@@ -12,6 +12,8 @@ import {
 	createGuildConfig,
 	createTimes,
 	randomElementsFromArray,
+	createPrivateban,
+	createWhitelist,
 } from "../utils"
 import { Category, Community, Report } from "fagc-api-types"
 import faker from "faker"
@@ -312,150 +314,148 @@ describe("guildConfigChangedBanlists", () => {
 		expect(results.toBan).toEqual([...playersToBan])
 	})
 
-	// it("Should ensure that people who are whitelisted or blacklisted are not banned", async () => {
-	// 	// this test ensures that people are not banned uselessly if they are whitelisted or blacklisted
-	// 	const [guildConfig, oldFilterObject] = createGuildConfig({
-	// 		categoryIds,
-	// 		communityIds,
-	// 	})
-	// 	const newFilterObject: typeof oldFilterObject = {
-	// 		...oldFilterObject,
-	// 		categoryFilters: [
-	// 			...randomElementsFromArray(oldFilterObject.categoryFilters),
-	// 			...randomElementsFromArray(
-	// 				categoryIds.filter(
-	// 					(id) => !oldFilterObject.categoryFilters.includes(id)
-	// 				)
-	// 			),
-	// 		],
-	// 		communityFilters: [
-	// 			...randomElementsFromArray(oldFilterObject.communityFilters),
-	// 			...randomElementsFromArray(
-	// 				communityIds.filter(
-	// 					(id) => !oldFilterObject.communityFilters.includes(id)
-	// 				)
-	// 			),
-	// 		],
-	// 	}
+	it("Should ensure that people who are whitelisted or blacklisted are not banned", async () => {
+		// this test ensures that people are not banned uselessly if they are whitelisted or blacklisted
+		const [guildConfig, oldFilterObject] = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+		const newFilterObject: typeof oldFilterObject = {
+			...oldFilterObject,
+			categoryFilters: [
+				...randomElementsFromArray(oldFilterObject.categoryFilters),
+				...randomElementsFromArray(
+					categoryIds.filter(
+						(id) => !oldFilterObject.categoryFilters.includes(id)
+					)
+				),
+			],
+			communityFilters: [
+				...randomElementsFromArray(oldFilterObject.communityFilters),
+				...randomElementsFromArray(
+					communityIds.filter(
+						(id) => !oldFilterObject.communityFilters.includes(id)
+					)
+				),
+			],
+		}
 
-	// 	const playernames = createTimes(faker.internet.userName, 5000)
+		const playernames = createTimes(faker.internet.userName, 5000)
 
-	// 	const oldReports = createTimes(
-	// 		createFAGCReport,
-	// 		[
-	// 			{
-	// 				categoryIds: oldFilterObject.categoryFilters,
-	// 				communityIds: oldFilterObject.communityFilters,
-	// 				playernames: playernames,
-	// 			},
-	// 		],
-	// 		5000
-	// 	)
-	// 	const newReports = createTimes(
-	// 		createFAGCReport,
-	// 		[
-	// 			{
-	// 				categoryIds: newFilterObject.categoryFilters,
-	// 				communityIds: newFilterObject.communityFilters,
-	// 				playernames: playernames,
-	// 			},
-	// 		],
-	// 		5000
-	// 	)
+		const oldReports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: oldFilterObject.categoryFilters,
+					communityIds: oldFilterObject.communityFilters,
+					playernames: playernames,
+				},
+			],
+			5000
+		)
+		const newReports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: newFilterObject.categoryFilters,
+					communityIds: newFilterObject.communityFilters,
+					playernames: playernames,
+				},
+			],
+			5000
+		)
 
-	// 	const whitelists: Omit<Whitelist, "id">[] = createTimes(
-	// 		createWhitelist,
-	// 		[
-	// 			{
-	// 				playernames: playernames,
-	// 			},
-	// 		],
-	// 		5000
-	// 	).map((i) => {
-	// 		delete (i as any).id
-	// 		return i
-	// 	})
-	// 	const privateBans: Omit<PrivateBan, "id">[] = createTimes(
-	// 		createPrivateban,
-	// 		[
-	// 			{
-	// 				playernames: playernames,
-	// 			},
-	// 		],
-	// 		5000
-	// 	).map((i) => {
-	// 		delete (i as any).id
-	// 		return i
-	// 	})
+		const whitelists: Omit<Whitelist, "id">[] = createTimes(
+			createWhitelist,
+			[
+				{
+					playernames: playernames,
+				},
+			],
+			5000
+		).map((i) => {
+			delete (i as any).id
+			return i
+		})
+		const privateBans: Omit<PrivateBan, "id">[] = createTimes(
+			createPrivateban,
+			[
+				{
+					playernames: playernames,
+				},
+			],
+			5000
+		).map((i) => {
+			delete (i as any).id
+			return i
+		})
 
-	// 	await database.getRepository(FAGCBan).insert(oldReports)
-	// 	for (const whitelist of splitIntoGroups(whitelists, 500)) {
-	// 		await database.getRepository(Whitelist).insert(whitelist)
-	// 	}
-	// 	for (const privateban of splitIntoGroups(privateBans, 500)) {
-	// 		await database.getRepository(PrivateBan).insert(privateban)
-	// 	}
+		await database.getRepository(FAGCBan).save(oldReports, { chunk: 750 })
+		await database.getRepository(Whitelist).save(whitelists, { chunk: 750 })
+		await database
+			.getRepository(PrivateBan)
+			.save(privateBans, { chunk: 750 })
 
-	// 	// get all the reports into a single map
-	// 	const playersToBan = new Set<string>()
-	// 	const playersToUnban = new Set<string>()
-	// 	const [invalidOldReports, validOldReports] = oldReports.reduce<
-	// 		[Report[], Report[]]
-	// 	>(
-	// 		(all, report) => {
-	// 			// if a report is valid under new filters, it falls into the second array
-	// 			if (
-	// 				newFilterObject.categoryFilters.includes(
-	// 					report.categoryId
-	// 				) &&
-	// 				newFilterObject.communityFilters.includes(
-	// 					report.communityId
-	// 				)
-	// 			) {
-	// 				all[1].push(report)
-	// 			} else {
-	// 				all[0].push(report)
-	// 			}
-	// 			return all
-	// 		},
-	// 		[[], []]
-	// 	)
-	// 	invalidOldReports.forEach((report) =>
-	// 		playersToUnban.add(report.playername)
-	// 	)
-	// 	newReports.forEach((report) => {
-	// 		playersToBan.add(report.playername)
-	// 		playersToUnban.delete(report.playername)
-	// 	})
-	// 	validOldReports.forEach((report) => {
-	// 		playersToBan.delete(report.playername) // the player was banned before so shouldn't be banned again
-	// 		playersToUnban.delete(report.playername) // the player was banned so shouldn't be unbanned
-	// 	})
-	// 	invalidOldReports.forEach((report) =>
-	// 		playersToBan.delete(report.playername)
-	// 	) // if a player was banned before, it makes no sense to unban and ban
-	// 	// players that are blacklisted or whitelisted should be ignored from lists
-	// 	whitelists.map((whitelist) => {
-	// 		playersToBan.delete(whitelist.playername)
-	// 		playersToUnban.delete(whitelist.playername)
-	// 	})
-	// 	privateBans.map((privateban) => {
-	// 		playersToBan.delete(privateban.playername)
-	// 		playersToUnban.delete(privateban.playername)
-	// 	})
+		// get all the reports into a single map
+		const playersToBan = new Set<string>()
+		const playersToUnban = new Set<string>()
+		const [invalidOldReports, validOldReports] = oldReports.reduce<
+			[Report[], Report[]]
+		>(
+			(all, report) => {
+				// if a report is valid under new filters, it falls into the second array
+				if (
+					newFilterObject.categoryFilters.includes(
+						report.categoryId
+					) &&
+					newFilterObject.communityFilters.includes(
+						report.communityId
+					)
+				) {
+					all[1].push(report)
+				} else {
+					all[0].push(report)
+				}
+				return all
+			},
+			[[], []]
+		)
+		invalidOldReports.forEach((report) =>
+			playersToUnban.add(report.playername)
+		)
+		newReports.forEach((report) => {
+			playersToBan.add(report.playername)
+			playersToUnban.delete(report.playername)
+		})
+		validOldReports.forEach((report) => {
+			playersToBan.delete(report.playername) // the player was banned before so shouldn't be banned again
+			playersToUnban.delete(report.playername) // the player was banned so shouldn't be unbanned
+		})
+		invalidOldReports.forEach((report) =>
+			playersToBan.delete(report.playername)
+		) // if a player was banned before, it makes no sense to unban and ban
+		// players that are blacklisted or whitelisted should be ignored from lists
+		whitelists.map((whitelist) => {
+			playersToBan.delete(whitelist.playername)
+			playersToUnban.delete(whitelist.playername)
+		})
+		privateBans.map((privateban) => {
+			playersToBan.delete(privateban.playername)
+			playersToUnban.delete(privateban.playername)
+		})
 
-	// 	const results = await filterObjectChangedBanlists({
-	// 		newFilter: newFilterObject,
-	// 		validReports: [...validOldReports, ...newReports],
-	// 		database,
-	// 	})
+		const results = await filterObjectChangedBanlists({
+			newFilter: newFilterObject,
+			validReports: [...validOldReports, ...newReports],
+			database,
+		})
 
-	// 	// the unbanned players should be the same
-	// 	expect(results.toUnban.length).toBe(playersToUnban.size) // april, wendel, elda, vivien
-	// 	expect(results.toUnban).toEqual([...playersToUnban])
+		// the unbanned players should be the same
+		expect(results.toUnban.length).toBe(playersToUnban.size) // april, wendel, elda, vivien
+		expect(results.toUnban).toEqual([...playersToUnban])
 
-	// 	// the banned players should be the same
-	// 	expect(results.toBan.length).toBe(playersToBan.size)
-	// 	expect(results.toBan).toEqual([...playersToBan])
-	// })
+		// the banned players should be the same
+		expect(results.toBan.length).toBe(playersToBan.size)
+		expect(results.toBan).toEqual([...playersToBan])
+	})
 })
