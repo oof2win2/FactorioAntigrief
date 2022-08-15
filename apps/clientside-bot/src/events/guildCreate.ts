@@ -1,6 +1,6 @@
 import { Guild } from "discord.js"
 import FAGCBot from "../base/FAGCBot.js"
-import { sendGuildMessage } from "../utils/functions.js"
+import sendGuildMessage from "../utils/functions/sendGuildMessage.js"
 
 export default async (client: FAGCBot, [guild]: [Guild]) => {
 	console.log(`Bot has now entered guild ${guild.name}`)

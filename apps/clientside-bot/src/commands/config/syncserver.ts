@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { ChannelType } from "discord-api-types"
 import { SubCommand } from "../../base/Commands.js"
-import { splitIntoGroups } from "../../utils/functions.js"
+import splitIntoGroups from "../../utils/functions/splitIntoGroups.js"
 import FAGCBan from "../../database/FAGCBan.js"
 import PrivateBan from "../../database/PrivateBan.js"
 import dayjs from "dayjs"
