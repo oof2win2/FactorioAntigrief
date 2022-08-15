@@ -1,21 +1,21 @@
 import { FilterObject } from "fagc-api-types"
 import { Connection } from "typeorm"
+import { DateUtils } from "typeorm/util/DateUtils"
 import FAGCBan from "../../database/FAGCBan"
 import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
 import ServerOnline from "../../database/ServerOnline"
 import dateIsBetween from "./dateIsBetween"
-import splitIntoGroups from "./splitIntoGroups"
 
 export default async function handleMissedData({
 	server,
 	allServers,
-	filters,
+	filter,
 	database,
 }: {
 	server: ServerOnline
 	allServers: ServerOnline[]
-	filters: FilterObject
+	filter: FilterObject
 	database: Connection
 }) {
 	/*
@@ -127,8 +127,8 @@ export default async function handleMissedData({
 			// filter reports only here, as it would be wasteful to filter reports against a player if they are whitelisted
 			const filteredReports = reports.filter((report) => {
 				if (
-					filters.categoryFilters.includes(report.categoryId) &&
-					filters.communityFilters.includes(report.communityId)
+					filter.categoryFilters.includes(report.categoryId) &&
+					filter.communityFilters.includes(report.communityId)
 				)
 					return true
 				return false
@@ -205,19 +205,25 @@ export default async function handleMissedData({
 		.getRepository(FAGCBan)
 		.createQueryBuilder()
 		.delete()
-		.where(`removedAt < :date`, { date: lastOfflineDate })
+		.where(`removedAt < :date`, {
+			date: DateUtils.mixedDateToUtcDatetimeString(lastOfflineDate),
+		})
 		.execute()
 	await database
 		.getRepository(Whitelist)
 		.createQueryBuilder()
 		.delete()
-		.where(`removedAt < :date`, { date: lastOfflineDate })
+		.where(`removedAt < :date`, {
+			date: DateUtils.mixedDateToUtcDatetimeString(lastOfflineDate),
+		})
 		.execute()
 	await database
 		.getRepository(PrivateBan)
 		.createQueryBuilder()
 		.delete()
-		.where(`removedAt < :date`, { date: lastOfflineDate })
+		.where(`removedAt < :date`, {
+			date: DateUtils.mixedDateToUtcDatetimeString(lastOfflineDate),
+		})
 		.execute()
 
 	return {
