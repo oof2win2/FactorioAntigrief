@@ -11,9 +11,11 @@ import {
 	createFAGCReport,
 	createGuildConfig,
 	createTimes,
+	createWhitelist,
 } from "../utils"
 import { Category, Community } from "fagc-api-types"
 import ServerOnline from "../../src/database/ServerOnline"
+import faker from "faker"
 
 describe("handleMissedData", () => {
 	let database: Connection
@@ -204,6 +206,93 @@ describe("handleMissedData", () => {
 
 		expect(result.playersToUnban.length).toBe(playernames.length)
 		expect(result.playersToUnban).toEqual(playernames)
+		expect(result.privatebansToBan.length).toBe(0)
+		expect(result.reportsToBan.length).toBe(0)
+	})
+
+	it("Should unban players if a whitelist was created whilst the server was down", async () => {
+		const [_, filter] = createGuildConfig({
+			categoryIds,
+			communityIds,
+		})
+		const playernames = [
+			...new Set(createTimes(faker.internet.userName, 25)),
+		]
+		const reports = createTimes(
+			createFAGCReport,
+			[
+				{
+					categoryIds: filter.categoryFilters,
+					communityIds: filter.communityFilters,
+					playernames: playernames,
+				},
+			],
+			5000
+		)
+
+		const whitelistedPlayers = new Set<string>()
+		const whitelistEntries = createTimes(
+			createWhitelist,
+			[
+				{
+					playernames: playernames,
+				},
+			],
+			2500
+		)
+			.filter((entry) => {
+				if (whitelistedPlayers.has(entry.playername)) return false
+				whitelistedPlayers.add(entry.playername)
+				return true
+			})
+			.map((i) => {
+				delete (i as any).id
+				return i
+			})
+
+		const server: ServerOnline = {
+			name: "TESTSERVER",
+			offlineSince: serverOfflineSince,
+			isOnline: true,
+		}
+
+		// ensure that the database stores all of the reports as created before the server went offline
+		// so that the server received all of the reports
+		const reportsCreatedAt = new Date(
+			serverOfflineSince.valueOf() - 3600 * 1000
+		)
+
+		// save reports to db
+		await database.getRepository(FAGCBan).save(
+			reports.map(
+				(report): FAGCBan => ({
+					...report,
+					createdAt: reportsCreatedAt,
+					removedAt: null,
+				})
+			),
+			{ chunk: 750 }
+		)
+		await database
+			.getRepository(Whitelist)
+			.save(whitelistEntries, { chunk: 750 })
+
+		const result = await handleMissedData({
+			server,
+			allServers: [server],
+			database,
+			filter,
+		})
+
+		const playersWithReports = new Set(reports.map((x) => x.playername))
+		const expectedUnbans: string[] = []
+		for (const whitelist of whitelistEntries) {
+			if (playersWithReports.has(whitelist.playername))
+				expectedUnbans.push(whitelist.playername)
+		}
+
+		expect(result.playersToUnban.length).toBe(expectedUnbans.length)
+		expect(result.playersToUnban.sort()).toEqual(expectedUnbans.sort())
 		expect(result.privatebansToBan.length).toBe(0)
 		expect(result.reportsToBan.length).toBe(0)
 	})

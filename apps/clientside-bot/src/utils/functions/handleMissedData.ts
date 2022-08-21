@@ -62,6 +62,43 @@ export default async function handleMissedData({
 	for (const playername of allPlayernames) {
 		let shouldBeUnbanned = false
 
+		// filter reports here, as we use them for everything
+		const reports = reportsByPlayer.get(playername) || []
+		const filteredReports = reports.filter((report) => {
+			if (
+				filter.categoryFilters.includes(report.categoryId) &&
+				filter.communityFilters.includes(report.communityId)
+			)
+				return true
+			return false
+		})
+		// check for the existence of reports at T1 and T2
+		let reportAtT1: FAGCBan | null = null
+		let reportAtT2: FAGCBan | null = null
+		for (const report of filteredReports) {
+			// check the T1 date, which is when the server went offline
+			if (
+				!reportAtT1 &&
+				dateIsBetween(
+					server.offlineSince,
+					report.createdAt,
+					report.removedAt || new Date()
+				)
+			)
+				reportAtT1 = report
+
+			// check the T2 date, which is the current time
+			if (
+				!reportAtT2 &&
+				dateIsBetween(
+					new Date(),
+					report.createdAt,
+					report.removedAt || new Date()
+				)
+			)
+				reportAtT2 = report
+		}
+
 		const privatebans = privatebansByPlayer.get(playername)
 		if (privatebans) {
 			// check for the existence of privatebans at T1 and T2
@@ -93,10 +130,21 @@ export default async function handleMissedData({
 			if (privatebanAtT1 == privatebanAtT2) {
 				// if they are the same, the player stays banned for the same reason and we don't need to do anything
 				continue
-			} else if (privatebanAtT2) {
+			} else if (!privatebanAtT1 && !privatebanAtT2) {
+				// there was no ban at either T1 or T2, so we don't need to do anything
+			} else if (reportAtT1 && privatebanAtT2) {
+				// there was a report at T1 and now there is a privateban at T2
+				// we need to reban so that the reason is correct
 				privatebansToBan.push({
 					...privatebanAtT2,
 					reban: true,
+				})
+			} else if (!reportAtT1 && privatebanAtT2) {
+				// there was no report at T1, but there is a privateban at T2
+				// we simply need to ban
+				privatebansToBan.push({
+					...privatebanAtT2,
+					reban: false,
 				})
 			} else if (privatebanAtT1 && !privatebanAtT2) {
 				// there was a privateban at T1, but not at T2, so we should unban them (for now)
@@ -114,7 +162,7 @@ export default async function handleMissedData({
 					whitelist.removedAt || new Date()
 				)
 			)
-			if (whitelistAtT2) {
+			if (whitelistAtT2 && reportAtT1) {
 				// if there is a whitelist at T2, we unban them
 				// we don't care about anything else, as they are whitelisted so any reports against them should be ignored
 				playersToUnban.push(playername)
@@ -122,43 +170,7 @@ export default async function handleMissedData({
 			}
 		}
 
-		const reports = reportsByPlayer.get(playername)
 		if (reports) {
-			// filter reports only here, as it would be wasteful to filter reports against a player if they are whitelisted
-			const filteredReports = reports.filter((report) => {
-				if (
-					filter.categoryFilters.includes(report.categoryId) &&
-					filter.communityFilters.includes(report.communityId)
-				)
-					return true
-				return false
-			})
-			// check for the existence of reports at T1 and T2
-			let reportAtT1: FAGCBan | null = null
-			let reportAtT2: FAGCBan | null = null
-			for (const report of filteredReports) {
-				// check the T1 date, which is when the server went offline
-				if (
-					!reportAtT1 &&
-					dateIsBetween(
-						server.offlineSince,
-						report.createdAt,
-						report.removedAt || new Date()
-					)
-				)
-					reportAtT1 = report
-
-				// check the T2 date, which is the current time
-				if (
-					!reportAtT2 &&
-					dateIsBetween(
-						new Date(),
-						report.createdAt,
-						report.removedAt || new Date()
-					)
-				)
-					reportAtT2 = report
-			}
 			if (reportAtT1 == reportAtT2) {
 				// if they are the same, the player stays banned for the same reason and we don't need to do anything
 				continue
