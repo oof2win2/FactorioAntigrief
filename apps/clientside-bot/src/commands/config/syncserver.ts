@@ -34,8 +34,6 @@ const Syncserver: SubCommand = {
 				ephemeral: true,
 			})
 
-		await interaction.deferReply()
-
 		await interaction.reply("Compiling banlist for the server...")
 
 		const alreadyBanned = new Set<string>()
@@ -82,7 +80,7 @@ const Syncserver: SubCommand = {
 				server.discordChannelId
 			)
 		}
-		await interaction.reply("Banlist synchronized with server.")
+		await interaction.followUp("Banlist synchronized with server.")
 	},
 }
 export default Syncserver
