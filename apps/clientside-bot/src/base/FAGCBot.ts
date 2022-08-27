@@ -147,7 +147,7 @@ export default class FAGCBot extends Client {
 		}
 	}
 
-	createBanCommand(report: FAGCBan) {
+	createBanCommand(report: Omit<FAGCBan, "createdAt" | "removedAt">) {
 		const botConfig = this.botConfig
 
 		const rawBanMessage =
