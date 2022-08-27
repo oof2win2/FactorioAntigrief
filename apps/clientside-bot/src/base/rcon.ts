@@ -112,6 +112,7 @@ export default class RconInterface {
 		const checkOnline = async () => {
 			try {
 				await rcon.connect()
+
 				await this.markAsOnline(server)
 				// if the connection was successful, it would not error
 				// if it failed, it would throw and be caught in the catch block
@@ -189,9 +190,9 @@ export default class RconInterface {
 					)) {
 						await rcon.send(
 							`/c ${ban
-								.map((record) => {
+								.map((record) =>
 									this.client.createBanCommand(record)
-								})
+								)
 								.join(";")}`
 						)
 					}
@@ -227,11 +228,10 @@ export default class RconInterface {
 			.values([
 				{
 					name: server.servername,
-					offlineSince: new Date(),
 					isOnline: true,
 				},
 			])
-			.orUpdate(["offlineSince", "isOnline"])
+			.orUpdate(["isOnline"])
 			.execute()
 	}
 
