@@ -5,6 +5,8 @@ import ENV from "../utils/env.js"
 import ServerOnline from "../database/ServerOnline"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import handleMissedData from "../utils/functions/handleMissedData"
+import splitIntoGroups from "../utils/functions/splitIntoGroups"
 
 dayjs.extend(relativeTime)
 
@@ -110,7 +112,7 @@ export default class RconInterface {
 		const checkOnline = async () => {
 			try {
 				await rcon.connect()
-				this.markAsOnline(server)
+				await this.markAsOnline(server)
 				// if the connection was successful, it would not error
 				// if it failed, it would throw and be caught in the catch block
 				const channel = this.client.channels.cache.get(
@@ -122,8 +124,78 @@ export default class RconInterface {
 						server.discordChannelId
 					}> has reconnected to RCON at <t:${Math.floor(
 						Date.now() / 1000
-					)}>, after ${dayjs(startedAt).fromNow(true)}`
+					)}>, after ${dayjs(startedAt).fromNow(
+						true
+					)}. Synchronizing banlist`
 				)
+
+				const serversOnline = await this.client.db
+					.getRepository(ServerOnline)
+					.find()
+
+				if (this.client.filterObject) {
+					const newBans = await handleMissedData({
+						server: serversOnline.find(
+							(x) => x.name === server.servername
+						)!,
+						allServers: serversOnline,
+						database: this.client.db,
+						filter: this.client.filterObject,
+					})
+
+					// unbanning first
+					for (const unban of splitIntoGroups(
+						newBans.playersToUnban,
+						500
+					)) {
+						await rcon.send(
+							`/c ${unban
+								.map((name) => `game.unban_player("${name}")`)
+								.join(";")}`
+						)
+					}
+					const toReban = [
+						...newBans.privatebansToBan.filter((x) => x.reban),
+						...newBans.reportsToBan.filter((x) => x.reban),
+					]
+					for (const unban of splitIntoGroups(toReban, 500)) {
+						await rcon.send(
+							`/c ${unban
+								.map(
+									(record) =>
+										`game.unban_player("${record.playername}")`
+								)
+								.join(";")}`
+						)
+					}
+
+					for (const ban of splitIntoGroups(
+						newBans.privatebansToBan,
+						500
+					)) {
+						await rcon.send(
+							`/c ${ban
+								.map(
+									(record) =>
+										`game.ban_player("${record.playername}", "${record.reason}")`
+								)
+								.join(";")}`
+						)
+					}
+
+					for (const ban of splitIntoGroups(
+						newBans.reportsToBan,
+						500
+					)) {
+						await rcon.send(
+							`/c ${ban
+								.map((record) => {
+									this.client.createBanCommand(record)
+								})
+								.join(";")}`
+						)
+					}
+				}
 				return
 			} catch {
 				// make sure that the time between the checks is not exceeding 1 day at most
