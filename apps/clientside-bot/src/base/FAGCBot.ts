@@ -13,6 +13,7 @@ import { createConnection, Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
 import InfoChannel from "../database/InfoChannel.js"
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
+import FAGCBan from "../database/FAGCBan.js"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -146,7 +147,7 @@ export default class FAGCBot extends Client {
 		}
 	}
 
-	createBanCommand(report: Report) {
+	createBanCommand(report: FAGCBan) {
 		const botConfig = this.botConfig
 
 		const rawBanMessage =
@@ -154,15 +155,9 @@ export default class FAGCBot extends Client {
 				? ENV.BANCOMMAND
 				: ENV.CUSTOMBANCOMMAND
 		const command = rawBanMessage
-			.replaceAll("{ADMINID}", report.adminId)
-			.replaceAll("{AUTOMATED}", report.automated ? "true" : "false")
-			.replaceAll("{CATEGORYID}", report.categoryId)
 			.replaceAll("{COMMUNITYID}", report.communityId)
 			.replaceAll("{REPORTID}", report.id)
-			.replaceAll("{DESCRIPTION}", report.description)
 			.replaceAll("{PLAYERNAME}", report.playername)
-			.replaceAll("{PROOF}", report.proof)
-			.replaceAll("{REPORTEDTIME}", report.reportedTime.toISOString())
 		return command
 	}
 
@@ -176,38 +171,5 @@ export default class FAGCBot extends Client {
 				: ENV.CUSTOMUNBANCOMMAND
 		const command = rawUnbanMessage.replaceAll("{PLAYERNAME}", playername)
 		return command
-	}
-
-	async ban(report: Report) {
-		const botConfig = this.botConfig
-		if (!botConfig || botConfig.reportAction === "none") return
-
-		const command = this.createBanCommand(report)
-		if (!command) return
-
-		this.rcon.rconCommandAll(command)
-	}
-
-	async unban(revocation: Revocation) {
-		const botConfig = this.botConfig
-		if (!botConfig || botConfig.revocationAction === "none") return
-
-		const rawUnbanMessage =
-			botConfig.revocationAction === "unban"
-				? ENV.UNBANCOMMAND
-				: ENV.CUSTOMUNBANCOMMAND
-
-		const command = rawUnbanMessage
-			.replace("{ADMINID}", revocation.adminId)
-			.replace("{AUTOMATED}", revocation.automated ? "true" : "false")
-			.replace("{CATEGORYID}", revocation.categoryId)
-			.replace("{COMMUNITYID}", revocation.communityId)
-			.replace("{REPORTID}", revocation.id)
-			.replace("{DESCRIPTION}", revocation.description)
-			.replace("{PLAYERNAME}", revocation.playername)
-			.replace("{PROOF}", revocation.proof)
-			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
-
-		this.rcon.rconCommandAll(command)
 	}
 }
