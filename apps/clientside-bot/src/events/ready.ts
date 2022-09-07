@@ -6,11 +6,7 @@ export default async function handler(client: FAGCBot) {
 		`${client.user?.tag} is online since ${new Date().toUTCString()}`
 	)
 
-	await client.guilds.fetch()
-
-	client.guilds.cache.map(async (guild) => {
-		// send info to backend about guilds, get configs through WS
-		client.fagc.websocket.addGuildId(guild.id)
-	})
+	// send info to backend about guilds, get configs through WS
+	client.fagc.websocket.addGuildId(ENV.GUILDID)
 	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 }

@@ -2,7 +2,7 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
 import Whitelist from "../../database/Whitelist.js"
-import { hasFAGCBans } from "../../utils/functions.js"
+import hasFAGCBans from "../../utils/functions/hasFAGCBans.js"
 
 const Setaction: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()

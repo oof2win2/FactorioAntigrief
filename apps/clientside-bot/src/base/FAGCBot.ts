@@ -13,6 +13,7 @@ import { createConnection, Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
 import InfoChannel from "../database/InfoChannel.js"
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
+import FAGCBan from "../database/FAGCBan.js"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -42,7 +43,7 @@ export default class FAGCBot extends Client {
 	guildConfig: GuildConfig | null = null
 	community: Community | null = null
 	embedQueue: Collection<string, MessageEmbed[]>
-	servers: Collection<string, database.FactorioServerType[]>
+	servers: database.FactorioServerType[] = []
 	filterObject: FilterObject | null = null
 	readonly rcon: RCONInterface
 
@@ -58,20 +59,10 @@ export default class FAGCBot extends Client {
 		this.commands = new Collection()
 
 		this.embedQueue = new Collection()
-		this.servers = new Collection()
 
-		const rawServers = getServers()
+		this.servers = getServers()
 
-		rawServers.map((server) => {
-			const existing = this.servers.get(server.discordGuildId)
-			if (existing) {
-				this.servers.set(server.discordGuildId, [...existing, server])
-			} else {
-				this.servers.set(server.discordGuildId, [server])
-			}
-		})
-
-		this.rcon = new RCONInterface(this, rawServers)
+		this.rcon = new RCONInterface(this, this.servers)
 
 		// load info channels
 		this.db
@@ -125,7 +116,9 @@ export default class FAGCBot extends Client {
 	async setBotConfig(config: Partial<database.BotConfigType>) {
 		await this.db
 			.getRepository(BotConfig)
-			.upsert({ ...config, guildId: config.guildId }, ["guildId"])
+			.upsert({ ...config, guildId: config.guildId ?? ENV.GUILDID }, [
+				"guildId",
+			])
 		const record = await this.db.getRepository(BotConfig).findOneOrFail()
 		this._botConfig = record
 	}
@@ -154,7 +147,7 @@ export default class FAGCBot extends Client {
 		}
 	}
 
-	createBanCommand(report: Report) {
+	createBanCommand(report: Omit<FAGCBan, "createdAt" | "removedAt">) {
 		const botConfig = this.botConfig
 
 		const rawBanMessage =
@@ -162,15 +155,9 @@ export default class FAGCBot extends Client {
 				? ENV.BANCOMMAND
 				: ENV.CUSTOMBANCOMMAND
 		const command = rawBanMessage
-			.replaceAll("{ADMINID}", report.adminId)
-			.replaceAll("{AUTOMATED}", report.automated ? "true" : "false")
-			.replaceAll("{CATEGORYID}", report.categoryId)
 			.replaceAll("{COMMUNITYID}", report.communityId)
 			.replaceAll("{REPORTID}", report.id)
-			.replaceAll("{DESCRIPTION}", report.description)
 			.replaceAll("{PLAYERNAME}", report.playername)
-			.replaceAll("{PROOF}", report.proof)
-			.replaceAll("{REPORTEDTIME}", report.reportedTime.toISOString())
 		return command
 	}
 
@@ -184,42 +171,5 @@ export default class FAGCBot extends Client {
 				: ENV.CUSTOMUNBANCOMMAND
 		const command = rawUnbanMessage.replaceAll("{PLAYERNAME}", playername)
 		return command
-	}
-
-	async ban(report: Report, guildId: string) {
-		const servers = this.servers.get(guildId)
-		if (!servers || !servers.length) return
-		const botConfig = this.botConfig
-		if (!botConfig || botConfig.reportAction === "none") return
-
-		const command = this.createBanCommand(report)
-		if (!command) return
-
-		this.rcon.rconCommandGuild(command, guildId)
-	}
-
-	async unban(revocation: Revocation, guildId: string) {
-		const servers = this.servers.get(guildId)
-		if (!servers || !servers.length) return
-		const botConfig = this.botConfig
-		if (!botConfig || botConfig.revocationAction === "none") return
-
-		const rawUnbanMessage =
-			botConfig.revocationAction === "unban"
-				? ENV.UNBANCOMMAND
-				: ENV.CUSTOMUNBANCOMMAND
-
-		const command = rawUnbanMessage
-			.replace("{ADMINID}", revocation.adminId)
-			.replace("{AUTOMATED}", revocation.automated ? "true" : "false")
-			.replace("{CATEGORYID}", revocation.categoryId)
-			.replace("{COMMUNITYID}", revocation.communityId)
-			.replace("{REPORTID}", revocation.id)
-			.replace("{DESCRIPTION}", revocation.description)
-			.replace("{PLAYERNAME}", revocation.playername)
-			.replace("{PROOF}", revocation.proof)
-			.replace("{REPORTEDTIME}", revocation.reportedTime.toTimeString())
-
-		this.rcon.rconCommandGuild(command, guildId)
 	}
 }
