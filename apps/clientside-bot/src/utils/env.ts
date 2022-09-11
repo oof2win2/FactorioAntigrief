@@ -49,6 +49,11 @@ const ENV = cleanEnv(
 			example: "/home/fagc/fagc-clientside-bot/servers.json",
 			default: "../servers.json",
 		}),
+		SERVERFOLDERPATH: str({
+			desc: "Path to folder with server folders",
+			example: "/opt/factorio/servers",
+			default: "",
+		}),
 		FILTEROBJECTID: str({ desc: "FAGC Filter object ID" }),
 		APIKEY: str({ desc: "Your FAGC API key" }),
 	},

@@ -1060,6 +1060,11 @@
   resolved "https://registry.yarnpkg.com/@types/strict-uri-encode/-/strict-uri-encode-2.0.0.tgz#c560ad6d8c0a3017405e5a4648aeff92fa9e858c"
   integrity sha512-R6vDd7CHxcWMzv5wfVhR3qyCRVQoZKwVd6kit0rkozTThRZSXZKEW2Kz3AxfVqq9+UyJAz1g8Q+bJ3CL6NzztQ==
 
+"@types/tail@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@types/tail/-/tail-2.2.1.tgz#ca8d8ea542cf3fefbdac9e8f131ae04990596f1e"
+  integrity sha512-j75Gs5MiIpNR14wztQ4vtViUqxZi+lcgflyXC7P9iMgNnMab7XcV5p+2590IO3njsWWn5l8C+55ILk2CDDyaHg==
+
 "@types/tmp@^0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.2.3.tgz#908bfb113419fd6a42273674c00994d40902c165"
@@ -6225,6 +6230,11 @@ symbol-tree@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
+
+tail@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/tail/-/tail-2.2.4.tgz#90dd4c5a174a3fa39dcb65a1df1950a4a0093a41"
+  integrity sha512-PX8klSxW1u3SdgDrDeewh5GNE+hkJ4h02JvHfV6YrHqWOVJ88nUdSQqtsUf/gWhgZlPAws3fiZ+F1f8euspcuQ==
 
 tar-fs@^2.0.0:
   version "2.1.1"

@@ -5,11 +5,10 @@ import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
 import { Command as CommandType } from "./Commands.js"
 import * as database from "./database.js"
 import wshandler from "./wshandler.js"
-import { Report, Revocation } from "fagc-api-types"
 import RCONInterface from "./rcon.js"
 import fs from "fs"
 import { z } from "zod"
-import { createConnection, Connection } from "typeorm"
+import { Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
 import InfoChannel from "../database/InfoChannel.js"
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
@@ -46,6 +45,7 @@ export default class FAGCBot extends Client {
 	servers: database.FactorioServerType[] = []
 	filterObject: FilterObject | null = null
 	readonly rcon: RCONInterface
+	serverSyncedActions: ServerSyncedAction[] = []
 
 	constructor(options: BotOptions) {
 		super(options)
@@ -100,6 +100,7 @@ export default class FAGCBot extends Client {
 		})
 
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
+		setInterval(() => this.clearServerSyncedActions(), 5 * 60 * 1000) // clear recent bans every minute
 	}
 
 	get botConfig(): database.BotConfigType {
@@ -171,5 +172,24 @@ export default class FAGCBot extends Client {
 				: ENV.CUSTOMUNBANCOMMAND
 		const command = rawUnbanMessage.replaceAll("{PLAYERNAME}", playername)
 		return command
+	}
+
+	/**
+	 * Remove cached records of recent actions from servers
+	 * @param removeAll If true, records of all actions will be removed. If false, only records older than 5 minutes will be removed.
+	 */
+	clearServerSyncedActions(removeAll = false) {
+		if (removeAll) {
+			this.serverSyncedActions = []
+			return
+		}
+
+		this.serverSyncedActions = this.serverSyncedActions.filter((action) => {
+			// if the record is not older than 5 minutes, keep it
+			if (action.receivedAt.valueOf() + 5 * 60 * 1000 > Date.now()) {
+				return true
+			}
+			return false
+		})
 	}
 }
