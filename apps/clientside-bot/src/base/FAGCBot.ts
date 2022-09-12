@@ -13,6 +13,10 @@ import BotConfig from "../database/BotConfig.js"
 import InfoChannel from "../database/InfoChannel.js"
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 import FAGCBan from "../database/FAGCBan.js"
+import ServerSyncedActionHandler from "./ServerReadHandler.js"
+import { BaseAction, ServerSyncedBan, ServerSyncedUnban } from "../types.js"
+import PrivateBan from "../database/PrivateBan.js"
+import LinkedAdmin from "../database/LinkedAdmin.js"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -45,7 +49,11 @@ export default class FAGCBot extends Client {
 	servers: database.FactorioServerType[] = []
 	filterObject: FilterObject | null = null
 	readonly rcon: RCONInterface
-	serverSyncedActions: ServerSyncedAction[] = []
+	private recentServerSyncedActions: (
+		| BaseAction<ServerSyncedBan>
+		| BaseAction<ServerSyncedUnban>
+	)[] = []
+	serverSyncedActionHandler: ServerSyncedActionHandler
 
 	constructor(options: BotOptions) {
 		super(options)
@@ -99,8 +107,18 @@ export default class FAGCBot extends Client {
 			)
 		})
 
+		this.serverSyncedActionHandler = new ServerSyncedActionHandler(
+			this.servers
+		)
+
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
-		setInterval(() => this.clearServerSyncedActions(), 5 * 60 * 1000) // clear recent bans every minute
+		setInterval(() => this.clearRecentServerSyncedActions(), 60 * 1000) // clear recent server synced actions every minute
+	}
+
+	async sendToErrorChannel(text: string) {
+		const channel = this.channels.cache.get(ENV.ERRORCHANNELID)
+		if (!channel || !channel.isNotDMChannel()) return
+		channel.send(text)
 	}
 
 	get botConfig(): database.BotConfigType {
@@ -176,20 +194,65 @@ export default class FAGCBot extends Client {
 
 	/**
 	 * Remove cached records of recent actions from servers
-	 * @param removeAll If true, records of all actions will be removed. If false, only records older than 5 minutes will be removed.
+	 * @param clearAll If true, records of all actions will be removed. If false, only records older than 5 minutes will be removed.
 	 */
-	clearServerSyncedActions(removeAll = false) {
-		if (removeAll) {
-			this.serverSyncedActions = []
+	clearRecentServerSyncedActions(clearAll = false) {
+		if (clearAll) {
+			this.recentServerSyncedActions = []
 			return
 		}
 
-		this.serverSyncedActions = this.serverSyncedActions.filter((action) => {
-			// if the record is not older than 5 minutes, keep it
-			if (action.receivedAt.valueOf() + 5 * 60 * 1000 > Date.now()) {
-				return true
-			}
-			return false
+		const now = new Date()
+		const cutoff = new Date(now.valueOf() - 60 * 1000)
+		this.recentServerSyncedActions = this.recentServerSyncedActions.filter(
+			(x) => x.receivedAt > cutoff
+		)
+	}
+
+	async handleSyncedBan(ban: BaseAction<ServerSyncedBan>) {
+		// if we performed an action like this already recently, we dont want to do it again
+		const foundRecent = this.recentServerSyncedActions.find((entry) => {
+			if (entry.actionType !== "ban") return false
+			return entry.action.playername === ban.action.playername
+		})
+		if (foundRecent) return
+
+		const banCommand = `/c game.ban_player("${ban.action.playername}", "${ban.action.reason}")`
+		this.rcon.rconCommandAll(banCommand)
+
+		this.recentServerSyncedActions.push(ban)
+
+		if (ban.action.byPlayer) {
+			const admin = await this.db.getRepository(LinkedAdmin).findOne({
+				where: { playername: ban.action.byPlayer },
+			})
+
+			if (!admin)
+				this.sendToErrorChannel(
+					`Admin with playername ${ban.action.byPlayer} not found in database`
+				)
+
+			this.db.getRepository(PrivateBan).create({
+				playername: ban.action.playername,
+				reason: ban.action.reason,
+				adminId: admin ? admin.discordId : ENV.OWNERID,
+			})
+		}
+	}
+
+	async handleSyncedUnban(unban: BaseAction<ServerSyncedUnban>) {
+		// if we performed an action like this already recently, we dont want to do it again
+		const foundRecent = this.recentServerSyncedActions.find((entry) => {
+			if (entry.actionType !== "unban") return false
+			return entry.action.playername === unban.action.playername
+		})
+		if (foundRecent) return
+
+		const unbanCommand = `/c game.unban_player("${unban.action.playername}")`
+		this.rcon.rconCommandAll(unbanCommand)
+
+		this.db.getRepository(PrivateBan).delete({
+			playername: unban.action.playername,
 		})
 	}
 }

@@ -59,11 +59,7 @@ export default class RconInterface {
 				// once it reconnects
 				this.markAsOffline(server)
 				this.reconnectRcon(rcon, server) // start the reconnection mechanism
-				const channel = this.client.channels.cache.get(
-					ENV.ERRORCHANNELID
-				)
-				if (!channel || !channel.isNotDMChannel()) return
-				channel.send(
+				this.client.sendToErrorChannel(
 					`Server <#${
 						server.discordChannelId
 					}> has dropped connection to RCON at <t:${Math.floor(
@@ -78,9 +74,7 @@ export default class RconInterface {
 			// once it reconnects
 			await this.markAsOffline(server)
 			this.reconnectRcon(rcon, server) // start the reconnection mechanism
-			const channel = this.client.channels.cache.get(ENV.ERRORCHANNELID)
-			if (!channel || !channel.isNotDMChannel()) return
-			channel.send(
+			this.client.sendToErrorChannel(
 				`Server <#${
 					server.discordChannelId
 				}> has failed to initially connect to RCON at <t:${Math.floor(
@@ -116,11 +110,7 @@ export default class RconInterface {
 				await this.markAsOnline(server)
 				// if the connection was successful, it would not error
 				// if it failed, it would throw and be caught in the catch block
-				const channel = this.client.channels.cache.get(
-					ENV.ERRORCHANNELID
-				)
-				if (!channel || !channel.isNotDMChannel()) return
-				channel.send(
+				this.client.sendToErrorChannel(
 					`Server <#${
 						server.discordChannelId
 					}> has reconnected to RCON at <t:${Math.floor(
@@ -201,11 +191,9 @@ export default class RconInterface {
 			} catch {
 				// make sure that the time between the checks is not exceeding 1 day at most
 				timeIndex = Math.min(timeIndex + 1, times.length - 1)
-				const channel = this.client.channels.resolve(ENV.ERRORCHANNELID)
 				setTimeout(checkOnline, times[timeIndex]) // set the interval for the next checks
-				if (!channel || !channel.isNotDMChannel()) return
 				// dayjs is used to get the relative time since the start of the reconnection attempts
-				channel.send(
+				this.client.sendToErrorChannel(
 					`Server <#${
 						server.discordChannelId
 					}> has been unable to connect to RCON for the past ${dayjs(

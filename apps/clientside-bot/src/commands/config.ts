@@ -1,9 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
-import {
-	CommandWithSubcommands,
-	PermissionOverrideType,
-	SubCommand,
-} from "../base/Commands.js"
+import { CommandWithSubcommands, SubCommand } from "../base/Commands.js"
 import { readdirSync } from "fs"
 
 const commands: SubCommand[] = readdirSync("./commands/config/")

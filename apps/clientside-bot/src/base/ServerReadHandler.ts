@@ -4,6 +4,7 @@ import { Tail } from "tail"
 import path from "path"
 import ENV from "../utils/env"
 import { existsSync } from "fs"
+import { BaseAction, ServerSyncedBan, ServerSyncedUnban } from "../types"
 
 export declare interface ServerSyncedActionHandlerActions {
 	ban: (ban: BaseAction<ServerSyncedBan>) => void
@@ -105,6 +106,7 @@ class ServerSyncedActionHandler extends EventEmitter {
 							byPlayer: removeStringSpeechmarks(data[2]),
 							reason: removeStringSpeechmarks(data[3]),
 						},
+						server,
 					}
 					this.emit("ban", result)
 					break
@@ -119,6 +121,7 @@ class ServerSyncedActionHandler extends EventEmitter {
 							byPlayer: removeStringSpeechmarks(data[2]),
 							reason: removeStringSpeechmarks(data[3]),
 						},
+						server,
 					}
 					this.emit("unban", result)
 					break

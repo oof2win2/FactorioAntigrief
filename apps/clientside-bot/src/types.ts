@@ -1,21 +1,24 @@
-type ServerSyncedBan = {
+import { FactorioServerType } from "./base/database"
+
+export type ServerSyncedBan = {
 	playername: string
 	reason: string | null
 	byPlayer: string | null
 }
 
-type ServerSyncedUnban = {
+export type ServerSyncedUnban = {
 	playername: string
 	reason: string | null
 	byPlayer: string | null
 }
 
-type BaseAction<T> = {
+export type BaseAction<T> = {
 	receivedAt: Date
 	actionType: string
 	action: T
+	server: FactorioServerType
 }
 
-type ServerSyncedAction =
+export type ServerSyncedAction =
 	| BaseAction<ServerSyncedBan>
 	| BaseAction<ServerSyncedUnban>
