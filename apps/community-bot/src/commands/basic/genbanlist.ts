@@ -30,7 +30,7 @@ const Genbanlist = Command({
 			return {
 				username: playername,
 				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${
-					client.fagc.apiurl
+					client.env.REPLACEMENT_APIURL
 				}/reports/search?playername=${encodeURIComponent(playername)}`,
 			}
 		})
