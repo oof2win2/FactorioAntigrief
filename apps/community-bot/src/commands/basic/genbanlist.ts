@@ -31,7 +31,7 @@ const Genbanlist = Command({
 				username: playername,
 				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${
 					client.env.REPLACEMENT_APIURL
-				}/reports/search?playername=${encodeURIComponent(playername)}`,
+				}/reports?playername=${encodeURIComponent(playername)}`,
 			}
 		})
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab
