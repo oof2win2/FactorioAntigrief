@@ -1,0 +1,11 @@
+{
+	"name": "fagc-actions-logger",
+	"version": "1.0.0",
+	"title": "FAGC Actions Logger",
+	"author": "oof2win2",
+	"description": "Logs actions useful to the FAGC Infobot to a file for processing",
+	"dependencies": [
+		"base >= 1.1.0"
+	],
+	"factorio_version": "1.1"
+}
