@@ -7,6 +7,7 @@ import PrivateBan from "../../database/PrivateBan.js"
 import dayjs from "dayjs"
 
 const Syncserver: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("syncserver")
 		.setDescription("Synchronize a server's banlist")

@@ -5,6 +5,7 @@ import PrivateBan from "../../database/PrivateBan.js"
 import hasFAGCBans from "../../utils/functions/hasFAGCBans"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
 		.setDescription("Remove a private ban")

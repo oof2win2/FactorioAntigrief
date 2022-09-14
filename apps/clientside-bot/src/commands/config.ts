@@ -1,12 +1,15 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
 import {
 	CommandWithSubcommands,
-	PermissionOverrideType,
+	executeCommandInteraction,
 	SubCommand,
+	SubCommandGroup,
 } from "../base/Commands.js"
 import { readdirSync } from "fs"
 
-const commands: SubCommand[] = readdirSync("./commands/config/")
+const commands: (SubCommand | SubCommandGroup)[] = readdirSync(
+	"./commands/config/"
+)
 	.filter((command) => command.endsWith(".js"))
 	.map((commandName) => {
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -19,22 +22,14 @@ const Config: CommandWithSubcommands = {
 		.setName("config")
 		.setDescription("Config")
 		.setDefaultPermission(false),
-	execute: async (args) => {
-		const subcommand = args.interaction.options.getSubcommand()
-		const command = commands.find(
-			(command) => command.data.name === subcommand
-		)
-		if (!command)
-			return args.interaction.reply(
-				"An error executing the command occured"
-			)
-		return command.execute(args)
-	},
+	execute: (args) => executeCommandInteraction(args, commands),
 	permissionType: "configrole",
+	type: "CommandWithSubcommands",
 }
 
 commands.forEach((command) => {
-	Config.data.addSubcommand(command.data)
+	if (command.type === "SubCommand") Config.data.addSubcommand(command.data)
+	else Config.data.addSubcommandGroup(command.data)
 })
 
 export default Config

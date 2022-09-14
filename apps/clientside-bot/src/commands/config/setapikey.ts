@@ -3,6 +3,7 @@ import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
 
 const Setapikey: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("setapikey")
 		.setDescription("Set the API key")

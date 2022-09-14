@@ -20,8 +20,14 @@ export const FactorioServer = z.object({
 		.string()
 		.describe("Name of Factorio server that it can be identified with"),
 	discordGuildId: z.string(),
+
 	rconPort: z.number().max(65535).min(0),
 	rconPassword: z.string().default(ENV.RCONPASSWORD),
+
+	serverFolderName: z.string().optional(),
+	absoluteServerPath: z.string().optional(),
+	gatherActions: z.boolean().default(true),
+	actionFilePath: z.string().default("script-output/fagc-actions.txt"),
 	// banlistPath: z.string().superRefine(async (path, ctx) => {
 	// 	if (!path.endsWith(".json")) {
 	// 		ctx.addIssue({

@@ -36,11 +36,14 @@
 		"rcon-client": "^4.2.3",
 		"reflect-metadata": "^0.1.13",
 		"sqlite3": "^5.0.2",
+		"tail": "^2.2.4",
 		"typeorm": "^0.2.45",
 		"utility-types": "^3.10.0",
 		"zod": "^3.11.6"
 	},
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.4.1"
+		"@types/better-sqlite3": "^7.4.1",
+		"@types/tail": "^2.2.1",
+		"tail": "^2.2.4"
 	}
 }
