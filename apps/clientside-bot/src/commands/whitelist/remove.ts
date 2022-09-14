@@ -39,22 +39,23 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		await client.rcon.rconCommandAll(`/whitelist remove ${playername}`)
-
 		if (client.filterObject) {
-			const hasBan = await hasFAGCBans({
+			const FAGCBan = await hasFAGCBans({
 				playername,
 				filter: client.filterObject,
 				database: client.db,
 			})
-			if (hasBan) {
+			if (FAGCBan) {
 				const report = await client.fagc.reports.fetchReport({
-					reportId: hasBan.id,
+					reportId: FAGCBan.id,
 				})
 				const bancmd = client.createBanCommand(report!)
-				if (bancmd) await client.rcon.rconCommandAll(bancmd)
+				if (bancmd) {
+					client.createActionForReport(FAGCBan.playername)
+					await client.rcon.rconCommandAll(bancmd)
+				}
 				return interaction.reply({
-					content: `Player ${playername} was unwhitelisted, but was banned due to FAGC report ${hasBan.id}`,
+					content: `Player ${playername} was unwhitelisted, but was banned due to FAGC report ${FAGCBan.id}`,
 				})
 			}
 		}

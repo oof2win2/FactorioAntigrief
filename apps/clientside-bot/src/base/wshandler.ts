@@ -97,6 +97,7 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 	// ban in guilds that its supposed to
 	const command = client.createBanCommand(event.report)
 	if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+	client.createActionForReport(event.report.playername)
 	client.rcon.rconCommandAll(`/sc ${command}; rcon.print(true)`)
 }
 
@@ -133,6 +134,7 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 	// unban if it should
 	const command = client.createUnbanCommand(event.revocation.playername)
 	if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+	client.createActionForUnban(event.revocation.playername)
 	client.rcon.rconCommandAll(
 		`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`
 	)
@@ -161,6 +163,14 @@ const filterObjectChanged = async ({
 		database: client.db,
 		newFilter: filterObject,
 		validReports: validReports,
+	})
+
+	// initially, create all of the actions for the reports
+	results.toBan.forEach((playername) => {
+		client.createActionForReport(playername)
+	})
+	results.toUnban.forEach((playername) => {
+		client.createActionForUnban(playername)
 	})
 
 	// ban players
@@ -194,6 +204,7 @@ const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
 	}
 	client.fagc.websocket.removeFilterObjectId(ENV.FILTEROBJECTID)
 }
+
 // here, we handle stuff since the last connection, such as fetching missed reports, revocations etc.
 const connected = async ({ client }: HandlerOpts<"connected">) => {
 	const lastReceivedDate = client.botConfig.lastNotificationProcessed
@@ -222,6 +233,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 			// ban in guilds that its supposed to
 			const command = client.createBanCommand(report)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+			client.createActionForReport(report.playername)
 			banCommands.push(command)
 		}
 
@@ -235,6 +247,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 
 			const command = client.createUnbanCommand(revocation.playername)
 			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+			client.createActionForUnban(revocation.playername)
 			unbanCommands.push(command)
 		}
 	}

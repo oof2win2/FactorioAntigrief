@@ -49,10 +49,8 @@ export default class FAGCBot extends Client {
 	servers: database.FactorioServerType[] = []
 	filterObject: FilterObject | null = null
 	readonly rcon: RCONInterface
-	private recentServerSyncedActions: (
-		| BaseAction<ServerSyncedBan>
-		| BaseAction<ServerSyncedUnban>
-	)[] = []
+	private recentServerSyncedBans: Map<string, Date> = new Map()
+	private recentServerSyncedUnbans: Map<string, Date> = new Map()
 	serverSyncedActionHandler: ServerSyncedActionHandler
 
 	constructor(options: BotOptions) {
@@ -205,29 +203,34 @@ export default class FAGCBot extends Client {
 	 */
 	clearRecentServerSyncedActions(clearAll = false) {
 		if (clearAll) {
-			this.recentServerSyncedActions = []
+			this.recentServerSyncedBans.clear()
+			this.recentServerSyncedUnbans.clear()
 			return
 		}
 
 		const now = new Date()
 		const cutoff = new Date(now.valueOf() - 60 * 1000)
-		this.recentServerSyncedActions = this.recentServerSyncedActions.filter(
-			(x) => x.receivedAt > cutoff
-		)
+		for (const [playername, createdAt] of this.recentServerSyncedBans) {
+			if (createdAt < cutoff) {
+				this.recentServerSyncedBans.delete(playername)
+			}
+		}
+
+		for (const [playername, createdAt] of this.recentServerSyncedUnbans) {
+			if (createdAt < cutoff) {
+				this.recentServerSyncedUnbans.delete(playername)
+			}
+		}
 	}
 
 	async handleSyncedBan(ban: BaseAction<ServerSyncedBan>) {
 		// if we performed an action like this already recently, we dont want to do it again
-		const foundRecent = this.recentServerSyncedActions.find((entry) => {
-			if (entry.actionType !== "ban") return false
-			return entry.action.playername === ban.action.playername
-		})
-		if (foundRecent) return
+		if (this.recentServerSyncedBans.has(ban.action.playername)) return
 
 		const banCommand = `/c game.ban_player("${ban.action.playername}", "${ban.action.reason}")`
 		this.rcon.rconCommandAll(banCommand)
 
-		this.recentServerSyncedActions.push(ban)
+		this.recentServerSyncedBans.set(ban.action.playername, new Date())
 
 		if (ban.action.byPlayer) {
 			const admin = await this.db.getRepository(LinkedAdmin).findOne({
@@ -249,11 +252,9 @@ export default class FAGCBot extends Client {
 
 	async handleSyncedUnban(unban: BaseAction<ServerSyncedUnban>) {
 		// if we performed an action like this already recently, we dont want to do it again
-		const foundRecent = this.recentServerSyncedActions.find((entry) => {
-			if (entry.actionType !== "unban") return false
-			return entry.action.playername === unban.action.playername
-		})
-		if (foundRecent) return
+		if (this.recentServerSyncedUnbans.has(unban.action.playername)) return
+
+		this.recentServerSyncedUnbans.set(unban.action.playername, new Date())
 
 		const unbanCommand = `/c game.unban_player("${unban.action.playername}")`
 		this.rcon.rconCommandAll(unbanCommand)
@@ -261,5 +262,13 @@ export default class FAGCBot extends Client {
 		this.db.getRepository(PrivateBan).delete({
 			playername: unban.action.playername,
 		})
+	}
+
+	createActionForReport(playername: string) {
+		this.recentServerSyncedBans.set(playername, new Date())
+	}
+
+	createActionForUnban(playername: string) {
+		this.recentServerSyncedUnbans.set(playername, new Date())
 	}
 }
