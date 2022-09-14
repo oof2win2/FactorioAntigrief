@@ -48,7 +48,7 @@ const Setaction: SubCommand = {
 			reason: reason,
 		})
 
-		await client.rcon.rconCommandAll(`/whitelist add ${playername}`)
+		await client.rcon.rconCommandAll(`/unban ${playername}`)
 
 		return interaction.reply({
 			content: `Player ${playername} is now whitelisted for ${reason}`,

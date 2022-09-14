@@ -39,8 +39,6 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		await client.rcon.rconCommandAll(`/whitelist remove ${playername}`)
-
 		if (client.filterObject) {
 			const hasBan = await hasFAGCBans({
 				playername,
