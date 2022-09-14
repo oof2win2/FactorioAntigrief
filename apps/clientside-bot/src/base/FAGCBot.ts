@@ -111,6 +111,13 @@ export default class FAGCBot extends Client {
 			this.servers
 		)
 
+		this.serverSyncedActionHandler.on("ban", (evt) =>
+			this.handleSyncedBan(evt)
+		)
+		this.serverSyncedActionHandler.on("unban", (evt) =>
+			this.handleSyncedUnban(evt)
+		)
+
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
 		setInterval(() => this.clearRecentServerSyncedActions(), 60 * 1000) // clear recent server synced actions every minute
 	}
@@ -232,7 +239,7 @@ export default class FAGCBot extends Client {
 					`Admin with playername ${ban.action.byPlayer} not found in database`
 				)
 
-			this.db.getRepository(PrivateBan).create({
+			this.db.getRepository(PrivateBan).insert({
 				playername: ban.action.playername,
 				reason: ban.action.reason,
 				adminId: admin ? admin.discordId : ENV.OWNERID,
