@@ -5,6 +5,7 @@ import PrivateBan from "../../database/PrivateBan.js"
 import dayjs from "dayjs"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
 		.setDescription("Create a private ban")

@@ -4,6 +4,7 @@ import { SubCommand } from "../../base/Commands.js"
 import PrivateBan from "../../database/PrivateBan.js"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("view")
 		.setDescription("View a private ban")

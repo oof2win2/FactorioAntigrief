@@ -5,6 +5,7 @@ import { BotConfigType } from "../../../base/database.js"
 import LinkedAdmin from "../../../database/LinkedAdmin.js"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("link")
 		.setDescription("Link yourself with a Factorio playername")

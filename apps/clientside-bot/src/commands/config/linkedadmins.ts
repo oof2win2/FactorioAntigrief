@@ -1,5 +1,12 @@
-import { SlashCommandBuilder } from "@discordjs/builders"
-import { CommandWithSubcommands, SubCommand } from "../../base/Commands.js"
+import {
+	SlashCommandBuilder,
+	SlashCommandSubcommandGroupBuilder,
+} from "@discordjs/builders"
+import {
+	executeCommandInteraction,
+	SubCommand,
+	SubCommandGroup,
+} from "../../base/Commands.js"
 import { readdirSync } from "fs"
 
 const commands: SubCommand[] = readdirSync("./commands/config/linkedadmins/")
@@ -10,22 +17,12 @@ const commands: SubCommand[] = readdirSync("./commands/config/linkedadmins/")
 		return command.default
 	})
 
-const Config: CommandWithSubcommands = {
-	data: new SlashCommandBuilder()
+const Config: SubCommandGroup = {
+	type: "SubCommandGroup",
+	data: new SlashCommandSubcommandGroupBuilder()
 		.setName("linkedadmins")
-		.setDescription("Linked admins")
-		.setDefaultPermission(false),
-	execute: async (args) => {
-		const subcommand = args.interaction.options.getSubcommand()
-		const command = commands.find(
-			(command) => command.data.name === subcommand
-		)
-		if (!command)
-			return args.interaction.reply(
-				"An error executing the command occured"
-			)
-		return command.execute(args)
-	},
+		.setDescription("Linked admins"),
+	execute: (args) => executeCommandInteraction(args, commands),
 	permissionType: "configrole",
 }
 

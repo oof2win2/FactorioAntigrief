@@ -4,6 +4,7 @@ import { SubCommand } from "../../base/Commands.js"
 import { BotConfigType } from "../../base/database.js"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("setaction")
 		.setDescription(

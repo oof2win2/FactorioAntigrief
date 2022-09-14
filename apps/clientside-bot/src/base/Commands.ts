@@ -1,6 +1,7 @@
 import {
 	SlashCommandBuilder,
 	SlashCommandSubcommandBuilder,
+	SlashCommandSubcommandGroupBuilder,
 } from "@discordjs/builders"
 import {
 	GuildApplicationCommandPermissionData,
@@ -30,12 +31,37 @@ interface BaseCommand {
 
 export interface CommandWithSubcommands extends BaseCommand {
 	data: SlashCommandBuilder
+	type: "CommandWithSubcommands"
 }
 
 export interface Command extends BaseCommand {
 	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
+	type: "Command"
 }
 
 export interface SubCommand extends BaseCommand {
 	data: SlashCommandSubcommandBuilder
+	type: "SubCommand"
+}
+
+export interface SubCommandGroup extends BaseCommand {
+	data: SlashCommandSubcommandGroupBuilder
+	type: "SubCommandGroup"
+}
+
+export function executeCommandInteraction(
+	args: CommandParams,
+	commands: (SubCommand | SubCommandGroup)[]
+) {
+	const subcommand = args.interaction.options.getSubcommand()
+	const group = args.interaction.options.getSubcommandGroup()
+	const command = commands.find(
+		(command) =>
+			command.data.name === subcommand || command.data.name === group
+	)
+	if (!command)
+		return args.interaction.reply(
+			"An error finding the command to execute occured"
+		)
+	return command.execute(args)
 }

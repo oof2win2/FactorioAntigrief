@@ -4,6 +4,7 @@ import { SubCommand } from "../../base/Commands.js"
 import Whitelist from "../../database/Whitelist.js"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
 		.setDescription("Create a whitelist entry")

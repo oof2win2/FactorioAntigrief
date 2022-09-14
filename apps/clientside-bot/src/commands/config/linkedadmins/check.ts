@@ -3,6 +3,7 @@ import { SubCommand } from "../../../base/Commands.js"
 import LinkedAdmin from "../../../database/LinkedAdmin.js"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("check")
 		.setDescription("Check whether a player or user is linked")

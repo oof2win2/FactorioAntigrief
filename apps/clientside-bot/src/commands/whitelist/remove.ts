@@ -5,6 +5,7 @@ import Whitelist from "../../database/Whitelist.js"
 import hasFAGCBans from "../../utils/functions/hasFAGCBans.js"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
 		.setDescription("Remove a whitelist entry")

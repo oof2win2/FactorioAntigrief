@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders"
 import { Command } from "../base/Commands.js"
 
 const Ping: Command = {
+	type: "Command",
 	data: new SlashCommandBuilder()
 		.setName("ping")
 		.setDescription("Ping the bot"),

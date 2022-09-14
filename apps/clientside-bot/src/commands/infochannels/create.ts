@@ -4,6 +4,7 @@ import { SubCommand } from "../../base/Commands.js"
 import InfoChannel from "../../database/InfoChannel.js"
 
 const Setaction: SubCommand = {
+	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
 		.setDescription("Create an info channel in this guild")
