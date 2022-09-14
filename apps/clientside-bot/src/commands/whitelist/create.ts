@@ -48,6 +48,7 @@ const Setaction: SubCommand = {
 			reason: reason,
 		})
 
+		client.createActionForUnban(playername)
 		await client.rcon.rconCommandAll(`/unban ${playername}`)
 
 		return interaction.reply({

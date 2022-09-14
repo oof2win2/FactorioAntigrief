@@ -262,4 +262,34 @@ export default class FAGCBot extends Client {
 			playername: unban.action.playername,
 		})
 	}
+
+	createActionForReport(playername: string) {
+		const action: BaseAction<ServerSyncedBan> = {
+			actionType: "ban",
+			action: {
+				playername: playername,
+				reason: "Some reason",
+				byPlayer: "FAGC User",
+			},
+			receivedAt: new Date(),
+			server: this.servers[0],
+		}
+
+		this.recentServerSyncedActions.push(action)
+	}
+
+	createActionForUnban(playername: string) {
+		const action: BaseAction<ServerSyncedUnban> = {
+			actionType: "unban",
+			action: {
+				playername,
+				reason: "Some reason",
+				byPlayer: "FAGC User",
+			},
+			receivedAt: new Date(),
+			server: this.servers[0],
+		}
+
+		this.recentServerSyncedActions.push(action)
+	}
 }

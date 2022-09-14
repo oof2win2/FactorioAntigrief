@@ -49,6 +49,7 @@ const Setaction: SubCommand = {
 			reason: reason,
 		})
 
+		client.createActionForReport(playername)
 		await client.rcon.rconCommandAll(
 			`/ban ${playername} ${reason} by ${interaction.user.username}#${
 				interaction.user.discriminator
