@@ -23,7 +23,7 @@
 		"envalid": "^7.2.1",
 		"fagc-api-wrapper": "^1.28.2",
 		"fs-extra": "^10.1.0",
-		"moment": "^2.29.1",
+		"moment": "^2.29.4",
 		"node-fetch": "^3.2.4",
 		"path": "^0.12.7",
 		"validator": "^13.7.0"
