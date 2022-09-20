@@ -30,8 +30,8 @@ declare interface ServerSyncedActionHandler {
 	): boolean
 }
 
-const banLineRegex = /ban;"\w+";("\w+")?;("\w+")?/
-const unbanLineRegex = /unban;"\w+";("\w+")?;("\w+")?/
+const banLineRegex = /ban,(\w+),(\w+)?,(".*")?/
+const unbanLineRegex = /unban,(\w+),(\w+)?,(".*")?/
 const removeStringSpeechmarks = (value: string) => {
 	return value.substring(1, value.length - 1)
 }
@@ -102,8 +102,8 @@ class ServerSyncedActionHandler extends EventEmitter {
 						receivedAt: new Date(),
 						actionType,
 						action: {
-							playername: removeStringSpeechmarks(data[1]),
-							byPlayer: removeStringSpeechmarks(data[2]),
+							playername: data[1],
+							byPlayer: data[2],
 							reason: removeStringSpeechmarks(data[3]),
 						},
 						server,
@@ -117,8 +117,8 @@ class ServerSyncedActionHandler extends EventEmitter {
 						receivedAt: new Date(),
 						actionType,
 						action: {
-							playername: removeStringSpeechmarks(data[1]),
-							byPlayer: removeStringSpeechmarks(data[2]),
+							playername: data[1],
+							byPlayer: data[2],
 							reason: removeStringSpeechmarks(data[3]),
 						},
 						server,
