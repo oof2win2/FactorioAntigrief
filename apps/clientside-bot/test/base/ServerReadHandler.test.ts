@@ -31,15 +31,12 @@ describe("ServerSyncedActionHandler", () => {
 	})
 
 	it("Should error with invalid ban line format", () => {
-		expect(handler.handleLine(server, `ban;;"Player";`)).toBe(false)
+		expect(handler.handleLine(server, `ban,,AdminName,`)).toBe(false)
 		expect(console.error).toBeCalled()
 	})
 
 	it("Should succeed with valid ban line format without a reason", () => {
-		const result = handler.handleLine(
-			server,
-			`ban;"oof2win2";"Windsinger";`
-		)
+		const result = handler.handleLine(server, `ban,oof2win2,Windsinger,`)
 
 		expect(result).not.toBe(false)
 		expect((result as Exclude<typeof result, false>).actionType).toBe("ban")
@@ -49,13 +46,15 @@ describe("ServerSyncedActionHandler", () => {
 		expect((result as Exclude<typeof result, false>).action.byPlayer).toBe(
 			"Windsinger"
 		)
-		expect((result as Exclude<typeof result, false>).action.reason).toBe("")
+		expect((result as Exclude<typeof result, false>).action.reason).toBe(
+			null
+		)
 	})
 
 	it("Should succeed with valid ban line format with a reason", () => {
 		const result = handler.handleLine(
 			server,
-			`ban;"oof2win2";"Windsinger";"Some reason"`
+			`ban,oof2win2,Windsinger,"Some reason"`
 		)
 
 		expect(result).not.toBe(false)
@@ -72,15 +71,12 @@ describe("ServerSyncedActionHandler", () => {
 	})
 
 	it("Should error with invalid unban line format", () => {
-		expect(handler.handleLine(server, `unban;;"Player";`)).toBe(false)
+		expect(handler.handleLine(server, `unban,,"Player",`)).toBe(false)
 		expect(console.error).toBeCalled()
 	})
 
 	it("Should succeed with valid unban line format without a reason", () => {
-		const result = handler.handleLine(
-			server,
-			`unban;"oof2win2";"Windsinger";`
-		)
+		const result = handler.handleLine(server, `unban,oof2win2,Windsinger,`)
 
 		expect(result).not.toBe(false)
 		expect((result as Exclude<typeof result, false>).actionType).toBe(
@@ -92,13 +88,15 @@ describe("ServerSyncedActionHandler", () => {
 		expect((result as Exclude<typeof result, false>).action.byPlayer).toBe(
 			"Windsinger"
 		)
-		expect((result as Exclude<typeof result, false>).action.reason).toBe("")
+		expect((result as Exclude<typeof result, false>).action.reason).toBe(
+			null
+		)
 	})
 
 	it("Should succeed with valid unban line format with a reason", () => {
 		const result = handler.handleLine(
 			server,
-			`unban;"oof2win2";"Windsinger";"Some reason"`
+			`unban,oof2win2,Windsinger,"Some reason"`
 		)
 
 		expect(result).not.toBe(false)
