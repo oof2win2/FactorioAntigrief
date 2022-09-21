@@ -30,14 +30,18 @@ declare interface ServerSyncedActionHandler {
 	): boolean
 }
 
-const banLineRegex = /ban;"\w+";("\w+")?;("\w+")?/
-const unbanLineRegex = /unban;"\w+";("\w+")?;("\w+")?/
 const removeStringSpeechmarks = (value: string) => {
 	return value.substring(1, value.length - 1)
 }
 
 class ServerSyncedActionHandler extends EventEmitter {
 	private tails: Tail[] = []
+
+	readonly Regexes: Record<keyof ServerSyncedActionHandlerActions, RegExp> = {
+		ban: /^ban,(\w+),(\w+)?,(".*")?$/,
+		unban: /^unban,(\w+),(\w+)?,(".*")?$/,
+	}
+
 	constructor(private servers: FactorioServerType[]) {
 		super()
 		for (const server of this.servers) {
@@ -89,48 +93,35 @@ class ServerSyncedActionHandler extends EventEmitter {
 	): false | (BaseAction<ServerSyncedBan> | BaseAction<ServerSyncedUnban>) {
 		let result: BaseAction<ServerSyncedBan> | BaseAction<ServerSyncedUnban>
 		try {
-			// the line is basically csv
-			const data = line.split(";")
+			for (const [name, regex] of Object.entries(this.Regexes)) {
+				const match = regex.exec(line)
+				if (!match) continue
 
-			// the first item is the action type
-			const actionType = data[0]
-			switch (actionType) {
-				case "ban":
-					if (!banLineRegex.test(line))
-						throw new Error("Invalid ban line format")
-					result = {
-						receivedAt: new Date(),
-						actionType,
-						action: {
-							playername: removeStringSpeechmarks(data[1]),
-							byPlayer: removeStringSpeechmarks(data[2]),
-							reason: removeStringSpeechmarks(data[3]),
-						},
-						server,
-					}
-					this.emit("ban", result)
-					break
-				case "unban":
-					if (!unbanLineRegex.test(line))
-						throw new Error("Invalid unban line format")
-					result = {
-						receivedAt: new Date(),
-						actionType,
-						action: {
-							playername: removeStringSpeechmarks(data[1]),
-							byPlayer: removeStringSpeechmarks(data[2]),
-							reason: removeStringSpeechmarks(data[3]),
-						},
-						server,
-					}
-					this.emit("unban", result)
-					break
-				default:
-					console.error(
-						`Unknown action type ${actionType} for server ${server.servername}`
-					)
-					return false
+				const [, player, admin, reason] = match
+
+				result = {
+					receivedAt: new Date(),
+					actionType: name as keyof ServerSyncedActionHandlerActions,
+					action: {
+						playername: player,
+						byPlayer: admin ? admin : null,
+						reason: reason ? removeStringSpeechmarks(reason) : null,
+					},
+					server,
+				}
+				this.emit(
+					name as keyof ServerSyncedActionHandlerActions,
+					result
+				)
+				return result
 			}
+
+			console.error(
+				`Unknown action type ${line.split(",")[0]} for server ${
+					server.servername
+				}`
+			)
+			return false
 		} catch (error) {
 			console.error(
 				`Error parsing action line from server ${server.servername}: ${line}`
