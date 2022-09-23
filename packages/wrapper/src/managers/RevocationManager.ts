@@ -61,17 +61,10 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	async fetchRevocation({
 		revocationId,
 		cache = true,
-		reqConfig = {},
 	}: {
 		revocationId: string
 	} & FetchRequestTypes): Promise<Revocation | null> {
-		const req = await fetch(`${this.apiurl}/revocations/${revocationId}`, {
-			credentials: "include",
-			headers: {
-				authorization: authenticate(this, reqConfig),
-			},
-		})
-		if (req.status === 401) throw new AuthError()
+		const req = await fetch(`${this.apiurl}/revocations/${revocationId}`)
 		const revocation = await req.json()
 
 		if (!revocation) return null

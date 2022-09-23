@@ -105,7 +105,7 @@ export default class RevocationController {
 					id: z.string(),
 				}),
 
-				description: "Fetch revocation",
+				description: "Fetch revocation by ID",
 				tags: ["revocations"],
 				security: [
 					{
@@ -118,7 +118,6 @@ export default class RevocationController {
 			},
 		},
 	})
-	@Authenticate
 	async fetch(
 		req: FastifyRequest<{
 			Params: {
@@ -128,20 +127,12 @@ export default class RevocationController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const { community } = req.requestContext.get("auth")
-		if (!community)
-			return res.status(404).send({
-				errorCode: 404,
-				error: "Community not found",
-				message: "Community not found",
-			})
 
 		const revocation = await ReportInfoModel.findOne({
 			id: id,
 		})
 		if (!revocation) return res.send(null)
 		if (!revocation.revokedAt) return res.send(null) // it is a report as it has not been revoked
-		if (revocation.communityId !== community.id) return res.send(null)
 
 		return res.send(revocation)
 	}
