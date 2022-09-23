@@ -105,7 +105,7 @@ export default class RevocationController {
 					id: z.string(),
 				}),
 
-				description: "Fetch revocation",
+				description: "Fetch revocation by ID",
 				tags: ["revocations"],
 				security: [
 					{
@@ -118,7 +118,6 @@ export default class RevocationController {
 			},
 		},
 	})
-	@Authenticate
 	async fetch(
 		req: FastifyRequest<{
 			Params: {
@@ -128,22 +127,57 @@ export default class RevocationController {
 		res: FastifyReply
 	): Promise<FastifyReply> {
 		const { id } = req.params
-		const { community } = req.requestContext.get("auth")
-		if (!community)
-			return res.status(404).send({
-				errorCode: 404,
-				error: "Community not found",
-				message: "Community not found",
-			})
 
 		const revocation = await ReportInfoModel.findOne({
 			id: id,
 		})
 		if (!revocation) return res.send(null)
 		if (!revocation.revokedAt) return res.send(null) // it is a report as it has not been revoked
-		if (revocation.communityId !== community.id) return res.send(null)
 
 		return res.send(revocation)
+	}
+
+	@POST({
+		url: "/bulk",
+		options: {
+			schema: {
+				body: z.object({
+					ids: z.array(z.string()).min(1),
+					since: z
+						.string()
+						.refine(
+							(input) => validator.isISO8601(input),
+							"since must be a valid ISO8601 date"
+						)
+						.transform((input) => new Date(input)),
+				}),
+				response: {
+					"200": z.array(Revocation),
+				},
+			},
+		},
+	})
+	async bulkFetch(
+		req: FastifyRequest<{
+			Body: {
+				ids: string[]
+				since: Date
+			}
+		}>,
+		res: FastifyReply
+	) {
+		const revocations = await ReportInfoModel.find({
+			revokedAt: {
+				$gt: req.body.since,
+			},
+		})
+
+		// filter the revocations to be only the ones that are in the ids array
+		const filteredRevocations = revocations.filter((revocation) => {
+			return req.body.ids.includes(revocation.id)
+		})
+
+		return res.send(filteredRevocations)
 	}
 
 	@POST({

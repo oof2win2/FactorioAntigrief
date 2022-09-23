@@ -61,22 +61,46 @@ export default class RevocationManager extends BaseManager<Revocation> {
 	async fetchRevocation({
 		revocationId,
 		cache = true,
-		reqConfig = {},
 	}: {
 		revocationId: string
 	} & FetchRequestTypes): Promise<Revocation | null> {
-		const req = await fetch(`${this.apiurl}/revocations/${revocationId}`, {
-			credentials: "include",
-			headers: {
-				authorization: authenticate(this, reqConfig),
-			},
-		})
-		if (req.status === 401) throw new AuthError()
+		const req = await fetch(`${this.apiurl}/revocations/${revocationId}`)
 		const revocation = await req.json()
 
 		if (!revocation) return null
 		const parsed = Revocation.parse(revocation)
 		if (cache) this.add(parsed)
+		return parsed
+	}
+
+	async fetchBulk({
+		reportIds,
+		since,
+		cache = true,
+	}: {
+		reportIds: string[]
+		since: Date
+	} & FetchRequestTypes): Promise<Revocation[]> {
+		const req = await fetch(`${this.apiurl}/revocations/bulk`, {
+			method: "POST",
+			body: JSON.stringify({
+				reportIds: reportIds,
+				since: since.toISOString(),
+			}),
+			credentials: "include",
+			headers: {
+				"content-type": "application/json",
+			},
+		})
+		const revocations = await req.json()
+
+		if (revocations.error)
+			throw new GenericAPIError(
+				`${revocations.error}: ${revocations.message}`
+			)
+
+		const parsed = z.array(Revocation).parse(revocations)
+		if (cache) parsed.forEach((revocation) => this.add(revocation))
 		return parsed
 	}
 
