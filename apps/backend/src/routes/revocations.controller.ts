@@ -138,6 +138,49 @@ export default class RevocationController {
 	}
 
 	@POST({
+		url: "/bulk",
+		options: {
+			schema: {
+				body: z.object({
+					ids: z.array(z.string()).min(1),
+					since: z
+						.string()
+						.refine(
+							(input) => validator.isISO8601(input),
+							"since must be a valid ISO8601 date"
+						)
+						.transform((input) => new Date(input)),
+				}),
+				response: {
+					"200": z.array(Revocation),
+				},
+			},
+		},
+	})
+	async bulkFetch(
+		req: FastifyRequest<{
+			Body: {
+				ids: string[]
+				since: Date
+			}
+		}>,
+		res: FastifyReply
+	) {
+		const revocations = await ReportInfoModel.find({
+			revokedAt: {
+				$gt: req.body.since,
+			},
+		})
+
+		// filter the revocations to be only the ones that are in the ids array
+		const filteredRevocations = revocations.filter((revocation) => {
+			return req.body.ids.includes(revocation.id)
+		})
+
+		return res.send(filteredRevocations)
+	}
+
+	@POST({
 		url: "/",
 		options: {
 			schema: {
