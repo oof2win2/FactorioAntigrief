@@ -14,6 +14,7 @@ import {
 	splitIntoGroups,
 } from "../utils/functions"
 import ENV from "../utils/env"
+import FAGCBan from "../database/FAGCBan"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -210,12 +211,19 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	const lastReceivedDate = client.botConfig.lastNotificationProcessed
 	const filterObject = client.filterObject
 
+	const allReportIds = await client.db
+		.getRepository(FAGCBan)
+		.createQueryBuilder()
+		.select(["id"])
+		.getMany()
+
 	// we fetch the missed reports and revocations and act on each of them
 	const reports = await client.fagc.reports.fetchSince({
 		timestamp: lastReceivedDate,
 	})
-	const revocations = await client.fagc.revocations.fetchSince({
-		timestamp: lastReceivedDate,
+	const revocations = await client.fagc.revocations.fetchBulk({
+		since: lastReceivedDate,
+		reportIds: allReportIds.map((r) => r.id),
 	})
 
 	const banCommands: string[] = []
