@@ -118,6 +118,7 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 		database: client.db,
 		revocation: event.revocation,
 		filter: filterObject,
+		offlineServerCount: client.rcon.offlineServerCount,
 	})
 	if (!shouldUnban) return
 
@@ -239,6 +240,7 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 				database: client.db,
 				revocation: revocation,
 				filter: filterObject,
+				offlineServerCount: client.rcon.offlineServerCount,
 			})
 			if (!shouldUnban) continue
 
