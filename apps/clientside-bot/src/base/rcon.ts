@@ -25,10 +25,9 @@ export default class RconInterface {
 	private client: FAGCBot
 	private connections: Connection[]
 	/**
-	 * Map of server name to timeout for the check if the server is online.
-	 * Can be used to cancel the check if a command is used etc.
+	 * Amount of servers that are offline
 	 */
-	private checkIntervals: Map<string, NodeJS.Timeout> = new Map()
+	private _offlineServerCount = 0
 	constructor(client: FAGCBot, servers: FactorioServerType[]) {
 		this.client = client
 		this.servers = servers
@@ -209,6 +208,7 @@ export default class RconInterface {
 	 * Mark a server as online in the database
 	 */
 	private async markAsOnline(server: FactorioServerType) {
+		this._offlineServerCount++
 		await this.client.db
 			.getRepository(ServerOnline)
 			.createQueryBuilder()
@@ -227,6 +227,7 @@ export default class RconInterface {
 	 * Mark a server as offline in the database
 	 */
 	private async markAsOffline(server: FactorioServerType) {
+		this._offlineServerCount--
 		await this.client.db
 			.getRepository(ServerOnline)
 			.createQueryBuilder()
@@ -278,5 +279,9 @@ export default class RconInterface {
 			)
 		)
 		return responses
+	}
+
+	get offlineServerCount() {
+		return this._offlineServerCount
 	}
 }
