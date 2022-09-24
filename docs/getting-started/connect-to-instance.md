@@ -103,7 +103,7 @@ yarn build
 4. Run the `yarn db:sync` command to create the tables in the database.
 5. Invite your bot to your guild with the `140123621440` permission integer and `bot+applications.commands` scopes.
 6. Run the `yarn bot:addcommands` command to populate commands in your guild.
-7. Run the bot with node, nodemon, pm2, or similar to keep it running.
+7. Run the bot with node, nodemon, pm2, or similar tools to keep it running.
 
 
 ## Generating a banlist only
