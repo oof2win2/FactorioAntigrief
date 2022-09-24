@@ -30,14 +30,29 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const result = await client.db.getRepository(PrivateBan).delete({
-			playername: playername,
+		const found = await client.db.getRepository(PrivateBan).findOne({
+			playername,
 		})
-		if (!result.affected)
+		if (!found)
 			return interaction.reply({
 				content: `Player ${playername} was not banned`,
 				ephemeral: true,
 			})
+
+		if (client.rcon.offlineServerCount > 0) {
+			await client.db.getRepository(PrivateBan).update(
+				{
+					playername,
+				},
+				{
+					removedAt: new Date(),
+				}
+			)
+		} else {
+			await client.db.getRepository(PrivateBan).delete({
+				playername,
+			})
+		}
 
 		client.createActionForUnban(playername)
 		await client.rcon.rconCommandAll(`/unban ${playername}`)

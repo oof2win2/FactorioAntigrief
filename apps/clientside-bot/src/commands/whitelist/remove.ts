@@ -30,14 +30,29 @@ const Setaction: SubCommand = {
 			.default("No reason")
 			.parse(interaction.options.getString("reason") ?? undefined)
 
-		const result = await client.db.getRepository(Whitelist).delete({
+		const found = await client.db.getRepository(Whitelist).findOne({
 			playername: playername,
 		})
-		if (!result.affected)
+		if (!found)
 			return interaction.reply({
 				content: `Player ${playername} was not whitelisted`,
 				ephemeral: true,
 			})
+
+		if (client.rcon.offlineServerCount > 0) {
+			await client.db.getRepository(Whitelist).update(
+				{
+					playername,
+				},
+				{
+					removedAt: new Date(),
+				}
+			)
+		} else {
+			await client.db.getRepository(Whitelist).delete({
+				playername,
+			})
+		}
 
 		if (client.filterObject) {
 			const FAGCBan = await hasFAGCBans({
