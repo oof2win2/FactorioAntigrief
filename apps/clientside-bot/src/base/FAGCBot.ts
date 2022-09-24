@@ -47,7 +47,7 @@ export default class FAGCBot extends Client {
 	community: Community | null = null
 	embedQueue: Collection<string, MessageEmbed[]>
 	servers: database.FactorioServerType[] = []
-	filterObject: FilterObject | null = null
+	private _filterObject: FilterObject | null = null
 	readonly rcon: RCONInterface
 	private recentServerSyncedBans: Map<string, Date> = new Map()
 	private recentServerSyncedUnbans: Map<string, Date> = new Map()
@@ -270,5 +270,19 @@ export default class FAGCBot extends Client {
 
 	createActionForUnban(playername: string) {
 		this.recentServerSyncedUnbans.set(playername, new Date())
+	}
+
+	get filterObject(): FilterObject {
+		if (this._filterObject) return this._filterObject
+
+		const filterObject: FilterObject = {
+			id: "00000",
+			communityFilters: [],
+			categoryFilters: [],
+		}
+		return filterObject
+	}
+	set filterObject(filterObject: FilterObject) {
+		this._filterObject = filterObject
 	}
 }

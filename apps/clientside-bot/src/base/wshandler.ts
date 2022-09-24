@@ -1,7 +1,6 @@
 import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
 import FAGCBot from "./FAGCBot"
 import {
-	Collection,
 	MessageEmbed,
 	NewsChannel,
 	TextChannel,
@@ -78,8 +77,6 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 	const filterObject = client.filterObject
 
-	if (!filterObject) return
-
 	// send the embed to info channels
 	client.infochannels.forEach((c) => {
 		const channel = client.channels.cache.get(c.channelId)
@@ -105,14 +102,6 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 	const embed = new MessageEmbed({ ...event.embed, type: undefined })
 	const filterObject = client.filterObject
-
-	if (!filterObject) return
-	// return if the report does not match filters
-	if (
-		!filterObject.categoryFilters.includes(event.revocation.categoryId) ||
-		!filterObject.communityFilters.includes(event.revocation.communityId)
-	)
-		return
 
 	client.infochannels.forEach((c) => {
 		const channel = client.channels.cache.get(c.channelId) as
@@ -236,11 +225,11 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 				report: report,
 				filter: filterObject,
 			})
-			if (!shouldBan) return
+			if (!shouldBan) continue
 
 			// ban in guilds that its supposed to
 			const command = client.createBanCommand(report)
-			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+			if (!command) continue // if it is not supposed to do anything in this guild, then it won't do anything
 			client.createActionForReport(report.playername)
 			banCommands.push(command)
 		}
@@ -251,10 +240,10 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 				revocation: revocation,
 				filter: filterObject,
 			})
-			if (!shouldUnban) return
+			if (!shouldUnban) continue
 
 			const command = client.createUnbanCommand(revocation.playername)
-			if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
+			if (!command) continue // if it is not supposed to do anything in this guild, then it won't do anything
 			client.createActionForUnban(revocation.playername)
 			unbanCommands.push(command)
 		}
