@@ -259,9 +259,20 @@ export default class FAGCBot extends Client {
 		const unbanCommand = `/c game.unban_player("${unban.action.playername}")`
 		this.rcon.rconCommandAll(unbanCommand)
 
-		this.db.getRepository(PrivateBan).delete({
-			playername: unban.action.playername,
-		})
+		if (this.rcon.offlineServerCount > 0) {
+			await this.db.getRepository(PrivateBan).update(
+				{
+					playername: unban.action.playername,
+				},
+				{
+					removedAt: new Date(),
+				}
+			)
+		} else {
+			await this.db.getRepository(PrivateBan).delete({
+				playername: unban.action.playername,
+			})
+		}
 	}
 
 	createActionForReport(playername: string) {
