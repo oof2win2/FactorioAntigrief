@@ -57,7 +57,8 @@ const CreateReport = Command({
 
 		const categories = await client.getMessageResponse(
 			message,
-			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`
+			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`,
+			120000
 		)
 		if (!categories) return message.channel.send("No categories specified")
 		const categoryIds = categories.content.split(" ")
@@ -95,7 +96,8 @@ const CreateReport = Command({
 			(await client
 				.getMessageResponse(
 					message,
-					`${client.emotes.type} Type in description of the report or \`none\` if you don't want to set one`
+					`${client.emotes.type} Type in description of the report or \`none\` if you don't want to set one`,
+					120000
 				)
 				.then((m) => m?.content))
 		if (!desc || desc.toLowerCase() === "none") desc = undefined
@@ -103,7 +105,8 @@ const CreateReport = Command({
 		let proof = await client
 			.getMessageResponse(
 				message,
-				`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`
+				`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`,
+				120000
 			)
 			.then((x) => x?.content)
 		if (!proof || proof.toLowerCase() === "none") proof = "No proof"

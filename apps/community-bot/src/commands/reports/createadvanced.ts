@@ -54,7 +54,8 @@ const CreateAdvanced = Command({
 			(await client
 				.getMessageResponse(
 					message,
-					`${client.emotes.type} Type in the description of the report, or "none" if no description`
+					`${client.emotes.type} Type in the description of the report, or "none" if no description`,
+					120000
 				)
 				.then((x) => x?.content))
 		if (!description || description.toLowerCase() === "none")
@@ -63,7 +64,8 @@ const CreateAdvanced = Command({
 		const timestampMessage = await client
 			.getMessageResponse(
 				message,
-				`${client.emotes.type} Type in the ISO8601 timestamp of when the player was reported (or "now" if current time). Use <https://www.timestamp-converter.com/> to find the timestamp`
+				`${client.emotes.type} Type in the ISO8601 timestamp of when the player was reported (or "now" if current time). Use <https://www.timestamp-converter.com/> to find the timestamp`,
+				120000
 			)
 			.then((x) => x?.content)
 		let timestamp: Date
@@ -104,7 +106,8 @@ const CreateAdvanced = Command({
 
 		const categories = await client.getMessageResponse(
 			message,
-			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`
+			`${client.emotes.type} Type in the categories to report the player for, separated with spaces`,
+			120000
 		)
 		if (!categories) return message.channel.send("No categories specified")
 		const categoryIds = categories.content.split(" ")
@@ -141,7 +144,8 @@ const CreateAdvanced = Command({
 		let proof = await client
 			.getMessageResponse(
 				message,
-				`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`
+				`${client.emotes.type} Send links to proof of the report, separated with spaces, or \`none\` if there is no proof`,
+				120000
 			)
 			.then((x) => x?.content)
 		if (!proof || proof.toLowerCase() === "none") proof = undefined
