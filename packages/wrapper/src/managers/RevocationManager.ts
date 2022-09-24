@@ -84,7 +84,7 @@ export default class RevocationManager extends BaseManager<Revocation> {
 		const req = await fetch(`${this.apiurl}/revocations/bulk`, {
 			method: "POST",
 			body: JSON.stringify({
-				reportIds: reportIds,
+				ids: reportIds,
 				since: since.toISOString(),
 			}),
 			credentials: "include",
