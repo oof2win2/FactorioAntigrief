@@ -1,7 +1,6 @@
 import { FactorioServerType } from "./database"
 import { Rcon } from "rcon-client"
 import FAGCBot from "./FAGCBot.js"
-import ENV from "../utils/env.js"
 import ServerOnline from "../database/ServerOnline"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -25,9 +24,10 @@ export default class RconInterface {
 	private client: FAGCBot
 	private connections: Connection[]
 	/**
-	 * Amount of servers that are offline
+	 * Intervals of checking if a server is online
 	 */
-	private _offlineServerCount = 0
+	private checkIntervals: Map<string, NodeJS.Timeout> = new Map()
+
 	constructor(client: FAGCBot, servers: FactorioServerType[]) {
 		this.client = client
 		this.servers = servers
@@ -87,24 +87,17 @@ export default class RconInterface {
 	 * RCON server reconnection mechanism
 	 */
 	private reconnectRcon(rcon: Rcon, server: FactorioServerType) {
-		const times = [
-			30 * 1000,
-			60 * 1000,
-			5 * 60 * 1000,
-			10 * 60 * 1000,
-			15 * 60 * 1000,
-			30 * 60 * 1000,
-			60 * 60 * 1000,
-			3 * 60 * 60 * 1000,
-			6 * 60 * 60 * 1000,
-			12 * 60 * 60 * 1000,
-			24 * 60 * 60 * 1000,
-		]
-		let timeIndex = -1
+		// amount of seconds passed = amount of attempts * 15
+		const attempts = [2, 4, 20, 40, 60, 120, 240, 720, 1440, 2880, 5760]
+
+		let connectionAttempts = 0
 		const startedAt = Date.now()
 		const checkOnline = async () => {
 			try {
 				await rcon.connect()
+
+				// if the server is online, remove the interval
+				this.checkIntervals.delete(server.servername)
 
 				await this.markAsOnline(server)
 				// if the connection was successful, it would not error
@@ -188,27 +181,29 @@ export default class RconInterface {
 				}
 				return
 			} catch {
-				// make sure that the time between the checks is not exceeding 1 day at most
-				timeIndex = Math.min(timeIndex + 1, times.length - 1)
-				setTimeout(checkOnline, times[timeIndex]) // set the interval for the next checks
+				connectionAttempts++
+				// if the amount of connection attempts is equal to 48h, then set it to 1d to send the message again
+				if (connectionAttempts === 11520) connectionAttempts = 5760
 				// dayjs is used to get the relative time since the start of the reconnection attempts
-				this.client.sendToErrorChannel(
-					`Server <#${
-						server.discordChannelId
-					}> has been unable to connect to RCON for the past ${dayjs(
-						startedAt
-					).fromNow(true)}`
-				)
+				if (attempts.includes(connectionAttempts)) {
+					this.client.sendToErrorChannel(
+						`Server <#${
+							server.discordChannelId
+						}> has been unable to connect to RCON since ${dayjs(
+							startedAt
+						).fromNow()}`
+					)
+				}
 			}
 		}
-		setTimeout(checkOnline, 0)
+		const interval = setInterval(checkOnline, 15 * 1000)
+		this.checkIntervals.set(server.servername, interval)
 	}
 
 	/**
 	 * Mark a server as online in the database
 	 */
 	private async markAsOnline(server: FactorioServerType) {
-		this._offlineServerCount++
 		await this.client.db
 			.getRepository(ServerOnline)
 			.createQueryBuilder()
@@ -227,7 +222,6 @@ export default class RconInterface {
 	 * Mark a server as offline in the database
 	 */
 	private async markAsOffline(server: FactorioServerType) {
-		this._offlineServerCount--
 		await this.client.db
 			.getRepository(ServerOnline)
 			.createQueryBuilder()
@@ -282,6 +276,6 @@ export default class RconInterface {
 	}
 
 	get offlineServerCount() {
-		return this._offlineServerCount
+		return this.checkIntervals.size
 	}
 }

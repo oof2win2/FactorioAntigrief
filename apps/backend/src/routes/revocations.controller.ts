@@ -142,7 +142,7 @@ export default class RevocationController {
 		options: {
 			schema: {
 				body: z.object({
-					ids: z.array(z.string()).min(1),
+					ids: z.array(z.string()),
 					since: z
 						.string()
 						.refine(
@@ -166,6 +166,8 @@ export default class RevocationController {
 		}>,
 		res: FastifyReply
 	) {
+		if (req.body.ids.length === 0) return res.send([])
+
 		const revocations = await ReportInfoModel.find({
 			revokedAt: {
 				$gt: req.body.since,
