@@ -40,7 +40,7 @@ const Genbanlist = Command({
 			"banlist.json"
 		)
 		return await message.reply({
-			content: "Banlist attatched",
+			content: "Banlist attached",
 			files: [file],
 		})
 	},

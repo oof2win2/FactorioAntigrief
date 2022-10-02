@@ -1,4 +1,4 @@
-import { EmbedField } from "discord.js"
+import { EmbedField, Formatters } from "discord.js"
 import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
@@ -54,12 +54,12 @@ const RevokeAllName = Command({
 						`By: <@${report.adminId}> | ${admin?.tag}\nCommunity ID: ${report.communityId}\n` +
 						`Category: ${report.categoryId}\nProof: ${report.proof}\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
-						`Reported at: <t:${Math.round(
-							report.reportedTime.valueOf() / 1000
-						)}>\n` +
-						`Report created at: <t:${Math.round(
-							report.reportCreatedAt.valueOf() / 1000
-						)}>`,
+						`Reported at: ${Formatters.time(
+							report.reportedTime
+						)}\n` +
+						`Report created at: ${Formatters.time(
+							report.reportCreatedAt
+						)}`,
 					inline: true,
 				}
 			})

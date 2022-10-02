@@ -1,3 +1,4 @@
+import { Formatters } from "discord.js"
 import { Command } from "../../base/Command"
 
 const GetUserById = Command({
@@ -23,9 +24,7 @@ const GetUserById = Command({
 					{ name: "User's tag", value: user.tag, inline: true },
 					{
 						name: "User created at",
-						value: `<t:${Math.round(
-							user.createdAt.valueOf() / 1000
-						)}>`,
+						value: Formatters.time(user.createdAt),
 						inline: true,
 					},
 				])
