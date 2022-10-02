@@ -27,7 +27,6 @@ const AllReports = Command({
 		const reports = await client.fagc.reports.search({
 			playername: playername,
 		})
-		console.log(reports)
 		if (!reports[0])
 			return message.channel.send(
 				`Player \`${playername}\` doesn't have any reports`
@@ -50,8 +49,7 @@ const AllReports = Command({
 					value:
 						`By: ${await client.safeGetContactString(
 							report.adminId
-						)}\nCommunity ID: ${community?.name} (${
-							community?.id
+						)}\nCommunity ID: ${community?.name} (${community?.id
 						})\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
 						`Category: ${category?.name} (${category?.id})\nProof: ${report.proof}\n` +
