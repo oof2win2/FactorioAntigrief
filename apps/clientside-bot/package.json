@@ -29,7 +29,7 @@
 		"dayjs": "^1.11.3",
 		"discord-api-types": "0.26.1",
 		"discord.js": "^13.7.0",
-		"dotenv": "^16.0.0",
+		"dotenv": "^16.0.3",
 		"envalid": "^7.2.2",
 		"fagc-api-wrapper": "^1.30.0",
 		"faker": "5",
