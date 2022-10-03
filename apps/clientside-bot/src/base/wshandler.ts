@@ -6,12 +6,10 @@ import {
 	TextChannel,
 	ThreadChannel,
 } from "discord.js"
-import {
-	filterObjectChangedBanlists,
-	handleReport,
-	handleRevocation,
-	splitIntoGroups,
-} from "../utils/functions"
+import filterObjectChangedBanlists from "../utils/functions/filterObjectChangedBanlists"
+import handleReport from "../utils/functions/handleReport"
+import handleRevocation from "../utils/functions/handleRevocation"
+import splitIntoGroups from "../utils/functions/splitIntoGroups"
 import ENV from "../utils/env"
 import FAGCBan from "../database/FAGCBan"
 
