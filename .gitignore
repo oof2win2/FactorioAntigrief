@@ -35,6 +35,8 @@ coverage
 build/Release
 
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 
 # Dependency directories
 node_modules
