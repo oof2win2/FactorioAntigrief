@@ -75,7 +75,7 @@ export default async (client: FAGCBot, message: Message) => {
 			!guildConfig.roles.webhooks)
 	)
 		return message.reply(
-			"You need to run the setup command and set all roles before you can run any other commands!"
+			`You need to run the \`${client.env.BOTPREFIX}setpermissions\` command and set all roles before you can run any other commands!`
 		)
 
 	// check which roles the user doesnt have

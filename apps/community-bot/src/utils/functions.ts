@@ -138,12 +138,12 @@ export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 			name: "Initial Setup",
 			value:
 				"We assume that you want to set your guild up. For now, your guild data has been set to a few defaults, " +
-				"such as the guild contact being the guild's owner. Everything with the API is readonly until you run `fagc!setapikey`. " +
-				"Run `fagc!help` to view command help. Commands don't work in DMs!",
+				`such as the guild contact being the guild's owner. Everything with the API is readonly until you run \`${client.env.BOTPREFIX}setapikey\`. ` +
+				`Run \`${client.env.BOTPREFIX}help\` to view command help. Commands don't work in DMs!`,
 		},
 		{
 			name: "Bot Prefix",
-			value: "The bot prefix is, and always will be, `fagc!`. This is displayed in the bot's status",
+			value: `The bot prefix is, and always will be, \`${client.env.BOTPREFIX}\`. This is displayed in the bot's status`,
 		}
 	)
 

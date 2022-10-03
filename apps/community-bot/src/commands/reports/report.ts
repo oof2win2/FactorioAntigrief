@@ -1,3 +1,4 @@
+import { Formatters } from "discord.js"
 import { Command } from "../../base/Command"
 
 const FetchReport = Command({
@@ -51,15 +52,11 @@ const FetchReport = Command({
 			{ name: "Proof", value: report.proof, inline: false },
 			{
 				name: "Reported At",
-				value: `<t:${Math.round(
-					report.reportedTime.valueOf() / 1000
-				)}>`,
+				value: Formatters.time(report.reportedTime),
 			},
 			{
 				name: "Report Created At",
-				value: `<t:${Math.round(
-					report.reportCreatedAt.valueOf() / 1000
-				)}>`,
+				value: Formatters.time(report.reportCreatedAt),
 			},
 		])
 		return message.channel.send({

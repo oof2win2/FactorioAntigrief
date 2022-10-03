@@ -1,4 +1,4 @@
-import { EmbedField } from "discord.js"
+import { EmbedField, Formatters } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
@@ -18,7 +18,7 @@ const CreateReport = Command({
 	run: async ({ client, message, args, guildConfig, filters }) => {
 		if (!filters.categoryFilters.length)
 			return message.channel.send(
-				`${client.emotes.warn} No categories are filtered`
+				`${client.emotes.warn} No categories are filtered. Add some with \`${client.env.BOTPREFIX}addcategory\``
 			)
 
 		const playername = await client.argsOrInput(
@@ -122,7 +122,7 @@ const CreateReport = Command({
 				)
 		}
 
-		const timestamp = Date.now()
+		const timestamp = new Date()
 
 		// send an embed to display the report that will be created
 		const checkEmbed = client
@@ -151,7 +151,7 @@ const CreateReport = Command({
 				{ name: "Proof", value: proof || "No proof", inline: true },
 				{
 					name: "Reported at",
-					value: `<t:${Math.round(timestamp / 1000)}>`,
+					value: Formatters.time(timestamp),
 					inline: true,
 				},
 			])
@@ -176,7 +176,7 @@ const CreateReport = Command({
 							description: desc ?? "No description",
 							proof: proof ?? "No proof",
 							categoryId: categoryId,
-							reportedTime: new Date(timestamp),
+							reportedTime: timestamp,
 							automated: false,
 						},
 						reqConfig: {

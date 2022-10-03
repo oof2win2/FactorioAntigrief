@@ -1,4 +1,4 @@
-import { EmbedField } from "discord.js"
+import { EmbedField, Formatters } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
@@ -8,7 +8,11 @@ const CreateAdvanced = Command({
 	name: "createadvanced",
 	aliases: ["createadv", "createadvanced"],
 	usage: "[player] [...description]",
-	examples: ["create", "create Potato", "create Potato hacking"],
+	examples: [
+		"createadvanced",
+		"createadvanced Potato",
+		"createadvanced Potato hacking",
+	],
 	description:
 		"Create a report for a player, with the possiblity of input of admin who banned the user and customizing the time when the player was reported",
 	category: "reports",
@@ -188,7 +192,7 @@ const CreateAdvanced = Command({
 				{ name: "Proof", value: proof || "No proof", inline: true },
 				{
 					name: "Reported at",
-					value: `<t:${Math.round(timestamp.valueOf() / 1000)}>`,
+					value: Formatters.time(timestamp),
 					inline: true,
 				},
 			])

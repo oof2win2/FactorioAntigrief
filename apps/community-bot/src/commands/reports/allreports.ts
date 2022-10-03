@@ -1,3 +1,4 @@
+import { Formatters } from "discord.js"
 import { Command } from "../../base/Command"
 import { createPagedEmbed } from "../../utils/functions"
 
@@ -42,19 +43,19 @@ const AllReports = Command({
 				const community = await client.fagc.communities.fetchCommunity({
 					communityId: report.communityId,
 				})
+
 				return {
 					name: report.id,
 					value:
 						`By: ${await client.safeGetContactString(
 							report.adminId
-						)}\nCommunity ID: ${community?.name} (${
-							community?.id
+						)}\nCommunity ID: ${community?.name} (${community?.id
 						})\n` +
 						`Description: ${report.description}\nAutomated: ${report.automated}\n` +
 						`Category: ${category?.name} (${category?.id})\nProof: ${report.proof}\n` +
-						`Violated time: <t:${Math.floor(
-							report.reportedTime.valueOf() / 1000
-						)}>`,
+						`Violated time: ${Formatters.time(
+							report.reportedTime
+						)}`,
 					inline: true,
 				}
 			})

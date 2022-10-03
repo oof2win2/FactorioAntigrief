@@ -1,3 +1,4 @@
+import { Formatters } from "discord.js"
 import { AuthError } from "fagc-api-wrapper"
 import { Command } from "../../base/Command"
 
@@ -61,15 +62,11 @@ const RevokeReport = Command({
 				},
 				{
 					name: "Reported At",
-					value: `<t:${Math.round(
-						report.reportedTime.valueOf() / 1000
-					)}>`,
+					value: Formatters.time(report.reportedTime),
 				},
 				{
 					name: "Report Created At",
-					value: `<t:${Math.round(
-						report.reportCreatedAt.valueOf() / 1000
-					)}>`,
+					value: Formatters.time(report.reportCreatedAt),
 				},
 			])
 		message.channel.send({
