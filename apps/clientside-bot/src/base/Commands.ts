@@ -54,7 +54,7 @@ export function executeCommandInteraction(
 	commands: (SubCommand | SubCommandGroup)[]
 ) {
 	const subcommand = args.interaction.options.getSubcommand()
-	const group = args.interaction.options.getSubcommandGroup(true)
+	const group = args.interaction.options.getSubcommandGroup(false)
 	const command = commands.find(
 		(command) =>
 			command.data.name === subcommand || command.data.name === group
