@@ -8,7 +8,7 @@ import {
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
-import type { Command } from "./Command"
+import type { CommandConfig } from "./Command"
 import {
 	Category,
 	FilterObject,
@@ -22,7 +22,7 @@ export default class FAGCBot extends Client {
 	env = ENV
 	RateLimit: Collection<string, number>
 	fagc: FAGCWrapper
-	commands: Map<string, Command<boolean, boolean>>
+	commands: Map<string, CommandConfig<boolean, boolean>>
 	aliases: Map<string, string>
 
 	constructor(options: ClientOptions) {
