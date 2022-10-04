@@ -4,6 +4,7 @@ import {
 	Collection,
 	Message,
 	MessageEmbed,
+	User,
 } from "discord.js"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
@@ -92,15 +93,18 @@ export default class FAGCBot extends Client {
 	async getConfirmationMessage(
 		message: Message,
 		content: string,
-		timeout = 120000
+		options: {
+			timeout?: number
+			user?: User
+		} = { timeout: 120000 }
 	): Promise<boolean> {
 		const confirm = await message.channel.send(content)
 		confirm.react("✅")
 		confirm.react("❌")
 		const reactions = await confirm.awaitReactions({
-			filter: (r, u) => u.id === message.author.id,
+			filter: (r, u) => u.id === (options.user?.id ?? message.author.id),
 			max: 1,
-			time: timeout,
+			time: options.timeout,
 			errors: [],
 		})
 		const reaction = reactions.first()

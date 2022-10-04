@@ -12,7 +12,6 @@ const GenerateBanlist: SubCommand<false, true> = {
 	requiresApikey: false,
 	fetchFilters: true,
 	execute: async ({ interaction, client, filters }) => {
-		console.log(filters)
 		if (!filters.categoryFilters.length)
 			return interaction.reply("Set category filters first")
 		if (!filters.communityFilters.length)

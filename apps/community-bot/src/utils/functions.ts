@@ -6,6 +6,7 @@ import {
 	MessageOptions,
 	Guild,
 	MessagePayload,
+	User,
 } from "discord.js"
 import { readdirSync } from "fs"
 import { SubCommand, SubCommandGroup } from "../base/Command"
@@ -17,6 +18,7 @@ export async function createPagedEmbed(
 	message: Message,
 	options: {
 		maxPageCount?: number
+		user?: User
 	} = {}
 ) {
 	const newOptions = {
@@ -29,9 +31,12 @@ export async function createPagedEmbed(
 	// if the amount of pages is 1 then there is actually only one page, f.e. 5/5 = 1 but the program will work with 0, 1
 	const maxPages = Math.floor(fields.length / newOptions.maxPageCount)
 	embed.fields = fields.slice(0, options.maxPageCount)
-	let embedMsg = await message.channel.send({
-		embeds: [embed],
-	})
+	let embedMsg =
+		options.user && options.user.id !== message.author.id
+			? await message.edit({ embeds: [embed] })
+			: await message.channel.send({
+					embeds: [embed],
+			  })
 
 	const setData = async () => {
 		const start = page * newOptions.maxPageCount
@@ -44,7 +49,8 @@ export async function createPagedEmbed(
 		const foundReaction = embedMsg.reactions.cache.find(
 			(r) => r.emoji.name === emoteName
 		)
-		if (foundReaction) foundReaction.users.remove(message.author.id)
+		if (foundReaction)
+			foundReaction.users.remove(options.user?.id ?? message.author.id)
 	}
 	// if there is only 1 page then no sense to make arrows, just slows other reactions down
 	if (maxPages) {
@@ -54,7 +60,8 @@ export async function createPagedEmbed(
 	await embedMsg.react("🗑️")
 
 	const reactionCollector = embedMsg.createReactionCollector({
-		filter: (reaction, user) => user.id === message.author.id,
+		filter: (reaction, user) =>
+			user.id === (options.user?.id ?? message.author.id),
 		time: 120000,
 	})
 
@@ -83,8 +90,11 @@ export async function createPagedEmbed(
 			}
 			case "🗑️": {
 				reactionCollector.stop()
-				embedMsg.delete()
-				message.delete()
+
+				if (embedMsg.id !== message.id) {
+					embedMsg.delete()
+					message.delete()
+				}
 			}
 		}
 	})

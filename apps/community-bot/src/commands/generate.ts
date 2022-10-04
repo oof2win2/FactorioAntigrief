@@ -1,10 +1,7 @@
-import { readdirSync } from "fs"
 import { SlashCommandBuilder } from "@discordjs/builders"
 import {
 	CommandWithSubcommands,
 	executeCommandInteraction,
-	SubCommand,
-	SubCommandGroup,
 } from "../base/Command"
 import { loadSubcommands } from "../utils/functions"
 
