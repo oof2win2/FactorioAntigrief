@@ -6,7 +6,6 @@ import * as Tracing from "@sentry/tracing"
 import { CaptureConsole } from "@sentry/integrations"
 import FAGCBot from "./base/fagcbot"
 import { Intents } from "discord.js"
-import { CommandConfig } from "./base/Command"
 import { readdirSync } from "fs"
 
 process.chdir(__dirname)

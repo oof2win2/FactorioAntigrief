@@ -18,8 +18,9 @@ const commandCategories = fs
 	.readdirSync("./commands")
 	.filter((command) => command.endsWith(".js"))
 const toPushCommmands = commandCategories.map((commandFile) => {
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	const command: Command<boolean, boolean> = require(`./commands/${commandFile}`).default
+	const command: Command<boolean, boolean> =
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		require(`./commands/${commandFile}`).default
 	return command
 })
 

@@ -1,6 +1,6 @@
 import { CommandInteraction, GuildMember, Interaction } from "discord.js"
 import { FilterObject, GuildConfig } from "fagc-api-types"
-import { Command, CommandConfig, SlashCommand } from "../../base/Command"
+import { CommandConfig, SlashCommand } from "../../base/Command"
 import FAGCBot from "../../base/fagcbot"
 import { afterJoinGuild, sendToGuild } from "../../utils/functions"
 
@@ -128,8 +128,6 @@ export default async (client: FAGCBot, interaction: Interaction) => {
 	const { commandName } = interaction
 	const command = client.commands.get(commandName)
 	if (!command) return
-
-	const botConfig = client.config
 
 	// idk but this shouldnt happen
 	if (!interaction.inCachedGuild()) return

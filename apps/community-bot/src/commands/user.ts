@@ -22,7 +22,7 @@ const User: Command<false, false> = {
 	requiresRoles: false,
 	requiresApikey: false,
 	fetchFilters: false,
-	execute: async ({ interaction, client, filters }) => {
+	execute: async ({ interaction, client }) => {
 		const uid = interaction.options.getString("id")
 
 		try {

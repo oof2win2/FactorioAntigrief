@@ -9,7 +9,7 @@ import {
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
-import type { CommandConfig, SlashCommand } from "./Command"
+import type { SlashCommand } from "./Command"
 import {
 	Category,
 	FilterObject,

@@ -34,9 +34,10 @@ const CategoriesAdd: SubCommand<false, true> = {
 	requiresApikey: false,
 	fetchFilters: true,
 	execute: async ({ interaction, client, filters, guildConfig }) => {
-		const argCategories = interaction.options.data[0].options!.map(
-			(option) => option.value as string
-		)
+		const argCategories =
+			interaction.options.data[0].options?.map(
+				(option) => option.value as string
+			) ?? []
 
 		// get the IDs that are not in their config
 		const newCategories = argCategories

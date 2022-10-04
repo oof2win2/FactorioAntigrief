@@ -34,9 +34,10 @@ const CategoriesAdd: SubCommand<false, true> = {
 	requiresApikey: false,
 	fetchFilters: true,
 	execute: async ({ interaction, client, filters, guildConfig }) => {
-		const argCategories = interaction.options.data[0].options!.map(
-			(option) => option.value as string
-		)
+		const argCategories =
+			interaction.options.data[0].options?.map(
+				(option) => option.value as string
+			) ?? []
 
 		// check if the categories are in the community's category filters
 		const categories = argCategories
