@@ -1,25 +1,24 @@
-import { Command } from "../../base/Command"
-import { Report } from "fagc-api-types"
+import { SubCommand } from "../../base/Command"
+import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { MessageAttachment } from "discord.js"
 
-const Genbanlist = Command({
-	name: "generatebanlist",
-	description: "Creates a .json banlist file to use for servers",
-	aliases: ["banlist", "genbanlist"],
-	usage: "",
-	examples: [],
-	category: "basic",
+const GenerateBanlist: SubCommand<false, true> = {
+	type: "SubCommand",
+	data: new SlashCommandSubcommandBuilder()
+		.setName("banlist")
+		.setDescription("Creates a .json banlist file to use for servers"),
 	requiresRoles: true,
 	requiredPermissions: ["reports"],
 	requiresApikey: false,
 	fetchFilters: true,
-	run: async ({ message, client, guildConfig, filters }) => {
+	execute: async ({ interaction, client, filters }) => {
+        console.log(filters)
 		if (!filters.categoryFilters.length)
-			return message.reply("Set category filters first")
+			return interaction.reply("Set category filters first")
 		if (!filters.communityFilters.length)
-			return message.reply("Set trusted communities first")
+			return interaction.reply("Set trusted communities first")
 
-		message.reply("Processing banlist. Please wait")
+		interaction.reply("Generating banlist...")
 
 		const reports = await client.fagc.reports.list({
 			communityIds: filters.communityFilters,
@@ -34,16 +33,17 @@ const Genbanlist = Command({
 				}/reports?playername=${encodeURIComponent(playername)}`,
 			}
 		})
+
 		// using (null, 4) in JSON.stringify() to have nice formatting - 4 = 4 spaces for tab
 		const file = new MessageAttachment(
 			Buffer.from(JSON.stringify(banlist, null, 4)),
 			"banlist.json"
 		)
-		return await message.reply({
+		return await interaction.editReply({
 			content: "Banlist attached",
 			files: [file],
 		})
 	},
-})
+}
 
-export default Genbanlist
+export default GenerateBanlist
