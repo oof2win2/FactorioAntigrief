@@ -6,27 +6,17 @@ import {
 	SubCommand,
 	SubCommandGroup,
 } from "../base/Command"
+import { loadSubcommands } from "../utils/functions"
 
-const commands: (
-	| SubCommand<boolean, boolean>
-	| SubCommandGroup<boolean, boolean>
-)[] = readdirSync("./commands/generate/")
-	.filter((command) => command.endsWith(".js"))
-	.map((commandName) => {
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const command = require(`./generate/${commandName}`)
-		return command.default
-	})
+const commands = loadSubcommands("generate")
 
-const Generate: CommandWithSubcommands<boolean, boolean> = {
+const Generate: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("generate")
 		.setDescription("Generate"),
 	execute: (args) => executeCommandInteraction(args, commands),
 	type: "CommandWithSubcommands",
-	requiresApikey: false,
-	requiresRoles: false,
-	fetchFilters: false,
+	commands,
 }
 
 commands.forEach((command) => {

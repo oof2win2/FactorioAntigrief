@@ -12,16 +12,25 @@ type CommandParams<Apikey extends boolean, hasFilters extends boolean> = {
 	interaction: CommandInteraction<"cached">
 	// if Apikey is true, the guildConfig will have an api key GUARANTEED. if it isn't true, it won't be guaranteed
 	guildConfig: Apikey extends true
-	? GuildConfig & { apikey: string }
-	: GuildConfig
+		? GuildConfig & { apikey: string }
+		: GuildConfig
 	filters: hasFilters extends true ? FilterObject : null
 }
 
-type BaseCommand<Apikey extends boolean, hasFilters extends boolean> = {
+export type CommandExecute<
+	Apikey extends boolean,
+	hasFilters extends boolean
+> = {
+	execute: (args: CommandParams<Apikey, hasFilters>) => Promise<unknown>
+}
+
+type BaseCommand<
+	Apikey extends boolean,
+	hasFilters extends boolean
+> = CommandExecute<Apikey, hasFilters> & {
 	requiresRoles: boolean
 	requiresApikey: Apikey
 	fetchFilters: hasFilters
-	execute: (args: CommandParams<Apikey, hasFilters>) => Promise<unknown>
 }
 
 type CommandWithoutGuildConfig<
@@ -43,6 +52,12 @@ export type CommandConfig<Apikey extends boolean, hasFilters extends boolean> =
 	| CommandWithoutGuildConfig<Apikey, hasFilters>
 	| CommandWithGuildConfig<Apikey, hasFilters>
 
+export type SlashCommand<Apikey extends boolean, hasFilters extends boolean> =
+	| CommandWithSubcommands
+	| Command<Apikey, hasFilters>
+	| SubCommand<Apikey, hasFilters>
+	| SubCommandGroup<Apikey, hasFilters>
+
 export type Command<
 	Apikey extends boolean,
 	hasFilters extends boolean
@@ -51,12 +66,13 @@ export type Command<
 	type: "Command"
 }
 
-export type CommandWithSubcommands<
-	Apikey extends boolean,
-	hasFilters extends boolean
-> = CommandConfig<Apikey, hasFilters> & {
+export type CommandWithSubcommands = CommandExecute<boolean, boolean> & {
 	data: SlashCommandBuilder
 	type: "CommandWithSubcommands"
+	commands: (
+		| SubCommand<boolean, boolean>
+		| SubCommandGroup<boolean, boolean>
+	)[]
 }
 
 export type SubCommand<

@@ -7,6 +7,8 @@ import {
 	Guild,
 	MessagePayload,
 } from "discord.js"
+import { readdirSync } from "fs"
+import { SubCommand, SubCommandGroup } from "../base/Command"
 import FAGCBot from "../base/fagcbot"
 
 export async function createPagedEmbed(
@@ -150,4 +152,20 @@ export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 	sendToGuild(guild, {
 		embeds: [embed],
 	})
+}
+
+export function loadSubcommands(
+	commandName: string,
+	...children: string[]
+): (SubCommand<boolean, boolean> | SubCommandGroup<boolean, boolean>)[] {
+	let path = `${__dirname}/../commands/${commandName}`
+	if (children.length) path += `/${children.join("/")}`
+
+	return readdirSync(path)
+		.filter((command) => command.endsWith(".js"))
+		.map((endCommand) => {
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			const command = require(`${path}/${endCommand}`)
+			return command.default
+		})
 }
