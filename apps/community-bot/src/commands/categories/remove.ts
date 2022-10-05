@@ -26,11 +26,11 @@ new Array(9).fill(0).forEach((_, i) => {
 	)
 })
 
-const CategoriesAdd: SubCommand<false, true> = {
+const CategoriesRemove: SubCommand<false, true> = {
 	type: "SubCommand",
 	data: slashCommand,
-	requiresRoles: true,
 	requiredPermissions: ["setCategories"],
+	requiresRoles: true,
 	requiresApikey: false,
 	fetchFilters: true,
 	execute: async ({ interaction, client, filters, guildConfig }) => {
@@ -120,4 +120,4 @@ const CategoriesAdd: SubCommand<false, true> = {
 	},
 }
 
-export default CategoriesAdd
+export default CategoriesRemove

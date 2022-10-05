@@ -2,7 +2,7 @@ import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { createPagedEmbed } from "../../utils/functions"
 
-const CategoriesList: SubCommand<false, true> = {
+const CategoriesView: SubCommand<false, true> = {
 	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("view")
@@ -60,4 +60,4 @@ const CategoriesList: SubCommand<false, true> = {
 	},
 }
 
-export default CategoriesList
+export default CategoriesView

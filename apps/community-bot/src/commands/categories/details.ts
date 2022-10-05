@@ -1,7 +1,7 @@
 import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 
-const CategoriesList: SubCommand<false, true> = {
+const CategoriesDetails: SubCommand<false, true> = {
 	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("details")
@@ -57,4 +57,4 @@ const CategoriesList: SubCommand<false, true> = {
 	},
 }
 
-export default CategoriesList
+export default CategoriesDetails
