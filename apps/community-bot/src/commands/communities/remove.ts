@@ -1,7 +1,5 @@
 import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { createPagedEmbed } from "../../utils/functions"
-import { Category } from "fagc-api-types"
 import { AuthError } from "fagc-api-wrapper"
 
 const slashCommand = new SlashCommandSubcommandBuilder()
@@ -42,11 +40,6 @@ const CommunitiesRemove: SubCommand<false, true> = {
 			return interaction.reply(
 				"You need to have at least one trusted community"
 			)
-
-		const allCommunities = await client.fagc.communities.fetchAll({})
-		const currentCommunities = allCommunities.filter((c) =>
-			filters.communityFilters.includes(c.id)
-		)
 
 		const argCommunities =
 			interaction.options.data[0].options?.map(

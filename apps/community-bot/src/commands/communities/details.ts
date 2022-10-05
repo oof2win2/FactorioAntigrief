@@ -18,7 +18,7 @@ const CommunitiesDetails: SubCommand<false, false> = {
 	requiresRoles: false,
 	requiresApikey: false,
 	fetchFilters: false,
-	execute: async ({ interaction, filters, client }) => {
+	execute: async ({ interaction, client }) => {
 		const communityId = interaction.options.getString("community", true)
 
 		const community = await client.fagc.communities.fetchCommunity({

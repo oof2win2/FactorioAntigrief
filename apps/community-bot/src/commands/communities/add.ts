@@ -73,7 +73,6 @@ const CommunitiesAdd: SubCommand<false, true> = {
 		createPagedEmbed(fields, confirmationEmbed, message, {
 			maxPageCount: 10,
 			user: interaction.user,
-
 		})
 		const confirm = await client.getConfirmationMessage(
 			message,
