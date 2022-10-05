@@ -7,8 +7,8 @@ const GenerateBanlist: SubCommand<false, true> = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("banlist")
 		.setDescription("Creates a .json banlist file to use for servers"),
-	requiresRoles: true,
 	requiredPermissions: ["reports"],
+	requiresRoles: true,
 	requiresApikey: false,
 	fetchFilters: true,
 	execute: async ({ interaction, client, filters }) => {
