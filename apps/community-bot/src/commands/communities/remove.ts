@@ -91,7 +91,10 @@ const CommunitiesRemove: SubCommand<false, true> = {
 			fetchReply: true,
 		})
 
-		createPagedEmbed(communityFields, embed, message, { maxPageCount: 5, user: interaction.user })
+		createPagedEmbed(communityFields, embed, message, {
+			maxPageCount: 5,
+			user: interaction.user,
+		})
 
 		const confirm = await client.getConfirmationMessage(
 			message,
