@@ -2,7 +2,10 @@ import {
 	Client,
 	ClientOptions,
 	Collection,
+	CommandInteraction,
 	Message,
+	MessageActionRow,
+	MessageButton,
 	MessageEmbed,
 	User,
 } from "discord.js"
@@ -90,27 +93,69 @@ export default class FAGCBot extends Client {
 		return `<@${user.id}> | ${user.tag}`
 	}
 
-	async getConfirmationMessage(
-		message: Message,
+	async getConfirmation(
+		messageOrInteraction: Message | CommandInteraction,
 		content: string,
-		options: {
-			timeout?: number
-			user?: User
-		} = { timeout: 120000 }
+		user: User,
+		timeout = 120000
 	): Promise<boolean> {
-		const confirm = await message.channel.send(content)
-		confirm.react("✅")
-		confirm.react("❌")
-		const reactions = await confirm.awaitReactions({
-			filter: (r, u) => u.id === (options.user?.id ?? message.author.id),
-			max: 1,
-			time: options.timeout,
-			errors: [],
+		const buttons = [
+			new MessageButton()
+				.setCustomId("yes")
+				.setLabel("Yes")
+				.setStyle("SUCCESS"),
+			new MessageButton()
+				.setCustomId("no")
+				.setLabel("No")
+				.setStyle("DANGER"),
+		]
+
+		let message: Message
+		if (messageOrInteraction instanceof Message)
+			message = (await messageOrInteraction.channel.send({
+				content,
+				components: [new MessageActionRow().addComponents(buttons)],
+			})) as Message
+		else {
+			let method: "editReply" | "reply" = "reply"
+			if (messageOrInteraction.replied || messageOrInteraction.deferred)
+				method = "editReply"
+
+			message = (await messageOrInteraction[method]({
+				content,
+				components: [new MessageActionRow().addComponents(buttons)],
+				fetchReply: true,
+			})) as Message
+		}
+
+		const response = await message
+			.awaitMessageComponent({
+				filter: (i) => i.user.id === user.id,
+				time: timeout,
+				componentType: "BUTTON",
+			})
+			.then((i) => {
+				i.deferUpdate()
+				return i
+			})
+			.catch(() => null)
+
+		await message.edit({
+			components: [
+				new MessageActionRow().addComponents(
+					buttons.map((b) => {
+						// Disable buttons
+						b.setDisabled(true)
+						// Set style to secondary
+						if (b.customId !== response?.customId)
+							b.setStyle("SECONDARY")
+						return b
+					})
+				),
+			],
 		})
-		const reaction = reactions.first()
-		if (!reaction) return false
-		if (reaction.emoji.name === "❌") return false
-		return true
+
+		return response?.customId === "yes"
 	}
 
 	async getMessageResponse(

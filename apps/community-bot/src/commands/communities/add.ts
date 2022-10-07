@@ -74,12 +74,10 @@ const CommunitiesAdd: SubCommand<false, true> = {
 			maxPageCount: 10,
 			user: interaction.user,
 		})
-		const confirm = await client.getConfirmationMessage(
+		const confirm = await client.getConfirmation(
 			message,
 			"Are you sure you want to add these communities to your communities filters?",
-			{
-				user: interaction.user,
-			}
+			interaction.user
 		)
 		if (!confirm)
 			return interaction.followUp("Adding communities cancelled")

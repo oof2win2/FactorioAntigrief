@@ -96,12 +96,10 @@ const CommunitiesRemove: SubCommand<false, true> = {
 			user: interaction.user,
 		})
 
-		const confirm = await client.getConfirmationMessage(
+		const confirm = await client.getConfirmation(
 			message,
 			"Are you sure you want to remove these communities from your community filters?",
-			{
-				user: interaction.user,
-			}
+			interaction.user
 		)
 		if (!confirm)
 			return interaction.followUp("Removing communities cancelled")

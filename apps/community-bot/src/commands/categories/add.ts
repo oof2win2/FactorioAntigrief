@@ -75,12 +75,10 @@ const CategoriesAdd: SubCommand<false, true> = {
 		})
 
 		// ask for confirmation if they want it like this
-		const confirm = await client.getConfirmationMessage(
+		const confirm = await client.getConfirmation(
 			message,
 			"Are you sure you want to add these categories to your category filters?",
-			{
-				user: interaction.user,
-			}
+			interaction.user
 		)
 		if (!confirm) return interaction.followUp("Adding categories cancelled")
 
