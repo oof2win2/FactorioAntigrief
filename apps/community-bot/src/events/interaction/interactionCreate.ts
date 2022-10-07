@@ -7,10 +7,10 @@ import { afterJoinGuild, sendToGuild } from "../../utils/functions"
 const getKey = (
 	key: keyof CommandConfig<boolean, boolean>,
 	command: SlashCommand<boolean, boolean>
-) =>
-	command.type === "CommandWithSubcommands"
-		? command.commands.some((c) => c[key])
-		: command[key]
+): unknown => // TODO typing
+	command.type === "Command" || command.type === "SubCommand"
+		? command[key]
+		: command.commands.some((c) => getKey(key, c)) // TODO is it right to use some here?
 
 const checkCommandErrors = async (
 	command: SlashCommand<boolean, boolean>,
@@ -31,7 +31,7 @@ const checkCommandErrors = async (
 
 	// if any of the roles are not present on the guild config, they must be filled first
 	if (
-		// TODO update the setpermissions command to use the new command system
+		// TODO update this to use the new command system
 		command.data.name !== "setpermissions" &&
 		(!guildConfig.roles.reports ||
 			!guildConfig.roles.setCommunities ||
@@ -45,7 +45,7 @@ const checkCommandErrors = async (
 	// check which roles the user doesnt have
 	const doesntHaveRoles =
 		// TODO solve this
-		command.type !== "CommandWithSubcommands" &&
+		(command.type === "Command" || command.type === "SubCommand") &&
 		command.requiresRoles &&
 		command.requiredPermissions.filter((permname) => {
 			const roleid = guildConfig.roles[permname] // get the role which has this perm

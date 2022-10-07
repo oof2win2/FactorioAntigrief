@@ -165,11 +165,9 @@ export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
 }
 
 export function loadSubcommands(
-	commandName: string,
-	...children: string[]
-): (SubCommand<boolean, boolean> | SubCommandGroup<boolean, boolean>)[] {
-	let path = `${__dirname}/../commands/${commandName}`
-	if (children.length) path += `/${children.join("/")}`
+	...commandName: string[]
+): (SubCommand<boolean, boolean> | SubCommandGroup)[] {
+	const path = `${__dirname}/../commands/${commandName.join("/")}`
 
 	return readdirSync(path)
 		.filter((command) => command.endsWith(".js"))

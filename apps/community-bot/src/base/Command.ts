@@ -56,7 +56,19 @@ export type SlashCommand<Apikey extends boolean, hasFilters extends boolean> =
 	| CommandWithSubcommands
 	| Command<Apikey, hasFilters>
 	| SubCommand<Apikey, hasFilters>
-	| SubCommandGroup<Apikey, hasFilters>
+	| SubCommandGroup
+
+export type CommandWithSubcommands = CommandExecute<boolean, boolean> & {
+	data: SlashCommandBuilder
+	type: "CommandWithSubcommands"
+	commands: (SubCommand<boolean, boolean> | SubCommandGroup)[]
+}
+
+export type SubCommandGroup = CommandExecute<boolean, boolean> & {
+	data: SlashCommandSubcommandGroupBuilder
+	type: "SubCommandGroup"
+	commands: SubCommand<boolean, boolean>[]
+}
 
 export type Command<
 	Apikey extends boolean,
@@ -64,15 +76,6 @@ export type Command<
 > = CommandConfig<Apikey, hasFilters> & {
 	data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
 	type: "Command"
-}
-
-export type CommandWithSubcommands = CommandExecute<boolean, boolean> & {
-	data: SlashCommandBuilder
-	type: "CommandWithSubcommands"
-	commands: (
-		| SubCommand<boolean, boolean>
-		| SubCommandGroup<boolean, boolean>
-	)[]
 }
 
 export type SubCommand<
@@ -83,23 +86,12 @@ export type SubCommand<
 	type: "SubCommand"
 }
 
-export type SubCommandGroup<
-	Apikey extends boolean,
-	hasFilters extends boolean
-> = CommandConfig<Apikey, hasFilters> & {
-	data: SlashCommandSubcommandGroupBuilder
-	type: "SubCommandGroup"
-}
-
 export function executeCommandInteraction<
 	Apikey extends boolean,
 	hasFilters extends boolean
 >(
 	args: CommandParams<Apikey, hasFilters>,
-	commands: (
-		| SubCommand<Apikey, hasFilters>
-		| SubCommandGroup<Apikey, hasFilters>
-	)[]
+	commands: (SubCommand<Apikey, hasFilters> | SubCommandGroup)[]
 ) {
 	const subcommand = args.interaction.options.getSubcommand()
 	const group = args.interaction.options.getSubcommandGroup(false)
