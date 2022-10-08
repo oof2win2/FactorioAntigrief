@@ -38,7 +38,7 @@ const GenerateBanlist: SubCommand<false, true> = {
 			Buffer.from(JSON.stringify(banlist, null, 4)),
 			"banlist.json"
 		)
-		return await interaction.editReply({
+		return await interaction.followUp({
 			content: "Banlist attached",
 			files: [file],
 		})
