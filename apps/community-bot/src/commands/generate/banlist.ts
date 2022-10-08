@@ -17,7 +17,7 @@ const GenerateBanlist: SubCommand<false, true> = {
 		if (!filters.communityFilters.length)
 			return interaction.reply("Set trusted communities first")
 
-		interaction.reply("Generating banlist...")
+		await interaction.reply("Generating banlist...")
 
 		const reports = await client.fagc.reports.list({
 			communityIds: filters.communityFilters,
