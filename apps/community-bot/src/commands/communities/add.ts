@@ -65,19 +65,20 @@ const CommunitiesAdd: SubCommand<false, true> = {
 			})
 		)
 
-		const message = await interaction.reply({
-			embeds: [confirmationEmbed],
-			fetchReply: true,
-		})
-
-		createPagedEmbed(fields, confirmationEmbed, message, {
-			maxPageCount: 10,
-			user: interaction.user,
-		})
+		createPagedEmbed(
+			fields,
+			confirmationEmbed,
+			interaction,
+			interaction.user,
+			{
+				maxPageCount: 10,
+			}
+		)
 		const confirm = await client.getConfirmation(
-			message,
+			interaction,
 			"Are you sure you want to add these communities to your communities filters?",
-			interaction.user
+			interaction.user,
+			{ followUp: true }
 		)
 		if (!confirm)
 			return interaction.followUp("Adding communities cancelled")

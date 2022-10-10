@@ -35,12 +35,9 @@ const CategoriesList: SubCommand<false, false> = {
 		}
 
 		// create the embed
-		createPagedEmbed(
-			fields,
-			embed,
-			await interaction.reply({ embeds: [embed], fetchReply: true }),
-			{ maxPageCount: 10, user: interaction.user }
-		)
+		createPagedEmbed(fields, embed, interaction, interaction.user, {
+			maxPageCount: 10,
+		})
 	},
 }
 

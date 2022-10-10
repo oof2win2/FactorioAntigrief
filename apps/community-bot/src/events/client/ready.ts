@@ -16,10 +16,9 @@ export default (client: FAGCBot) => {
 	let i = 0
 	setInterval(
 		() =>
-			client.user?.setActivity(
-				`${ENV.BOTPREFIX}help | ${activities[i++ % activities.length]}`,
-				{ type: "WATCHING" }
-			),
+			client.user?.setActivity(activities[i++ % activities.length], {
+				type: "WATCHING",
+			}),
 		15000
 	)
 }

@@ -1,3 +1,4 @@
+import { enumDeclaration } from "@babel/types"
 import {
 	MessageEmbed,
 	EmbedField,
@@ -7,96 +8,154 @@ import {
 	Guild,
 	MessagePayload,
 	User,
+	CommandInteraction,
+	MessageButton,
+	MessageActionRow,
+	ButtonInteraction,
 } from "discord.js"
 import { readdirSync } from "fs"
 import { SubCommand, SubCommandGroup } from "../base/Command"
 import FAGCBot from "../base/fagcbot"
 
+/**
+ * Create the pagination components
+ * @param {number} page - Current page. -1 if disabled
+ * @param {number} count - Page count
+ */
+const makePaginationComponents = (page: number, count: number) => {
+	if (count <= 1) return []
+
+	return [
+		new MessageActionRow().addComponents(
+			new MessageButton()
+				.setCustomId("first")
+				.setLabel("First")
+				.setStyle("PRIMARY")
+				.setEmoji("⏮️")
+				.setDisabled(page === 0 || page === -1),
+			new MessageButton()
+				.setCustomId("previous")
+				.setLabel("Previous")
+				.setStyle("PRIMARY")
+				.setEmoji("⬅️")
+				.setDisabled(page === 0 || page === -1),
+			new MessageButton()
+				.setCustomId("next")
+				.setLabel("Next")
+				.setStyle("PRIMARY")
+				.setEmoji("➡️")
+				.setDisabled(page === count - 1 || page === -1),
+			new MessageButton()
+				.setCustomId("last")
+				.setLabel("Last")
+				.setStyle("PRIMARY")
+				.setEmoji("⏭️")
+				.setDisabled(page === count - 1 || page === -1),
+			new MessageButton()
+				.setCustomId("cancel")
+				.setLabel("Cancel")
+				.setStyle("DANGER")
+				.setEmoji("🗑️")
+				.setDisabled(page === -1)
+		),
+	]
+}
+
 export async function createPagedEmbed(
 	fields: EmbedField[],
 	embedMsgOptions: MessageEmbed | MessageEmbedOptions,
-	message: Message,
+	messageOrInteraction: Message | CommandInteraction,
+	target: User,
 	options: {
 		maxPageCount?: number
-		user?: User
-	} = {}
+		followUp?: boolean
+		timeout?: number
+	} = { timeout: 120000, followUp: false }
 ) {
 	const newOptions = {
 		maxPageCount: 25,
 		...options,
 	}
-	if (newOptions.maxPageCount > 25) newOptions.maxPageCount = 25 // discord limit is 25 things per embed
-	const embed = new MessageEmbed(embedMsgOptions)
+	if (newOptions.maxPageCount > 25) newOptions.maxPageCount = 25 // discord limit is 25 fields per embed
+
 	let page = 0
+	const embed = new MessageEmbed(embedMsgOptions)
+
 	// if the amount of pages is 1 then there is actually only one page, f.e. 5/5 = 1 but the program will work with 0, 1
 	const maxPages = Math.floor(fields.length / newOptions.maxPageCount)
 	embed.fields = fields.slice(0, options.maxPageCount)
-	let embedMsg =
-		options.user && options.user.id !== message.author.id
-			? await message.edit({ embeds: [embed] })
-			: await message.channel.send({
-					embeds: [embed],
-			  })
 
-	const setData = async () => {
-		const start = page * newOptions.maxPageCount
-		embed.fields = fields.slice(start, start + newOptions.maxPageCount)
-		embedMsg = await embedMsg.edit({
+	let message: Message
+	if (messageOrInteraction instanceof Message)
+		message = await messageOrInteraction.reply({
 			embeds: [embed],
+			components: makePaginationComponents(page, maxPages),
 		})
-	}
-	const removeReaction = async (emoteName: string) => {
-		const foundReaction = embedMsg.reactions.cache.find(
-			(r) => r.emoji.name === emoteName
+	else {
+		let method: "editReply" | "reply" | "followUp" = options.followUp
+			? "followUp"
+			: "reply"
+		if (
+			method === "reply" &&
+			(messageOrInteraction.replied || messageOrInteraction.deferred)
 		)
-		if (foundReaction)
-			foundReaction.users.remove(options.user?.id ?? message.author.id)
+			method = "editReply"
+		message = (await messageOrInteraction[method]({
+			embeds: [embed],
+			components: makePaginationComponents(page, maxPages),
+			fetchReply: true,
+		})) as Message
 	}
-	// if there is only 1 page then no sense to make arrows, just slows other reactions down
-	if (maxPages) {
-		await embedMsg.react("⬅️")
-		await embedMsg.react("➡️")
-	}
-	await embedMsg.react("🗑️")
 
-	const reactionCollector = embedMsg.createReactionCollector({
-		filter: (reaction, user) =>
-			user.id === (options.user?.id ?? message.author.id),
-		time: 120000,
+	if (maxPages <= 1) return
+
+	const makeNewContent = () => {
+		const start = page * newOptions.maxPageCount
+
+		// Only update fields if not ended
+		if (page !== -1)
+			embed.fields = fields.slice(start, start + newOptions.maxPageCount)
+
+		return {
+			embeds: [embed],
+			components: makePaginationComponents(page, maxPages),
+		}
+	}
+
+	const collector = message.createMessageComponentCollector({
+		componentType: "BUTTON",
+		filter: (i) => i.user.id === target.id,
+		time: options.timeout,
 	})
 
-	// remove reactions after timeout runs out
-	setTimeout(async () => {
-		await embedMsg.reactions.cache.get("⬅️")?.remove().catch()
-		await embedMsg.reactions.cache.get("➡️")?.remove().catch()
-		await embedMsg.reactions.cache.get("🗑️")?.remove().catch()
-	}, 120000)
-
-	reactionCollector.on("collect", (reaction) => {
-		switch (reaction.emoji.name) {
-			case "⬅️": {
+	collector.on("collect", (i) => {
+		switch (i.customId) {
+			case "first":
+				page = 0
+				break
+			case "previous":
 				page--
-				removeReaction("⬅️") // remove the user's reaction no matter what
-				if (page <= -1) page = 0
-				else setData()
 				break
-			}
-			case "➡️": {
+			case "next":
 				page++
-				removeReaction("➡️") // remove the user's reaction no matter what
-				if (page > maxPages) page = maxPages
-				else setData()
 				break
-			}
-			case "🗑️": {
-				reactionCollector.stop()
-
-				if (embedMsg.id !== message.id) {
-					embedMsg.delete()
-					message.delete()
-				}
-			}
+			case "last":
+				page = maxPages - 1
+				break
+			case "cancel":
+				i.deferUpdate()
+				collector.stop()
+				return
 		}
+
+		i.update(makeNewContent())
+		collector.resetTimer()
+	})
+
+	collector.once("end", () => {
+		page = -1
+		console.log("end")
+		message.edit(makeNewContent())
 	})
 }
 

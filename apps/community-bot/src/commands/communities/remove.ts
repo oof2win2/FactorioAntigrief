@@ -86,20 +86,21 @@ const CommunitiesRemove: SubCommand<false, true> = {
 			})
 		)
 
-		const message = await interaction.reply({
-			embeds: [embed],
-			fetchReply: true,
-		})
-
-		createPagedEmbed(communityFields, embed, message, {
-			maxPageCount: 5,
-			user: interaction.user,
-		})
+		createPagedEmbed(
+			communityFields,
+			embed,
+			interaction,
+			interaction.user,
+			{
+				maxPageCount: 5,
+			}
+		)
 
 		const confirm = await client.getConfirmation(
-			message,
+			interaction,
 			"Are you sure you want to remove these communities from your community filters?",
-			interaction.user
+			interaction.user,
+			{ followUp: true }
 		)
 		if (!confirm)
 			return interaction.followUp("Removing communities cancelled")

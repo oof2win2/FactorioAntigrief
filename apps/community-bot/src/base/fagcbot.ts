@@ -96,8 +96,11 @@ export default class FAGCBot extends Client {
 	async getConfirmation(
 		messageOrInteraction: Message | CommandInteraction,
 		content: string,
-		user: User,
-		timeout = 120000
+		target: User,
+		options: {
+			timeout?: number
+			followUp?: boolean
+		} = { timeout: 120000, followUp: false }
 	): Promise<boolean> {
 		const buttons = [
 			new MessageButton()
@@ -112,13 +115,18 @@ export default class FAGCBot extends Client {
 
 		let message: Message
 		if (messageOrInteraction instanceof Message)
-			message = (await messageOrInteraction.channel.send({
+			message = await messageOrInteraction.channel.send({
 				content,
 				components: [new MessageActionRow().addComponents(buttons)],
-			})) as Message
+			})
 		else {
-			let method: "editReply" | "reply" = "reply"
-			if (messageOrInteraction.replied || messageOrInteraction.deferred)
+			let method: "editReply" | "reply" | "followUp" = options.followUp
+				? "followUp"
+				: "reply"
+			if (
+				method === "reply" &&
+				(messageOrInteraction.replied || messageOrInteraction.deferred)
+			)
 				method = "editReply"
 
 			message = (await messageOrInteraction[method]({
@@ -130,8 +138,8 @@ export default class FAGCBot extends Client {
 
 		const response = await message
 			.awaitMessageComponent({
-				filter: (i) => i.user.id === user.id,
-				time: timeout,
+				filter: (i) => i.user.id === target.id,
+				time: options.timeout,
 				componentType: "BUTTON",
 			})
 			.then((i) => {
@@ -156,36 +164,6 @@ export default class FAGCBot extends Client {
 		})
 
 		return response?.customId === "yes"
-	}
-
-	async getMessageResponse(
-		message: Message,
-		content: string,
-		timeout = 30000
-	): Promise<Message | null> {
-		const msg = await message.channel.send(content)
-		return (
-			(
-				await msg.channel.awaitMessages({
-					filter: (m) => m.author.id === message.author.id,
-					max: 1,
-					time: timeout,
-				})
-			).first() || null
-		)
-	}
-
-	async argsOrInput(
-		args: string[],
-		message: Message,
-		content: string
-	): Promise<string | null> {
-		const arg = args.shift()
-		if (arg) return arg
-
-		const newMessage = await this.getMessageResponse(message, content)
-		if (!newMessage) return null
-		return newMessage.content.split(" ")[0]
 	}
 
 	createBaseEmbed() {

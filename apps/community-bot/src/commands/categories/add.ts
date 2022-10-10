@@ -64,22 +64,24 @@ const CategoriesAdd: SubCommand<false, true> = {
 			}
 		})
 
-		const message = await interaction.reply({
-			embeds: [newCategoryEmbed],
-			fetchReply: true,
-		})
-
-		createPagedEmbed(newCategoryFields, newCategoryEmbed, message, {
-			maxPageCount: 10,
-			user: interaction.user,
-		})
+		await createPagedEmbed(
+			newCategoryFields,
+			newCategoryEmbed,
+			interaction,
+			interaction.user,
+			{
+				maxPageCount: 10,
+			}
+		)
 
 		// ask for confirmation if they want it like this
 		const confirm = await client.getConfirmation(
-			message,
+			interaction,
 			"Are you sure you want to add these categories to your category filters?",
-			interaction.user
+			interaction.user,
+			{ followUp: true }
 		)
+
 		if (!confirm) return interaction.followUp("Adding categories cancelled")
 
 		// add the new categories to the config

@@ -71,20 +71,15 @@ const CategoriesRemove: SubCommand<false, true> = {
 			}
 		})
 
-		const message = await interaction.reply({
-			embeds: [embed],
-			fetchReply: true,
-		})
-
-		createPagedEmbed(categoryFields, embed, message, {
+		createPagedEmbed(categoryFields, embed, interaction, interaction.user, {
 			maxPageCount: 5,
-			user: interaction.user,
 		})
 
 		const confirm = await client.getConfirmation(
-			message,
+			interaction,
 			"Are you sure you want to remove these categories from your category filters?",
-			interaction.user
+			interaction.user,
+			{ followUp: true }
 		)
 		if (!confirm)
 			return interaction.followUp("Removing categories cancelled")

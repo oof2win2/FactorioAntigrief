@@ -28,8 +28,7 @@ const ConfigSetName: SubCommand<true, false> = {
 		const confirmation = await client.getConfirmation(
 			interaction,
 			`Are you sure you want to set your community's name to ${name}?`,
-			interaction.user,
-			120000
+			interaction.user
 		)
 
 		if (!confirmation)
