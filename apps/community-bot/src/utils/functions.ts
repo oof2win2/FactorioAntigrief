@@ -1,4 +1,3 @@
-import { enumDeclaration } from "@babel/types"
 import {
 	MessageEmbed,
 	EmbedField,
@@ -11,7 +10,6 @@ import {
 	CommandInteraction,
 	MessageButton,
 	MessageActionRow,
-	ButtonInteraction,
 } from "discord.js"
 import { readdirSync } from "fs"
 import { SubCommand, SubCommandGroup } from "../base/Command"

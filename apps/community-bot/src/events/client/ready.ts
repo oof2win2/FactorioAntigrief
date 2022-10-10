@@ -1,5 +1,4 @@
 import FAGCBot from "../../base/fagcbot"
-import ENV from "../../utils/env"
 import Logger from "../../utils/logger"
 
 export default (client: FAGCBot) => {
