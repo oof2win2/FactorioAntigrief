@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import { cleanEnv, str, url } from "envalid"
 dotenv.config({
-	path: "./.env",
+	path: `${__dirname}/../../.env`,
 })
 const ENV = cleanEnv(process.env, {
 	APIURL: url({ desc: "API URL", default: "https://factoriobans.club/api" }),
