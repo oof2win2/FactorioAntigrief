@@ -1,5 +1,4 @@
 import FAGCBot from "../../base/fagcbot"
-import ENV from "../../utils/env"
 import Logger from "../../utils/logger"
 
 export default (client: FAGCBot) => {
@@ -16,10 +15,9 @@ export default (client: FAGCBot) => {
 	let i = 0
 	setInterval(
 		() =>
-			client.user?.setActivity(
-				`${ENV.BOTPREFIX}help | ${activities[i++ % activities.length]}`,
-				{ type: "WATCHING" }
-			),
+			client.user?.setActivity(activities[i++ % activities.length], {
+				type: "WATCHING",
+			}),
 		15000
 	)
 }

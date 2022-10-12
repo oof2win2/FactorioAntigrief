@@ -6,7 +6,7 @@ import * as Tracing from "@sentry/tracing"
 import { CaptureConsole } from "@sentry/integrations"
 import FAGCBot from "./base/fagcbot"
 import { Intents } from "discord.js"
-import { Command } from "./base/Command"
+import { readdirSync } from "fs"
 
 process.chdir(__dirname)
 if (ENV.SENTRY_LINK) {
@@ -38,27 +38,13 @@ const client = new FAGCBot({
 
 const init = async () => {
 	// Loads commands
-	const commandDirs = await fs.readdir("./commands/")
-	// reads the commands dir
-	commandDirs.forEach(async (dir) => {
-		const evts = await fs.readdir(`./commands/${dir}/`)
-		// gets every dir inside events
-		evts.filter((evt) => evt.endsWith(".js")).forEach(async (cmd) => {
-			// splits the command and gets first part. commands are in the format "commandName.js"
-			const command = (await import(`./commands/${dir}/${cmd}`).then(
-				(x) => x.default
-			)) as Command<boolean, boolean>
-
-			if (!command)
-				return console.log(`./commands/${dir}/${cmd} is not a command`)
-
-			// adds command to client
-			client.commands.set(command.name, command)
-			// adds aliases to the command
-			command.aliases.forEach((alias) =>
-				client.commands.set(alias, command)
-			)
-		})
+	const commands = readdirSync("commands")
+	commands.forEach(async (name) => {
+		if (!name.endsWith(".js")) return
+		const handler = await import(`./commands/${name}`).then(
+			(r) => r.default
+		)
+		client.commands.set(name.slice(0, name.indexOf(".js")), handler)
 	})
 
 	// Loads events

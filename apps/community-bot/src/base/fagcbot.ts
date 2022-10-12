@@ -2,13 +2,17 @@ import {
 	Client,
 	ClientOptions,
 	Collection,
+	CommandInteraction,
 	Message,
+	MessageActionRow,
+	MessageButton,
 	MessageEmbed,
+	User,
 } from "discord.js"
 import { FAGCWrapper } from "fagc-api-wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
-import type { Command } from "./Command"
+import type { SlashCommand } from "./Command"
 import {
 	Category,
 	FilterObject,
@@ -22,7 +26,7 @@ export default class FAGCBot extends Client {
 	env = ENV
 	RateLimit: Collection<string, number>
 	fagc: FAGCWrapper
-	commands: Map<string, Command<boolean, boolean>>
+	commands: Map<string, SlashCommand<boolean, boolean>>
 	aliases: Map<string, string>
 
 	constructor(options: ClientOptions) {
@@ -89,54 +93,77 @@ export default class FAGCBot extends Client {
 		return `<@${user.id}> | ${user.tag}`
 	}
 
-	async getConfirmationMessage(
-		message: Message,
+	async getConfirmation(
+		messageOrInteraction: Message | CommandInteraction,
 		content: string,
-		timeout = 120000
+		target: User,
+		options: {
+			timeout?: number
+			followUp?: boolean
+		} = { timeout: 120000, followUp: false }
 	): Promise<boolean> {
-		const confirm = await message.channel.send(content)
-		confirm.react("✅")
-		confirm.react("❌")
-		const reactions = await confirm.awaitReactions({
-			filter: (r, u) => u.id === message.author.id,
-			max: 1,
-			time: timeout,
-			errors: [],
+		const buttons = [
+			new MessageButton()
+				.setCustomId("yes")
+				.setLabel("Yes")
+				.setStyle("SUCCESS"),
+			new MessageButton()
+				.setCustomId("no")
+				.setLabel("No")
+				.setStyle("DANGER"),
+		]
+
+		let message: Message
+		if (messageOrInteraction instanceof Message)
+			message = await messageOrInteraction.channel.send({
+				content,
+				components: [new MessageActionRow().addComponents(buttons)],
+			})
+		else {
+			let method: "editReply" | "reply" | "followUp" = options.followUp
+				? "followUp"
+				: "reply"
+			if (
+				method === "reply" &&
+				(messageOrInteraction.replied || messageOrInteraction.deferred)
+			)
+				method = "editReply"
+
+			message = (await messageOrInteraction[method]({
+				content,
+				components: [new MessageActionRow().addComponents(buttons)],
+				fetchReply: true,
+			})) as Message
+		}
+
+		const response = await message
+			.awaitMessageComponent({
+				filter: (i) => i.user.id === target.id,
+				time: options.timeout,
+				componentType: "BUTTON",
+			})
+			.then((i) => {
+				i.deferUpdate()
+				return i
+			})
+			.catch(() => null)
+
+		await message.edit({
+			components: [
+				new MessageActionRow().addComponents(
+					buttons.map((b) => {
+						// Disable buttons
+						b.setDisabled(true)
+						// Set style to secondary
+						if (b.customId !== response?.customId)
+							b.setStyle("SECONDARY")
+						return b
+					})
+				),
+			],
 		})
-		const reaction = reactions.first()
-		if (!reaction) return false
-		if (reaction.emoji.name === "❌") return false
-		return true
-	}
 
-	async getMessageResponse(
-		message: Message,
-		content: string,
-		timeout = 30000
-	): Promise<Message | null> {
-		const msg = await message.channel.send(content)
-		return (
-			(
-				await msg.channel.awaitMessages({
-					filter: (m) => m.author.id === message.author.id,
-					max: 1,
-					time: timeout,
-				})
-			).first() || null
-		)
-	}
-
-	async argsOrInput(
-		args: string[],
-		message: Message,
-		content: string
-	): Promise<string | null> {
-		const arg = args.shift()
-		if (arg) return arg
-
-		const newMessage = await this.getMessageResponse(message, content)
-		if (!newMessage) return null
-		return newMessage.content.split(" ")[0]
+		return response?.customId === "yes"
 	}
 
 	createBaseEmbed() {
