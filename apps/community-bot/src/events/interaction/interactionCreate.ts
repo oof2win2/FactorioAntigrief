@@ -114,8 +114,7 @@ const handleCommandFilters = async (
 	)
 
 	if (error) {
-		await interaction.reply(error)
-		return null
+		return error
 	}
 
 	return filters
@@ -152,6 +151,10 @@ export default async (client: FAGCBot, interaction: Interaction) => {
 		client,
 		guildConfig
 	)
+
+	// if filters is a string, it means there was an error
+	// f.e. command requires apikey etc.
+	if (typeof filters === "string") return await interaction.reply(filters)
 
 	try {
 		return await command.execute({
