@@ -97,7 +97,11 @@ export default class RconInterface {
 				await rcon.connect()
 
 				// if the server is online, remove the interval
-				this.checkIntervals.delete(server.servername)
+				const interval = this.checkIntervals.get(server.servername)
+				if (interval) {
+					clearInterval(interval)
+					this.checkIntervals.delete(server.servername)
+				}
 
 				await this.markAsOnline(server)
 				// if the connection was successful, it would not error
