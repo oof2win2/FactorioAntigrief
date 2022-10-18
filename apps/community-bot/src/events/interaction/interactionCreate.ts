@@ -40,7 +40,7 @@ const checkCommandErrors = async (
 			!guildConfig.roles.webhooks)
 	)
 		// TODO use a command mention
-		return `You need to run the \`${client.env.BOTPREFIX}setpermissions\` command and set all roles before you can run any other commands!`
+		return `You need to run the \`/config set permissions\` command and set all roles before you can run any other commands!`
 
 	// check which roles the user doesnt have
 	const doesntHaveRoles =
