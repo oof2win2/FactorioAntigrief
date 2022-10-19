@@ -66,13 +66,13 @@ This is the short process that you may want to follow for each ban that you have
    and it is faster to click a single checkbox than select it from a list
 4. Select any other categories that the player violated in the "CATEGORY" columns. There are only four, but you can add more columns as you require
 5. Type in the ISO-8601 timestamp into the "DATE" column. An available date picker is [here](https://www.timestamp-converter.com/)
-6. Type the name or any identification of the admin who created the report into the "BY" column. Make not of this,
+6. Type the name or any identification of the admin who created the report into the "BY" column. Make note of this,
    as it is used to identify the admin when you import the report into FAGC
 7. Place any proof into any one of the "PROOF" columns. Fill from the left to right, so that the first proof is the first column,
    the second proof is the second column etc.
 8. Click the checkbox in the "DONE" column to signify that this ban can be imported later. Without this checked, the script will ignore it
 
-After you have all of your reports categorized, you need to download the sheet as a .csv file and save it. Then download the [script](../data/connect-to-instance_import-bans.js).
+After you have all of your reports categorized, you need to download the sheet as a .csv file and save it. Then download the [script](data/connect-to-instance_import-bans.js).
 You will need to install the dependencies (`fagc-api-wrapper` and `csv`), and then fill in your API key and guild ID.
 FAGC uses **discord IDs** for identification of users, so between line 14 and 22 (the object called `mods`), please fill in the IDs of the admins
 who created reports, indexed by the names you used in step 6 of the categorization process.
