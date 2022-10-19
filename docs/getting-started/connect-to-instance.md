@@ -88,7 +88,7 @@ minutes that the import will take, but this may vary depending on the amount of 
 The clientside bot is an integral part of the FAGC ecosystem if you want to automate banning and unbanning players on your server with a minimal setup
 and minimal effort. In this part, we will go through the setup of the bot, and how to use it to automate banning and unbanning players.
 
-1. Clone the FAGC repository and install it on your server, just as if you would [install it selfhosted](installation-selfhosted.md).
+1. Clone the FAGC repository and install it on your server, just as if you would [install it selfhosted](./getting-started/installation-selfhosted.md).
    Below is a command that will do this for you.
 
 ```
