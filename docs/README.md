@@ -49,7 +49,7 @@ created by this community, such as if you want to ban for reports created by the
 want to ban for reports created for this category, such as if you want to ban for reports created for the "cheating" category.
 
 You can change these settings at any time - you can trust a community, untrust a community, acknowledge a category, unacknowledge a category. This means that
-the FAGC system itself is zero-trust - by default, you don't trust anyone and you don't acknowledge any categories. You must **explicitly** trust a community
+the FAGC system itself is low-trust - by default, you don't trust anyone (except yourself) and you don't acknowledge any categories. You must **explicitly** trust a community
 or acknowledge a category for their reports to be considered valid. This means that by default, you won't ban anyone for any category. Once you add communities
 you trust to your filters, you will start banning for reports created by those communities. Once you add categories you acknowledge to your filters, you will
 start banning for reports created for those categories. For a report to be considered "valid" for your community, it must be created by a community you trust
