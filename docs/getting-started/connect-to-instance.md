@@ -9,12 +9,12 @@ For that, please view [Generating a banlist only](#Generating-a-banlist-only)
 ## Connecting to view bans
 
 1. Invite the bot to your Discord server through [our invite link](https://discord.com/api/oauth2/authorize?client_id=817908486494617621&scope=bot+identify+applications.commands+applications.commands.permissions.update&response_type=code&redirect_uri=https%3A%2F%2Ffactoriobans.club%2Fapi%2Fdiscord%2Foauth%2Fcallback&permissions=156766628928).
-   The bot will ask for some permissions that are necessary for it to function properly, so please do not disable some of them
+   The bot will ask for some permissions that are necessary for it to function properly, so please don't disable any of them
 2. Once you have the bot in your server, you can use the `/config set permissions` command to set permissions for commands.
    Only the server owner can do this initially. See the image below for how this looks
 3. Once you have set the permissions, you can set your community and category filters. This is when FAGC comes into play,
    as these filters are what ensures that players are banned only from communities you trust and categories you yourself acknowledge.
-4. If you have an API key that can be used to create reports (you would have been told about this explicitly by a FAGC core member), you can set the API
+4. If you have an API key that can be used to create reports (you would have been told about this explicitly by a FAGC maintainer), you can set the API
    key on the bot with `/config set APIKEY`. This will allow you to use `/reports create` to create reports
 
 ## Connecting to the API
