@@ -8,14 +8,14 @@ For that, please view [Generating a banlist only](#Generating-a-banlist-only)
 
 ## Connecting to view bans
 
-1. Invite the bot to your Discord server through [our invite link](https://factoriobans.club/api/discord/oauth/url). The bot will ask for some
-   permissions that are necessary for it to function properly, so please do not disable some of them
-2. Once you have the bot in your server, you can use the `fagc!setperms` command to set permissions for commands.
+1. Invite the bot to your Discord server through [our invite link](https://discord.com/api/oauth2/authorize?client_id=817908486494617621&scope=bot+identify+applications.commands+applications.commands.permissions.update&response_type=code&redirect_uri=https%3A%2F%2Ffactoriobans.club%2Fapi%2Fdiscord%2Foauth%2Fcallback&permissions=156766628928).
+   The bot will ask for some permissions that are necessary for it to function properly, so please don't disable any of them
+2. Once you have the bot in your server, you can use the `/config set permissions` command to set permissions for commands.
    Only the server owner can do this initially. See the image below for how this looks
 3. Once you have set the permissions, you can set your community and category filters. This is when FAGC comes into play,
    as these filters are what ensures that players are banned only from communities you trust and categories you yourself acknowledge.
-4. If you have an API key that can be used to create reports (you would have been told about this explicitly by a FAGC core member), you can set the API
-   key on the bot with `fagc!setapikey`. This will allow you to use `fagc!create` and `fagc!createadvanced` to create reports
+4. If you have an API key that can be used to create reports (you would have been told about this explicitly by a FAGC maintainer), you can set the API
+   key on the bot with `/config set APIKEY`. This will allow you to use `/reports create` to create reports
 
 ## Connecting to the API
 
@@ -119,18 +119,18 @@ Prerequisites:
 -	Have the FAGC bot in your guild, see the instructions [here](#Connecting-to-view-bans) for how to do so
 
 1. Create a list of categories your community will respect (ban for) by getting them with
-`fagc!allcategories`. You can then view the names of all categories that are in the system with
-their respective IDs. You can also use the `fagc!category {ID}` command to view the description
+`/categories list`. You can then view the names of all categories that are in the system with
+their respective IDs. You can also use the `/categories details` command to view the description
 of a specific category if you would like more thorough information. You will however need a list of category IDs separated with spaces, such as `7LxjUX Oefczd u6HCU2 d9lY7t 5YdwHW`
-2. Use the `fagc!addcategory` command to add the categories to your filters. You can input multiple
-categories at once, such as `fagc!addcategory 7LxjUX Oefczd u6HCU2 d9lY7t 5YdwHW`. Remember to
+2. Use the `/categories add` command to add the categories to your filters. You can input multiple
+categories at once, such as `/categories add 7LxjUX Oefczd u6HCU2 d9lY7t 5YdwHW`. Remember to
 confirm the action.
 3. Create a list of communities that your community will acknowledge (accept reports from) by
-getting them with `fagc!allcommunities`. Create a list of the communities that you wish to
+getting them with `/communities list`. Create a list of the communities that you wish to
 acknowledge, separated with spaces, such as `5nXzxm DbJ0mH 9KAbEA`
-4. Use the `fagc!addcommunity` command to add the communities to your filters. You can input multiple
-communities at once, such as `fagc!addcommunity 5nXzxm DbJ0mH 9KAbEA`
-5. Use `fagc!genbanlist` to get the bot to generate a banlist for you. This will send a JSON file
+4. Use the `/communities add` command to add the communities to your filters. You can input multiple
+communities at once, such as `/communities add 5nXzxm DbJ0mH 9KAbEA`
+5. Use `/generate banlist` to get the bot to generate a banlist for you. This will send a JSON file
 to the channel that the command was executed in, which contains all the bans that match the criteria
 you input with the filters. You can use this JSON file with Factorio and have Factorio use it as
 your banlist.
