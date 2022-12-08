@@ -10,7 +10,7 @@ const Setapikey: SubCommand = {
 		.addStringOption((option) =>
 			option
 				.setName("apikey")
-				.setDescription("FAGC API key")
+				.setDescription("FDGL API key")
 				.setRequired(true)
 		),
 	execute: async ({ client, interaction, botConfig }) => {
@@ -24,7 +24,7 @@ const Setapikey: SubCommand = {
 			})
 		}
 		try {
-			const community = await client.fagc.communities.fetchOwnCommunity({
+			const community = await client.fdgl.communities.fetchOwnCommunity({
 				reqConfig: {
 					apikey: apikey.data,
 				},
@@ -41,7 +41,7 @@ const Setapikey: SubCommand = {
 				ephemeral: true,
 			})
 		}
-		client.fagc.setdata({
+		client.fdgl.setdata({
 			apikey: apikey.data,
 		})
 		await client.setBotConfig({

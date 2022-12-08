@@ -1,6 +1,6 @@
-import { FilterObject, Report } from "fagc-api-types"
+import { FilterObject, Report } from "@fdgl/types"
 import { Connection } from "typeorm"
-import FAGCBan from "../../database/FAGCBan"
+import FDGLBan from "../../database/FDGLBan"
 import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
 import splitIntoGroups from "./splitIntoGroups"
@@ -42,7 +42,7 @@ export default async function filterObjectChangedBanlists({
 	const toBanPlayers = new Set<string>()
 	const toUnbanPlayers = new Set<string>()
 
-	const currentBans = await database.getRepository(FAGCBan).find()
+	const currentBans = await database.getRepository(FDGLBan).find()
 	const whitelist = await database.getRepository(Whitelist).find()
 	const privateBans = await database.getRepository(PrivateBan).find()
 
@@ -51,7 +51,7 @@ export default async function filterObjectChangedBanlists({
 	)
 
 	// get all the reports into a single map
-	const bansByPlayer = new Map<string, FAGCBan[]>()
+	const bansByPlayer = new Map<string, FDGLBan[]>()
 	currentBans.forEach((ban) => {
 		if (!bansByPlayer.has(ban.playername)) {
 			bansByPlayer.set(ban.playername, [])
@@ -112,7 +112,7 @@ export default async function filterObjectChangedBanlists({
 
 		// remove all the bans that are not in the filters
 		await transaction
-			.getRepository(FAGCBan)
+			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.delete()
 			.where(
@@ -131,7 +131,7 @@ export default async function filterObjectChangedBanlists({
 	// and remove them from the database
 	for (const splitReports of splitIntoGroups(validReports, 750)) {
 		await database
-			.getRepository(FAGCBan)
+			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.insert()
 			.orIgnore()

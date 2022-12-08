@@ -1,7 +1,7 @@
-import { FilterObject } from "fagc-api-types"
+import { FilterObject } from "@fdgl/types"
 import { Connection } from "typeorm"
 import { DateUtils } from "typeorm/util/DateUtils"
-import FAGCBan from "../../database/FAGCBan"
+import FDGLBan from "../../database/FDGLBan"
 import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
 import ServerOnline from "../../database/ServerOnline"
@@ -26,12 +26,12 @@ export default async function handleMissedData({
 	 If they don't, we check if they have valid reports at T1 and T2. If they are the same, do nothing. If they are different, we ban them for
 	 the one at T2. If they don't have any reports at T2 but do at T1, we unban them. Do nothing if no reports at either.
 	*/
-	const allReports = await database.getRepository(FAGCBan).find()
+	const allReports = await database.getRepository(FDGLBan).find()
 	const privatebans = await database.getRepository(PrivateBan).find()
 	const whitelist = await database.getRepository(Whitelist).find()
 
 	// first, group them all by playername
-	const reportsByPlayer = new Map<string, FAGCBan[]>()
+	const reportsByPlayer = new Map<string, FDGLBan[]>()
 	const privatebansByPlayer = new Map<string, PrivateBan[]>()
 	const whitelistByPlayer = new Map<string, Whitelist[]>()
 	const allPlayernames = new Set<string>()
@@ -56,7 +56,7 @@ export default async function handleMissedData({
 	}
 
 	const privatebansToBan: (PrivateBan & { reban: boolean })[] = []
-	const reportsToBan: (FAGCBan & { reban: boolean })[] = []
+	const reportsToBan: (FDGLBan & { reban: boolean })[] = []
 	const playersToUnban: string[] = []
 
 	for (const playername of allPlayernames) {
@@ -73,8 +73,8 @@ export default async function handleMissedData({
 			return false
 		})
 		// check for the existence of reports at T1 and T2
-		let reportAtT1: FAGCBan | null = null
-		let reportAtT2: FAGCBan | null = null
+		let reportAtT1: FDGLBan | null = null
+		let reportAtT2: FDGLBan | null = null
 		for (const report of filteredReports) {
 			// check the T1 date, which is when the server went offline
 			if (
@@ -214,7 +214,7 @@ export default async function handleMissedData({
 	const lastOfflineDate =
 		sortedOfflineDates[sortedOfflineDates.length - 1] || new Date()
 	await database
-		.getRepository(FAGCBan)
+		.getRepository(FDGLBan)
 		.createQueryBuilder()
 		.delete()
 		.where(`removedAt < :date`, {

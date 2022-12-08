@@ -5,9 +5,9 @@ import {
 	GuildConfig,
 	Report,
 	Revocation,
-} from "fagc-api-types"
+} from "@fdgl/types"
 import faker from "faker"
-import FAGCBan from "../src/database/FAGCBan"
+import FDGLBan from "../src/database/FDGLBan"
 import PrivateBan from "../src/database/PrivateBan"
 import Whitelist from "../src/database/Whitelist"
 
@@ -36,11 +36,11 @@ export function createTimes<F extends (...args: any[]) => any>(
 }
 
 // this is to make sure that the IDs are unique
-const existingFAGCIds = new Set<string>()
-export const createFAGCId = (): string => {
+const existingFDGLIds = new Set<string>()
+export const createFDGLId = (): string => {
 	const id = faker.random.alphaNumeric(6)
-	if (existingFAGCIds.has(id)) return createFAGCId()
-	existingFAGCIds.add(id)
+	if (existingFDGLIds.has(id)) return createFDGLId()
+	existingFDGLIds.add(id)
 	return id
 }
 
@@ -73,7 +73,7 @@ const createDiscordId = (): string => {
 		.toString()
 }
 
-export const createFAGCReport = ({
+export const createFDGLReport = ({
 	categoryIds,
 	communityIds,
 	playernames,
@@ -85,7 +85,7 @@ export const createFAGCReport = ({
 	adminIds?: string[]
 }): Report => {
 	return {
-		id: createFAGCId(),
+		id: createFDGLId(),
 		playername: (playernames
 			? randomElementFromArray(playernames)
 			: faker.internet.userName()
@@ -103,7 +103,7 @@ export const createFAGCReport = ({
 	}
 }
 
-export const createFAGCRevocation = ({
+export const createFDGLRevocation = ({
 	report,
 }: {
 	report: Report
@@ -126,7 +126,7 @@ export const createGuildConfig = ({
 }): [GuildConfig, FilterObject] => {
 	const guildConfig: GuildConfig = {
 		guildId: createDiscordId(),
-		filterObjectId: createFAGCId(),
+		filterObjectId: createFDGLId(),
 		roles: {
 			reports: createDiscordId(),
 			webhooks: createDiscordId(),
@@ -153,17 +153,17 @@ export const createGuildConfig = ({
 	return [guildConfig, filterObject]
 }
 
-export const createFAGCCategory = (): Category => {
+export const createFDGLCategory = (): Category => {
 	return {
-		id: createFAGCId(),
+		id: createFDGLId(),
 		name: faker.lorem.words(),
 		description: faker.lorem.sentence(10),
 	}
 }
 
-export const createFAGCCommunity = (): Community => {
+export const createFDGLCommunity = (): Community => {
 	return {
-		id: createFAGCId(),
+		id: createFDGLId(),
 		name: faker.lorem.words(),
 		contact: createDiscordId(),
 		guildIds: createTimes(
@@ -172,11 +172,11 @@ export const createFAGCCommunity = (): Community => {
 			faker.datatype.number({ min: 1, max: 5 })
 		),
 		tokenInvalidBefore: faker.date.past(),
-		filterObjectId: createFAGCId(),
+		filterObjectId: createFDGLId(),
 	}
 }
 
-export const createFAGCBan = ({
+export const createFDGLBan = ({
 	categoryIds,
 	communityIds,
 	playernames,
@@ -186,9 +186,9 @@ export const createFAGCBan = ({
 	communityIds: string[]
 	playernames?: string[]
 	createdAt: Date
-}): FAGCBan => {
+}): FDGLBan => {
 	return {
-		id: createFAGCId(),
+		id: createFDGLId(),
 		playername: (playernames
 			? randomElementFromArray(playernames)
 			: faker.internet.userName()
@@ -244,9 +244,9 @@ export const createPrivateban = ({
 	}
 }
 
-export const reportIntoFAGCBan = (
+export const reportIntoFDGLBan = (
 	report: Report
-): Omit<FAGCBan, "createdAt"> => {
+): Omit<FDGLBan, "createdAt"> => {
 	return {
 		id: report.id,
 		playername: report.playername,
@@ -256,17 +256,17 @@ export const reportIntoFAGCBan = (
 	}
 }
 
-export const simplifyDatabaseFAGCBan = <T>(
-	fagcBan: FAGCBan | T
-): T | Omit<FAGCBan, "createdAt"> => {
-	if (!(fagcBan instanceof FAGCBan)) {
-		return fagcBan
+export const simplifyDatabaseFDGLBan = <T>(
+	fdglBan: FDGLBan | T
+): T | Omit<FDGLBan, "createdAt"> => {
+	if (!(fdglBan instanceof FDGLBan)) {
+		return fdglBan
 	}
 	return {
-		id: fagcBan.id,
-		playername: fagcBan.playername,
-		categoryId: fagcBan.categoryId,
-		communityId: fagcBan.communityId,
-		removedAt: fagcBan.removedAt,
+		id: fdglBan.id,
+		playername: fdglBan.playername,
+		categoryId: fdglBan.categoryId,
+		communityId: fdglBan.communityId,
+		removedAt: fdglBan.removedAt,
 	}
 }

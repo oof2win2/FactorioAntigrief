@@ -1,5 +1,5 @@
-import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
-import FAGCBot from "./FAGCBot"
+import { WebSocketEvents } from "@fdgl/wrapper/dist/WebsocketListener"
+import FDGLBot from "./FDGLBot"
 import {
 	MessageEmbed,
 	NewsChannel,
@@ -11,11 +11,11 @@ import handleReport from "../utils/functions/handleReport"
 import handleRevocation from "../utils/functions/handleRevocation"
 import splitIntoGroups from "../utils/functions/splitIntoGroups"
 import ENV from "../utils/env"
-import FAGCBan from "../database/FAGCBan"
+import FDGLBan from "../database/FDGLBan"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
-	client: FAGCBot
+	client: FDGLBot
 }
 
 const communityCreated = ({
@@ -143,7 +143,7 @@ const filterObjectChanged = async ({
 	const filterObject = event.filterObject
 	client.filterObject = filterObject
 
-	const validReports = await client.fagc.reports.list({
+	const validReports = await client.fdgl.reports.list({
 		categoryIds: filterObject.categoryFilters,
 		communityIds: filterObject.communityFilters,
 	})
@@ -165,7 +165,7 @@ const filterObjectChanged = async ({
 	// ban players
 	const playerBanStrings = results.toBan.map(
 		(playername) =>
-			`game.ban_player("${playername}", "View your FAGC reports on https://factoriobans.club/api/reports/search?${new URLSearchParams(
+			`game.ban_player("${playername}", "View your FDGL reports on https://factoriobans.club/api/reports/search?${new URLSearchParams(
 				{ playername: playername }
 			).toString()}")`
 	)
@@ -188,10 +188,10 @@ const filterObjectChanged = async ({
 
 // removing of guild IDs from the websocket is done so that they don't interfere once the socket connects again
 const disconnected = ({ client }: HandlerOpts<"disconnected">) => {
-	for (const guildID of client.fagc.websocket.guildIds) {
-		client.fagc.websocket.removeGuildId(guildID)
+	for (const guildID of client.fdgl.websocket.guildIds) {
+		client.fdgl.websocket.removeGuildId(guildID)
 	}
-	client.fagc.websocket.removeFilterObjectId(ENV.FILTEROBJECTID)
+	client.fdgl.websocket.removeFilterObjectId(ENV.FILTEROBJECTID)
 }
 
 // here, we handle stuff since the last connection, such as fetching missed reports, revocations etc.
@@ -200,16 +200,16 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	const filterObject = client.filterObject
 
 	const allReportIds = await client.db
-		.getRepository(FAGCBan)
+		.getRepository(FDGLBan)
 		.createQueryBuilder()
 		.select(["id"])
 		.getMany()
 
 	// we fetch the missed reports and revocations and act on each of them
-	const reports = await client.fagc.reports.fetchSince({
+	const reports = await client.fdgl.reports.fetchSince({
 		timestamp: lastReceivedDate,
 	})
-	const revocations = await client.fagc.revocations.fetchBulk({
+	const revocations = await client.fdgl.revocations.fetchBulk({
 		since: lastReceivedDate,
 		reportIds: allReportIds.map((r) => r.id),
 	})
@@ -250,8 +250,8 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	}
 
 	// add guild IDs back into the websocket handler after all of this was done
-	client.fagc.websocket.addGuildId(ENV.GUILDID)
-	client.fagc.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
+	client.fdgl.websocket.addGuildId(ENV.GUILDID)
+	client.fdgl.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 
 	// execute the commands in batches
 	for (const commandGroup of splitIntoGroups(banCommands)) {

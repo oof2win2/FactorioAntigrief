@@ -1,21 +1,21 @@
 import { Guild } from "discord.js"
-import FAGCBot from "../base/FAGCBot.js"
+import FDGLBot from "../base/FDGLBot.js"
 import sendGuildMessage from "../utils/functions/sendGuildMessage.js"
 
-export default async (client: FAGCBot, [guild]: [Guild]) => {
+export default async (client: FDGLBot, [guild]: [Guild]) => {
 	console.log(`Bot has now entered guild ${guild.name}`)
 
-	const fagcconfig = await client.fagc.communities.fetchGuildConfig({
+	const fdglconfig = await client.fdgl.communities.fetchGuildConfig({
 		guildId: guild.id,
 	})
-	if (!fagcconfig) {
+	if (!fdglconfig) {
 		return sendGuildMessage(
 			guild,
-			`You do not have an existing FAGC configuration in the guild ${guild.name}, so none has been saved or synchronized`
+			`You do not have an existing FDGL configuration in the guild ${guild.name}, so none has been saved or synchronized`
 		)
 	}
 
-	client.fagc.websocket.addGuildId(guild.id)
+	client.fdgl.websocket.addGuildId(guild.id)
 	await client.setBotConfig({
 		guildId: guild.id,
 		owner: guild.ownerId,

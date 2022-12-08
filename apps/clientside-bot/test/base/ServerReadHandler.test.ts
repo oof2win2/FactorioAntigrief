@@ -9,7 +9,7 @@ describe("ServerSyncedActionHandler", () => {
 		rconPort: 0,
 		rconPassword: "",
 		gatherActions: true,
-		actionFilePath: "script-output/fagc-actions.txt",
+		actionFilePath: "script-output/fdgl-actions.txt",
 		absoluteServerPath: "/home/factorio/servers/test",
 	}
 	const handler = new ServerSyncedActionHandler([])

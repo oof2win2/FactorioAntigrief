@@ -1,5 +1,5 @@
-import { FAGCWrapper } from "fagc-api-wrapper"
-import { GuildConfig, Community, FilterObject } from "fagc-api-types"
+import { FDGLWrapper } from "@fdgl/wrapper"
+import { GuildConfig, Community, FilterObject } from "@fdgl/types"
 import ENV from "../utils/env.js"
 import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
 import { Command as CommandType } from "./Commands.js"
@@ -11,8 +11,8 @@ import { z } from "zod"
 import { Connection } from "typeorm"
 import BotConfig from "../database/BotConfig.js"
 import InfoChannel from "../database/InfoChannel.js"
-import { WebSocketEvents } from "fagc-api-wrapper/dist/WebsocketListener"
-import FAGCBan from "../database/FAGCBan.js"
+import { WebSocketEvents } from "@fdgl/wrapper/dist/WebsocketListener"
+import FDGLBan from "../database/FDGLBan.js"
 import ServerSyncedActionHandler from "./ServerReadHandler.js"
 import { BaseAction, ServerSyncedBan, ServerSyncedUnban } from "../types.js"
 import PrivateBan from "../database/PrivateBan.js"
@@ -30,8 +30,8 @@ function getServers(): database.FactorioServerType[] {
 interface BotOptions extends ClientOptions {
 	database: Connection
 }
-export default class FAGCBot extends Client {
-	fagc: FAGCWrapper
+export default class FDGLBot extends Client {
+	fdgl: FDGLWrapper
 	db: Connection
 	commands: Collection<string, CommandType>
 	// private _botConfig so that it can be accessed any time from external code with the botConfig getter
@@ -56,7 +56,7 @@ export default class FAGCBot extends Client {
 	constructor(options: BotOptions) {
 		super(options)
 		this.db = options.database
-		this.fagc = new FAGCWrapper({
+		this.fdgl = new FDGLWrapper({
 			apiurl: ENV.APIURL,
 			socketurl: ENV.WSURL,
 			enableWebSocket: true,
@@ -86,15 +86,15 @@ export default class FAGCBot extends Client {
 				})
 			})
 
-		// load fagc guild config
-		this.fagc.communities
+		// load fdgl guild config
+		this.fdgl.communities
 			.fetchGuildConfig({ guildId: ENV.GUILDID })
 			.then((config) => (this.guildConfig = config))
 
 		// register listeners for parsing WS notifications
 		Object.entries(wshandler).forEach(([eventname, handler]) => {
 			if (!handler) return
-			this.fagc.websocket.on(
+			this.fdgl.websocket.on(
 				eventname as keyof WebSocketEvents,
 				async (event: any) => {
 					await handler({ event, client: this })
@@ -171,7 +171,7 @@ export default class FAGCBot extends Client {
 		}
 	}
 
-	createBanCommand(report: Omit<FAGCBan, "createdAt" | "removedAt">) {
+	createBanCommand(report: Omit<FDGLBan, "createdAt" | "removedAt">) {
 		const botConfig = this.botConfig
 
 		const rawBanMessage =

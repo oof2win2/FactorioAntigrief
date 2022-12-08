@@ -8,11 +8,11 @@ const ENV = cleanEnv(
 	process.env,
 	{
 		APIURL: url({
-			desc: "FAGC API URL",
+			desc: "FDGL API URL",
 			default: "https://factoriobans.club/api",
 		}),
 		WSURL: url({
-			desc: "FAGC WS URL",
+			desc: "FDGL WS URL",
 			default: "wss://factoriobans.club/api/ws",
 		}),
 		DATABASE_URL: str({ desc: "DB URL", default: "../database.sqlite" }),
@@ -28,12 +28,12 @@ const ENV = cleanEnv(
 		BANCOMMAND: str({
 			desc: "Command to ban with",
 			default:
-				'game.ban_player("{PLAYERNAME}", "You have been banned for FAGC report {REPORTID} created on {REPORTEDTIME}")',
+				'game.ban_player("{PLAYERNAME}", "You have been banned for FDGL report {REPORTID} created on {REPORTEDTIME}")',
 		}),
 		CUSTOMBANCOMMAND: str({
 			desc: "Custom command to send over RCON",
 			default:
-				'game.ban_player("{PLAYERNAME}", "You have been banned for FAGC report {REPORTID} created on {REPORTEDTIME}")',
+				'game.ban_player("{PLAYERNAME}", "You have been banned for FDGL report {REPORTID} created on {REPORTEDTIME}")',
 		}),
 		UNBANCOMMAND: str({
 			desc: "Command to unban with",
@@ -46,7 +46,7 @@ const ENV = cleanEnv(
 		ERRORCHANNELID: str({ desc: "Discord channel ID of error channel" }),
 		SERVERSFILEPATH: str({
 			desc: "Path to JSON file of server descriptions",
-			example: "/home/fagc/fagc-clientside-bot/servers.json",
+			example: "/home/fdgl/fdgl-clientside-bot/servers.json",
 			default: "../servers.json",
 		}),
 		SERVERFOLDERPATH: str({
@@ -54,8 +54,8 @@ const ENV = cleanEnv(
 			example: "/opt/factorio/servers",
 			default: "",
 		}),
-		FILTEROBJECTID: str({ desc: "FAGC Filter object ID" }),
-		APIKEY: str({ desc: "Your FAGC API key" }),
+		FILTEROBJECTID: str({ desc: "FDGL Filter object ID" }),
+		APIKEY: str({ desc: "Your FDGL API key" }),
 	},
 	{}
 )

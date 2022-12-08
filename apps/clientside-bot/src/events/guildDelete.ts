@@ -1,8 +1,8 @@
 import { Guild } from "discord.js"
-import FAGCBot from "../base/FAGCBot.js"
+import FDGLBot from "../base/FDGLBot.js"
 
-export default async (client: FAGCBot, [guild]: [Guild]) => {
+export default async (client: FDGLBot, [guild]: [Guild]) => {
 	console.log(`Bot has now left guild ${guild.name}, removing their config`)
 
-	client.fagc.websocket.removeGuildId(guild.id)
+	client.fdgl.websocket.removeGuildId(guild.id)
 }

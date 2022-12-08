@@ -1,7 +1,7 @@
 import { Interaction } from "discord.js"
-import FAGCBot from "../base/FAGCBot.js"
+import FDGLBot from "../base/FDGLBot.js"
 
-export default async (client: FAGCBot, [interaction]: [Interaction]) => {
+export default async (client: FDGLBot, [interaction]: [Interaction]) => {
 	// if interaction is not a command or not in a guild then we dont care
 	if (!interaction.isCommand() || !interaction.inGuild()) return
 

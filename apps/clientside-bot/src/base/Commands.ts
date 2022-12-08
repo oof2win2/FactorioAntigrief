@@ -7,11 +7,11 @@ import {
 	GuildApplicationCommandPermissionData,
 	CommandInteraction,
 } from "discord.js"
-import FAGCBot from "./FAGCBot.js"
+import FDGLBot from "./FDGLBot.js"
 import { BotConfigType } from "./database.js"
 
 interface CommandParams {
-	client: FAGCBot
+	client: FDGLBot
 	interaction: CommandInteraction<"cached">
 	botConfig: BotConfigType
 }

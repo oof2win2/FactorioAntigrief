@@ -1,9 +1,9 @@
 {
-	"name": "fagc-actions-logger",
+	"name": "fdgl-actions-logger",
 	"version": "1.0.0",
-	"title": "FAGC Actions Logger",
+	"title": "FDGL Actions Logger",
 	"author": "oof2win2",
-	"description": "Logs actions useful to the FAGC Infobot to a file for processing",
+	"description": "Logs actions useful to the FDGL Infobot to a file for processing",
 	"dependencies": [
 		"base >= 1.1.0"
 	],

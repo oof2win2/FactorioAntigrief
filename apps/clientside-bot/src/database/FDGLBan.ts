@@ -1,10 +1,10 @@
 import { Entity, Column, PrimaryColumn, CreateDateColumn } from "typeorm"
 
-@Entity({ name: "FAGCBan" })
-export default class FAGCBan {
+@Entity({ name: "FDGLBan" })
+export default class FDGLBan {
 	@PrimaryColumn({
 		type: "text",
-		length: 6, // length of a FAGC ID
+		length: 6, // length of a FDGL ID
 	})
 	id!: string
 
@@ -16,13 +16,13 @@ export default class FAGCBan {
 
 	@Column({
 		type: "text",
-		length: 6, // length of a FAGC ID
+		length: 6, // length of a FDGL ID
 	})
 	categoryId!: string
 
 	@Column({
 		type: "text",
-		length: 6, // length of a FAGC ID
+		length: 6, // length of a FDGL ID
 	})
 	communityId!: string
 
