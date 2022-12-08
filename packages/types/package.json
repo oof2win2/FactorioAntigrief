@@ -1,5 +1,5 @@
 {
-	"name": "fagc-api-types",
+	"name": "@fdgl/types",
 	"version": "1.12.0",
 	"description": "",
 	"main": "dist/src/index.js",
