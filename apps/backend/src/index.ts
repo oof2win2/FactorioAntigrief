@@ -30,7 +30,7 @@ const start = async () => {
 				communityFilters: [],
 			})
 			const community = await CommunityModel.create({
-				name: "FAGC Master Community",
+				name: "FDGL Master Community",
 				contact: client.user?.id,
 				filterObjectId: filterObject.id,
 			})

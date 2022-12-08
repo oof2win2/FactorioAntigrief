@@ -10,7 +10,7 @@ import {
 	Category,
 	Report,
 	ReportMessageExtraOpts,
-} from "fagc-api-types"
+} from "@fdgl/types"
 import GuildConfigModel from "../database/guildconfig"
 import { z } from "zod"
 import validator from "validator"

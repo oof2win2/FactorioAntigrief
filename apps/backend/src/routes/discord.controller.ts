@@ -16,7 +16,7 @@ import GuildConfigModel from "../database/guildconfig"
 import WebhookModel from "../database/webhook"
 import { guildConfigChanged } from "../utils/info"
 import { client, rest } from "../utils/discord"
-import { GuildConfig, Webhook } from "fagc-api-types"
+import { GuildConfig, Webhook } from "@fdgl/types"
 import { z } from "zod"
 import UserModel from "../database/user"
 import ENV from "../utils/env"
@@ -443,7 +443,7 @@ export default class DiscordController {
 					token: z.string(),
 				}),
 
-				description: "Add Discord webhook to FAGC notifications",
+				description: "Add Discord webhook to FDGL notifications",
 				tags: ["discord"],
 				response: {
 					"200": Webhook,
@@ -475,13 +475,13 @@ export default class DiscordController {
 			guildId: webhook.guildId,
 		})
 		if (webhooksInSameGuild.length) {
-			const msg = `This guild already has another webhook in the FAGC database with the ID of ${webhooksInSameGuild[0].id}, therefore another webhook was not added`
+			const msg = `This guild already has another webhook in the FDGL database with the ID of ${webhooksInSameGuild[0].id}, therefore another webhook was not added`
 			webhook.send(msg)
 			return res
 				.status(409)
 				.send({ errorCode: 409, error: "Conflict", message: msg })
 		}
-		webhook.send("Success in adding this webhook to FAGC")
+		webhook.send("Success in adding this webhook to FDGL")
 		const dbRes = await WebhookModel.create({
 			id: id,
 			token: token,
@@ -499,7 +499,7 @@ export default class DiscordController {
 					token: z.string(),
 				}),
 
-				description: "Remove a webhook from FAGC notifications",
+				description: "Remove a webhook from FDGL notifications",
 				tags: ["discord"],
 				response: {
 					"200": Webhook,
@@ -528,7 +528,7 @@ export default class DiscordController {
 				token: found.token,
 			})
 			webhook
-				.send("This webhook will no longer recieve FAGC notifications")
+				.send("This webhook will no longer recieve FDGL notifications")
 				.then(() => webhook.destroy())
 			return res.status(200).send(found)
 		}
