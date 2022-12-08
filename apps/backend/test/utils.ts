@@ -1,5 +1,5 @@
 import cryptoRandomString from "crypto-random-string"
-import { Community, Category } from "fagc-api-types"
+import { Community, Category } from "@fdgl/types"
 import * as faker from "faker"
 
 export function createId() {

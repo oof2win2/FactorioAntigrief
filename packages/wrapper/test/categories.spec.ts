@@ -1,10 +1,10 @@
 import { enableFetchMocks } from "jest-fetch-mock"
 enableFetchMocks()
-import { FAGCWrapper } from "../src/index"
+import { FDGLWrapper } from "../src/index"
 import "cross-fetch"
 import { createCategory } from "./util"
 
-const wrapper = new FAGCWrapper({
+const wrapper = new FDGLWrapper({
 	masterapikey: "x",
 	apikey: "x",
 })

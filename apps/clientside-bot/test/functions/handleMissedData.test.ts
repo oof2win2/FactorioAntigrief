@@ -1,19 +1,19 @@
 import { createConnection, Connection } from "typeorm"
 import handleMissedData from "../../src/utils/functions/handleMissedData"
 import BotConfig from "../../src/database/BotConfig"
-import FAGCBan from "../../src/database/FAGCBan"
+import FDGLBan from "../../src/database/FDGLBan"
 import InfoChannel from "../../src/database/InfoChannel"
 import PrivateBan from "../../src/database/PrivateBan"
 import Whitelist from "../../src/database/Whitelist"
 import {
-	createFAGCCategory,
-	createFAGCCommunity,
-	createFAGCReport,
+	createFDGLCategory,
+	createFDGLCommunity,
+	createFDGLReport,
 	createGuildConfig,
 	createTimes,
 	createWhitelist,
 } from "../utils"
-import { Category, Community } from "fagc-api-types"
+import { Category, Community } from "@fdgl/types"
 import ServerOnline from "../../src/database/ServerOnline"
 import faker from "faker"
 
@@ -30,12 +30,12 @@ describe("handleMissedData", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			entities: [FDGLBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
-		categories = createTimes(createFAGCCategory, 100)
+		categories = createTimes(createFDGLCategory, 100)
 		categoryIds = categories.map((x) => x.id)
-		communities = createTimes(createFAGCCommunity, 100)
+		communities = createTimes(createFDGLCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
 
@@ -49,7 +49,7 @@ describe("handleMissedData", () => {
 			communityIds,
 		})
 		const reports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: filter.categoryFilters,
@@ -72,9 +72,9 @@ describe("handleMissedData", () => {
 		)
 
 		// save reports to db
-		await database.getRepository(FAGCBan).save(
+		await database.getRepository(FDGLBan).save(
 			reports.map(
-				(report): FAGCBan => ({
+				(report): FDGLBan => ({
 					...report,
 					createdAt: reportsCreatedAt,
 					removedAt: null,
@@ -101,7 +101,7 @@ describe("handleMissedData", () => {
 			communityIds,
 		})
 		const reports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: filter.categoryFilters,
@@ -124,9 +124,9 @@ describe("handleMissedData", () => {
 		)
 
 		// save reports to db
-		await database.getRepository(FAGCBan).save(
+		await database.getRepository(FDGLBan).save(
 			reports.map(
-				(report): FAGCBan => ({
+				(report): FDGLBan => ({
 					...report,
 					createdAt: reportsCreatedAt,
 					removedAt: null,
@@ -158,7 +158,7 @@ describe("handleMissedData", () => {
 			communityIds,
 		})
 		const reports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: filter.categoryFilters,
@@ -184,9 +184,9 @@ describe("handleMissedData", () => {
 		)
 
 		// save reports to db
-		await database.getRepository(FAGCBan).save(
+		await database.getRepository(FDGLBan).save(
 			reports.map(
-				(report): FAGCBan => ({
+				(report): FDGLBan => ({
 					...report,
 					createdAt: reportsCreatedAt,
 					removedAt: reportsRemovedAt,
@@ -219,7 +219,7 @@ describe("handleMissedData", () => {
 			...new Set(createTimes(faker.internet.userName, 25)),
 		]
 		const reports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: filter.categoryFilters,
@@ -263,9 +263,9 @@ describe("handleMissedData", () => {
 		)
 
 		// save reports to db
-		await database.getRepository(FAGCBan).save(
+		await database.getRepository(FDGLBan).save(
 			reports.map(
-				(report): FAGCBan => ({
+				(report): FDGLBan => ({
 					...report,
 					createdAt: reportsCreatedAt,
 					removedAt: null,

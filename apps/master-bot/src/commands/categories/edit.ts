@@ -1,12 +1,12 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
-import FAGCBot from "../../utils/FAGCBot.js"
+import FDGLBot from "../../utils/FDGLBot.js"
 
 const EditCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("edit")
-		.setDescription("Edit a FAGC category")
+		.setDescription("Edit a FDGL category")
 		.addStringOption((option) =>
 			option
 				.setName("id")
@@ -37,7 +37,7 @@ const EditCategory: SubCommand = {
 				ephemeral: true,
 			})
 
-		const category = await client.FAGC.categories.modify({
+		const category = await client.FDGL.categories.modify({
 			categoryId: id,
 			name: name ?? undefined,
 			description: description ?? undefined,

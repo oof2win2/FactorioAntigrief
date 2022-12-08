@@ -1,5 +1,5 @@
 {
-	"name": "fagc-master-bot",
+	"name": "fdgl-master-bot",
 	"version": "2.0.0",
 	"description": "The master bot for the Factorio Anti-Grief community",
 	"main": "dist/app.js",
@@ -29,7 +29,7 @@
 		"discord.js": "^13.4.0",
 		"dotenv": "^16.0.3",
 		"envalid": "^7.2.1",
-		"fagc-api-wrapper": "^1.30.0",
+		"@fdgl/wrapper": "^1.30.0",
 		"install-types": "^2.0.1",
 		"nodemon": "^2.0.12",
 		"typescript": "^4.3.5"

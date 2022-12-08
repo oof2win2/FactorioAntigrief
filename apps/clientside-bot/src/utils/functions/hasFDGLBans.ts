@@ -1,12 +1,12 @@
-import { FilterObject } from "fagc-api-types"
+import { FilterObject } from "@fdgl/types"
 import { Connection } from "typeorm"
-import FAGCBan from "../../database/FAGCBan"
+import FDGLBan from "../../database/FDGLBan"
 
 /**
- * Function to check if a player has valid FAGC reports against them and whether they should be banned for them
- * @returns False if the player should not be banned, a FAGCBan if the player should be banned
+ * Function to check if a player has valid FDGL reports against them and whether they should be banned for them
+ * @returns False if the player should not be banned, a FDGLBan if the player should be banned
  */
-export default async function hasFAGCBans({
+export default async function hasFDGLBans({
 	playername,
 	filter,
 	database,
@@ -14,8 +14,8 @@ export default async function hasFAGCBans({
 	playername: string
 	filter: FilterObject
 	database: Connection
-}): Promise<false | FAGCBan> {
-	const bans = await database.getRepository(FAGCBan).find({
+}): Promise<false | FDGLBan> {
+	const bans = await database.getRepository(FDGLBan).find({
 		playername: playername,
 	})
 	if (bans.length === 0) return false

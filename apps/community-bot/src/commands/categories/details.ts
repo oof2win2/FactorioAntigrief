@@ -22,10 +22,10 @@ const CategoriesDetails: SubCommand<false, true> = {
 		const categoryId = interaction.options.getString("category", true)
 
 		const category = Number(categoryId)
-			? await client.fagc.categories.fetchCategory({
+			? await client.fdgl.categories.fetchCategory({
 					categoryId: filters.categoryFilters[Number(categoryId) - 1],
 			  })
-			: await client.fagc.categories.fetchCategory({
+			: await client.fdgl.categories.fetchCategory({
 					categoryId: categoryId,
 			  })
 
@@ -36,8 +36,8 @@ const CategoriesDetails: SubCommand<false, true> = {
 
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Categories")
-			.setDescription(`FAGC Category with ID \`${category.id}\``)
+			.setTitle("FDGL Categories")
+			.setDescription(`FDGL Category with ID \`${category.id}\``)
 		embed.addField(category.name, category.description)
 
 		if (client.config && filters.categoryFilters) {

@@ -5,7 +5,7 @@ import CommunityModel from "../database/community"
 import { z } from "zod"
 import * as jose from "jose"
 import ENV from "./env"
-import { Community } from "fagc-api-types"
+import { Community } from "@fdgl/types"
 
 export const apikey = z.object({
 	/**
@@ -35,7 +35,7 @@ export const apikey = z.object({
 export type apikey = z.infer<typeof apikey>
 
 /**
- * Create a FAGC API key
+ * Create a FDGL API key
  * @param cId Community (ID) or guild ID that this key is for
  * @param act Discord user that the API key is for. Can be community, as it maps to the contact
  * @param audience The type of API key that this is

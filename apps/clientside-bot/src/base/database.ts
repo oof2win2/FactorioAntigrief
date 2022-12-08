@@ -27,7 +27,7 @@ export const FactorioServer = z.object({
 	serverFolderName: z.string().optional(),
 	absoluteServerPath: z.string().optional(),
 	gatherActions: z.boolean().default(true),
-	actionFilePath: z.string().default("script-output/fagc-actions.txt"),
+	actionFilePath: z.string().default("script-output/fdgl-actions.txt"),
 	// banlistPath: z.string().superRefine(async (path, ctx) => {
 	// 	if (!path.endsWith(".json")) {
 	// 		ctx.addIssue({

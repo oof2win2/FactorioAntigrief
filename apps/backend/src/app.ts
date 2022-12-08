@@ -18,7 +18,7 @@ import * as Tracing from "@sentry/tracing"
 import fastifySwagger from "fastify-swagger"
 import { z } from "zod"
 import { generateSchema } from "@anatine/zod-openapi"
-import * as Types from "fagc-api-types"
+import * as Types from "@fdgl/types"
 
 const fastify: FastifyInstance = Fastify({
 	jsonShorthand: false,
@@ -73,12 +73,12 @@ fastify.register(fastifySwagger, {
 	},
 	openapi: {
 		info: {
-			title: "FAGC Backend",
-			description: "FAGC Backend",
+			title: "FDGL Backend",
+			description: "FDGL Backend",
 			version: "0.1.0",
 		},
 		externalDocs: {
-			url: "https://github.com/FactorioAntigrief/fagc-backend",
+			url: "https://github.com/FactorioAntigrief/FactorioAntigrief",
 			description: "Find the repo here",
 		},
 		// consumes: ["application/json", "x-www-form-urlencoded"],

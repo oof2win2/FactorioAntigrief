@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
-import FAGCBot from "../../utils/FAGCBot.js"
+import FDGLBot from "../../utils/FDGLBot.js"
 
 const EditCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -25,7 +25,7 @@ const EditCategory: SubCommand = {
 		const idReceiving = interaction.options.getString("receiving", true)
 		const idDissolving = interaction.options.getString("dissolving", true)
 
-		const receiving = await client.FAGC.categories.fetchCategory({
+		const receiving = await client.FDGL.categories.fetchCategory({
 			categoryId: idReceiving,
 		})
 		if (!receiving)
@@ -33,7 +33,7 @@ const EditCategory: SubCommand = {
 				content: `Category ID \`${idReceiving}\` does not exist`,
 				ephemeral: true,
 			})
-		const dissolving = await client.FAGC.categories.fetchCategory({
+		const dissolving = await client.FDGL.categories.fetchCategory({
 			categoryId: idDissolving,
 		})
 		if (!dissolving)
@@ -42,7 +42,7 @@ const EditCategory: SubCommand = {
 				ephemeral: true,
 			})
 
-		const merged = await client.FAGC.categories.merge({
+		const merged = await client.FDGL.categories.merge({
 			idReceiving: idReceiving,
 			idDissolving: idDissolving,
 		})

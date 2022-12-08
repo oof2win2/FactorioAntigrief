@@ -11,7 +11,7 @@ import {
 	categoryUpdatedMessage,
 	filterObjectChanged,
 } from "../utils/info"
-import { Category } from "fagc-api-types"
+import { Category } from "@fdgl/types"
 import { z } from "zod"
 import ReportInfoModel from "../database/reportinfo"
 import FilterModel from "../database/filterobject"

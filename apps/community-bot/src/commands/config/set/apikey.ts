@@ -59,7 +59,7 @@ const ConfigSetApikey: SubCommand<false, false> = {
 
 			const key = modal.fields.getTextInputValue("apikey")
 
-			const community = await client.fagc.communities
+			const community = await client.fdgl.communities
 				.fetchOwnCommunity({
 					reqConfig: {
 						apikey: key,
@@ -83,7 +83,7 @@ const ConfigSetApikey: SubCommand<false, false> = {
 				)
 			}
 
-			await client.fagc.communities.setGuildConfigMaster({
+			await client.fdgl.communities.setGuildConfigMaster({
 				config: {
 					communityId: community.id,
 					guildId: interaction.guild.id,

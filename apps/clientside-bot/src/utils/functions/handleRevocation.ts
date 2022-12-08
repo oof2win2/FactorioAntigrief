@@ -1,11 +1,11 @@
-import { FilterObject, Revocation } from "fagc-api-types"
+import { FilterObject, Revocation } from "@fdgl/types"
 import { Connection } from "typeorm"
-import FAGCBan from "../../database/FAGCBan"
+import FDGLBan from "../../database/FDGLBan"
 import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
 
 /**
- * Handle a revocation event from the FAGC API
+ * Handle a revocation event from the FDGL API
  * @returns List of guild IDs in which the player should be unbanned or false if the revocation is invalid across all guilds
  */
 export default async function handleRevocation({
@@ -28,7 +28,7 @@ export default async function handleRevocation({
 
 	// remove the report from the database if the offline server count is 0, else just mark it as revoked
 	if (offlineServerCount > 0) {
-		await database.getRepository(FAGCBan).update(
+		await database.getRepository(FDGLBan).update(
 			{
 				id: revocation.id,
 			},
@@ -37,7 +37,7 @@ export default async function handleRevocation({
 			}
 		)
 	} else {
-		await database.getRepository(FAGCBan).delete({
+		await database.getRepository(FDGLBan).delete({
 			id: revocation.id,
 		})
 	}
@@ -52,11 +52,11 @@ export default async function handleRevocation({
 	})
 	if (isPrivatebanned) return false
 
-	const existing = await database.getRepository(FAGCBan).find({
+	const existing = await database.getRepository(FDGLBan).find({
 		playername: revocation.playername,
 	})
 
-	// figure out whether the player should be unbanned or not depending on whether any other FAGC bans are valid
+	// figure out whether the player should be unbanned or not depending on whether any other FDGL bans are valid
 	const otherValidBans = existing.some((report) => {
 		return (
 			report.communityId === report.communityId &&

@@ -1,5 +1,5 @@
-import FAGCBot from "../utils/FAGCBot.js"
+import FDGLBot from "../utils/FDGLBot.js"
 
-export default (client: FAGCBot) => {
+export default (client: FDGLBot) => {
 	console.log(`${client.user?.tag} is online`)
 }

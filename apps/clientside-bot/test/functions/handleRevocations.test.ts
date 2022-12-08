@@ -1,19 +1,19 @@
 import { createConnection, Connection } from "typeorm"
 import handleRevocation from "../../src/utils/functions/handleRevocation"
 import BotConfig from "../../src/database/BotConfig"
-import FAGCBan from "../../src/database/FAGCBan"
+import FDGLBan from "../../src/database/FDGLBan"
 import InfoChannel from "../../src/database/InfoChannel"
 import PrivateBan from "../../src/database/PrivateBan"
 import Whitelist from "../../src/database/Whitelist"
 import {
-	createFAGCCategory,
-	createFAGCCommunity,
-	createFAGCReport,
-	createFAGCRevocation,
+	createFDGLCategory,
+	createFDGLCommunity,
+	createFDGLReport,
+	createFDGLRevocation,
 	createGuildConfig,
 	createTimes,
 } from "../utils"
-import { Category, Community } from "fagc-api-types"
+import { Category, Community } from "@fdgl/types"
 import faker from "faker"
 
 describe("handleRevocation", () => {
@@ -27,12 +27,12 @@ describe("handleRevocation", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			entities: [FDGLBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
-		categories = createTimes(createFAGCCategory, 100)
+		categories = createTimes(createFDGLCategory, 100)
 		categoryIds = categories.map((x) => x.id)
-		communities = createTimes(createFAGCCommunity, 100)
+		communities = createTimes(createFDGLCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
 
@@ -46,14 +46,14 @@ describe("handleRevocation", () => {
 			communityIds,
 		})
 
-		const report = createFAGCReport({
+		const report = createFDGLReport({
 			categoryIds: filterObject.categoryFilters,
 			communityIds: filterObject.communityFilters,
 		})
 
-		await database.getRepository(FAGCBan).insert(report)
+		await database.getRepository(FDGLBan).insert(report)
 
-		const revocation = createFAGCRevocation({ report })
+		const revocation = createFDGLRevocation({ report })
 
 		const results = await handleRevocation({
 			revocation,
@@ -62,7 +62,7 @@ describe("handleRevocation", () => {
 			offlineServerCount: 0,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
 		// there should be no records in the database, as the report should have been deleted
 		expect(foundInDatabase.length).toBe(0)
@@ -77,7 +77,7 @@ describe("handleRevocation", () => {
 		})
 
 		const [oldReport, newReport] = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: filterObject.categoryFilters,
@@ -89,9 +89,9 @@ describe("handleRevocation", () => {
 			2
 		)
 
-		await database.getRepository(FAGCBan).insert([oldReport, newReport])
+		await database.getRepository(FDGLBan).insert([oldReport, newReport])
 
-		const revocation = createFAGCRevocation({ report: newReport })
+		const revocation = createFDGLRevocation({ report: newReport })
 
 		const results = await handleRevocation({
 			revocation,
@@ -100,7 +100,7 @@ describe("handleRevocation", () => {
 			offlineServerCount: 0,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
 		// the record of the original report should be removed from the database, as it is now unbaned
 		expect(foundInDatabase.length).toBe(1)
@@ -114,14 +114,14 @@ describe("handleRevocation", () => {
 			communityIds,
 		})
 
-		const report = createFAGCReport({
+		const report = createFDGLReport({
 			categoryIds: filterObject.categoryFilters,
 			communityIds: filterObject.communityFilters,
 		})
 
-		const revocation = createFAGCRevocation({ report })
+		const revocation = createFDGLRevocation({ report })
 
-		await database.getRepository(FAGCBan).insert(report)
+		await database.getRepository(FDGLBan).insert(report)
 		await database.getRepository(Whitelist).insert({
 			playername: report.playername,
 			adminId: "123",
@@ -134,7 +134,7 @@ describe("handleRevocation", () => {
 			offlineServerCount: 0,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
 		// should be false, as the player is whitelisted so the system should not interact with whitelisted players
 		expect(results).toBe(false)
@@ -148,14 +148,14 @@ describe("handleRevocation", () => {
 			communityIds,
 		})
 
-		const report = createFAGCReport({
+		const report = createFDGLReport({
 			categoryIds: filterObject.categoryFilters,
 			communityIds: filterObject.communityFilters,
 		})
 
-		const revocation = createFAGCRevocation({ report })
+		const revocation = createFDGLRevocation({ report })
 
-		await database.getRepository(FAGCBan).insert(report)
+		await database.getRepository(FDGLBan).insert(report)
 		await database.getRepository(PrivateBan).insert({
 			playername: report.playername,
 			adminId: "123",
@@ -168,9 +168,9 @@ describe("handleRevocation", () => {
 			offlineServerCount: 0,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
-		// should be false, as the player is private banned and shouldnt be affected by FAGC bans
+		// should be false, as the player is private banned and shouldnt be affected by FDGL bans
 		expect(results).toBe(false)
 		// there should be no reports in the database
 		expect(foundInDatabase.length).toBe(0)

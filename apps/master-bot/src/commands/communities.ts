@@ -13,7 +13,7 @@ const commands: SubCommand[] = readdirSync("./commands/communities")
 const Communities: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("communities")
-		.setDescription("FAGC Communities")
+		.setDescription("FDGL Communities")
 		.setDefaultPermission(false),
 	execute: async ({ client, interaction }) => {
 		const subcommand = interaction.options.getSubcommand()!

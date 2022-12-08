@@ -3,13 +3,13 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { Formatters } from "discord.js"
 import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
-import { AuthError } from "fagc-api-wrapper"
+import { AuthError } from "@fdgl/wrapper"
 
 const Create: SubCommand<true, true> = {
 	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("revoke")
-		.setDescription("Revoke a FAGC report by it's ID")
+		.setDescription("Revoke a FDGL report by it's ID")
 		.addStringOption((option) =>
 			option
 				.setName("id")
@@ -23,7 +23,7 @@ const Create: SubCommand<true, true> = {
 	execute: async ({ interaction, client, filters, guildConfig }) => {
 		const id = interaction.options.getString("id", true)
 
-		const report = await client.fagc.reports.fetchReport({ reportId: id })
+		const report = await client.fdgl.reports.fetchReport({ reportId: id })
 		if (!report) {
 			return interaction.reply({
 				content: `Report with ID \`${id}\` does not exist!`,
@@ -39,9 +39,9 @@ const Create: SubCommand<true, true> = {
 
 		const checkEmbed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Report Revocation")
+			.setTitle("FDGL Report Revocation")
 			.setDescription(
-				`FAGC Report \`${report.id}\` of player \`${report.playername}\``
+				`FDGL Report \`${report.id}\` of player \`${report.playername}\``
 			)
 			.addFields([
 				{
@@ -74,7 +74,7 @@ const Create: SubCommand<true, true> = {
 		if (!confirm) return interaction.followUp("Report revocation cancelled")
 
 		try {
-			await client.fagc.revocations.revoke({
+			await client.fdgl.revocations.revoke({
 				reportId: id,
 				adminId: interaction.user.id,
 				reqConfig: { apikey: guildConfig.apikey },
@@ -84,7 +84,7 @@ const Create: SubCommand<true, true> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

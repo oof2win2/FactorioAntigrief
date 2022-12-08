@@ -1,12 +1,12 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
-import FAGCBot from "../../utils/FAGCBot.js"
+import FDGLBot from "../../utils/FDGLBot.js"
 
 const CreateCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
-		.setDescription("Remove a FAGC category")
+		.setDescription("Remove a FDGL category")
 		.addStringOption((option) =>
 			option.setName("id").setDescription("Category ID").setRequired(true)
 		),
@@ -16,7 +16,7 @@ const CreateCategory: SubCommand = {
 		const id = interaction.options.getString("id")
 		if (!id) return interaction.reply("Category id not provided")
 
-		const category = await client.FAGC.categories.remove({
+		const category = await client.FDGL.categories.remove({
 			categoryId: id,
 		})
 

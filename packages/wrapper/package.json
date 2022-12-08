@@ -1,7 +1,7 @@
 {
-	"name": "fagc-api-wrapper",
+	"name": "@fdgl/wrapper",
 	"version": "1.30.0",
-	"description": "Wrapper for the FAGC API",
+	"description": "Wrapper for the FDGL API",
 	"main": "dist/index.js",
 	"prettier": "../../.prettierrc.json",
 	"scripts": {
@@ -21,7 +21,7 @@
 	"keywords": [
 		"api",
 		"wrapper",
-		"fagc"
+		"fdgl"
 	],
 	"license": "MIT",
 	"bugs": {
@@ -32,7 +32,7 @@
 		"@discordjs/collection": "^0.1.6",
 		"cross-fetch": "^3.1.4",
 		"discord-api-types": "^0.23.1",
-		"fagc-api-types": "^1.12.0",
+		"@fdgl/types": "^1.12.0",
 		"faker": "^5.5.3",
 		"isomorphic-ws": "^4.0.1",
 		"jest-fetch-mock": "^3.0.3",

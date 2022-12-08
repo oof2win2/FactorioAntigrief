@@ -2,7 +2,7 @@ import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { EmbedField, Formatters } from "discord.js"
 import { createPagedEmbed } from "../../utils/functions"
-import { AuthError } from "fagc-api-wrapper"
+import { AuthError } from "@fdgl/wrapper"
 
 const Create: SubCommand<true, true> = {
 	type: "SubCommand",
@@ -22,7 +22,7 @@ const Create: SubCommand<true, true> = {
 	execute: async ({ interaction, client, filters, guildConfig }) => {
 		const playername = interaction.options.getString("playername", true)
 
-		const reports = await client.fagc.reports.search({
+		const reports = await client.fdgl.reports.search({
 			playername: playername,
 			communityId: guildConfig.communityId,
 		})
@@ -34,8 +34,8 @@ const Create: SubCommand<true, true> = {
 
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Report Revocation")
-			.setDescription(`FAGC Reports of player \`${playername}\``)
+			.setTitle("FDGL Report Revocation")
+			.setDescription(`FDGL Reports of player \`${playername}\``)
 		const fields: EmbedField[] = await Promise.all(
 			reports.map(async (report) => {
 				const admin = await client.users
@@ -70,7 +70,7 @@ const Create: SubCommand<true, true> = {
 		if (!confirm) return interaction.followUp("Report revocation cancelled")
 
 		try {
-			await client.fagc.revocations.revokePlayer({
+			await client.fdgl.revocations.revokePlayer({
 				playername: playername,
 				adminId: interaction.user.id,
 				reqConfig: {
@@ -81,7 +81,7 @@ const Create: SubCommand<true, true> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

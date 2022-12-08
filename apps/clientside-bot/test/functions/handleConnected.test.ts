@@ -1,21 +1,21 @@
 import { createConnection, Connection } from "typeorm"
 import handleConnected from "../../src/utils/functions/handleConnected"
 import BotConfig from "../../src/database/BotConfig"
-import FAGCBan from "../../src/database/FAGCBan"
+import FDGLBan from "../../src/database/FDGLBan"
 import InfoChannel from "../../src/database/InfoChannel"
 import PrivateBan from "../../src/database/PrivateBan"
 import Whitelist from "../../src/database/Whitelist"
 import {
-	createFAGCCategory,
-	createFAGCCommunity,
-	createFAGCReport,
-	createFAGCRevocation,
+	createFDGLCategory,
+	createFDGLCommunity,
+	createFDGLReport,
+	createFDGLRevocation,
 	createTimes,
 	randomElementsFromArray,
-	reportIntoFAGCBan,
-	simplifyDatabaseFAGCBan,
+	reportIntoFDGLBan,
+	simplifyDatabaseFDGLBan,
 } from "../utils"
-import { Category, Community } from "fagc-api-types"
+import { Category, Community } from "@fdgl/types"
 
 describe("handleConnected", () => {
 	let database: Connection
@@ -28,12 +28,12 @@ describe("handleConnected", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			entities: [FDGLBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
-		categories = createTimes(createFAGCCategory, 100)
+		categories = createTimes(createFDGLCategory, 100)
 		categoryIds = categories.map((x) => x.id)
-		communities = createTimes(createFAGCCommunity, 100)
+		communities = createTimes(createFDGLCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
 
@@ -43,7 +43,7 @@ describe("handleConnected", () => {
 
 	it("Should do nothing if no reports or revocations are created", async () => {
 		const previousReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: categoryIds,
@@ -59,7 +59,7 @@ describe("handleConnected", () => {
 
 		// add old reports to the database
 		await database
-			.getRepository(FAGCBan)
+			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.insert()
 			.values(
@@ -82,7 +82,7 @@ describe("handleConnected", () => {
 			revocations: [],
 			database,
 		})
-		const databaseReports = await database.getRepository(FAGCBan).find()
+		const databaseReports = await database.getRepository(FDGLBan).find()
 
 		// ensure that players to ban and unban are correct
 		expect(results.toBan.length).toBe(0)
@@ -93,14 +93,14 @@ describe("handleConnected", () => {
 
 		// ensure that the database stores the right bans
 		expect(databaseReports.length).toBe(previousReports.length)
-		expect(databaseReports.map(simplifyDatabaseFAGCBan)).toEqual(
-			previousReports.map(reportIntoFAGCBan)
+		expect(databaseReports.map(simplifyDatabaseFDGLBan)).toEqual(
+			previousReports.map(reportIntoFDGLBan)
 		)
 	})
 
 	it("Should ban and unban people if reports are created and revoked", async () => {
 		const previousReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: categoryIds,
@@ -112,13 +112,13 @@ describe("handleConnected", () => {
 		// create revocations from the reports that were created and valid
 		const reportsToRevoke = randomElementsFromArray(previousReports, 250)
 		const revokedReports = reportsToRevoke.map((report) =>
-			createFAGCRevocation({
+			createFDGLRevocation({
 				report,
 			})
 		)
 
 		const newReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: categoryIds,
@@ -147,7 +147,7 @@ describe("handleConnected", () => {
 
 		// add old reports to the database
 		await database
-			.getRepository(FAGCBan)
+			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.insert()
 			.values(
@@ -209,7 +209,7 @@ describe("handleConnected", () => {
 			revocations: revokedReports,
 			database,
 		})
-		const databaseReports = await database.getRepository(FAGCBan).find()
+		const databaseReports = await database.getRepository(FDGLBan).find()
 
 		// ensure that players to ban and unban are correct
 		expect(results.toBan.length).toBe(playersToBan.size)
@@ -220,8 +220,8 @@ describe("handleConnected", () => {
 
 		// ensure that the database stores the right bans
 		expect(databaseReports.length).toBe(allNewReports.length)
-		expect(databaseReports.map(simplifyDatabaseFAGCBan)).toEqual(
-			allNewReports.map(reportIntoFAGCBan)
+		expect(databaseReports.map(simplifyDatabaseFDGLBan)).toEqual(
+			allNewReports.map(reportIntoFDGLBan)
 		)
 	})
 })

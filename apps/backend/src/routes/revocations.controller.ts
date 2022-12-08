@@ -12,7 +12,7 @@ import {
 	ReportMessageExtraOpts,
 	RevocationMessageExtraOpts,
 	Revocation,
-} from "fagc-api-types"
+} from "@fdgl/types"
 import { DocumentType } from "@typegoose/typegoose"
 import { BeAnObject } from "@typegoose/typegoose/lib/types"
 import validator from "validator"

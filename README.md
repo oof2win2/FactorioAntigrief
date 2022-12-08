@@ -1,11 +1,11 @@
-# FAGC
+# FDGL
 
-This repository is a monorepo that houses the entire FAGC project.
-FAGC is a free and open-source software project that aims to provide a centralized banlist for Factorio server owners and players.
+This repository is a monorepo that houses the entire FDGL project.
+FDGL is a free and open-source software project that aims to provide a centralized banlist for Factorio server owners and players.
 
 If you would like to view the documentation, you can see markdown [here](./docs/README.md) or the HTML version [here](https://factorioantigrief.github.io/FactorioAntigrief/).
-This is most likely the page you are looking for if you are not attempting to set up your own instance of FAGC but instead use the public one hosted
-by the FAGC team.
+This is most likely the page you are looking for if you are not attempting to set up your own instance of FDGL but instead use the public one hosted
+by the FDGL team.
 
 ## Installation
 

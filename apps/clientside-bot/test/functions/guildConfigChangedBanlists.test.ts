@@ -1,21 +1,21 @@
 import { createConnection, Connection } from "typeorm"
 import filterObjectChangedBanlists from "../../src/utils/functions/filterObjectChangedBanlists"
 import BotConfig from "../../src/database/BotConfig"
-import FAGCBan from "../../src/database/FAGCBan"
+import FDGLBan from "../../src/database/FDGLBan"
 import InfoChannel from "../../src/database/InfoChannel"
 import PrivateBan from "../../src/database/PrivateBan"
 import Whitelist from "../../src/database/Whitelist"
 import {
-	createFAGCCategory,
-	createFAGCCommunity,
-	createFAGCReport,
+	createFDGLCategory,
+	createFDGLCommunity,
+	createFDGLReport,
 	createGuildConfig,
 	createTimes,
 	randomElementsFromArray,
 	createPrivateban,
 	createWhitelist,
 } from "../utils"
-import { Category, Community, Report } from "fagc-api-types"
+import { Category, Community, Report } from "@fdgl/types"
 import faker from "faker"
 
 describe("guildConfigChangedBanlists", () => {
@@ -28,13 +28,13 @@ describe("guildConfigChangedBanlists", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			entities: [FDGLBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 			// logging: true,
 		})
-		categories = createTimes(createFAGCCategory, 100)
+		categories = createTimes(createFDGLCategory, 100)
 		categoryIds = categories.map((x) => x.id)
-		communities = createTimes(createFAGCCommunity, 100)
+		communities = createTimes(createFDGLCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
 
@@ -54,7 +54,7 @@ describe("guildConfigChangedBanlists", () => {
 		}
 
 		const reports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: newFilterObject.categoryFilters,
@@ -70,7 +70,7 @@ describe("guildConfigChangedBanlists", () => {
 			database,
 		})
 
-		const fetchedFAGCBans = await database.getRepository(FAGCBan).find()
+		const fetchedFDGLBans = await database.getRepository(FDGLBan).find()
 
 		const allReportPlayernames = [
 			...new Set(reports.map((report) => report.playername)),
@@ -80,10 +80,10 @@ describe("guildConfigChangedBanlists", () => {
 		expect(results.toBan).toEqual(allReportPlayernames)
 
 		// there should be a record for each report
-		const fagcBanIds = fetchedFAGCBans.map((ban) => ban.id)
+		const fdglBanIds = fetchedFDGLBans.map((ban) => ban.id)
 		const reportIds = reports.map((report) => report.id)
-		expect(fetchedFAGCBans.length).toBe(reports.length)
-		expect(fagcBanIds).toEqual(reportIds)
+		expect(fetchedFDGLBans.length).toBe(reports.length)
+		expect(fdglBanIds).toEqual(reportIds)
 	})
 
 	it("Should unban everyone if all filters are removed", async () => {
@@ -98,7 +98,7 @@ describe("guildConfigChangedBanlists", () => {
 		}
 
 		const reports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: oldFilterObject.categoryFilters,
@@ -108,7 +108,7 @@ describe("guildConfigChangedBanlists", () => {
 			5000
 		)
 
-		await database.getRepository(FAGCBan).save(reports, { chunk: 750 })
+		await database.getRepository(FDGLBan).save(reports, { chunk: 750 })
 
 		const results = await filterObjectChangedBanlists({
 			newFilter: newFilterObject,
@@ -116,7 +116,7 @@ describe("guildConfigChangedBanlists", () => {
 			database,
 		})
 
-		const fetchedFAGCBans = await database.getRepository(FAGCBan).find()
+		const fetchedFDGLBans = await database.getRepository(FDGLBan).find()
 
 		// the function should unban everyone there is a report against
 		const allPlayers = [
@@ -125,17 +125,17 @@ describe("guildConfigChangedBanlists", () => {
 		expect(results.toUnban.length).toBe(allPlayers.length)
 		expect(results.toUnban).toEqual(allPlayers)
 
-		// there should be no records of FAGC bans in the database, as they were all supposed to be removed
-		expect(fetchedFAGCBans.length).toBe(0)
+		// there should be no records of FDGL bans in the database, as they were all supposed to be removed
+		expect(fetchedFDGLBans.length).toBe(0)
 	})
 
 	it("Should not re-ban players that are already banned", async () => {
 		// this can occur if some filters are added to a config
 		// the goal here is to check that the return of the value banlistResults.toBan totals to the amount of reports that have already
 		// been handled (are created in the databse), so people that have already been banned should not be banned again
-		const categories = createTimes(createFAGCCategory, 100)
+		const categories = createTimes(createFDGLCategory, 100)
 		const categoryIds = categories.map((x) => x.id)
-		const communities = createTimes(createFAGCCategory, 100)
+		const communities = createTimes(createFDGLCategory, 100)
 		const communityIds = communities.map((x) => x.id)
 
 		const [guildConfig, oldFilterObject] = createGuildConfig({
@@ -166,7 +166,7 @@ describe("guildConfigChangedBanlists", () => {
 
 		const playernames = createTimes(faker.internet.userName, 5500)
 		const oldReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: oldFilterObject.categoryFilters,
@@ -177,7 +177,7 @@ describe("guildConfigChangedBanlists", () => {
 			5000
 		)
 		const newReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: newFilterObject.categoryFilters,
@@ -188,7 +188,7 @@ describe("guildConfigChangedBanlists", () => {
 			5000
 		)
 
-		await database.getRepository(FAGCBan).save(oldReports, { chunk: 750 })
+		await database.getRepository(FDGLBan).save(oldReports, { chunk: 750 })
 
 		const results = await filterObjectChangedBanlists({
 			newFilter: newFilterObject,
@@ -236,7 +236,7 @@ describe("guildConfigChangedBanlists", () => {
 		const playernames = createTimes(faker.internet.userName, 5000)
 
 		const oldReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: oldFilterObject.categoryFilters,
@@ -247,7 +247,7 @@ describe("guildConfigChangedBanlists", () => {
 			5000
 		)
 		const newReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: newFilterObject.categoryFilters,
@@ -258,7 +258,7 @@ describe("guildConfigChangedBanlists", () => {
 			5000
 		)
 
-		await database.getRepository(FAGCBan).save(oldReports, { chunk: 750 })
+		await database.getRepository(FDGLBan).save(oldReports, { chunk: 750 })
 
 		// get all the reports into a single map
 		const playersToBan = new Set<string>()
@@ -343,7 +343,7 @@ describe("guildConfigChangedBanlists", () => {
 		const playernames = createTimes(faker.internet.userName, 5000)
 
 		const oldReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: oldFilterObject.categoryFilters,
@@ -354,7 +354,7 @@ describe("guildConfigChangedBanlists", () => {
 			5000
 		)
 		const newReports = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: newFilterObject.categoryFilters,
@@ -390,7 +390,7 @@ describe("guildConfigChangedBanlists", () => {
 			return i
 		})
 
-		await database.getRepository(FAGCBan).save(oldReports, { chunk: 750 })
+		await database.getRepository(FDGLBan).save(oldReports, { chunk: 750 })
 		await database.getRepository(Whitelist).save(whitelists, { chunk: 750 })
 		await database
 			.getRepository(PrivateBan)

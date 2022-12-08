@@ -3,13 +3,13 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { Formatters } from "discord.js"
 import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
-import { AuthError } from "fagc-api-wrapper"
+import { AuthError } from "@fdgl/wrapper"
 
 const Create: SubCommand<true, true> = {
 	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
-		.setDescription("Create a FAGC report for a player")
+		.setDescription("Create a FDGL report for a player")
 		.addStringOption((option) =>
 			option
 				.setName("playername")
@@ -46,7 +46,7 @@ const Create: SubCommand<true, true> = {
 		const categoryIds = interaction.options
 			.getString("categories", true)
 			.split(" ")
-		await client.fagc.categories.fetchAll({}) // fetch all categories to cache them
+		await client.fdgl.categories.fetchAll({}) // fetch all categories to cache them
 		// check for validity of categories, sort into valid and invalid IDs
 		const invalidCategoryIds: string[] = []
 		const validCategoryIds: string[] = []
@@ -64,7 +64,7 @@ const Create: SubCommand<true, true> = {
 				id = filters.categoryFilters[i - 1]
 			}
 			// all categories are fetched above so they are cached
-			const category = client.fagc.categories.resolveId(id)
+			const category = client.fdgl.categories.resolveId(id)
 			if (!category) invalidCategoryIds.push(id)
 			else validCategoryIds.push(id)
 		})
@@ -89,7 +89,7 @@ const Create: SubCommand<true, true> = {
 
 		const checkEmbed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Reports")
+			.setTitle("FDGL Reports")
 			.addFields([
 				{ name: "Player", value: playername, inline: true },
 				{
@@ -98,7 +98,7 @@ const Create: SubCommand<true, true> = {
 						.map(
 							(id) =>
 								`${
-									client.fagc.categories.resolveId(id)?.name
+									client.fdgl.categories.resolveId(id)?.name
 								} (\`${id}\`)`
 						)
 						.join(", "),
@@ -129,7 +129,7 @@ const Create: SubCommand<true, true> = {
 			// create the reports for each category
 			const reports = await Promise.all(
 				validCategoryIds.map(async (categoryId) => {
-					return client.fagc.reports.create({
+					return client.fdgl.reports.create({
 						report: {
 							playername: playername,
 							adminId: interaction.user.id,
@@ -153,7 +153,7 @@ const Create: SubCommand<true, true> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

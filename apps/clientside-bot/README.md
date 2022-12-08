@@ -1,4 +1,4 @@
-# fagc-clientside-bot
+# fdgl-clientside-bot
 
 ## Installation
 

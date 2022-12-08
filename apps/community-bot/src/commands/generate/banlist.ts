@@ -19,7 +19,7 @@ const GenerateBanlist: SubCommand<false, true> = {
 
 		await interaction.reply("Generating banlist...")
 
-		const reports = await client.fagc.reports.list({
+		const reports = await client.fdgl.reports.list({
 			communityIds: filters.communityFilters,
 			categoryIds: filters.categoryFilters,
 		})
@@ -27,7 +27,7 @@ const GenerateBanlist: SubCommand<false, true> = {
 		const banlist = [...toBanWith].map((playername) => {
 			return {
 				username: playername,
-				reason: `Banned on FAGC. Please check one of the community Discord servers or go to ${
+				reason: `Banned on FDGL. Please check one of the community Discord servers or go to ${
 					client.env.REPLACEMENT_APIURL
 				}/reports?playername=${encodeURIComponent(playername)}`,
 			}

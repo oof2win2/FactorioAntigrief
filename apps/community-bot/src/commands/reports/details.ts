@@ -19,7 +19,7 @@ const ReportDetails: SubCommand<false, true> = {
 	execute: async ({ interaction, client, filters }) => {
 		const id = interaction.options.getString("id", true)
 
-		const report = await client.fagc.reports.fetchReport({
+		const report = await client.fdgl.reports.fetchReport({
 			reportId: id,
 		})
 
@@ -30,8 +30,8 @@ const ReportDetails: SubCommand<false, true> = {
 
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Report")
-			.setDescription(`FAGC Report with ID \`${id}\``)
+			.setTitle("FDGL Report")
+			.setDescription(`FDGL Report with ID \`${id}\``)
 
 		embed.addFields([
 			{

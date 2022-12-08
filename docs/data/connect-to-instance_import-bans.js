@@ -1,11 +1,11 @@
 const csv = require("csv/sync")
-const { FAGCWrapper } = require("fagc-api-wrapper")
+const { FDGLWrapper } = require("@fdgl/api-wrapper")
 const fs = require("fs")
 
-const APIKEY = "YOUR FAGC API KEY HERE"
+const APIKEY = "YOUR FDGL API KEY HERE"
 const GUILDID = "YOUR GUILD ID HERE"
 
-const fagc = new FAGCWrapper({
+const fdgl = new FDGLWrapper({
 	apiurl: "https://factoriobans.club",
 	apikey: APIKEY,
 })
@@ -26,17 +26,17 @@ const input = csv.stringify(csv.parse(fs.readFileSync("./input.csv", "utf8")))
 const lines = input.split("\n").slice(1)
 
 const run = async () => {
-	const allCategories = await fagc.categories.fetchAll({})
+	const allCategories = await fdgl.categories.fetchAll({})
 	const getCategory = (name) => {
 		return allCategories.find((c) => c.name === name).id
 	}
 
-	let existingGuildConfig = await fagc.communities.fetchGuildConfig({
+	let existingGuildConfig = await fdgl.communities.fetchGuildConfig({
 		guildId: GUILDID,
 	})
 
 	const addCategoryToFilters = async (categoryId) => {
-		const newConfig = await fagc.communities.setGuildConfig({
+		const newConfig = await fdgl.communities.setGuildConfig({
 			config: {
 				guildId: GUILDID,
 				categoryFilters: [
@@ -90,7 +90,7 @@ const run = async () => {
 				// wait for 1200ms
 				await new Promise((resolve) => setTimeout(resolve, 1200))
 			}
-			await fagc.reports.create({
+			await fdgl.reports.create({
 				report: {
 					playername,
 					description: reason,
@@ -104,6 +104,6 @@ const run = async () => {
 			await new Promise((resolve) => setTimeout(resolve, 1250))
 		}
 	}
-	fagc.destroy()
+	fdgl.destroy()
 }
 run()

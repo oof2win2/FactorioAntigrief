@@ -11,12 +11,12 @@ const CommunitiesList: SubCommand<false, false> = {
 	requiresApikey: false,
 	fetchFilters: false,
 	execute: async ({ interaction, client }) => {
-		const communities = await client.fagc.communities.fetchAll({})
+		const communities = await client.fdgl.communities.fetchAll({})
 
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Communities")
-			.setDescription("All FAGC Communities")
+			.setTitle("FDGL Communities")
+			.setDescription("All FDGL Communities")
 
 		const fields = await Promise.all(
 			communities.map(async (community) => {

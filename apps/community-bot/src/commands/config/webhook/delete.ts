@@ -7,7 +7,7 @@ const ConfigWebhookDelete: SubCommand<false, false> = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("delete")
 		.setDescription(
-			"Remove a webhook from a specified channel to stop sending FAGC notifications to"
+			"Remove a webhook from a specified channel to stop sending FDGL notifications to"
 		)
 		.addChannelOption(
 			(option) =>
@@ -58,7 +58,7 @@ const ConfigWebhookDelete: SubCommand<false, false> = {
 			)
 			.map(async (webhook) => {
 				// there should be only one removeWebhook call, as guilds are limited to 1 webhook / guild
-				await client.fagc.info.removeWebhook({
+				await client.fdgl.info.removeWebhook({
 					webhookId: webhook.id,
 					webhookToken: webhook.token,
 				})

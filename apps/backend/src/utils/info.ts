@@ -14,7 +14,7 @@ import {
 	ReportMessageExtraOpts,
 	Revocation,
 	RevocationMessageExtraOpts,
-} from "fagc-api-types"
+} from "@fdgl/types"
 import { z } from "zod"
 
 interface WebSocketData {
@@ -39,7 +39,7 @@ async function SendWebhookMessages() {
 			token: webhook.token,
 		})
 		client
-			.send({ embeds: embeds, username: "FAGC Notifier" })
+			.send({ embeds: embeds, username: "FDGL Notifier" })
 			.catch((error) => {
 				if (error.stack.includes("Unknown Webhook")) {
 					console.log(
@@ -209,7 +209,7 @@ export function reportCreatedMessage(
 	// WebsocketMessage(JSON.stringify(Object.assign({}, report.toObject(), { messageType: "report" })))
 
 	const reportEmbed = new MessageEmbed()
-		.setTitle("FAGC - Report Created")
+		.setTitle("FDGL - Report Created")
 		.setDescription(
 			`${report.automated ? "Automated " : ""}Report \`${
 				report.id
@@ -263,7 +263,7 @@ export function reportRevokedMessage(
 	// WebsocketMessage(JSON.stringify(Object.assign({}, revocation.toObject(), { messageType: "revocation" })))
 
 	const revocationEmbed = new MessageEmbed()
-		.setTitle("FAGC - Report Revoked")
+		.setTitle("FDGL - Report Revoked")
 		.setDescription(
 			`${revocation.automated ? "Automated " : ""}Report \`${
 				revocation.id
@@ -330,7 +330,7 @@ export function categoryCreatedMessage(
 	// WebsocketMessage(JSON.stringify(Object.assign({}, category.toObject(), { messageType: "categoryCreated" })))
 
 	const categoryEmbed = new MessageEmbed()
-		.setTitle("FAGC - Category Created")
+		.setTitle("FDGL - Category Created")
 		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
@@ -369,7 +369,7 @@ export function categoryRemovedMessage(
 	// WebsocketMessage(JSON.stringify(Object.assign({}, category.toObject(), { messageType: "categoryRemoved" })))
 
 	const categoryEmbed = new MessageEmbed()
-		.setTitle("FAGC - Category Removed")
+		.setTitle("FDGL - Category Removed")
 		.setColor("#6f4fe3")
 		.addFields(
 			{ name: "Category ID", value: `\`${category.id}\``, inline: true },
@@ -400,7 +400,7 @@ export function categoryUpdatedMessage(
 	newCategory: Category
 ) {
 	const categoryEmbed = new MessageEmbed()
-		.setTitle("FAGC - Category Updated")
+		.setTitle("FDGL - Category Updated")
 		.setColor("#6f4fe3")
 		.addFields(
 			{
@@ -445,7 +445,7 @@ export function categoriesMergedMessage(
 	dissolving: DocumentType<CategoryClass, BeAnObject>
 ) {
 	const categoryEmbed = new MessageEmbed()
-		.setTitle("FAGC - Categories merged")
+		.setTitle("FDGL - Categories merged")
 		.setColor("#6f4fe3")
 		.addFields(
 			{
@@ -494,7 +494,7 @@ export function communityCreatedMessage(
 	// WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityCreated" })))
 
 	const embed = new MessageEmbed()
-		.setTitle("FAGC - Community Created")
+		.setTitle("FDGL - Community Created")
 		.setColor("#6f4fe3")
 		.addFields(
 			{
@@ -528,7 +528,7 @@ export function communityRemovedMessage(
 	// WebsocketMessage(JSON.stringify(Object.assign({}, community.toObject(), { messageType: "communityRemoved" })))
 
 	const embed = new MessageEmbed()
-		.setTitle("FAGC - Community Removed")
+		.setTitle("FDGL - Community Removed")
 		.setColor("#6f4fe3")
 		.addFields(
 			{
@@ -560,7 +560,7 @@ export function communityUpdatedMessage(
 	opts: CommunityCreatedMessageExtraOpts
 ) {
 	const embed = new MessageEmbed()
-		.setTitle("FAGC - Community Updated")
+		.setTitle("FDGL - Community Updated")
 		.setColor("#6f4fe3")
 		.addFields(
 			{
@@ -593,7 +593,7 @@ export function communitiesMergedMessage(
 	opts: CommunityCreatedMessageExtraOpts
 ) {
 	const embed = new MessageEmbed()
-		.setTitle("FAGC - Communities Updated")
+		.setTitle("FDGL - Communities Updated")
 		.setColor("#6f4fe3")
 		.addFields(
 			{

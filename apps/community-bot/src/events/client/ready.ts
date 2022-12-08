@@ -1,7 +1,7 @@
-import FAGCBot from "../../base/fagcbot"
+import FDGLBot from "../../base/fdglbot"
 import Logger from "../../utils/logger"
 
-export default (client: FAGCBot) => {
+export default (client: FDGLBot) => {
 	Logger.log(
 		`${client.user?.username} is online: ${new Date()
 			.toString()

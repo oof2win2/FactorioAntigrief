@@ -21,16 +21,16 @@ const CategoriesView: SubCommand<false, true> = {
 				`${client.emotes.warn} No category filters set`
 			)
 
-		const allCategories = await client.fagc.categories.fetchAll({})
+		const allCategories = await client.fdgl.categories.fetchAll({})
 		const filteredCategories = allCategories.filter((category) =>
 			filters.categoryFilters.includes(category.id)
 		)
 
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Categories")
+			.setTitle("FDGL Categories")
 			.setDescription(
-				"Filtered FAGC Categories. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
+				"Filtered FDGL Categories. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
 			)
 		// create the fields
 		const fields = filteredCategories

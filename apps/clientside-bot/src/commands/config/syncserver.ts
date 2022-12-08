@@ -2,7 +2,7 @@ import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { ChannelType } from "discord-api-types"
 import { SubCommand } from "../../base/Commands.js"
 import splitIntoGroups from "../../utils/functions/splitIntoGroups.js"
-import FAGCBan from "../../database/FAGCBan.js"
+import FDGLBan from "../../database/FDGLBan.js"
 import PrivateBan from "../../database/PrivateBan.js"
 import dayjs from "dayjs"
 
@@ -40,7 +40,7 @@ const Syncserver: SubCommand = {
 		const alreadyBanned = new Set<string>()
 		const banCommands: string[] = []
 
-		// handle private bans first, so that they are not overriden by FAGC bans
+		// handle private bans first, so that they are not overriden by FDGL bans
 		const privatebans = await client.db.getRepository(PrivateBan).find()
 		for (const ban of privatebans) {
 			const admin = await client.users.fetch(ban.adminId)
@@ -56,14 +56,14 @@ const Syncserver: SubCommand = {
 
 		const filter = client.filterObject
 		if (filter) {
-			const allFAGCBans = await client.db.getRepository(FAGCBan).find()
-			for (const ban of allFAGCBans) {
+			const allFDGLBans = await client.db.getRepository(FDGLBan).find()
+			for (const ban of allFDGLBans) {
 				if (alreadyBanned.has(ban.playername)) continue
 				if (
 					filter.categoryFilters.includes(ban.categoryId) &&
 					filter.communityFilters.includes(ban.communityId)
 				) {
-					const report = await client.fagc.reports.fetchReport({
+					const report = await client.fdgl.reports.fetchReport({
 						reportId: ban.id,
 					})
 					banCommands.push(client.createBanCommand(report!))

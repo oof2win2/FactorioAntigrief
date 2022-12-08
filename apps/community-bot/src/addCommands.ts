@@ -10,8 +10,8 @@ import {
 import ENV from "./utils/env.js"
 import fs from "fs"
 import { Collection } from "discord.js"
-import { FAGCWrapper } from "fagc-api-wrapper"
-import { GuildConfig } from "fagc-api-types"
+import { FDGLWrapper } from "@fdgl/wrapper"
+import { GuildConfig } from "@fdgl/types"
 import { Command } from "./base/Command.js"
 
 const commandCategories = fs
@@ -26,7 +26,7 @@ const toPushCommmands = commandCategories.map((commandFile) => {
 
 const rest = new REST({ version: "9" }).setToken(ENV.DISCORD_BOTTOKEN)
 
-const FAGC = new FAGCWrapper({
+const FDGL = new FDGLWrapper({
 	apiurl: ENV.APIURL,
 	socketurl: "",
 	enableWebSocket: false,
@@ -42,7 +42,7 @@ const run = async () => {
 		console.log(guildIds)
 		await Promise.all(
 			guildIds.map(async (guildId) => {
-				const config = await FAGC.communities.fetchGuildConfig({
+				const config = await FDGL.communities.fetchGuildConfig({
 					guildId: guildId,
 				})
 				if (config) guildConfigs.set(guildId, config)
@@ -65,6 +65,6 @@ const run = async () => {
 	} catch (error) {
 		console.error(error)
 	}
-	FAGC.destroy()
+	FDGL.destroy()
 }
 run()

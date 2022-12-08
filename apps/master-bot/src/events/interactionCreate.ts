@@ -1,7 +1,7 @@
 import { Interaction } from "discord.js"
-import FAGCBot from "../utils/FAGCBot.js"
+import FDGLBot from "../utils/FDGLBot.js"
 
-export default async (client: FAGCBot, interaction: Interaction) => {
+export default async (client: FDGLBot, interaction: Interaction) => {
 	if (!interaction.isCommand()) return
 
 	const { commandName } = interaction

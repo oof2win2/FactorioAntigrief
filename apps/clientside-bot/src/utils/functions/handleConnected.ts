@@ -1,6 +1,6 @@
-import { Report, Revocation } from "fagc-api-types"
+import { Report, Revocation } from "@fdgl/types"
 import { Connection } from "typeorm"
-import FAGCBan from "../../database/FAGCBan"
+import FDGLBan from "../../database/FDGLBan"
 import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
 import splitIntoGroups from "./splitIntoGroups"
@@ -26,7 +26,7 @@ export default async function handleConnected({
 	const toBanPlayers = new Set<string>()
 	const toUnbanPlayers = new Set<string>()
 
-	const currentBans = await database.getRepository(FAGCBan).find()
+	const currentBans = await database.getRepository(FDGLBan).find()
 	const whitelist = await database.getRepository(Whitelist).find()
 	const privateBans = await database.getRepository(PrivateBan).find()
 
@@ -35,7 +35,7 @@ export default async function handleConnected({
 	)
 
 	// get all the reports into a single map
-	const bansByPlayer = new Map<string, FAGCBan[]>()
+	const bansByPlayer = new Map<string, FDGLBan[]>()
 	currentBans.forEach((ban) => {
 		if (!bansByPlayer.has(ban.playername)) {
 			bansByPlayer.set(ban.playername, [])
@@ -99,7 +99,7 @@ export default async function handleConnected({
 
 		// remove all the bans that are not in the filters
 		await transaction
-			.getRepository(FAGCBan)
+			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.delete()
 			.where(
@@ -121,7 +121,7 @@ export default async function handleConnected({
 	// we do this after removing any reports that were revoked, so that
 	for (const splitReports of splitIntoGroups(unrevokedReports, 5000)) {
 		await database
-			.getRepository(FAGCBan)
+			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.insert()
 			.orIgnore()

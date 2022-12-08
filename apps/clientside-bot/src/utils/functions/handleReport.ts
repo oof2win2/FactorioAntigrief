@@ -1,11 +1,11 @@
-import { FilterObject, Report } from "fagc-api-types"
+import { FilterObject, Report } from "@fdgl/types"
 import { Connection } from "typeorm"
-import FAGCBan from "../../database/FAGCBan"
+import FDGLBan from "../../database/FDGLBan"
 import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
 
 /**
- * Handle a report event from the FAGC API
+ * Handle a report event from the FDGL API
  * @returns List of guild IDs in which the player should be banned or false if the report is invalid across all guilds
  */
 export default async function handleReport({
@@ -25,7 +25,7 @@ export default async function handleReport({
 		return false
 
 	// insert the report to the database no matter what
-	await database.getRepository(FAGCBan).insert({
+	await database.getRepository(FDGLBan).insert({
 		id: report.id,
 		playername: report.playername,
 		communityId: report.communityId,
@@ -42,7 +42,7 @@ export default async function handleReport({
 	})
 	if (isPrivatebanned) return false
 
-	const existing = await database.getRepository(FAGCBan).find({
+	const existing = await database.getRepository(FDGLBan).find({
 		playername: report.playername,
 	})
 

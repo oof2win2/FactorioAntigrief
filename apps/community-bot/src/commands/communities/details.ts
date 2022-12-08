@@ -21,7 +21,7 @@ const CommunitiesDetails: SubCommand<false, false> = {
 	execute: async ({ interaction, client }) => {
 		const communityId = interaction.options.getString("community", true)
 
-		const community = await client.fagc.communities.fetchCommunity({
+		const community = await client.fdgl.communities.fetchCommunity({
 			communityId: communityId,
 		})
 
@@ -30,7 +30,7 @@ const CommunitiesDetails: SubCommand<false, false> = {
 				`${client.emotes.warn} Community with the ID \`${communityId}\` does not exist!`
 			)
 
-		const embed = client.createBaseEmbed().setTitle("FAGC Communities")
+		const embed = client.createBaseEmbed().setTitle("FDGL Communities")
 
 		embed.addFields({
 			name: `${community.name} | \`${community.id}\``,

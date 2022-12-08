@@ -1,4 +1,4 @@
-import { createFAGCId, createTimes, randomElementFromArray } from "./utils"
+import { createFDGLId, createTimes, randomElementFromArray } from "./utils"
 
 describe("createTimes", () => {
 	it("Should run a function multiple times and give correct output", () => {
@@ -21,13 +21,13 @@ describe("createTimes", () => {
 	})
 })
 
-describe("createFAGCId", () => {
+describe("createFDGLId", () => {
 	it("Should create a 6 character long string", () => {
-		const result = createFAGCId()
+		const result = createFDGLId()
 		expect(result.length).toBe(6)
 	})
 	it("Should make all characters alphanumerical", () => {
-		const result = createFAGCId()
+		const result = createFDGLId()
 		expect(result).toMatch(/^[0-9a-zA-Z]+$/)
 	})
 })

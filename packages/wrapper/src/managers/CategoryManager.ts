@@ -1,5 +1,5 @@
 import "cross-fetch/polyfill"
-import { Category } from "fagc-api-types"
+import { Category } from "@fdgl/types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import {

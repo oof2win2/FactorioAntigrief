@@ -1,8 +1,8 @@
 import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { createPagedEmbed } from "../../utils/functions"
-import { Category } from "fagc-api-types"
-import { AuthError } from "fagc-api-wrapper"
+import { Category } from "@fdgl/types"
+import { AuthError } from "@fdgl/wrapper"
 
 const slashCommand = new SlashCommandSubcommandBuilder()
 	.setName("remove")
@@ -43,9 +43,9 @@ const CategoriesRemove: SubCommand<false, true> = {
 		const categories = argCategories
 			.map((categoryId) =>
 				isNaN(Number(categoryId))
-					? client.fagc.categories.resolveId(categoryId)
+					? client.fdgl.categories.resolveId(categoryId)
 					: // if it is an index in filtered categories, it needs to be resolved
-					  client.fagc.categories.resolveId(
+					  client.fdgl.categories.resolveId(
 							filters.categoryFilters[Number(categoryId) - 1]
 					  )
 			)
@@ -59,7 +59,7 @@ const CategoriesRemove: SubCommand<false, true> = {
 		// otherwise, send a paged embed with the categories to be removed and ask for confirmation
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Categories")
+			.setTitle("FDGL Categories")
 			.setDescription(
 				"Remove Filtered Categories. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
 			)
@@ -105,7 +105,7 @@ const CategoriesRemove: SubCommand<false, true> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

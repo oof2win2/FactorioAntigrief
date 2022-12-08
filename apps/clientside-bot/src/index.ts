@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { Intents } from "discord.js"
-import FAGCBot from "./base/FAGCBot.js"
+import FDGLBot from "./base/FDGLBot.js"
 import ENV from "./utils/env.js"
 import "./extenders.js"
 import { readdirSync } from "fs"
@@ -11,7 +11,7 @@ process.chdir("dist")
 
 async function run() {
 	const database = await createConnection(await dbConnectionOptions())
-	const client = new FAGCBot({
+	const client = new FDGLBot({
 		intents: [Intents.FLAGS.GUILDS],
 		database,
 	})
@@ -38,7 +38,7 @@ async function run() {
 
 	process.on("exit", () => {
 		client.destroy()
-		client.fagc.destroy()
+		client.fdgl.destroy()
 	})
 }
 run()

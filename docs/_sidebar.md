@@ -1,10 +1,10 @@
 -   Getting started
 
-    -   [Basics about FAGC](./README.md)
+    -   [Basics about FDGL](./README.md)
     -   [Installation for selfhosting](./getting-started/installation-selfhosted.md)
     -   [Connection to an instance](./getting-started/connect-to-instance.md)
 
--   Further reading about FAGC
+-   Further reading about FDGL
     -    [Implementation of the Clientside Bot](./further-reading/clientside-bot.md)
 
 

@@ -15,7 +15,7 @@ import {
 	GuildConfigChangedMessage,
 	FilterObjectChangedMessage,
 	BaseWebsocketMessage,
-} from "fagc-api-types"
+} from "@fdgl/types"
 
 // some typescript stuff so it is strictly typed
 export interface WebSockethandlerOpts {

@@ -1,22 +1,22 @@
 import { createConnection, Connection } from "typeorm"
-import hasFAGCBans from "../../src/utils/functions/hasFAGCBans"
+import hasFDGLBans from "../../src/utils/functions/hasFDGLBans"
 import BotConfig from "../../src/database/BotConfig"
-import FAGCBan from "../../src/database/FAGCBan"
+import FDGLBan from "../../src/database/FDGLBan"
 import InfoChannel from "../../src/database/InfoChannel"
 import PrivateBan from "../../src/database/PrivateBan"
 import Whitelist from "../../src/database/Whitelist"
 import {
-	createFAGCCategory,
-	createFAGCCommunity,
-	createFAGCReport,
+	createFDGLCategory,
+	createFDGLCommunity,
+	createFDGLReport,
 	createGuildConfig,
 	createTimes,
-	reportIntoFAGCBan,
-	simplifyDatabaseFAGCBan,
+	reportIntoFDGLBan,
+	simplifyDatabaseFDGLBan,
 } from "../utils"
-import { Category, Community } from "fagc-api-types"
+import { Category, Community } from "@fdgl/types"
 
-describe("hasFAGCBans", () => {
+describe("hasFDGLBans", () => {
 	let database: Connection
 	let categories: Category[]
 	let categoryIds: string[]
@@ -27,12 +27,12 @@ describe("hasFAGCBans", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			entities: [FDGLBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
-		categories = createTimes(createFAGCCategory, 100)
+		categories = createTimes(createFDGLCategory, 100)
 		categoryIds = categories.map((x) => x.id)
-		communities = createTimes(createFAGCCommunity, 100)
+		communities = createTimes(createFDGLCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
 
@@ -46,14 +46,14 @@ describe("hasFAGCBans", () => {
 			communityIds,
 		})
 
-		const report = createFAGCReport({
+		const report = createFDGLReport({
 			categoryIds: filterObject.categoryFilters,
 			communityIds: filterObject.communityFilters,
 		})
 
-		await database.getRepository(FAGCBan).insert(report)
+		await database.getRepository(FDGLBan).insert(report)
 
-		const result = await hasFAGCBans({
+		const result = await hasFDGLBans({
 			playername: report.playername,
 			database,
 			filter: filterObject,
@@ -62,8 +62,8 @@ describe("hasFAGCBans", () => {
 		// the result should not be false, as that would mean that the player should not be banned
 		expect(result).not.toBe(false)
 		// the result should be equal to the simplified report
-		expect(simplifyDatabaseFAGCBan(result)).toEqual(
-			reportIntoFAGCBan(report)
+		expect(simplifyDatabaseFDGLBan(result)).toEqual(
+			reportIntoFDGLBan(report)
 		)
 	})
 
@@ -73,7 +73,7 @@ describe("hasFAGCBans", () => {
 			communityIds,
 		})
 
-		const result = await hasFAGCBans({
+		const result = await hasFDGLBans({
 			playername: "some random playername",
 			database,
 			filter: filterObject,

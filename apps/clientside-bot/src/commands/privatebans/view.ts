@@ -23,7 +23,7 @@ const Setaction: SubCommand = {
 			playername: playername,
 		})
 
-		// TODO: check if they are currently banned on servers due to FAGC and state if so
+		// TODO: check if they are currently banned on servers due to FDGL and state if so
 		if (existing) {
 			return interaction.reply({
 				content: `Player ${playername} was already banned by <@${

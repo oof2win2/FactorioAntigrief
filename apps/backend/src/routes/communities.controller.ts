@@ -24,7 +24,7 @@ import {
 	FilterObject,
 	FilterObjectChangedMessage,
 	SetFilterObject,
-} from "fagc-api-types"
+} from "@fdgl/types"
 import { z } from "zod"
 import FilterModel from "../database/filterobject"
 

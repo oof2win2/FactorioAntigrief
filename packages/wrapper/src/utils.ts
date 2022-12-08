@@ -1,4 +1,4 @@
-import { Common } from "fagc-api-types"
+import { Common } from "@fdgl/types"
 import { AuthError, AuthErrorType, RequestConfig } from "."
 import BaseManager from "./managers/BaseManager"
 

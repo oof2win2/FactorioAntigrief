@@ -1,5 +1,5 @@
 {
-	"name": "fagc-clientside-bot",
+	"name": "fdgl-clientside-bot",
 	"version": "1.0.0",
 	"description": "## Installation",
 	"main": "dist/index.js",
@@ -31,7 +31,7 @@
 		"discord.js": "^13.7.0",
 		"dotenv": "^16.0.3",
 		"envalid": "^7.2.2",
-		"fagc-api-wrapper": "^1.30.0",
+		"@fdgl/wrapper": "^1.30.0",
 		"faker": "5",
 		"rcon-client": "^4.2.3",
 		"reflect-metadata": "^0.1.13",

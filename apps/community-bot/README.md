@@ -1,8 +1,8 @@
-## FAGC Discord Bot
+## FDGL Discord Bot
 
 ## Contents
 
-- [FAGC Discord Bot](#fagc-discord-bot)
+- [FDGL Discord Bot](#fdgl-discord-bot)
 - [Contents](#contents)
 - [Explanation](#explanation)
   - [Key terms](#key-terms)
@@ -13,7 +13,7 @@
 
 [⬆️ Head back up](#contents)
 
-FAGC (Factorio Anti-Grief Community) is a community of people who try to work against griefers in Factorio.
+FDGL (Factorio Anti-Grief Community) is a community of people who try to work against griefers in Factorio.
 
 ### Key terms
 
@@ -73,9 +73,9 @@ All `id` properties are generated automatically by the API and cannot be set by 
 
 Installation instructions are useful only in the case when you want to **self-host the whole ecosystem**
 
-1. Set up the API [See installation instructions here](https://github.com/oof2win2/fagc-backend#readme)
+1. Set up the API [See installation instructions here](https://github.com/oof2win2/fdgl-backend#readme)
 2. Install dependencies with `npm i`
-3. Set up your `config.js` file according to [`config.example.js`](config.example.js). Make sure that the database connection string is the same as for the API but with its collection set to `bot` instead of `fagc`
+3. Set up your `config.js` file according to [`config.example.js`](config.example.js). Make sure that the database connection string is the same as for the API but with its collection set to `bot` instead of `fdgl`
 4. Run the program with one of:
    1. `nodemon`
    2. `pm2 start pm2.config.js`

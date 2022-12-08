@@ -1,19 +1,19 @@
 import { createConnection, Connection } from "typeorm"
 import handleReport from "../../src/utils/functions/handleReport"
 import BotConfig from "../../src/database/BotConfig"
-import FAGCBan from "../../src/database/FAGCBan"
+import FDGLBan from "../../src/database/FDGLBan"
 import InfoChannel from "../../src/database/InfoChannel"
 import PrivateBan from "../../src/database/PrivateBan"
 import Whitelist from "../../src/database/Whitelist"
 import {
-	createFAGCCategory,
-	createFAGCCommunity,
-	createFAGCReport,
+	createFDGLCategory,
+	createFDGLCommunity,
+	createFDGLReport,
 	createGuildConfig,
 	createTimes,
-	reportIntoFAGCBan,
+	reportIntoFDGLBan,
 } from "../utils"
-import { Category, Community } from "fagc-api-types"
+import { Category, Community } from "@fdgl/types"
 import faker from "faker"
 
 describe("handleReport", () => {
@@ -27,12 +27,12 @@ describe("handleReport", () => {
 		database = await createConnection({
 			type: "better-sqlite3",
 			database: ":memory:",
-			entities: [FAGCBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
+			entities: [FDGLBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
 			synchronize: true,
 		})
-		categories = createTimes(createFAGCCategory, 100)
+		categories = createTimes(createFDGLCategory, 100)
 		categoryIds = categories.map((x) => x.id)
-		communities = createTimes(createFAGCCommunity, 100)
+		communities = createTimes(createFDGLCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
 
@@ -46,7 +46,7 @@ describe("handleReport", () => {
 			communityIds,
 		})
 
-		const report = createFAGCReport({
+		const report = createFDGLReport({
 			categoryIds: filterObject.categoryFilters,
 			communityIds: filterObject.communityFilters,
 		})
@@ -57,14 +57,14 @@ describe("handleReport", () => {
 			filter: filterObject,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
 		// should be true as the player should be banned
 		expect(results).toBe(true)
 		// there should be only one ban in the database, which is equal to the simplified report
 		expect(foundInDatabase.length).toBe(1)
 		expect(foundInDatabase[0]).toEqual(
-			expect.objectContaining(reportIntoFAGCBan(report))
+			expect.objectContaining(reportIntoFDGLBan(report))
 		)
 	})
 
@@ -75,7 +75,7 @@ describe("handleReport", () => {
 		})
 
 		const [oldReport, newReport] = createTimes(
-			createFAGCReport,
+			createFDGLReport,
 			[
 				{
 					categoryIds: filterObject.categoryFilters,
@@ -87,7 +87,7 @@ describe("handleReport", () => {
 			2
 		)
 
-		await database.getRepository(FAGCBan).insert(oldReport)
+		await database.getRepository(FDGLBan).insert(oldReport)
 
 		const results = await handleReport({
 			report: newReport,
@@ -95,15 +95,15 @@ describe("handleReport", () => {
 			filter: filterObject,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
 		// the result should be false, as the player is already banned
 		expect(results).toBe(false)
 		// there should be two bans in the database, which are equal to the simplified reports
 		expect(foundInDatabase.length).toBe(2)
 		expect(foundInDatabase).toEqual([
-			expect.objectContaining(reportIntoFAGCBan(oldReport)),
-			expect.objectContaining(reportIntoFAGCBan(newReport)),
+			expect.objectContaining(reportIntoFDGLBan(oldReport)),
+			expect.objectContaining(reportIntoFDGLBan(newReport)),
 		])
 	})
 
@@ -113,7 +113,7 @@ describe("handleReport", () => {
 			communityIds,
 		})
 
-		const report = createFAGCReport({
+		const report = createFDGLReport({
 			categoryIds: filterObject.categoryFilters,
 			communityIds: filterObject.communityFilters,
 		})
@@ -129,14 +129,14 @@ describe("handleReport", () => {
 			filter: filterObject,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
 		// should be false as the player is to not be banned
 		expect(results).toBe(false)
 		// there should be a ban in the database, which is equal to the simplified report
 		expect(foundInDatabase.length).toBe(1)
 		expect(foundInDatabase[0]).toEqual(
-			expect.objectContaining(reportIntoFAGCBan(report))
+			expect.objectContaining(reportIntoFDGLBan(report))
 		)
 	})
 
@@ -146,7 +146,7 @@ describe("handleReport", () => {
 			communityIds,
 		})
 
-		const report = createFAGCReport({
+		const report = createFDGLReport({
 			categoryIds: filterObject.categoryFilters,
 			communityIds: filterObject.communityFilters,
 		})
@@ -162,14 +162,14 @@ describe("handleReport", () => {
 			filter: filterObject,
 		})
 
-		const foundInDatabase = await database.manager.find(FAGCBan)
+		const foundInDatabase = await database.manager.find(FDGLBan)
 
 		// should be false, as the player is private banned and shouldnt be banned again
 		expect(results).toBe(false)
 		// there should be a ban in the database, which is equal to the simplified report
 		expect(foundInDatabase.length).toBe(1)
 		expect(foundInDatabase[0]).toEqual(
-			expect.objectContaining(reportIntoFAGCBan(report))
+			expect.objectContaining(reportIntoFDGLBan(report))
 		)
 	})
 })

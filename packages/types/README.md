@@ -1,3 +1,3 @@
-# fagc-api-types
+# @fdgl/types
 
-Typescript definitions used globally in the FAGC project
+Typescript definitions used globally in the FDGL project

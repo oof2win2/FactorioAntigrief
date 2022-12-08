@@ -1,6 +1,6 @@
 import "cross-fetch/polyfill"
 import { ManagerOptions, WrapperOptions } from "../types/types"
-import { Revocation } from "fagc-api-types"
+import { Revocation } from "@fdgl/types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { AuthError, GenericAPIError } from ".."

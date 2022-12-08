@@ -1,12 +1,12 @@
 process.chdir(__dirname)
 
 import { Intents } from "discord.js"
-import FAGCBot from "./utils/FAGCBot.js"
+import FDGLBot from "./utils/FDGLBot.js"
 import ENV from "./utils/env.js"
 
-const bot = new FAGCBot({
+const bot = new FDGLBot({
 	intents: [Intents.FLAGS.GUILDS],
-	fagc: {
+	fdgl: {
 		apiurl: ENV.API_URL,
 		masterapikey: ENV.MASTERAPIKEY,
 	},

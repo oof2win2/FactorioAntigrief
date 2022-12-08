@@ -1,6 +1,6 @@
 import { FactorioServerType } from "./database"
 import { Rcon } from "rcon-client"
-import FAGCBot from "./FAGCBot.js"
+import FDGLBot from "./FDGLBot.js"
 import ServerOnline from "../database/ServerOnline"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -21,14 +21,14 @@ interface Connection {
 
 export default class RconInterface {
 	private servers: FactorioServerType[]
-	private client: FAGCBot
+	private client: FDGLBot
 	private connections: Connection[]
 	/**
 	 * Intervals of checking if a server is online
 	 */
 	private checkIntervals: Map<string, NodeJS.Timeout> = new Map()
 
-	constructor(client: FAGCBot, servers: FactorioServerType[]) {
+	constructor(client: FDGLBot, servers: FactorioServerType[]) {
 		this.client = client
 		this.servers = servers
 		this.connections = []
@@ -54,7 +54,7 @@ export default class RconInterface {
 
 			// reconnection mechanism
 			rcon.on("end", () => {
-				// firstly, mark the server as offline in the database so it can get appropriate FAGC commands
+				// firstly, mark the server as offline in the database so it can get appropriate FDGL commands
 				// once it reconnects
 				this.markAsOffline(server)
 				this.reconnectRcon(rcon, server) // start the reconnection mechanism
@@ -69,7 +69,7 @@ export default class RconInterface {
 		} catch (error) {
 			// mechanism to reconnect to RCON after some time
 
-			// firstly, mark the server as offline in the database so it can get appropriate FAGC commands
+			// firstly, mark the server as offline in the database so it can get appropriate FDGL commands
 			// once it reconnects
 			await this.markAsOffline(server)
 			this.reconnectRcon(rcon, server) // start the reconnection mechanism
