@@ -1,32 +1,32 @@
 import { Client, ClientOptions, Collection, Constants } from "discord.js"
 import { Command } from "./Command.js"
 import fs from "fs"
-import { FAGCWrapper } from "fagc-api-wrapper"
+import { FDGLWrapper } from "@fdgl/wrapper"
 import { PrismaClient } from ".prisma/client/index.js"
 import ENV from "./env.js"
 
-interface FAGCBotOptions extends ClientOptions {
-	fagc: {
+interface FDGLBotOptions extends ClientOptions {
+	fdgl: {
 		apiurl: string
 		masterapikey: string
 	}
 }
 
-export default class FAGCBot extends Client {
+export default class FDGLBot extends Client {
 	public commands: Collection<string, Command>
-	public FAGC: FAGCWrapper
+	public FDGL: FDGLWrapper
 	public db: PrismaClient
 
-	constructor(options: FAGCBotOptions) {
+	constructor(options: FDGLBotOptions) {
 		super(options)
 
 		this.commands = new Collection()
 
-		this.FAGC = new FAGCWrapper({
-			apiurl: options.fagc.apiurl,
+		this.FDGL = new FDGLWrapper({
+			apiurl: options.fdgl.apiurl,
 			socketurl: "",
 			enableWebSocket: false,
-			masterapikey: options.fagc.masterapikey,
+			masterapikey: options.fdgl.masterapikey,
 		})
 
 		this.db = new PrismaClient()

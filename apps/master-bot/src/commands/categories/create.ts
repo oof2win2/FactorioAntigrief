@@ -1,12 +1,12 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
-import FAGCBot from "../../utils/FAGCBot.js"
+import FDGLBot from "../../utils/FDGLBot.js"
 
 const CreateCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
-		.setDescription("Create a FAGC category")
+		.setDescription("Create a FDGL category")
 		.addStringOption((option) =>
 			option
 				.setName("name")
@@ -28,7 +28,7 @@ const CreateCategory: SubCommand = {
 		if (!description)
 			return interaction.reply("Category description not provided")
 
-		const category = await client.FAGC.categories.create({
+		const category = await client.FDGL.categories.create({
 			category: {
 				name: name,
 				description: description,

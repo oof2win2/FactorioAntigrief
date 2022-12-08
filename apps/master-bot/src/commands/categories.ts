@@ -17,7 +17,7 @@ const commands: SubCommand[] = readdirSync("./commands/categories")
 const Categories: CommandWithSubcommands = {
 	data: new SlashCommandBuilder()
 		.setName("categories")
-		.setDescription("FAGC Categories")
+		.setDescription("FDGL Categories")
 		.setDefaultPermission(false),
 	execute: async ({ client, interaction }) => {
 		const subcommand = interaction.options.getSubcommand()!

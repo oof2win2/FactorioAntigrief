@@ -2778,32 +2778,6 @@ extsprintf@^1.2.0:
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.1.tgz#8d172c064867f235c0c84a596806d279bf4bcc07"
   integrity sha512-Wrk35e8ydCKDj/ArClo1VrPVmN8zph5V4AtHwIuHhvMXsKf73UT3BOD+azBIW+3wOJ4FhEH7zyaJCFvChjYvMA==
 
-fagc-api-types@^1.12.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/fagc-api-types/-/fagc-api-types-1.12.0.tgz#c95abf84343e9ca8181b35dd112d51ac4bd6fad1"
-  integrity sha512-vnc3ttOOU3PTFRnd/BZfPnspgG9Fan3gU6mIPQBDKiVLVMM/0UWn8p/SWCPBNohLQoFo6B3otH3NmYrr08AZQw==
-  dependencies:
-    discord-api-types "^0.23.1"
-    zod "^3.11.6"
-
-fagc-api-wrapper@^1.30.0:
-  version "1.30.0"
-  resolved "https://registry.yarnpkg.com/fagc-api-wrapper/-/fagc-api-wrapper-1.30.0.tgz#ebcfca95a716f97f010cde3c68e81ad6e264b1e9"
-  integrity sha512-2oAb9JMlX44prHVtA46/rarM4K/n/wf9HIAl3SWcFuOyODQXAR6RKvbo1r7EFh45PGFKrxCIFRTHTpduqVkodQ==
-  dependencies:
-    "@discordjs/collection" "^0.1.6"
-    cross-fetch "^3.1.4"
-    discord-api-types "^0.23.1"
-    fagc-api-types "^1.12.0"
-    faker "^5.5.3"
-    isomorphic-ws "^4.0.1"
-    jest-fetch-mock "^3.0.3"
-    reconnecting-websocket "^4.4.0"
-    strict-uri-encode "^2.0.0"
-    tslib "^2.3.1"
-    ws "^7.5.0"
-    zod "^3.19.1"
-
 faker@5, faker@^5.5.3:
   version "5.5.3"
   resolved "https://registry.yarnpkg.com/faker/-/faker-5.5.3.tgz#c57974ee484431b25205c2c8dc09fda861e51e0e"

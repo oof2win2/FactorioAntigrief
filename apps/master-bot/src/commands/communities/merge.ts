@@ -1,7 +1,7 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
-import FAGCBot from "../../utils/FAGCBot.js"
+import FDGLBot from "../../utils/FDGLBot.js"
 
 const EditCategory: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
@@ -25,7 +25,7 @@ const EditCategory: SubCommand = {
 		const idReceiving = interaction.options.getString("receiving", true)
 		const idDissolving = interaction.options.getString("dissolving", true)
 
-		const receiving = await client.FAGC.communities.fetchCommunity({
+		const receiving = await client.FDGL.communities.fetchCommunity({
 			communityId: idReceiving,
 		})
 		if (!receiving)
@@ -33,7 +33,7 @@ const EditCategory: SubCommand = {
 				content: `Community with the ID \`${idReceiving}\` does not exist`,
 				ephemeral: true,
 			})
-		const dissolving = await client.FAGC.communities.fetchCommunity({
+		const dissolving = await client.FDGL.communities.fetchCommunity({
 			communityId: idDissolving,
 		})
 		if (!dissolving)
@@ -42,7 +42,7 @@ const EditCategory: SubCommand = {
 				ephemeral: true,
 			})
 
-		await client.FAGC.communities.merge({
+		await client.FDGL.communities.merge({
 			idReceiving: idReceiving,
 			idDissolving: idDissolving,
 		})

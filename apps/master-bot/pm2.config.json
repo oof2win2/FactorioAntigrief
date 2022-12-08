@@ -1,7 +1,7 @@
 {
 	"apps": [
 		{
-			"name": "fagc-master-bot",
+			"name": "fdgl-master-bot",
 			"script": "node .",
 			"env": {
 				"NODE_ENV": "development"

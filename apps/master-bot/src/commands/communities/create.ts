@@ -1,12 +1,12 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { CommandInteraction } from "discord.js"
 import { SubCommand } from "../../utils/Command.js"
-import FAGCBot from "../../utils/FAGCBot.js"
+import FDGLBot from "../../utils/FDGLBot.js"
 
 const CreateCommunity: SubCommand = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
-		.setDescription("Create a FAGC community")
+		.setDescription("Create a FDGL community")
 		.addStringOption((option) =>
 			option
 				.setName("name")
@@ -31,7 +31,7 @@ const CreateCommunity: SubCommand = {
 			})
 		}
 		try {
-			const community = await client.FAGC.communities.create({
+			const community = await client.FDGL.communities.create({
 				name: name,
 				contact: contact.id,
 			})
