@@ -5,7 +5,7 @@ import {
 	GenericAPIError,
 	AuthError,
 } from "../types"
-import { Report, CreateReport } from "fagc-api-types"
+import { Report, CreateReport } from "@fdgl/types"
 import BaseManager from "./BaseManager"
 import strictUriEncode from "strict-uri-encode"
 import { FetchRequestTypes } from "../types/privatetypes"

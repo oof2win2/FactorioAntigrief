@@ -1,4 +1,4 @@
-import { Community, GuildConfig, Category } from "fagc-api-types"
+import { Community, GuildConfig, Category } from "@fdgl/types"
 import faker from "faker"
 
 export const createCategory = (): Category => {

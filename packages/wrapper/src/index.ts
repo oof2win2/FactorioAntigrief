@@ -13,7 +13,7 @@ import WebSocketHandler from "./WebsocketListener"
 // export types
 export * from "./types/index"
 
-export class FAGCWrapper {
+export class FDGLWrapper {
 	public readonly apiurl: string
 	public apikey?: string | null = null
 	public masterapikey?: string | null = null

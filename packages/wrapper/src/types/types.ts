@@ -1,10 +1,10 @@
 export interface RequestConfig {
 	/**
-	 * FAGC API key
+	 * FDGL API key
 	 */
 	apikey?: string
 	/**
-	 * FAGC API Master key
+	 * FDGL API Master key
 	 */
 	masterapikey?: string
 }

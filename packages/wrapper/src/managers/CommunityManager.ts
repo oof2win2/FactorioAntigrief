@@ -12,7 +12,7 @@ import {
 	FilterObject,
 	GuildConfig,
 	SetFilterObject,
-} from "fagc-api-types"
+} from "@fdgl/types"
 import { FetchRequestTypes } from "../types/privatetypes"
 import { authenticate, masterAuthenticate } from "../utils"
 import { z } from "zod"

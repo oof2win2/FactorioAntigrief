@@ -1,6 +1,6 @@
 import "cross-fetch/polyfill"
 import { ManagerOptions, WrapperOptions } from "../types/types"
-import { Webhook } from "fagc-api-types"
+import { Webhook } from "@fdgl/types"
 import BaseManager from "./BaseManager"
 import { GenericAPIError } from "../types"
 import strictUriEncode from "strict-uri-encode"

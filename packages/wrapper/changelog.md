@@ -32,7 +32,7 @@
 
 ### Bugfixes
 
--	Update `fagc-api-types` to have a correct typing for `GuildConfig`.`apiKey`
+-	Update `@fdgl/types` to have a correct typing for `GuildConfig`.`apiKey`
 
 ## [1.27.2] - [2022-01-20]
 
@@ -58,7 +58,7 @@
 
 ### Changes
 
--	Bump `fagc-api-types` from 1.5.1 to 1.7.0
+-	Bump `@fdgl/types` from 1.5.1 to 1.7.0
 -	Add methods to work with API keys
 
 ## [1.25.0] - [2022-01-15]
@@ -120,7 +120,7 @@
 
 ### Changes
 
--	Update `fagc-api-types`
+-	Update `@fdgl/types`
 -	Fix changelog versions
 
 ## [1.22.5] - [2022-01-02]
@@ -297,7 +297,7 @@
 ### Changes
 
 -   Changes the websocket to be disabled by default
--   Started using `fagc-api-types` for type declarations of the API
+-   Started using `@fdgl/types` for type declarations of the API
 -   Reformatted changelog
 
 ## [1.7.3] - [2021-06-23]
@@ -348,7 +348,7 @@
 
 ### Added
 
--   WebSocket handler for FAGC events [1d639eb2f665e524b9a0822cdac3553f83a5ecb4]
+-   WebSocket handler for FDGL events [1d639eb2f665e524b9a0822cdac3553f83a5ecb4]
 
 # [1.4.0] - [2021-06-19]
 
