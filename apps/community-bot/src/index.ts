@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/node"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from "@sentry/tracing"
 import { CaptureConsole } from "@sentry/integrations"
-import FAGCBot from "./base/fagcbot"
+import FDGLBot from "./base/fdglbot"
 import { Intents } from "discord.js"
 import { readdirSync } from "fs"
 
@@ -26,7 +26,7 @@ if (ENV.SENTRY_LINK) {
 	})
 }
 
-const client = new FAGCBot({
+const client = new FDGLBot({
 	// maybe fix these intents later?
 	intents: [
 		Intents.FLAGS.GUILDS,

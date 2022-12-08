@@ -9,10 +9,10 @@ const ENV = cleanEnv(process.env, {
 		desc: "API URL to use in exported banlists",
 		default: "https://factoriobans.club/api",
 	}),
-	MASTERAPIKEY: str({ desc: "FAGC Master API key" }),
+	MASTERAPIKEY: str({ desc: "FDGL Master API key" }),
 	DISCORD_BOTTOKEN: str({ desc: "Your Discord bot token" }),
 	SENTRY_LINK: str({ desc: "Your sentry.io link", default: "" }),
-	FAGC_INVITE_STRING: str({ desc: "FAGC server invite string" }),
+	FDGL_INVITE_STRING: str({ desc: "FDGL server invite string" }),
 	BOTPREFIX: str({ desc: "Discord bot prefix" }),
 })
 

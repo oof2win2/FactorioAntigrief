@@ -1,8 +1,8 @@
 import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { createPagedEmbed } from "../../utils/functions"
-import { Category } from "fagc-api-types"
-import { AuthError } from "fagc-api-wrapper"
+import { Category } from "@fdgl/types"
+import { AuthError } from "@fdgl/wrapper"
 
 const slashCommand = new SlashCommandSubcommandBuilder()
 	.setName("add")
@@ -41,7 +41,7 @@ const CategoriesAdd: SubCommand<false, true> = {
 
 		// get the IDs that are not in their config
 		const newCategories = argCategories
-			.map((categoryId) => client.fagc.categories.resolveId(categoryId))
+			.map((categoryId) => client.fdgl.categories.resolveId(categoryId))
 			.filter((r): r is Category => Boolean(r))
 			.filter((r) => !filters.categoryFilters.includes(r.id))
 
@@ -54,7 +54,7 @@ const CategoriesAdd: SubCommand<false, true> = {
 		// send the new categories as an embed
 		const newCategoryEmbed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Categories")
+			.setTitle("FDGL Categories")
 			.setDescription("New Categories")
 		const newCategoryFields = newCategories.map((category) => {
 			return {
@@ -107,7 +107,7 @@ const CategoriesAdd: SubCommand<false, true> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

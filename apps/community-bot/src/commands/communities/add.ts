@@ -1,7 +1,7 @@
 import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { createPagedEmbed } from "../../utils/functions"
-import { AuthError } from "fagc-api-wrapper"
+import { AuthError } from "@fdgl/wrapper"
 
 const slashCommand = new SlashCommandSubcommandBuilder()
 	.setName("add")
@@ -33,7 +33,7 @@ const CommunitiesAdd: SubCommand<false, true> = {
 	requiresApikey: false,
 	fetchFilters: true,
 	execute: async ({ interaction, client, filters, guildConfig }) => {
-		const allCommunities = await client.fagc.communities.fetchAll({})
+		const allCommunities = await client.fdgl.communities.fetchAll({})
 
 		const argCategories =
 			interaction.options.data[0].options?.map(
@@ -51,8 +51,8 @@ const CommunitiesAdd: SubCommand<false, true> = {
 
 		const confirmationEmbed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Communities")
-			.setDescription("All FAGC Communities")
+			.setTitle("FDGL Communities")
+			.setDescription("All FDGL Communities")
 		const fields = await Promise.all(
 			communitiesToAdd.map(async (id) => {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -100,7 +100,7 @@ const CommunitiesAdd: SubCommand<false, true> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

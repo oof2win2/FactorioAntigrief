@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { AuthError } from "fagc-api-wrapper"
+import { AuthError } from "@fdgl/wrapper"
 import { SubCommand } from "../../../base/Command"
 
 const ConfigSetPermissions: SubCommand<false, false> = {
@@ -60,7 +60,7 @@ const ConfigSetPermissions: SubCommand<false, false> = {
 		try {
 			await client.saveGuildConfig({
 				guildId: interaction.guild.id,
-				// this works but just needs to have the right types, maybe a SetGuildConfig type from fagc-api-types
+				// this works but just needs to have the right types, maybe a SetGuildConfig type from @fdgl/types
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				roles: {
@@ -73,7 +73,7 @@ const ConfigSetPermissions: SubCommand<false, false> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

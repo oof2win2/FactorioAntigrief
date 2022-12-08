@@ -7,7 +7,7 @@ const ConfigWebhookCreate: SubCommand<false, false> = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
 		.setDescription(
-			"Create a webhook in specified channel to send FAGC notifications to"
+			"Create a webhook in specified channel to send FDGL notifications to"
 		)
 		.addChannelOption(
 			(option) =>
@@ -53,16 +53,16 @@ const ConfigWebhookCreate: SubCommand<false, false> = {
 				`${client.emotes.warn} Webhook creation cancelled`
 			)
 
-		const webhook = await channel.createWebhook("FAGC Notifier")
+		const webhook = await channel.createWebhook("FDGL Notifier")
 
 		try {
-			await client.fagc.info.addWebhook({
+			await client.fdgl.info.addWebhook({
 				webhookId: webhook.id,
 				webhookToken: webhook.token || "", // this should be available, but TS doesn't know that
 			})
 
 			return interaction.followUp(
-				"Webhook created successfully! A testing message from the FAGC API should be sent"
+				"Webhook created successfully! A testing message from the FDGL API should be sent"
 			)
 		} catch {
 			// there is a webhook in this guild already, so it can't be created

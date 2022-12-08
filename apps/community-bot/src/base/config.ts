@@ -7,10 +7,10 @@ const config = {
 	},
 	embeds: {
 		color: "#0099ff",
-		footer: "FAGC Team",
-		author: "FAGC Infobot",
+		footer: "FDGL Team",
+		author: "FDGL Infobot",
 	},
-	fagcInvite: "DISCORD FAGC INVITE",
+	fdglInvite: "DISCORD FDGL INVITE",
 } as const
 
 export default config

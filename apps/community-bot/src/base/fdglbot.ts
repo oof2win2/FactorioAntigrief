@@ -9,7 +9,7 @@ import {
 	MessageEmbed,
 	User,
 } from "discord.js"
-import { FAGCWrapper } from "fagc-api-wrapper"
+import { FDGLWrapper } from "@fdgl/wrapper"
 import ENV from "../utils/env"
 import CONFIG from "./config"
 import type { SlashCommand } from "./Command"
@@ -18,14 +18,14 @@ import {
 	FilterObject,
 	SetFilterObject,
 	SetGuildConfig,
-} from "fagc-api-types"
+} from "@fdgl/types"
 
-export default class FAGCBot extends Client {
+export default class FDGLBot extends Client {
 	config: typeof CONFIG
 	emotes: typeof CONFIG["emotes"]
 	env = ENV
 	RateLimit: Collection<string, number>
-	fagc: FAGCWrapper
+	fdgl: FDGLWrapper
 	commands: Map<string, SlashCommand<boolean, boolean>>
 	aliases: Map<string, string>
 
@@ -38,7 +38,7 @@ export default class FAGCBot extends Client {
 		// setup rate limit
 		this.RateLimit = new Collection()
 
-		this.fagc = new FAGCWrapper({
+		this.fdgl = new FDGLWrapper({
 			apiurl: ENV.APIURL,
 			enableWebSocket: false,
 			socketurl: "",
@@ -62,7 +62,7 @@ export default class FAGCBot extends Client {
 	}
 
 	async getFilteredCategories(filter: FilterObject): Promise<Category[]> {
-		const allCategories = await this.fagc.categories.fetchAll({})
+		const allCategories = await this.fdgl.categories.fetchAll({})
 		const filteredCategories = allCategories
 			.filter((category) =>
 				filter.categoryFilters.some((id) => id === category.id)
@@ -75,13 +75,13 @@ export default class FAGCBot extends Client {
 		return filteredCategories
 	}
 	async saveGuildConfig(config: SetGuildConfig) {
-		return this.fagc.communities.setGuildConfigMaster({
+		return this.fdgl.communities.setGuildConfigMaster({
 			config: config,
 		})
 	}
 
 	async saveFilters(filter: SetFilterObject, communityId: string | null) {
-		return this.fagc.communities.setMasterFilters({
+		return this.fdgl.communities.setMasterFilters({
 			filter,
 			communityId,
 		})

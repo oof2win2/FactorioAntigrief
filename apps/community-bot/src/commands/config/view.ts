@@ -13,11 +13,11 @@ const ConfigView: SubCommand<false, false> = {
 	execute: async ({ interaction, client, guildConfig }) => {
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Config")
-			.setDescription("Your FAGC Configuration")
+			.setTitle("FDGL Config")
+			.setDescription("Your FDGL Configuration")
 
 		const community = guildConfig.communityId
-			? await client.fagc.communities.fetchCommunity({
+			? await client.fdgl.communities.fetchCommunity({
 					communityId: guildConfig.communityId,
 			  })
 			: null

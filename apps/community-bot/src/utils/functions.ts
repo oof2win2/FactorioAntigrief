@@ -13,7 +13,7 @@ import {
 } from "discord.js"
 import { readdirSync } from "fs"
 import { SubCommand, SubCommandGroup } from "../base/Command"
-import FAGCBot from "../base/fagcbot"
+import FDGLBot from "../base/fdglbot"
 
 /**
  * Create the pagination components
@@ -187,22 +187,22 @@ export async function sendToGuild(
 	publicUpdates()
 }
 
-export async function afterJoinGuild(guild: Guild, client: FAGCBot) {
+export async function afterJoinGuild(guild: Guild, client: FDGLBot) {
 	// create initial config only if it doesn't exist yet
-	client.fagc.communities
+	client.fdgl.communities
 		.fetchGuildConfig({
 			guildId: guild.id,
 		})
 		.then((config) => {
 			if (config) return
 			console.log(`Creating config for guild with ID ${guild.id}`)
-			client.fagc.communities.createGuildConfig({
+			client.fdgl.communities.createGuildConfig({
 				guildId: guild.id,
 			})
 		})
-	const embed = client.createBaseEmbed().setTitle("Welcome to FAGC")
+	const embed = client.createBaseEmbed().setTitle("Welcome to FDGL")
 	embed.addFields(
-		{ name: "FAGC Invite", value: client.config.fagcInvite },
+		{ name: "FDGL Invite", value: client.config.fdglInvite },
 		{
 			name: "Initial Setup",
 			value:

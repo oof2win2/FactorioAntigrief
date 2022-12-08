@@ -1,10 +1,10 @@
-import FAGCBot from "../../base/fagcbot"
+import FDGLBot from "../../base/fdglbot"
 import { Guild } from "discord.js"
 import Logger from "../../utils/logger"
 
-export default async (client: FAGCBot, guild: Guild) => {
+export default async (client: FDGLBot, guild: Guild) => {
 	Logger.log(`${client.user?.username} left guild ${guild.name}`)
-	client.fagc.communities.guildLeave({
+	client.fdgl.communities.guildLeave({
 		guildId: guild.id,
 	})
 }

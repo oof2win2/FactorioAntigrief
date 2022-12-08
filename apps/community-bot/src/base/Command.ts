@@ -4,11 +4,11 @@ import {
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
 } from "@discordjs/builders"
-import FAGCBot from "./fagcbot"
-import { FilterObject, GuildConfig } from "fagc-api-types"
+import FDGLBot from "./fdglbot"
+import { FilterObject, GuildConfig } from "@fdgl/types"
 
 type CommandParams<Apikey extends boolean, hasFilters extends boolean> = {
-	client: FAGCBot
+	client: FDGLBot
 	interaction: CommandInteraction<"cached">
 	// if Apikey is true, the guildConfig will have an api key GUARANTEED. if it isn't true, it won't be guaranteed
 	guildConfig: Apikey extends true

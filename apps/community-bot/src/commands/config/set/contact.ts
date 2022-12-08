@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { AuthError } from "fagc-api-wrapper"
+import { AuthError } from "@fdgl/wrapper"
 import { SubCommand } from "../../../base/Command"
 
 const ConfigSetContact: SubCommand<true, false> = {
@@ -30,7 +30,7 @@ const ConfigSetContact: SubCommand<true, false> = {
 			)
 
 		try {
-			await client.fagc.communities.setCommunityConfig({
+			await client.fdgl.communities.setCommunityConfig({
 				config: {
 					contact: user.id,
 				},
@@ -42,7 +42,7 @@ const ConfigSetContact: SubCommand<true, false> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.reply(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

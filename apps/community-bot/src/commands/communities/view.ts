@@ -13,12 +13,12 @@ const CommunitiesView: SubCommand<false, true> = {
 	execute: async ({ interaction, client, filters }) => {
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Communities")
+			.setTitle("FDGL Communities")
 			.setDescription(
-				"Trusted FAGC Communities [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
+				"Trusted FDGL Communities [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
 			)
 
-		const allCommunities = await client.fagc.communities.fetchAll({})
+		const allCommunities = await client.fdgl.communities.fetchAll({})
 		const filteredCommunities = allCommunities.filter((community) =>
 			filters.communityFilters.includes(community.id)
 		)

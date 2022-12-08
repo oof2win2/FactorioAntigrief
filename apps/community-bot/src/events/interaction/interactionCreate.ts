@@ -1,7 +1,7 @@
 import { CommandInteraction, GuildMember, Interaction } from "discord.js"
-import { FilterObject, GuildConfig } from "fagc-api-types"
+import { FilterObject, GuildConfig } from "@fdgl/types"
 import { CommandConfig, SlashCommand } from "../../base/Command"
-import FAGCBot from "../../base/fagcbot"
+import FDGLBot from "../../base/fdglbot"
 import { afterJoinGuild, sendToGuild } from "../../utils/functions"
 
 const getKey = (
@@ -14,7 +14,7 @@ const getKey = (
 
 const checkCommandErrors = async (
 	command: SlashCommand<boolean, boolean>,
-	client: FAGCBot,
+	client: FDGLBot,
 	member: GuildMember,
 	guildConfig: GuildConfig,
 	filters: FilterObject | null
@@ -96,11 +96,11 @@ const checkCommandErrors = async (
 const handleCommandFilters = async (
 	interaction: CommandInteraction<"cached">,
 	command: SlashCommand<boolean, boolean>,
-	client: FAGCBot,
+	client: FDGLBot,
 	guildConfig: GuildConfig
 ) => {
 	const filters = getKey("fetchFilters", command)
-		? await client.fagc.communities.getFiltersById({
+		? await client.fdgl.communities.getFiltersById({
 				id: guildConfig.filterObjectId,
 		  })
 		: null
@@ -120,7 +120,7 @@ const handleCommandFilters = async (
 	return filters
 }
 
-export default async (client: FAGCBot, interaction: Interaction) => {
+export default async (client: FDGLBot, interaction: Interaction) => {
 	// if interaction is not a command or not in a guild then we dont care
 	if (!interaction.isCommand() || !interaction.inGuild()) return
 
@@ -133,11 +133,11 @@ export default async (client: FAGCBot, interaction: Interaction) => {
 
 	// this temp var is required due to TS being TS
 	// fetch the guild config for the guild, or create one if it doesn't exist yet
-	let tmpGuildConfig = await client.fagc.communities.fetchGuildConfigMaster({
+	let tmpGuildConfig = await client.fdgl.communities.fetchGuildConfigMaster({
 		guildId: interaction.guild.id,
 	})
 	if (!tmpGuildConfig) {
-		tmpGuildConfig = await client.fagc.communities.createGuildConfig({
+		tmpGuildConfig = await client.fdgl.communities.createGuildConfig({
 			guildId: interaction.guild.id,
 		})
 		// this creates a guild config if it doesn't exist yet, so it runs after

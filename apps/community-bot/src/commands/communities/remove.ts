@@ -1,7 +1,7 @@
 import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { AuthError } from "fagc-api-wrapper"
-import { Community } from "fagc-api-types"
+import { AuthError } from "@fdgl/wrapper"
+import { Community } from "@fdgl/types"
 import { createPagedEmbed } from "../../utils/functions"
 
 const slashCommand = new SlashCommandSubcommandBuilder()
@@ -53,9 +53,9 @@ const CommunitiesRemove: SubCommand<false, true> = {
 		const communities = argCategories
 			.map((communityId) =>
 				isNaN(Number(communityId))
-					? client.fagc.communities.resolveId(communityId)
+					? client.fdgl.communities.resolveId(communityId)
 					: // if it is an index in filtered communities, it needs to be resolved
-					  client.fagc.communities.resolveId(
+					  client.fdgl.communities.resolveId(
 							filters.categoryFilters[Number(communityId) - 1]
 					  )
 			)
@@ -69,7 +69,7 @@ const CommunitiesRemove: SubCommand<false, true> = {
 		// otherwise, send a paged embed with the communities to be removed and ask for confirmation
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Communities")
+			.setTitle("FDGL Communities")
 			.setDescription(
 				"Remove Filtered Communities. [Explanation](https://gist.github.com/oof2win2/370050d3aa1f37947a374287a5e011c4#file-trusted-md)"
 			)
@@ -125,7 +125,7 @@ const CommunitiesRemove: SubCommand<false, true> = {
 		} catch (e) {
 			if (e instanceof AuthError) {
 				return interaction.followUp(
-					`${client.emotes.warn} Your API key is not recognized by FAGC`
+					`${client.emotes.warn} Your API key is not recognized by FDGL`
 				)
 			}
 			throw e

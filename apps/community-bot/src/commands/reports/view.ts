@@ -7,7 +7,7 @@ const View: SubCommand<false, true> = {
 	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("view")
-		.setDescription("View filtered FAGC reports of a player")
+		.setDescription("View filtered FDGL reports of a player")
 		.addStringOption((option) =>
 			option
 				.setName("playername")
@@ -19,7 +19,7 @@ const View: SubCommand<false, true> = {
 	fetchFilters: true,
 	execute: async ({ interaction, client, filters }) => {
 		const playername = interaction.options.getString("playername", true)
-		const reports = await client.fagc.reports.fetchAllName({ playername })
+		const reports = await client.fdgl.reports.fetchAllName({ playername })
 		const filteredReports = reports.filter((report) => {
 			if (!filters.categoryFilters.includes(report.categoryId))
 				return false
@@ -36,15 +36,15 @@ const View: SubCommand<false, true> = {
 
 		const embed = client
 			.createBaseEmbed()
-			.setTitle("FAGC Reports")
-			.setDescription(`All FAGC Reports of ${playername}`)
+			.setTitle("FDGL Reports")
+			.setDescription(`All FDGL Reports of ${playername}`)
 
 		const fields = await Promise.all(
 			filteredReports.map(async (report) => {
-				const community = await client.fagc.communities.fetchCommunity({
+				const community = await client.fdgl.communities.fetchCommunity({
 					communityId: report.communityId,
 				})
-				const category = await client.fagc.categories.fetchCategory({
+				const category = await client.fdgl.categories.fetchCategory({
 					categoryId: report.categoryId,
 				})
 
