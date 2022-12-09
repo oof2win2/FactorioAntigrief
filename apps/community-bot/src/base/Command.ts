@@ -6,6 +6,7 @@ import {
 } from "@discordjs/builders"
 import FDGLBot from "./fdglbot"
 import { FilterObject, GuildConfig } from "@fdgl/types"
+import { checkCommandErrors } from "../events/interaction/interactionCreate"
 
 type CommandParams<Apikey extends boolean, hasFilters extends boolean> = {
 	client: FDGLBot
@@ -86,7 +87,7 @@ export type SubCommand<
 	type: "SubCommand"
 }
 
-export function executeCommandInteraction<
+export async function executeCommandInteraction<
 	Apikey extends boolean,
 	hasFilters extends boolean
 >(
@@ -104,6 +105,15 @@ export function executeCommandInteraction<
 		return args.interaction.reply(
 			"An error finding the command to execute occured"
 		)
+
+	const error = await checkCommandErrors(
+		command,
+		args.client,
+		args.interaction.member,
+		args.guildConfig,
+		args.filters
+	)
+	if (error !== null) return args.interaction.reply(error)
 
 	return command.execute(args)
 }

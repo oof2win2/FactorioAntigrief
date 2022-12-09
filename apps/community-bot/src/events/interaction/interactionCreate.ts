@@ -12,7 +12,7 @@ const getKey = (
 		? command[key]
 		: command.commands.some((c) => getKey(key, c)) // TODO is it right to use some here?
 
-const checkCommandErrors = async (
+export const checkCommandErrors = async (
 	command: SlashCommand<boolean, boolean>,
 	client: FDGLBot,
 	member: GuildMember,
@@ -93,33 +93,6 @@ const checkCommandErrors = async (
 	return null
 }
 
-const handleCommandFilters = async (
-	interaction: CommandInteraction<"cached">,
-	command: SlashCommand<boolean, boolean>,
-	client: FDGLBot,
-	guildConfig: GuildConfig
-) => {
-	const filters = getKey("fetchFilters", command)
-		? await client.fdgl.communities.getFiltersById({
-				id: guildConfig.filterObjectId,
-		  })
-		: null
-
-	const error = await checkCommandErrors(
-		command,
-		client,
-		interaction.member,
-		guildConfig,
-		filters
-	)
-
-	if (error) {
-		return error
-	}
-
-	return filters
-}
-
 export default async (client: FDGLBot, interaction: Interaction) => {
 	// if interaction is not a command or not in a guild then we dont care
 	if (!interaction.isCommand() || !interaction.inGuild()) return
@@ -145,16 +118,24 @@ export default async (client: FDGLBot, interaction: Interaction) => {
 	}
 	const guildConfig = tmpGuildConfig
 
-	const filters = await handleCommandFilters(
-		interaction,
+	// fetch the filters for the guild if the command requires it
+	const filters = getKey("fetchFilters", command)
+		? await client.fdgl.communities.getFiltersById({
+				id: guildConfig.filterObjectId,
+		  })
+		: null
+
+	const error = await checkCommandErrors(
 		command,
 		client,
-		guildConfig
+		interaction.member,
+		guildConfig,
+		filters
 	)
 
 	// if filters is a string, it means there was an error
 	// f.e. command requires apikey etc.
-	if (typeof filters === "string") return await interaction.reply(filters)
+	if (error !== null) return await interaction.reply(error)
 
 	try {
 		return await command.execute({

@@ -1,7 +1,6 @@
 import { SubCommand } from "../../base/Command"
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
 import { Formatters } from "discord.js"
-import { createPagedEmbed } from "../../utils/functions"
 import validator from "validator"
 import { AuthError } from "@fdgl/wrapper"
 
