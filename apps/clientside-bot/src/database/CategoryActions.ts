@@ -21,14 +21,14 @@ export default class CategoryActions {
 	revokeOptions!: number
 
 	@Column({
-		type: "string",
+		type: "text",
 		nullable: true,
 		default: null,
 	})
 	createCustomCommand!: string | null
 
 	@Column({
-		type: "string",
+		type: "text",
 		nullable: true,
 		default: null,
 	})
