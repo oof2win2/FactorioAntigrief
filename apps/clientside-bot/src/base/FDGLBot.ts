@@ -17,6 +17,7 @@ import ServerSyncedActionHandler from "./ServerReadHandler.js"
 import { BaseAction, ServerSyncedBan, ServerSyncedUnban } from "../types.js"
 import PrivateBan from "../database/PrivateBan.js"
 import LinkedAdmin from "../database/LinkedAdmin.js"
+import CategoryActions from "../database/CategoryActions.js"
 
 function getServers(): database.FactorioServerType[] {
 	const serverJSON = fs.readFileSync(ENV.SERVERSFILEPATH, "utf8")
@@ -24,6 +25,20 @@ function getServers(): database.FactorioServerType[] {
 		.array(database.FactorioServer)
 		.parse(JSON.parse(serverJSON))
 	return servers
+}
+
+// The bit indexes of different actions. Used to store the actions in a single number, for ease of adding more actions later
+export enum FDGLCategoryAction {
+	FactorioMessage = 0,
+	DiscordMessage = 1,
+	FactorioBan = 2,
+	CustomCommand = 3,
+}
+export type FDGLCategoryHandler = {
+	createAction: FDGLCategoryAction[]
+	revokeAction: FDGLCategoryAction[]
+	createCustomCommand: string | null
+	revokeCustomCommand: string | null
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -51,6 +66,7 @@ export default class FDGLBot extends Client {
 	readonly rcon: RCONInterface
 	private recentServerSyncedBans: Map<string, Date> = new Map()
 	private recentServerSyncedUnbans: Map<string, Date> = new Map()
+	FDGLCategoryActions: Map<string, FDGLCategoryHandler> = new Map()
 	serverSyncedActionHandler: ServerSyncedActionHandler
 
 	constructor(options: BotOptions) {
@@ -112,6 +128,55 @@ export default class FDGLBot extends Client {
 			guildId: ENV.GUILDID,
 		})
 		this.guildConfig = guildconfig
+
+		// load all FDGL categories and their actions
+		const categories = await this.fdgl.categories.fetchAll({})
+		const actions = await this.db.getRepository(CategoryActions).find()
+		// if there are categories that don't have actions, create them
+		for (const category of categories) {
+			if (!actions.find((a) => a.id === category.id)) {
+				await this.db.getRepository(CategoryActions).save({
+					id: category.id,
+					options: 0,
+				})
+				actions.push({
+					id: category.id,
+					createOptions: 0,
+					revokeOptions: 0,
+					createCustomCommand: null,
+					revokeCustomCommand: null,
+				})
+			}
+		}
+		// if there are actions that don't have categories, delete them
+		for (const action of actions) {
+			if (!categories.find((c) => c.id === action.id)) {
+				await this.db.getRepository(CategoryActions).delete(action.id)
+			}
+		}
+		// now we need to load the actions for each category in a a developer-friendly format
+		for (const action of actions) {
+			const createActions: FDGLCategoryAction[] = []
+			const revokeActions: FDGLCategoryAction[] = []
+			Object.values(FDGLCategoryAction)
+				// we want to get the names of the actions, not the values
+				.filter((v): v is number => !isNaN(Number(v)))
+				.forEach((index) => {
+					const bitMask = 1 << index
+					// if this is true, then the bit at position index is set to 1
+					// therefore the action is enabled
+					if (action.createOptions & bitMask)
+						createActions.push(index)
+					if (action.revokeOptions & bitMask)
+						revokeActions.push(index)
+				})
+			this.FDGLCategoryActions.set(action.id, {
+				createAction: createActions,
+				revokeAction: revokeActions,
+				createCustomCommand: action.createCustomCommand,
+				revokeCustomCommand: action.revokeCustomCommand,
+			})
+		}
 	}
 
 	async sendToErrorChannel(text: string) {

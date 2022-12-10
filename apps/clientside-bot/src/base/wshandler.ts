@@ -12,6 +12,7 @@ import handleRevocation from "../utils/functions/handleRevocation"
 import splitIntoGroups from "../utils/functions/splitIntoGroups"
 import ENV from "../utils/env"
 import FDGLBan from "../database/FDGLBan"
+import CategoryActions from "../database/CategoryActions"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -56,6 +57,16 @@ const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated">) => {
 		if (!channel || !channel.isNotDMChannel()) return
 		client.addEmbedToQueue(channel.id, embed)
 	})
+
+	client.FDGLCategoryActions.set(event.category.id, {
+		createAction: [],
+		revokeAction: [],
+		createCustomCommand: null,
+		revokeCustomCommand: null,
+	})
+	client.db.getRepository(CategoryActions).save({
+		id: event.category.id,
+	})
 }
 
 const categoryRemoved = async ({
@@ -68,6 +79,11 @@ const categoryRemoved = async ({
 		const channel = client.channels.cache.get(infoChannel.channelId)
 		if (!channel || !channel.isNotDMChannel()) return
 		client.addEmbedToQueue(channel.id, embed)
+	})
+
+	client.FDGLCategoryActions.delete(event.category.id)
+	client.db.getRepository(CategoryActions).delete({
+		id: event.category.id,
 	})
 }
 
