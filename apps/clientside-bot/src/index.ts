@@ -16,6 +16,9 @@ async function run() {
 		database,
 	})
 
+	// first we need to setup, only after we want to start handling commands and events
+	await client.setupPreLogin()
+
 	const events = readdirSync("events")
 	events.forEach(async (name) => {
 		if (!name.endsWith(".js")) return

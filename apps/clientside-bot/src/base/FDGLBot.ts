@@ -70,27 +70,6 @@ export default class FDGLBot extends Client {
 
 		this.rcon = new RCONInterface(this, this.servers)
 
-		// load info channels
-		this.db
-			.getRepository(InfoChannel)
-			.find()
-			.then((channels) => (this.infochannels = channels))
-		// load bot config or create one if it doesnt exist yet
-		this.db
-			.getRepository(BotConfig)
-			.findOne()
-			.then((x) => {
-				if (x) return (this._botConfig = x)
-				this.setBotConfig({
-					guildId: ENV.GUILDID,
-				})
-			})
-
-		// load fdgl guild config
-		this.fdgl.communities
-			.fetchGuildConfig({ guildId: ENV.GUILDID })
-			.then((config) => (this.guildConfig = config))
-
 		// register listeners for parsing WS notifications
 		Object.entries(wshandler).forEach(([eventname, handler]) => {
 			if (!handler) return
@@ -118,6 +97,21 @@ export default class FDGLBot extends Client {
 
 		setInterval(() => this.sendEmbeds(), 10 * 1000) // send embeds every 10 seconds
 		setInterval(() => this.clearRecentServerSyncedActions(), 60 * 1000) // clear recent server synced actions every minute
+	}
+
+	async setupPreLogin() {
+		// we need to load info channels
+		this.infochannels = await this.db.getRepository(InfoChannel).find()
+
+		// load the whole bot's config
+		const botconfig = await this.db.getRepository(BotConfig).findOne()
+		if (botconfig) this._botConfig = botconfig
+
+		// load the FDGL guild config, if exists
+		const guildconfig = await this.fdgl.communities.fetchGuildConfig({
+			guildId: ENV.GUILDID,
+		})
+		this.guildConfig = guildconfig
 	}
 
 	async sendToErrorChannel(text: string) {
