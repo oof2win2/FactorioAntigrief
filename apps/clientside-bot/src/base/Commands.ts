@@ -3,16 +3,13 @@ import {
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
 } from "@discordjs/builders"
-import {
-	GuildApplicationCommandPermissionData,
-	CommandInteraction,
-} from "discord.js"
+import { ChatInputCommandInteraction } from "discord.js"
 import FDGLBot from "./FDGLBot.js"
 import { BotConfigType } from "./database.js"
 
 interface CommandParams {
 	client: FDGLBot
-	interaction: CommandInteraction<"cached">
+	interaction: ChatInputCommandInteraction<"cached">
 	botConfig: BotConfigType
 }
 
@@ -26,7 +23,7 @@ type PermissionType = "banrole" | "configrole" | "notificationsrole"
 interface BaseCommand {
 	execute: (params: CommandParams) => Promise<unknown>
 	permissionType?: PermissionType
-	permissionOverrides?: GuildApplicationCommandPermissionData["permissions"]
+	// permissionOverrides?: GuildApplicationCommandPermissionData["permissions"]
 }
 
 export interface CommandWithSubcommands extends BaseCommand {

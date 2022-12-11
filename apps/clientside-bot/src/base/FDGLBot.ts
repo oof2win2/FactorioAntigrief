@@ -1,7 +1,13 @@
 import { FDGLWrapper } from "@fdgl/wrapper"
 import { GuildConfig, Community, FilterObject } from "@fdgl/types"
 import ENV from "../utils/env.js"
-import { Client, ClientOptions, Collection, MessageEmbed } from "discord.js"
+import {
+	ChannelType,
+	Client,
+	ClientOptions,
+	Collection,
+	EmbedBuilder,
+} from "discord.js"
 import { Command as CommandType } from "./Commands.js"
 import * as database from "./database.js"
 import wshandler from "./wshandler.js"
@@ -60,7 +66,7 @@ export default class FDGLBot extends Client {
 	 */
 	guildConfig: GuildConfig | null = null
 	community: Community | null = null
-	embedQueue: Collection<string, MessageEmbed[]>
+	embedQueue: Collection<string, EmbedBuilder[]>
 	servers: database.FactorioServerType[] = []
 	private _filterObject: FilterObject | null = null
 	readonly rcon: RCONInterface
@@ -181,7 +187,7 @@ export default class FDGLBot extends Client {
 
 	async sendToErrorChannel(text: string) {
 		const channel = this.channels.cache.get(ENV.ERRORCHANNELID)
-		if (!channel || !channel.isNotDMChannel()) return
+		if (!channel || !channel.isTextBased()) return
 		channel.send(text)
 	}
 
@@ -211,14 +217,14 @@ export default class FDGLBot extends Client {
 			const embeds = this.embedQueue.get(channelId)?.splice(0, 10) ?? []
 			if (!embeds.length) continue
 			const channel = this.channels.resolve(channelId)
-			if (!channel || !channel.isNotDMChannel()) continue
+			if (!channel || !channel.isTextBased()) continue
 			channel.send({ embeds: embeds })
 		}
 	}
 
-	addEmbedToQueue(channelId: string, embed: MessageEmbed) {
+	addEmbedToQueue(channelId: string, embed: EmbedBuilder) {
 		const channel = this.channels.resolve(channelId)
-		if (!channel || !channel.isNotDMChannel()) return false
+		if (!channel || !channel.isTextBased()) return false
 		if (this.embedQueue.has(channelId)) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			this.embedQueue.set(channelId, [

@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import { Intents } from "discord.js"
+import { GatewayIntentBits } from "discord.js"
 import FDGLBot from "./base/FDGLBot.js"
 import ENV from "./utils/env.js"
 import "./extenders.js"
@@ -12,12 +12,13 @@ process.chdir("dist")
 async function run() {
 	const database = await createConnection(await dbConnectionOptions())
 	const client = new FDGLBot({
-		intents: [Intents.FLAGS.GUILDS],
+		intents: [GatewayIntentBits.Guilds],
 		database,
 	})
 
 	// first we need to setup, only after we want to start handling commands and events
 	await client.setupPreLogin()
+	console.log(client.FDGLCategoryActions.get("9jMT6x"))
 
 	const events = readdirSync("events")
 	events.forEach(async (name) => {

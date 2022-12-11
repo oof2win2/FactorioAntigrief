@@ -3,7 +3,7 @@ import FDGLBot from "../base/FDGLBot.js"
 
 export default async (client: FDGLBot, [interaction]: [Interaction]) => {
 	// if interaction is not a command or not in a guild then we dont care
-	if (!interaction.isCommand() || !interaction.inGuild()) return
+	if (!interaction.isChatInputCommand() || !interaction.inGuild()) return
 
 	const { commandName } = interaction
 	if (!client.commands.has(commandName)) return

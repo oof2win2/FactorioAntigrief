@@ -13,7 +13,7 @@ const Setaction: SubCommand = {
 				.setName("channel")
 				.setDescription("Channel where to create an info channel")
 				.setRequired(true)
-				.addChannelType(ChannelType.GuildText)
+				.addChannelTypes(ChannelType.GuildText)
 		),
 	execute: async ({ client, interaction }) => {
 		const channel = interaction.options.getChannel("channel", true)

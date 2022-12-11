@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { ChannelType } from "discord-api-types"
+import { ChannelType } from "discord.js"
 import { SubCommand } from "../../base/Commands.js"
 import splitIntoGroups from "../../utils/functions/splitIntoGroups.js"
 import FDGLBan from "../../database/FDGLBan.js"
@@ -18,7 +18,7 @@ const Syncserver: SubCommand = {
 					"Channel paired to the server which to synchronize the banlist of"
 				)
 				.setRequired(true)
-				.addChannelTypes([ChannelType.GuildNews, ChannelType.GuildText])
+				.addChannelTypes(ChannelType.GuildNews, ChannelType.GuildText)
 		),
 	execute: async ({ client, interaction }) => {
 		const serverchannel = interaction.options.getChannel(

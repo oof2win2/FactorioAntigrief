@@ -15,15 +15,12 @@ const Setaction: SubCommand = {
 				.setRequired(true)
 		),
 	execute: async ({ client, interaction }) => {
-		const playername = z
-			.string()
-			.parse(interaction.options.getString("playername"))
+		const playername = interaction.options.getString("playername", true)
 
 		const existing = await client.db.getRepository(Whitelist).findOne({
 			playername: playername,
 		})
 
-		// TODO: check if they are currently banned on servers due to FDGL and state if so, unban them
 		if (existing) {
 			return interaction.reply({
 				content: `Player ${playername} is whitelisted by <@${

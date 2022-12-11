@@ -1,7 +1,7 @@
 import { WebSocketEvents } from "@fdgl/wrapper/dist/WebsocketListener"
 import FDGLBot from "./FDGLBot"
 import {
-	MessageEmbed,
+	EmbedBuilder,
 	NewsChannel,
 	TextChannel,
 	ThreadChannel,
@@ -23,11 +23,11 @@ const communityCreated = ({
 	client,
 	event,
 }: HandlerOpts<"communityCreated">) => {
-	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
 	client.infochannels.forEach((infoChannel) => {
 		const channel = client.channels.cache.get(infoChannel.channelId)
-		if (!channel || !channel.isNotDMChannel()) return
+		if (!channel || !channel.isTextBased()) return
 		client.addEmbedToQueue(channel.id, embed)
 	})
 }
@@ -36,7 +36,7 @@ const communityRemoved = ({
 	client,
 	event,
 }: HandlerOpts<"communityRemoved">) => {
-	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
 	client.infochannels.forEach((infoChannel) => {
 		const channel = client.channels.cache.get(infoChannel.channelId) as
@@ -50,11 +50,11 @@ const communityRemoved = ({
 }
 
 const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated">) => {
-	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
 	client.infochannels.forEach((infoChannel) => {
 		const channel = client.channels.cache.get(infoChannel.channelId)
-		if (!channel || !channel.isNotDMChannel()) return
+		if (!channel || !channel.isTextBased()) return
 		client.addEmbedToQueue(channel.id, embed)
 	})
 
@@ -73,11 +73,11 @@ const categoryRemoved = async ({
 	client,
 	event,
 }: HandlerOpts<"categoryRemoved">) => {
-	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
 	client.infochannels.forEach((infoChannel) => {
 		const channel = client.channels.cache.get(infoChannel.channelId)
-		if (!channel || !channel.isNotDMChannel()) return
+		if (!channel || !channel.isTextBased()) return
 		client.addEmbedToQueue(channel.id, embed)
 	})
 
@@ -88,13 +88,13 @@ const categoryRemoved = async ({
 }
 
 const report = async ({ client, event }: HandlerOpts<"report">) => {
-	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 	const filterObject = client.filterObject
 
 	// send the embed to info channels
 	client.infochannels.forEach((c) => {
 		const channel = client.channels.cache.get(c.channelId)
-		if (!channel || !channel.isNotDMChannel()) return
+		if (!channel || !channel.isTextBased()) return
 		client.addEmbedToQueue(channel.id, embed)
 	})
 
@@ -114,7 +114,7 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 }
 
 const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
-	const embed = new MessageEmbed({ ...event.embed, type: undefined })
+	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 	const filterObject = client.filterObject
 
 	client.infochannels.forEach((c) => {

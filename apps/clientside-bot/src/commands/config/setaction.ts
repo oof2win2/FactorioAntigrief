@@ -15,22 +15,22 @@ const Setaction: SubCommand = {
 				.setName("report")
 				.setDescription("Action to perform on report creation")
 				.setRequired(false)
-				.addChoices([
-					["ban", "ban"],
-					["custom", "custom"],
-					["none", "none"],
-				])
+				.addChoices(
+					{ name: "ban", value: "ban" },
+					{ name: "custom", value: "custom" },
+					{ name: "none", value: "none" }
+				)
 		)
 		.addStringOption((option) =>
 			option
 				.setName("revocation")
 				.setDescription("Action to perform on revocation creation")
 				.setRequired(false)
-				.addChoices([
-					["unban", "unban"],
-					["custom", "custom"],
-					["none", "none"],
-				])
+				.addChoices(
+					{ name: "unban", value: "unban" },
+					{ name: "custom", value: "custom" },
+					{ name: "none", value: "none" }
+				)
 		),
 	execute: async ({ client, interaction }) => {
 		const revocation = z

@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from "@discordjs/builders"
-import { MessageEmbed } from "discord.js"
+import { EmbedBuilder } from "discord.js"
 import { z } from "zod"
 import { SubCommand } from "../../base/Commands.js"
 
@@ -9,7 +9,7 @@ const Setaction: SubCommand = {
 		.setName("view")
 		.setDescription("View your bot config"),
 	execute: async ({ client, interaction, botConfig }) => {
-		const embed = new MessageEmbed().setTitle("Current bot config")
+		const embed = new EmbedBuilder().setTitle("Current bot config")
 		const ownerUser = await client.users.fetch(botConfig.owner)
 		embed.addFields([
 			{
