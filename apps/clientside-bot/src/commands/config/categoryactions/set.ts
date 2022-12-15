@@ -89,7 +89,7 @@ const Setaction: SubCommand = {
 			filter: (i) => i.user.id === interaction.user.id,
 		})
 
-		const handleSubmit = () => {
+		const handleSubmit = async () => {
 			collector.stop()
 
 			const reportActions =
@@ -110,7 +110,7 @@ const Setaction: SubCommand = {
 							)?.label
 					)
 					.join(", ") || "nothing"
-			interaction.followUp({
+			const followUp = await interaction.followUp({
 				content: `Setting actions of category ${categoryId} to ${reportActions} on report creation and ${revokeActions} on report revocation.`,
 			})
 
@@ -141,6 +141,9 @@ const Setaction: SubCommand = {
 					revokeOptions: revokeActionBytes,
 				}
 			)
+			followUp.edit({
+				content: `Actions of category ${categoryId} have been set to ${reportActions} on report creation and ${revokeActions} on report revocation.`,
+			})
 		}
 
 		collector.on("collect", (i) => {
