@@ -45,6 +45,7 @@ export type FDGLCategoryHandler = {
 	revokeAction: FDGLCategoryAction[]
 	createCustomCommand: string | null
 	revokeCustomCommand: string | null
+	clearCustomCommand: string | null
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -151,6 +152,7 @@ export default class FDGLBot extends Client {
 					revokeOptions: 0,
 					createCustomCommand: null,
 					revokeCustomCommand: null,
+					clearCustomCommand: null,
 				})
 			}
 		}
@@ -181,6 +183,7 @@ export default class FDGLBot extends Client {
 				revokeAction: revokeActions,
 				createCustomCommand: action.createCustomCommand,
 				revokeCustomCommand: action.revokeCustomCommand,
+				clearCustomCommand: action.clearCustomCommand,
 			})
 		}
 	}

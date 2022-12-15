@@ -33,4 +33,11 @@ export default class CategoryActions {
 		default: null,
 	})
 	revokeCustomCommand!: string | null
+
+	@Column({
+		type: "text",
+		nullable: true,
+		default: null,
+	})
+	clearCustomCommand!: string | null
 }

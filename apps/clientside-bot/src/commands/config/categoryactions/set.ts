@@ -42,6 +42,12 @@ const Setaction: SubCommand = {
 		.setDescription("Set an action for a category")
 		.addStringOption((option) =>
 			option.setName("id").setDescription("Category ID").setRequired(true)
+		)
+		.addStringOption((option) =>
+			option
+				.setName("createaction")
+				.setDescription("Action to perform when a report is created")
+				.setRequired(true)
 		),
 	execute: async ({ client, interaction }) => {
 		const categoryId = interaction.options.getString("id", true)
@@ -123,6 +129,7 @@ const Setaction: SubCommand = {
 				revokeAction: state.revoke,
 				revokeCustomCommand:
 					existingAction?.revokeCustomCommand || null,
+				clearCustomCommand: existingAction?.clearCustomCommand || null,
 			})
 			let createActionBytes = 0
 			let revokeActionBytes = 0
