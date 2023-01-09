@@ -20,7 +20,13 @@ import InfoChannel from "../database/InfoChannel.js"
 import { WebSocketEvents } from "@fdgl/wrapper/dist/WebsocketListener"
 import FDGLBan from "../database/FDGLBan.js"
 import ServerSyncedActionHandler from "./ServerReadHandler.js"
-import { BaseAction, ServerSyncedBan, ServerSyncedUnban } from "../types.js"
+import {
+	BaseAction,
+	ServerSyncedBan,
+	ServerSyncedUnban,
+	FDGLCategoryAction,
+	FDGLCategoryHandler,
+} from "../types.js"
 import PrivateBan from "../database/PrivateBan.js"
 import LinkedAdmin from "../database/LinkedAdmin.js"
 import CategoryActions from "../database/CategoryActions.js"
@@ -33,22 +39,6 @@ function getServers(): database.FactorioServerType[] {
 	return servers
 }
 
-// The bit indexes of different actions. Used to store the actions in a single number, for ease of adding more actions later
-export enum FDGLCategoryAction {
-	FactorioMessage = 0,
-	DiscordMessage = 1,
-	FactorioBan = 2,
-	CustomCommand = 3,
-}
-export type FDGLCategoryHandler = {
-	createAction: FDGLCategoryAction[]
-	revokeAction: FDGLCategoryAction[]
-	createCustomCommand: string | null
-	revokeCustomCommand: string | null
-	clearCustomCommand: string | null
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface BotOptions extends ClientOptions {
 	database: Connection
 }

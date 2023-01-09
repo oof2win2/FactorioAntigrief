@@ -22,3 +22,18 @@ export type BaseAction<T> = {
 export type ServerSyncedAction =
 	| BaseAction<ServerSyncedBan>
 	| BaseAction<ServerSyncedUnban>
+
+// The bit indexes of different actions. Used to store the actions in a single number, for ease of adding more actions later
+export enum FDGLCategoryAction {
+	FactorioMessage = 0,
+	DiscordMessage = 1,
+	FactorioBan = 2,
+	CustomCommand = 3,
+}
+export type FDGLCategoryHandler = {
+	createAction: FDGLCategoryAction[]
+	revokeAction: FDGLCategoryAction[]
+	createCustomCommand: string | null
+	revokeCustomCommand: string | null
+	clearCustomCommand: string | null
+}

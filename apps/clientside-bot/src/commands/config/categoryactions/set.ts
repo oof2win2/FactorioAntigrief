@@ -13,7 +13,7 @@ import {
 	TextInputStyle,
 } from "discord.js"
 import { SubCommand } from "../../../base/Commands.js"
-import { FDGLCategoryAction } from "../../../base/FDGLBot.js"
+import { FDGLCategoryAction } from "../../../types"
 import CategoryActions from "../../../database/CategoryActions.js"
 
 const Actions = [

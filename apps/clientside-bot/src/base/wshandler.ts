@@ -63,6 +63,7 @@ const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated">) => {
 		revokeAction: [],
 		createCustomCommand: null,
 		revokeCustomCommand: null,
+		clearCustomCommand: null,
 	})
 	client.db.getRepository(CategoryActions).save({
 		id: event.category.id,
