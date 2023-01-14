@@ -10,9 +10,12 @@ import filterObjectChangedBanlists from "../utils/functions/filterObjectChangedB
 import handleReport from "../utils/functions/handleReport"
 import handleRevocation from "../utils/functions/handleRevocation"
 import splitIntoGroups from "../utils/functions/splitIntoGroups"
+import reportCreatedActionHandler from "../utils/functions/reportCreatedActionHandler"
+import reportRevokedActionHandler from "../utils/functions/reportRevokedActionHandler"
 import ENV from "../utils/env"
 import FDGLBan from "../database/FDGLBan"
 import CategoryActions from "../database/CategoryActions"
+import { FDGLCategoryAction } from "../types"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -64,6 +67,7 @@ const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated">) => {
 		createCustomCommand: null,
 		revokeCustomCommand: null,
 		clearCustomCommand: null,
+		factorioMessage: null,
 	})
 	client.db.getRepository(CategoryActions).save({
 		id: event.category.id,
@@ -99,19 +103,43 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 		client.addEmbedToQueue(channel.id, embed)
 	})
 
+	const report = event.report
+
 	// figure out whether it should ban or not
-	const guildsToBan = await handleReport({
+	const shouldBan = await handleReport({
 		database: client.db,
-		report: event.report,
+		report: report,
 		filter: filterObject,
 	})
-	if (!guildsToBan) return
+	if (!shouldBan) return
 
-	// ban in guilds that its supposed to
-	const command = client.createBanCommand(event.report)
-	if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-	client.createActionForReport(event.report.playername)
-	client.rcon.rconCommandAll(`/sc ${command}; rcon.print(true)`)
+	const action = client.FDGLCategoryActions.get(report.categoryId)
+	if (!action) return
+	const stuffToDo = reportCreatedActionHandler(event, action, client)
+	for (const item of stuffToDo) {
+		switch (item.type) {
+			case FDGLCategoryAction.DiscordMessage:
+				for (const infochannel of client.infochannels) {
+					const channel = client.channels.cache.get(
+						infochannel.channelId
+					)
+					if (!channel || !channel.isTextBased()) continue
+					client.addEmbedToQueue(channel.id, item.embed)
+				}
+				break
+			case FDGLCategoryAction.FactorioMessage:
+				client.rcon.rconCommandAll(`/sc game.print("${item.message}")`)
+				break
+			case FDGLCategoryAction.FactorioBan:
+				client.createActionForReport(report.playername)
+				client.rcon.rconCommandAll(item.command)
+				break
+			case FDGLCategoryAction.CustomCommand:
+				client.createActionForReport(report.playername)
+				client.rcon.rconCommandAll(item.command)
+				break
+		}
+	}
 }
 
 const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
@@ -128,22 +156,44 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 		client.addEmbedToQueue(channel.id, embed)
 	})
 
+	const revocation = event.revocation
+
 	// check whether it should unban or not
 	const shouldUnban = await handleRevocation({
 		database: client.db,
-		revocation: event.revocation,
+		revocation: revocation,
 		filter: filterObject,
 		offlineServerCount: client.rcon.offlineServerCount,
 	})
 	if (!shouldUnban) return
 
-	// unban if it should
-	const command = client.createUnbanCommand(event.revocation.playername)
-	if (!command) return // if it is not supposed to do anything in this guild, then it won't do anything
-	client.createActionForUnban(event.revocation.playername)
-	client.rcon.rconCommandAll(
-		`/sc game.unban_player("${event.revocation.playername}"); rcon.print(true)`
-	)
+	const action = client.FDGLCategoryActions.get(revocation.categoryId)
+	if (!action) return
+	const stuffToDo = reportRevokedActionHandler(event, action, client)
+	for (const item of stuffToDo) {
+		switch (item.type) {
+			case FDGLCategoryAction.DiscordMessage:
+				for (const infochannel of client.infochannels) {
+					const channel = client.channels.cache.get(
+						infochannel.channelId
+					)
+					if (!channel || !channel.isTextBased()) continue
+					client.addEmbedToQueue(channel.id, item.embed)
+				}
+				break
+			case FDGLCategoryAction.FactorioMessage:
+				client.rcon.rconCommandAll(`/sc game.print("${item.message}")`)
+				break
+			case FDGLCategoryAction.FactorioBan:
+				client.createActionForUnban(revocation.playername)
+				client.rcon.rconCommandAll(item.command)
+				break
+			case FDGLCategoryAction.CustomCommand:
+				client.createActionForUnban(revocation.playername)
+				client.rcon.rconCommandAll(item.command)
+				break
+		}
+	}
 }
 
 const guildConfigChanged = async ({

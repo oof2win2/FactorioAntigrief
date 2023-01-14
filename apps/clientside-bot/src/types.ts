@@ -1,3 +1,4 @@
+import { EmbedBuilder } from "discord.js"
 import { FactorioServerType } from "./base/database"
 
 export type ServerSyncedBan = {
@@ -36,4 +37,21 @@ export type FDGLCategoryHandler = {
 	createCustomCommand: string | null
 	revokeCustomCommand: string | null
 	clearCustomCommand: string | null
+	factorioMessage: string | null
 }
+
+export type FDGLReportActionResponse =
+	| {
+			type: FDGLCategoryAction.FactorioMessage
+			message: string
+	  }
+	| {
+			type: FDGLCategoryAction.DiscordMessage
+			embed: EmbedBuilder
+	  }
+	| {
+			type:
+				| FDGLCategoryAction.FactorioBan
+				| FDGLCategoryAction.CustomCommand
+			command: string
+	  }

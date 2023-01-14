@@ -130,6 +130,7 @@ const Setaction: SubCommand = {
 				revokeCustomCommand:
 					existingAction?.revokeCustomCommand || null,
 				clearCustomCommand: existingAction?.clearCustomCommand || null,
+				factorioMessage: existingAction?.factorioMessage || null,
 			})
 			let createActionBytes = 0
 			let revokeActionBytes = 0

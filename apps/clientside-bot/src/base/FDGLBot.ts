@@ -143,6 +143,7 @@ export default class FDGLBot extends Client {
 					createCustomCommand: null,
 					revokeCustomCommand: null,
 					clearCustomCommand: null,
+					factorioMessage: null,
 				})
 			}
 		}
@@ -174,6 +175,7 @@ export default class FDGLBot extends Client {
 				createCustomCommand: action.createCustomCommand,
 				revokeCustomCommand: action.revokeCustomCommand,
 				clearCustomCommand: action.clearCustomCommand,
+				factorioMessage: action.factorioMessage,
 			})
 		}
 	}

@@ -40,4 +40,11 @@ export default class CategoryActions {
 		default: null,
 	})
 	clearCustomCommand!: string | null
+
+	@Column({
+		type: "text",
+		nullable: true,
+		default: null,
+	})
+	factorioMessage!: string | null
 }
