@@ -217,6 +217,12 @@ export default class FDGLBot extends Client {
 		}
 	}
 
+	addEmbedToAllQueues(embed: EmbedBuilder) {
+		for (const [channelId] of this.embedQueue) {
+			this.addEmbedToQueue(channelId, embed)
+		}
+	}
+
 	addEmbedToQueue(channelId: string, embed: EmbedBuilder) {
 		const channel = this.channels.resolve(channelId)
 		if (!channel || !channel.isTextBased()) return false

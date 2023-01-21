@@ -1,6 +1,7 @@
-import { RevocationMessage } from "@fdgl/types"
+import { Category, Community, Revocation } from "@fdgl/types"
 import { EmbedBuilder } from "discord.js"
 import FDGLBot from "../../base/FDGLBot"
+import ActionLog from "../../database/ActionLog"
 import {
 	FDGLCategoryAction,
 	FDGLCategoryHandler,
@@ -8,11 +9,12 @@ import {
 } from "../../types"
 
 const reportRevokedActionHandler = (
-	event: RevocationMessage,
+	revocation: Revocation,
+	category: Category,
+	community: Community,
 	action: FDGLCategoryHandler,
 	client: FDGLBot
 ): FDGLReportActionResponse[] => {
-	const revocation = event.revocation
 	const actions: FDGLReportActionResponse[] = []
 	if (action.createAction.includes(FDGLCategoryAction.DiscordMessage)) {
 		const embed = new EmbedBuilder()
@@ -24,11 +26,11 @@ const reportRevokedActionHandler = (
 				},
 				{
 					name: "Category",
-					value: `${event.extraData.category.name} (\`${revocation.categoryId}\`)`,
+					value: `${category.name} (\`${revocation.categoryId}\`)`,
 				},
 				{
 					name: "Community",
-					value: `${event.extraData.community.name} (\`${revocation.communityId}\`)`,
+					value: `${community.name} (\`${revocation.communityId}\`)`,
 				}
 			)
 		actions.push({
@@ -42,9 +44,9 @@ const reportRevokedActionHandler = (
 	) {
 		const formatted = action.factorioMessage
 			.replaceAll("{PLAYERNAME}", revocation.playername)
-			.replaceAll("{CATEGORYNAME}", event.extraData.category.name)
+			.replaceAll("{CATEGORYNAME}", category.name)
 			.replaceAll("{CATEGORYID}", revocation.categoryId)
-			.replaceAll("{COMMUNITYNAME}", event.extraData.community.name)
+			.replaceAll("{COMMUNITYNAME}", community.name)
 			.replaceAll("{COMMUNITYID}", revocation.communityId)
 			.replaceAll("{REPORTID}", revocation.id)
 			.replaceAll(
@@ -60,33 +62,35 @@ const reportRevokedActionHandler = (
 	if (action.createAction.includes(FDGLCategoryAction.FactorioBan)) {
 		// ban in guilds that its supposed to
 		const command = client.createUnbanCommand(revocation.playername)
-		if (command)
+		if (command) {
 			actions.push({
 				type: FDGLCategoryAction.FactorioBan,
 				command: command,
 			})
+		}
 	}
-	if (
-		action.createAction.includes(FDGLCategoryAction.CustomCommand) &&
-		action.createCustomCommand
-	) {
-		const formatted = action.createCustomCommand
-			.replaceAll("{PLAYERNAME}", revocation.playername)
-			.replaceAll("{CATEGORYNAME}", event.extraData.category.name)
-			.replaceAll("{CATEGORYID}", revocation.categoryId)
-			.replaceAll("{COMMUNITYNAME}", event.extraData.community.name)
-			.replaceAll("{COMMUNITYID}", revocation.communityId)
-			.replaceAll("{REPORTID}", revocation.id)
-			.replaceAll(
-				"{REPORTEDTIME}",
-				revocation.reportCreatedAt.toDateString()
-			)
-			.replaceAll("{REVOKEDTIME}", revocation.revokedAt.toDateString())
-		actions.push({
-			type: FDGLCategoryAction.CustomCommand,
-			command: formatted,
-		})
-	}
+	// TODO: eventually use custom commands
+	// if (
+	// 	action.createAction.includes(FDGLCategoryAction.CustomCommand) &&
+	// 	action.createCustomCommand
+	// ) {
+	// 	const formatted = action.createCustomCommand
+	// 		.replaceAll("{PLAYERNAME}", revocation.playername)
+	// 		.replaceAll("{CATEGORYNAME}", category.name)
+	// 		.replaceAll("{CATEGORYID}", revocation.categoryId)
+	// 		.replaceAll("{COMMUNITYNAME}", community.name)
+	// 		.replaceAll("{COMMUNITYID}", revocation.communityId)
+	// 		.replaceAll("{REPORTID}", revocation.id)
+	// 		.replaceAll(
+	// 			"{REPORTEDTIME}",
+	// 			revocation.reportCreatedAt.toDateString()
+	// 		)
+	// 		.replaceAll("{REVOKEDTIME}", revocation.revokedAt.toDateString())
+	// 	actions.push({
+	// 		type: FDGLCategoryAction.CustomCommand,
+	// 		command: formatted,
+	// 	})
+	// }
 	return actions
 }
 export default reportRevokedActionHandler

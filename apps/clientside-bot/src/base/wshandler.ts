@@ -1,21 +1,18 @@
 import { WebSocketEvents } from "@fdgl/wrapper/dist/WebsocketListener"
 import FDGLBot from "./FDGLBot"
-import {
-	EmbedBuilder,
-	NewsChannel,
-	TextChannel,
-	ThreadChannel,
-} from "discord.js"
+import { EmbedBuilder } from "discord.js"
 import filterObjectChangedBanlists from "../utils/functions/filterObjectChangedBanlists"
 import handleReport from "../utils/functions/handleReport"
 import handleRevocation from "../utils/functions/handleRevocation"
-import splitIntoGroups from "../utils/functions/splitIntoGroups"
 import reportCreatedActionHandler from "../utils/functions/reportCreatedActionHandler"
 import reportRevokedActionHandler from "../utils/functions/reportRevokedActionHandler"
 import ENV from "../utils/env"
 import FDGLBan from "../database/FDGLBan"
 import CategoryActions from "../database/CategoryActions"
 import { FDGLCategoryAction } from "../types"
+import { Category, Community, Report } from "@fdgl/types"
+import ActionLog from "../database/ActionLog"
+import { splitIntoGroups } from "../utils/functions"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -28,11 +25,7 @@ const communityCreated = ({
 }: HandlerOpts<"communityCreated">) => {
 	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((infoChannel) => {
-		const channel = client.channels.cache.get(infoChannel.channelId)
-		if (!channel || !channel.isTextBased()) return
-		client.addEmbedToQueue(channel.id, embed)
-	})
+	client.addEmbedToAllQueues(embed)
 }
 
 const communityRemoved = ({
@@ -41,25 +34,13 @@ const communityRemoved = ({
 }: HandlerOpts<"communityRemoved">) => {
 	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((infoChannel) => {
-		const channel = client.channels.cache.get(infoChannel.channelId) as
-			| NewsChannel
-			| TextChannel
-			| ThreadChannel
-			| undefined
-		if (!channel) return
-		client.addEmbedToQueue(channel.id, embed)
-	})
+	client.addEmbedToAllQueues(embed)
 }
 
 const categoryCreated = ({ client, event }: HandlerOpts<"categoryCreated">) => {
 	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((infoChannel) => {
-		const channel = client.channels.cache.get(infoChannel.channelId)
-		if (!channel || !channel.isTextBased()) return
-		client.addEmbedToQueue(channel.id, embed)
-	})
+	client.addEmbedToAllQueues(embed)
 
 	client.FDGLCategoryActions.set(event.category.id, {
 		createAction: [],
@@ -80,11 +61,7 @@ const categoryRemoved = async ({
 }: HandlerOpts<"categoryRemoved">) => {
 	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 
-	client.infochannels.forEach((infoChannel) => {
-		const channel = client.channels.cache.get(infoChannel.channelId)
-		if (!channel || !channel.isTextBased()) return
-		client.addEmbedToQueue(channel.id, embed)
-	})
+	client.addEmbedToAllQueues(embed)
 
 	client.FDGLCategoryActions.delete(event.category.id)
 	client.db.getRepository(CategoryActions).delete({
@@ -96,12 +73,7 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 	const filterObject = client.filterObject
 
-	// send the embed to info channels
-	client.infochannels.forEach((c) => {
-		const channel = client.channels.cache.get(c.channelId)
-		if (!channel || !channel.isTextBased()) return
-		client.addEmbedToQueue(channel.id, embed)
-	})
+	client.addEmbedToAllQueues(embed)
 
 	const report = event.report
 
@@ -115,28 +87,37 @@ const report = async ({ client, event }: HandlerOpts<"report">) => {
 
 	const action = client.FDGLCategoryActions.get(report.categoryId)
 	if (!action) return
-	const stuffToDo = reportCreatedActionHandler(event, action, client)
+	const stuffToDo = reportCreatedActionHandler(
+		event.report,
+		event.extraData.category,
+		event.extraData.community,
+		action,
+		client
+	)
 	for (const item of stuffToDo) {
 		switch (item.type) {
 			case FDGLCategoryAction.DiscordMessage:
-				for (const infochannel of client.infochannels) {
-					const channel = client.channels.cache.get(
-						infochannel.channelId
-					)
-					if (!channel || !channel.isTextBased()) continue
-					client.addEmbedToQueue(channel.id, item.embed)
-				}
+				client.addEmbedToAllQueues(embed)
 				break
 			case FDGLCategoryAction.FactorioMessage:
 				client.rcon.rconCommandAll(`/sc game.print("${item.message}")`)
+				client.db.getRepository(ActionLog).insert({
+					command: `/sc game.print("${item.message}")`,
+				})
 				break
 			case FDGLCategoryAction.FactorioBan:
 				client.createActionForReport(report.playername)
 				client.rcon.rconCommandAll(item.command)
+				client.db.getRepository(ActionLog).insert({
+					command: item.command,
+				})
 				break
 			case FDGLCategoryAction.CustomCommand:
 				client.createActionForReport(report.playername)
 				client.rcon.rconCommandAll(item.command)
+				client.db.getRepository(ActionLog).insert({
+					command: item.command,
+				})
 				break
 		}
 	}
@@ -146,17 +127,16 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 	const embed = new EmbedBuilder({ ...event.embed, type: undefined })
 	const filterObject = client.filterObject
 
-	client.infochannels.forEach((c) => {
-		const channel = client.channels.cache.get(c.channelId) as
-			| NewsChannel
-			| TextChannel
-			| ThreadChannel
-			| undefined
-		if (!channel) return
-		client.addEmbedToQueue(channel.id, embed)
-	})
+	client.addEmbedToAllQueues(embed)
 
 	const revocation = event.revocation
+
+	// we need this for after the revocation is handled to check which actions should be taken
+	const validReports = await client.db.getRepository(FDGLBan).find({
+		where: {
+			playername: revocation.playername,
+		},
+	})
 
 	// check whether it should unban or not
 	const shouldUnban = await handleRevocation({
@@ -169,29 +149,69 @@ const revocation = async ({ client, event }: HandlerOpts<"revocation">) => {
 
 	const action = client.FDGLCategoryActions.get(revocation.categoryId)
 	if (!action) return
-	const stuffToDo = reportRevokedActionHandler(event, action, client)
+	const stuffToDo = reportRevokedActionHandler(
+		event.revocation,
+		event.extraData.category,
+		event.extraData.community,
+		action,
+		client
+	)
 	for (const item of stuffToDo) {
 		switch (item.type) {
 			case FDGLCategoryAction.DiscordMessage:
-				for (const infochannel of client.infochannels) {
-					const channel = client.channels.cache.get(
-						infochannel.channelId
-					)
-					if (!channel || !channel.isTextBased()) continue
-					client.addEmbedToQueue(channel.id, item.embed)
-				}
+				client.addEmbedToAllQueues(embed)
 				break
 			case FDGLCategoryAction.FactorioMessage:
 				client.rcon.rconCommandAll(`/sc game.print("${item.message}")`)
+				client.db.getRepository(ActionLog).insert({
+					command: `/sc game.print("${item.message}")`,
+				})
 				break
 			case FDGLCategoryAction.FactorioBan:
 				client.createActionForUnban(revocation.playername)
 				client.rcon.rconCommandAll(item.command)
+				client.db.getRepository(ActionLog).insert({
+					command: item.command,
+				})
 				break
 			case FDGLCategoryAction.CustomCommand:
 				client.createActionForUnban(revocation.playername)
-				client.rcon.rconCommandAll(item.command)
+				client.db.getRepository(ActionLog).insert({
+					command: item.command,
+				})
 				break
+		}
+	}
+	// now we need to re-ban the player if they have other reports that would ban them
+	// and if the revoked report would have banned them
+	const didRevocationBan = action.createAction.includes(
+		FDGLCategoryAction.FactorioBan
+	)
+	const bannedAfterRevocation: FDGLBan[] = []
+	for (const report of validReports) {
+		const action = client.FDGLCategoryActions.get(report.categoryId)
+		if (!action) continue
+		if (report.id !== revocation.id) {
+			if (action.createAction.includes(FDGLCategoryAction.FactorioBan)) {
+				bannedAfterRevocation.push(report)
+			}
+		}
+	}
+
+	if (bannedAfterRevocation.length && didRevocationBan) {
+		// we do this for loop just in case any of the reports are invalid
+		for (const report of bannedAfterRevocation) {
+			// we need to re-ban the player for the other report
+			const fullReport = await client.fdgl.reports.fetchReport({
+				reportId: report.id,
+			})
+			if (!fullReport) continue // the report was most likely revoked in the meantime
+
+			// now we need to create a ban command and execute it
+			const command = client.createBanCommand(fullReport)
+			client.createActionForReport(report.playername)
+			client.rcon.rconCommandAll(command)
+			break // success running this one, so we can stop
 		}
 	}
 }
@@ -208,11 +228,21 @@ const filterObjectChanged = async ({
 	event,
 }: HandlerOpts<"filterObjectChanged">) => {
 	const filterObject = event.filterObject
+	const oldFilterObject = client.filterObject
 	client.filterObject = filterObject
 
 	const validReports = await client.fdgl.reports.list({
 		categoryIds: filterObject.categoryFilters,
 		communityIds: filterObject.communityFilters,
+	})
+	// get a list of all reports that are no longer valid, will act as "revocations"
+	const invalidReports = await client.fdgl.reports.list({
+		categoryIds: oldFilterObject.categoryFilters.filter(
+			(x) => !filterObject.categoryFilters.includes(x)
+		),
+		communityIds: oldFilterObject.communityFilters.filter(
+			(x) => !filterObject.communityFilters.includes(x)
+		),
 	})
 
 	const results = await filterObjectChangedBanlists({
@@ -221,35 +251,117 @@ const filterObjectChanged = async ({
 		validReports: validReports,
 	})
 
+	const allCategories = new Map<string, Category>(
+		(await client.fdgl.categories.fetchAll({})).map((c) => [c.id, c])
+	)
+	const allCommunities = new Map<string, Community>(
+		(await client.fdgl.communities.fetchAll({})).map((c) => [c.id, c])
+	)
+
+	const reportEmbeds: EmbedBuilder[] = []
+	const reportFactorioMessages: string[] = []
+	const reportFactorioCommands: string[] = []
+
 	// initially, create all of the actions for the reports
 	results.toBan.forEach((playername) => {
-		client.createActionForReport(playername)
+		const report = validReports.find((r) => r.playername === playername)
+		if (!report) return
+		const actions = reportCreatedActionHandler(
+			report,
+			allCategories.get(report.categoryId)!,
+			allCommunities.get(report.communityId)!,
+			client.FDGLCategoryActions.get(report.categoryId)!,
+			client
+		)
+		for (const item of actions) {
+			switch (item.type) {
+				case FDGLCategoryAction.DiscordMessage:
+					reportEmbeds.push(item.embed)
+					break
+				case FDGLCategoryAction.FactorioMessage:
+					reportFactorioMessages.push(item.message)
+					break
+				case FDGLCategoryAction.FactorioBan:
+					reportFactorioCommands.push(item.command)
+					break
+				case FDGLCategoryAction.CustomCommand:
+					reportFactorioCommands.push(item.command)
+					break
+			}
+		}
 	})
 	results.toUnban.forEach((playername) => {
-		client.createActionForUnban(playername)
+		const revocation = invalidReports.find(
+			(r) => r.playername === playername
+		)
+		if (!revocation) return
+		const actions = reportRevokedActionHandler(
+			{
+				...revocation,
+				revokedAt: new Date(),
+				revokedBy: "0",
+			},
+			allCategories.get(revocation.categoryId)!,
+			allCommunities.get(revocation.communityId)!,
+			client.FDGLCategoryActions.get(revocation.categoryId)!,
+			client
+		)
+		for (const item of actions) {
+			switch (item.type) {
+				case FDGLCategoryAction.DiscordMessage:
+					reportEmbeds.push(item.embed)
+					break
+				case FDGLCategoryAction.FactorioMessage:
+					reportFactorioMessages.push(item.message)
+					break
+				case FDGLCategoryAction.FactorioBan:
+					reportFactorioCommands.push(item.command)
+					break
+				case FDGLCategoryAction.CustomCommand:
+					reportFactorioCommands.push(item.command)
+					break
+			}
+		}
 	})
 
-	// ban players
-	const playerBanStrings = results.toBan.map(
-		(playername) =>
-			`game.ban_player("${playername}", "View your FDGL reports on https://factoriobans.club/api/reports/search?${new URLSearchParams(
-				{ playername: playername }
-			).toString()}")`
-	)
-	for (const playerBanGroup of splitIntoGroups(playerBanStrings)) {
-		await client.rcon.rconCommandAll(
-			`/sc ${playerBanGroup.join(";")}; rcon.print(true)`
-		)
+	// now, send all of the actions
+	for (const embed of reportEmbeds) {
+		client.addEmbedToAllQueues(embed)
 	}
-
-	// unban players
-	const playerUnbanStrings = results.toUnban.map(
-		(playername) => `game.unban_player("${playername}")`
-	)
-	for (const playerUnbanGroup of splitIntoGroups(playerUnbanStrings)) {
-		await client.rcon.rconCommandAll(
-			`/sc ${playerUnbanGroup.join(";")}; rcon.print(true)`
-		)
+	for (const message of reportFactorioMessages) {
+		client.rcon.rconCommandAll(`/sc game.print("${message}")`)
+	}
+	for (const command of reportFactorioCommands) {
+		client.rcon.rconCommandAll(command)
+	}
+	// we also need to save all of the actions to the database
+	for (const group of splitIntoGroups(reportFactorioMessages, 500)) {
+		await client.db
+			.getRepository(ActionLog)
+			.createQueryBuilder()
+			.insert()
+			.values(
+				group.map((message) => {
+					return {
+						command: `/sc game.print("${message}")`,
+					}
+				})
+			)
+			.execute()
+	}
+	for (const group of splitIntoGroups(reportFactorioCommands, 500)) {
+		await client.db
+			.getRepository(ActionLog)
+			.createQueryBuilder()
+			.insert()
+			.values(
+				group.map((command) => {
+					return {
+						command: command,
+					}
+				})
+			)
+			.execute()
 	}
 }
 
@@ -280,9 +392,16 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 		since: lastReceivedDate,
 		reportIds: allReportIds.map((r) => r.id),
 	})
+	const allCategories = new Map<string, Category>(
+		(await client.fdgl.categories.fetchAll({})).map((c) => [c.id, c])
+	)
+	const allCommunities = new Map<string, Community>(
+		(await client.fdgl.communities.fetchAll({})).map((c) => [c.id, c])
+	)
 
-	const banCommands: string[] = []
-	const unbanCommands: string[] = []
+	const reportEmbeds: EmbedBuilder[] = []
+	const reportFactorioMessages: string[] = []
+	const reportFactorioCommands: string[] = []
 
 	if (filterObject) {
 		for (const report of reports) {
@@ -293,11 +412,29 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 			})
 			if (!shouldBan) continue
 
-			// ban in guilds that its supposed to
-			const command = client.createBanCommand(report)
-			if (!command) continue // if it is not supposed to do anything in this guild, then it won't do anything
-			client.createActionForReport(report.playername)
-			banCommands.push(command)
+			const actions = reportCreatedActionHandler(
+				report,
+				allCategories.get(report.categoryId)!,
+				allCommunities.get(report.communityId)!,
+				client.FDGLCategoryActions.get(report.categoryId)!,
+				client
+			)
+			for (const item of actions) {
+				switch (item.type) {
+					case FDGLCategoryAction.DiscordMessage:
+						reportEmbeds.push(item.embed)
+						break
+					case FDGLCategoryAction.FactorioMessage:
+						reportFactorioMessages.push(item.message)
+						break
+					case FDGLCategoryAction.FactorioBan:
+						reportFactorioCommands.push(item.command)
+						break
+					case FDGLCategoryAction.CustomCommand:
+						reportFactorioCommands.push(item.command)
+						break
+				}
+			}
 		}
 
 		for (const revocation of revocations) {
@@ -309,10 +446,29 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 			})
 			if (!shouldUnban) continue
 
-			const command = client.createUnbanCommand(revocation.playername)
-			if (!command) continue // if it is not supposed to do anything in this guild, then it won't do anything
-			client.createActionForUnban(revocation.playername)
-			unbanCommands.push(command)
+			const actions = reportRevokedActionHandler(
+				revocation,
+				allCategories.get(revocation.categoryId)!,
+				allCommunities.get(revocation.communityId)!,
+				client.FDGLCategoryActions.get(revocation.categoryId)!,
+				client
+			)
+			for (const item of actions) {
+				switch (item.type) {
+					case FDGLCategoryAction.DiscordMessage:
+						reportEmbeds.push(item.embed)
+						break
+					case FDGLCategoryAction.FactorioMessage:
+						reportFactorioMessages.push(item.message)
+						break
+					case FDGLCategoryAction.FactorioBan:
+						reportFactorioCommands.push(item.command)
+						break
+					case FDGLCategoryAction.CustomCommand:
+						reportFactorioCommands.push(item.command)
+						break
+				}
+			}
 		}
 	}
 
@@ -320,17 +476,44 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 	client.fdgl.websocket.addGuildId(ENV.GUILDID)
 	client.fdgl.websocket.addFilterObjectId(ENV.FILTEROBJECTID)
 
-	// execute the commands in batches
-	for (const commandGroup of splitIntoGroups(banCommands)) {
-		await client.rcon.rconCommandAll(
-			`/sc ${commandGroup.join(";")}; rcon.print(true)`
-		)
+	// now, send all of the actions
+	for (const embed of reportEmbeds) {
+		client.addEmbedToAllQueues(embed)
 	}
-
-	for (const commandGroup of splitIntoGroups(unbanCommands)) {
-		await client.rcon.rconCommandAll(
-			`/sc ${commandGroup.join(";")}; rcon.print(true)`
-		)
+	for (const message of reportFactorioMessages) {
+		client.rcon.rconCommandAll(`/sc game.print("${message}")`)
+	}
+	for (const command of reportFactorioCommands) {
+		client.rcon.rconCommandAll(command)
+	}
+	// we also need to save all of the actions to the database
+	for (const group of splitIntoGroups(reportFactorioMessages, 500)) {
+		await client.db
+			.getRepository(ActionLog)
+			.createQueryBuilder()
+			.insert()
+			.values(
+				group.map((message) => {
+					return {
+						command: `/sc game.print("${message}")`,
+					}
+				})
+			)
+			.execute()
+	}
+	for (const group of splitIntoGroups(reportFactorioCommands, 500)) {
+		await client.db
+			.getRepository(ActionLog)
+			.createQueryBuilder()
+			.insert()
+			.values(
+				group.map((command) => {
+					return {
+						command: command,
+					}
+				})
+			)
+			.execute()
 	}
 }
 

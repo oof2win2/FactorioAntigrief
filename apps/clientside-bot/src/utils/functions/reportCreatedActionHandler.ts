@@ -1,18 +1,40 @@
-import { ReportCreatedMessage } from "@fdgl/types"
+import { Category, Community, Report } from "@fdgl/types"
 import { EmbedBuilder } from "discord.js"
 import FDGLBot from "../../base/FDGLBot"
+import ActionLog from "../../database/ActionLog"
 import {
 	FDGLCategoryAction,
 	FDGLCategoryHandler,
 	FDGLReportActionResponse,
 } from "../../types"
 
+type reportCreatedActionHandlerInput =
+	| {
+			detailed: true
+			report: Report
+			category: Category
+			community: Community
+			action: FDGLCategoryHandler
+			client: FDGLBot
+	  }
+	| {
+			detailed: false
+			playername: string
+	  }
+
+/**
+ * Creates embeds and commands for when a report is created
+ *
+ * Pure function
+ * @modifies None
+ */
 const reportCreatedActionHandler = (
-	event: ReportCreatedMessage,
+	report: Report,
+	category: Category,
+	community: Community,
 	action: FDGLCategoryHandler,
 	client: FDGLBot
 ): FDGLReportActionResponse[] => {
-	const report = event.report
 	const actions: FDGLReportActionResponse[] = []
 	if (action.createAction.includes(FDGLCategoryAction.DiscordMessage)) {
 		const embed = new EmbedBuilder()
@@ -24,11 +46,11 @@ const reportCreatedActionHandler = (
 				},
 				{
 					name: "Category",
-					value: `${event.extraData.category.name} (\`${report.categoryId}\`)`,
+					value: `${category.name} (\`${report.categoryId}\`)`,
 				},
 				{
 					name: "Community",
-					value: `${event.extraData.community.name} (\`${report.communityId}\`)`,
+					value: `${community.name} (\`${report.communityId}\`)`,
 				}
 			)
 		actions.push({
@@ -42,9 +64,9 @@ const reportCreatedActionHandler = (
 	) {
 		const formatted = action.factorioMessage
 			.replaceAll("{PLAYERNAME}", report.playername)
-			.replaceAll("{CATEGORYNAME}", event.extraData.category.name)
+			.replaceAll("{CATEGORYNAME}", category.name)
 			.replaceAll("{CATEGORYID}", report.categoryId)
-			.replaceAll("{COMMUNITYNAME}", event.extraData.community.name)
+			.replaceAll("{COMMUNITYNAME}", community.name)
 			.replaceAll("{COMMUNITYID}", report.communityId)
 			.replaceAll("{REPORTID}", report.id)
 			.replaceAll("{REPORTEDTIME}", report.reportCreatedAt.toDateString())
@@ -55,30 +77,32 @@ const reportCreatedActionHandler = (
 	}
 	if (action.createAction.includes(FDGLCategoryAction.FactorioBan)) {
 		// ban in guilds that its supposed to
-		const command = client.createBanCommand(event.report)
-		if (command)
+		const command = client.createBanCommand(report)
+		if (command) {
 			actions.push({
 				type: FDGLCategoryAction.FactorioBan,
 				command: command,
 			})
+		}
 	}
-	if (
-		action.createAction.includes(FDGLCategoryAction.CustomCommand) &&
-		action.createCustomCommand
-	) {
-		const formatted = action.createCustomCommand
-			.replaceAll("{PLAYERNAME}", report.playername)
-			.replaceAll("{CATEGORYNAME}", event.extraData.category.name)
-			.replaceAll("{CATEGORYID}", report.categoryId)
-			.replaceAll("{COMMUNITYNAME}", event.extraData.community.name)
-			.replaceAll("{COMMUNITYID}", report.communityId)
-			.replaceAll("{REPORTID}", report.id)
-			.replaceAll("{REPORTEDTIME}", report.reportCreatedAt.toDateString())
-		actions.push({
-			type: FDGLCategoryAction.CustomCommand,
-			command: formatted,
-		})
-	}
+	// TODO: eventually use custom commands
+	// if (
+	// 	action.createAction.includes(FDGLCategoryAction.CustomCommand) &&
+	// 	action.createCustomCommand
+	// ) {
+	// 	const formatted = action.createCustomCommand
+	// 		.replaceAll("{PLAYERNAME}", report.playername)
+	// 		.replaceAll("{CATEGORYNAME}", category.name)
+	// 		.replaceAll("{CATEGORYID}", report.categoryId)
+	// 		.replaceAll("{COMMUNITYNAME}", community.name)
+	// 		.replaceAll("{COMMUNITYID}", report.communityId)
+	// 		.replaceAll("{REPORTID}", report.id)
+	// 		.replaceAll("{REPORTEDTIME}", report.reportCreatedAt.toDateString())
+	// 	actions.push({
+	// 		type: FDGLCategoryAction.CustomCommand,
+	// 		command: formatted,
+	// 	})
+	// }
 	return actions
 }
 export default reportCreatedActionHandler

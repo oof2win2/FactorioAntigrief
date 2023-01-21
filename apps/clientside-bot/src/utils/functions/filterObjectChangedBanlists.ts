@@ -54,27 +54,25 @@ export default async function filterObjectChangedBanlists({
 	const bansByPlayer = new Map<string, FDGLBan[]>()
 	currentBans.forEach((ban) => {
 		if (!bansByPlayer.has(ban.playername)) {
-			bansByPlayer.set(ban.playername, [])
+			bansByPlayer.set(ban.playername, [ban])
+		} else {
+			bansByPlayer.get(ban.playername)!.push(ban)
 		}
-		bansByPlayer.get(ban.playername)!.push(ban)
 	})
 	validReports.forEach((report) => {
 		if (!bansByPlayer.has(report.playername)) {
 			bansByPlayer.set(report.playername, [])
+		} else {
+			bansByPlayer.get(report.playername)!.push({
+				id: report.id,
+				playername: report.playername,
+				communityId: report.communityId,
+				categoryId: report.categoryId,
+				removedAt: null,
+				createdAt: report.reportCreatedAt,
+			})
 		}
-		bansByPlayer.get(report.playername)!.push({
-			id: report.id,
-			playername: report.playername,
-			communityId: report.communityId,
-			categoryId: report.categoryId,
-			removedAt: null,
-			createdAt: report.reportCreatedAt,
-		})
 	})
-
-	// const filter = allFilters.find(
-	// 	(filter) => filter.id === newConfig.filterObjectId
-	// )!
 
 	// loop over the single map and check if the player is banned in the new config
 	for (const [playername, bans] of bansByPlayer) {
