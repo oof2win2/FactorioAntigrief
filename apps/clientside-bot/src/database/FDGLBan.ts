@@ -26,6 +26,18 @@ export default class FDGLBan {
 	})
 	communityId!: string
 
+	@Column({
+		type: "boolean",
+		default: false,
+	})
+	automated!: boolean
+
+	@Column({
+		type: "text",
+		length: 32, // length of a Discord snowflake
+	})
+	adminId!: string
+
 	@CreateDateColumn()
 	createdAt!: Date
 

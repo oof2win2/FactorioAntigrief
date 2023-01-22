@@ -13,6 +13,8 @@ import { FDGLCategoryAction } from "../types"
 import { Category, Community, Report } from "@fdgl/types"
 import ActionLog from "../database/ActionLog"
 import { splitIntoGroups } from "../utils/functions"
+import Whitelist from "../database/Whitelist"
+import PrivateBan from "../database/PrivateBan"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -231,12 +233,12 @@ const filterObjectChanged = async ({
 	const oldFilterObject = client.filterObject
 	client.filterObject = filterObject
 
-	const validReports = await client.fdgl.reports.list({
+	const newlyValidReports = await client.fdgl.reports.list({
 		categoryIds: filterObject.categoryFilters,
 		communityIds: filterObject.communityFilters,
 	})
 	// get a list of all reports that are no longer valid, will act as "revocations"
-	const invalidReports = await client.fdgl.reports.list({
+	const previouslyValidReports = await client.fdgl.reports.list({
 		categoryIds: oldFilterObject.categoryFilters.filter(
 			(x) => !filterObject.categoryFilters.includes(x)
 		),
@@ -244,123 +246,39 @@ const filterObjectChanged = async ({
 			(x) => !filterObject.communityFilters.includes(x)
 		),
 	})
+	const whitelist = await client.db.getRepository(Whitelist).find()
+	const privateBans = await client.db.getRepository(PrivateBan).find()
 
 	const results = await filterObjectChangedBanlists({
-		database: client.db,
+		oldFilter: oldFilterObject,
 		newFilter: filterObject,
-		validReports: validReports,
+		newlyValidReports,
+		previouslyValidReports,
+		whitelist,
+		privateBans,
+		categoryActions: client.FDGLCategoryActions,
 	})
 
-	const allCategories = new Map<string, Category>(
-		(await client.fdgl.categories.fetchAll({})).map((c) => [c.id, c])
-	)
-	const allCommunities = new Map<string, Community>(
-		(await client.fdgl.communities.fetchAll({})).map((c) => [c.id, c])
-	)
-
-	const reportEmbeds: EmbedBuilder[] = []
-	const reportFactorioMessages: string[] = []
-	const reportFactorioCommands: string[] = []
-
-	// initially, create all of the actions for the reports
-	results.toBan.forEach((playername) => {
-		const report = validReports.find((r) => r.playername === playername)
-		if (!report) return
-		const actions = reportCreatedActionHandler(
-			report,
-			allCategories.get(report.categoryId)!,
-			allCommunities.get(report.communityId)!,
-			client.FDGLCategoryActions.get(report.categoryId)!,
-			client
-		)
-		for (const item of actions) {
-			switch (item.type) {
-				case FDGLCategoryAction.DiscordMessage:
-					reportEmbeds.push(item.embed)
-					break
-				case FDGLCategoryAction.FactorioMessage:
-					reportFactorioMessages.push(item.message)
-					break
-				case FDGLCategoryAction.FactorioBan:
-					reportFactorioCommands.push(item.command)
-					break
-				case FDGLCategoryAction.CustomCommand:
-					reportFactorioCommands.push(item.command)
-					break
-			}
-		}
-	})
-	results.toUnban.forEach((playername) => {
-		const revocation = invalidReports.find(
-			(r) => r.playername === playername
-		)
-		if (!revocation) return
-		const actions = reportRevokedActionHandler(
-			{
-				...revocation,
-				revokedAt: new Date(),
-				revokedBy: "0",
-			},
-			allCategories.get(revocation.categoryId)!,
-			allCommunities.get(revocation.communityId)!,
-			client.FDGLCategoryActions.get(revocation.categoryId)!,
-			client
-		)
-		for (const item of actions) {
-			switch (item.type) {
-				case FDGLCategoryAction.DiscordMessage:
-					reportEmbeds.push(item.embed)
-					break
-				case FDGLCategoryAction.FactorioMessage:
-					reportFactorioMessages.push(item.message)
-					break
-				case FDGLCategoryAction.FactorioBan:
-					reportFactorioCommands.push(item.command)
-					break
-				case FDGLCategoryAction.CustomCommand:
-					reportFactorioCommands.push(item.command)
-					break
-			}
-		}
-	})
-
-	// now, send all of the actions
-	for (const embed of reportEmbeds) {
-		client.addEmbedToAllQueues(embed)
+	// now we need to unban players that are no longer banned
+	for (const report of results.toUnban) {
+		const command = client.createUnbanCommand(report.playername)
+		if (!command) continue
+		client.createActionForUnban(report.playername)
+		await client.rcon.rconCommandAll(command)
 	}
-	for (const message of reportFactorioMessages) {
-		client.rcon.rconCommandAll(`/sc game.print("${message}")`)
+	for (const report of results.toBan) {
+		const command = client.createBanCommand(report)
+		if (!command) continue
+		client.createActionForReport(report.playername)
+		await client.rcon.rconCommandAll(command)
 	}
-	for (const command of reportFactorioCommands) {
-		client.rcon.rconCommandAll(command)
-	}
-	// we also need to save all of the actions to the database
-	for (const group of splitIntoGroups(reportFactorioMessages, 500)) {
+	// now we remove the reports that are no longer valid from the database
+	for (const group of splitIntoGroups(results.reportsToRemoveFromDB, 100)) {
 		await client.db
-			.getRepository(ActionLog)
+			.getRepository(FDGLBan)
 			.createQueryBuilder()
-			.insert()
-			.values(
-				group.map((message) => {
-					return {
-						command: `/sc game.print("${message}")`,
-					}
-				})
-			)
-			.execute()
-	}
-	for (const group of splitIntoGroups(reportFactorioCommands, 500)) {
-		await client.db
-			.getRepository(ActionLog)
-			.createQueryBuilder()
-			.insert()
-			.values(
-				group.map((command) => {
-					return {
-						command: command,
-					}
-				})
-			)
+			.delete()
+			.where("id IN (:...ids)", { ids: group.map((r) => r.id) })
 			.execute()
 	}
 }
@@ -481,10 +399,10 @@ const connected = async ({ client }: HandlerOpts<"connected">) => {
 		client.addEmbedToAllQueues(embed)
 	}
 	for (const message of reportFactorioMessages) {
-		client.rcon.rconCommandAll(`/sc game.print("${message}")`)
+		await client.rcon.rconCommandAll(`/sc game.print("${message}")`)
 	}
 	for (const command of reportFactorioCommands) {
-		client.rcon.rconCommandAll(command)
+		await client.rcon.rconCommandAll(command)
 	}
 	// we also need to save all of the actions to the database
 	for (const group of splitIntoGroups(reportFactorioMessages, 500)) {

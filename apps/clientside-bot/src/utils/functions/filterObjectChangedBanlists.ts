@@ -98,7 +98,11 @@ export default async function filterObjectChangedBanlists({
 
 		if (bannedBefore && !bannedAfter) {
 			toUnbanPlayers.push(bannedBefore)
-		} else if (bannedBefore && bannedAfter) {
+		} else if (
+			bannedBefore &&
+			bannedAfter &&
+			bannedBefore.id !== bannedAfter.id
+		) {
 			toRebanPlayers.push(bannedAfter)
 		} else if (!bannedBefore && bannedAfter) {
 			toBanPlayers.push(bannedAfter)
