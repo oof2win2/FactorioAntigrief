@@ -4,8 +4,9 @@ import FDGLBot from "./FDGLBot.js"
 import ServerOnline from "../database/ServerOnline"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
-import handleMissedData from "../utils/functions/handleMissedData"
-import splitIntoGroups from "../utils/functions/splitIntoGroups"
+import { DateUtils } from "typeorm/util/DateUtils"
+import ActionLog from "../database/ActionLog"
+import { MoreThanOrEqual } from "typeorm"
 
 dayjs.extend(relativeTime)
 
@@ -116,72 +117,37 @@ export default class RconInterface {
 					)}. Synchronizing banlist`
 				)
 
-				const serversOnline = await this.client.db
+				// now we get the actions since that time and send them to the server
+				const serverOffline = await this.client.db
 					.getRepository(ServerOnline)
-					.find()
-
-				if (this.client.filterObject) {
-					const newBans = await handleMissedData({
-						server: serversOnline.find(
-							(x) => x.name === server.servername
-						)!,
-						allServers: serversOnline,
-						database: this.client.db,
-						filter: this.client.filterObject,
+					.findOne({
+						where: {
+							name: server.servername,
+						},
 					})
+				if (!serverOffline) return
+				await this.client.db.getRepository(ServerOnline).update(
+					{
+						name: server.servername,
+					},
+					{
+						isOnline: true,
+					}
+				)
 
-					// unbanning first
-					for (const unban of splitIntoGroups(
-						newBans.playersToUnban,
-						500
-					)) {
-						await rcon.send(
-							`/c ${unban
-								.map((name) => `game.unban_player("${name}")`)
-								.join(";")}`
-						)
-					}
-					const toReban = [
-						...newBans.privatebansToBan.filter((x) => x.reban),
-						...newBans.reportsToBan.filter((x) => x.reban),
-					]
-					for (const unban of splitIntoGroups(toReban, 500)) {
-						await rcon.send(
-							`/c ${unban
-								.map(
-									(record) =>
-										`game.unban_player("${record.playername}")`
-								)
-								.join(";")}`
-						)
-					}
-
-					for (const ban of splitIntoGroups(
-						newBans.privatebansToBan,
-						500
-					)) {
-						await rcon.send(
-							`/c ${ban
-								.map(
-									(record) =>
-										`game.ban_player("${record.playername}", "${record.reason}")`
-								)
-								.join(";")}`
-						)
-					}
-
-					for (const ban of splitIntoGroups(
-						newBans.reportsToBan,
-						500
-					)) {
-						await rcon.send(
-							`/c ${ban
-								.map((record) =>
-									this.client.createBanCommand(record)
-								)
-								.join(";")}`
-						)
-					}
+				const actionsSinceOffline = await this.client.db
+					.getRepository(ActionLog)
+					.createQueryBuilder()
+					.select()
+					.where("createdAt < :date", {
+						date: DateUtils.mixedDateToUtcDatetimeString(
+							serverOffline.offlineSince
+						),
+					})
+					.getMany()
+				for (const action of actionsSinceOffline) {
+					// TODO: tell the client to not resend the command to other servers
+					await this.rconCommand(server.servername, action.command)
 				}
 				return
 			} catch {
