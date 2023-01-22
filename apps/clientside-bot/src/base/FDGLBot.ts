@@ -237,7 +237,7 @@ export default class FDGLBot extends Client {
 		}
 	}
 
-	createBanCommand(report: Omit<FDGLBan, "createdAt" | "removedAt">) {
+	createBanCommand(report: Omit<FDGLBan, "createdAt">) {
 		const botConfig = this.botConfig
 
 		const rawBanMessage =
@@ -325,20 +325,9 @@ export default class FDGLBot extends Client {
 		const unbanCommand = `/c game.unban_player("${unban.action.playername}")`
 		this.rcon.rconCommandAll(unbanCommand)
 
-		if (this.rcon.offlineServerCount > 0) {
-			await this.db.getRepository(PrivateBan).update(
-				{
-					playername: unban.action.playername,
-				},
-				{
-					removedAt: new Date(),
-				}
-			)
-		} else {
-			await this.db.getRepository(PrivateBan).delete({
-				playername: unban.action.playername,
-			})
-		}
+		await this.db.getRepository(PrivateBan).delete({
+			playername: unban.action.playername,
+		})
 	}
 
 	createActionForReport(playername: string) {

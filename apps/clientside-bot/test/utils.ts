@@ -196,7 +196,8 @@ export const createFDGLBan = ({
 		categoryId: randomElementFromArray(categoryIds),
 		communityId: randomElementFromArray(communityIds),
 		createdAt,
-		removedAt: null,
+		automated: false,
+		adminId: createDiscordId(),
 	}
 }
 
@@ -218,7 +219,6 @@ export const createWhitelist = ({
 		adminId: adminIds
 			? randomElementFromArray(adminIds)
 			: createDiscordId(),
-		removedAt: null,
 	}
 }
 
@@ -240,7 +240,6 @@ export const createPrivateban = ({
 		adminId: adminIds
 			? randomElementFromArray(adminIds)
 			: createDiscordId(),
-		removedAt: null,
 	}
 }
 
@@ -252,7 +251,8 @@ export const reportIntoFDGLBan = (
 		playername: report.playername,
 		categoryId: report.categoryId,
 		communityId: report.communityId,
-		removedAt: null,
+		automated: false,
+		adminId: report.adminId,
 	}
 }
 
@@ -267,6 +267,7 @@ export const simplifyDatabaseFDGLBan = <T>(
 		playername: fdglBan.playername,
 		categoryId: fdglBan.categoryId,
 		communityId: fdglBan.communityId,
-		removedAt: fdglBan.removedAt,
+		automated: false,
+		adminId: fdglBan.adminId,
 	}
 }

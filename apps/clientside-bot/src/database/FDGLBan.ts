@@ -40,11 +40,4 @@ export default class FDGLBan {
 
 	@CreateDateColumn()
 	createdAt!: Date
-
-	@Column({
-		type: "datetime",
-		nullable: true,
-		default: null,
-	})
-	removedAt: Date | null = null
 }

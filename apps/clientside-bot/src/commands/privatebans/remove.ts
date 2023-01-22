@@ -4,7 +4,7 @@ import { SubCommand } from "../../base/Commands.js"
 import PrivateBan from "../../database/PrivateBan.js"
 import hasFDGLBans from "../../utils/functions/hasFDGLBans"
 
-const Setaction: SubCommand = {
+const RemovePrivateban: SubCommand = {
 	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
@@ -39,20 +39,9 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		if (client.rcon.offlineServerCount > 0) {
-			await client.db.getRepository(PrivateBan).update(
-				{
-					playername,
-				},
-				{
-					removedAt: new Date(),
-				}
-			)
-		} else {
-			await client.db.getRepository(PrivateBan).delete({
-				playername,
-			})
-		}
+		await client.db.getRepository(PrivateBan).delete({
+			playername,
+		})
 
 		client.createActionForUnban(playername)
 		await client.rcon.rconCommandAll(`/unban ${playername}`)
@@ -83,4 +72,4 @@ const Setaction: SubCommand = {
 		})
 	},
 }
-export default Setaction
+export default RemovePrivateban

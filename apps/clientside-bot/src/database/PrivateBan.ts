@@ -31,11 +31,4 @@ export default class PrivateBan {
 
 	@CreateDateColumn()
 	createdAt!: Date
-
-	@Column({
-		type: "datetime",
-		nullable: true,
-		default: null,
-	})
-	removedAt: Date | null = null
 }

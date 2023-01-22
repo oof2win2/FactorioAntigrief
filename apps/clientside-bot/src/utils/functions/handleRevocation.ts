@@ -12,12 +12,10 @@ export default async function handleRevocation({
 	revocation,
 	database,
 	filter,
-	offlineServerCount,
 }: {
 	revocation: Revocation
 	database: Connection
 	filter: FilterObject
-	offlineServerCount: number
 }): Promise<boolean> {
 	// if the revocation is not accepted by the config, ignore it
 	if (
@@ -26,21 +24,9 @@ export default async function handleRevocation({
 	)
 		return false
 
-	// remove the report from the database if the offline server count is 0, else just mark it as revoked
-	if (offlineServerCount > 0) {
-		await database.getRepository(FDGLBan).update(
-			{
-				id: revocation.id,
-			},
-			{
-				removedAt: new Date(),
-			}
-		)
-	} else {
-		await database.getRepository(FDGLBan).delete({
-			id: revocation.id,
-		})
-	}
+	await database.getRepository(FDGLBan).delete({
+		id: revocation.id,
+	})
 
 	// if the player is whitelisted or private banned, do nothing
 	const isWhitelisted = await database.getRepository(Whitelist).findOne({

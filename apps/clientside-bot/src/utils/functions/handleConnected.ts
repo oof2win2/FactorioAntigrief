@@ -53,8 +53,9 @@ export default async function handleConnected({
 			playername: report.playername,
 			communityId: report.communityId,
 			categoryId: report.categoryId,
-			removedAt: null,
 			createdAt: report.reportCreatedAt,
+			automated: report.automated,
+			adminId: report.adminId,
 		})
 
 		// if the player is not banned yet (new report), we ban them now

@@ -4,7 +4,7 @@ import { SubCommand } from "../../base/Commands.js"
 import Whitelist from "../../database/Whitelist.js"
 import hasFDGLBans from "../../utils/functions/hasFDGLBans.js"
 
-const Setaction: SubCommand = {
+const RemoveWhitelist: SubCommand = {
 	type: "SubCommand",
 	data: new SlashCommandSubcommandBuilder()
 		.setName("remove")
@@ -39,20 +39,9 @@ const Setaction: SubCommand = {
 				ephemeral: true,
 			})
 
-		if (client.rcon.offlineServerCount > 0) {
-			await client.db.getRepository(Whitelist).update(
-				{
-					playername,
-				},
-				{
-					removedAt: new Date(),
-				}
-			)
-		} else {
-			await client.db.getRepository(Whitelist).delete({
-				playername,
-			})
-		}
+		await client.db.getRepository(Whitelist).delete({
+			playername,
+		})
 
 		if (client.filterObject) {
 			const FDGLBan = await hasFDGLBans({
@@ -80,4 +69,4 @@ const Setaction: SubCommand = {
 		})
 	},
 }
-export default Setaction
+export default RemoveWhitelist

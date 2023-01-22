@@ -5,5 +5,4 @@ export { default as filterObjectChangedBanlists } from "./filterObjectChangedBan
 export { default as handleReport } from "./handleReport"
 export { default as handleRevocation } from "./handleRevocation"
 export { default as hasFDGLBans } from "./hasFDGLBans"
-export { default as handleMissedData } from "./handleMissedData"
 export { default as handleConnected } from "./handleConnected"
