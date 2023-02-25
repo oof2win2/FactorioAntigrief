@@ -3,6 +3,7 @@ import {
 	createFDGLBan,
 	createFDGLCategory,
 	createFDGLCommunity,
+	createFDGLId,
 	createTimes,
 	randomElementFromArray,
 	randomElementsFromArray,
@@ -121,7 +122,6 @@ describe("checkTakenActions", () => {
 				.map((report) => actionMap.get(report.categoryId))
 				.filter((x): x is string => Boolean(x))
 		)
-		console.log(previousActions, actionsAfter)
 
 		// it should return that actions should be revoked if reports are removed
 		const newChanges = diffTakenActions(actionMap, reports, reportsAfter)
@@ -138,7 +138,61 @@ describe("checkTakenActions", () => {
 		}
 	})
 
-	it("Should return that actions should be retaken if reports are updated", () => {
-		// TODO: implement this test
+	it("Should return that actions should be retaken if reports are switched out", () => {
+		const reports = createTimes(
+			createFDGLBan,
+			[
+				{
+					categoryIds: categories.map((c) => c.id),
+					communityIds: communities.map((c) => c.id),
+					createdAt: faker.date.past(),
+				},
+			],
+			25
+		)
+		const reportsAfter = reports.map((report) => {
+			if (Math.random() < 0.5) return report // 50% chance of keeping the report
+			// otherwise, return the same report but with a different ID - this simulates a report being revoked and a new one in the same category being created
+			return {
+				...report,
+				id: createFDGLId(),
+			}
+		})
+
+		// get a map of taken actions and their causes before and after
+		const previousActions = new Map<string, string>()
+		for (const report of reports.sort(
+			(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+		)) {
+			const action = actionMap.get(report.categoryId)
+			if (!action) continue
+			if (previousActions.has(action)) continue // if the action is already in the map, don't add it again
+			previousActions.set(action, report.id)
+		}
+		const actionsAfter = new Map<string, string>()
+		for (const report of reportsAfter.sort(
+			(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+		)) {
+			const action = actionMap.get(report.categoryId)
+			if (!action) continue
+			if (actionsAfter.has(action)) continue // if the action is already in the map, don't add it again
+			actionsAfter.set(action, report.id)
+		}
+
+		// now find the actions that should be retaken
+		const actionsToRetake = new Set<string>()
+		for (const [action, reportId] of actionsAfter) {
+			if (previousActions.get(action) !== reportId) {
+				actionsToRetake.add(action)
+			}
+		}
+
+		const data = diffTakenActions(actionMap, reports, reportsAfter)
+		expect(data.actionsToTake).toHaveLength(0)
+		expect(data.actionsToRevoke).toHaveLength(0)
+		expect(data.actionsToRetake).toHaveLength(actionsToRetake.size)
+		for (const action of data.actionsToRetake) {
+			expect(actionsToRetake).toContain(action)
+		}
 	})
 })

@@ -73,8 +73,6 @@ const diffTakenActions = (
 		actionsToRetake.push(actionId)
 	}
 
-	console.log(actionsToTake, actionsToRevoke, actionsToRetake)
-
 	return {
 		actionsToTake,
 		actionsToRevoke,
