@@ -51,7 +51,10 @@ describe("hasFDGLBans", () => {
 			communityIds: filterObject.communityFilters,
 		})
 
-		await database.getRepository(FDGLBan).insert(report)
+		await database.getRepository(FDGLBan).insert({
+			...report,
+			createdAt: report.reportCreatedAt,
+		})
 
 		const result = await hasFDGLBans({
 			playername: report.playername,

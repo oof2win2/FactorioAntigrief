@@ -30,6 +30,9 @@ export default async function handleReport({
 		playername: report.playername,
 		communityId: report.communityId,
 		categoryId: report.categoryId,
+		adminId: report.adminId,
+		createdAt: report.reportCreatedAt,
+		automated: report.automated,
 	})
 
 	// if the player is whitelisted or private banned, do nothing

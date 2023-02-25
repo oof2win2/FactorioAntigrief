@@ -133,6 +133,9 @@ export default async function handleConnected({
 						playername: report.playername,
 						communityId: report.communityId,
 						categoryId: report.categoryId,
+						automated: report.automated,
+						adminId: report.adminId,
+						createdAt: report.reportCreatedAt,
 					}
 				})
 			)

@@ -69,6 +69,9 @@ describe("handleConnected", () => {
 						playername: report.playername,
 						communityId: report.communityId,
 						categoryId: report.categoryId,
+						createdAt: report.reportCreatedAt,
+						adminId: report.adminId,
+						automated: report.automated,
 					}
 				})
 			)
@@ -157,6 +160,9 @@ describe("handleConnected", () => {
 						playername: report.playername,
 						communityId: report.communityId,
 						categoryId: report.categoryId,
+						adminId: report.adminId,
+						createdAt: report.reportCreatedAt,
+						automated: report.automated,
 					}
 				})
 			)

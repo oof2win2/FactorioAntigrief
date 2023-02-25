@@ -59,7 +59,6 @@ describe("handleRevocation", () => {
 			revocation,
 			database,
 			filter: filterObject,
-			offlineServerCount: 0,
 		})
 
 		const foundInDatabase = await database.manager.find(FDGLBan)
@@ -97,7 +96,6 @@ describe("handleRevocation", () => {
 			revocation,
 			database,
 			filter: filterObject,
-			offlineServerCount: 0,
 		})
 
 		const foundInDatabase = await database.manager.find(FDGLBan)
@@ -131,7 +129,6 @@ describe("handleRevocation", () => {
 			revocation,
 			database,
 			filter: filterObject,
-			offlineServerCount: 0,
 		})
 
 		const foundInDatabase = await database.manager.find(FDGLBan)
@@ -165,7 +162,6 @@ describe("handleRevocation", () => {
 			revocation,
 			database,
 			filter: filterObject,
-			offlineServerCount: 0,
 		})
 
 		const foundInDatabase = await database.manager.find(FDGLBan)

@@ -243,22 +243,21 @@ export const createPrivateban = ({
 	}
 }
 
-export const reportIntoFDGLBan = (
-	report: Report
-): Omit<FDGLBan, "createdAt"> => {
+export const reportIntoFDGLBan = (report: Report): FDGLBan => {
 	return {
 		id: report.id,
 		playername: report.playername,
 		categoryId: report.categoryId,
 		communityId: report.communityId,
-		automated: false,
+		automated: report.automated,
+		createdAt: report.reportCreatedAt,
 		adminId: report.adminId,
 	}
 }
 
 export const simplifyDatabaseFDGLBan = <T>(
 	fdglBan: FDGLBan | T
-): T | Omit<FDGLBan, "createdAt"> => {
+): T | FDGLBan => {
 	if (!(fdglBan instanceof FDGLBan)) {
 		return fdglBan
 	}
@@ -267,7 +266,8 @@ export const simplifyDatabaseFDGLBan = <T>(
 		playername: fdglBan.playername,
 		categoryId: fdglBan.categoryId,
 		communityId: fdglBan.communityId,
-		automated: false,
+		automated: fdglBan.automated,
 		adminId: fdglBan.adminId,
+		createdAt: fdglBan.createdAt,
 	}
 }
