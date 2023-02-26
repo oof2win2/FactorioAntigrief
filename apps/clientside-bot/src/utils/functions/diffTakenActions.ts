@@ -19,10 +19,10 @@ const diffTakenActions = (
 	newReports: FDGLBan[]
 ) => {
 	const prevSorted = prevReports.sort(
-		(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+		(a, b) => a.reportCreatedAt.getTime() - b.reportCreatedAt.getTime()
 	)
 	const newSorted = newReports.sort(
-		(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+		(a, b) => a.reportCreatedAt.getTime() - b.reportCreatedAt.getTime()
 	)
 
 	// get the IDs of the actions that were taken before, store the report that triggered them

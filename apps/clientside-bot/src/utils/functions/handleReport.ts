@@ -25,15 +25,7 @@ export default async function handleReport({
 		return false
 
 	// insert the report to the database no matter what
-	await database.getRepository(FDGLBan).insert({
-		id: report.id,
-		playername: report.playername,
-		communityId: report.communityId,
-		categoryId: report.categoryId,
-		adminId: report.adminId,
-		createdAt: report.reportCreatedAt,
-		automated: report.automated,
-	})
+	await database.getRepository(FDGLBan).insert(report)
 
 	// if the player is whitelisted or private banned, do nothing
 	const isWhitelisted = await database.getRepository(Whitelist).findOne({

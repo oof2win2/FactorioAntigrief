@@ -162,7 +162,7 @@ describe("checkTakenActions", () => {
 		// get a map of taken actions and their causes before and after
 		const previousActions = new Map<string, string>()
 		for (const report of reports.sort(
-			(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+			(a, b) => a.reportCreatedAt.getTime() - b.reportCreatedAt.getTime()
 		)) {
 			const action = actionMap.get(report.categoryId)
 			if (!action) continue
@@ -171,7 +171,7 @@ describe("checkTakenActions", () => {
 		}
 		const actionsAfter = new Map<string, string>()
 		for (const report of reportsAfter.sort(
-			(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+			(a, b) => a.reportCreatedAt.getTime() - b.reportCreatedAt.getTime()
 		)) {
 			const action = actionMap.get(report.categoryId)
 			if (!action) continue

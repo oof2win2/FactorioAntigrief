@@ -87,11 +87,7 @@ describe("handleReport", () => {
 			2
 		)
 
-		await database.getRepository(FDGLBan).insert({
-			...oldReport,
-			adminId: oldReport.adminId,
-			createdAt: oldReport.reportCreatedAt,
-		})
+		await database.getRepository(FDGLBan).insert(oldReport)
 
 		const results = await handleReport({
 			report: newReport,

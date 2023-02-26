@@ -13,7 +13,6 @@ import {
 	createTimes,
 	randomElementsFromArray,
 	reportIntoFDGLBan,
-	simplifyDatabaseFDGLBan,
 } from "../utils"
 import { Category, Community } from "@fdgl/types"
 
@@ -62,19 +61,7 @@ describe("handleConnected", () => {
 			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.insert()
-			.values(
-				previousReports.map((report) => {
-					return {
-						id: report.id,
-						playername: report.playername,
-						communityId: report.communityId,
-						categoryId: report.categoryId,
-						createdAt: report.reportCreatedAt,
-						adminId: report.adminId,
-						automated: report.automated,
-					}
-				})
-			)
+			.values(previousReports)
 			.execute()
 
 		// run the actual function
@@ -96,9 +83,7 @@ describe("handleConnected", () => {
 
 		// ensure that the database stores the right bans
 		expect(databaseReports.length).toBe(previousReports.length)
-		expect(databaseReports.map(simplifyDatabaseFDGLBan)).toEqual(
-			previousReports.map(reportIntoFDGLBan)
-		)
+		expect(databaseReports).toEqual(previousReports.map(reportIntoFDGLBan))
 	})
 
 	it("Should ban and unban people if reports are created and revoked", async () => {
@@ -153,19 +138,7 @@ describe("handleConnected", () => {
 			.getRepository(FDGLBan)
 			.createQueryBuilder()
 			.insert()
-			.values(
-				previousReports.map((report) => {
-					return {
-						id: report.id,
-						playername: report.playername,
-						communityId: report.communityId,
-						categoryId: report.categoryId,
-						adminId: report.adminId,
-						createdAt: report.reportCreatedAt,
-						automated: report.automated,
-					}
-				})
-			)
+			.values(previousReports)
 			.execute()
 
 		// add old reports to the map
@@ -226,8 +199,6 @@ describe("handleConnected", () => {
 
 		// ensure that the database stores the right bans
 		expect(databaseReports.length).toBe(allNewReports.length)
-		expect(databaseReports.map(simplifyDatabaseFDGLBan)).toEqual(
-			allNewReports.map(reportIntoFDGLBan)
-		)
+		expect(databaseReports).toEqual(allNewReports.map(reportIntoFDGLBan))
 	})
 })

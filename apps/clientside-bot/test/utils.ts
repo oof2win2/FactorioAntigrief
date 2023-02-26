@@ -195,7 +195,7 @@ export const createFDGLBan = ({
 		).slice(0, 60),
 		categoryId: randomElementFromArray(categoryIds),
 		communityId: randomElementFromArray(communityIds),
-		createdAt,
+		reportCreatedAt: createdAt,
 		automated: false,
 		adminId: createDiscordId(),
 	}
@@ -250,24 +250,7 @@ export const reportIntoFDGLBan = (report: Report): FDGLBan => {
 		categoryId: report.categoryId,
 		communityId: report.communityId,
 		automated: report.automated,
-		createdAt: report.reportCreatedAt,
+		reportCreatedAt: report.reportCreatedAt,
 		adminId: report.adminId,
-	}
-}
-
-export const simplifyDatabaseFDGLBan = <T>(
-	fdglBan: FDGLBan | T
-): T | FDGLBan => {
-	if (!(fdglBan instanceof FDGLBan)) {
-		return fdglBan
-	}
-	return {
-		id: fdglBan.id,
-		playername: fdglBan.playername,
-		categoryId: fdglBan.categoryId,
-		communityId: fdglBan.communityId,
-		automated: fdglBan.automated,
-		adminId: fdglBan.adminId,
-		createdAt: fdglBan.createdAt,
 	}
 }

@@ -48,15 +48,7 @@ export default async function handleConnected({
 		if (!bansByPlayer.has(report.playername)) {
 			bansByPlayer.set(report.playername, [])
 		}
-		bansByPlayer.get(report.playername)!.push({
-			id: report.id,
-			playername: report.playername,
-			communityId: report.communityId,
-			categoryId: report.categoryId,
-			createdAt: report.reportCreatedAt,
-			automated: report.automated,
-			adminId: report.adminId,
-		})
+		bansByPlayer.get(report.playername)!.push(report)
 
 		// if the player is not banned yet (new report), we ban them now
 		if (!currentlyBannedPlayers.has(report.playername))
@@ -126,19 +118,7 @@ export default async function handleConnected({
 			.createQueryBuilder()
 			.insert()
 			.orIgnore()
-			.values(
-				splitReports.map((report) => {
-					return {
-						id: report.id,
-						playername: report.playername,
-						communityId: report.communityId,
-						categoryId: report.categoryId,
-						automated: report.automated,
-						adminId: report.adminId,
-						createdAt: report.reportCreatedAt,
-					}
-				})
-			)
+			.values(splitReports)
 			.execute()
 	}
 

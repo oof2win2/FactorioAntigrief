@@ -12,7 +12,6 @@ import {
 	createGuildConfig,
 	createTimes,
 	reportIntoFDGLBan,
-	simplifyDatabaseFDGLBan,
 } from "../utils"
 import { Category, Community } from "@fdgl/types"
 
@@ -51,10 +50,7 @@ describe("hasFDGLBans", () => {
 			communityIds: filterObject.communityFilters,
 		})
 
-		await database.getRepository(FDGLBan).insert({
-			...report,
-			createdAt: report.reportCreatedAt,
-		})
+		await database.getRepository(FDGLBan).insert(report)
 
 		const result = await hasFDGLBans({
 			playername: report.playername,
@@ -65,9 +61,7 @@ describe("hasFDGLBans", () => {
 		// the result should not be false, as that would mean that the player should not be banned
 		expect(result).not.toBe(false)
 		// the result should be equal to the simplified report
-		expect(simplifyDatabaseFDGLBan(result)).toEqual(
-			reportIntoFDGLBan(report)
-		)
+		expect(result).toEqual(reportIntoFDGLBan(report))
 	})
 
 	it("Should state that a player should not be banned if there are no valid reports against them", async () => {

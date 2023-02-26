@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn } from "typeorm"
 
 @Entity({ name: "FDGLBan" })
 export default class FDGLBan {
@@ -38,6 +38,8 @@ export default class FDGLBan {
 	})
 	adminId!: string
 
-	@CreateDateColumn()
-	createdAt!: Date
+	@Column({
+		type: "datetime",
+	})
+	reportCreatedAt!: Date
 }
