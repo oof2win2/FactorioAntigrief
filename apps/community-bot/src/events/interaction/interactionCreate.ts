@@ -6,33 +6,86 @@ import { afterJoinGuild, sendToGuild } from "../../utils/functions"
 
 const getKey = (
 	key: keyof CommandConfig<boolean, boolean>,
-	command: SlashCommand<boolean, boolean>
-): unknown => // TODO typing
-	command.type === "Command" || command.type === "SubCommand"
-		? command[key]
-		: command.commands.some((c) => getKey(key, c)) // TODO is it right to use some here?
+	command: SlashCommand<boolean, boolean>,
+	subcommandName: string | null,
+	groupName: string | null
+): unknown => {
+	switch (command.type) {
+		case "Command":
+			return command[key]
+		case "SubCommand":
+			return command[key]
+		case "SubCommandGroup": {
+			const subcommand = command.commands.find(
+				(subcommand) =>
+					subcommand.data.name === groupName ||
+					subcommand.data.name === subcommandName
+			)
+
+			if (!subcommand) throw new Error("Subcommand Group not found")
+			return getKey(key, subcommand, subcommandName, groupName)
+		}
+		case "CommandWithSubcommands": {
+			const subcommand = command.commands.find(
+				(subcommand) =>
+					subcommand.data.name === groupName ||
+					subcommand.data.name === subcommandName
+			)
+
+			if (!subcommand) throw new Error("Subcommand not found")
+			return getKey(key, subcommand, subcommandName, groupName)
+		}
+	}
+}
 
 export const checkCommandErrors = async (
 	command: SlashCommand<boolean, boolean>,
+	interaction: CommandInteraction<"cached">,
 	client: FDGLBot,
 	member: GuildMember,
 	guildConfig: GuildConfig,
 	filters: FilterObject | null
 ) => {
 	// check if the command requires api key
-	if (getKey("requiresApikey", command) && !guildConfig.apikey)
+	if (
+		getKey(
+			"requiresApikey",
+			command,
+			interaction.options.getSubcommand(false),
+			interaction.options.getSubcommandGroup(false)
+		) &&
+		!guildConfig.apikey
+	)
 		return `${client.config.emotes.warn} API key must be set for use of this command`
 
-	if (!filters && getKey("fetchFilters", command))
+	if (
+		!filters &&
+		getKey(
+			"fetchFilters",
+			command,
+			interaction.options.getSubcommand(false),
+			interaction.options.getSubcommandGroup(false)
+		)
+	)
 		return `${client.emotes.error} An error occured whilst fetching your filters`
 
 	// if command doesnt require guild config (like help, ping etc), it can be ran
-	if (!getKey("requiresRoles", command)) return null
+	if (
+		!getKey(
+			"requiresRoles",
+			command,
+			interaction.options.getSubcommand(false),
+			interaction.options.getSubcommandGroup(false)
+		)
+	)
+		return null
 
 	// if any of the roles are not present on the guild config, they must be filled first
+	console.log(interaction.options.getSubcommand(false))
 	if (
 		// TODO update this to use the new command system
-		command.data.name !== "setpermissions" &&
+		interaction.options.getSubcommand(false) !== "permissions" &&
+		interaction.options.getSubcommandGroup(false) !== "set" &&
 		(!guildConfig.roles.reports ||
 			!guildConfig.roles.setCommunities ||
 			!guildConfig.roles.setConfig ||
@@ -119,7 +172,13 @@ export default async (client: FDGLBot, interaction: Interaction) => {
 	const guildConfig = tmpGuildConfig
 
 	// fetch the filters for the guild if the command requires it
-	const filters = getKey("fetchFilters", command)
+	console.log(interaction)
+	const filters = getKey(
+		"fetchFilters",
+		command,
+		interaction.options.getSubcommand(false),
+		interaction.options.getSubcommandGroup(false)
+	)
 		? await client.fdgl.communities.getFiltersById({
 				id: guildConfig.filterObjectId,
 		  })
@@ -127,6 +186,7 @@ export default async (client: FDGLBot, interaction: Interaction) => {
 
 	const error = await checkCommandErrors(
 		command,
+		interaction,
 		client,
 		interaction.member,
 		guildConfig,

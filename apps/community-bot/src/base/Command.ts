@@ -108,6 +108,7 @@ export async function executeCommandInteraction<
 
 	const error = await checkCommandErrors(
 		command,
+		args.interaction,
 		args.client,
 		args.interaction.member,
 		args.guildConfig,
