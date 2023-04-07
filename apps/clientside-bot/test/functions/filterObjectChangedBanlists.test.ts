@@ -1,48 +1,31 @@
-import { createConnection, Connection } from "typeorm"
 import filterObjectChangedBanlists from "../../src/utils/functions/filterObjectChangedBanlists"
-import BotConfig from "../../src/database/BotConfig"
-import FDGLBan from "../../src/database/FDGLBan"
-import InfoChannel from "../../src/database/InfoChannel"
-import PrivateBan from "../../src/database/PrivateBan"
-import Whitelist from "../../src/database/Whitelist"
 import {
 	createFDGLCategory,
 	createFDGLCommunity,
 	createFDGLReport,
 	createGuildConfig,
-	createTimes,
-	randomElementsFromArray,
 	createPrivateban,
+	createTimes,
 	createWhitelist,
+	randomElementsFromArray,
 } from "../utils"
 import { Category, Community, Report } from "@fdgl/types"
 import faker from "faker"
+import { expect } from "chai"
 
 describe("guildConfigChangedBanlists", () => {
-	let database: Connection
 	let categories: Category[]
 	let categoryIds: string[]
 	let communities: Community[]
 	let communityIds: string[]
 	beforeEach(async () => {
-		database = await createConnection({
-			type: "better-sqlite3",
-			database: ":memory:",
-			entities: [FDGLBan, InfoChannel, BotConfig, PrivateBan, Whitelist],
-			synchronize: true,
-			// logging: true,
-		})
 		categories = createTimes(createFDGLCategory, 100)
 		categoryIds = categories.map((x) => x.id)
 		communities = createTimes(createFDGLCommunity, 100)
 		communityIds = communities.map((x) => x.id)
 	})
 
-	afterEach(async () => {
-		await database.close()
-	})
-
-	it("Should create bans for reports that have just been included in the filters", async () => {
+	it("Should create bans for reports that have been newly included in the filters", async () => {
 		const [guildConfig, oldFilterObject] = createGuildConfig({
 			categoryIds: [],
 			communityIds: [],
@@ -65,25 +48,27 @@ describe("guildConfigChangedBanlists", () => {
 		)
 
 		const results = await filterObjectChangedBanlists({
+			oldFilter: oldFilterObject,
 			newFilter: newFilterObject,
-			validReports: reports,
-			database,
+			previouslyValidReports: [],
+			newlyValidReports: reports,
+			whitelist: [],
+			privateBans: [],
 		})
-
-		const fetchedFDGLBans = await database.getRepository(FDGLBan).find()
 
 		const allReportPlayernames = [
 			...new Set(reports.map((report) => report.playername)),
 		]
 		// the function should ban everyone there is a report against
-		expect(results.toBan.length).toBe(allReportPlayernames.length)
-		expect(results.toBan).toEqual(allReportPlayernames)
+		expect(results.toBan.length).to.equal(allReportPlayernames.length)
+		expect(results.toBan.map((x) => x.playername)).to.have.members(
+			allReportPlayernames
+		)
 
-		// there should be a record for each report
-		const fdglBanIds = fetchedFDGLBans.map((ban) => ban.id)
-		const reportIds = reports.map((report) => report.id)
-		expect(fetchedFDGLBans.length).toBe(reports.length)
-		expect(fdglBanIds).toEqual(reportIds)
+		// the function should not unban anyone
+		expect(results.toUnban.length).to.equal(0)
+		// the function should not remove anything from db
+		expect(results.reportsToRemoveFromDB.length).to.equal(0)
 	})
 
 	it("Should unban everyone if all filters are removed", async () => {
@@ -108,25 +93,28 @@ describe("guildConfigChangedBanlists", () => {
 			5000
 		)
 
-		await database.getRepository(FDGLBan).save(reports, { chunk: 750 })
-
 		const results = await filterObjectChangedBanlists({
+			oldFilter: oldFilterObject,
 			newFilter: newFilterObject,
-			validReports: [],
-			database,
+			previouslyValidReports: reports,
+			newlyValidReports: [],
+			whitelist: [],
+			privateBans: [],
 		})
 
-		const fetchedFDGLBans = await database.getRepository(FDGLBan).find()
-
 		// the function should unban everyone there is a report against
-		const allPlayers = [
+		const allPlayerNames = [
 			...new Set(reports.map((report) => report.playername)),
 		]
-		expect(results.toUnban.length).toBe(allPlayers.length)
-		expect(results.toUnban).toEqual(allPlayers)
+		expect(results.toUnban.length).to.equal(allPlayerNames.length)
+		expect(results.toUnban.map((x) => x.playername)).to.have.members(
+			allPlayerNames
+		)
 
-		// there should be no records of FDGL bans in the database, as they were all supposed to be removed
-		expect(fetchedFDGLBans.length).toBe(0)
+		// it should not ban anyone
+		expect(results.toBan.length).to.equal(0)
+		// it should remove all records from the db
+		expect(results.reportsToRemoveFromDB.length).to.equal(reports.length)
 	})
 
 	it("Should not re-ban players that are already banned", async () => {
@@ -180,21 +168,18 @@ describe("guildConfigChangedBanlists", () => {
 			createFDGLReport,
 			[
 				{
-					categoryIds: newFilterObject.categoryFilters,
-					communityIds: newFilterObject.communityFilters,
+					// we ensure that the new reports do not ban for the old filters, so they aren't valid under the old config
+					categoryIds: newFilterObject.categoryFilters.filter(
+						(id) => !oldFilterObject.categoryFilters.includes(id)
+					),
+					communityIds: newFilterObject.communityFilters.filter(
+						(id) => !oldFilterObject.communityFilters.includes(id)
+					),
 					playernames: playernames,
 				},
 			],
-			5000
+			10
 		)
-
-		await database.getRepository(FDGLBan).save(oldReports, { chunk: 750 })
-
-		const results = await filterObjectChangedBanlists({
-			newFilter: newFilterObject,
-			validReports: [...newReports, ...oldReports],
-			database,
-		})
 
 		const expectedBans = new Set<string>()
 		// compile a list of people that should be banned with the new reports
@@ -202,9 +187,25 @@ describe("guildConfigChangedBanlists", () => {
 		newReports.forEach((report) => expectedBans.add(report.playername))
 		oldReports.forEach((report) => expectedBans.delete(report.playername))
 
+		const results = await filterObjectChangedBanlists({
+			oldFilter: oldFilterObject,
+			newFilter: newFilterObject,
+			previouslyValidReports: oldReports,
+			newlyValidReports: [...newReports, ...oldReports],
+			whitelist: [],
+			privateBans: [],
+		})
+
 		// the function shouldn't re-ban people that are already banned
-		expect(results.toBan.length).toBe(expectedBans.size)
-		expect(results.toBan).toEqual([...expectedBans])
+		expect(results.toBan.length).to.equal(expectedBans.size)
+		expect(results.toBan.map((x) => x.playername)).to.have.members([
+			...expectedBans,
+		])
+
+		// the function should not unban anyone
+		expect(results.toUnban.length).to.equal(0)
+		// the function should not remove anything from db
+		expect(results.reportsToRemoveFromDB.length).to.equal(0)
 	})
 
 	it("Should work with a combination of reports and revocations", async () => {
@@ -250,15 +251,18 @@ describe("guildConfigChangedBanlists", () => {
 			createFDGLReport,
 			[
 				{
-					categoryIds: newFilterObject.categoryFilters,
-					communityIds: newFilterObject.communityFilters,
+					// we ensure that the new reports do not ban for the old filters, so they aren't valid under the old config
+					categoryIds: newFilterObject.categoryFilters.filter(
+						(id) => !oldFilterObject.categoryFilters.includes(id)
+					),
+					communityIds: newFilterObject.communityFilters.filter(
+						(id) => !oldFilterObject.communityFilters.includes(id)
+					),
 					playernames: playernames,
 				},
 			],
 			5000
 		)
-
-		await database.getRepository(FDGLBan).save(oldReports, { chunk: 750 })
 
 		// get all the reports into a single map
 		const playersToBan = new Set<string>()
@@ -300,18 +304,32 @@ describe("guildConfigChangedBanlists", () => {
 		) // if a player was banned before, it makes no sense to unban and ban
 
 		const results = await filterObjectChangedBanlists({
+			oldFilter: oldFilterObject,
 			newFilter: newFilterObject,
-			validReports: [...validOldReports, ...newReports],
-			database,
+			previouslyValidReports: oldReports,
+			newlyValidReports: [...validOldReports, ...newReports],
+			whitelist: [],
+			privateBans: [],
 		})
 
 		// the unbanned players should be the same
-		expect(results.toUnban.length).toBe(playersToUnban.size) // april, wendel, elda, vivien
-		expect(results.toUnban).toEqual([...playersToUnban])
+		expect(results.toUnban.length).to.equal(playersToUnban.size) // april, wendel, elda, vivien
+		expect(results.toUnban.map((x) => x.playername)).to.have.members([
+			...playersToUnban,
+		])
 
 		// the banned players should be the same
-		expect(results.toBan.length).toBe(playersToBan.size)
-		expect(results.toBan).toEqual([...playersToBan])
+		expect(results.toBan.length).to.equal(playersToBan.size)
+		expect(results.toBan.map((x) => x.playername)).to.have.members([
+			...playersToBan,
+		])
+
+		// the function should remove invalid reports from the db
+		const invalidReportIds = invalidOldReports.map((report) => report.id)
+		expect(results.reportsToRemoveFromDB.length).to.equal(
+			invalidReportIds.length
+		)
+		expect(results.reportsToRemoveFromDB).to.have.members(invalidReportIds)
 	})
 
 	it("Should ensure that people who are whitelisted or blacklisted are not banned", async () => {
@@ -357,15 +375,20 @@ describe("guildConfigChangedBanlists", () => {
 			createFDGLReport,
 			[
 				{
-					categoryIds: newFilterObject.categoryFilters,
-					communityIds: newFilterObject.communityFilters,
+					// we ensure that the new reports do not ban for the old filters, so they aren't valid under the old config
+					categoryIds: newFilterObject.categoryFilters.filter(
+						(id) => !oldFilterObject.categoryFilters.includes(id)
+					),
+					communityIds: newFilterObject.communityFilters.filter(
+						(id) => !oldFilterObject.communityFilters.includes(id)
+					),
 					playernames: playernames,
 				},
 			],
 			5000
 		)
 
-		const whitelists: Omit<Whitelist, "id">[] = createTimes(
+		const whitelists = createTimes(
 			createWhitelist,
 			[
 				{
@@ -373,11 +396,8 @@ describe("guildConfigChangedBanlists", () => {
 				},
 			],
 			5000
-		).map((i) => {
-			delete (i as any).id
-			return i
-		})
-		const privateBans: Omit<PrivateBan, "id">[] = createTimes(
+		)
+		const privateBans = createTimes(
 			createPrivateban,
 			[
 				{
@@ -385,16 +405,7 @@ describe("guildConfigChangedBanlists", () => {
 				},
 			],
 			5000
-		).map((i) => {
-			delete (i as any).id
-			return i
-		})
-
-		await database.getRepository(FDGLBan).save(oldReports, { chunk: 750 })
-		await database.getRepository(Whitelist).save(whitelists, { chunk: 750 })
-		await database
-			.getRepository(PrivateBan)
-			.save(privateBans, { chunk: 750 })
+		)
 
 		// get all the reports into a single map
 		const playersToBan = new Set<string>()
@@ -445,17 +456,24 @@ describe("guildConfigChangedBanlists", () => {
 		})
 
 		const results = await filterObjectChangedBanlists({
+			oldFilter: oldFilterObject,
 			newFilter: newFilterObject,
-			validReports: [...validOldReports, ...newReports],
-			database,
+			previouslyValidReports: oldReports,
+			newlyValidReports: [...validOldReports, ...newReports],
+			whitelist: whitelists,
+			privateBans: privateBans,
 		})
 
 		// the unbanned players should be the same
-		expect(results.toUnban.length).toBe(playersToUnban.size) // april, wendel, elda, vivien
-		expect(results.toUnban).toEqual([...playersToUnban])
+		expect(results.toUnban.length).to.equal(playersToUnban.size) // april, wendel, elda, vivien
+		expect(results.toUnban.map((x) => x.playername)).to.have.members([
+			...playersToUnban,
+		])
 
 		// the banned players should be the same
-		expect(results.toBan.length).toBe(playersToBan.size)
-		expect(results.toBan).toEqual([...playersToBan])
+		expect(results.toBan.length).to.equal(playersToBan.size)
+		expect(results.toBan.map((x) => x.playername)).to.have.members([
+			...playersToBan,
+		])
 	})
 })
