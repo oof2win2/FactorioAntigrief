@@ -1,6 +1,9 @@
-import { FilterObject, Report } from "@fdgl/types"
+import { FilterObject } from "@fdgl/types"
 import PrivateBan from "../../database/PrivateBan"
 import Whitelist from "../../database/Whitelist"
+import FDGLBan from "../../database/FDGLBan"
+
+type ReportType = Omit<FDGLBan, "createdAt" | "removedAt">
 
 /**
  * Generate the list of players to ban and unban based on a filter object change
@@ -15,8 +18,8 @@ export default async function filterObjectChangedBanlists({
 }: {
 	oldFilter: FilterObject
 	newFilter: FilterObject
-	previouslyValidReports: Report[]
-	newlyValidReports: Report[]
+	previouslyValidReports: ReportType[]
+	newlyValidReports: ReportType[]
 	whitelist: Whitelist[]
 	privateBans: PrivateBan[]
 }) {
@@ -33,8 +36,8 @@ export default async function filterObjectChangedBanlists({
 			- Keep in mind, that some people's reports *still may be valid* in other guilds, so we need to keep track of which guilds they are valid in and not remove them from the DB outright
 	*/
 
-	const toBanPlayers: Report[] = []
-	const toUnbanPlayers: Report[] = []
+	const toBanPlayers: ReportType[] = []
+	const toUnbanPlayers: ReportType[] = []
 	// list of IDs of reports to remove from the database
 	const reportsToRemoveFromDB: string[] = []
 	const ignoredNames = [
@@ -43,7 +46,7 @@ export default async function filterObjectChangedBanlists({
 	]
 
 	// get all the reports into a single map
-	const bansByPlayer = new Map<string, Report[]>()
+	const bansByPlayer = new Map<string, ReportType[]>()
 	previouslyValidReports.forEach((ban) => {
 		if (!bansByPlayer.has(ban.playername)) {
 			bansByPlayer.set(ban.playername, [ban])

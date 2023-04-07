@@ -12,6 +12,8 @@ import handleRevocation from "../utils/functions/handleRevocation"
 import splitIntoGroups from "../utils/functions/splitIntoGroups"
 import ENV from "../utils/env"
 import FDGLBan from "../database/FDGLBan"
+import Whitelist from "../database/Whitelist"
+import PrivateBan from "../database/PrivateBan"
 
 interface HandlerOpts<T extends keyof WebSocketEvents> {
 	event: Parameters<WebSocketEvents[T]>[0]
@@ -140,33 +142,40 @@ const filterObjectChanged = async ({
 	client,
 	event,
 }: HandlerOpts<"filterObjectChanged">) => {
+	const oldFilter = client.filterObject
 	const filterObject = event.filterObject
 	client.filterObject = filterObject
 
-	const validReports = await client.fdgl.reports.list({
+	const validReports = client.fdgl.reports.list({
 		categoryIds: filterObject.categoryFilters,
 		communityIds: filterObject.communityFilters,
 	})
+	const oldValidReports = client.db.getRepository(FDGLBan).find()
+	const whitelist = client.db.getRepository(Whitelist).find()
+	const privatebans = client.db.getRepository(PrivateBan).find()
 
 	const results = await filterObjectChangedBanlists({
-		database: client.db,
+		oldFilter,
 		newFilter: filterObject,
-		validReports: validReports,
+		previouslyValidReports: await oldValidReports,
+		newlyValidReports: await validReports,
+		whitelist: await whitelist,
+		privateBans: await privatebans,
 	})
 
 	// initially, create all of the actions for the reports
-	results.toBan.forEach((playername) => {
-		client.createActionForReport(playername)
+	results.toBan.forEach((report) => {
+		client.createActionForReport(report.playername)
 	})
-	results.toUnban.forEach((playername) => {
-		client.createActionForUnban(playername)
+	results.toUnban.forEach((report) => {
+		client.createActionForUnban(report.playername)
 	})
 
 	// ban players
 	const playerBanStrings = results.toBan.map(
-		(playername) =>
-			`game.ban_player("${playername}", "View your FDGL reports on https://factoriobans.club/api/reports/search?${new URLSearchParams(
-				{ playername: playername }
+		(report) =>
+			`game.ban_player("${report}", "View your FDGL reports on https://factoriobans.club/api/reports/search?${new URLSearchParams(
+				{ playername: report.playername }
 			).toString()}")`
 	)
 	for (const playerBanGroup of splitIntoGroups(playerBanStrings)) {
